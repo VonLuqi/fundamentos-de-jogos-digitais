@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 1 — A Regra do Jogo (Unplugged): Framework MDA, mecânicas e dinâmicas fundamentais do design de jogos." />
-  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="description" content="Aula 1 — A Regra do Jogo (Unplugged): Framework MDA, tensão vs ação e o miniprojeto Robô vs Monstro." />
+  <meta name="theme-color" content="#0d0a10" />
   <title>Aula 1 — A Regra do Jogo | Fundamentos de Jogos Digitais</title>
 
-  <!-- Fonts: Cinzel (títulos) + Rajdhani (leitura/UI) -->
+  <!-- Fonts: Cinzel (títulos, romana/serifada clássica) + Crimson Text (leitura confortável) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
     rel="stylesheet"
   />
 
@@ -19,125 +19,167 @@
 </head>
 <body>
 
-  <!-- Header / Navegação -->
+  <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
   <header class="lesson-header">
-    <a class="lesson-header__back" href="../index.html" aria-label="Voltar para a Home">
-      <span aria-hidden="true">←</span> VOLTAR PARA A HOME
+    <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
+      <span aria-hidden="true">←</span> Voltar
     </a>
-    <h1 class="lesson-header__title">AULA 1: A REGRA DO JOGO <span class="accent">(UNPLUGGED)</span></h1>
+    <div class="lesson-header__titles">
+      <p class="lesson-header__eyebrow">Fundamentos de Jogos Digitais</p>
+      <h1 class="lesson-header__title">AULA 1: A REGRA DO JOGO <span class="accent">(UNPLUGGED)</span></h1>
+    </div>
   </header>
 
-  <!-- Sistema de Abas -->
-  <nav class="tabs" aria-label="Navegação por abas">
-    <button class="tab is-active" type="button" data-tab="theory" role="tab" aria-selected="true">
-      1. TEORIA E MANUAIS
+  <!-- Divisor ornamentado -->
+  <div class="ornate-divider" aria-hidden="true">
+    <span class="ornate-divider__line"></span>
+    <span class="ornate-divider__gem">◆</span>
+    <span class="ornate-divider__line"></span>
+  </div>
+
+  <!-- ========== SISTEMA DE ABAS ========== -->
+  <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+    <button
+      class="tab is-active"
+      type="button"
+      id="tab-theory"
+      data-tab="theory"
+      role="tab"
+      aria-selected="true"
+      aria-controls="theory"
+    >
+      I. Teoria e Manuais
     </button>
-    <button class="tab" type="button" data-tab="simulation" role="tab" aria-selected="false">
-      2. SIMULAÇÃO INTERATIVA
+    <button
+      class="tab"
+      type="button"
+      id="tab-simulation"
+      data-tab="simulation"
+      role="tab"
+      aria-selected="false"
+      aria-controls="simulation"
+    >
+      II. Simulação Interativa
     </button>
   </nav>
 
-  <main class="lesson-container">
+  <main class="lesson-main">
 
-    <!-- ========== ABA 1: TEORIA ========== -->
-    <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="theory">
-      <article class="lesson-content">
+    <!-- ========== ABA I: TEORIA E MANUAIS ========== -->
+    <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-theory">
+      <article class="hades-frame lesson-content">
 
         <h2 class="lesson-title">A Experiência Nasce da Regra</h2>
         <p>
           Toda decisão de design começa com uma restrição. A <strong>munição infinita</strong>
-          transforma um corredor em um campo de ação frenética: o jogador não calcula, ele executa.
-          Remova essa abundância, limite o sistema a <strong>uma única bala no tambor</strong>, e o mesmo
-          corredor se torna um labirinto de tensão. O terror não vem da escuridão, mas da matemática
-          da escassez. A regra não é apenas o manual — ela é o gerador de emoção.
+          transforma um corredor em um palco de ação pura: o jogador não pensa, ele executa,
+          disparando sem custo algum. Agora remova essa abundância — limite o sistema a
+          <strong>uma única bala no tambor</strong> — e o mesmo corredor se torna um altar de tensão.
+          O terror não nasce da escuridão do cenário, mas da aritmética da escassez. A regra não é
+          apenas um manual de instruções: ela é o verdadeiro motor da emoção.
         </p>
 
         <h2 class="lesson-title">O Motor do Game Design: Framework MDA</h2>
         <p>
-          Para projetar experiências consistentes, utilizamos o <strong>Framework MDA</strong>,
-          um modelo universal que traduz código em sentimento. Ele divide o jogo em três camadas
-          interdependentes:
+          Para projetar experiências consistentes, os designers recorrem ao <strong>Framework MDA</strong>
+          — uma ponte estrutural que traduz código frio em sentimento humano. Ele organiza o jogo
+          em três camadas interdependentes, como os três andares de um mesmo templo:
         </p>
 
-        <h3 class="lesson-subtitle">Mecânica (A Anatomia do Sistema)</h3>
+        <h3 class="lesson-subtitle">Mecânica — A Anatomia do Sistema</h3>
         <p>
-          São as regras matemáticas, as restrições de espaço e os dados que formam a base do jogo.
-          Aqui vivem os limites de vida, a velocidade de movimento, o custo de uma ação e o
-          tamanho do mapa. A mecânica é o <em>o que o sistema permite</em>.
+          São as regras matemáticas, as restrições de espaço e os dados que sustentam o jogo por
+          baixo da superfície. Aqui residem os limites de vida, a velocidade de movimento, o custo
+          de uma ação e o tamanho do mapa. A mecânica responde a uma única pergunta:
+          <em>o que o sistema permite?</em>
         </p>
         <ul class="lesson-list">
-          <li>Regras de pontuação (ex: 1 engrenagem = 10 pontos)</li>
-          <li>Restrições de espaço (ex: corredor de 3 unidades de largura)</li>
-          <li>Dados de estado (ex: energia, tempo, inventário)</li>
+          <li>Regras de pontuação (ex.: 1 engrenagem coletada = 10 pontos)</li>
+          <li>Restrições de espaço (ex.: corredor de apenas 3 unidades de largura)</li>
+          <li>Dados de estado (ex.: energia, tempo restante, inventário)</li>
         </ul>
 
-        <h3 class="lesson-subtitle">Dinâmica (A Regra em Movimento)</h3>
+        <h3 class="lesson-subtitle">Dinâmica — A Regra em Movimento</h3>
         <p>
-          Quando o jogador interage com as mecânicas, comportamentos emergem. A dinâmica é o
-          <em>o que acontece quando se joga</em>: o jogador aprende a desviar, cria uma estratégia
-          de fuga, ou otimiza rotas de coleta. Nenhum designer escreve a dinâmica diretamente —
-          ela nasce da fricção entre regra e agência do jogador.
+          Quando o jogador colide com as mecânicas, comportamentos emergem que nenhum designer
+          escreveu diretamente no código. A dinâmica é <em>o que acontece quando se joga</em>:
+          o jogador aprende a desviar, arquiteta uma rota de fuga, hesita antes de um risco. Ela nasce
+          do atrito entre a regra fixa e a agência viva de quem joga.
         </p>
 
-        <h3 class="lesson-subtitle">Estética (A Engenharia da Emoção)</h3>
+        <h3 class="lesson-subtitle">Estética — A Engenharia da Emoção</h3>
         <p>
-          É a resposta emocional provocada pela dinâmica: medo, triunfo, curiosidade, tensão.
-          A estética responde à pergunta <em>por que o jogador se importa?</em>. No design de jogos,
-          usamos taxonomias como Desafio (superação), Fantasia (imersão narrativa) e Descoberta
-          (exploração) para nomear essas experiências.
+          É a resposta emocional provocada pela dinâmica em ação: medo, triunfo, curiosidade, alívio.
+          A estética responde à pergunta final — <em>por que o jogador se importa?</em> — e costuma
+          ser descrita por taxonomias como Desafio (superação), Fantasia (imersão narrativa) e
+          Descoberta (exploração de território desconhecido).
         </p>
 
-        <!-- Placeholder: Cabo de Guerra -->
+        <!-- Placeholder de Imagem -->
         <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: O Cabo de Guerra do Design — Designer vs Jogador">
           🖼️ [ Inserir Imagem Aqui: O Cabo de Guerra do Design (Designer vs Jogador) ]
         </div>
 
         <h2 class="lesson-title">O Desafio Unplugged: Robô vs Monstro</h2>
         <p>
-          Para demonstrar o MDA sem código, projetamos um exercício de papel e caneta:
-          o <strong>Robô deve coletar 5 engrenagens</strong> espalhadas por um mapa desenhado
-          enquanto <strong>foge de um Monstro</strong> que se move em sua direção.
-        </p>
-        <p>
-          A mecânica é deliberadamente simples: o Robô move-se 3 unidades por turno; o Monstro,
-          2 unidades. O mapa contém corredores estreitos (gargalos) e rotas alternadas.
-          A dinâmica emerge na escolha: arriscar a rota curta com risco de encontro, ou a rota
-          longa com segurança e menor margem de erro. A estética resultante é a de perseguição
-          e risco calculado.
+          Para provar que o MDA existe fora de qualquer engine, propomos um exercício de papel e
+          caneta: um <strong>Robô deve atravessar um mapa desenhado coletando engrenagens</strong>,
+          enquanto um <strong>Monstro rabiscado à mão o persegue</strong> uma casa por turno em
+          direção à sua posição atual.
         </p>
 
-        <!-- Placeholder: Arquitetura do Mapa -->
-        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Arquitetura do Mapa, Gargalos e Rotas">
-          🖼️ [ Inserir Imagem Aqui: Arquitetura do Mapa, Gargalos e Rotas ]
+        <h3 class="lesson-subtitle">Gargalos e Rotas de Fuga</h3>
+        <p>
+          A mecânica é deliberadamente enxuta: o Robô avança 3 casas por turno; o Monstro, apenas 2.
+          O mapa é desenhado com <strong>corredores estreitos (gargalos)</strong> — pontos onde um
+          encontro é quase inevitável — e <strong>rotas alternativas mais longas</strong>, porém
+          seguras. A dinâmica emerge exatamente nessa escolha: arriscar o gargalo para economizar
+          turnos, ou desviar pela rota de fuga e perder tempo precioso. A estética resultante é a
+          tensão da perseguição e o alívio calculado de cada decisão correta.
+        </p>
+
+        <!-- Placeholder de Imagem -->
+        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Arquitetura do Mapa, Gargalos e Rotas de Fuga">
+          🖼️ [ Inserir Imagem Aqui: Arquitetura do Mapa, Gargalos e Rotas de Fuga ]
         </div>
 
       </article>
     </section>
 
-    <!-- ========== ABA 2: SIMULAÇÃO INTERATIVA ========== -->
-    <section id="simulation" class="tab-panel" role="tabpanel" aria-labelledby="simulation">
-      <div class="simulation-wrapper">
-        <p class="simulation-hud">
-          // SIMULAÇÃO: MECÂNICA → DINÂMICA em tempo real.<br>
-          // Use as <strong>Setas do Teclado</strong> para mover o Robô.
+    <!-- ========== ABA II: SIMULAÇÃO INTERATIVA ========== -->
+    <section id="simulation" class="tab-panel" role="tabpanel" aria-labelledby="tab-simulation">
+      <div class="hades-frame simulation-panel">
+
+        <p class="simulation-instructions">
+          Use as <strong>Setas do Teclado</strong> (↑ ↓ ← →) para mover o Robô e escapar do Monstro
+          em tempo real. Observe: a <strong>Mecânica</strong> (as velocidades fixas) gera a
+          <strong>Dinâmica</strong> (a perseguição que se desenrola a cada frame).
         </p>
 
-        <div id="game-canvas-container">
-          <!-- Kaboom.js renderiza o canvas aqui -->
+        <!-- Moldura dourada do canvas -->
+        <div class="canvas-frame">
+          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: Robô fugindo do Monstro"></canvas>
         </div>
 
-        <p class="simulation-hud simulation-hud--right">
-          ROBÔ: velocidade 300 | MONSTRO: velocidade 120
+        <p class="simulation-legend">
+          <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Robô (Jogador)
+          &nbsp;&nbsp;&nbsp;
+          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (Inimigo — 10% mais lento)
         </p>
+
       </div>
     </section>
 
   </main>
 
-  <!-- Importação da biblioteca Kaboom.js via CDN -->
-  <script src="https://unpkg.com/kaboom@3000.0.1/dist/kaboom.js"></script>
+  <footer class="lesson-footer">
+    <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 1 de N</p>
+  </footer>
 
-  <!-- Script da página (tabs + boilerplate do jogo) -->
-  <script type="module" src="../js/aula1.js"></script>
+  <!-- Script da página: tabs + simulação em Canvas API nativo (sem dependências externas) -->
+  <script src="../js/aula1.js"></script>
 </body>
 </html>

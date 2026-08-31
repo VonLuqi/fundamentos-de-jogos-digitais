@@ -2,38 +2,27 @@
  * ============================================================
  * AULA 1 — A Regra do Jogo (Unplugged)
  * ============================================================
- * Arquitetura deste script:
- * 1. INICIALIZAÇÃO + LOG DE BOOT
- * 2. SISTEMA DE ABAS (Tabs) — alternância entre Teoria e Simulação
- * 3. SIMULAÇÃO INTERATIVA (Kaboom.js) — boilerplate didático
- *    demonstrando MECÂNICA, DINÂMICA e ESTÉTICA em código.
+ * Este arquivo contém duas responsabilidades independentes:
+ *
+ * 1. TABS       → Alterna entre "Teoria e Manuais" e "Simulação".
+ * 2. SIMULAÇÃO  → Um mini-jogo de perseguição (Robô vs Monstro)
+ *                 escrito com a API NATIVA do HTML5 Canvas.
+ *
+ * IMPORTANTE: Nenhuma biblioteca externa é utilizada aqui.
+ * A versão anterior dependia de uma engine de jogos via CDN, que
+ * podia falhar ao carregar (erro de rede, CORS, versão incompatível).
+ * Usando apenas `CanvasRenderingContext2D` + `requestAnimationFrame`,
+ * garantimos que a simulação funcione em qualquer navegador moderno,
+ * sem depender de nada além do próprio HTML5.
  * ============================================================
  */
 
 'use strict';
 
-const APP_VERSION = '1.0.0';
-const LESSON_ID = 'AULA-1';
-
-/* ---------- 1. INICIALIZAÇÃO ---------- */
-function init() {
-  logBoot();
-  setupTabs();
-  // Não inicializamos a simulação imediatamente: Kaboom só roda quando
-  // o usuário abre a aba de simulação pela primeira vez (lazy start).
-}
-
-function logBoot() {
-  const ts = new Date().toISOString();
-  console.info(
-    `%c[${LESSON_ID}]%c v${APP_VERSION} — Sistemas de leitura e simulação prontos em ${ts}`,
-    'color: #a855f7; font-weight: bold;',
-    'color: #22d3ee;'
-  );
-}
-
-/* ---------- 2. SISTEMA DE ABAS ---------- */
-function setupTabs() {
+/* ============================================================
+   1. SISTEMA DE ABAS (TABS)
+   ============================================================ */
+function initTabs() {
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.tab-panel');
 
@@ -41,7 +30,7 @@ function setupTabs() {
     tab.addEventListener('click', () => {
       const targetId = tab.dataset.tab;
 
-      // Atualiza o estado visual das abas
+      // Atualiza o estado visual (dourado ativo vs escurecido inativo)
       tabs.forEach((t) => {
         t.classList.remove('is-active');
         t.setAttribute('aria-selected', 'false');
@@ -49,138 +38,213 @@ function setupTabs() {
       tab.classList.add('is-active');
       tab.setAttribute('aria-selected', 'true');
 
-      // Mostra o painel correspondente
-      panels.forEach((panel) => {
-        panel.classList.remove('is-active');
-      });
+      // Mostra apenas o painel correspondente
+      panels.forEach((panel) => panel.classList.remove('is-active'));
       const targetPanel = document.getElementById(targetId);
       if (targetPanel) {
         targetPanel.classList.add('is-active');
       }
-
-      // Se for a aba de simulação e o jogo ainda não iniciou, inicializa.
-      if (targetId === 'simulation') {
-        startSimulationOnce();
-      }
     });
   });
 }
 
-/* ---------- 3. SIMULAÇÃO INTERATIVA (Kaboom.js) ---------- */
-// Variável de controle para evitar reinicialização do motor.
-let simulationStarted = false;
-
-function startSimulationOnce() {
-  if (simulationStarted) {
+/* ============================================================
+   2. SIMULAÇÃO — CANVAS API NATIVO (JavaScript puro)
+   ============================================================ */
+function initSimulation() {
+  const canvas = document.getElementById('game-canvas');
+  if (!canvas) {
+    console.warn('[AULA-1] #game-canvas não encontrado no DOM.');
     return;
   }
-  simulationStarted = true;
 
-  // -----------------------------------------------------------
-  // 3.1 INICIALIZAÇÃO DO MOTOR KABOOM
-  // -----------------------------------------------------------
-  // MECÂNICA: Resolução, fundo e escala definem o "espaço" do jogo.
-  // -----------------------------------------------------------
-  kaboom({
-    width: 800,
-    height: 480,
-    scale: 1,
-    background: [10, 10, 15],           // preto profundo (Cyber-Gothic)
-    canvas: document.querySelector('#game-canvas-container'),
-  });
+  // Contexto 2D: nossa "caneta" para desenhar no canvas.
+  const ctx = canvas.getContext('2d');
+  const WORLD_WIDTH = canvas.width;   // 600 — definido no HTML
+  const WORLD_HEIGHT = canvas.height; // 400 — definido no HTML
 
-  // -----------------------------------------------------------
-  // 3.2 CONSTANTES DE JOGABILIDADE
-  // -----------------------------------------------------------
-  // MECÂNICA: Estes números são as "regras do sistema". Alterá-los
-  // muda a dificuldade, o ritmo e a sensação do jogo.
-  const PLAYER_SPEED = 300;   // pixels/segundo — velocidade do Robô (rápido)
-  const MONSTER_SPEED = 120;  // pixels/segundo — perseguição do Monstro (mais lento, persistente)
-  const PLAYER_SIZE = 28;
-  const MONSTER_SIZE = 34;
+  // ------------------------------------------------------------
+  // 2.1 MECÂNICA — As regras fixas do sistema.
+  // ------------------------------------------------------------
+  // Estas constantes SÃO a mecânica: números que qualquer jogador
+  // pode aprender e prever. Alterá-las muda toda a sensação do jogo.
+  const PLAYER_SPEED = 4;               // pixels por frame (Robô)
+  const ENEMY_SPEED = PLAYER_SPEED * 0.9; // MECÂNICA: 10% mais lento que o jogador
 
-  // -----------------------------------------------------------
-  // 3.3 DEFINIÇÃO DOS ATUANTES (Objetos do Game World)
-  // -----------------------------------------------------------
+  const PLAYER_RADIUS = 14;   // Robô: círculo azul/ciano
+  const ENEMY_SIZE = 30;      // Monstro: quadrado vermelho
 
-  // MECÂNICA: O jogador (Robô) é representado por um retângulo ciano
-  // com um marcador de posição inicial e componentes de movimentação.
-  const player = add([
-    rect(PLAYER_SIZE, PLAYER_SIZE),
-    pos(80, height() / 2),            // posição inicial: lado esquerdo
-    area(),                            // habilita colisões (futuro uso)
-    color(0, 200, 255),               // ciano neon
-    outline(4, rgb(176, 141, 74)),    // borda dourada ornamentada
-    'player',                          // tag para identificação
-  ]);
+  // ------------------------------------------------------------
+  // 2.2 ESTADO DOS ATUANTES (posições iniciais)
+  // ------------------------------------------------------------
+  const player = {
+    x: 80,
+    y: WORLD_HEIGHT / 2,
+    radius: PLAYER_RADIUS,
+  };
 
-  // MECÂNICA: O Monstro é um retângulo vermelho mais pesado. Seu papel
-  // é gerar tensão por meio da perseguição constante.
-  const monster = add([
-    rect(MONSTER_SIZE, MONSTER_SIZE),
-    pos(width() - 120, height() / 2), // posição inicial: lado direito
-    area(),
-    color(200, 40, 60),               // vermelho sangue
-    outline(2, rgb(40, 40, 40)),      // borda escura
-    'monster',
-  ]);
+  const enemy = {
+    x: WORLD_WIDTH - 80,
+    y: WORLD_HEIGHT / 2,
+    size: ENEMY_SIZE,
+  };
 
-  // -----------------------------------------------------------
-  // 3.4 SISTEMA DE CONTROLE (Input → Mecânica aplicada)
-  // -----------------------------------------------------------
-  // MECÂNICA: As setas do teclado geram vetores de direção.
-  // Cada tecla aplica velocidade ao jogador — isso é a regra
-  // explícita do sistema.
-  onKeyDown('left', () => player.move(-PLAYER_SPEED, 0));
-  onKeyDown('right', () => player.move(PLAYER_SPEED, 0));
-  onKeyDown('up', () => player.move(0, -PLAYER_SPEED));
-  onKeyDown('down', () => player.move(0, PLAYER_SPEED));
+  // ------------------------------------------------------------
+  // 2.3 INPUT — Estado das setas do teclado
+  // ------------------------------------------------------------
+  // Guardamos "true/false" para cada tecla em vez de mover o jogador
+  // direto no evento. Isso garante movimento fluido e contínuo,
+  // em vez de um "passo" único por tecla pressionada.
+  const keysPressed = {
+    ArrowUp: false,
+    ArrowDown: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+  };
 
-  // Mantém o jogador dentro dos limites da tela.
-  // MECÂNICA: Restrição de espaço (paredes invisíveis).
-  player.onUpdate(() => {
-    player.pos.x = Math.max(0, Math.min(width() - PLAYER_SIZE, player.pos.x));
-    player.pos.y = Math.max(0, Math.min(height() - PLAYER_SIZE, player.pos.y));
-  });
-
-  // -----------------------------------------------------------
-  // 3.5 PERSEGUIÇÃO: O MONSTRO REAGE AO JOGADOR
-  // -----------------------------------------------------------
-  // DINÂMICA: O comportamento emergente. Nenhum código diz "como"
-  // o jogador deve se sentir; ele emerge do atrito entre as regras.
-  monster.onUpdate(() => {
-    // Vetor direção do monstro para o jogador
-    const direction = player.pos.sub(monster.pos);
-
-    // Normaliza e aplica velocidade menor: perseguição persistente mas lenta
-    if (direction.len() > 0) {
-      monster.move(direction.unit().scale(MONSTER_SPEED));
+  window.addEventListener('keydown', (event) => {
+    if (event.key in keysPressed) {
+      keysPressed[event.key] = true;
+      event.preventDefault(); // evita rolar a página com as setas
     }
   });
 
-  // -----------------------------------------------------------
-  // 3.6 DIAGNÓSTICO VISUAL (HUD de depuração da simulação)
-  // -----------------------------------------------------------
-  // ESTÉTICA: Transformamos o resultado em tensão visual. A fuga
-  // gera medo de ser alcançado; o sucesso (desviar) gera alívio.
-  onDraw(() => {
-    // Linha sutil mostrando a distância/jornada do monstro ao jogador
-    drawLine({
-      p1: monster.pos.add(vec2(MONSTER_SIZE / 2, MONSTER_SIZE / 2)),
-      p2: player.pos.add(vec2(PLAYER_SIZE / 2, PLAYER_SIZE / 2)),
-      width: 1,
-      color: rgb(100, 100, 120),
-      opacity: 0.25,
-    });
+  window.addEventListener('keyup', (event) => {
+    if (event.key in keysPressed) {
+      keysPressed[event.key] = false;
+    }
   });
 
-  // Log de boot da simulação
+  /**
+   * Restringe um valor entre um mínimo e um máximo.
+   * MECÂNICA: representa as "paredes invisíveis" do mapa —
+   * uma restrição de espaço, exatamente como descrito na Aba 1.
+   */
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  /**
+   * Atualiza a posição do Robô com base nas teclas pressionadas.
+   * MECÂNICA: cada tecla aplica um deslocamento fixo (PLAYER_SPEED).
+   */
+  function updatePlayer() {
+    if (keysPressed.ArrowUp) player.y -= PLAYER_SPEED;
+    if (keysPressed.ArrowDown) player.y += PLAYER_SPEED;
+    if (keysPressed.ArrowLeft) player.x -= PLAYER_SPEED;
+    if (keysPressed.ArrowRight) player.x += PLAYER_SPEED;
+
+    // Restrição de espaço: o Robô não pode saltar fora do canvas.
+    player.x = clamp(player.x, player.radius, WORLD_WIDTH - player.radius);
+    player.y = clamp(player.y, player.radius, WORLD_HEIGHT - player.radius);
+  }
+
+  /**
+   * Move o Monstro em direção ao Robô, a cada frame.
+   * DINÂMICA: este é o comportamento EMERGENTE. Ninguém programou
+   * "medo" ou "fuga" diretamente — eles surgem da combinação entre
+   * a regra do jogador (livre, rápido) e a regra do monstro
+   * (restrito a perseguir, 10% mais lento). O resultado — tensão,
+   * quase-escapes, decisões de rota — é a Dinâmica em ação.
+   */
+  function updateEnemy() {
+    const deltaX = player.x - enemy.x;
+    const deltaY = player.y - enemy.y;
+    const distance = Math.hypot(deltaX, deltaY);
+
+    // Evita divisão por zero quando o monstro já está sobre o jogador.
+    if (distance > 0.5) {
+      // Vetor normalizado (direção pura, sem magnitude) * velocidade.
+      enemy.x += (deltaX / distance) * ENEMY_SPEED;
+      enemy.y += (deltaY / distance) * ENEMY_SPEED;
+    }
+
+    // O Monstro também respeita os limites do mapa.
+    const half = enemy.size / 2;
+    enemy.x = clamp(enemy.x, half, WORLD_WIDTH - half);
+    enemy.y = clamp(enemy.y, half, WORLD_HEIGHT - half);
+  }
+
+  /**
+   * Desenha o fundo do "tabuleiro" com uma grade sutil,
+   * remetendo ao mapa unplugged (papel quadriculado) da Aba 1.
+   */
+  function drawBackground() {
+    ctx.fillStyle = '#0d0a10';
+    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+    ctx.strokeStyle = 'rgba(207, 167, 89, 0.06)';
+    ctx.lineWidth = 1;
+    const GRID_SIZE = 40;
+    for (let x = 0; x <= WORLD_WIDTH; x += GRID_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, WORLD_HEIGHT);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= WORLD_HEIGHT; y += GRID_SIZE) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(WORLD_WIDTH, y);
+      ctx.stroke();
+    }
+  }
+
+  /** Desenha o Robô (jogador) como um círculo ciano com brilho neon. */
+  function drawPlayer() {
+    ctx.save();
+    ctx.shadowColor = '#3fd0ff';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#3fd0ff';
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /** Desenha o Monstro (inimigo) como um quadrado vermelho-sangue. */
+  function drawEnemy() {
+    const half = enemy.size / 2;
+    ctx.save();
+    ctx.shadowColor = '#c23548';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = '#c23548';
+    ctx.fillRect(enemy.x - half, enemy.y - half, enemy.size, enemy.size);
+    ctx.restore();
+  }
+
+  /**
+   * Loop principal do jogo.
+   * `requestAnimationFrame` chama esta função ~60x por segundo,
+   * sincronizada com a taxa de atualização do monitor.
+   */
+  function gameLoop() {
+    updatePlayer();
+    updateEnemy();
+
+    drawBackground();
+    drawPlayer();
+    drawEnemy();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Inicia o loop de jogo.
+  requestAnimationFrame(gameLoop);
+
   console.info(
-    `%c[SIMULAÇÃO]%c Caboom.js rodando — Mecânica configurada (Robô: ${PLAYER_SPEED}px/s | Monstro: ${MONSTER_SPEED}px/s)`,
-    'color: #4ade80; font-weight: bold;',
-    'color: #a09a90;'
+    '%c[SIMULAÇÃO]%c Canvas API nativo iniciado — Robô: %dpx/frame | Monstro: %dpx/frame (10%% mais lento)',
+    'color: #cfa759; font-weight: bold;',
+    'color: #ab9c8a;',
+    PLAYER_SPEED,
+    ENEMY_SPEED
   );
 }
 
-/* ---------- BOOT ---------- */
-document.addEventListener('DOMContentLoaded', init);
+/* ============================================================
+   BOOT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  initTabs();
+  initSimulation();
+});
