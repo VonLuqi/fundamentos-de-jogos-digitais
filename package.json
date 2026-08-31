@@ -8,7 +8,6 @@
     "node": ">=18"
   },
   "scripts": {
-    "dev": "vercel dev",
     "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js"
   },
   "optionalDependencies": {
