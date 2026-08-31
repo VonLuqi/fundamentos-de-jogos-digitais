@@ -66,12 +66,13 @@ function initSimulation() {
     COUNTDOWN: 'COUNTDOWN',
     PLAYING: 'PLAYING',
     CAUGHT: 'CAUGHT',
+    WON: 'WON',
   };
 
   let currentState = GameState.START_SCREEN;
 
   const COUNTDOWN_DURATION_MS = 3000;   // 3 segundos, contagem 3-2-1
-  const ENEMY_WAKE_DELAY_MS = 5000;     // MECÂNICA: o Monstro "dorme" 5s
+  const ENEMY_WAKE_DELAY_MS = 1000;     // MECÂNICA: o Monstro "dorme" 1s
   let countdownStartedAt = 0;
   let playingStartedAt = null;
 
@@ -225,15 +226,27 @@ function initSimulation() {
   }
 
   /* ==========================================================
-     2.3 MECÂNICA — Velocidades (drasticamente reduzidas)
+     2.3 MECÂNICA — Velocidades (independentes da taxa de quadros)
+     ==========================================================
+     As velocidades são expressas em PIXELS POR SEGUNDO, e não por
+     quadro. Isso é essencial: monitores com taxas de atualização
+     diferentes (60Hz, 120Hz, 144Hz...) disparam requestAnimationFrame
+     em ritmos diferentes. Se movêssemos um valor fixo "por quadro",
+     a simulação rodaria proporcionalmente mais rápido em telas de
+     alta taxa de atualização — exatamente o bug de "velocidade
+     extremamente alta" percebido. Multiplicando pelo tempo real
+     decorrido (deltaSeconds) a cada quadro, o movimento fica sempre
+     consistente, independentemente do hardware do jogador.
   ========================================================== */
-  const PLAYER_SPEED = 2.5;                // 2 a 3 px/frame
+  const PLAYER_SPEED = 90;                 // pixels por segundo
   const ENEMY_SPEED = PLAYER_SPEED * 0.85; // 15% mais lento que o jogador
+  const MAX_DELTA_SECONDS = 0.1;           // evita "saltos" após aba minimizada/trocada
 
   // Tamanhos reduzidos: além de deixar mais espaço de manobra dentro
   // dos corredores, evitam que Robô e Monstro nasçam colados/sobrepostos.
   const PLAYER_SIZE = 14;
   const ENEMY_SIZE = 16;
+  const GOAL_SIZE = 18; // OBJETIVO: núcleo dourado no extremo oposto do labirinto
 
   /* ==========================================================
      2.4 ESTADO DO MUNDO (grade, paredes e atuantes)
@@ -242,14 +255,19 @@ function initSimulation() {
      como as salas proceduralmente geradas de um rogue-like — e
      posiciona o Monstro na célula IMEDIATAMENTE ATRÁS do Robô
      (uma célula inteira de distância, nunca sobreposto a ele).
-     Para garantir isso, forçamos a abertura de uma única parede
-     entre a célula inicial e a célula "de trás", independente de
-     como o restante do labirinto foi sorteado.
+     Para garantir isso, forçamos a abertura de duas paredes a
+     partir da célula inicial: uma para o "corredor do Monstro" e
+     outra como rota de fuga independente — assim o jogador nunca
+     fica bloqueado, independente de como o resto do labirinto foi
+     sorteado. O OBJETIVO (núcleo dourado) nasce sempre no canto
+     diagonalmente oposto ao início, e a vitória exige atravessar
+     o labirinto inteiro para alcançá-lo.
   ========================================================== */
   let grid = null;
   let wallRects = [];
   let player = null;
   let enemy = null;
+  let goal = null;
 
   function resetSimulation() {
     grid = createGrid();
@@ -263,6 +281,18 @@ function initSimulation() {
     grid[0][0].bottom = false;
     grid[1][0].top = false;
 
+    // BUGFIX: a célula (0,0) é um canto do labirinto, então o gerador
+    // procedural pode ter aberto UMA ÚNICA saída natural — e essa saída
+    // pode coincidir justamente com a passagem acima, onde o Monstro
+    // nasce. Nesse caso o Robô ficaria "preso": a única rota de saída
+    // estaria bloqueada pelo próprio Monstro. Para evitar isso, forçamos
+    // também uma segunda saída independente, para o lado (0,1) — assim
+    // a célula inicial sempre tem no mínimo 2 rotas livres (baixo e
+    // direita), garantindo que o jogador tenha por onde escapar mesmo
+    // que o Monstro esteja bloqueando o corredor de baixo.
+    grid[0][0].right = false;
+    grid[0][1].left = false;
+
     wallRects = buildWallRects(grid);
 
     const playerStart = cellTopLeft(0, 0, PLAYER_SIZE);
@@ -271,26 +301,54 @@ function initSimulation() {
     const enemyStart = cellTopLeft(1, 0, ENEMY_SIZE);
     enemy = { x: enemyStart.x, y: enemyStart.y, size: ENEMY_SIZE };
 
+    // OBJETIVO: o núcleo dourado nasce sempre no extremo OPOSTO do
+    // labirinto (canto inferior-direito), obrigando o Robô a atravessar
+    // o mapa inteiro — e não apenas fugir do Monstro no lugar — para
+    // vencer a simulação.
+    const goalStart = cellTopLeft(ROWS - 1, COLS - 1, GOAL_SIZE);
+    goal = { x: goalStart.x, y: goalStart.y, size: GOAL_SIZE };
+
     playingStartedAt = null;
   }
 
   resetSimulation();
 
   /* ==========================================================
-     2.5 INPUT — Estado das setas do teclado
+     2.5 INPUT — Estado do teclado (Setas e WASD)
+     ==========================================================
+     O estado é guardado por DIREÇÃO LÓGICA (up/down/left/right),
+     não pela tecla crua — assim tanto as Setas quanto WASD (comum
+     em jogos) alimentam exatamente o mesmo estado de movimento.
   ========================================================== */
-  const keysPressed = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+  const keysPressed = { up: false, down: false, left: false, right: false };
+
+  const KEY_TO_DIRECTION = {
+    ArrowUp: 'up',
+    ArrowDown: 'down',
+    ArrowLeft: 'left',
+    ArrowRight: 'right',
+    w: 'up',
+    W: 'up',
+    s: 'down',
+    S: 'down',
+    a: 'left',
+    A: 'left',
+    d: 'right',
+    D: 'right',
+  };
 
   window.addEventListener('keydown', (event) => {
-    if (event.key in keysPressed) {
-      keysPressed[event.key] = true;
+    const direction = KEY_TO_DIRECTION[event.key];
+    if (direction) {
+      keysPressed[direction] = true;
       event.preventDefault();
     }
   });
 
   window.addEventListener('keyup', (event) => {
-    if (event.key in keysPressed) {
-      keysPressed[event.key] = false;
+    const direction = KEY_TO_DIRECTION[event.key];
+    if (direction) {
+      keysPressed[direction] = false;
     }
   });
 
@@ -299,7 +357,7 @@ function initSimulation() {
     if (currentState === GameState.START_SCREEN) {
       countdownStartedAt = performance.now();
       currentState = GameState.COUNTDOWN;
-    } else if (currentState === GameState.CAUGHT) {
+    } else if (currentState === GameState.CAUGHT || currentState === GameState.WON) {
       // Gera um NOVO labirinto e reinicia do zero.
       resetSimulation();
       currentState = GameState.START_SCREEN;
@@ -350,14 +408,15 @@ function initSimulation() {
   /* ==========================================================
      2.7 ATUALIZAÇÃO — JOGADOR
   ========================================================== */
-  function updatePlayer() {
+  function updatePlayer(deltaSeconds) {
+    const step = PLAYER_SPEED * deltaSeconds;
     let deltaX = 0;
     let deltaY = 0;
 
-    if (keysPressed.ArrowUp) deltaY -= PLAYER_SPEED;
-    if (keysPressed.ArrowDown) deltaY += PLAYER_SPEED;
-    if (keysPressed.ArrowLeft) deltaX -= PLAYER_SPEED;
-    if (keysPressed.ArrowRight) deltaX += PLAYER_SPEED;
+    if (keysPressed.up) deltaY -= step;
+    if (keysPressed.down) deltaY += step;
+    if (keysPressed.left) deltaX -= step;
+    if (keysPressed.right) deltaX += step;
 
     moveWithCollision(player, deltaX, deltaY);
 
@@ -435,17 +494,19 @@ function initSimulation() {
   }
 
   /* ==========================================================
-     2.9 ATUALIZAÇÃO — MONSTRO (dorme 5s, depois persegue com IA)
+     2.9 ATUALIZAÇÃO — MONSTRO (dorme 1s, depois persegue com IA)
   ========================================================== */
-  function updateEnemy(now) {
+  function updateEnemy(now, deltaSeconds) {
     if (playingStartedAt === null) return;
 
-    // MECÂNICA: o Monstro permanece imóvel pelos primeiros 5 segundos
+    // MECÂNICA: o Monstro permanece imóvel pelo primeiro 1 segundo
     // de jogo — o tempo de reação/fuga garantido ao jogador.
     const timeSincePlayStarted = now - playingStartedAt;
     if (timeSincePlayStarted < ENEMY_WAKE_DELAY_MS) {
       return;
     }
+
+    const enemyStep = ENEMY_SPEED * deltaSeconds;
 
     const enemyCell = pixelToCell(enemy.x, enemy.y, enemy.size);
     const playerCell = pixelToCell(player.x, player.y, player.size);
@@ -469,13 +530,13 @@ function initSimulation() {
     const deltaY = targetY - enemy.y;
     const distance = Math.hypot(deltaX, deltaY);
 
-    if (distance <= ENEMY_SPEED) {
+    if (distance <= enemyStep) {
       // Já está praticamente sobre o alvo: encaixa exatamente, sem "tremer".
       enemy.x = targetX;
       enemy.y = targetY;
     } else {
-      enemy.x += (deltaX / distance) * ENEMY_SPEED;
-      enemy.y += (deltaY / distance) * ENEMY_SPEED;
+      enemy.x += (deltaX / distance) * enemyStep;
+      enemy.y += (deltaY / distance) * enemyStep;
     }
   }
 
@@ -483,6 +544,13 @@ function initSimulation() {
   function checkCapture() {
     if (isCollidingAABB(toBoundingBox(player), toBoundingBox(enemy))) {
       currentState = GameState.CAUGHT;
+    }
+  }
+
+  /** Verifica se o Robô alcançou o núcleo dourado no extremo oposto (vitória). */
+  function checkWin() {
+    if (isCollidingAABB(toBoundingBox(player), toBoundingBox(goal))) {
+      currentState = GameState.WON;
     }
   }
 
@@ -502,6 +570,26 @@ function initSimulation() {
       ctx.lineWidth = 1;
       ctx.strokeRect(wall.x + 0.5, wall.y + 0.5, wall.width - 1, wall.height - 1);
     });
+  }
+
+  /** OBJETIVO: núcleo dourado desenhado como um losango pulsante — a "engrenagem final". */
+  function drawGoal() {
+    const centerX = goal.x + goal.size / 2;
+    const centerY = goal.y + goal.size / 2;
+    const half = goal.size / 2;
+    const pulse = 1 + Math.sin(performance.now() / 250) * 0.12; // brilho pulsante
+
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.rotate(Math.PI / 4);
+    ctx.shadowColor = '#f2d59a';
+    ctx.shadowBlur = 16 * pulse;
+    ctx.fillStyle = '#cfa759';
+    ctx.strokeStyle = '#f2d59a';
+    ctx.lineWidth = 2;
+    ctx.fillRect(-half * pulse, -half * pulse, half * 2 * pulse, half * 2 * pulse);
+    ctx.strokeRect(-half * pulse, -half * pulse, half * 2 * pulse, half * 2 * pulse);
+    ctx.restore();
   }
 
   function drawPlayer() {
@@ -560,6 +648,7 @@ function initSimulation() {
   function renderStartScreen() {
     drawMazeBackground();
     drawMazeWalls();
+    drawGoal();
     drawPlayer();
     drawEnemy();
 
@@ -572,6 +661,7 @@ function initSimulation() {
   function renderCountdown(now) {
     drawMazeBackground();
     drawMazeWalls();
+    drawGoal();
     drawPlayer();
     drawEnemy();
 
@@ -591,13 +681,17 @@ function initSimulation() {
     drawCenteredText(String(remainingSeconds), 60, '#f2d59a', 'rgba(194, 53, 72, 0.75)');
   }
 
-  function renderPlaying(now) {
-    updatePlayer();
-    updateEnemy(now);
-    checkCapture();
+  function renderPlaying(now, deltaSeconds) {
+    updatePlayer(deltaSeconds);
+    updateEnemy(now, deltaSeconds);
+    checkWin();
+    if (currentState !== GameState.WON) {
+      checkCapture();
+    }
 
     drawMazeBackground();
     drawMazeWalls();
+    drawGoal();
     drawPlayer();
     drawEnemy();
     drawEnemySleepIndicator(now);
@@ -606,6 +700,7 @@ function initSimulation() {
   function renderCaught() {
     drawMazeBackground();
     drawMazeWalls();
+    drawGoal();
     drawPlayer();
     drawEnemy();
 
@@ -616,10 +711,33 @@ function initSimulation() {
     drawCenteredText('Clique para gerar outro labirinto', 15, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 18);
   }
 
+  function renderWon() {
+    drawMazeBackground();
+    drawMazeWalls();
+    drawGoal();
+    drawPlayer();
+    drawEnemy();
+
+    ctx.fillStyle = 'rgba(45, 30, 12, 0.55)';
+    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+    drawCenteredText('Núcleo alcançado! Vitória!', 24, '#f2d59a', 'rgba(207, 167, 89, 0.9)', -14);
+    drawCenteredText('Clique para gerar outro labirinto', 15, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 18);
+  }
+
   /* ==========================================================
      2.12 LOOP PRINCIPAL
   ========================================================== */
+  let lastFrameTimestamp = null;
+
   function gameLoop(now) {
+    // Tempo real decorrido desde o quadro anterior, em segundos — a base
+    // de toda a movimentação (ver comentário na seção 2.3). No primeiro
+    // quadro não há referência anterior, então deltaSeconds é 0.
+    const deltaSeconds =
+      lastFrameTimestamp === null ? 0 : Math.min((now - lastFrameTimestamp) / 1000, MAX_DELTA_SECONDS);
+    lastFrameTimestamp = now;
+
     switch (currentState) {
       case GameState.START_SCREEN:
         renderStartScreen();
@@ -628,10 +746,13 @@ function initSimulation() {
         renderCountdown(now);
         break;
       case GameState.PLAYING:
-        renderPlaying(now);
+        renderPlaying(now, deltaSeconds);
         break;
       case GameState.CAUGHT:
         renderCaught();
+        break;
+      case GameState.WON:
+        renderWon();
         break;
       default:
         break;
@@ -643,7 +764,7 @@ function initSimulation() {
   requestAnimationFrame(gameLoop);
 
   console.info(
-    '%c[SIMULAÇÃO]%c Labirinto procedural (%d\u00d7%d células) — Robô: %spx/frame | Monstro: %spx/frame, dorme %ds e usa BFS para perseguir',
+    '%c[SIMULAÇÃO]%c Labirinto procedural (%d\u00d7%d células) — Robô: %spx/s | Monstro: %spx/s, dorme %ds e usa BFS para perseguir',
     'color: #cfa759; font-weight: bold;',
     'color: #ab9c8a;',
     COLS,

@@ -155,22 +155,26 @@
 
         <p class="simulation-instructions">
           <strong>Clique na tela</strong> para iniciar a contagem regressiva. O Monstro nasce
-          colado ao Robô, mas dorme por <strong>5 segundos</strong> — use esse tempo para fugir.
+          próximo ao Robô, mas dorme por <strong>1 segundo</strong> — use esse tempo para fugir.
           Depois disso, ele desperta e persegue o jogador pelo labirinto com um algoritmo de
           <strong>pathfinding (BFS)</strong>, contornando as paredes de verdade. Use as
-          <strong>Setas do Teclado</strong> (↑ ↓ ← →) para escapar pelos gargalos e rotas de fuga.
-          Cada tentativa gera um <strong>labirinto novo</strong>.
+          <strong>Setas do Teclado</strong> (↑ ↓ ← →) ou <strong>WASD</strong> para escapar pelos
+          gargalos e rotas de fuga e alcançar o <strong>núcleo dourado</strong> no extremo oposto
+          do labirinto — esse é o seu objetivo de vitória. Cada tentativa gera um
+          <strong>labirinto novo</strong>.
         </p>
 
         <!-- Moldura dourada do canvas -->
         <div class="canvas-frame">
-          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: labirinto procedural com Robô fugindo do Monstro"></canvas>
+          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: labirinto procedural com Robô fugindo do Monstro em busca do núcleo dourado no extremo oposto"></canvas>
         </div>
 
         <p class="simulation-legend">
           <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Robô (Jogador)
           &nbsp;&nbsp;&nbsp;
-          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (dorme 5s, depois persegue com BFS — 15% mais lento)
+          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (dorme 1s, depois persegue com BFS — 15% mais lento)
+          &nbsp;&nbsp;&nbsp;
+          <span class="legend-dot legend-dot--goal" aria-hidden="true"></span> Núcleo Dourado (objetivo de vitória)
         </p>
 
       </div>

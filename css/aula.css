@@ -368,6 +368,12 @@ body {
   box-shadow: 0 0 8px rgba(194, 53, 72, 0.8);
   border-radius: 2px;
 }
+.legend-dot--goal {
+  background: var(--hades-gold);
+  box-shadow: 0 0 8px rgba(207, 167, 89, 0.85);
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
 
 /* ---------- 10. Footer ---------- */
 .lesson-footer {
