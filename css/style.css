@@ -1,58 +1,61 @@
 /* ============================================================
-   FUNDAMENTOS DE JOGOS DIGITAIS — Design System "Cyber-Gothic"
-   Dark Mode profundo + detalhes neon (roxo / ciano / verde)
+   FUNDAMENTOS DE JOGOS DIGITAIS — Game UI "Cyber-Gothic / Rogue-like"
+   Tela de seleção de módulos (100vh / 100vw, sem scroll)
    ============================================================ */
 
 /* ---------- 1. Design Tokens ---------- */
 :root {
-  /* Paleta — Fundos (Gothic Dark) */
-  --color-bg-void: #050507;       /* Preto absoluto */
-  --color-bg-deep: #0a0a0f;       /* Fundo raiz */
-  --color-bg-surface: #12121a;    /* Grafite profundo */
-  --color-bg-elevated: #1a1a26;   /* Superfícies elevadas */
+  /* Cores — Fundo (Gothic Dark) */
+  --color-void: #050507;
+  --color-deep: #0a0a0f;
+  --color-surface: #12121a;
+  --color-elevated: #1a1a26;
+  --color-panel: rgba(18, 18, 26, 0.85);
 
-  /* Paleta — Neon Accents */
+  /* Cores — Neon & Acentos */
   --color-neon-purple: #a855f7;
   --color-neon-cyan: #22d3ee;
-  --color-neon-green: #4ade80;
-  --color-neon-magenta: #e935c1;
+  --color-blood-red: #e9353b;
+  --color-electric-green: #4ade80;
 
-  /* Paleta — Texto */
-  --color-text-primary: #e5e5f0;
-  --color-text-secondary: #8b8b9e;
-  --color-text-muted: #55556a;
+  /* Cores — Ouro / Bronze para bordas ornamentadas */
+  --color-gold: #b08d4a;
+  --color-gold-dark: #6b5323;
+  --color-gold-light: #d4aa5f;
+  --color-bronze: #8b6914;
 
-  /* Paleta — Bordas & Linhas */
-  --color-border: #23233a;
-  --color-border-glow: rgba(168, 85, 247, 0.45);
+  /* Texto */
+  --color-text-primary: #e5e0d8;
+  --color-text-secondary: #a09a90;
+  --color-text-muted: #55504a;
+
+  /* Bordas padrão */
+  --color-border: #2a2a35;
+
+  /* Sombras / Glow */
+  --glow-purple: 0 0 12px rgba(168, 85, 247, 0.6), 0 0 40px rgba(168, 85, 247, 0.25);
+  --glow-cyan: 0 0 12px rgba(34, 211, 238, 0.6), 0 0 40px rgba(34, 211, 238, 0.25);
+  --glow-red: 0 0 12px rgba(233, 53, 59, 0.5), 0 0 40px rgba(233, 53, 59, 0.2);
+  --glow-gold: 0 0 8px rgba(176, 141, 74, 0.45), 0 0 30px rgba(176, 141, 74, 0.2);
 
   /* Tipografia */
-  --font-display: "Orbitron", sans-serif;      /* Títulos / Headers */
-  --font-mono: "Share Tech Mono", monospace;   /* Corpo / UI terminal */
+  --font-title: "Cinzel", serif;
+  --font-body: "Rajdhani", sans-serif;
 
-  /* Espaçamento (escala 4px) */
-  --space-1: 0.25rem;
+  /* Transições */
+  --transition-fast: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Espaçamento */
   --space-2: 0.5rem;
-  --space-3: 0.75rem;
   --space-4: 1rem;
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-12: 3rem;
-  --space-16: 4rem;
-
-  /* Raios & Glow */
-  --radius-sm: 2px;
-  --radius-md: 4px;
-  --glow-purple: 0 0 8px rgba(168, 85, 247, 0.55), 0 0 24px rgba(168, 85, 247, 0.25);
-  --glow-cyan: 0 0 8px rgba(34, 211, 238, 0.55), 0 0 24px rgba(34, 211, 238, 0.25);
-  --glow-green: 0 0 8px rgba(74, 222, 128, 0.55), 0 0 24px rgba(74, 222, 128, 0.25);
-
-  /* Transições */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
 }
 
-/* ---------- 2. Reset mínimo ---------- */
+/* ---------- 2. Reset ---------- */
 *,
 *::before,
 *::after {
@@ -61,320 +64,422 @@
   padding: 0;
 }
 
-/* ---------- 3. Base ---------- */
-html {
+/* ---------- 3. Base / Tela Cheia ---------- */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
   color-scheme: dark;
-  scroll-behavior: smooth;
 }
 
 body {
-  background-color: var(--color-bg-deep);
+  background-color: var(--color-deep);
   color: var(--color-text-primary);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   font-size: 1rem;
-  line-height: 1.6;
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
+  line-height: 1.5;
+  /* Textura sutil de fundo (pontos) */
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(168, 85, 247, 0.04) 1px, transparent 1px),
+    radial-gradient(circle at 80% 70%, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+  background-size: 80px 80px, 60px 60px;
 }
 
 ::selection {
   background-color: var(--color-neon-purple);
-  color: var(--color-bg-void);
+  color: var(--color-void);
 }
 
-/* Overlay de scanlines (efeito CRT jogável) */
-.scanlines {
+/* ---------- 4. Overlay de transição ---------- */
+.screen-fade {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: 1000;
+  background-color: var(--color-void);
+  opacity: 0;
   pointer-events: none;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.18) 3px,
-    rgba(0, 0, 0, 0.18) 4px
-  );
-  mix-blend-mode: multiply;
+  transition: opacity var(--transition-slow);
+}
+.screen-fade.is-active {
+  opacity: 1;
+  pointer-events: all;
 }
 
-.container {
-  width: min(1100px, 100% - var(--space-8));
-  margin-inline: auto;
-}
-
-.accent { color: var(--color-neon-cyan); }
-
-/* ---------- 4. Header / Navegação ---------- */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  padding: var(--space-4) var(--space-8);
-  border-bottom: 1px solid var(--color-border);
-  background: linear-gradient(180deg, var(--color-bg-surface), transparent);
-}
-
-.site-header__brand {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  text-decoration: none;
-}
-
-.site-header__logo {
-  color: var(--color-neon-purple);
-  text-shadow: var(--glow-purple);
-  font-size: 1.4rem;
-}
-
-.site-header__title {
-  font-family: var(--font-display);
-  font-size: clamp(0.75rem, 2vw, 1rem);
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: var(--color-text-primary);
-}
-
-.site-nav__list {
-  display: flex;
-  gap: var(--space-6);
-  list-style: none;
-}
-
-.site-nav__link {
-  color: var(--color-text-secondary);
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.85rem;
-  transition: color var(--transition-fast), text-shadow var(--transition-fast);
-}
-
-.site-nav__link:hover,
-.site-nav__link:focus-visible {
-  color: var(--color-neon-cyan);
-  text-shadow: var(--glow-cyan);
-}
-
-.site-nav__link.is-active {
-  color: var(--color-neon-green);
-  text-shadow: var(--glow-green);
-  border-bottom: 1px solid var(--color-neon-green);
-}
-
-/* ---------- 5. Hero ---------- */
-main { flex: 1; }
-
-.hero {
-  padding: var(--space-16) 0 var(--space-12);
+/* ---------- 5. Header ---------- */
+.game-header {
+  padding: var(--space-6) var(--space-8) var(--space-2);
   text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, rgba(18,18,26,0.95), transparent);
 }
 
-.hero__subtitle {
-  color: var(--color-neon-green);
-  font-size: 0.85rem;
+.game-header__title {
+  font-family: var(--font-title);
+  font-weight: 700;
+  font-size: clamp(1.1rem, 3vw, 1.8rem);
   letter-spacing: 0.2em;
-  margin-bottom: var(--space-4);
-  text-shadow: var(--glow-green);
-}
-
-.hero__title {
-  font-family: var(--font-display);
-  font-size: clamp(2.25rem, 8vw, 4.5rem);
-  font-weight: 900;
-  letter-spacing: 0.08em;
   color: var(--color-text-primary);
-  text-shadow:
-    0 0 12px rgba(168, 85, 247, 0.6),
-    0 0 42px rgba(168, 85, 247, 0.3);
-  margin-bottom: var(--space-4);
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+.accent { color: var(--color-gold); }
+
+.game-header__subtitle {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
 }
 
-/* Efeito "glitch" sutil via pseudo-elementos */
-.glitch { position: relative; }
-.glitch::before,
-.glitch::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  opacity: 0.35;
-  pointer-events: none;
-}
-.glitch::before { color: var(--color-neon-cyan); transform: translateX(2px); clip-path: inset(20% 0 60% 0); }
-.glitch::after { color: var(--color-neon-magenta); transform: translateX(-2px); clip-path: inset(60% 0 20% 0); }
-
-.hero__description {
-  max-width: 60ch;
-  margin: 0 auto var(--space-8);
-  color: var(--color-text-secondary);
-}
-
-.hero__actions {
-  display: flex;
-  gap: var(--space-4);
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-/* ---------- 6. Botões ---------- */
-.btn {
-  display: inline-block;
-  padding: var(--space-3) var(--space-6);
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  text-decoration: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  transition: all var(--transition-base);
-}
-
-.btn--primary {
-  color: var(--color-bg-void);
-  background-color: var(--color-neon-purple);
-  box-shadow: var(--glow-purple);
-}
-.btn--primary:hover,
-.btn--primary:focus-visible {
-  background-color: var(--color-neon-cyan);
-  box-shadow: var(--glow-cyan);
-}
-
-.btn--ghost {
-  color: var(--color-neon-cyan);
-  border-color: var(--color-neon-cyan);
-  background: transparent;
-}
-.btn--ghost:hover,
-.btn--ghost:focus-visible {
-  background-color: rgba(34, 211, 238, 0.1);
-  box-shadow: var(--glow-cyan);
-}
-
-/* ---------- 7. Seções / Cards ---------- */
-.section-title {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.25em;
-  color: var(--color-neon-cyan);
-  text-shadow: var(--glow-cyan);
-  margin-bottom: var(--space-8);
-}
-
-.modules { padding-bottom: var(--space-16); }
-
-.modules__grid {
-  list-style: none;
+/* ---------- 6. Layout Principal ---------- */
+.game-layout {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: 320px 1fr;
   gap: var(--space-6);
+  height: calc(100vh - 160px);
+  padding: var(--space-6) var(--space-8);
+  max-width: 1400px;
+  margin-inline: auto;
+  width: 100%;
 }
 
-.card {
-  background-color: var(--color-bg-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-6);
+/* ---------- 7. Painel Esquerdo: Status do Jogador ---------- */
+.player-panel {
+  background: var(--color-panel);
+  border: 3px solid var(--color-gold);
+  border-radius: 6px;
+  padding: var(--space-8);
   position: relative;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 0 30px rgba(176, 141, 74, 0.15);
+  clip-path: polygon(
+    0 12px, 12px 0,
+    calc(100% - 12px) 0, 100% 12px,
+    100% calc(100% - 12px), calc(100% - 12px) 100%,
+    12px 100%, 0 calc(100% - 12px)
+  );
 }
-
-.card::before {
+/* Cantos ornamentados */
+.player-panel::before {
   content: "";
   position: absolute;
-  inset-inline: 0;
-  top: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--color-neon-purple), transparent);
-  opacity: 0.7;
+  top: 6px; left: 6px;
+  width: 12px; height: 12px;
+  border-top: 2px solid var(--color-gold-light);
+  border-left: 2px solid var(--color-gold-light);
+}
+.player-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 6px; right: 6px;
+  width: 12px; height: 12px;
+  border-bottom: 2px solid var(--color-gold-light);
+  border-right: 2px solid var(--color-gold-light);
 }
 
-.card:hover {
-  border-color: var(--color-border-glow);
-  box-shadow: var(--glow-purple);
-  transform: translateY(-2px);
+.player-panel__avatar-wrapper {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto var(--space-8);
+}
+.player-avatar {
+  position: absolute;
+  inset: 8px;
+  background: radial-gradient(circle at 35% 35%, var(--color-elevated), var(--color-void));
+  border: 2px solid var(--color-gold-dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+}
+.player-avatar__glyph {
+  font-size: 2.5rem;
+  color: var(--color-neon-purple);
+  text-shadow: var(--glow-purple);
+  opacity: 0.8;
+}
+.player-avatar__frame {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--color-gold);
+  border-radius: 50%;
+  clip-path: polygon(
+    50% 0%, 100% 50%, 50% 100%, 0% 50%
+  );
+  opacity: 0.6;
+  box-shadow: var(--glow-gold);
 }
 
-.card--locked {
-  opacity: 0.45;
-  filter: grayscale(0.6);
+.player-panel__name {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  text-align: center;
+  letter-spacing: 0.15em;
+  margin-bottom: var(--space-2);
 }
-.card--locked:hover {
-  border-color: var(--color-border);
-  box-shadow: none;
-  transform: none;
+.player-panel__class {
+  text-align: center;
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-8);
+  text-transform: uppercase;
 }
 
-.card__header {
+.player-stats__level {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: var(--space-4);
-  font-size: 0.75rem;
-  letter-spacing: 0.15em;
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
-
-.card__badge { color: var(--color-neon-purple); }
-.card__xp { color: var(--color-neon-green); text-shadow: var(--glow-green); }
-
-.card__title {
-  font-family: var(--font-display);
-  font-size: 1.1rem;
-  letter-spacing: 0.06em;
-  margin-bottom: var(--space-3);
-}
-.card__title em {
-  font-style: normal;
-  color: var(--color-neon-cyan);
-}
-
-.card__text {
+.player-stats__level-label {
   color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  margin-bottom: var(--space-6);
-}
-
-.card__link {
-  color: var(--color-neon-cyan);
-  text-decoration: none;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.15em;
   font-size: 0.85rem;
-  transition: text-shadow var(--transition-fast);
 }
-.card__link:hover { text-shadow: var(--glow-cyan); }
-.card__link--disabled { color: var(--color-text-muted); cursor: not-allowed; }
+.player-stats__level-value {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: var(--color-gold-light);
+  text-shadow: var(--glow-gold);
+}
 
-/* ---------- 8. Footer ---------- */
-.site-footer {
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-6);
+/* Barra de XP estilo vida/mana */
+.xp-bar {
+  position: relative;
+  height: 22px;
+  background: var(--color-void);
+  border: 2px solid var(--color-border);
+  margin-bottom: var(--space-6);
+  overflow: hidden;
+}
+.xp-bar::after {
+  /* brilho superior (efeito vidro) */
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent);
+}
+.xp-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-neon-purple), var(--color-neon-cyan));
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+  transition: width var(--transition-base);
+}
+.xp-bar__text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+.player-stats__list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+.player-stats__item {
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   text-align: center;
 }
-
-.site-footer__text {
-  color: var(--color-text-muted);
-  font-size: 0.75rem;
+.player-stats__item dt {
+  font-size: 0.7rem;
   letter-spacing: 0.12em;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+.player-stats__item dd {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  color: var(--color-electric-green);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.55);
 }
 
-/* ---------- 9. Motion & Acessibilidade ---------- */
+/* ---------- 8. Painel Central: Seleção de Fases ---------- */
+.stage-select__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  height: 100%;
+  overflow-y: auto;
+  /* esconder scrollbar visual */
+  scrollbar-width: none;
+}
+.stage-select__list::-webkit-scrollbar { display: none; }
+
+.stage-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--space-6) var(--space-8);
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  /* canto chanfrado ornamentado */
+  clip-path: polygon(
+    0 20px, 20px 0,
+    calc(100% - 20px) 0, 100% 20px,
+    100% calc(100% - 20px), calc(100% - 20px) 100%,
+    20px 100%, 0 calc(100% - 20px)
+  );
+  transition:
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
+}
+
+/* Foco / Hover no card desbloqueado */
+.stage-card:not([data-unlocked="false"]):hover,
+.stage-card:not([data-unlocked="false"]).is-selected {
+  transform: scale(1.02);
+  border-color: var(--color-gold);
+  box-shadow:
+    0 0 30px rgba(176, 141, 74, 0.35),
+    inset 0 0 20px rgba(176, 141, 74, 0.08);
+  background-color: var(--color-elevated);
+}
+.stage-card:not([data-unlocked="false"]):hover .stage-card__title,
+.stage-card:not([data-unlocked="false"]).is-selected .stage-card__title {
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.8);
+  color: var(--color-neon-purple);
+}
+.stage-card:not([data-unlocked="false"]):hover .stage-card__xp,
+.stage-card:not([data-unlocked="false"]).is-selected .stage-card__xp {
+  text-shadow: 0 0 16px rgba(74, 222, 128, 0.8);
+}
+
+/* Cards bloqueados: sem hover, opacidade reduzida */
+.stage-card[data-unlocked="false"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  /* garante que nenhuma transformação/glow ocorra */
+  box-shadow: none !important;
+}
+
+.stage-card__number {
+  font-family: var(--font-title);
+  font-size: 2.5rem;
+  color: var(--color-gold);
+  margin-right: var(--space-6);
+  text-shadow: var(--glow-gold);
+  min-width: 48px;
+}
+.stage-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.stage-card__title {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  transition: color var(--transition-base), text-shadow var(--transition-base);
+}
+.stage-card__subtitle {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.12em;
+}
+.stage-card__reward,
+.stage-card__lock {
+  margin-left: var(--space-6);
+  display: flex;
+  align-items: center;
+}
+.stage-card__xp {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  color: var(--color-electric-green);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.55);
+  transition: text-shadow var(--transition-base);
+}
+.stage-card__lock {
+  color: var(--color-text-muted);
+}
+
+/* ---------- 9. Barra Inferior: Controles ---------- */
+.controls-bar {
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-8);
+  border-top: 1px solid var(--color-border);
+  background: linear-gradient(0deg, rgba(18,18,26,0.95), transparent);
+}
+.controls-bar__btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: not-allowed; /* placeholder, controles futuros */
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+.controls-bar__key {
+  font-family: "Consolas", "Courier New", monospace;
+  padding: 4px 8px;
+  background: var(--color-void);
+  border: 1px solid var(--color-border);
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+}
+/* Hover apenas se o botão não estiver disabled */
+.controls-bar__btn:not([disabled]):hover {
+  border-color: var(--color-gold);
+  box-shadow: var(--glow-gold);
+}
+
+/* ---------- 10. Motion / Acessibilidade ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .scanlines { display: none; }
+  .screen-fade { transition: none; }
 }
 
-/* Foco visível para navegação por teclado */
+/* Foco visível para teclado */
 :focus-visible {
-  outline: 2px solid var(--color-neon-cyan);
+  outline: 3px solid var(--color-neon-cyan);
   outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Oculta qualquer scroll interno de forma acessível */
+.stage-select__list {
+  -ms-overflow-style: none;
 }
