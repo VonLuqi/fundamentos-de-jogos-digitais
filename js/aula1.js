@@ -230,17 +230,21 @@ function initSimulation() {
   const PLAYER_SPEED = 2.5;                // 2 a 3 px/frame
   const ENEMY_SPEED = PLAYER_SPEED * 0.85; // 15% mais lento que o jogador
 
-  const PLAYER_SIZE = 18;
-  const ENEMY_SIZE = 20;
+  // Tamanhos reduzidos: além de deixar mais espaço de manobra dentro
+  // dos corredores, evitam que Robô e Monstro nasçam colados/sobrepostos.
+  const PLAYER_SIZE = 14;
+  const ENEMY_SIZE = 16;
 
   /* ==========================================================
      2.4 ESTADO DO MUNDO (grade, paredes e atuantes)
      ==========================================================
      resetSimulation() gera um labirinto NOVO a cada partida —
      como as salas proceduralmente geradas de um rogue-like — e
-     posiciona o Monstro na MESMA célula do Robô, ligeiramente
-     atrás dele (mais próximo do canto da célula), simbolizando
-     que ele já está "colado" ao jogador desde o início.
+     posiciona o Monstro na célula IMEDIATAMENTE ATRÁS do Robô
+     (uma célula inteira de distância, nunca sobreposto a ele).
+     Para garantir isso, forçamos a abertura de uma única parede
+     entre a célula inicial e a célula "de trás", independente de
+     como o restante do labirinto foi sorteado.
   ========================================================== */
   let grid = null;
   let wallRects = [];
@@ -251,18 +255,21 @@ function initSimulation() {
     grid = createGrid();
     carveMaze(grid, 0, 0);
     addExtraRoutes(grid, 0.12);
+
+    // Garante uma passagem entre a célula de partida (0,0) e a célula
+    // logo abaixo (1,0) — é onde o Monstro vai nascer. Isso evita que
+    // ele apareça isolado ou colado ao Robô: sempre há 1 célula cheia
+    // (50px) de distância real entre os dois no início da partida.
+    grid[0][0].bottom = false;
+    grid[1][0].top = false;
+
     wallRects = buildWallRects(grid);
 
     const playerStart = cellTopLeft(0, 0, PLAYER_SIZE);
     player = { x: playerStart.x, y: playerStart.y, size: PLAYER_SIZE };
 
-    // O Monstro nasce na MESMA célula inicial, encostado no canto
-    // inferior-direito dela: literalmente "atrás" do Robô na entrada.
-    enemy = {
-      x: CELL_SIZE - ENEMY_SIZE - 2,
-      y: CELL_SIZE - ENEMY_SIZE - 2,
-      size: ENEMY_SIZE,
-    };
+    const enemyStart = cellTopLeft(1, 0, ENEMY_SIZE);
+    enemy = { x: enemyStart.x, y: enemyStart.y, size: ENEMY_SIZE };
 
     playingStartedAt = null;
   }
