@@ -2,183 +2,205 @@
  * ============================================================
  * FUNDAMENTOS DE JOGOS DIGITAIS — Menu Principal (Game UI)
  * ============================================================
- * Lógica de interação da tela de seleção de módulos:
- *  - Gerenciamento de foco/seleção dos cards de aulas.
- *  - Simulação de "entrada na fase" (fade de tela + log).
- *  - Futuro: navegação por teclado (↑ ↓ Enter ESC) e persistência.
+ * Agora conectado ao backend serverless:
+ *  - Exige sessão ativa (senão redireciona ao Pacto de Sangue).
+ *  - Renderiza o Painel Esquerdo dinamicamente (nome, avatar,
+ *    rank, XP, aulas concluídas e conquistas) com dados da API.
+ *  - Destrava os cards de aula conforme o progresso REAL do aluno.
+ *  - Aplica a "pele de Mestre" (coroa + aura) quando role=admin.
  * ============================================================
  */
 
 'use strict';
 
+import {
+  AVATAR_GLYPHS,
+  ACHIEVEMENTS,
+  LESSONS,
+  LEVEL_XP_BASE,
+  ROUTES,
+  ApiError,
+  requireSession,
+  logout,
+  rankForXp,
+  levelForXp,
+  xpWithinLevel,
+} from './api.js';
+
 /* ---------- Configurações ---------- */
-const APP_VERSION = '0.2.0';
+const APP_VERSION = '0.4.0';
 const APP_NAME = 'FUNDAMENTOS.DE.JOGOS.DIGITAIS';
 const FADE_DURATION = 400; // ms — casar com o CSS .screen-fade transition
 
-/* ---------- Estado em memória (stub para futura persistência) ---------- */
-const gameState = {
-  currentLevel: 1,
-  totalXp: 0,
-  completedLessons: 0,
-  unlockedStages: ['aula1'],
-};
+/* ---------- Estado da sessão ---------- */
+let currentUser = null;
 
-/**
- * Inicialização da UI.
- */
-function init() {
+/* ============================================================
+   1. BOOT
+   ============================================================ */
+async function init() {
   logBoot();
-  setupStageCards();
   setupScreenFade();
-  renderPlayerStats(); // stub — futura leitura de localStorage/API
-  initFooterNav();
+  setupFooterNav();
+
+  let result;
+  try {
+    // Guard de rota: sem sessão válida → Pacto de Sangue.
+    result = await requireSession();
+  } catch (error) {
+    // API fora do ar: mostra aviso no painel em vez de travar a tela.
+    renderPanelError(
+      error instanceof ApiError
+        ? error.message
+        : 'A API não respondeu. Rode `vercel dev` localmente ou publique no Vercel.'
+    );
+    return;
+  }
+
+  if (!result) return; // requireSession já redirecionou
+
+  currentUser = result.user;
+  renderPlayerPanel(currentUser);
+  renderStageCards(currentUser);
 }
 
-/**
- * Log estilizado no console.
- */
 function logBoot() {
-  const ts = new Date().toISOString();
   console.info(
-    `%c[${APP_NAME}]%c v${APP_VERSION} — Menu inicializado em ${ts}`,
-    'color: #a855f7; font-weight: bold;',
-    'color: #22d3ee;'
+    `%c[${APP_NAME}]%c v${APP_VERSION} — Menu inicializado`,
+    'color: #cfa759; font-weight: bold;',
+    'color: #ab9c8a;'
   );
 }
 
-/**
- * Adiciona listeners de foco/hover e clique nos cards de fase.
- */
-function setupStageCards() {
+/* ============================================================
+   2. PAINEL ESQUERDO DINÂMICO
+   ============================================================ */
+function renderPlayerPanel(user) {
+  setText('player-name', user.name.toUpperCase());
+  setText('player-rank', rankForXp(user.xp));
+  setText('player-level', String(levelForXp(user.xp)));
+  setText('player-lessons', String(user.completedLessons.length));
+  setText('player-achievements', `${user.achievements.length} / ${ACHIEVEMENTS.length}`);
+
+  // Avatar escolhido no Salão dos Heróis
+  setText('player-glyph', AVATAR_GLYPHS[user.avatarIndex % AVATAR_GLYPHS.length]);
+
+  // Pele de Mestre: coroa + aura vermelha (CSS reage à classe)
+  document.getElementById('player-panel')?.classList.toggle('is-admin', user.role === 'admin');
+
+  // Barra de XP — JUICE: enche de 0 até o valor real, com transição CSS
+  const fill = document.getElementById('player-xp-fill');
+  const text = document.getElementById('player-xp-text');
+  const bar = fill?.closest('.xp-bar');
+  if (fill && text && bar) {
+    const xpInLevel = xpWithinLevel(user.xp);
+    const percent = Math.min((xpInLevel / LEVEL_XP_BASE) * 100, 100);
+
+    text.textContent = `${xpInLevel} / ${LEVEL_XP_BASE} XP`;
+    bar.setAttribute('aria-valuenow', String(xpInLevel));
+
+    window.setTimeout(() => {
+      fill.style.width = `${percent}%`;
+    }, 200);
+  }
+}
+
+function renderPanelError(message) {
+  setText('player-name', 'SEM CONEXÃO');
+  setText('player-rank', message);
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+/* ============================================================
+   3. CARDS DE AULA — destravados pelo progresso REAL
+   ============================================================ */
+function renderStageCards(user) {
   const cards = document.querySelectorAll('.stage-card');
 
-  cards.forEach((card) => {
-    const isUnlocked = card.dataset.unlocked === 'true';
+  cards.forEach((card, index) => {
+    const lesson = LESSONS[index];
+    if (!lesson) return;
 
-    // Previne qualquer interação em cards bloqueados (defesa extra,
-    // embora o atributo `disabled` já impeça o clique nativo).
-    if (!isUnlocked) {
-      card.addEventListener('click', (event) => event.preventDefault());
-      return;
+    const completed = user.completedLessons.includes(lesson.id);
+    const previousDone = index === 0 || user.completedLessons.includes(LESSONS[index - 1].id);
+    const unlocked = completed || previousDone;
+
+    card.dataset.unlocked = String(unlocked);
+    card.disabled = !unlocked;
+    card.dataset.stage = lesson.id;
+
+    // Marca visualmente a aula já concluída
+    card.classList.toggle('is-completed', completed);
+
+    const reward = card.querySelector('.stage-card__xp');
+    if (reward) {
+      reward.textContent = completed ? 'CONCLUÍDA' : `+${lesson.rewardXp} XP`;
     }
 
-    // Foco visual ao passar o mouse
-    card.addEventListener('mouseenter', () => {
-      selectCard(card);
-    });
-
-    // Remove foco quando o mouse sai
-    card.addEventListener('mouseleave', () => {
-      deselectCard(card);
-    });
-
-    // Ação de clique: "entrar na fase"
-    card.addEventListener('click', () => {
-      const stageId = card.dataset.stage;
-      enterStage(stageId);
-    });
+    if (unlocked) {
+      card.addEventListener('mouseenter', () => selectCard(card));
+      card.addEventListener('mouseleave', () => deselectCard(card));
+      card.addEventListener('click', () => enterStage(lesson.id));
+    }
   });
 }
 
-/**
- * Aplica estado visual de seleção a um card.
- * @param {HTMLElement} card
- */
 function selectCard(card) {
   card.classList.add('is-selected');
   card.setAttribute('aria-pressed', 'true');
 }
 
-/**
- * Remove estado visual de seleção de um card.
- * @param {HTMLElement} card
- */
 function deselectCard(card) {
   card.classList.remove('is-selected');
   card.setAttribute('aria-pressed', 'false');
 }
 
-/**
- * Simula a transição de entrada na fase.
- * @param {string} stageId
- */
+/** Transição de entrada na fase (fade de tela + navegação). */
 function enterStage(stageId) {
-  console.log(`Carregando ${stageId}...`);
-
-  // Feedback visual: ativa fade de tela
   const fade = document.querySelector('.screen-fade');
-  fade.classList.add('is-active');
+  fade?.classList.add('is-active');
 
-  // Navega para a página da aula (stub de roteador front-end)
-  const targetUrl = `./pages/${stageId}.html`;
   window.setTimeout(() => {
-    window.location.href = targetUrl;
+    window.location.href = ROUTES.lesson(stageId === 'aula1' ? 'aula1' : 'aula1');
   }, FADE_DURATION);
 }
 
-/**
- * Referencia o elemento de fade para garantir que ele exista.
- * (Método separado para facilitar testes unitários futuros.)
- */
 function setupScreenFade() {
-  const fade = document.querySelector('.screen-fade');
-  if (!fade) {
+  if (!document.querySelector('.screen-fade')) {
     console.warn('Elemento .screen-fade não encontrado no DOM.');
   }
 }
 
-/**
- * Renderiza os dados do jogador no painel esquerdo.
- * Stub visual — futuramente conectado a storage/API.
- */
-function renderPlayerStats() {
-  // Atualiza barra de XP (0/20 por enquanto)
-  const xpBarFill = document.querySelector('.xp-bar__fill');
-  const xpBarText = document.querySelector('.xp-bar__text');
-  const xpBar = document.querySelector('.xp-bar');
+/* ============================================================
+   4. RODAPÉ — navegação e atalhos
+   ============================================================ */
+function setupFooterNav() {
+  document.querySelectorAll('.controls-bar__btn[data-action]').forEach((btn) => {
+    btn.addEventListener('click', () => handleAction(btn.dataset.action));
+  });
 
-  if (xpBarFill && xpBarText && xpBar) {
-    const xpMax = 20;
-    const percentage = Math.min((gameState.totalXp / xpMax) * 100, 100);
+  window.addEventListener('keydown', (event) => {
+    // Ignora atalhos enquanto o usuário digita em algum campo.
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-    xpBarFill.style.width = `${percentage}%`;
-    xpBarText.textContent = `${gameState.totalXp} / ${xpMax} XP`;
-    xpBar.setAttribute('aria-valuenow', String(gameState.totalXp));
-  }
-
-  // Futuro: atualizar nível, aulas concluídas, conquistas, etc.
-  // document.querySelector('.player-stats__level-value').textContent = gameState.currentLevel;
+    const key = event.key.toLowerCase();
+    if (key === 'p') handleAction('dashboard');
+    else if (key === 'l') handleAction('logout');
+  });
 }
 
-/**
- * Liga os botões do rodapé às novas telas de Autenticação/Dashboard,
- * incluindo atalhos de teclado (P = Painel, L = Login).
- */
-function initFooterNav() {
-  const targets = {
-    dashboard: './pages/dashboard.html',
-    login: './pages/auth.html',
-  };
-
-  document.querySelectorAll('.controls-bar__btn[data-action]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const action = btn.dataset.action;
-      if (targets[action]) {
-        window.location.href = targets[action];
-      }
-    });
-  });
-
-  // Atalhos de teclado: P → Painel, L → Login (com feedback no console)
-  window.addEventListener('keydown', (event) => {
-    const key = event.key.toLowerCase();
-    if (key === 'p') {
-      window.location.href = targets.dashboard;
-    } else if (key === 'l') {
-      window.location.href = targets.login;
-    }
-  });
+async function handleAction(action) {
+  if (action === 'dashboard') {
+    window.location.href = ROUTES.dashboard();
+  } else if (action === 'logout') {
+    await logout();
+    window.location.href = ROUTES.auth();
+  }
 }
 
 /* ---------- Boot ---------- */

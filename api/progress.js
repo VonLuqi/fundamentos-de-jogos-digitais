@@ -16,7 +16,12 @@ export const REDEEM_CODES = {
 function sanitizeUser(u) {
   if (!u) return null;
   const { password_hash, ...safe } = u;
-  return safe;
+  const displayName = safe.name ?? safe.username;
+  return {
+    ...safe,
+    name: displayName,
+    username: safe.username ?? displayName,
+  };
 }
 
 function levelForXp(xp) {
