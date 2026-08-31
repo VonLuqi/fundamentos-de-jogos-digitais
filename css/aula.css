@@ -1,0 +1,289 @@
+/* ============================================================
+   AULA 1 — Estilo Cyber-Gothic / HUD para página de aula
+   Paleta: Dark profundo + neon roxo/ciano, ornamentação dourada
+   ============================================================ */
+
+/* ---------- 1. Design Tokens (espelham o sistema global) ---------- */
+:root {
+  --color-void: #050507;
+  --color-deep: #0a0a0f;
+  --color-surface: #12121a;
+  --color-elevated: #1a1a26;
+
+  --color-neon-purple: #a855f7;
+  --color-neon-cyan: #22d3ee;
+  --color-gold: #b08d4a;
+  --color-gold-light: #d4aa5f;
+
+  --color-text-primary: #e5e0d8;
+  --color-text-secondary: #a09a90;
+  --color-text-muted: #55504a;
+
+  --font-title: "Cinzel", serif;
+  --font-body: "Rajdhani", sans-serif;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+/* ---------- 2. Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background-color: var(--color-deep);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100dvh;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at 90% 80%, rgba(34, 211, 238, 0.02) 1px, transparent 1px);
+  background-size: 70px 70px, 55px 55px;
+}
+
+::selection {
+  background-color: var(--color-neon-purple);
+  color: var(--color-void);
+}
+
+/* ---------- 3. Header / Navegação ---------- */
+.lesson-header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #2a2a35;
+  background: linear-gradient(180deg, rgba(18, 18, 26, 0.95), transparent);
+}
+
+.lesson-header__back {
+  display: inline-block;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  transition: color 150ms ease, text-shadow 150ms ease;
+}
+.lesson-header__back:hover,
+.lesson-header__back:focus-visible {
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+}
+
+.lesson-header__title {
+  font-family: var(--font-title);
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+  text-shadow: 0 0 24px rgba(168, 85, 247, 0.5);
+}
+.accent { color: var(--color-gold); }
+
+/* ---------- 4. Sistema de Abas (Tabs) ---------- */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 2rem 1.5rem 2rem;
+  border-bottom: 1px solid #2a2a35;
+}
+
+.tab {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 2px solid #2a2a35;
+  cursor: pointer;
+  transition: all 200ms ease;
+  clip-path: polygon(
+    8px 0%, 100% 0%, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 0% 100%, 0% 8px
+  );
+}
+
+.tab:hover,
+.tab:focus-visible {
+  color: var(--color-neon-cyan);
+  border-color: var(--color-neon-cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.tab.is-active {
+  color: var(--color-void);
+  background: linear-gradient(90deg, var(--color-neon-purple), var(--color-neon-cyan));
+  border-color: var(--color-neon-purple);
+  box-shadow:
+    0 0 16px rgba(168, 85, 247, 0.6),
+    0 0 40px rgba(168, 85, 247, 0.3);
+}
+
+/* ---------- 5. Painéis de Conteúdo ---------- */
+.lesson-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.tab-panel {
+  display: none;
+}
+.tab-panel.is-active {
+  display: block;
+  animation: fadeIn 250ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- 6. Conteúdo da Teoria (pergaminho digital) ---------- */
+.lesson-content {
+  max-width: 68ch;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.lesson-title {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  letter-spacing: 0.12em;
+  margin: 2.5rem 0 1rem 0;
+  color: var(--color-neon-purple);
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
+}
+.lesson-title:first-child { margin-top: 0; }
+
+.lesson-subtitle {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  letter-spacing: 0.1em;
+  margin: 1.8rem 0 0.6rem 0;
+  color: var(--color-neon-cyan);
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.4);
+}
+
+.lesson-content p {
+  margin-bottom: 1.2rem;
+  color: var(--color-text-primary);
+}
+.lesson-content strong {
+  color: var(--color-gold-light);
+  font-weight: 600;
+}
+.lesson-content em {
+  color: var(--color-neon-cyan);
+  font-style: normal;
+  font-weight: 500;
+}
+
+.lesson-list {
+  margin: 1.2rem 0 1.2rem 2rem;
+  color: var(--color-text-secondary);
+}
+.lesson-list li {
+  margin-bottom: 0.4rem;
+}
+
+/* ---------- 7. Placeholders de Imagem (Hologram slots) ---------- */
+.img-placeholder {
+  width: 100%;
+  min-height: 300px;
+  margin: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  background: rgba(10, 10, 15, 0.6);
+  border: 2px dashed var(--color-neon-purple);
+  color: var(--color-neon-purple);
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  transition: opacity 200ms ease;
+}
+.img-placeholder::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    rgba(168, 85, 247, 0.08) 50%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+/* ---------- 8. Simulação Interativa ---------- */
+.simulation-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.simulation-hud {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--color-neon-green, #4ade80);
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+}
+.simulation-hud--right {
+  text-align: right;
+  color: var(--color-text-secondary);
+  text-shadow: none;
+}
+
+#game-canvas-container {
+  width: 100%;
+  height: 480px;
+  background: var(--color-void);
+  border: 3px solid var(--color-gold);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow:
+    0 0 24px rgba(176, 141, 74, 0.25),
+    inset 0 0 40px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+
+/* ---------- 9. Acessibilidade & Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .tab-panel.is-active { animation: none; }
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-neon-cyan);
+  outline-offset: 2px;
+}
+
+/* ---------- 10. Glossário Cyber-Gothic — ajustes finais ---------- */
+:root {
+  --color-neon-green: #4ade80;
+}

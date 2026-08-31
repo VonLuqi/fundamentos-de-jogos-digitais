@@ -21,7 +21,7 @@ const gameState = {
   currentLevel: 1,
   totalXp: 0,
   completedLessons: 0,
-  unlockedStages: ['aula-1'],
+  unlockedStages: ['aula1'],
 };
 
 /**
@@ -109,12 +109,10 @@ function enterStage(stageId) {
   const fade = document.querySelector('.screen-fade');
   fade.classList.add('is-active');
 
-  // Em produção, aqui faríamos:
-  //   await router.push(`./pages/${stageId}.html`);
-  // Por enquanto, apenas simulamos e revertemos o fade.
+  // Navega para a página da aula (stub de roteador front-end)
+  const targetUrl = `./pages/${stageId}.html`;
   window.setTimeout(() => {
-    fade.classList.remove('is-active');
-    console.log(`${stageId} — transição concluída (stub).`);
+    window.location.href = targetUrl;
   }, FADE_DURATION);
 }
 
