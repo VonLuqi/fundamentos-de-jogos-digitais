@@ -573,7 +573,475 @@ body {
 }
 
 /* ============================================================
-   8. RESPONSIVO
+   8. ALTAR — "OFERENDA AO ESTIGE" (resgate de código)
+   ============================================================
+   O input imita uma RANHURA escavada em pedra: fundo afundado
+   (inset shadow forte), letras espaçadas em caixa alta e um filete
+   dourado que acende no foco, como se o altar reconhecesse a oferenda.
+   ============================================================ */
+.altar-block {
+  padding: 1.35rem 1.5rem 1.5rem;
+  background: linear-gradient(180deg, rgba(122, 31, 43, 0.16), rgba(24, 18, 26, 0.95));
+  border: 2px solid var(--hades-gold-dark);
+  outline: 1px solid rgba(207, 167, 89, 0.35);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-panel);
+  animation: panelEnter 550ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+.altar-block__intro {
+  font-size: 0.9rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+  margin-bottom: 1.1rem;
+}
+
+.altar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+/* A RANHURA propriamente dita */
+.altar__slot {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+.altar__label {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+  margin-bottom: 0.4rem;
+}
+.altar__input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--hades-gold-bright);
+  /* Fundo "escavado": gradiente escuro + sombra interna profunda */
+  background: linear-gradient(180deg, #07060a, #120d14);
+  border: 1px solid var(--hades-bronze);
+  border-radius: 2px;
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.95),
+    inset 0 -1px 0 rgba(207, 167, 89, 0.18);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), color var(--transition-base);
+}
+.altar__input::placeholder {
+  color: var(--hades-text-muted);
+  letter-spacing: 0.18em;
+  font-weight: 400;
+}
+/* JUICE: no foco, a ranhura "acende" — o altar reagiu à presença do herói */
+.altar__input:focus {
+  outline: none;
+  border-color: var(--hades-gold);
+  color: #fff;
+  box-shadow:
+    inset 0 6px 16px rgba(0, 0, 0, 0.95),
+    inset 0 0 26px rgba(207, 167, 89, 0.28),
+    0 0 20px rgba(207, 167, 89, 0.55);
+  transform: translateY(-1px);
+  will-change: box-shadow, transform;
+}
+
+/* Screen Shake do altar: erro de código */
+.altar__slot.is-shaking {
+  animation: altarShake 480ms cubic-bezier(.36, .07, .19, .97) both;
+}
+
+/* Botão "Oferendar" */
+.btn-offer {
+  flex: 0 0 auto;
+  padding: 0.78rem 1.5rem;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  background: linear-gradient(180deg, rgba(194, 53, 72, 0.6), rgba(74, 0, 0, 0.85));
+  border: 1px solid var(--hades-gold);
+  cursor: pointer;
+  box-shadow: var(--shadow-blood-glow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+}
+.btn-offer:hover:not(:disabled) {
+  transform: scale(1.03);
+  background: linear-gradient(180deg, rgba(194, 53, 72, 0.8), rgba(122, 31, 43, 0.9));
+  box-shadow: 0 0 16px rgba(194, 53, 72, 0.8), 0 0 36px rgba(194, 53, 72, 0.4), var(--shadow-gold-glow);
+}
+.btn-offer:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.btn-offer:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+/* Feedback textual do altar */
+.altar__feedback {
+  min-height: 1.4em;
+  margin-top: 0.85rem;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+.altar__feedback.is-info { color: var(--hades-text-dim); }
+.altar__feedback.is-success {
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 10px rgba(242, 213, 154, 0.5);
+  font-style: normal;
+}
+.altar__feedback.is-error {
+  color: var(--hades-blood-bright);
+  text-shadow: 0 0 8px rgba(194, 53, 72, 0.6);
+}
+
+/* ============================================================
+   9. GAME FEEL — Flash de tela + Overlay de LEVEL UP
+   ============================================================ */
+/* Flash dourado que cobre a tela por um instante ao acertar o código */
+.screen-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(242, 213, 154, 0.5), rgba(194, 53, 72, 0.18) 60%, transparent 80%);
+  backdrop-filter: blur(2px) saturate(1.05);
+  will-change: opacity, backdrop-filter;
+}
+.screen-flash.is-active {
+  animation: screenGlow 760ms ease-out both;
+}
+
+/* Overlay central de recompensa */
+.levelup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--transition-base), visibility var(--transition-base);
+}
+.levelup-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+.levelup-card {
+  padding: 1.6rem 2.4rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(24, 18, 26, 0.97), rgba(12, 8, 14, 0.97));
+  border: 2px solid var(--hades-gold);
+  outline: 1px solid var(--hades-blood-bright);
+  outline-offset: 5px;
+  box-shadow: 0 0 40px rgba(207, 167, 89, 0.5), 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+.levelup-overlay.is-active .levelup-card {
+  animation: levelUpPop 700ms cubic-bezier(0.2, 1.5, 0.35, 1) both;
+}
+.levelup-card__glyph {
+  display: block;
+  font-size: 2.2rem;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 20px rgba(242, 213, 154, 0.9);
+  animation: glyphSpin 2.2s linear infinite;
+}
+.levelup-card__title {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 16px rgba(242, 213, 154, 0.6);
+  margin: 0.4rem 0 0.25rem;
+}
+.levelup-card__detail {
+  font-size: 0.95rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+
+/* Conquista recém-desbloqueada: pulso dourado por alguns instantes */
+.achievement-card.is-just-unlocked {
+  animation: achievementUnlock 1.4s ease-out 2;
+}
+
+/* ============================================================
+   10. PELE DE MESTRE (role: admin)
+   ============================================================
+   O status de "Mestre do Domínio" é comunicado por três camadas
+   redundantes: coroa, aura vermelha pulsante e borda diferenciada.
+   ============================================================ */
+.avatar-frame__crown {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 14px rgba(242, 213, 154, 0.9), 0 0 26px rgba(194, 53, 72, 0.6);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+/* A coroa só existe visualmente para o admin */
+.profile-panel.is-admin .avatar-frame__crown {
+  opacity: 1;
+  animation: crownFloat 2.8s ease-in-out infinite, crownGlow 3.6s ease-in-out infinite;
+}
+/* Aura vermelha pulsante + moldura diferenciada */
+.profile-panel.is-admin .avatar-frame {
+  border-color: var(--hades-blood-bright);
+  outline-color: var(--hades-gold-bright);
+  animation: adminAura 2.4s ease-in-out infinite;
+}
+.profile-panel.is-admin {
+  border-color: var(--hades-blood-bright);
+  box-shadow: var(--shadow-panel), inset 0 0 40px rgba(194, 53, 72, 0.12), 0 0 24px rgba(194, 53, 72, 0.25);
+}
+
+/* Selo textual "Mestre do Domínio" */
+.master-badge {
+  display: inline-block;
+  margin: -0.6rem 0 1rem;
+  padding: 0.2rem 0.7rem;
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  background: linear-gradient(180deg, rgba(194, 53, 72, 0.7), rgba(74, 0, 0, 0.9));
+  border: 1px solid var(--hades-gold);
+  box-shadow: var(--shadow-blood-glow);
+}
+
+/* Ferramentas do Admin */
+.admin-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(194, 53, 72, 0.35);
+}
+
+/* Botão dourado em destaque */
+.btn-gold {
+  padding: 0.7rem 1rem;
+  font-family: var(--font-title);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #1a1208;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold) 55%, var(--hades-gold-dark));
+  border: 1px solid var(--hades-gold-bright);
+  cursor: pointer;
+  box-shadow: var(--shadow-gold-glow);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), filter var(--transition-fast);
+}
+.btn-gold:hover {
+  transform: scale(1.03);
+  filter: brightness(1.12);
+  box-shadow: 0 0 18px rgba(242, 213, 154, 0.8), 0 0 40px rgba(207, 167, 89, 0.45);
+}
+.btn-gold:active {
+  transform: scale(0.97);
+}
+/* Variante pulsante — chama atenção para o poder do Mestre */
+.btn-gold--pulse {
+  animation: goldPulse 2.4s ease-in-out infinite;
+}
+/* Variante secundária, mais discreta */
+.btn-gold--ghost {
+  color: var(--hades-gold-bright);
+  background: transparent;
+  border-color: var(--hades-gold-dark);
+  box-shadow: none;
+}
+.btn-gold--ghost:hover {
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 12px rgba(207, 167, 89, 0.4);
+}
+
+/* ============================================================
+   11. MODAL "PERGAMINHO" (substitui o alert nativo)
+   ============================================================ */
+.scroll-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(6, 4, 8, 0.82);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+.scroll-modal.is-open {
+  opacity: 1;
+}
+.scroll-modal__parchment {
+  width: min(560px, 100%);
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.75rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(32, 24, 30, 0.98), rgba(16, 11, 18, 0.98));
+  border: 2px solid var(--hades-gold);
+  outline: 1px solid var(--hades-blood);
+  outline-offset: 5px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 30px rgba(207, 167, 89, 0.25);
+  animation: levelUpPop 420ms cubic-bezier(0.2, 1.3, 0.35, 1) both;
+}
+.scroll-modal__title {
+  font-family: var(--font-title);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 14px rgba(242, 213, 154, 0.4);
+  margin-bottom: 1.1rem;
+}
+.scroll-modal__body {
+  margin-bottom: 1.35rem;
+  text-align: left;
+}
+.scroll-modal__note {
+  margin-top: 0.9rem;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--hades-text-muted);
+  text-align: center;
+}
+
+/* Linha de código/aluno dentro do pergaminho */
+.code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(0, 0, 0, 0.45);
+  border-left: 3px solid var(--hades-gold);
+}
+.code-row__code {
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 10px rgba(242, 213, 154, 0.5);
+}
+.code-row__meta {
+  font-size: 0.82rem;
+  color: var(--hades-text-dim);
+  text-align: right;
+}
+
+/* ============================================================
+   12. AVISO DE API INDISPONÍVEL
+   ============================================================ */
+.api-warning {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  max-width: min(640px, calc(100% - 2rem));
+  padding: 0.85rem 1.2rem;
+  font-size: 0.9rem;
+  text-align: center;
+  color: var(--hades-text);
+  background: linear-gradient(180deg, rgba(122, 31, 43, 0.95), rgba(48, 12, 18, 0.97));
+  border: 1px solid var(--hades-gold);
+  box-shadow: var(--shadow-panel);
+}
+
+/* ============================================================
+   13. @keyframes adicionais
+   ============================================================ */
+/* Screen Shake do altar — erro de oferenda */
+@keyframes altarShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-9px); }
+  30% { transform: translateX(9px); }
+  45% { transform: translateX(-7px); }
+  60% { transform: translateX(7px); }
+  75% { transform: translateX(-4px); }
+  90% { transform: translateX(3px); }
+}
+
+/* Flash dourado cobrindo a tela — recompensa o acerto */
+@keyframes screenGlow {
+  0% { opacity: 0; backdrop-filter: blur(0px); }
+  12% { opacity: 0.9; backdrop-filter: blur(3px); }
+  40% { opacity: 0.7; backdrop-filter: blur(4px); }
+  100% { opacity: 0; backdrop-filter: blur(0px); }
+}
+
+/* "Pop" do card de LEVEL UP — overshoot deliberado (juiciness) */
+@keyframes levelUpPop {
+  0% { opacity: 0; transform: scale(0.7) translateY(22px) rotate(0deg); }
+  60% { opacity: 1; transform: scale(1.06) translateY(-8px) rotate(-2deg); }
+  100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); }
+}
+
+/* Glifo girando dentro do card de recompensa */
+@keyframes glyphSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Conquista recém-desbloqueada pulsa em ouro */
+@keyframes achievementUnlock {
+  0%, 100% { box-shadow: var(--shadow-gold-glow); transform: scale(1); }
+  50% { box-shadow: 0 0 26px rgba(242, 213, 154, 0.95), 0 0 54px rgba(207, 167, 89, 0.6); transform: scale(1.05); }
+}
+
+/* Aura vermelha do Mestre */
+@keyframes adminAura {
+  0%, 100% { box-shadow: 0 0 14px rgba(194, 53, 72, 0.6), 0 0 30px rgba(194, 53, 72, 0.3), inset 0 0 22px rgba(0, 0, 0, 0.65); }
+  50% { box-shadow: 0 0 24px rgba(194, 53, 72, 0.95), 0 0 54px rgba(194, 53, 72, 0.55), inset 0 0 22px rgba(0, 0, 0, 0.65); }
+}
+
+/* Coroa flutuando suavemente sobre o avatar */
+@keyframes crownFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-5px); }
+}
+
+/* Brilho pulsante da coroa para reforçar status de admin */
+@keyframes crownGlow {
+  0% { text-shadow: 0 0 6px rgba(242,213,154,0.6), 0 0 12px rgba(194,53,72,0.35); }
+  50% { text-shadow: 0 0 18px rgba(242,213,154,0.95), 0 0 36px rgba(194,53,72,0.55); }
+  100% { text-shadow: 0 0 6px rgba(242,213,154,0.6), 0 0 12px rgba(194,53,72,0.35); }
+}
+
+/* Pulso do botão dourado do Admin */
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(207, 167, 89, 0.5), 0 0 22px rgba(207, 167, 89, 0.22); }
+  50% { box-shadow: 0 0 20px rgba(242, 213, 154, 0.85), 0 0 46px rgba(207, 167, 89, 0.5); }
+}
+
+/* ============================================================
+   14. RESPONSIVO
    ============================================================ */
 @media (max-width: 900px) {
   .dashboard-layout {
