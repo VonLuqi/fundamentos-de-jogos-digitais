@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Pacto de Sangue — Autenticação | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Pacto de Sangue — Entrar | Fundamentos de Jogos Digitais</title>
+
+  <!-- Fonts: Cinzel (títulos, romana/serifada clássica) + Crimson Text (leitura confortável) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body>
+
+  <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- Screen Shake container: a animação CSS atinge este wrapper,
+       deixando o documento <body> estável para evitar o scroll "pular". -->
+  <div class="shake-wrapper" id="shake-wrapper">
+
+    <main class="auth-layout">
+
+      <!-- ========== PACTO DE SANGUE (LOGIN/CADASTRO) ========== -->
+      <section class="pact-frame" aria-labelledby="pact-title">
+
+        <!-- Selo decorativo acima do pergaminho -->
+        <div class="pact-frame__seal" aria-hidden="true">
+          <span class="pact-frame__seal-glyph">◆</span>
+        </div>
+
+        <h1 class="pact-frame__title" id="pact-title">Pacto de Sangue</h1>
+        <p class="pact-frame__subtitle" id="pact-subtitle">
+          Assine seu nome no tomo dos iniciados para adentrar o Domínio.
+        </p>
+
+        <!-- SELETOR DE MODO: Entrar vs. Criar Conta -->
+        <div class="pact-mode-toggle" role="tablist" aria-label="Selecione entre entrar com uma conta existente ou criar uma nova">
+          <button
+            class="pact-mode-toggle__btn is-active"
+            type="button"
+            id="mode-login"
+            role="tab"
+            aria-selected="true"
+            aria-controls="form-login"
+          >
+            Entrar
+          </button>
+          <button
+            class="pact-mode-toggle__btn"
+            type="button"
+            id="mode-register"
+            role="tab"
+            aria-selected="false"
+            aria-controls="form-register"
+          >
+            Firmar Pacto
+          </button>
+        </div>
+
+        <!-- FORMULÁRIO DE LOGIN -->
+        <form class="pact-form is-active" id="form-login" role="tabpanel" aria-labelledby="mode-login" novalidate>
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="login-name">Nome da Alma</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="login-name"
+              name="name"
+              placeholder="Ex.: Orfeu"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="login-password">Palavra de Passagem</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="login-password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <!-- Mensagem de erro (aparece com shake quando as credenciais falham) -->
+          <p class="pact-form__error" id="login-error" role="alert" aria-live="polite"></p>
+
+          <button class="btn-pact" type="submit">
+            <span class="btn-pact__label">Entrar no Domínio</span>
+          </button>
+        </form>
+
+        <!-- FORMULÁRIO DE CADASTRO -->
+        <form class="pact-form" id="form-register" role="tabpanel" aria-labelledby="mode-register" novalidate>
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="register-name">Nome da Alma</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="register-name"
+              name="name"
+              placeholder="Ex.: Sísifo"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="register-password">Palavra de Passagem</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="register-password"
+              name="password"
+              placeholder="Mínimo de 4 símbolos"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="register-password-confirm">Confirme a Palavra</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="register-password-confirm"
+              name="password_confirm"
+              placeholder="Repita a palavra de passagem"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <!-- Mensagem de erro (por exemplo, senhas diferentes) -->
+          <p class="pact-form__error" id="register-error" role="alert" aria-live="polite"></p>
+
+          <button class="btn-pact btn-pact--blood" type="submit">
+            <span class="btn-pact__label">Firmar Pacto</span>
+          </button>
+        </form>
+
+        <p class="pact-frame__footnote">
+          O pacto é armazenado neste dispositivo apenas. Nenhuma alma é enviada aos deuses ainda.
+        </p>
+      </section>
+
+      <!-- ========== NAVEGAÇÃO DE RETORNO ========== -->
+      <nav class="auth-nav" aria-label="Voltar">
+        <a class="btn-back" href="../index.html">
+          <span aria-hidden="true">←</span> Voltar ao Menu Principal
+        </a>
+      </nav>
+
+    </main>
+
+  </div>
+
+  <script type="module" src="../js/auth.js"></script>
+</body>
+</html>

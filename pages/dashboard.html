@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Salão dos Heróis — Painel do Aluno | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Salão dos Heróis | Fundamentos de Jogos Digitais</title>
+
+  <!-- Fonts: Cinzel (títulos, romana/serifada clássica) + Crimson Text (leitura confortável) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+
+  <!-- Vinheta escura nas bordas -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
+  <header class="dashboard-header">
+    <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
+      <span aria-hidden="true">←</span> Voltar
+    </a>
+    <div class="dashboard-header__titles">
+      <p class="dashboard-header__eyebrow">Fundamentos de Jogos Digitais</p>
+      <h1 class="dashboard-header__title">SALÃO DOS <span class="accent">HERÓIS</span></h1>
+    </div>
+    <button class="btn-logout" type="button" id="btn-logout" aria-label="Encerrar sessão corrente">
+      Encerrar Sessão
+    </button>
+  </header>
+
+  <!-- Divisor ornamentado -->
+  <div class="ornate-divider" aria-hidden="true">
+    <span class="ornate-divider__line"></span>
+    <span class="ornate-divider__gem">◆</span>
+    <span class="ornate-divider__line"></span>
+  </div>
+
+  <!-- ========== LAYOUT PRINCIPAL ========== -->
+  <main class="dashboard-layout">
+
+    <!-- ========== COLUNA ESQUERDA: PERFIL ========== -->
+    <aside class="profile-panel" aria-label="Perfil do aluno">
+
+      <!-- Avatar clicável: alterna entre os 6 avatares pré-definidos -->
+      <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
+        <span class="avatar-frame__glyph" id="avatar-glyph" aria-hidden="true">◆</span>
+        <span class="avatar-frame__hint">Trocar avatar</span>
+      </button>
+
+      <h2 class="profile-panel__name" id="profile-name">Alma Anônima</h2>
+      <p class="profile-panel__rank" id="profile-rank">Alma Novata</p>
+
+      <!-- Nível + XP (barra \"juicy\": enche gradativamente ao carregar) -->
+      <div class="profile-panel__stats">
+        <div class="level-badge" aria-label="Nível atual">
+          <span class="level-badge__label">Nível</span>
+          <span class="level-badge__value" id="level-value">1</span>
+        </div>
+
+        <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Experiência do aluno">
+          <!-- A ponta brilhante (glow) acompanha a progressão -->
+          <div class="xp-bar__fill" id="xp-fill" style="width: 0%;">
+            <span class="xp-bar__tip" aria-hidden="true"></span>
+          </div>
+          <span class="xp-bar__text" id="xp-text">0 / 100 XP</span>
+        </div>
+      </div>
+
+      <!-- Estatísticas rápidas -->
+      <dl class="profile-panel__quickstats">
+        <div class="profile-panel__stat">
+          <dt>Aulas Concluídas</dt>
+          <dd id="stat-lessons">0</dd>
+        </div>
+        <div class="profile-panel__stat">
+          <dt>Conquistas</dt>
+          <dd id="stat-achievements">0 / 6</dd>
+        </div>
+      </dl>
+    </aside>
+
+    <!-- ========== COLUNA DIREITA: PROGRESSO + CONQUISTAS ========== -->
+    <section class="hall-content" aria-label="Progresso e conquistas">
+
+      <!-- CONQUISTAS -->
+      <article class="achievements-block">
+        <h3 class="block-title">Quadro de Honra <span class="block-title__sub">(Conquistas)</span></h3>
+
+        <ul class="achievements-grid" id="achievements-grid">
+          <!-- Preenchido via JS a partir do estado em localStorage -->
+        </ul>
+      </article>
+
+      <!-- PROGRESSO DAS AULAS -->
+      <article class="lessons-block">
+        <h3 class="block-title">Trilha do Herói <span class="block-title__sub">(Módulos)</span></h3>
+
+        <ul class="lessons-list" id="lessons-list">
+          <!-- Preenchido via JS — status: locked / available / completed -->
+        </ul>
+      </article>
+
+    </section>
+
+  </main>
+
+  <script type="module" src="../js/dashboard.js"></script>
+</body>
+</html>

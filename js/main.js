@@ -32,6 +32,7 @@ function init() {
   setupStageCards();
   setupScreenFade();
   renderPlayerStats(); // stub — futura leitura de localStorage/API
+  initFooterNav();
 }
 
 /**
@@ -148,6 +149,36 @@ function renderPlayerStats() {
 
   // Futuro: atualizar nível, aulas concluídas, conquistas, etc.
   // document.querySelector('.player-stats__level-value').textContent = gameState.currentLevel;
+}
+
+/**
+ * Liga os botões do rodapé às novas telas de Autenticação/Dashboard,
+ * incluindo atalhos de teclado (P = Painel, L = Login).
+ */
+function initFooterNav() {
+  const targets = {
+    dashboard: './pages/dashboard.html',
+    login: './pages/auth.html',
+  };
+
+  document.querySelectorAll('.controls-bar__btn[data-action]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.action;
+      if (targets[action]) {
+        window.location.href = targets[action];
+      }
+    });
+  });
+
+  // Atalhos de teclado: P → Painel, L → Login (com feedback no console)
+  window.addEventListener('keydown', (event) => {
+    const key = event.key.toLowerCase();
+    if (key === 'p') {
+      window.location.href = targets.dashboard;
+    } else if (key === 'l') {
+      window.location.href = targets.login;
+    }
+  });
 }
 
 /* ---------- Boot ---------- */

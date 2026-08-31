@@ -1,0 +1,592 @@
+/* ============================================================
+   PAINEL DO ALUNO ("SALÃO DOS HERÓIS") — Hades UI / Juicy
+   Preto / roxo-quase-negro + dourado metálico + vermelho-sangue
+   Tipografia: Cinzel (títulos) + Crimson Text (leitura)
+   ============================================================ */
+
+/* ---------- 1. Design Tokens (mesmos da "style.css", "aula.css" e "auth.css") ---------- */
+:root {
+  --hades-bg: #0d0a10;
+  --hades-bg-alt: #14101a;
+  --hades-panel: rgba(24, 18, 26, 0.92);
+  --hades-panel-alt: rgba(32, 24, 30, 0.9);
+
+  --hades-gold: #cfa759;
+  --hades-gold-bright: #f2d59a;
+  --hades-gold-dark: #7a5c2e;
+  --hades-bronze: #5c4322;
+
+  --hades-blood: #7a1f2b;
+  --hades-blood-bright: #c23548;
+
+  --hades-text: #ece1d1;
+  --hades-text-dim: #ab9c8a;
+  --hades-text-muted: #6f6459;
+
+  --font-title: "Cinzel", serif;
+  --font-body: "Crimson Text", serif;
+
+  --shadow-gold-glow: 0 0 10px rgba(207, 167, 89, 0.55), 0 0 24px rgba(207, 167, 89, 0.25);
+  --shadow-blood-glow: 0 0 10px rgba(194, 53, 72, 0.55), 0 0 26px rgba(194, 53, 72, 0.28);
+  --shadow-panel: 0 14px 40px rgba(0, 0, 0, 0.65);
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+/* ---------- 2. Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--hades-text);
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(122, 31, 43, 0.18), transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(207, 167, 89, 0.08), transparent 50%),
+    var(--hades-bg);
+  overflow-x: hidden;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+/* ============================================================
+   3. LAYOUT — Header + Grid principal
+   ============================================================ */
+.dashboard-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 0.5rem;
+  flex-wrap: wrap;
+}
+
+.dashboard-header__titles {
+  flex: 1 1 auto;
+  text-align: center;
+}
+.dashboard-header__eyebrow {
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--hades-text-muted);
+}
+.dashboard-header__title {
+  font-family: var(--font-title);
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--hades-text);
+  text-shadow: 0 0 18px rgba(207, 167, 89, 0.2);
+}
+.accent {
+  color: var(--hades-gold-bright);
+}
+
+.btn-back,
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.95rem;
+  font-family: var(--font-title);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  background: transparent;
+  color: var(--hades-gold);
+  text-decoration: none;
+  border: 1px solid var(--hades-gold-dark);
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.btn-back:hover,
+.btn-logout:hover {
+  color: var(--hades-gold-bright);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.35);
+}
+
+/* Divisor ornamentado (mesmo padrão das outras telas) */
+.ornate-divider {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.5rem 1rem;
+}
+.ornate-divider__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hades-gold-dark), transparent);
+}
+.ornate-divider__gem {
+  color: var(--hades-blood-bright);
+  font-size: 0.7rem;
+}
+
+.dashboard-layout {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(260px, 320px) 1fr;
+  gap: 1.5rem;
+  padding: 0 1.5rem 2.5rem;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   4. COLUNA ESQUERDA — PERFIL
+   ============================================================ */
+.profile-panel {
+  padding: 1.75rem 1.5rem;
+  background: var(--hades-panel);
+  border: 2px solid var(--hades-gold-dark);
+  outline: 1px solid var(--hades-gold);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-panel), inset 0 0 32px rgba(207, 167, 89, 0.05);
+  text-align: center;
+
+  animation: panelEnter 550ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+/* Avatar circular com moldura dourada — clicável para trocar o glifo */
+.avatar-frame {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 35% 30%, rgba(122, 31, 43, 0.4), rgba(20, 16, 26, 0.95));
+  border: 2px solid var(--hades-gold-dark);
+  outline: 1px solid var(--hades-gold);
+  outline-offset: 3px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold-glow), inset 0 0 22px rgba(0, 0, 0, 0.65);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+.avatar-frame:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 18px rgba(207, 167, 89, 0.75), 0 0 38px rgba(207, 167, 89, 0.35), inset 0 0 22px rgba(0, 0, 0, 0.65);
+}
+.avatar-frame:active {
+  transform: scale(0.96);
+}
+/* JUICE: ao trocar o avatar, um flash dourado confirma a ação */
+.avatar-frame.is-swapping .avatar-frame__glyph {
+  animation: avatarFlash 380ms ease-out both;
+}
+.avatar-frame__glyph {
+  font-size: 3.2rem;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 14px rgba(242, 213, 154, 0.65);
+  user-select: none;
+}
+.avatar-frame__hint {
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.1rem 0.5rem;
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--hades-gold-bright);
+  background: var(--hades-blood);
+  border: 1px solid var(--hades-gold);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+.avatar-frame:hover .avatar-frame__hint {
+  opacity: 1;
+}
+
+.profile-panel__name {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--hades-text);
+  margin-bottom: 0.15rem;
+}
+
+.profile-panel__rank {
+  font-family: var(--font-title);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hades-blood-bright);
+  text-shadow: 0 0 8px rgba(194, 53, 72, 0.6);
+  margin-bottom: 1.25rem;
+}
+
+.profile-panel__stats {
+  margin-bottom: 1.25rem;
+}
+.level-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.level-badge__label {
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--hades-text-muted);
+}
+.level-badge__value {
+  font-family: var(--font-title);
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 10px rgba(242, 213, 154, 0.5);
+}
+
+/* ============================================================
+   5. BARRA DE XP ("JUICY")
+   A barra enche de 0 → valor salvo assim que a página carrega,
+   via JS que simplesmente altera a propriedade `width` — a transição
+   CSS cuida da animação. A "ponta" (xp-bar__tip) é um orbe que
+   acompanha o preenchimento, emitindo brilho pulsante.
+   ============================================================ */
+.xp-bar {
+  position: relative;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--hades-gold-dark);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+}
+.xp-bar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%; /* JS define o alvo; CSS anima */
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold) 45%, var(--hades-gold-dark));
+  box-shadow: 0 0 12px rgba(207, 167, 89, 0.7);
+  /* JUICE: cubic-bezier com leve "anticipation" — a barra acelera e desacelera suavemente */
+  transition: width 1.6s cubic-bezier(0.17, 0.9, 0.32, 1);
+}
+/* O orbe na ponta — acompanha o fill graças ao posicionamento à direita */
+.xp-bar__tip {
+  position: absolute;
+  top: 50%;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  transform: translateY(-50%) rotate(45deg);
+  background: var(--hades-gold-bright);
+  box-shadow: 0 0 10px rgba(242, 213, 154, 0.9), 0 0 22px rgba(207, 167, 89, 0.6);
+  animation: xpTipPulse 1.2s ease-in-out infinite;
+}
+.xp-bar__text {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.6);
+}
+
+.profile-panel__quickstats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid rgba(207, 167, 89, 0.2);
+}
+.profile-panel__stat dt {
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hades-text-muted);
+}
+.profile-panel__stat dd {
+  font-family: var(--font-title);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--hades-gold-bright);
+}
+
+/* ============================================================
+   6. COLUNA DIREITA — CONQUISTAS + PROGRESSO
+   ============================================================ */
+.hall-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 0;
+}
+
+.block-title {
+  position: relative;
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+/* Filete dourado abaixo do título da seção — assinatura visual "Hades" */
+.block-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 64px;
+  height: 2px;
+  background: var(--hades-gold);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.5);
+}
+.block-title__sub {
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  color: var(--hades-text-muted);
+  text-transform: none;
+  font-style: italic;
+}
+
+/* ---------- Grade de Conquistas ---------- */
+.achievements-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
+}
+.achievement-card {
+  position: relative;
+  padding: 1rem 0.85rem;
+  text-align: center;
+  background: var(--hades-panel-alt);
+  border: 1px solid var(--hades-gold-dark);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+
+  /* JUICE: staggered entrance — cada medalha "surgindo" uma após a outra */
+  animation: achievementEnter 550ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  animation-delay: calc(var(--ach-index, 0) * 80ms);
+}
+.achievement-card:hover:not(.is-locked) {
+  transform: translateY(-3px);
+  border-color: var(--hades-gold);
+  box-shadow: var(--shadow-gold-glow);
+}
+.achievement-card__icon {
+  display: block;
+  font-size: 1.9rem;
+  margin-bottom: 0.45rem;
+}
+.achievement-card__name {
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.achievement-card__desc {
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+
+/* Estado DESBLOQUEADO — cores vivas, glow dourado */
+.achievement-card.is-unlocked {
+  background: linear-gradient(180deg, rgba(122, 31, 43, 0.24), rgba(24, 18, 26, 0.95));
+  border-color: var(--hades-gold);
+  box-shadow: var(--shadow-gold-glow);
+}
+.achievement-card.is-unlocked .achievement-card__icon {
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 12px rgba(242, 213, 154, 0.7);
+}
+
+/* Estado BLOQUEADO — preto e branco, opaco, "apagado" */
+.achievement-card.is-locked {
+  opacity: 0.45;
+  filter: grayscale(1);
+  border-style: dashed;
+}
+.achievement-card.is-locked .achievement-card__icon {
+  color: var(--hades-text-muted);
+}
+
+/* ---------- Lista de Aulas ---------- */
+.lessons-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--hades-panel-alt);
+  border: 1px solid var(--hades-gold-dark);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+
+  animation: panelEnter 550ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  animation-delay: calc(var(--lesson-index, 0) * 90ms);
+}
+.lesson-row:hover:not(.is-locked) {
+  transform: translateX(4px);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.25);
+}
+.lesson-row.is-locked {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+.lesson-row__number {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--hades-gold);
+  min-width: 2.4rem;
+  text-align: center;
+}
+.lesson-row__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.lesson-row__title {
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lesson-row__subtitle {
+  font-size: 0.8rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+.lesson-row__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid var(--hades-gold-dark);
+  white-space: nowrap;
+  transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.lesson-row__action:hover {
+  color: var(--hades-gold-bright);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 8px rgba(207, 167, 89, 0.35);
+}
+/* Estado "concluída": selo verde- dourado discreto */
+.lesson-row.is-completed {
+  border-color: var(--hades-gold);
+}
+.lesson-row.is-completed .lesson-row__action {
+  color: var(--hades-gold-bright);
+  border-color: var(--hades-gold);
+}
+
+/* ============================================================
+   7. @keyframes
+   ============================================================ */
+/* Entrada dos painéis — leve "subida + fade" */
+@keyframes panelEnter {
+  0% { opacity: 0; transform: translateY(18px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Entrada das conquistas — "pulo" sutil, como moedas aparecendo */
+@keyframes achievementEnter {
+  0% { opacity: 0; transform: scale(0.85) translateY(6px); }
+  60% { opacity: 1; transform: scale(1.04) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Pulso da ponta da barra de XP — "brasa" que atrai o olho */
+@keyframes xpTipPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(242, 213, 154, 0.7), 0 0 14px rgba(207, 167, 89, 0.4); }
+  50% { box-shadow: 0 0 12px rgba(242, 213, 154, 1), 0 0 28px rgba(207, 167, 89, 0.75); }
+}
+
+/* Flash dourado ao trocar o avatar — feedback imediato da ação */
+@keyframes avatarFlash {
+  0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* ============================================================
+   8. RESPONSIVO
+   ============================================================ */
+@media (max-width: 900px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

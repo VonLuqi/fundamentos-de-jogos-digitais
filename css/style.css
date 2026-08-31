@@ -468,7 +468,7 @@ body {
   font-family: var(--font-title);
   font-size: 0.8rem;
   letter-spacing: 0.1em;
-  cursor: not-allowed; /* placeholder — controles futuros */
+  cursor: pointer;
   transition:
     border-color var(--transition-fast),
     box-shadow var(--transition-fast);
