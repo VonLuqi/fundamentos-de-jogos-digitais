@@ -341,6 +341,7 @@ body {
   display: block;
   background-color: #0d0a10;
   border: 1px solid var(--hades-bronze);
+  cursor: pointer; /* sinaliza a interação de clique da Máquina de Estados */
 }
 
 .simulation-legend {
