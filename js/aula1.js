@@ -5,13 +5,13 @@
  * Este arquivo contém duas responsabilidades independentes:
  *
  * 1. TABS       → Alterna entre "Teoria e Manuais" e "Simulação".
- * 2. SIMULAÇÃO  → Um labirinto com Máquina de Estados, colisão
- *                 AABB e perseguição (Robô vs Monstro), escrito
- *                 100% com a API NATIVA do HTML5 Canvas.
+ * 2. SIMULAÇÃO  → Um labirinto PROCEDURAL (gerado a cada partida),
+ *                 com Máquina de Estados, colisão AABB e um
+ *                 Monstro que persegue o Robô usando PATHFINDING
+ *                 real (busca em largura / BFS) sobre a grade do
+ *                 labirinto — 100% em Canvas API nativo.
  *
  * IMPORTANTE: Nenhuma biblioteca externa é utilizada aqui.
- * Usamos apenas `CanvasRenderingContext2D` + `requestAnimationFrame`,
- * garantindo que a simulação funcione em qualquer navegador moderno.
  * ============================================================
  */
 
@@ -45,7 +45,7 @@ function initTabs() {
 }
 
 /* ============================================================
-   2. SIMULAÇÃO — LABIRINTO, ESTADOS E COLISÃO (Canvas API nativo)
+   2. SIMULAÇÃO — LABIRINTO PROCEDURAL + PATHFINDING (Canvas nativo)
    ============================================================ */
 function initSimulation() {
   const canvas = document.getElementById('game-canvas');
@@ -55,100 +55,229 @@ function initSimulation() {
   }
 
   const ctx = canvas.getContext('2d');
-  const WORLD_WIDTH = canvas.width;   // 600 — definido no HTML
-  const WORLD_HEIGHT = canvas.height; // 400 — definido no HTML
+  const WORLD_WIDTH = canvas.width;   // 600
+  const WORLD_HEIGHT = canvas.height; // 400
 
   /* ==========================================================
      2.1 MÁQUINA DE ESTADOS
-     ==========================================================
-     Todo jogo é, no fundo, uma máquina de estados: a cada
-     instante, o sistema só pode estar em UM estado, e cada
-     estado tem suas próprias regras de desenho e atualização.
-     Isso evita, por exemplo, que o jogador se mova durante a
-     contagem regressiva ou antes de clicar para iniciar.
   ========================================================== */
   const GameState = {
-    START_SCREEN: 'START_SCREEN', // Aguardando o clique inicial
-    COUNTDOWN: 'COUNTDOWN',       // Contagem 3, 2, 1...
-    PLAYING: 'PLAYING',           // Loop de jogo ativo
-    CAUGHT: 'CAUGHT',             // Monstro alcançou o Robô
+    START_SCREEN: 'START_SCREEN',
+    COUNTDOWN: 'COUNTDOWN',
+    PLAYING: 'PLAYING',
+    CAUGHT: 'CAUGHT',
   };
 
   let currentState = GameState.START_SCREEN;
 
-  // Guarda o instante (timestamp) em que a contagem regressiva
-  // começou, para calcularmos quanto tempo já passou a cada frame.
-  const COUNTDOWN_DURATION_MS = 3000; // 3 segundos, conforme pedido
+  const COUNTDOWN_DURATION_MS = 3000;   // 3 segundos, contagem 3-2-1
+  const ENEMY_WAKE_DELAY_MS = 5000;     // MECÂNICA: o Monstro "dorme" 5s
   let countdownStartedAt = 0;
+  let playingStartedAt = null;
 
   /* ==========================================================
-     2.2 MECÂNICA — O LABIRINTO (paredes/obstáculos)
+     2.2 GRADE DO LABIRINTO (Design Tokens do mapa)
      ==========================================================
-     Cada parede é um retângulo {x, y, width, height}. Juntas,
-     elas formam corredores com GARGALOS (passagens estreitas)
-     e ROTAS DE FUGA alternativas — exatamente o conceito
-     apresentado na Aba "Teoria" desta aula.
+     O labirinto é dividido em uma grade de células. Cada célula
+     guarda quais dos seus 4 lados possuem parede. O tamanho da
+     célula é escolhido para que COLS × CELL_SIZE = 600 e
+     ROWS × CELL_SIZE = 400, preenchendo o canvas exatamente.
   ========================================================== */
-  const WALL_COLOR = '#3a2a2c';        // grafite/vermelho-escuro (combina com a estética Hades)
-  const WALL_BORDER_COLOR = '#7a5c2e'; // fio dourado sutil, para leitura visual das bordas
+  const CELL_SIZE = 50;
+  const COLS = WORLD_WIDTH / CELL_SIZE;   // 12 colunas
+  const ROWS = WORLD_HEIGHT / CELL_SIZE;  // 8 linhas
+  const WALL_THICKNESS = 8;
 
-  const maze = [
-    // Parede A (segmento superior) — força o jogador a descer.
-    { x: 250, y: 0, width: 24, height: 150 },
-    // Parede B (segmento inferior) — entre A e B existe um
-    // GARGALO de 80px (de y=150 a y=230): a única passagem
-    // central entre a metade esquerda e a direita do mapa.
-    { x: 250, y: 230, width: 24, height: 170 },
-    // Parede C — cria uma ROTA DE FUGA alternativa: sua abertura
-    // fica no topo (y=0 a y=100), mais longa, porém mais segura.
-    { x: 400, y: 100, width: 24, height: 300 },
-    // Parede D — obstáculo curto próximo ao início, obriga um
-    // pequeno desvio logo na largada.
-    { x: 90, y: 300, width: 160, height: 24 },
-  ];
+  const WALL_COLOR = '#3a2a2c';        // grafite/vermelho-escuro (estética Hades)
+  const WALL_BORDER_COLOR = '#7a5c2e'; // fio dourado sutil
+
+  /**
+   * Cria a grade vazia: toda célula nasce com os 4 lados fechados.
+   */
+  function createGrid() {
+    const grid = [];
+    for (let row = 0; row < ROWS; row += 1) {
+      const rowCells = [];
+      for (let col = 0; col < COLS; col += 1) {
+        rowCells.push({ row, col, top: true, right: true, bottom: true, left: true, visited: false });
+      }
+      grid.push(rowCells);
+    }
+    return grid;
+  }
+
+  /** Embaralha um array no local (Fisher-Yates). */
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+
+  /**
+   * MECÂNICA — Geração procedural do labirinto ("recursive backtracker").
+   * Começamos em uma célula, e a cada passo vamos a um vizinho ainda não
+   * visitado (derrubando a parede entre as duas), empilhando o caminho.
+   * Quando não há mais vizinhos livres, voltamos (backtrack) na pilha.
+   * O resultado é um labirinto onde QUALQUER célula pode alcançar
+   * qualquer outra — não existem áreas isoladas.
+   */
+  function carveMaze(grid, startRow, startCol) {
+    const DIRECTIONS = [
+      { dr: -1, dc: 0, wallHere: 'top', wallThere: 'bottom' },
+      { dr: 1, dc: 0, wallHere: 'bottom', wallThere: 'top' },
+      { dr: 0, dc: -1, wallHere: 'left', wallThere: 'right' },
+      { dr: 0, dc: 1, wallHere: 'right', wallThere: 'left' },
+    ];
+
+    const stack = [grid[startRow][startCol]];
+    grid[startRow][startCol].visited = true;
+
+    while (stack.length > 0) {
+      const current = stack[stack.length - 1];
+      const shuffledDirs = shuffle(DIRECTIONS.slice());
+
+      let advanced = false;
+      for (const dir of shuffledDirs) {
+        const nextRow = current.row + dir.dr;
+        const nextCol = current.col + dir.dc;
+        const inBounds = nextRow >= 0 && nextRow < ROWS && nextCol >= 0 && nextCol < COLS;
+
+        if (inBounds && !grid[nextRow][nextCol].visited) {
+          const neighbor = grid[nextRow][nextCol];
+          current[dir.wallHere] = false;   // derruba a parede do lado de "current"
+          neighbor[dir.wallThere] = false; // e o lado correspondente do vizinho
+          neighbor.visited = true;
+          stack.push(neighbor);
+          advanced = true;
+          break;
+        }
+      }
+
+      if (!advanced) {
+        stack.pop(); // sem vizinhos livres: backtrack
+      }
+    }
+  }
+
+  /**
+   * DINÂMICA — Adiciona "rotas de fuga" extras (loops).
+   * Um labirinto 100% "árvore" (gerado só pelo backtracker) tem
+   * exatamente UM caminho entre dois pontos. Ao remover ~12% das
+   * paredes restantes, criamos atalhos e rotas alternativas —
+   * o mesmo conceito de "gargalos e rotas de fuga" da Aba 1.
+   */
+  function addExtraRoutes(grid, chance = 0.12) {
+    for (let row = 0; row < ROWS; row += 1) {
+      for (let col = 0; col < COLS; col += 1) {
+        const cell = grid[row][col];
+
+        if (col < COLS - 1 && cell.right && Math.random() < chance) {
+          cell.right = false;
+          grid[row][col + 1].left = false;
+        }
+        if (row < ROWS - 1 && cell.bottom && Math.random() < chance) {
+          cell.bottom = false;
+          grid[row + 1][col].top = false;
+        }
+      }
+    }
+  }
+
+  /**
+   * Converte a grade lógica em retângulos físicos {x, y, width, height}
+   * para desenho e para a colisão AABB. Cada parede é desenhada apenas
+   * uma vez (lados "top"/"left" de cada célula, mais o "right"/"bottom"
+   * das bordas externas), evitando retas duplicadas.
+   */
+  function buildWallRects(grid) {
+    const rects = [];
+    for (let row = 0; row < ROWS; row += 1) {
+      for (let col = 0; col < COLS; col += 1) {
+        const cell = grid[row][col];
+        const x = col * CELL_SIZE;
+        const y = row * CELL_SIZE;
+
+        if (cell.top) {
+          rects.push({ x, y: y - WALL_THICKNESS / 2, width: CELL_SIZE + WALL_THICKNESS, height: WALL_THICKNESS });
+        }
+        if (cell.left) {
+          rects.push({ x: x - WALL_THICKNESS / 2, y, width: WALL_THICKNESS, height: CELL_SIZE + WALL_THICKNESS });
+        }
+        if (col === COLS - 1 && cell.right) {
+          rects.push({ x: x + CELL_SIZE - WALL_THICKNESS / 2, y, width: WALL_THICKNESS, height: CELL_SIZE + WALL_THICKNESS });
+        }
+        if (row === ROWS - 1 && cell.bottom) {
+          rects.push({ x, y: y + CELL_SIZE - WALL_THICKNESS / 2, width: CELL_SIZE + WALL_THICKNESS, height: WALL_THICKNESS });
+        }
+      }
+    }
+    return rects;
+  }
+
+  /** Canto superior-esquerdo (em pixels) para centralizar um ator de `size` px dentro de uma célula. */
+  function cellTopLeft(row, col, size) {
+    return {
+      x: col * CELL_SIZE + (CELL_SIZE - size) / 2,
+      y: row * CELL_SIZE + (CELL_SIZE - size) / 2,
+    };
+  }
 
   /* ==========================================================
      2.3 MECÂNICA — Velocidades (drasticamente reduzidas)
-     ==========================================================
-     Em um labirinto, velocidade alta = colisões imprevisíveis.
-     Por isso, usamos poucos pixels por frame: o jogador ganha
-     precisão para "usar as paredes a seu favor".
   ========================================================== */
-  const PLAYER_SPEED = 2.5;                 // 2 a 3 px/frame, conforme solicitado
-  const ENEMY_SPEED = PLAYER_SPEED * 0.85;  // MECÂNICA: 15% mais lento que o jogador
+  const PLAYER_SPEED = 2.5;                // 2 a 3 px/frame
+  const ENEMY_SPEED = PLAYER_SPEED * 0.85; // 15% mais lento que o jogador
 
-  const PLAYER_SIZE = 22; // usamos caixas quadradas para simplificar a colisão AABB
-  const ENEMY_SIZE = 26;
+  const PLAYER_SIZE = 18;
+  const ENEMY_SIZE = 20;
 
   /* ==========================================================
-     2.4 ESTADO DOS ATUANTES
-     ========================================================== */
-  // getInitialPlayerState/getInitialEnemyState permitem "reiniciar"
-  // a simulação após o jogador ser capturado (estado CAUGHT).
-  function getInitialPlayerState() {
-    return { x: 40, y: 40, size: PLAYER_SIZE };
-  }
-  function getInitialEnemyState() {
-    return { x: WORLD_WIDTH - 60, y: WORLD_HEIGHT - 60, size: ENEMY_SIZE };
+     2.4 ESTADO DO MUNDO (grade, paredes e atuantes)
+     ==========================================================
+     resetSimulation() gera um labirinto NOVO a cada partida —
+     como as salas proceduralmente geradas de um rogue-like — e
+     posiciona o Monstro na MESMA célula do Robô, ligeiramente
+     atrás dele (mais próximo do canto da célula), simbolizando
+     que ele já está "colado" ao jogador desde o início.
+  ========================================================== */
+  let grid = null;
+  let wallRects = [];
+  let player = null;
+  let enemy = null;
+
+  function resetSimulation() {
+    grid = createGrid();
+    carveMaze(grid, 0, 0);
+    addExtraRoutes(grid, 0.12);
+    wallRects = buildWallRects(grid);
+
+    const playerStart = cellTopLeft(0, 0, PLAYER_SIZE);
+    player = { x: playerStart.x, y: playerStart.y, size: PLAYER_SIZE };
+
+    // O Monstro nasce na MESMA célula inicial, encostado no canto
+    // inferior-direito dela: literalmente "atrás" do Robô na entrada.
+    enemy = {
+      x: CELL_SIZE - ENEMY_SIZE - 2,
+      y: CELL_SIZE - ENEMY_SIZE - 2,
+      size: ENEMY_SIZE,
+    };
+
+    playingStartedAt = null;
   }
 
-  let player = getInitialPlayerState();
-  let enemy = getInitialEnemyState();
+  resetSimulation();
 
   /* ==========================================================
      2.5 INPUT — Estado das setas do teclado
-     ========================================================== */
-  const keysPressed = {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false,
-  };
+  ========================================================== */
+  const keysPressed = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
 
   window.addEventListener('keydown', (event) => {
     if (event.key in keysPressed) {
       keysPressed[event.key] = true;
-      event.preventDefault(); // evita rolar a página com as setas
+      event.preventDefault();
     }
   });
 
@@ -164,20 +293,14 @@ function initSimulation() {
       countdownStartedAt = performance.now();
       currentState = GameState.COUNTDOWN;
     } else if (currentState === GameState.CAUGHT) {
-      // Reinicia posições e volta para a tela inicial.
-      player = getInitialPlayerState();
-      enemy = getInitialEnemyState();
+      // Gera um NOVO labirinto e reinicia do zero.
+      resetSimulation();
       currentState = GameState.START_SCREEN;
     }
   });
 
   /* ==========================================================
      2.6 COLISÃO — AABB (Axis-Aligned Bounding Box)
-     ==========================================================
-     Duas caixas (retângulos sem rotação) colidem quando NÃO
-     existe espaço entre elas em nenhum dos dois eixos (X e Y).
-     Esta é a verificação matemática mais simples e eficiente
-     para jogos 2D com grades/labirintos.
   ========================================================== */
   function isCollidingAABB(boxA, boxB) {
     return (
@@ -188,50 +311,37 @@ function initSimulation() {
     );
   }
 
-  /** Converte um atuante {x, y, size} em uma caixa AABB {x, y, width, height}. */
   function toBoundingBox(actor) {
     return { x: actor.x, y: actor.y, width: actor.size, height: actor.size };
   }
 
-  /** Verifica se uma caixa colide com QUALQUER parede do labirinto. */
   function collidesWithMaze(box) {
-    return maze.some((wall) => isCollidingAABB(box, wall));
+    return wallRects.some((wall) => isCollidingAABB(box, wall));
   }
 
   /**
-   * Move um atuante respeitando as paredes do labirinto.
-   * MECÂNICA: a movimentação é resolvida EIXO POR EIXO (X, depois Y).
-   * Isso permite que o atuante "deslize" ao longo de uma parede em
-   * vez de travar por completo — mas quando o caminho direto está
-   * bloqueado nos dois eixos, ele efetivamente FICA PRESO na parede.
-   * É exatamente esse comportamento que força o Monstro a contornar
-   * obstáculos de forma imperfeita, abrindo brechas para o jogador.
+   * Move um atuante respeitando as paredes, eixo por eixo (X, depois Y).
+   * Usado apenas pelo JOGADOR: ele tem movimento livre em pixels e
+   * precisa "esbarrar" fisicamente nas paredes do labirinto.
    */
   function moveWithCollision(actor, deltaX, deltaY) {
-    // Tenta mover no eixo X.
     const boxAfterX = { x: actor.x + deltaX, y: actor.y, width: actor.size, height: actor.size };
     if (!collidesWithMaze(boxAfterX)) {
       actor.x += deltaX;
     }
 
-    // Tenta mover no eixo Y (a partir da posição X já resolvida).
     const boxAfterY = { x: actor.x, y: actor.y + deltaY, width: actor.size, height: actor.size };
     if (!collidesWithMaze(boxAfterY)) {
       actor.y += deltaY;
     }
   }
 
-  /** Restringe um valor entre um mínimo e um máximo (limites do canvas). */
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
   }
 
   /* ==========================================================
      2.7 ATUALIZAÇÃO — JOGADOR
-     ==========================================================
-     MECÂNICA: cada tecla pressionada aplica um deslocamento fixo
-     (PLAYER_SPEED) por frame. A colisão com o labirinto é resolvida
-     por moveWithCollision().
   ========================================================== */
   function updatePlayer() {
     let deltaX = 0;
@@ -244,44 +354,122 @@ function initSimulation() {
 
     moveWithCollision(player, deltaX, deltaY);
 
-    // Restrição de espaço: paredes invisíveis nas bordas do canvas.
     player.x = clamp(player.x, 0, WORLD_WIDTH - player.size);
     player.y = clamp(player.y, 0, WORLD_HEIGHT - player.size);
   }
 
   /* ==========================================================
-     2.8 ATUALIZAÇÃO — MONSTRO (perseguição linear)
+     2.8 PATHFINDING — Busca em Largura (BFS) sobre a grade
      ==========================================================
-     DINÂMICA: o Monstro persegue o jogador na linha reta mais
-     curta possível. Sem um algoritmo de pathfinding (fora do
-     escopo de JS puro sem bibliotecas), ele simplesmente tenta
-     seguir o vetor direção → e, ao colidir com uma parede nesse
-     eixo, moveWithCollision() bloqueia aquele movimento.
-     Resultado emergente: o Monstro "trava" contra obstáculos,
-     dando ao jogador a janela de tempo necessária para escapar
-     pelos gargalos ou pela rota de fuga alternativa.
+     Diferente de uma perseguição "em linha reta" (que trava em
+     qualquer parede), o BFS explora a grade camada por camada a
+     partir da célula do Monstro até encontrar a célula do Robô,
+     retornando o CAMINHO MAIS CURTO entre as duas. O Monstro
+     então persegue apenas o PRIMEIRO passo desse caminho — e o
+     caminho é recalculado a cada frame, reagindo ao jogador em
+     tempo real, como um verdadeiro algoritmo de IA de perseguição.
   ========================================================== */
-  function updateEnemy() {
-    const centerPlayerX = player.x + player.size / 2;
-    const centerPlayerY = player.y + player.size / 2;
-    const centerEnemyX = enemy.x + enemy.size / 2;
-    const centerEnemyY = enemy.y + enemy.size / 2;
+  function pixelToCell(x, y, size) {
+    const centerX = x + size / 2;
+    const centerY = y + size / 2;
+    const col = clamp(Math.floor(centerX / CELL_SIZE), 0, COLS - 1);
+    const row = clamp(Math.floor(centerY / CELL_SIZE), 0, ROWS - 1);
+    return { row, col };
+  }
 
-    const directionX = centerPlayerX - centerEnemyX;
-    const directionY = centerPlayerY - centerEnemyY;
-    const distance = Math.hypot(directionX, directionY);
+  /** Retorna as células vizinhas alcançáveis (sem parede) a partir de (row, col). */
+  function getOpenNeighbors(row, col) {
+    const cell = grid[row][col];
+    const neighbors = [];
+    if (!cell.top && row > 0) neighbors.push({ row: row - 1, col });
+    if (!cell.bottom && row < ROWS - 1) neighbors.push({ row: row + 1, col });
+    if (!cell.left && col > 0) neighbors.push({ row, col: col - 1 });
+    if (!cell.right && col < COLS - 1) neighbors.push({ row, col: col + 1 });
+    return neighbors;
+  }
 
-    let deltaX = 0;
-    let deltaY = 0;
-    if (distance > 0.5) {
-      deltaX = (directionX / distance) * ENEMY_SPEED;
-      deltaY = (directionY / distance) * ENEMY_SPEED;
+  /** BFS clássico: devolve o caminho (lista de células) de `start` até `goal`, ou null. */
+  function findShortestPath(start, goal) {
+    if (start.row === goal.row && start.col === goal.col) {
+      return [start];
     }
 
-    moveWithCollision(enemy, deltaX, deltaY);
+    const cellKey = (r, c) => `${r}:${c}`;
+    const visited = new Set([cellKey(start.row, start.col)]);
+    const cameFrom = new Map();
+    const queue = [start];
 
-    enemy.x = clamp(enemy.x, 0, WORLD_WIDTH - enemy.size);
-    enemy.y = clamp(enemy.y, 0, WORLD_HEIGHT - enemy.size);
+    while (queue.length > 0) {
+      const current = queue.shift();
+
+      if (current.row === goal.row && current.col === goal.col) {
+        // Reconstrói o caminho percorrendo os "pais" até a origem.
+        const path = [current];
+        let key = cellKey(current.row, current.col);
+        while (cameFrom.has(key)) {
+          const previous = cameFrom.get(key);
+          path.unshift(previous);
+          key = cellKey(previous.row, previous.col);
+        }
+        return path;
+      }
+
+      for (const neighbor of getOpenNeighbors(current.row, current.col)) {
+        const neighborKey = cellKey(neighbor.row, neighbor.col);
+        if (!visited.has(neighborKey)) {
+          visited.add(neighborKey);
+          cameFrom.set(neighborKey, current);
+          queue.push(neighbor);
+        }
+      }
+    }
+
+    return null; // Não deveria ocorrer: o labirinto é sempre totalmente conectado.
+  }
+
+  /* ==========================================================
+     2.9 ATUALIZAÇÃO — MONSTRO (dorme 5s, depois persegue com IA)
+  ========================================================== */
+  function updateEnemy(now) {
+    if (playingStartedAt === null) return;
+
+    // MECÂNICA: o Monstro permanece imóvel pelos primeiros 5 segundos
+    // de jogo — o tempo de reação/fuga garantido ao jogador.
+    const timeSincePlayStarted = now - playingStartedAt;
+    if (timeSincePlayStarted < ENEMY_WAKE_DELAY_MS) {
+      return;
+    }
+
+    const enemyCell = pixelToCell(enemy.x, enemy.y, enemy.size);
+    const playerCell = pixelToCell(player.x, player.y, player.size);
+
+    let targetX;
+    let targetY;
+
+    if (enemyCell.row === playerCell.row && enemyCell.col === playerCell.col) {
+      // DINÂMICA: dentro da mesma célula, ataca o pixel exato do jogador.
+      targetX = player.x;
+      targetY = player.y;
+    } else {
+      const path = findShortestPath(enemyCell, playerCell);
+      const nextCell = path && path.length > 1 ? path[1] : enemyCell;
+      const nextTopLeft = cellTopLeft(nextCell.row, nextCell.col, enemy.size);
+      targetX = nextTopLeft.x;
+      targetY = nextTopLeft.y;
+    }
+
+    const deltaX = targetX - enemy.x;
+    const deltaY = targetY - enemy.y;
+    const distance = Math.hypot(deltaX, deltaY);
+
+    if (distance <= ENEMY_SPEED) {
+      // Já está praticamente sobre o alvo: encaixa exatamente, sem "tremer".
+      enemy.x = targetX;
+      enemy.y = targetY;
+    } else {
+      enemy.x += (deltaX / distance) * ENEMY_SPEED;
+      enemy.y += (deltaY / distance) * ENEMY_SPEED;
+    }
   }
 
   /** Verifica se o Monstro alcançou o Robô (fim de jogo). */
@@ -292,32 +480,15 @@ function initSimulation() {
   }
 
   /* ==========================================================
-     2.9 DESENHO — Elementos reutilizáveis
-     ========================================================== */
+     2.10 DESENHO
+  ========================================================== */
   function drawMazeBackground() {
     ctx.fillStyle = '#0d0a10';
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    // Grade sutil, remetendo ao "papel quadriculado" do exercício unplugged.
-    ctx.strokeStyle = 'rgba(207, 167, 89, 0.06)';
-    ctx.lineWidth = 1;
-    const GRID_SIZE = 40;
-    for (let x = 0; x <= WORLD_WIDTH; x += GRID_SIZE) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, WORLD_HEIGHT);
-      ctx.stroke();
-    }
-    for (let y = 0; y <= WORLD_HEIGHT; y += GRID_SIZE) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(WORLD_WIDTH, y);
-      ctx.stroke();
-    }
   }
 
   function drawMazeWalls() {
-    maze.forEach((wall) => {
+    wallRects.forEach((wall) => {
       ctx.fillStyle = WALL_COLOR;
       ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
       ctx.strokeStyle = WALL_BORDER_COLOR;
@@ -329,7 +500,7 @@ function initSimulation() {
   function drawPlayer() {
     ctx.save();
     ctx.shadowColor = '#3fd0ff';
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = 12;
     ctx.fillStyle = '#3fd0ff';
     ctx.fillRect(player.x, player.y, player.size, player.size);
     ctx.restore();
@@ -338,13 +509,32 @@ function initSimulation() {
   function drawEnemy() {
     ctx.save();
     ctx.shadowColor = '#c23548';
-    ctx.shadowBlur = 14;
+    ctx.shadowBlur = 12;
     ctx.fillStyle = '#c23548';
     ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
     ctx.restore();
   }
 
-  /** Texto centralizado, com fonte temática e brilho dourado. */
+  /** Enquanto o Monstro "dorme", mostra a contagem regressiva sobre ele. */
+  function drawEnemySleepIndicator(now) {
+    if (playingStartedAt === null) return;
+
+    const remainingMs = ENEMY_WAKE_DELAY_MS - (now - playingStartedAt);
+    if (remainingMs <= 0) return;
+
+    const remainingSeconds = Math.ceil(remainingMs / 1000);
+    ctx.save();
+    ctx.font = '11px "Cinzel", serif';
+    ctx.fillStyle = '#f2d59a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.shadowColor = 'rgba(194, 53, 72, 0.8)';
+    ctx.shadowBlur = 6;
+    ctx.fillText(`zzz ${remainingSeconds}`, enemy.x + enemy.size / 2, enemy.y - 4);
+    ctx.restore();
+  }
+
+  /** Texto centralizado, com fonte temática e brilho dourado/sangue. */
   function drawCenteredText(text, sizePx, color, glowColor, yOffset = 0) {
     ctx.save();
     ctx.font = `${sizePx}px "Cinzel", serif`;
@@ -358,19 +548,18 @@ function initSimulation() {
   }
 
   /* ==========================================================
-     2.10 DESENHO — Uma função de render por ESTADO
-     ========================================================== */
+     2.11 RENDERIZAÇÃO — Uma função por ESTADO
+  ========================================================== */
   function renderStartScreen() {
     drawMazeBackground();
     drawMazeWalls();
     drawPlayer();
     drawEnemy();
 
-    // Camada escura semitransparente para destacar o texto do menu.
     ctx.fillStyle = 'rgba(10, 8, 7, 0.55)';
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-    drawCenteredText('Clique na tela para iniciar', 22, '#f2d59a', 'rgba(207, 167, 89, 0.7)');
+    drawCenteredText('Clique na tela para iniciar', 20, '#f2d59a', 'rgba(207, 167, 89, 0.7)');
   }
 
   function renderCountdown(now) {
@@ -386,23 +575,25 @@ function initSimulation() {
     const remainingSeconds = Math.ceil((COUNTDOWN_DURATION_MS - elapsedMs) / 1000);
 
     if (remainingSeconds <= 0) {
-      // 3 segundos se esgotaram: inicia o jogo.
+      // 3 segundos se esgotaram: o cronômetro do Monstro começa agora.
       currentState = GameState.PLAYING;
+      playingStartedAt = now;
       return;
     }
 
-    drawCenteredText(String(remainingSeconds), 64, '#f2d59a', 'rgba(194, 53, 72, 0.75)');
+    drawCenteredText(String(remainingSeconds), 60, '#f2d59a', 'rgba(194, 53, 72, 0.75)');
   }
 
-  function renderPlaying() {
+  function renderPlaying(now) {
     updatePlayer();
-    updateEnemy();
+    updateEnemy(now);
     checkCapture();
 
     drawMazeBackground();
     drawMazeWalls();
     drawPlayer();
     drawEnemy();
+    drawEnemySleepIndicator(now);
   }
 
   function renderCaught() {
@@ -411,19 +602,15 @@ function initSimulation() {
     drawPlayer();
     drawEnemy();
 
-    ctx.fillStyle = 'rgba(92, 20, 29, 0.55)'; // véu vermelho-sangue translúcido
+    ctx.fillStyle = 'rgba(92, 20, 29, 0.55)';
     ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
-    drawCenteredText('Você foi capturado!', 26, '#f2d59a', 'rgba(194, 53, 72, 0.85)', -14);
-    drawCenteredText('Clique para reiniciar', 18, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 20);
+    drawCenteredText('Você foi capturado!', 24, '#f2d59a', 'rgba(194, 53, 72, 0.85)', -14);
+    drawCenteredText('Clique para gerar outro labirinto', 15, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 18);
   }
 
   /* ==========================================================
-     2.11 LOOP PRINCIPAL
-     ==========================================================
-     Um único `requestAnimationFrame` roda para sempre; a cada
-     frame, delegamos o desenho/atualização para a função
-     correspondente ao estado atual da Máquina de Estados.
+     2.12 LOOP PRINCIPAL
   ========================================================== */
   function gameLoop(now) {
     switch (currentState) {
@@ -434,7 +621,7 @@ function initSimulation() {
         renderCountdown(now);
         break;
       case GameState.PLAYING:
-        renderPlaying();
+        renderPlaying(now);
         break;
       case GameState.CAUGHT:
         renderCaught();
@@ -449,11 +636,14 @@ function initSimulation() {
   requestAnimationFrame(gameLoop);
 
   console.info(
-    '%c[SIMULAÇÃO]%c Labirinto iniciado — Robô: %spx/frame | Monstro: %spx/frame (15%% mais lento)',
+    '%c[SIMULAÇÃO]%c Labirinto procedural (%d\u00d7%d células) — Robô: %spx/frame | Monstro: %spx/frame, dorme %ds e usa BFS para perseguir',
     'color: #cfa759; font-weight: bold;',
     'color: #ab9c8a;',
+    COLS,
+    ROWS,
     PLAYER_SPEED,
-    ENEMY_SPEED.toFixed(2)
+    ENEMY_SPEED.toFixed(2),
+    ENEMY_WAKE_DELAY_MS / 1000
   );
 }
 

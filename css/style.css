@@ -74,6 +74,12 @@ body {
 
 body {
   position: relative;
+  /* Layout em coluna flexível: header/divisor/rodapé têm altura própria
+     e o conteúdo central (.game-layout) ocupa o espaço restante. Isso
+     evita o "cálculo mágico" de altura (ex.: calc(100vh - 190px)) que
+     quebra e corta o rodapé sempre que o cabeçalho muda de tamanho. */
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(circle at 50% 0%, rgba(106, 63, 143, 0.16), transparent 55%),
     radial-gradient(circle at 50% 100%, rgba(194, 53, 72, 0.12), transparent 55%),
@@ -117,6 +123,7 @@ body {
 .game-header {
   position: relative;
   z-index: 2;
+  flex: 0 0 auto; /* altura definida pelo próprio conteúdo, nunca encolhe */
   padding: var(--space-6) var(--space-8) var(--space-2);
   text-align: center;
 }
@@ -146,10 +153,12 @@ body {
 .ornate-divider {
   position: relative;
   z-index: 2;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   max-width: 640px;
+  width: 100%;
   margin: 0 auto;
   padding: 0 var(--space-8) var(--space-4);
 }
@@ -168,10 +177,13 @@ body {
 .game-layout {
   position: relative;
   z-index: 2;
+  /* Ocupa todo o espaço restante entre o header e o rodapé, sem
+     depender de nenhum valor fixo/calculado em pixels. */
+  flex: 1 1 auto;
+  min-height: 0; /* evita overflow por min-content implícito do flex */
   display: grid;
   grid-template-columns: 320px 1fr;
   gap: var(--space-6);
-  height: calc(100vh - 190px);
   padding: 0 var(--space-8) var(--space-6);
   max-width: 1400px;
   margin-inline: auto;
@@ -181,6 +193,8 @@ body {
 /* ---------- 7. Painel Esquerdo: Status do Jogador ---------- */
 .player-panel {
   position: relative;
+  min-height: 0; /* item de grid: permite encolher em vez de vazar */
+  overflow-y: auto;
   background: linear-gradient(180deg, var(--hades-panel), var(--hades-panel-alt));
   border: 6px double var(--hades-gold-dark);
   padding: var(--space-8) var(--space-6);
@@ -319,12 +333,17 @@ body {
 }
 
 /* ---------- 8. Painel Central: Seleção de Fases ---------- */
+.stage-select {
+  min-height: 0; /* item de grid: permite encolher em vez de vazar */
+}
+
 .stage-select__list {
   list-style: none;
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
   height: 100%;
+  min-height: 0;
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -430,7 +449,9 @@ body {
 .controls-bar {
   position: relative;
   z-index: 2;
+  flex: 0 0 auto; /* nunca é comprimido pelo restante do layout */
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-8);
   justify-content: center;
   padding: var(--space-4) var(--space-8);

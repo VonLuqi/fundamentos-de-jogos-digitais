@@ -154,20 +154,23 @@
       <div class="hades-frame simulation-panel">
 
         <p class="simulation-instructions">
-          <strong>Clique na tela</strong> para iniciar a contagem regressiva. Depois, use as
-          <strong>Setas do Teclado</strong> (↑ ↓ ← →) para guiar o Robô pelo labirinto, usando os
-          <strong>gargalos e rotas de fuga</strong> a seu favor para escapar do Monstro.
+          <strong>Clique na tela</strong> para iniciar a contagem regressiva. O Monstro nasce
+          colado ao Robô, mas dorme por <strong>5 segundos</strong> — use esse tempo para fugir.
+          Depois disso, ele desperta e persegue o jogador pelo labirinto com um algoritmo de
+          <strong>pathfinding (BFS)</strong>, contornando as paredes de verdade. Use as
+          <strong>Setas do Teclado</strong> (↑ ↓ ← →) para escapar pelos gargalos e rotas de fuga.
+          Cada tentativa gera um <strong>labirinto novo</strong>.
         </p>
 
         <!-- Moldura dourada do canvas -->
         <div class="canvas-frame">
-          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: labirinto com Robô fugindo do Monstro"></canvas>
+          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: labirinto procedural com Robô fugindo do Monstro"></canvas>
         </div>
 
         <p class="simulation-legend">
           <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Robô (Jogador)
           &nbsp;&nbsp;&nbsp;
-          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (Inimigo — 15% mais lento)
+          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (dorme 5s, depois persegue com BFS — 15% mais lento)
         </p>
 
       </div>
