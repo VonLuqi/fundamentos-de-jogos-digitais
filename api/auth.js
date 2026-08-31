@@ -1,130 +1,105 @@
-/**
- * ============================================================
- * /api/auth — Pacto de Sangue (login, cadastro, sessão, logout)
- * ============================================================
- * Contrato da API (todas as ações em um único endpoint para
- * economizar funções serverless no plano gratuito do Vercel):
- *
- *   POST /api/auth  { action: "register", name, password }
- *     → 201 { ok: true, token, user }
- *
- *   POST /api/auth  { action: "login", name, password }
- *     → 200 { ok: true, token, user }
- *
- *   POST /api/auth  { action: "logout", token }
- *     → 200 { ok: true }
- *
- *   GET  /api/auth?token=...      (valida a sessão ativa)
- *     → 200 { ok: true, user }  |  401 { ok: false }
- * ============================================================
- */
+import crypto from 'node:crypto';
+import supabase from './supabaseClient.js';
 
-import {
-  ensureSeed,
-  findUserByName,
-  createUserRecord,
-  evaluateAchievements,
-  saveUser,
-  verifyPassword,
-  createSession,
-  destroySession,
-  getUserFromToken,
-  sanitizeUser,
-  sendJson,
-  readBody,
-  getStorageMode,
-} from './_lib/store.js';
+const USERS_TABLE = 'users';
 
-/* ---------- Validação de credenciais ---------- */
-function validateCredentials(name, password) {
-  const errors = [];
-  if (typeof name !== 'string' || name.trim().length < 2) {
-    errors.push('O nome da alma precisa de ao menos 2 letras.');
-  }
-  if (typeof name === 'string' && name.trim().length > 24) {
-    errors.push('O nome da alma não pode passar de 24 letras.');
-  }
-  if (typeof password !== 'string' || password.length < 4) {
-    errors.push('A palavra de passagem precisa de ao menos 4 símbolos.');
-  }
-  return errors;
+function hashPassword(password, salt = crypto.randomBytes(12).toString('hex')) {
+  const derived = crypto.scryptSync(password, salt, 64).toString('hex');
+  return `${salt}:${derived}`;
+}
+
+function verifyPassword(password, stored) {
+  if (typeof stored !== 'string' || !stored.includes(':')) return false;
+  const [salt] = stored.split(':');
+  const candidate = hashPassword(password, salt);
+  const a = Buffer.from(candidate);
+  const b = Buffer.from(stored);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function sanitizeUser(u) {
+  if (!u) return null;
+  const { password_hash, ...safe } = u;
+  return safe;
 }
 
 export default async function handler(req, res) {
   try {
-    // O ADMIN é re-semeado em toda invocação: nunca se perde.
-    await ensureSeed();
-
-    /* ============ GET: validar sessão ativa ============ */
     if (req.method === 'GET') {
       const token = req.query?.token;
-      const user = await getUserFromToken(token);
-      if (!user) {
-        return sendJson(res, 401, { ok: false, error: 'Sessão inválida ou expirada.' });
-      }
-      return sendJson(res, 200, { ok: true, user: sanitizeUser(user), storage: getStorageMode() });
+      if (!token) return res.status(400).json({ ok: false, error: 'Token ausente.' });
+
+      const { data: session } = await supabase.from('sessions').select('token, user_id').eq('token', token).limit(1).single();
+      if (!session) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
+
+      const { data: user } = await supabase.from(USERS_TABLE).select('*').eq('id', session.user_id).limit(1).single();
+      return res.status(200).json({ ok: true, user: sanitizeUser(user) });
     }
 
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'GET, POST');
-      return sendJson(res, 405, { ok: false, error: 'Método não permitido.' });
+      return res.status(405).json({ ok: false, error: 'Método não permitido.' });
     }
 
-    const body = readBody(req);
-    const action = body.action;
+    const { action } = req.body || {};
 
-    /* ============ LOGOUT ============ */
-    if (action === 'logout') {
-      await destroySession(body.token);
-      return sendJson(res, 200, { ok: true });
-    }
-
-    /* ============ REGISTER ============ */
     if (action === 'register') {
-      const errors = validateCredentials(body.name, body.password);
-      if (errors.length > 0) {
-        return sendJson(res, 400, { ok: false, error: errors.join(' ') });
-      }
+      const { username, password } = req.body;
+      const errors = [];
+      if (!username || username.trim().length < 2) errors.push('Nome muito curto.');
+      if (!password || password.length < 4) errors.push('Senha muito curta.');
+      if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
-      const existing = await findUserByName(body.name);
-      if (existing) {
-        return sendJson(res, 409, { ok: false, error: 'Essa alma já assinou o tomo. Tente "Entrar".' });
-      }
+      const { data: existing } = await supabase.from(USERS_TABLE).select('id').eq('username', username.trim().toLowerCase()).limit(1).single();
+      if (existing) return res.status(409).json({ ok: false, error: 'Usuário já existe.' });
 
-      // CORREÇÃO: novo usuário SEMPRE nasce com xp = 0 e achievements = [].
-      const user = createUserRecord({
-        name: body.name,
-        password: body.password,
+      const password_hash = hashPassword(password);
+      const now = new Date().toISOString();
+      const payload = {
+        username: username.trim(),
+        password_hash,
         role: 'student',
-      });
-      // Reavalie conquistas iniciais (caso regras dependam de estado inicial)
-      evaluateAchievements(user);
-      await saveUser(user);
+        xp: 0,
+        achievements: [],
+        completed_lessons: [],
+        redeemed_codes: [],
+        avatar_index: 0,
+        created_at: now,
+      };
 
-      const token = await createSession(user.name);
-      return sendJson(res, 201, { ok: true, token, user: sanitizeUser(user), storage: getStorageMode() });
+      const { data, error } = await supabase.from(USERS_TABLE).insert(payload).select('*').single();
+      if (error) return res.status(500).json({ ok: false, error: 'Erro ao criar usuário.' });
+
+      const token = crypto.randomBytes(24).toString('hex');
+      await supabase.from('sessions').insert({ token, user_id: data.id, created_at: new Date().toISOString() });
+
+      return res.status(201).json({ ok: true, token, user: sanitizeUser(data) });
     }
 
-    /* ============ LOGIN ============ */
     if (action === 'login') {
-      const errors = validateCredentials(body.name, body.password);
-      if (errors.length > 0) {
-        return sendJson(res, 400, { ok: false, error: errors.join(' ') });
+      const { username, password } = req.body;
+      const { data: user } = await supabase.from(USERS_TABLE).select('*').ilike('username', username).limit(1).single();
+      if (!user || !verifyPassword(password, user.password_hash)) {
+        return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
       }
 
-      const user = await findUserByName(body.name);
-      if (!user || !verifyPassword(body.password, user.passwordHash)) {
-        // Mensagem genérica: não revela se o nome existe.
-        return sendJson(res, 401, { ok: false, error: 'O nome da alma ou a palavra de passagem estão errados.' });
-      }
+      const token = crypto.randomBytes(24).toString('hex');
+      await supabase.from('sessions').insert({ token, user_id: user.id, created_at: new Date().toISOString() });
 
-      const token = await createSession(user.name);
-      return sendJson(res, 200, { ok: true, token, user: sanitizeUser(user), storage: getStorageMode() });
+      return res.status(200).json({ ok: true, token, user: sanitizeUser(user) });
     }
 
-    return sendJson(res, 400, { ok: false, error: 'Ação desconhecida.' });
-  } catch (error) {
-    console.error('[api/auth] Erro inesperado:', error);
-    return sendJson(res, 500, { ok: false, error: 'Os deuses estão em silêncio. Tente novamente.' });
+    if (action === 'logout') {
+      const { token } = req.body;
+      if (token) {
+        await supabase.from('sessions').delete().eq('token', token);
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    return res.status(400).json({ ok: false, error: 'Ação desconhecida.' });
+  } catch (err) {
+    console.error('[api/auth] erro', err);
+    return res.status(500).json({ ok: false, error: 'Erro interno.' });
   }
 }

@@ -1,0 +1,32 @@
+{
+  "name": "fundamentos-de-jogos-digitais",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Plataforma gamificada de ensino de design de jogos — estética Hades (Supergiant Games).",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js"
+  },
+  "optionalDependencies": {
+    "@vercel/kv": "^3.0.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4"
+  },
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VonLuqi/fundamentos-de-jogos-digitais.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VonLuqi/fundamentos-de-jogos-digitais/issues"
+  },
+  "homepage": "https://github.com/VonLuqi/fundamentos-de-jogos-digitais#readme"
+}

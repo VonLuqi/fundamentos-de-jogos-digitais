@@ -22,6 +22,27 @@
   <!-- Vinheta escura nas bordas -->
   <div class="vignette" aria-hidden="true"></div>
 
+  <!-- JUICE: flash dourado que cobre a tela ao resgatar um código com sucesso -->
+  <div class="screen-flash" id="screen-flash" aria-hidden="true"></div>
+
+  <!-- JUICE: overlay de "LEVEL UP" / recompensa concedida -->
+  <div class="levelup-overlay" id="levelup-overlay" role="status" aria-live="polite">
+    <div class="levelup-card">
+      <span class="levelup-card__glyph" aria-hidden="true">✦</span>
+      <p class="levelup-card__title" id="levelup-title">Oferenda Aceita</p>
+      <p class="levelup-card__detail" id="levelup-detail"></p>
+    </div>
+  </div>
+
+  <!-- Modal estilizado (substitui o alert nativo para os códigos do Admin) -->
+  <div class="scroll-modal" id="scroll-modal" role="dialog" aria-modal="true" aria-labelledby="scroll-modal-title" hidden>
+    <div class="scroll-modal__parchment">
+      <h2 class="scroll-modal__title" id="scroll-modal-title">Códigos de Acesso</h2>
+      <div class="scroll-modal__body" id="scroll-modal-body"></div>
+      <button class="btn-gold" type="button" id="scroll-modal-close">Selar o Pergaminho</button>
+    </div>
+  </div>
+
   <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
   <header class="dashboard-header">
     <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
@@ -46,31 +67,35 @@
   <!-- ========== LAYOUT PRINCIPAL ========== -->
   <main class="dashboard-layout">
 
-    <!-- ========== COLUNA ESQUERDA: PERFIL ========== -->
-    <aside class="profile-panel" aria-label="Perfil do aluno">
+    <!-- ========== COLUNA ESQUERDA: PERFIL DINÂMICO ========== -->
+    <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
 
-      <!-- Avatar clicável: alterna entre os 6 avatares pré-definidos -->
+      <!-- Avatar clicável (persistido via /api/progress) -->
       <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
+        <!-- Coroa exibida somente para role=admin (inserida/escondida via CSS) -->
+        <span class="avatar-frame__crown" aria-hidden="true">♛</span>
         <span class="avatar-frame__glyph" id="avatar-glyph" aria-hidden="true">◆</span>
         <span class="avatar-frame__hint">Trocar avatar</span>
       </button>
 
-      <h2 class="profile-panel__name" id="profile-name">Alma Anônima</h2>
-      <p class="profile-panel__rank" id="profile-rank">Alma Novata</p>
+      <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
+      <p class="profile-panel__rank" id="profile-rank">—</p>
 
-      <!-- Nível + XP (barra \"juicy\": enche gradativamente ao carregar) -->
+      <!-- Selo de Mestre (apenas admin) -->
+      <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
+
+      <!-- Nível + XP (barra "juicy": enche gradativamente ao carregar) -->
       <div class="profile-panel__stats">
         <div class="level-badge" aria-label="Nível atual">
           <span class="level-badge__label">Nível</span>
-          <span class="level-badge__value" id="level-value">1</span>
+          <span class="level-badge__value" id="level-value">—</span>
         </div>
 
         <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Experiência do aluno">
-          <!-- A ponta brilhante (glow) acompanha a progressão -->
           <div class="xp-bar__fill" id="xp-fill" style="width: 0%;">
             <span class="xp-bar__tip" aria-hidden="true"></span>
           </div>
-          <span class="xp-bar__text" id="xp-text">0 / 100 XP</span>
+          <span class="xp-bar__text" id="xp-text">— / — XP</span>
         </div>
       </div>
 
@@ -78,31 +103,70 @@
       <dl class="profile-panel__quickstats">
         <div class="profile-panel__stat">
           <dt>Aulas Concluídas</dt>
-          <dd id="stat-lessons">0</dd>
+          <dd id="stat-lessons">—</dd>
         </div>
         <div class="profile-panel__stat">
           <dt>Conquistas</dt>
-          <dd id="stat-achievements">0 / 6</dd>
+          <dd id="stat-achievements">—</dd>
         </div>
       </dl>
+
+      <!-- ========== PAINEL EXCLUSIVO DO ADMIN ========== -->
+      <div class="admin-tools" id="admin-tools" hidden>
+        <button class="btn-gold btn-gold--pulse" type="button" id="btn-generate-codes">
+          Gerar Códigos de Acesso
+        </button>
+        <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
+          Ver Almas Registradas
+        </button>
+      </div>
     </aside>
 
-    <!-- ========== COLUNA DIREITA: PROGRESSO + CONQUISTAS ========== -->
+    <!-- ========== COLUNA DIREITA ========== -->
     <section class="hall-content" aria-label="Progresso e conquistas">
+
+      <!-- ========== ALTAR: OFERENDA AO ESTIGE ========== -->
+      <article class="altar-block">
+        <h3 class="block-title">Oferenda ao Estige <span class="block-title__sub">(Resgate de Código)</span></h3>
+        <p class="altar-block__intro">
+          Ao concluir uma aula, o Mestre entrega um <strong>código de acesso</strong>.
+          Deposite-o na ranhura do altar para receber XP e conquistas.
+        </p>
+
+        <!-- O wrapper recebe o Screen Shake quando o código é rejeitado -->
+        <form class="altar" id="altar-form" novalidate>
+          <div class="altar__slot" id="altar-slot">
+            <label class="altar__label" for="altar-input">Código da Oferenda</label>
+            <input
+              class="altar__input"
+              type="text"
+              id="altar-input"
+              name="code"
+              placeholder="EX.: MDA2026"
+              autocomplete="off"
+              spellcheck="false"
+              maxlength="24"
+            />
+          </div>
+          <button class="btn-offer" type="submit" id="btn-offer">
+            <span class="btn-offer__label">Oferendar</span>
+          </button>
+        </form>
+
+        <p class="altar__feedback" id="altar-feedback" role="status" aria-live="polite"></p>
+      </article>
 
       <!-- CONQUISTAS -->
       <article class="achievements-block">
         <h3 class="block-title">Quadro de Honra <span class="block-title__sub">(Conquistas)</span></h3>
-
         <ul class="achievements-grid" id="achievements-grid">
-          <!-- Preenchido via JS a partir do estado em localStorage -->
+          <!-- Preenchido via JS a partir dos dados vindos da API -->
         </ul>
       </article>
 
       <!-- PROGRESSO DAS AULAS -->
       <article class="lessons-block">
         <h3 class="block-title">Trilha do Herói <span class="block-title__sub">(Módulos)</span></h3>
-
         <ul class="lessons-list" id="lessons-list">
           <!-- Preenchido via JS — status: locked / available / completed -->
         </ul>
@@ -112,6 +176,44 @@
 
   </main>
 
-  <script type="module" src="../js/dashboard.js"></script>
+  <!-- Aviso exibido quando a API não está acessível (ex.: abrir o HTML via file://) -->
+  <div class="api-warning" id="api-warning" hidden>
+    <p id="api-warning-text"></p>
+  </div>
+
+  <script type="module">
+    import { requireSession, clearSession, ROUTES } from '../js/api.js';
+    import { renderProfile, bindAltar, bindAdmin } from '../js/gamefeel.js';
+
+    (async function boot() {
+      try {
+        const payload = await requireSession();
+        if (!payload) return; // requireSession already redirected
+        const { user, session } = payload;
+        renderProfile(user);
+        if (user.role === 'admin') {
+          const adminTools = document.getElementById('admin-tools');
+          const masterBadge = document.getElementById('master-badge');
+          if (adminTools) adminTools.hidden = false;
+          if (masterBadge) masterBadge.hidden = false;
+        }
+        bindAltar();
+        bindAdmin();
+
+        const btnLogout = document.getElementById('btn-logout');
+        if (btnLogout) btnLogout.addEventListener('click', async () => {
+          try {
+            await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token: session.token }) });
+          } catch (e) {}
+          clearSession();
+          window.location.href = ROUTES.auth();
+        });
+      } catch (err) {
+        console.error(err);
+        // Em caso de falha perigosa, redireciona para login
+        window.location.href = ROUTES.auth();
+      }
+    })();
+  </script>
 </body>
 </html>
