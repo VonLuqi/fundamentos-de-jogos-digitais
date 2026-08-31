@@ -79,9 +79,27 @@ export default async function handler(req, res) {
     if (action === 'login') {
       const { username, password } = req.body;
       const { data: user } = await supabase.from(USERS_TABLE).select('*').ilike('username', username).limit(1).single();
-      if (!user || !verifyPassword(password, user.password_hash)) {
-        return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
+      if (!user) return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
+
+      let valid = false;
+      // primary check: hashed password
+      if (user.password_hash && verifyPassword(password, user.password_hash)) {
+        valid = true;
       }
+
+      // fallback: legacy plaintext `password` column — migrate on successful match
+      if (!valid && user.password && password === user.password) {
+        try {
+          const newHash = hashPassword(password);
+          await supabase.from(USERS_TABLE).update({ password_hash: newHash, password: null }).eq('id', user.id);
+          valid = true;
+          console.log(`[api/auth] migrated plaintext password for user id=${user.id}`);
+        } catch (e) {
+          console.warn('[api/auth] migration failed for user', user.id, e);
+        }
+      }
+
+      if (!valid) return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
 
       const token = crypto.randomBytes(24).toString('hex');
       await supabase.from('sessions').insert({ token, user_id: user.id, created_at: new Date().toISOString() });
