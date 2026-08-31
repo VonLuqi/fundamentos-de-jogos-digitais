@@ -45,11 +45,12 @@ export const ROUTES = {
 /* ============================================================
    2. SESSÃO ATIVA (localStorage — só o token e o mínimo de UI)
    ============================================================ */
-export function saveSession({ token, name, role }) {
+export function saveSession({ token, name, username, role }) {
   try {
+    const displayName = name ?? username ?? 'Jogador';
     localStorage.setItem(
       SESSION_KEY,
-      JSON.stringify({ token, name, role, savedAt: new Date().toISOString() })
+      JSON.stringify({ token, name: displayName, role, savedAt: new Date().toISOString() })
     );
   } catch (error) {
     console.error('[API] Não foi possível salvar a sessão:', error);
@@ -195,7 +196,11 @@ export async function requireSession() {
   try {
     const { user } = await validateSession(session.token);
     // Mantém o cache de UI (nome/role) alinhado ao servidor.
-    saveSession({ token: session.token, name: user.name, role: user.role });
+    saveSession({
+      token: session.token,
+      name: user.name ?? user.username,
+      role: user.role,
+    });
     return { session, user };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
