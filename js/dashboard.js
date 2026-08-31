@@ -1,191 +1,127 @@
 /**
  * ============================================================
- * SALÃO DOS HERÓIS — Painel do Aluno (localStorage)
+ * SALÃO DOS HERÓIS — Painel do Aluno (consumindo /api/progress)
  * ============================================================
- * Consome os dados gravados pelo `auth.js`:
- *
- *    localStorage['fjg_users']  → Array<UserAccount>
- *    localStorage['fjg_session']→ { name: string }
- *
- * Tudo aqui é lógica de apresentação/estado front-end. Quando
- * o back-end PHP/SQL entrar, estes pontos serão substituídos
- * por fetch() para endpoints reais — a estrutura de dados
- * (UserAccount) já está preparada para isso.
+ * O estado de verdade vive no BACKEND. Este arquivo:
+ *   1. Exige sessão ativa (senão redireciona ao Pacto de Sangue).
+ *   2. Renderiza o perfil dinamicamente com os dados da API.
+ *   3. Implementa a "Oferenda ao Estige" (resgate de código) com
+ *      Game Feel: flash de tela, overlay de Level Up, barra de XP
+ *      preenchendo com transição CSS e Screen Shake no erro.
+ *   4. Adapta a interface para `role: "admin"` (coroa, aura e
+ *      botão dourado "Gerar Códigos de Acesso").
  * ============================================================
  */
 
 'use strict';
 
-/* ---------- Chaves de persistência (espelhado de auth.js) ---------- */
-const STORAGE_KEYS = {
-  USERS: 'fjg_users',
-  SESSION: 'fjg_session',
-};
+import {
+  AVATAR_GLYPHS,
+  ACHIEVEMENTS,
+  LESSONS,
+  LEVEL_XP_BASE,
+  ROUTES,
+  ApiError,
+  requireSession,
+  redeemCode,
+  setAvatar,
+  listCodes,
+  listUsers,
+  logout,
+  getSession,
+  rankForXp,
+  levelForXp,
+  xpWithinLevel,
+} from './api.js';
 
-/* ---------- Avatares pré-definidos ---- glifos Unicode ---------- */
-const AVATAR_GLYPHS = ['◆', '♠', '♥', '♣', '♦', '★'];
+/* ---------- Estado local de apresentação (espelho do servidor) ---------- */
+let currentUser = null;
+let currentToken = null;
 
-/* ---------- Definições estáticas (Rank / Conquistas / Aulas)
-   Os limites abaixo formam o "contrato de design" da gamificação.
-   No futuro, eles podem vir de uma tabela `achievements` no SQL.
-*/
-const RANKS = [
-  { minXp: 0, title: 'Alma Novata' },
-  { minXp: 20, title: 'Iniciado do Tártaro' },
-  { minXp: 60, title: 'Operador do Tártaro' },
-  { minXp: 120, title: 'Veterano do Submundo' },
-  { minXp: 240, title: 'Campeão Érebo' },
-];
-
-const ACHIEVEMENTS = [
-  { id: 'primeiro_sangue', icon: '🩸', name: 'Primeiro Sangue', desc: 'Completou a Aula 1.' },
-  { id: 'escudeiro', icon: '🛡️', name: 'Escudeiro', desc: 'Concluir 2 aulas.' },
-  { id: 'arquiteto', icon: '⚙️', name: 'Arquiteto de Mapas', desc: 'Concluir a simulação da Aula 1.' },
-  { id: 'cacador_echos', icon: '🔥', name: 'Caçador de Ecos', desc: 'Alcançar 20 XP.' },
-  { id: 'desvendador', icon: '✦', name: 'Desvendador', desc: 'Desbloquear 3 conquistas.' },
-  { id: 'campeao', icon: '👑', name: 'Campeão do Submundo', desc: 'Alcançar 120 XP.' },
-];
-
-const LESSONS = [
-  { id: 'aula1', number: '01', title: 'A Regra do Jogo', subtitle: 'O Framework MDA e Mecânicas', rewardXp: 20, href: './aula1.html' },
-  { id: 'aula2', number: '02', title: '????????', subtitle: 'Requisito: Concluir Aula Anterior', rewardXp: 20, href: './aula1.html' },
-  { id: 'aula3', number: '03', title: '????????', subtitle: 'Requisito: Concluir Aula Anterior', rewardXp: 20, href: './aula1.html' },
-];
-
-const LEVEL_XP_BASE = 100; // nível sobe a cada 100 XP (stub simples)
-
-/* ============================
-   1. HELPERS DE STORAGE
-   ============================ */
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.USERS);
-    if (!raw) return [];
-    const users = JSON.parse(raw);
-    return Array.isArray(users) ? users : [];
-  } catch (error) {
-    console.warn('[DASHBOARD] Falha ao ler usuários do localStorage:', error);
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-  } catch (error) {
-    console.error('[DASHBOARD] Não foi possível salvar usuários no localStorage:', error);
-  }
-}
-
-function getSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEYS.SESSION);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function clearSession() {
-  localStorage.removeItem(STORAGE_KEYS.SESSION);
-}
-
-function getCurrentUser() {
-  const session = getSession();
-  if (!session || !session.name) return null;
-
-  const users = loadUsers();
-  const lookup = session.name.trim().toLowerCase();
-  return users.find((user) => user.name.trim().toLowerCase() === lookup) ?? null;
-}
-
-/* ============================
-   2. CÁLCULOS DE RANK / TÍTULO
-   ============================ */
-function getRankForXp(xp) {
-  const rank = RANKS.filter((r) => xp >= r.minXp).pop();
-  return rank ? rank.title : RANKS[0].title;
-}
-
-function getLevelForXp(xp) {
-  return Math.max(1, Math.floor(xp / LEVEL_XP_BASE) + 1);
-}
-
-/* ============================
-   3. RENDERIZAÇÃO DO PERFIL
-   ============================ */
+/* ============================================================
+   1. RENDERIZAÇÃO DO PERFIL
+   ============================================================ */
 function renderProfile(user) {
   document.getElementById('profile-name').textContent = user.name;
-  document.getElementById('profile-rank').textContent = getRankForXp(user.xp);
-  document.getElementById('level-value').textContent = String(getLevelForXp(user.xp));
-  document.getElementById('avatar-glyph').textContent = AVATAR_GLYPHS[user.avatarIndex % AVATAR_GLYPHS.length];
+  document.getElementById('profile-rank').textContent = rankForXp(user.xp);
+  document.getElementById('level-value').textContent = String(levelForXp(user.xp));
+  document.getElementById('avatar-glyph').textContent =
+    AVATAR_GLYPHS[user.avatarIndex % AVATAR_GLYPHS.length];
   document.getElementById('stat-lessons').textContent = String(user.completedLessons.length);
-  document.getElementById('stat-achievements').textContent = `${user.achievements.length} / ${ACHIEVEMENTS.length}`;
+  document.getElementById('stat-achievements').textContent =
+    `${user.achievements.length} / ${ACHIEVEMENTS.length}`;
+
+  applyAdminSkin(user);
 }
 
-/* ============================
-   4. BARra DE XP "JUICY"
-   Lê o XP do localStorage e preenche a barra de 0 → valor, com
-   transição CSS. A animação acontece de forma assíncrona logo
-   após o primeiro paint, para garantir o efeito visual.
-   ============================ */
-function animateXpBar(user) {
+/**
+ * PAINEL DO ADMIN — a interface se adapta ao papel do usuário.
+ * A classe `is-admin` no painel ativa, via CSS: coroa sobre o avatar,
+ * aura vermelha pulsante na moldura e borda diferenciada.
+ */
+function applyAdminSkin(user) {
+  const isAdmin = user.role === 'admin';
+  const panel = document.getElementById('profile-panel');
+  const badge = document.getElementById('master-badge');
+  const tools = document.getElementById('admin-tools');
+
+  panel.classList.toggle('is-admin', isAdmin);
+  if (badge) badge.hidden = !isAdmin;
+  if (tools) tools.hidden = !isAdmin;
+}
+
+/* ============================================================
+   2. BARRA DE XP "JUICY"
+   ============================================================
+   `animate = true` força o preenchimento a partir de 0, criando a
+   sensação de progresso conquistado. Ao carregar a página usamos
+   animação; após um resgate, animamos do valor antigo para o novo.
+   ============================================================ */
+function renderXpBar(user, { fromZero = false } = {}) {
   const fillEl = document.getElementById('xp-fill');
   const textEl = document.getElementById('xp-text');
-  const barEl = fillEl ? fillEl.closest('.xp-bar') : null;
+  const barEl = fillEl?.closest('.xp-bar');
   if (!fillEl || !textEl || !barEl) return;
 
-  const xpMax = LEVEL_XP_BASE; // barra representa progresso até o próximo nível
-  const xpInLevel = user.xp % LEVEL_XP_BASE;
-  const targetPercent = Math.min((xpInLevel / xpMax) * 100, 100);
+  const xpInLevel = xpWithinLevel(user.xp);
+  const targetPercent = Math.min((xpInLevel / LEVEL_XP_BASE) * 100, 100);
 
-  // Atualiza texto + ARIA com o valor FINAL (atual em localStorage).
-  textEl.textContent = `${xpInLevel} / ${xpMax} XP`;
+  textEl.textContent = `${xpInLevel} / ${LEVEL_XP_BASE} XP`;
   barEl.setAttribute('aria-valuenow', String(xpInLevel));
 
-  // JUICE: dispara a transição a partir de 0 — feedback visual gratificante.
+  if (fromZero) {
+    fillEl.style.transition = 'none';
+    fillEl.style.width = '0%';
+    void fillEl.offsetHeight; // reflow: garante que o 0% seja aplicado
+    fillEl.style.transition = '';
+  }
+
+  // Pequeno atraso para que a transição CSS seja perceptível.
   window.setTimeout(() => {
     fillEl.style.width = `${targetPercent}%`;
-  }, 200);
+  }, 180);
 }
 
-/* ============================
-   5. TROCA DE AVATAR
-   ============================ */
-function initAvatarSwap(user, users) {
-  const frame = document.getElementById('avatar-frame');
-  const glyph = document.getElementById('avatar-glyph');
-  if (!frame || !glyph) return;
-
-  frame.addEventListener('click', () => {
-    // Avança para o próximo avatar da lista circular
-    user.avatarIndex = (user.avatarIndex + 1) % AVATAR_GLYPHS.length;
-
-    // Persiste a escolha no array de usuários e já atualiza session
-    saveUsers(users);
-    glyph.textContent = AVATAR_GLYPHS[user.avatarIndex];
-
-    // JUICE: animação "flash" da troca (classe controlada para re-disparo)
-    frame.classList.remove('is-swapping');
-    // eslint-disable-next-line no-unused-expressions
-    frame.offsetHeight;
-    frame.classList.add('is-swapping');
-  });
-}
-
-/* ============================
-   6. CONQUISTAS
-   ============================ */
-function renderAchievements(user) {
+/* ============================================================
+   3. CONQUISTAS
+   ============================================================ */
+function renderAchievements(user, highlightIds = []) {
   const grid = document.getElementById('achievements-grid');
   if (!grid) return;
 
   grid.innerHTML = '';
   ACHIEVEMENTS.forEach((ach, index) => {
     const unlocked = user.achievements.includes(ach.id);
+    const justUnlocked = highlightIds.includes(ach.id);
 
     const li = document.createElement('li');
-    li.className = `achievement-card ${unlocked ? 'is-unlocked' : 'is-locked'}`;
+    li.className = [
+      'achievement-card',
+      unlocked ? 'is-unlocked' : 'is-locked',
+      justUnlocked ? 'is-just-unlocked' : '',
+    ]
+      .filter(Boolean)
+      .join(' ');
     li.style.setProperty('--ach-index', String(index));
 
     const icon = document.createElement('span');
@@ -206,9 +142,9 @@ function renderAchievements(user) {
   });
 }
 
-/* ============================
-   7. LISTAGEM DE AULAS
-   ============================ */
+/* ============================================================
+   4. TRILHA DE AULAS
+   ============================================================ */
 function renderLessons(user) {
   const list = document.getElementById('lessons-list');
   if (!list) return;
@@ -216,10 +152,13 @@ function renderLessons(user) {
   list.innerHTML = '';
   LESSONS.forEach((lesson, index) => {
     const completed = user.completedLessons.includes(lesson.id);
-    const locked = !completed && index > 0 && !user.completedLessons.includes(LESSONS[index - 1].id);
+    const previousDone = index === 0 || user.completedLessons.includes(LESSONS[index - 1].id);
+    const locked = !completed && !previousDone;
 
     const li = document.createElement('li');
-    li.className = `lesson-row ${locked ? 'is-locked' : ''} ${completed ? 'is-completed' : ''}`;
+    li.className = ['lesson-row', locked ? 'is-locked' : '', completed ? 'is-completed' : '']
+      .filter(Boolean)
+      .join(' ');
     li.style.setProperty('--lesson-index', String(index));
 
     const number = document.createElement('span');
@@ -233,38 +172,22 @@ function renderLessons(user) {
     title.textContent = lesson.title;
     const subtitle = document.createElement('p');
     subtitle.className = 'lesson-row__subtitle';
-    subtitle.textContent = lesson.subtitle;
+    subtitle.textContent = completed ? `Concluída — +${lesson.rewardXp} XP recebidos` : lesson.subtitle;
     body.append(title, subtitle);
 
     if (locked) {
-      const lockIcon = document.createElement('span');
-      lockIcon.setAttribute('aria-hidden', 'true');
-      lockIcon.textContent = '🔒';
-      li.append(number, body, lockIcon);
+      const lock = document.createElement('span');
+      lock.setAttribute('aria-hidden', 'true');
+      lock.textContent = '🔒';
+      li.append(number, body, lock);
     } else {
+      // Apenas navega para a aula. O XP é concedido SOMENTE pela
+      // Oferenda ao Estige (validada no servidor) — não por clique.
       const action = document.createElement('a');
       action.className = 'lesson-row__action';
-      action.href = lesson.href;
+      action.href = ROUTES.lesson(lesson.id === 'aula1' ? 'aula1' : 'aula1');
       action.textContent = completed ? 'Rever' : 'Iniciar';
-      if (completed) {
-        action.setAttribute('aria-label', `Rever ${lesson.title}`);
-      } else {
-        action.setAttribute('aria-label', `Iniciar ${lesson.title}`);
-      }
-
-      // JUICE: ao clicar, concede o XP da aula (uma única vez) e marca como concluída.
-      action.addEventListener('click', () => {
-        if (!user.completedLessons.includes(lesson.id)) {
-          user.completedLessons.push(lesson.id);
-          user.xp += lesson.rewardXp;
-          // Exemplo de conquista desbloqueada por progresso
-          if (user.xp >= 20 && !user.achievements.includes('cacador_echos')) {
-            user.achievements.push('cacador_echos');
-          }
-          saveUsers(loadUsers().map((u) => (u.name.trim().toLowerCase() === user.name.trim().toLowerCase() ? user : u)));
-        }
-      });
-
+      action.setAttribute('aria-label', `${completed ? 'Rever' : 'Iniciar'} ${lesson.title}`);
       li.append(number, body, action);
     }
 
@@ -272,37 +195,306 @@ function renderLessons(user) {
   });
 }
 
-/* ============================
-   8. LOGOUT
-   ============================ */
-function initLogout() {
-  const btn = document.getElementById('btn-logout');
-  if (!btn) return;
-  btn.addEventListener('click', () => {
-    clearSession();
-    window.location.href = './auth.html';
+/* ============================================================
+   5. GAME FEEL — Efeitos de tela
+   ============================================================ */
+/** Flash dourado sutil cobrindo a tela: recompensa o acerto. */
+function flashScreen() {
+  const flash = document.getElementById('screen-flash');
+  if (!flash) return;
+  flash.classList.remove('is-active');
+  void flash.offsetHeight;
+  flash.classList.add('is-active');
+  flash.addEventListener('animationend', () => flash.classList.remove('is-active'), { once: true });
+}
+
+/** Overlay de "Level Up" / recompensa concedida. */
+function showLevelUpOverlay(title, detail) {
+  const overlay = document.getElementById('levelup-overlay');
+  const titleEl = document.getElementById('levelup-title');
+  const detailEl = document.getElementById('levelup-detail');
+  if (!overlay || !titleEl || !detailEl) return;
+
+  titleEl.textContent = title;
+  detailEl.textContent = detail;
+
+  overlay.classList.remove('is-active');
+  void overlay.offsetHeight;
+  overlay.classList.add('is-active');
+
+  window.setTimeout(() => overlay.classList.remove('is-active'), 2600);
+}
+
+/** Screen Shake no altar: comunica rejeição sem precisar ler o texto. */
+function shakeAltar() {
+  const slot = document.getElementById('altar-slot');
+  if (!slot) return;
+  slot.classList.remove('is-shaking');
+  void slot.offsetHeight;
+  slot.classList.add('is-shaking');
+  slot.addEventListener('animationend', () => slot.classList.remove('is-shaking'), { once: true });
+}
+
+function setAltarFeedback(message, kind = 'info') {
+  const el = document.getElementById('altar-feedback');
+  if (!el) return;
+  el.textContent = message;
+  el.className = `altar__feedback is-${kind}`;
+}
+
+/* ============================================================
+   6. OFERENDA AO ESTIGE (resgate de código via API)
+   ============================================================ */
+function initAltar() {
+  const form = document.getElementById('altar-form');
+  const input = document.getElementById('altar-input');
+  const button = document.getElementById('btn-offer');
+  if (!form || !input || !button) return;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const code = input.value.trim();
+
+    if (!code) {
+      setAltarFeedback('A ranhura do altar está vazia.', 'error');
+      shakeAltar();
+      return;
+    }
+
+    const label = button.querySelector('.btn-offer__label');
+    const originalLabel = label.textContent;
+    button.disabled = true;
+    label.textContent = 'Oferendando...';
+    setAltarFeedback('O Estige avalia sua oferenda...', 'info');
+
+    try {
+      const result = await redeemCode(currentToken, code);
+      currentUser = result.user;
+
+      // === JUICE EM CADEIA: flash → overlay → barra de XP enchendo ===
+      flashScreen();
+
+      const achievementNames = result.awarded.achievements
+        .map((id) => ACHIEVEMENTS.find((a) => a.id === id)?.name)
+        .filter(Boolean);
+
+      const detailParts = [`+${result.awarded.xp} XP`];
+      if (achievementNames.length > 0) {
+        detailParts.push(`Conquista: ${achievementNames.join(', ')}`);
+      }
+
+      showLevelUpOverlay(
+        result.leveledUp ? 'LEVEL UP!' : 'Oferenda Aceita',
+        `${result.awarded.lesson} — ${detailParts.join(' • ')}`
+      );
+
+      renderProfile(currentUser);
+      renderXpBar(currentUser);
+      renderAchievements(currentUser, result.awarded.achievements);
+      renderLessons(currentUser);
+
+      setAltarFeedback(`Oferenda aceita: ${detailParts.join(' • ')}`, 'success');
+      input.value = '';
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
+      setAltarFeedback(message, 'error');
+      shakeAltar();
+    } finally {
+      button.disabled = false;
+      label.textContent = originalLabel;
+    }
   });
 }
 
-/* ============================
-   9. BOOT
-   ============================ */
-function init() {
-  const user = getCurrentUser();
+/* ============================================================
+   7. TROCA DE AVATAR (persistida na API)
+   ============================================================ */
+function initAvatarSwap() {
+  const frame = document.getElementById('avatar-frame');
+  const glyph = document.getElementById('avatar-glyph');
+  if (!frame || !glyph) return;
 
-  // Sem sessão? Retorna ao Pacto de Sangue.
-  if (!user) {
-    window.location.href = './auth.html';
+  frame.addEventListener('click', async () => {
+    const nextIndex = (currentUser.avatarIndex + 1) % AVATAR_GLYPHS.length;
+
+    // Atualização otimista: a UI responde na hora (Game Feel),
+    // e o servidor confirma logo depois.
+    glyph.textContent = AVATAR_GLYPHS[nextIndex];
+    frame.classList.remove('is-swapping');
+    void frame.offsetHeight;
+    frame.classList.add('is-swapping');
+
+    try {
+      const { user } = await setAvatar(currentToken, nextIndex);
+      currentUser = user;
+    } catch {
+      // Reverte se o servidor recusar.
+      glyph.textContent = AVATAR_GLYPHS[currentUser.avatarIndex % AVATAR_GLYPHS.length];
+    }
+  });
+}
+
+/* ============================================================
+   8. MODAL "PERGAMINHO" (substitui o alert nativo)
+   ============================================================ */
+function openScrollModal(title, contentNode) {
+  const modal = document.getElementById('scroll-modal');
+  const titleEl = document.getElementById('scroll-modal-title');
+  const bodyEl = document.getElementById('scroll-modal-body');
+  if (!modal || !titleEl || !bodyEl) return;
+
+  titleEl.textContent = title;
+  bodyEl.innerHTML = '';
+  bodyEl.appendChild(contentNode);
+
+  modal.hidden = false;
+  modal.classList.add('is-open');
+  document.getElementById('scroll-modal-close')?.focus();
+}
+
+function closeScrollModal() {
+  const modal = document.getElementById('scroll-modal');
+  if (!modal) return;
+  modal.classList.remove('is-open');
+  modal.hidden = true;
+}
+
+function initScrollModal() {
+  document.getElementById('scroll-modal-close')?.addEventListener('click', closeScrollModal);
+  document.getElementById('scroll-modal')?.addEventListener('click', (event) => {
+    if (event.target.id === 'scroll-modal') closeScrollModal();
+  });
+  window.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeScrollModal();
+  });
+}
+
+/* ============================================================
+   9. FERRAMENTAS DO ADMIN
+   ============================================================ */
+function initAdminTools() {
+  const btnCodes = document.getElementById('btn-generate-codes');
+  const btnSouls = document.getElementById('btn-list-souls');
+
+  btnCodes?.addEventListener('click', async () => {
+    try {
+      const { codes } = await listCodes(currentToken);
+      const wrapper = document.createElement('div');
+
+      codes.forEach((entry) => {
+        const row = document.createElement('div');
+        row.className = 'code-row';
+
+        const code = document.createElement('span');
+        code.className = 'code-row__code';
+        code.textContent = entry.code;
+
+        const meta = document.createElement('span');
+        meta.className = 'code-row__meta';
+        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP`;
+
+        row.append(code, meta);
+        wrapper.appendChild(row);
+      });
+
+      const note = document.createElement('p');
+      note.className = 'scroll-modal__note';
+      note.textContent = 'Entregue estes códigos aos alunos ao concluírem a aula correspondente.';
+      wrapper.appendChild(note);
+
+      openScrollModal('Códigos de Acesso', wrapper);
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Falha ao consultar os códigos.';
+      const p = document.createElement('p');
+      p.textContent = message;
+      openScrollModal('Erro', p);
+    }
+  });
+
+  btnSouls?.addEventListener('click', async () => {
+    try {
+      const { users } = await listUsers(currentToken);
+      const wrapper = document.createElement('div');
+
+      users.forEach((u) => {
+        const row = document.createElement('div');
+        row.className = 'code-row';
+
+        const name = document.createElement('span');
+        name.className = 'code-row__code';
+        name.textContent = u.role === 'admin' ? `♛ ${u.name}` : u.name;
+
+        const meta = document.createElement('span');
+        meta.className = 'code-row__meta';
+        meta.textContent = `${u.xp} XP • ${u.completedLessons.length} aula(s) • ${u.achievements.length} conquista(s)`;
+
+        row.append(name, meta);
+        wrapper.appendChild(row);
+      });
+
+      openScrollModal(`Almas Registradas (${users.length})`, wrapper);
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Falha ao consultar as almas.';
+      const p = document.createElement('p');
+      p.textContent = message;
+      openScrollModal('Erro', p);
+    }
+  });
+}
+
+/* ============================================================
+   10. LOGOUT
+   ============================================================ */
+function initLogout() {
+  document.getElementById('btn-logout')?.addEventListener('click', async () => {
+    await logout();
+    window.location.href = ROUTES.auth();
+  });
+}
+
+/* ============================================================
+   11. AVISO DE API INDISPONÍVEL
+   ============================================================ */
+function showApiWarning(message) {
+  const box = document.getElementById('api-warning');
+  const text = document.getElementById('api-warning-text');
+  if (!box || !text) return;
+  text.textContent = message;
+  box.hidden = false;
+}
+
+/* ============================================================
+   12. BOOT
+   ============================================================ */
+async function init() {
+  initScrollModal();
+
+  let result;
+  try {
+    // Guard de rota: sem sessão válida → Pacto de Sangue.
+    result = await requireSession();
+  } catch (error) {
+    showApiWarning(
+      error instanceof ApiError
+        ? error.message
+        : 'A API não respondeu. Rode `vercel dev` localmente ou publique no Vercel.'
+    );
     return;
   }
 
-  const users = loadUsers();
+  if (!result) return; // requireSession já redirecionou
 
-  renderProfile(user);
-  renderAchievements(user);
-  renderLessons(user);
-  animateXpBar(user);
-  initAvatarSwap(user, users);
+  currentUser = result.user;
+  currentToken = getSession()?.token ?? null;
+
+  renderProfile(currentUser);
+  renderAchievements(currentUser);
+  renderLessons(currentUser);
+  renderXpBar(currentUser, { fromZero: true }); // JUICE: enche de 0 até o valor real
+
+  initAltar();
+  initAvatarSwap();
+  initAdminTools();
   initLogout();
 }
 
