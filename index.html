@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fundamentos de Jogos Digitais — Plataforma gamificada de ensino de design e desenvolvimento de jogos." />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>Fundamentos de Jogos Digitais</title>
+
+  <!-- Preconnect / Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="site-header__brand" href="./index.html">
+      <span class="site-header__logo" aria-hidden="true">▲</span>
+      <h1 class="site-header__title">FUNDAMENTOS<span class="accent">//</span>JOGOS DIGITAIS</h1>
+    </a>
+    <nav class="site-nav" aria-label="Navegação principal">
+      <ul class="site-nav__list">
+        <li><a class="site-nav__link is-active" href="./index.html">Terminal</a></li>
+        <li><a class="site-nav__link" href="./pages/aula-1.html">Aulas</a></li>
+        <!-- Futuro: link para perfil/XP do jogador -->
+      </ul>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero" aria-labelledby="hero-title">
+      <p class="hero__subtitle">// INICIALIZANDO SISTEMA DE APRENDIZADO...</p>
+      <h2 id="hero-title" class="hero__title glitch" data-text="DESIGN DE JOGOS">
+        DESIGN DE JOGOS
+      </h2>
+      <p class="hero__description">
+        Plataforma gamificada de ensino. Complete aulas, acumule XP e
+        evolua seu nível de designer de jogos futuramente no sistema.
+      </p>
+      <div class="hero__actions">
+        <a class="btn btn--primary" href="./pages/aula-1.html">Iniciar Aula 01 →</a>
+        <a class="btn btn--ghost" href="./assets/docs/aulas/AULA-1-A-REGRA-DO-JOGO-UNPLUGGED.pdf" target="_blank" rel="noopener">
+          Download PDF
+        </a>
+      </div>
+    </section>
+
+    <section class="modules" aria-labelledby="modules-title">
+      <h2 id="modules-title" class="section-title">[ MÓDULOS DISPONÍVEIS ]</h2>
+      <ul class="modules__grid">
+        <li>
+          <article class="card">
+            <header class="card__header">
+              <span class="card__badge">MÓDULO 01</span>
+              <span class="card__xp">+100 XP</span>
+            </header>
+            <h3 class="card__title">A REGRA DO JOGO <em>(UNPLUGGED)</em></h3>
+            <p class="card__text">
+              Entenda o que define um jogo: regras, objetivos, conflito e
+              sistemas — sem telas, sem código. A fundação de todo design.
+            </p>
+            <footer class="card__footer">
+              <a class="card__link" href="./pages/aula-1.html">Acessar terminal →</a>
+            </footer>
+          </article>
+        </li>
+        <li>
+          <article class="card card--locked" aria-disabled="true">
+            <header class="card__header">
+              <span class="card__badge">MÓDULO 02</span>
+              <span class="card__xp">+??? XP</span>
+            </header>
+            <h3 class="card__title">??? <em>(BLOQUEADO)</em></h3>
+            <p class="card__text">Complete o módulo anterior para descriptografar este conteúdo.</p>
+            <footer class="card__footer">
+              <span class="card__link card__link--disabled">[ ACESSO NEGADO ]</span>
+            </footer>
+          </article>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__text">
+      &copy; 2026 FUNDAMENTOS.DE.JOGOS.DIGITAIS <span class="accent">::</span>
+      SYS.VERSION.0.1.0
+    </p>
+  </footer>
+
+  <!-- Scripts (defer nativo via type="module" + ordem de carregamento) -->
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

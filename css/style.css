@@ -1,0 +1,380 @@
+/* ============================================================
+   FUNDAMENTOS DE JOGOS DIGITAIS — Design System "Cyber-Gothic"
+   Dark Mode profundo + detalhes neon (roxo / ciano / verde)
+   ============================================================ */
+
+/* ---------- 1. Design Tokens ---------- */
+:root {
+  /* Paleta — Fundos (Gothic Dark) */
+  --color-bg-void: #050507;       /* Preto absoluto */
+  --color-bg-deep: #0a0a0f;       /* Fundo raiz */
+  --color-bg-surface: #12121a;    /* Grafite profundo */
+  --color-bg-elevated: #1a1a26;   /* Superfícies elevadas */
+
+  /* Paleta — Neon Accents */
+  --color-neon-purple: #a855f7;
+  --color-neon-cyan: #22d3ee;
+  --color-neon-green: #4ade80;
+  --color-neon-magenta: #e935c1;
+
+  /* Paleta — Texto */
+  --color-text-primary: #e5e5f0;
+  --color-text-secondary: #8b8b9e;
+  --color-text-muted: #55556a;
+
+  /* Paleta — Bordas & Linhas */
+  --color-border: #23233a;
+  --color-border-glow: rgba(168, 85, 247, 0.45);
+
+  /* Tipografia */
+  --font-display: "Orbitron", sans-serif;      /* Títulos / Headers */
+  --font-mono: "Share Tech Mono", monospace;   /* Corpo / UI terminal */
+
+  /* Espaçamento (escala 4px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Raios & Glow */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --glow-purple: 0 0 8px rgba(168, 85, 247, 0.55), 0 0 24px rgba(168, 85, 247, 0.25);
+  --glow-cyan: 0 0 8px rgba(34, 211, 238, 0.55), 0 0 24px rgba(34, 211, 238, 0.25);
+  --glow-green: 0 0 8px rgba(74, 222, 128, 0.55), 0 0 24px rgba(74, 222, 128, 0.25);
+
+  /* Transições */
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+/* ---------- 2. Reset mínimo ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- 3. Base ---------- */
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg-deep);
+  color: var(--color-text-primary);
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: var(--color-neon-purple);
+  color: var(--color-bg-void);
+}
+
+/* Overlay de scanlines (efeito CRT jogável) */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.18) 3px,
+    rgba(0, 0, 0, 0.18) 4px
+  );
+  mix-blend-mode: multiply;
+}
+
+.container {
+  width: min(1100px, 100% - var(--space-8));
+  margin-inline: auto;
+}
+
+.accent { color: var(--color-neon-cyan); }
+
+/* ---------- 4. Header / Navegação ---------- */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding: var(--space-4) var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+  background: linear-gradient(180deg, var(--color-bg-surface), transparent);
+}
+
+.site-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+}
+
+.site-header__logo {
+  color: var(--color-neon-purple);
+  text-shadow: var(--glow-purple);
+  font-size: 1.4rem;
+}
+
+.site-header__title {
+  font-family: var(--font-display);
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--color-text-primary);
+}
+
+.site-nav__list {
+  display: flex;
+  gap: var(--space-6);
+  list-style: none;
+}
+
+.site-nav__link {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.85rem;
+  transition: color var(--transition-fast), text-shadow var(--transition-fast);
+}
+
+.site-nav__link:hover,
+.site-nav__link:focus-visible {
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.site-nav__link.is-active {
+  color: var(--color-neon-green);
+  text-shadow: var(--glow-green);
+  border-bottom: 1px solid var(--color-neon-green);
+}
+
+/* ---------- 5. Hero ---------- */
+main { flex: 1; }
+
+.hero {
+  padding: var(--space-16) 0 var(--space-12);
+  text-align: center;
+}
+
+.hero__subtitle {
+  color: var(--color-neon-green);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  margin-bottom: var(--space-4);
+  text-shadow: var(--glow-green);
+}
+
+.hero__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.25rem, 8vw, 4.5rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--color-text-primary);
+  text-shadow:
+    0 0 12px rgba(168, 85, 247, 0.6),
+    0 0 42px rgba(168, 85, 247, 0.3);
+  margin-bottom: var(--space-4);
+}
+
+/* Efeito "glitch" sutil via pseudo-elementos */
+.glitch { position: relative; }
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  pointer-events: none;
+}
+.glitch::before { color: var(--color-neon-cyan); transform: translateX(2px); clip-path: inset(20% 0 60% 0); }
+.glitch::after { color: var(--color-neon-magenta); transform: translateX(-2px); clip-path: inset(60% 0 20% 0); }
+
+.hero__description {
+  max-width: 60ch;
+  margin: 0 auto var(--space-8);
+  color: var(--color-text-secondary);
+}
+
+.hero__actions {
+  display: flex;
+  gap: var(--space-4);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- 6. Botões ---------- */
+.btn {
+  display: inline-block;
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+}
+
+.btn--primary {
+  color: var(--color-bg-void);
+  background-color: var(--color-neon-purple);
+  box-shadow: var(--glow-purple);
+}
+.btn--primary:hover,
+.btn--primary:focus-visible {
+  background-color: var(--color-neon-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.btn--ghost {
+  color: var(--color-neon-cyan);
+  border-color: var(--color-neon-cyan);
+  background: transparent;
+}
+.btn--ghost:hover,
+.btn--ghost:focus-visible {
+  background-color: rgba(34, 211, 238, 0.1);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ---------- 7. Seções / Cards ---------- */
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.25em;
+  color: var(--color-neon-cyan);
+  text-shadow: var(--glow-cyan);
+  margin-bottom: var(--space-8);
+}
+
+.modules { padding-bottom: var(--space-16); }
+
+.modules__grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-6);
+}
+
+.card {
+  background-color: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  position: relative;
+  transition: border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-neon-purple), transparent);
+  opacity: 0.7;
+}
+
+.card:hover {
+  border-color: var(--color-border-glow);
+  box-shadow: var(--glow-purple);
+  transform: translateY(-2px);
+}
+
+.card--locked {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+.card--locked:hover {
+  border-color: var(--color-border);
+  box-shadow: none;
+  transform: none;
+}
+
+.card__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+}
+
+.card__badge { color: var(--color-neon-purple); }
+.card__xp { color: var(--color-neon-green); text-shadow: var(--glow-green); }
+
+.card__title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-3);
+}
+.card__title em {
+  font-style: normal;
+  color: var(--color-neon-cyan);
+}
+
+.card__text {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-6);
+}
+
+.card__link {
+  color: var(--color-neon-cyan);
+  text-decoration: none;
+  letter-spacing: 0.1em;
+  font-size: 0.85rem;
+  transition: text-shadow var(--transition-fast);
+}
+.card__link:hover { text-shadow: var(--glow-cyan); }
+.card__link--disabled { color: var(--color-text-muted); cursor: not-allowed; }
+
+/* ---------- 8. Footer ---------- */
+.site-footer {
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.site-footer__text {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- 9. Motion & Acessibilidade ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+  .scanlines { display: none; }
+}
+
+/* Foco visível para navegação por teclado */
+:focus-visible {
+  outline: 2px solid var(--color-neon-cyan);
+  outline-offset: 2px;
+}

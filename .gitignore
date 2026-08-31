@@ -1,0 +1,45 @@
+# ==================== Sistema Operacional ====================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ==================== IDEs e Editores ====================
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ==================== Dependências / Build ====================
+node_modules/
+dist/
+build/
+out/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ==================== Ambiente / Segredos ====================
+.env
+.env.local
+.env.*.local
+
+# ==================== Cache / Temporários ====================
+.cache/
+.tmp/
+tmp/
+temp/
+*.tmp
+*.temp
+
+# ==================== Testes / Cobertura ====================
+coverage/
+.nyc_output/
