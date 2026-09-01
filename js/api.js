@@ -467,6 +467,12 @@ export const ACHIEVEMENTS = [
     name: 'Primeira Travessia',
     desc: 'Concluir a Aula 01 e realizar sua primeira oferenda ao Estige.',
   },
+  {
+    id: 'gdd_integracao_documental',
+    icon: '📜',
+    name: 'Escriba do Submundo',
+    desc: 'Entregar a integração documental do GDD da Aula 01.',
+  },
 ];
 
 export const LESSONS = [

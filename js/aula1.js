@@ -157,8 +157,8 @@ async function initParagraphPersistence() {
       const result = await saveLessonParagraph(currentToken, LESSON_ID, textarea.value);
       paragraphSaved = true;
       if (result.awarded) {
-        const { xp, achievements } = result.awarded;
-        setSaveStatus(`Parágrafo salvo. +${xp} XP e conquista desbloqueada: ${achievements.join(', ')}.`, 'success');
+        const { xp } = result.awarded;
+        setSaveStatus(`Parágrafo salvo. +${xp} XP e conquista desbloqueada: Escriba do Submundo.`, 'success');
       } else {
         setSaveStatus('Parágrafo salvo com sucesso no banco.', 'success');
       }

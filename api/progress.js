@@ -35,6 +35,11 @@ const ACHIEVEMENT_RULES = [
   },
 ];
 
+const ALL_ACHIEVEMENT_IDS = [
+  ...ACHIEVEMENT_RULES.map((rule) => rule.id),
+  ...Object.values(ACTIVITY_CATALOG).map((activity) => activity.achievementId),
+];
+
 function defaultGatesForLesson(lessonId) {
   const gates = LESSON_GATES[String(lessonId || '')] || [];
   const out = {};
@@ -53,7 +58,9 @@ function sanitizeUser(u) {
     name: displayName,
     fullName: safe.full_name ?? safe.name ?? safe.username,
     username: safe.username ?? displayName,
-    achievements: Array.isArray(conquistas) ? conquistas : [],
+    achievements: safe.role === 'admin'
+      ? ALL_ACHIEVEMENT_IDS
+      : (Array.isArray(conquistas) ? conquistas : []),
   };
 }
 
