@@ -171,6 +171,11 @@ async function initParagraphPersistence() {
 function initFeelLab() {
   const canvas = document.getElementById('feel-canvas');
   if (!canvas) return;
+  const legend = document.querySelector('.simulation-legend');
+  const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches
+    || window.innerWidth <= 860
+    || navigator.maxTouchPoints > 0
+    || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const ctx = canvas.getContext('2d');
   const W = canvas.width;
@@ -229,6 +234,13 @@ function initFeelLab() {
   });
 
   const keys = { left: false, right: false, jump: false, sprint: false };
+  let autoDir = 1;
+  let autoJumpCooldown = 0;
+  let autoSprintTimer = 0;
+
+  if (isTouchDevice && legend) {
+    legend.textContent = 'Modo celular: demonstração automática ativa (andar e pular). Ajuste os parâmetros e observe o efeito.';
+  }
 
   const map = {
     ArrowLeft: 'left',
@@ -244,17 +256,19 @@ function initFeelLab() {
     Shift: 'sprint',
   };
 
-  window.addEventListener('keydown', (event) => {
-    const key = map[event.key];
-    if (!key) return;
-    keys[key] = true;
-    if (event.key === ' ' || event.key.startsWith('Arrow')) event.preventDefault();
-  });
-  window.addEventListener('keyup', (event) => {
-    const key = map[event.key];
-    if (!key) return;
-    keys[key] = false;
-  });
+  if (!isTouchDevice) {
+    window.addEventListener('keydown', (event) => {
+      const key = map[event.key];
+      if (!key) return;
+      keys[key] = true;
+      if (event.key === ' ' || event.key.startsWith('Arrow')) event.preventDefault();
+    });
+    window.addEventListener('keyup', (event) => {
+      const key = map[event.key];
+      if (!key) return;
+      keys[key] = false;
+    });
+  }
 
   const actor = { x: 80, y: GROUND_Y - 32, w: 26, h: 32, vx: 0, vy: 0, onGround: true };
   let prev = performance.now();
@@ -262,6 +276,25 @@ function initFeelLab() {
   function tick(now) {
     const dt = Math.min((now - prev) / 1000, 0.05);
     prev = now;
+
+    if (isTouchDevice) {
+      if (actor.x <= 28) autoDir = 1;
+      if (actor.x + actor.w >= W - 28) autoDir = -1;
+
+      keys.left = autoDir < 0;
+      keys.right = autoDir > 0;
+
+      autoSprintTimer += dt;
+      keys.sprint = Math.sin(autoSprintTimer * 2.4) > -0.1;
+
+      autoJumpCooldown -= dt;
+      if (actor.onGround && autoJumpCooldown <= 0) {
+        keys.jump = true;
+        autoJumpCooldown = 1.15;
+      } else {
+        keys.jump = false;
+      }
+    }
 
     const accel = Number(controls.accel.value);
     const friction = Number(controls.friction.value);
@@ -392,6 +425,7 @@ function initCompletion() {
 async function init() {
   initTabs();
   initSlidesViewer();
+  initFeelLab();
 
   const result = await requireSession();
   if (!result) return;
@@ -400,7 +434,6 @@ async function init() {
   currentToken = getSession()?.token ?? null;
 
   await initParagraphPersistence();
-  initFeelLab();
   initCompletion();
 }
 

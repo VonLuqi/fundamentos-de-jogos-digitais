@@ -747,15 +747,131 @@ body {
 }
 
 /* ---------- 11. Responsividade ---------- */
-@media (max-width: 640px) {
-  .hades-frame { padding: 1.75rem 1.25rem; }
-  .lesson-header { flex-wrap: wrap; }
-  #game-canvas { max-width: 100%; height: auto; }
+@media (max-width: 860px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .lesson-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1rem 0.8rem;
+  }
+
+  .ornate-divider {
+    padding: 0 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: stretch;
+    gap: 0.35rem;
+    padding: 0.9rem 0.8rem 0;
+    overflow: visible;
+  }
+
+  .tab {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    line-height: 1.2;
+    padding: 0.65rem 0.5rem;
+    white-space: normal;
+    text-wrap: balance;
+  }
+
+  .lesson-main {
+    padding: 1.2rem 0.75rem 2.4rem;
+  }
+
+  .hades-frame {
+    padding: 1.35rem 1rem;
+    border-width: 4px;
+  }
+
+  .lesson-title {
+    font-size: 1.2rem;
+    margin: 1.6rem 0 0.8rem;
+  }
+
+  .lesson-subtitle {
+    font-size: 1rem;
+    margin: 1.2rem 0 0.55rem;
+  }
+
+  .lesson-list {
+    margin: 0.75rem 0 1rem 1.1rem;
+  }
+
   .triplet-grid {
     grid-template-columns: 1fr;
   }
+
   .feel-layout {
     grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .feel-actions,
+  .slides-actions,
+  .gdd-actions {
+    width: 100%;
+  }
+
+  .feel-actions .lesson-cta,
+  .slides-actions .lesson-cta,
+  .gdd-actions .lesson-cta,
+  .completion-box .lesson-cta {
+    width: 100%;
+  }
+
+  #feel-canvas,
+  #game-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .slides-viewer {
+    min-height: 340px;
+  }
+
+  .lesson-footer {
+    padding: 1rem 0.8rem 1.2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .tabs {
+    gap: 0.25rem;
+    padding-inline: 0.65rem;
+  }
+
+  .tab {
+    font-size: 0.62rem;
+    padding: 0.6rem 0.4rem;
+  }
+
+  .lesson-header__title {
+    font-size: 1.05rem;
+    letter-spacing: 0.04em;
+  }
+
+  .lesson-header__eyebrow {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+  }
+
+  .img-placeholder,
+  .lesson-media {
+    margin: 1.1rem 0;
+  }
+
+  .slides-viewer {
+    min-height: 300px;
   }
 }
 
