@@ -272,6 +272,19 @@ body {
   margin-bottom: 1.15rem;
   max-width: 100%;
 }
+
+.lesson-chip {
+  display: inline-block;
+  margin-bottom: 1.1rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--hades-gold-dark);
+  background: rgba(12, 9, 14, 0.8);
+  font-family: var(--font-title);
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
 .lesson-content strong {
   color: var(--hades-gold-bright);
   font-weight: 600;
@@ -291,6 +304,107 @@ body {
 }
 .lesson-list li::marker {
   color: var(--hades-gold);
+}
+
+.triplet-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1.2rem 0 1.4rem;
+}
+
+.triplet-card {
+  padding: 0.9rem;
+  border: 1px solid var(--hades-bronze);
+  background: rgba(14, 11, 17, 0.75);
+}
+
+.triplet-card h3 {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--hades-gold-bright);
+  margin-bottom: 0.35rem;
+}
+
+.triplet-card p {
+  margin-bottom: 0;
+  color: var(--hades-text-dim);
+}
+
+.quote-block {
+  margin: 1.1rem 0 1.3rem;
+  padding: 0.95rem 1rem;
+  border-left: 3px solid var(--hades-gold);
+  background: rgba(20, 14, 24, 0.8);
+}
+
+.quote-block p {
+  margin-bottom: 0;
+  font-style: italic;
+  color: var(--hades-gold-bright);
+}
+
+.censored-card {
+  position: relative;
+  margin: 1rem 0;
+  border: 1px solid var(--hades-blood-bright);
+  background: rgba(25, 14, 20, 0.8);
+  overflow: hidden;
+}
+
+.censored-card__content {
+  padding: 1rem;
+}
+
+.censored-card__veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: repeating-linear-gradient(
+    135deg,
+    rgba(8, 8, 10, 0.94) 0,
+    rgba(8, 8, 10, 0.94) 10px,
+    rgba(42, 16, 22, 0.94) 10px,
+    rgba(42, 16, 22, 0.94) 20px
+  );
+  color: var(--hades-blood-bright);
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  padding: 1rem;
+}
+
+.censored-card:not(.is-released) .censored-card__content {
+  filter: blur(6px);
+  user-select: none;
+}
+
+.censored-card.is-released {
+  border-color: var(--hades-gold-dark);
+}
+
+.censored-card.is-released .censored-card__veil {
+  display: none;
+}
+
+.admin-gates {
+  margin-top: 1.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(207, 167, 89, 0.35);
+}
+
+.admin-gates__hint {
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+
+.admin-gates__buttons {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
 }
 
 /* ---------- 8. Placeholders de Imagem (holograma / vitral) ---------- */
@@ -351,6 +465,206 @@ body {
   color: var(--hades-text-dim);
 }
 
+.feel-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) 1fr;
+  gap: 1rem;
+  margin: 1.3rem 0 1.8rem;
+}
+
+.feel-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.feel-controls label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--hades-gold-bright);
+}
+
+.feel-controls input[type="range"] {
+  accent-color: #cfa759;
+}
+
+.feel-controls span {
+  font-size: 0.9rem;
+  font-family: var(--font-body);
+  color: var(--hades-text-dim);
+}
+
+.feel-actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.feel-playground {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+#feel-canvas {
+  width: min(100%, 640px);
+  height: auto;
+  border: 1px solid var(--hades-gold-dark);
+  background: #0d0a10;
+}
+
+.feel-reading {
+  min-height: 1.3em;
+  color: var(--hades-gold-bright);
+  font-style: italic;
+  text-align: center;
+}
+
+.gdd-text {
+  width: 100%;
+  margin-top: 0.7rem;
+  padding: 0.85rem;
+  border: 1px solid var(--hades-gold-dark);
+  background: rgba(10, 8, 12, 0.88);
+  color: var(--hades-text);
+  font-family: var(--font-body);
+  font-size: 1.02rem;
+}
+
+.completion-box {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.lesson-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  text-decoration: none;
+  padding: 0.6rem 0.95rem;
+  border: 1px solid var(--hades-gold);
+  background: linear-gradient(180deg, rgba(194, 53, 72, 0.7), rgba(62, 18, 28, 0.9));
+  color: var(--hades-gold-bright);
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+.lesson-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.08);
+}
+
+.lesson-cta:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.lesson-cta--ghost {
+  background: transparent;
+  border-color: var(--hades-gold-dark);
+}
+
+.gdd-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+}
+
+.gdd-save-status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.95rem;
+}
+
+.gdd-save-status.is-info {
+  color: var(--hades-text-dim);
+}
+
+.gdd-save-status.is-success {
+  color: var(--hades-gold-bright);
+}
+
+.gdd-save-status.is-error {
+  color: var(--hades-blood-bright);
+}
+
+.slides-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.slides-web {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.slides-viewer {
+  width: 100%;
+  min-height: 520px;
+  border: 1px solid var(--hades-gold-dark);
+  background: #ffffff;
+}
+
+.slides-viewer-status {
+  margin: 0 0 0.8rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+
+.slides-fallback-panel {
+  margin: 0 0 1rem;
+  padding: 0.8rem;
+  border: 1px dashed var(--hades-gold-dark);
+  background: rgba(20, 14, 20, 0.7);
+}
+
+.slides-fallback-panel p {
+  margin: 0 0 0.6rem;
+  color: var(--hades-text-dim);
+}
+
+.slide-card {
+  padding: 0.9rem;
+  border: 1px solid var(--hades-bronze);
+  background: rgba(16, 12, 19, 0.82);
+}
+
+.slide-card__tag {
+  margin-bottom: 0.25rem;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--hades-text-muted);
+}
+
+.slide-card__title {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  color: var(--hades-gold-bright);
+  margin-bottom: 0.35rem;
+}
+
+.slide-card__body {
+  margin-bottom: 0;
+  color: var(--hades-text-dim);
+}
+
 .legend-dot {
   display: inline-block;
   width: 11px;
@@ -392,6 +706,12 @@ body {
   .hades-frame { padding: 1.75rem 1.25rem; }
   .lesson-header { flex-wrap: wrap; }
   #game-canvas { max-width: 100%; height: auto; }
+  .triplet-grid {
+    grid-template-columns: 1fr;
+  }
+  .feel-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- 12. Acessibilidade & Motion ---------- */

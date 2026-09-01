@@ -1,784 +1,485 @@
-/**
- * ============================================================
- * AULA 1 — A Regra do Jogo (Unplugged)
- * ============================================================
- * Este arquivo contém duas responsabilidades independentes:
- *
- * 1. TABS       → Alterna entre "Teoria e Manuais" e "Simulação".
- * 2. SIMULAÇÃO  → Um labirinto PROCEDURAL (gerado a cada partida),
- *                 com Máquina de Estados, colisão AABB e um
- *                 Monstro que persegue o Robô usando PATHFINDING
- *                 real (busca em largura / BFS) sobre a grade do
- *                 labirinto — 100% em Canvas API nativo.
- *
- * IMPORTANTE: Nenhuma biblioteca externa é utilizada aqui.
- * ============================================================
- */
-
 'use strict';
 
-/* ============================================================
-   1. SISTEMA DE ABAS (TABS)
-   ============================================================ */
+import {
+  ApiError,
+  requireSession,
+  getSession,
+  getLessonCode,
+  fetchLessonGates,
+  setLessonGate,
+  getLessonParagraph,
+  saveLessonParagraph,
+} from './api.js';
+
+const LESSON_ID = 'aula1';
+const GATE_KEYS = ['aula1_referencias', 'aula1_nota_instrutor'];
+const PPTX_FILE = 'aula01-circulo-magico-roguelite.pptx';
+const PDF_FILE = 'aula01-circulo-magico-roguelite.pdf';
+
+let currentUser = null;
+let currentToken = null;
+let paragraphSaved = false;
+
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
   const panels = document.querySelectorAll('.tab-panel');
 
   tabs.forEach((tab) => {
     tab.addEventListener('click', () => {
-      const targetId = tab.dataset.tab;
-
-      tabs.forEach((t) => {
-        t.classList.remove('is-active');
-        t.setAttribute('aria-selected', 'false');
+      const target = tab.getAttribute('data-tab');
+      tabs.forEach((item) => {
+        item.classList.remove('is-active');
+        item.setAttribute('aria-selected', 'false');
       });
       tab.classList.add('is-active');
       tab.setAttribute('aria-selected', 'true');
 
       panels.forEach((panel) => panel.classList.remove('is-active'));
-      const targetPanel = document.getElementById(targetId);
-      if (targetPanel) {
-        targetPanel.classList.add('is-active');
+      document.getElementById(target)?.classList.add('is-active');
+    });
+  });
+}
+
+function initSlidesViewer() {
+  const pptxViewer = document.getElementById('pptx-online-viewer');
+  const pdfFallback = document.getElementById('pdf-fallback-viewer');
+  const downloadPptx = document.getElementById('download-pptx');
+  const downloadPdf = document.getElementById('download-pdf');
+  const openPptx = document.getElementById('open-pptx');
+  const openPdf = document.getElementById('open-pdf');
+  const localFallbackPanel = document.getElementById('slides-fallback-panel');
+  const status = document.getElementById('slides-viewer-status');
+  if (
+    !pptxViewer
+    || !pdfFallback
+    || !downloadPptx
+    || !downloadPdf
+    || !openPptx
+    || !openPdf
+    || !localFallbackPanel
+    || !status
+  ) return;
+
+  const encodedPptx = encodeURIComponent(PPTX_FILE);
+  const encodedPdf = encodeURIComponent(PDF_FILE);
+  const pptxRelativePath = `../assets/docs/aulas/${encodedPptx}`;
+  const pdfRelativePath = `../assets/docs/aulas/${encodedPdf}`;
+
+  downloadPptx.href = pptxRelativePath;
+  downloadPdf.href = pdfRelativePath;
+  openPptx.href = pptxRelativePath;
+  openPdf.href = pdfRelativePath;
+
+  const pptxPublicUrl = `${window.location.origin}/assets/docs/aulas/${encodedPptx}`;
+  const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxPublicUrl)}`;
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+  if (isLocalHost) {
+    // O Office Online não renderiza PPTX com URL local.
+    localFallbackPanel.hidden = false;
+    pptxViewer.hidden = true;
+    pdfFallback.hidden = true;
+    status.textContent = 'Visualização do PPTX em localhost pode falhar; usando PDF online como fallback.';
+    return;
+  } else {
+    localFallbackPanel.hidden = true;
+    pptxViewer.hidden = false;
+    pdfFallback.hidden = false;
+    pptxViewer.src = officeViewerUrl;
+    status.textContent = 'Visualização PPTX carregada para ambiente publicado.';
+  }
+
+  // Fallback secundário em produção caso o PPTX não carregue no navegador do aluno.
+  pdfFallback.src = pdfRelativePath;
+}
+
+function normalizeParagraph(text) {
+  return String(text || '').replace(/\s+/g, ' ').trim();
+}
+
+function setCompletionAvailability() {
+  const textarea = document.getElementById('gdd-text');
+  const button = document.getElementById('btn-complete-aula');
+  if (!textarea || !button) return;
+
+  const hasText = normalizeParagraph(textarea.value).length > 0;
+  const canReveal = hasText && paragraphSaved;
+
+  button.disabled = !canReveal;
+  button.textContent = canReveal
+    ? 'Finalizar aula e revelar código'
+    : 'Preencha e salve o parágrafo para revelar código';
+}
+
+function setSaveStatus(message, kind = 'info') {
+  const status = document.getElementById('gdd-save-status');
+  if (!status) return;
+  status.className = `gdd-save-status is-${kind}`;
+  status.textContent = message;
+}
+
+async function initParagraphPersistence() {
+  const textarea = document.getElementById('gdd-text');
+  const saveButton = document.getElementById('btn-save-gdd');
+  if (!textarea || !saveButton || !currentToken) return;
+
+  textarea.addEventListener('input', () => {
+    paragraphSaved = false;
+    setSaveStatus('Texto alterado. Salve novamente para liberar o código.', 'info');
+    setCompletionAvailability();
+  });
+
+  try {
+    const { paragraph } = await getLessonParagraph(currentToken, LESSON_ID);
+    if (paragraph) {
+      textarea.value = paragraph;
+      paragraphSaved = true;
+      setSaveStatus('Parágrafo carregado do banco.', 'success');
+    } else {
+      setSaveStatus('Escreva seu parágrafo e salve.', 'info');
+    }
+  } catch {
+    setSaveStatus('Não foi possível carregar do banco agora.', 'error');
+  }
+  setCompletionAvailability();
+
+  saveButton.addEventListener('click', async () => {
+    const text = normalizeParagraph(textarea.value);
+    if (!text) {
+      paragraphSaved = false;
+      setSaveStatus('Digite o parágrafo antes de salvar.', 'error');
+      setCompletionAvailability();
+      return;
+    }
+
+    saveButton.disabled = true;
+    const previous = saveButton.textContent;
+    saveButton.textContent = 'Salvando...';
+    try {
+      await saveLessonParagraph(currentToken, LESSON_ID, textarea.value);
+      paragraphSaved = true;
+      setSaveStatus('Parágrafo salvo com sucesso no banco.', 'success');
+    } catch (error) {
+      paragraphSaved = false;
+      const message = error instanceof ApiError ? error.message : 'Falha ao salvar o parágrafo.';
+      setSaveStatus(message, 'error');
+    } finally {
+      saveButton.disabled = false;
+      saveButton.textContent = previous;
+      setCompletionAvailability();
+    }
+  });
+}
+
+function applyGateState(gates) {
+  document.querySelectorAll('[data-gate]').forEach((card) => {
+    const key = card.getAttribute('data-gate');
+    const released = Boolean(gates?.[key]);
+    card.classList.toggle('is-released', released);
+  });
+
+  document.querySelectorAll('[data-gate-toggle]').forEach((button) => {
+    const key = button.getAttribute('data-gate-toggle');
+    const released = Boolean(gates?.[key]);
+    button.textContent = released
+      ? `Reaplicar censura: ${prettyGateName(key)}`
+      : `Liberar: ${prettyGateName(key)}`;
+    button.dataset.released = String(released);
+  });
+}
+
+function prettyGateName(key) {
+  if (key === 'aula1_referencias') return 'Referências';
+  if (key === 'aula1_nota_instrutor') return 'Nota do Instrutor';
+  return key;
+}
+
+async function loadGates() {
+  if (!currentToken) return;
+  try {
+    const { gates } = await fetchLessonGates(currentToken, LESSON_ID);
+    applyGateState(gates || {});
+  } catch {
+    const fallback = {};
+    GATE_KEYS.forEach((key) => {
+      fallback[key] = false;
+    });
+    applyGateState(fallback);
+  }
+}
+
+function initAdminGates() {
+  const panel = document.getElementById('admin-gates');
+  if (!panel) return;
+
+  const isAdmin = currentUser?.role === 'admin';
+  panel.hidden = !isAdmin;
+  if (!isAdmin) return;
+
+  panel.querySelectorAll('[data-gate-toggle]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const gateKey = button.getAttribute('data-gate-toggle');
+      const currentlyReleased = button.dataset.released === 'true';
+
+      button.disabled = true;
+      const previous = button.textContent;
+      button.textContent = 'Atualizando...';
+      try {
+        const { gates } = await setLessonGate(currentToken, LESSON_ID, gateKey, !currentlyReleased);
+        applyGateState(gates || {});
+      } catch (error) {
+        const message = error instanceof ApiError ? error.message : 'Falha ao atualizar censura.';
+        window.alert(message);
+        button.textContent = previous;
+      } finally {
+        button.disabled = false;
       }
     });
   });
 }
 
-/* ============================================================
-   2. SIMULAÇÃO — LABIRINTO PROCEDURAL + PATHFINDING (Canvas nativo)
-   ============================================================ */
-function initSimulation() {
-  const canvas = document.getElementById('game-canvas');
-  if (!canvas) {
-    console.warn('[AULA-1] #game-canvas não encontrado no DOM.');
-    return;
-  }
+function initFeelLab() {
+  const canvas = document.getElementById('feel-canvas');
+  if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
-  const WORLD_WIDTH = canvas.width;   // 600
-  const WORLD_HEIGHT = canvas.height; // 400
+  const W = canvas.width;
+  const H = canvas.height;
+  const GROUND_Y = H - 42;
 
-  /* ==========================================================
-     2.1 MÁQUINA DE ESTADOS
-  ========================================================== */
-  const GameState = {
-    START_SCREEN: 'START_SCREEN',
-    COUNTDOWN: 'COUNTDOWN',
-    PLAYING: 'PLAYING',
-    CAUGHT: 'CAUGHT',
-    WON: 'WON',
+  const controls = {
+    accel: document.getElementById('param-accel'),
+    friction: document.getElementById('param-friction'),
+    gravity: document.getElementById('param-gravity'),
+    maxSpeed: document.getElementById('param-maxspeed'),
+    sprint: document.getElementById('param-sprint'),
   };
 
-  let currentState = GameState.START_SCREEN;
+  const outputs = {
+    accel: document.getElementById('param-accel-value'),
+    friction: document.getElementById('param-friction-value'),
+    gravity: document.getElementById('param-gravity-value'),
+    maxSpeed: document.getElementById('param-maxspeed-value'),
+    sprint: document.getElementById('param-sprint-value'),
+  };
 
-  const COUNTDOWN_DURATION_MS = 3000;   // 3 segundos, contagem 3-2-1
-  const ENEMY_WAKE_DELAY_MS = 1000;     // MECÂNICA: o Monstro "dorme" 1s
-  let countdownStartedAt = 0;
-  let playingStartedAt = null;
+  const base = { accel: 900, friction: 1250, gravity: 1200, maxSpeed: 220, sprint: 1.5 };
 
-  /* ==========================================================
-     2.2 GRADE DO LABIRINTO (Design Tokens do mapa)
-     ==========================================================
-     O labirinto é dividido em uma grade de células. Cada célula
-     guarda quais dos seus 4 lados possuem parede. O tamanho da
-     célula é escolhido para que COLS × CELL_SIZE = 600 e
-     ROWS × CELL_SIZE = 400, preenchendo o canvas exatamente.
-  ========================================================== */
-  const CELL_SIZE = 50;
-  const COLS = WORLD_WIDTH / CELL_SIZE;   // 12 colunas
-  const ROWS = WORLD_HEIGHT / CELL_SIZE;  // 8 linhas
-  const WALL_THICKNESS = 8;
-
-  const WALL_COLOR = '#3a2a2c';        // grafite/vermelho-escuro (estética Hades)
-  const WALL_BORDER_COLOR = '#7a5c2e'; // fio dourado sutil
-
-  /**
-   * Cria a grade vazia: toda célula nasce com os 4 lados fechados.
-   */
-  function createGrid() {
-    const grid = [];
-    for (let row = 0; row < ROWS; row += 1) {
-      const rowCells = [];
-      for (let col = 0; col < COLS; col += 1) {
-        rowCells.push({ row, col, top: true, right: true, bottom: true, left: true, visited: false });
-      }
-      grid.push(rowCells);
-    }
-    return grid;
+  function syncLabels() {
+    outputs.accel.textContent = controls.accel.value;
+    outputs.friction.textContent = controls.friction.value;
+    outputs.gravity.textContent = controls.gravity.value;
+    outputs.maxSpeed.textContent = controls.maxSpeed.value;
+    outputs.sprint.textContent = `${controls.sprint.value}x`;
   }
 
-  /** Embaralha um array no local (Fisher-Yates). */
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i -= 1) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
+  Object.values(controls).forEach((input) => {
+    input.addEventListener('input', syncLabels);
+  });
 
-  /**
-   * MECÂNICA — Geração procedural do labirinto ("recursive backtracker").
-   * Começamos em uma célula, e a cada passo vamos a um vizinho ainda não
-   * visitado (derrubando a parede entre as duas), empilhando o caminho.
-   * Quando não há mais vizinhos livres, voltamos (backtrack) na pilha.
-   * O resultado é um labirinto onde QUALQUER célula pode alcançar
-   * qualquer outra — não existem áreas isoladas.
-   */
-  function carveMaze(grid, startRow, startCol) {
-    const DIRECTIONS = [
-      { dr: -1, dc: 0, wallHere: 'top', wallThere: 'bottom' },
-      { dr: 1, dc: 0, wallHere: 'bottom', wallThere: 'top' },
-      { dr: 0, dc: -1, wallHere: 'left', wallThere: 'right' },
-      { dr: 0, dc: 1, wallHere: 'right', wallThere: 'left' },
-    ];
+  document.getElementById('btn-baseline')?.addEventListener('click', () => {
+    controls.accel.value = String(base.accel);
+    controls.friction.value = String(base.friction);
+    controls.gravity.value = String(base.gravity);
+    controls.maxSpeed.value = String(base.maxSpeed);
+    controls.sprint.value = String(base.sprint);
+    syncLabels();
+  });
 
-    const stack = [grid[startRow][startCol]];
-    grid[startRow][startCol].visited = true;
+  document.getElementById('btn-reflect')?.addEventListener('click', () => {
+    const reading = document.getElementById('feel-reading');
+    if (!reading) return;
+    reading.textContent = describeFeel({
+      accel: Number(controls.accel.value),
+      friction: Number(controls.friction.value),
+      gravity: Number(controls.gravity.value),
+      maxSpeed: Number(controls.maxSpeed.value),
+      sprint: Number(controls.sprint.value),
+    });
+  });
 
-    while (stack.length > 0) {
-      const current = stack[stack.length - 1];
-      const shuffledDirs = shuffle(DIRECTIONS.slice());
+  const keys = { left: false, right: false, jump: false, sprint: false };
 
-      let advanced = false;
-      for (const dir of shuffledDirs) {
-        const nextRow = current.row + dir.dr;
-        const nextCol = current.col + dir.dc;
-        const inBounds = nextRow >= 0 && nextRow < ROWS && nextCol >= 0 && nextCol < COLS;
-
-        if (inBounds && !grid[nextRow][nextCol].visited) {
-          const neighbor = grid[nextRow][nextCol];
-          current[dir.wallHere] = false;   // derruba a parede do lado de "current"
-          neighbor[dir.wallThere] = false; // e o lado correspondente do vizinho
-          neighbor.visited = true;
-          stack.push(neighbor);
-          advanced = true;
-          break;
-        }
-      }
-
-      if (!advanced) {
-        stack.pop(); // sem vizinhos livres: backtrack
-      }
-    }
-  }
-
-  /**
-   * DINÂMICA — Adiciona "rotas de fuga" extras (loops).
-   * Um labirinto 100% "árvore" (gerado só pelo backtracker) tem
-   * exatamente UM caminho entre dois pontos. Ao remover ~12% das
-   * paredes restantes, criamos atalhos e rotas alternativas —
-   * o mesmo conceito de "gargalos e rotas de fuga" da Aba 1.
-   */
-  function addExtraRoutes(grid, chance = 0.12) {
-    for (let row = 0; row < ROWS; row += 1) {
-      for (let col = 0; col < COLS; col += 1) {
-        const cell = grid[row][col];
-
-        if (col < COLS - 1 && cell.right && Math.random() < chance) {
-          cell.right = false;
-          grid[row][col + 1].left = false;
-        }
-        if (row < ROWS - 1 && cell.bottom && Math.random() < chance) {
-          cell.bottom = false;
-          grid[row + 1][col].top = false;
-        }
-      }
-    }
-  }
-
-  /**
-   * Converte a grade lógica em retângulos físicos {x, y, width, height}
-   * para desenho e para a colisão AABB. Cada parede é desenhada apenas
-   * uma vez (lados "top"/"left" de cada célula, mais o "right"/"bottom"
-   * das bordas externas), evitando retas duplicadas.
-   */
-  function buildWallRects(grid) {
-    const rects = [];
-    for (let row = 0; row < ROWS; row += 1) {
-      for (let col = 0; col < COLS; col += 1) {
-        const cell = grid[row][col];
-        const x = col * CELL_SIZE;
-        const y = row * CELL_SIZE;
-
-        if (cell.top) {
-          rects.push({ x, y: y - WALL_THICKNESS / 2, width: CELL_SIZE + WALL_THICKNESS, height: WALL_THICKNESS });
-        }
-        if (cell.left) {
-          rects.push({ x: x - WALL_THICKNESS / 2, y, width: WALL_THICKNESS, height: CELL_SIZE + WALL_THICKNESS });
-        }
-        if (col === COLS - 1 && cell.right) {
-          rects.push({ x: x + CELL_SIZE - WALL_THICKNESS / 2, y, width: WALL_THICKNESS, height: CELL_SIZE + WALL_THICKNESS });
-        }
-        if (row === ROWS - 1 && cell.bottom) {
-          rects.push({ x, y: y + CELL_SIZE - WALL_THICKNESS / 2, width: CELL_SIZE + WALL_THICKNESS, height: WALL_THICKNESS });
-        }
-      }
-    }
-    return rects;
-  }
-
-  /** Canto superior-esquerdo (em pixels) para centralizar um ator de `size` px dentro de uma célula. */
-  function cellTopLeft(row, col, size) {
-    return {
-      x: col * CELL_SIZE + (CELL_SIZE - size) / 2,
-      y: row * CELL_SIZE + (CELL_SIZE - size) / 2,
-    };
-  }
-
-  /* ==========================================================
-     2.3 MECÂNICA — Velocidades (independentes da taxa de quadros)
-     ==========================================================
-     As velocidades são expressas em PIXELS POR SEGUNDO, e não por
-     quadro. Isso é essencial: monitores com taxas de atualização
-     diferentes (60Hz, 120Hz, 144Hz...) disparam requestAnimationFrame
-     em ritmos diferentes. Se movêssemos um valor fixo "por quadro",
-     a simulação rodaria proporcionalmente mais rápido em telas de
-     alta taxa de atualização — exatamente o bug de "velocidade
-     extremamente alta" percebido. Multiplicando pelo tempo real
-     decorrido (deltaSeconds) a cada quadro, o movimento fica sempre
-     consistente, independentemente do hardware do jogador.
-  ========================================================== */
-  const PLAYER_SPEED = 90;                 // pixels por segundo
-  const ENEMY_SPEED = PLAYER_SPEED * 0.85; // 15% mais lento que o jogador
-  const MAX_DELTA_SECONDS = 0.1;           // evita "saltos" após aba minimizada/trocada
-
-  // Tamanhos reduzidos: além de deixar mais espaço de manobra dentro
-  // dos corredores, evitam que Robô e Monstro nasçam colados/sobrepostos.
-  const PLAYER_SIZE = 14;
-  const ENEMY_SIZE = 16;
-  const GOAL_SIZE = 18; // OBJETIVO: núcleo dourado no extremo oposto do labirinto
-
-  /* ==========================================================
-     2.4 ESTADO DO MUNDO (grade, paredes e atuantes)
-     ==========================================================
-     resetSimulation() gera um labirinto NOVO a cada partida —
-     como as salas proceduralmente geradas de um rogue-like — e
-     posiciona o Monstro na célula IMEDIATAMENTE ATRÁS do Robô
-     (uma célula inteira de distância, nunca sobreposto a ele).
-     Para garantir isso, forçamos a abertura de duas paredes a
-     partir da célula inicial: uma para o "corredor do Monstro" e
-     outra como rota de fuga independente — assim o jogador nunca
-     fica bloqueado, independente de como o resto do labirinto foi
-     sorteado. O OBJETIVO (núcleo dourado) nasce sempre no canto
-     diagonalmente oposto ao início, e a vitória exige atravessar
-     o labirinto inteiro para alcançá-lo.
-  ========================================================== */
-  let grid = null;
-  let wallRects = [];
-  let player = null;
-  let enemy = null;
-  let goal = null;
-
-  function resetSimulation() {
-    grid = createGrid();
-    carveMaze(grid, 0, 0);
-    addExtraRoutes(grid, 0.12);
-
-    // Garante uma passagem entre a célula de partida (0,0) e a célula
-    // logo abaixo (1,0) — é onde o Monstro vai nascer. Isso evita que
-    // ele apareça isolado ou colado ao Robô: sempre há 1 célula cheia
-    // (50px) de distância real entre os dois no início da partida.
-    grid[0][0].bottom = false;
-    grid[1][0].top = false;
-
-    // BUGFIX: a célula (0,0) é um canto do labirinto, então o gerador
-    // procedural pode ter aberto UMA ÚNICA saída natural — e essa saída
-    // pode coincidir justamente com a passagem acima, onde o Monstro
-    // nasce. Nesse caso o Robô ficaria "preso": a única rota de saída
-    // estaria bloqueada pelo próprio Monstro. Para evitar isso, forçamos
-    // também uma segunda saída independente, para o lado (0,1) — assim
-    // a célula inicial sempre tem no mínimo 2 rotas livres (baixo e
-    // direita), garantindo que o jogador tenha por onde escapar mesmo
-    // que o Monstro esteja bloqueando o corredor de baixo.
-    grid[0][0].right = false;
-    grid[0][1].left = false;
-
-    wallRects = buildWallRects(grid);
-
-    const playerStart = cellTopLeft(0, 0, PLAYER_SIZE);
-    player = { x: playerStart.x, y: playerStart.y, size: PLAYER_SIZE };
-
-    const enemyStart = cellTopLeft(1, 0, ENEMY_SIZE);
-    enemy = { x: enemyStart.x, y: enemyStart.y, size: ENEMY_SIZE };
-
-    // OBJETIVO: o núcleo dourado nasce sempre no extremo OPOSTO do
-    // labirinto (canto inferior-direito), obrigando o Robô a atravessar
-    // o mapa inteiro — e não apenas fugir do Monstro no lugar — para
-    // vencer a simulação.
-    const goalStart = cellTopLeft(ROWS - 1, COLS - 1, GOAL_SIZE);
-    goal = { x: goalStart.x, y: goalStart.y, size: GOAL_SIZE };
-
-    playingStartedAt = null;
-  }
-
-  resetSimulation();
-
-  /* ==========================================================
-     2.5 INPUT — Estado do teclado (Setas e WASD)
-     ==========================================================
-     O estado é guardado por DIREÇÃO LÓGICA (up/down/left/right),
-     não pela tecla crua — assim tanto as Setas quanto WASD (comum
-     em jogos) alimentam exatamente o mesmo estado de movimento.
-  ========================================================== */
-  const keysPressed = { up: false, down: false, left: false, right: false };
-
-  const KEY_TO_DIRECTION = {
-    ArrowUp: 'up',
-    ArrowDown: 'down',
+  const map = {
     ArrowLeft: 'left',
-    ArrowRight: 'right',
-    w: 'up',
-    W: 'up',
-    s: 'down',
-    S: 'down',
     a: 'left',
     A: 'left',
+    ArrowRight: 'right',
     d: 'right',
     D: 'right',
+    ArrowUp: 'jump',
+    w: 'jump',
+    W: 'jump',
+    ' ': 'jump',
+    Shift: 'sprint',
   };
 
   window.addEventListener('keydown', (event) => {
-    const direction = KEY_TO_DIRECTION[event.key];
-    if (direction) {
-      keysPressed[direction] = true;
-      event.preventDefault();
-    }
+    const key = map[event.key];
+    if (!key) return;
+    keys[key] = true;
+    if (event.key === ' ' || event.key.startsWith('Arrow')) event.preventDefault();
   });
-
   window.addEventListener('keyup', (event) => {
-    const direction = KEY_TO_DIRECTION[event.key];
-    if (direction) {
-      keysPressed[direction] = false;
-    }
+    const key = map[event.key];
+    if (!key) return;
+    keys[key] = false;
   });
 
-  // Clique no canvas: avança a máquina de estados.
-  canvas.addEventListener('click', () => {
-    if (currentState === GameState.START_SCREEN) {
-      countdownStartedAt = performance.now();
-      currentState = GameState.COUNTDOWN;
-    } else if (currentState === GameState.CAUGHT || currentState === GameState.WON) {
-      // Gera um NOVO labirinto e reinicia do zero.
-      resetSimulation();
-      currentState = GameState.START_SCREEN;
-    }
-  });
+  const actor = { x: 80, y: GROUND_Y - 32, w: 26, h: 32, vx: 0, vy: 0, onGround: true };
+  let prev = performance.now();
 
-  /* ==========================================================
-     2.6 COLISÃO — AABB (Axis-Aligned Bounding Box)
-  ========================================================== */
-  function isCollidingAABB(boxA, boxB) {
-    return (
-      boxA.x < boxB.x + boxB.width &&
-      boxA.x + boxA.width > boxB.x &&
-      boxA.y < boxB.y + boxB.height &&
-      boxA.y + boxA.height > boxB.y
-    );
-  }
+  function tick(now) {
+    const dt = Math.min((now - prev) / 1000, 0.05);
+    prev = now;
 
-  function toBoundingBox(actor) {
-    return { x: actor.x, y: actor.y, width: actor.size, height: actor.size };
-  }
+    const accel = Number(controls.accel.value);
+    const friction = Number(controls.friction.value);
+    const gravity = Number(controls.gravity.value);
+    const maxSpeed = Number(controls.maxSpeed.value) * (keys.sprint ? Number(controls.sprint.value) : 1);
 
-  function collidesWithMaze(box) {
-    return wallRects.some((wall) => isCollidingAABB(box, wall));
-  }
+    if (keys.left) actor.vx -= accel * dt;
+    if (keys.right) actor.vx += accel * dt;
 
-  /**
-   * Move um atuante respeitando as paredes, eixo por eixo (X, depois Y).
-   * Usado apenas pelo JOGADOR: ele tem movimento livre em pixels e
-   * precisa "esbarrar" fisicamente nas paredes do labirinto.
-   */
-  function moveWithCollision(actor, deltaX, deltaY) {
-    const boxAfterX = { x: actor.x + deltaX, y: actor.y, width: actor.size, height: actor.size };
-    if (!collidesWithMaze(boxAfterX)) {
-      actor.x += deltaX;
+    if (!keys.left && !keys.right) {
+      const signal = Math.sign(actor.vx);
+      const next = Math.abs(actor.vx) - friction * dt;
+      actor.vx = next <= 0 ? 0 : next * signal;
     }
 
-    const boxAfterY = { x: actor.x, y: actor.y + deltaY, width: actor.size, height: actor.size };
-    if (!collidesWithMaze(boxAfterY)) {
-      actor.y += deltaY;
-    }
-  }
+    actor.vx = Math.max(-maxSpeed, Math.min(maxSpeed, actor.vx));
 
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
-
-  /* ==========================================================
-     2.7 ATUALIZAÇÃO — JOGADOR
-  ========================================================== */
-  function updatePlayer(deltaSeconds) {
-    const step = PLAYER_SPEED * deltaSeconds;
-    let deltaX = 0;
-    let deltaY = 0;
-
-    if (keysPressed.up) deltaY -= step;
-    if (keysPressed.down) deltaY += step;
-    if (keysPressed.left) deltaX -= step;
-    if (keysPressed.right) deltaX += step;
-
-    moveWithCollision(player, deltaX, deltaY);
-
-    player.x = clamp(player.x, 0, WORLD_WIDTH - player.size);
-    player.y = clamp(player.y, 0, WORLD_HEIGHT - player.size);
-  }
-
-  /* ==========================================================
-     2.8 PATHFINDING — Busca em Largura (BFS) sobre a grade
-     ==========================================================
-     Diferente de uma perseguição "em linha reta" (que trava em
-     qualquer parede), o BFS explora a grade camada por camada a
-     partir da célula do Monstro até encontrar a célula do Robô,
-     retornando o CAMINHO MAIS CURTO entre as duas. O Monstro
-     então persegue apenas o PRIMEIRO passo desse caminho — e o
-     caminho é recalculado a cada frame, reagindo ao jogador em
-     tempo real, como um verdadeiro algoritmo de IA de perseguição.
-  ========================================================== */
-  function pixelToCell(x, y, size) {
-    const centerX = x + size / 2;
-    const centerY = y + size / 2;
-    const col = clamp(Math.floor(centerX / CELL_SIZE), 0, COLS - 1);
-    const row = clamp(Math.floor(centerY / CELL_SIZE), 0, ROWS - 1);
-    return { row, col };
-  }
-
-  /** Retorna as células vizinhas alcançáveis (sem parede) a partir de (row, col). */
-  function getOpenNeighbors(row, col) {
-    const cell = grid[row][col];
-    const neighbors = [];
-    if (!cell.top && row > 0) neighbors.push({ row: row - 1, col });
-    if (!cell.bottom && row < ROWS - 1) neighbors.push({ row: row + 1, col });
-    if (!cell.left && col > 0) neighbors.push({ row, col: col - 1 });
-    if (!cell.right && col < COLS - 1) neighbors.push({ row, col: col + 1 });
-    return neighbors;
-  }
-
-  /** BFS clássico: devolve o caminho (lista de células) de `start` até `goal`, ou null. */
-  function findShortestPath(start, goal) {
-    if (start.row === goal.row && start.col === goal.col) {
-      return [start];
+    if (keys.jump && actor.onGround) {
+      actor.vy = -420;
+      actor.onGround = false;
     }
 
-    const cellKey = (r, c) => `${r}:${c}`;
-    const visited = new Set([cellKey(start.row, start.col)]);
-    const cameFrom = new Map();
-    const queue = [start];
+    actor.vy += gravity * dt;
 
-    while (queue.length > 0) {
-      const current = queue.shift();
+    actor.x += actor.vx * dt;
+    actor.y += actor.vy * dt;
 
-      if (current.row === goal.row && current.col === goal.col) {
-        // Reconstrói o caminho percorrendo os "pais" até a origem.
-        const path = [current];
-        let key = cellKey(current.row, current.col);
-        while (cameFrom.has(key)) {
-          const previous = cameFrom.get(key);
-          path.unshift(previous);
-          key = cellKey(previous.row, previous.col);
-        }
-        return path;
-      }
-
-      for (const neighbor of getOpenNeighbors(current.row, current.col)) {
-        const neighborKey = cellKey(neighbor.row, neighbor.col);
-        if (!visited.has(neighborKey)) {
-          visited.add(neighborKey);
-          cameFrom.set(neighborKey, current);
-          queue.push(neighbor);
-        }
-      }
+    if (actor.y + actor.h >= GROUND_Y) {
+      actor.y = GROUND_Y - actor.h;
+      actor.vy = 0;
+      actor.onGround = true;
     }
 
-    return null; // Não deveria ocorrer: o labirinto é sempre totalmente conectado.
-  }
-
-  /* ==========================================================
-     2.9 ATUALIZAÇÃO — MONSTRO (dorme 1s, depois persegue com IA)
-  ========================================================== */
-  function updateEnemy(now, deltaSeconds) {
-    if (playingStartedAt === null) return;
-
-    // MECÂNICA: o Monstro permanece imóvel pelo primeiro 1 segundo
-    // de jogo — o tempo de reação/fuga garantido ao jogador.
-    const timeSincePlayStarted = now - playingStartedAt;
-    if (timeSincePlayStarted < ENEMY_WAKE_DELAY_MS) {
-      return;
+    if (actor.x < 24) {
+      actor.x = 24;
+      actor.vx = 0;
+    }
+    if (actor.x + actor.w > W - 24) {
+      actor.x = W - 24 - actor.w;
+      actor.vx = 0;
     }
 
-    const enemyStep = ENEMY_SPEED * deltaSeconds;
-
-    const enemyCell = pixelToCell(enemy.x, enemy.y, enemy.size);
-    const playerCell = pixelToCell(player.x, player.y, player.size);
-
-    let targetX;
-    let targetY;
-
-    if (enemyCell.row === playerCell.row && enemyCell.col === playerCell.col) {
-      // DINÂMICA: dentro da mesma célula, ataca o pixel exato do jogador.
-      targetX = player.x;
-      targetY = player.y;
-    } else {
-      const path = findShortestPath(enemyCell, playerCell);
-      const nextCell = path && path.length > 1 ? path[1] : enemyCell;
-      const nextTopLeft = cellTopLeft(nextCell.row, nextCell.col, enemy.size);
-      targetX = nextTopLeft.x;
-      targetY = nextTopLeft.y;
-    }
-
-    const deltaX = targetX - enemy.x;
-    const deltaY = targetY - enemy.y;
-    const distance = Math.hypot(deltaX, deltaY);
-
-    if (distance <= enemyStep) {
-      // Já está praticamente sobre o alvo: encaixa exatamente, sem "tremer".
-      enemy.x = targetX;
-      enemy.y = targetY;
-    } else {
-      enemy.x += (deltaX / distance) * enemyStep;
-      enemy.y += (deltaY / distance) * enemyStep;
-    }
+    drawScene(ctx, W, H, actor);
+    requestAnimationFrame(tick);
   }
 
-  /** Verifica se o Monstro alcançou o Robô (fim de jogo). */
-  function checkCapture() {
-    if (isCollidingAABB(toBoundingBox(player), toBoundingBox(enemy))) {
-      currentState = GameState.CAUGHT;
-    }
-  }
-
-  /** Verifica se o Robô alcançou o núcleo dourado no extremo oposto (vitória). */
-  function checkWin() {
-    if (isCollidingAABB(toBoundingBox(player), toBoundingBox(goal))) {
-      currentState = GameState.WON;
-    }
-  }
-
-  /* ==========================================================
-     2.10 DESENHO
-  ========================================================== */
-  function drawMazeBackground() {
-    ctx.fillStyle = '#0d0a10';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-  }
-
-  function drawMazeWalls() {
-    wallRects.forEach((wall) => {
-      ctx.fillStyle = WALL_COLOR;
-      ctx.fillRect(wall.x, wall.y, wall.width, wall.height);
-      ctx.strokeStyle = WALL_BORDER_COLOR;
-      ctx.lineWidth = 1;
-      ctx.strokeRect(wall.x + 0.5, wall.y + 0.5, wall.width - 1, wall.height - 1);
-    });
-  }
-
-  /** OBJETIVO: núcleo dourado desenhado como um losango pulsante — a "engrenagem final". */
-  function drawGoal() {
-    const centerX = goal.x + goal.size / 2;
-    const centerY = goal.y + goal.size / 2;
-    const half = goal.size / 2;
-    const pulse = 1 + Math.sin(performance.now() / 250) * 0.12; // brilho pulsante
-
-    ctx.save();
-    ctx.translate(centerX, centerY);
-    ctx.rotate(Math.PI / 4);
-    ctx.shadowColor = '#f2d59a';
-    ctx.shadowBlur = 16 * pulse;
-    ctx.fillStyle = '#cfa759';
-    ctx.strokeStyle = '#f2d59a';
-    ctx.lineWidth = 2;
-    ctx.fillRect(-half * pulse, -half * pulse, half * 2 * pulse, half * 2 * pulse);
-    ctx.strokeRect(-half * pulse, -half * pulse, half * 2 * pulse, half * 2 * pulse);
-    ctx.restore();
-  }
-
-  function drawPlayer() {
-    ctx.save();
-    ctx.shadowColor = '#3fd0ff';
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = '#3fd0ff';
-    ctx.fillRect(player.x, player.y, player.size, player.size);
-    ctx.restore();
-  }
-
-  function drawEnemy() {
-    ctx.save();
-    ctx.shadowColor = '#c23548';
-    ctx.shadowBlur = 12;
-    ctx.fillStyle = '#c23548';
-    ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
-    ctx.restore();
-  }
-
-  /** Enquanto o Monstro "dorme", mostra a contagem regressiva sobre ele. */
-  function drawEnemySleepIndicator(now) {
-    if (playingStartedAt === null) return;
-
-    const remainingMs = ENEMY_WAKE_DELAY_MS - (now - playingStartedAt);
-    if (remainingMs <= 0) return;
-
-    const remainingSeconds = Math.ceil(remainingMs / 1000);
-    ctx.save();
-    ctx.font = '11px "Cinzel", serif';
-    ctx.fillStyle = '#f2d59a';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'bottom';
-    ctx.shadowColor = 'rgba(194, 53, 72, 0.8)';
-    ctx.shadowBlur = 6;
-    ctx.fillText(`zzz ${remainingSeconds}`, enemy.x + enemy.size / 2, enemy.y - 4);
-    ctx.restore();
-  }
-
-  /** Texto centralizado, com fonte temática e brilho dourado/sangue. */
-  function drawCenteredText(text, sizePx, color, glowColor, yOffset = 0) {
-    ctx.save();
-    ctx.font = `${sizePx}px "Cinzel", serif`;
-    ctx.fillStyle = color;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor = glowColor;
-    ctx.shadowBlur = 18;
-    ctx.fillText(text, WORLD_WIDTH / 2, WORLD_HEIGHT / 2 + yOffset);
-    ctx.restore();
-  }
-
-  /* ==========================================================
-     2.11 RENDERIZAÇÃO — Uma função por ESTADO
-  ========================================================== */
-  function renderStartScreen() {
-    drawMazeBackground();
-    drawMazeWalls();
-    drawGoal();
-    drawPlayer();
-    drawEnemy();
-
-    ctx.fillStyle = 'rgba(10, 8, 7, 0.55)';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    drawCenteredText('Clique na tela para iniciar', 20, '#f2d59a', 'rgba(207, 167, 89, 0.7)');
-  }
-
-  function renderCountdown(now) {
-    drawMazeBackground();
-    drawMazeWalls();
-    drawGoal();
-    drawPlayer();
-    drawEnemy();
-
-    ctx.fillStyle = 'rgba(10, 8, 7, 0.5)';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    const elapsedMs = now - countdownStartedAt;
-    const remainingSeconds = Math.ceil((COUNTDOWN_DURATION_MS - elapsedMs) / 1000);
-
-    if (remainingSeconds <= 0) {
-      // 3 segundos se esgotaram: o cronômetro do Monstro começa agora.
-      currentState = GameState.PLAYING;
-      playingStartedAt = now;
-      return;
-    }
-
-    drawCenteredText(String(remainingSeconds), 60, '#f2d59a', 'rgba(194, 53, 72, 0.75)');
-  }
-
-  function renderPlaying(now, deltaSeconds) {
-    updatePlayer(deltaSeconds);
-    updateEnemy(now, deltaSeconds);
-    checkWin();
-    if (currentState !== GameState.WON) {
-      checkCapture();
-    }
-
-    drawMazeBackground();
-    drawMazeWalls();
-    drawGoal();
-    drawPlayer();
-    drawEnemy();
-    drawEnemySleepIndicator(now);
-  }
-
-  function renderCaught() {
-    drawMazeBackground();
-    drawMazeWalls();
-    drawGoal();
-    drawPlayer();
-    drawEnemy();
-
-    ctx.fillStyle = 'rgba(92, 20, 29, 0.55)';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    drawCenteredText('Você foi capturado!', 24, '#f2d59a', 'rgba(194, 53, 72, 0.85)', -14);
-    drawCenteredText('Clique para gerar outro labirinto', 15, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 18);
-  }
-
-  function renderWon() {
-    drawMazeBackground();
-    drawMazeWalls();
-    drawGoal();
-    drawPlayer();
-    drawEnemy();
-
-    ctx.fillStyle = 'rgba(45, 30, 12, 0.55)';
-    ctx.fillRect(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
-
-    drawCenteredText('Núcleo alcançado! Vitória!', 24, '#f2d59a', 'rgba(207, 167, 89, 0.9)', -14);
-    drawCenteredText('Clique para gerar outro labirinto', 15, '#ece1d1', 'rgba(207, 167, 89, 0.6)', 18);
-  }
-
-  /* ==========================================================
-     2.12 LOOP PRINCIPAL
-  ========================================================== */
-  let lastFrameTimestamp = null;
-
-  function gameLoop(now) {
-    // Tempo real decorrido desde o quadro anterior, em segundos — a base
-    // de toda a movimentação (ver comentário na seção 2.3). No primeiro
-    // quadro não há referência anterior, então deltaSeconds é 0.
-    const deltaSeconds =
-      lastFrameTimestamp === null ? 0 : Math.min((now - lastFrameTimestamp) / 1000, MAX_DELTA_SECONDS);
-    lastFrameTimestamp = now;
-
-    switch (currentState) {
-      case GameState.START_SCREEN:
-        renderStartScreen();
-        break;
-      case GameState.COUNTDOWN:
-        renderCountdown(now);
-        break;
-      case GameState.PLAYING:
-        renderPlaying(now, deltaSeconds);
-        break;
-      case GameState.CAUGHT:
-        renderCaught();
-        break;
-      case GameState.WON:
-        renderWon();
-        break;
-      default:
-        break;
-    }
-
-    requestAnimationFrame(gameLoop);
-  }
-
-  requestAnimationFrame(gameLoop);
-
-  console.info(
-    '%c[SIMULAÇÃO]%c Labirinto procedural (%d\u00d7%d células) — Robô: %spx/s | Monstro: %spx/s, dorme %ds e usa BFS para perseguir',
-    'color: #cfa759; font-weight: bold;',
-    'color: #ab9c8a;',
-    COLS,
-    ROWS,
-    PLAYER_SPEED,
-    ENEMY_SPEED.toFixed(2),
-    ENEMY_WAKE_DELAY_MS / 1000
-  );
+  syncLabels();
+  requestAnimationFrame(tick);
 }
 
-/* ============================================================
-   BOOT
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', () => {
+function drawScene(ctx, w, h, actor) {
+  ctx.clearRect(0, 0, w, h);
+
+  const bg = ctx.createLinearGradient(0, 0, 0, h);
+  bg.addColorStop(0, '#111521');
+  bg.addColorStop(1, '#0d0a10');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.fillStyle = '#2a2430';
+  ctx.fillRect(0, h - 42, w, 42);
+
+  for (let i = 0; i < 7; i += 1) {
+    const x = 90 + i * 80;
+    const columnH = 16 + (i % 3) * 10;
+    ctx.fillStyle = '#6c5363';
+    ctx.fillRect(x, h - 42 - columnH, 24, columnH);
+  }
+
+  ctx.fillStyle = '#54d6ff';
+  ctx.fillRect(actor.x, actor.y, actor.w, actor.h);
+}
+
+function describeFeel(values) {
+  const labels = [];
+
+  labels.push(values.accel >= 1200 ? 'arranque agressivo' : values.accel <= 650 ? 'arranque com antecipação' : 'arranque equilibrado');
+  labels.push(values.friction >= 1700 ? 'paradas precisas' : values.friction <= 850 ? 'deslizamento perceptível' : 'freio moderado');
+  labels.push(values.gravity >= 1600 ? 'queda urgente' : values.gravity <= 850 ? 'suspensão tolerante' : 'queda legível');
+  labels.push(values.maxSpeed >= 300 ? 'agência alta' : values.maxSpeed <= 150 ? 'agência contida' : 'ritmo controlado');
+  labels.push(values.sprint >= 1.9 ? 'sprint explosivo' : values.sprint <= 1.2 ? 'sprint discreto' : 'sprint estratégico');
+
+  return `Leitura atual: ${labels.join(' · ')}.`;
+}
+
+function initCompletion() {
+  const button = document.getElementById('btn-complete-aula');
+  const textarea = document.getElementById('gdd-text');
+  const rewardEl = document.getElementById('reward-codes');
+  const codeValue = document.getElementById('reward-code-value');
+  const codeMeta = document.getElementById('reward-code-meta');
+  if (!button || !textarea || !rewardEl || !codeValue || !codeMeta) return;
+
+  setCompletionAvailability();
+
+  button.addEventListener('click', async () => {
+    const text = normalizeParagraph(textarea.value);
+    if (!text || !paragraphSaved) {
+      codeValue.textContent = 'Preencha e salve o parágrafo para solicitar o código.';
+      codeMeta.textContent = '';
+      rewardEl.hidden = false;
+      setCompletionAvailability();
+      return;
+    }
+
+    button.disabled = true;
+    const previous = button.textContent;
+    button.textContent = 'Consultando código...';
+
+    rewardEl.hidden = false;
+    codeValue.textContent = 'Carregando...';
+    codeMeta.textContent = '';
+
+    try {
+      const { code } = await getLessonCode(currentToken, LESSON_ID);
+      codeValue.textContent = code.code;
+      codeMeta.textContent = `${code.lessonTitle} • +${code.xp} XP • válido por 20 minutos`;
+    } catch (error) {
+      codeValue.textContent = error instanceof ApiError ? error.message : 'Não foi possível obter o código agora.';
+      codeMeta.textContent = 'Peça para um ADM gerar um novo código no Salão dos Heróis.';
+    } finally {
+      button.textContent = previous;
+      setCompletionAvailability();
+    }
+  });
+}
+
+async function init() {
   initTabs();
-  initSimulation();
+  initSlidesViewer();
+
+  const result = await requireSession();
+  if (!result) return;
+
+  currentUser = result.user;
+  currentToken = getSession()?.token ?? null;
+
+  initAdminGates();
+  await loadGates();
+
+  await initParagraphPersistence();
+  initFeelLab();
+  initCompletion();
+}
+
+init().catch((error) => {
+  const message = error instanceof ApiError
+    ? error.message
+    : 'Falha ao inicializar a aula. Verifique se a API está ativa.';
+  window.alert(message);
 });

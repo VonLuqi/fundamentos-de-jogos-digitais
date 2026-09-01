@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 1 — A Regra do Jogo (Unplugged): Framework MDA, tensão vs ação e o miniprojeto Robô vs Monstro." />
+  <meta name="description" content="Aula 01 — O Círculo Mágico do Roguelite: teoria do jogo, game feel na Godot e escrita de Player Fantasy no GDD." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 1 — A Regra do Jogo | Fundamentos de Jogos Digitais</title>
+  <title>Aula 01 — O Círculo Mágico do Roguelite | Fundamentos de Jogos Digitais</title>
 
-  <!-- Fonts: Cinzel (títulos, romana/serifada clássica) + Crimson Text (leitura confortável) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -18,175 +17,213 @@
   <link rel="stylesheet" href="../css/aula.css" />
 </head>
 <body>
-
-  <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
   <header class="lesson-header">
     <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
       <span aria-hidden="true">←</span> Voltar
     </a>
     <div class="lesson-header__titles">
       <p class="lesson-header__eyebrow">Fundamentos de Jogos Digitais</p>
-      <h1 class="lesson-header__title">AULA 1: A REGRA DO JOGO <span class="accent">(UNPLUGGED)</span></h1>
+      <h1 class="lesson-header__title">AULA 01: O CÍRCULO MÁGICO DO <span class="accent">ROGUELITE</span></h1>
     </div>
   </header>
 
-  <!-- Divisor ornamentado -->
   <div class="ornate-divider" aria-hidden="true">
     <span class="ornate-divider__line"></span>
     <span class="ornate-divider__gem">◆</span>
     <span class="ornate-divider__line"></span>
   </div>
 
-  <!-- ========== SISTEMA DE ABAS ========== -->
   <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
-    <button
-      class="tab is-active"
-      type="button"
-      id="tab-theory"
-      data-tab="theory"
-      role="tab"
-      aria-selected="true"
-      aria-controls="theory"
-    >
-      I. Teoria e Manuais
+    <button class="tab is-active" type="button" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+      I. Fundamentos
     </button>
-    <button
-      class="tab"
-      type="button"
-      id="tab-simulation"
-      data-tab="simulation"
-      role="tab"
-      aria-selected="false"
-      aria-controls="simulation"
-    >
-      II. Simulação Interativa
+    <button class="tab" type="button" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+      II. Oficina na Aula
+    </button>
+    <button class="tab" type="button" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+      III. Slides
     </button>
   </nav>
 
   <main class="lesson-main">
-
-    <!-- ========== ABA I: TEORIA E MANUAIS ========== -->
-    <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-theory">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel">
       <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Tópico da Ementa: Conceitos de jogos e Ontologia do Jogo</p>
 
-        <h2 class="lesson-title">A Experiência Nasce da Regra</h2>
+        <h2 class="lesson-title">Quando a morte vira parte do jogo?</h2>
         <p>
-          Toda decisão de design começa com uma restrição. A <strong>munição infinita</strong>
-          transforma um corredor em um palco de ação pura: o jogador não pensa, ele executa,
-          disparando sem custo algum. Agora remova essa abundância — limite o sistema a
-          <strong>uma única bala no tambor</strong> — e o mesmo corredor se torna um altar de tensão.
-          O terror não nasce da escuridão do cenário, mas da aritmética da escassez. A regra não é
-          apenas um manual de instruções: ela é o verdadeiro motor da emoção.
+          No roguelite, a morte não é somente punição: ela encerra a corrida atual, preserva leitura do sistema e prepara
+          um novo retorno. Esse ciclo transforma falha em ritmo de aprendizagem.
         </p>
 
-        <h2 class="lesson-title">O Motor do Game Design: Framework MDA</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>O que termina</h3>
+            <p>A corrida atual: vida, recursos e build local se desfazem.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>O que continua</h3>
+            <p>O aprendizado: padrões, hipóteses e domínio do espaço.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>O que muda</h3>
+            <p>A leitura de risco: a mesma sala vira experimento.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Círculo Mágico e tensão consentida</h2>
         <p>
-          Para projetar experiências consistentes, os designers recorrem ao <strong>Framework MDA</strong>
-          — uma ponte estrutural que traduz código frio em sentimento humano. Ele organiza o jogo
-          em três camadas interdependentes, como os três andares de um mesmo templo:
+          Entrar em um jogo é aceitar temporariamente um contrato de regras. Dentro desse círculo, o risco se torna legível:
+          o jogador entende causa e consequência, aceita a perda e deseja tentar de novo.
         </p>
 
-        <h3 class="lesson-subtitle">Mecânica — A Anatomia do Sistema</h3>
+        <div class="quote-block">
+          <p>"Se a morte parece arbitrária, o círculo se rompe. Se a morte parece instrutiva, o jogador retorna."</p>
+        </div>
+
+        <h2 class="lesson-title">Game Feel em vocabulário MDA</h2>
         <p>
-          São as regras matemáticas, as restrições de espaço e os dados que sustentam o jogo por
-          baixo da superfície. Aqui residem os limites de vida, a velocidade de movimento, o custo
-          de uma ação e o tamanho do mapa. A mecânica responde a uma única pergunta:
-          <em>o que o sistema permite?</em>
+          Pequenos números criam grandes sensações: aceleração, atrito, gravidade e velocidade alteram a resposta corporal.
+          No MDA, valor numérico é mecânica, movimento percebido é dinâmica e fantasia corporal é estética.
         </p>
+
         <ul class="lesson-list">
-          <li>Regras de pontuação (ex.: 1 engrenagem coletada = 10 pontos)</li>
-          <li>Restrições de espaço (ex.: corredor de apenas 3 unidades de largura)</li>
-          <li>Dados de estado (ex.: energia, tempo restante, inventário)</li>
+          <li>Aceleração: resposta imediata ou preparação.</li>
+          <li>Velocidade máxima: escala de agência no espaço.</li>
+          <li>Atrito/desaceleração: precisão versus deslizamento.</li>
+          <li>Gravidade/impulso: queda, risco e recuperação.</li>
         </ul>
 
-        <h3 class="lesson-subtitle">Dinâmica — A Regra em Movimento</h3>
-        <p>
-          Quando o jogador colide com as mecânicas, comportamentos emergem que nenhum designer
-          escreveu diretamente no código. A dinâmica é <em>o que acontece quando se joga</em>:
-          o jogador aprende a desviar, arquiteta uma rota de fuga, hesita antes de um risco. Ela nasce
-          do atrito entre a regra fixa e a agência viva de quem joga.
-        </p>
-
-        <h3 class="lesson-subtitle">Estética — A Engenharia da Emoção</h3>
-        <p>
-          É a resposta emocional provocada pela dinâmica em ação: medo, triunfo, curiosidade, alívio.
-          A estética responde à pergunta final — <em>por que o jogador se importa?</em> — e costuma
-          ser descrita por taxonomias como Desafio (superação), Fantasia (imersão narrativa) e
-          Descoberta (exploração de território desconhecido).
-        </p>
-
-        <!-- Placeholder de Imagem -->
-        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: O Cabo de Guerra do Design — Designer vs Jogador">
-          🖼️ [ Inserir Imagem Aqui: O Cabo de Guerra do Design (Designer vs Jogador) ]
+        <div class="censored-card" data-gate="aula1_referencias" data-default="locked">
+          <div class="censored-card__veil" aria-hidden="true">CENSURADO · AGUARDANDO LIBERAÇÃO DO ADM</div>
+          <div class="censored-card__content">
+            <h3 class="lesson-subtitle">Referências essenciais da aula</h3>
+            <p>[15, 37, 52] Círculo Mágico e fronteiras normativas do jogo.</p>
+            <p>[85] Roguelite e tensão consentida no ciclo morrer-aprender-retornar.</p>
+            <p>[17, 30, 107] CharacterBody2D e parâmetros de game feel observáveis no Inspector.</p>
+          </div>
         </div>
 
-        <h2 class="lesson-title">O Desafio Unplugged: Robô vs Monstro</h2>
-        <p>
-          Para provar que o MDA existe fora de qualquer engine, propomos um exercício de papel e
-          caneta: um <strong>Robô deve atravessar um mapa desenhado coletando engrenagens</strong>,
-          enquanto um <strong>Monstro rabiscado à mão o persegue</strong> uma casa por turno em
-          direção à sua posição atual.
-        </p>
-
-        <h3 class="lesson-subtitle">Gargalos e Rotas de Fuga</h3>
-        <p>
-          A mecânica é deliberadamente enxuta: o Robô avança 3 casas por turno; o Monstro, apenas 2.
-          O mapa é desenhado com <strong>corredores estreitos (gargalos)</strong> — pontos onde um
-          encontro é quase inevitável — e <strong>rotas alternativas mais longas</strong>, porém
-          seguras. A dinâmica emerge exatamente nessa escolha: arriscar o gargalo para economizar
-          turnos, ou desviar pela rota de fuga e perder tempo precioso. A estética resultante é a
-          tensão da perseguição e o alívio calculado de cada decisão correta.
-        </p>
-
-        <!-- Placeholder de Imagem -->
-        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Arquitetura do Mapa, Gargalos e Rotas de Fuga">
-          🖼️ [ Inserir Imagem Aqui: Arquitetura do Mapa, Gargalos e Rotas de Fuga ]
+        <div class="censored-card" data-gate="aula1_nota_instrutor" data-default="locked">
+          <div class="censored-card__veil" aria-hidden="true">CENSURADO · AGUARDANDO LIBERAÇÃO DO ADM</div>
+          <div class="censored-card__content">
+            <h3 class="lesson-subtitle">Nota do instrutor (liberação coletiva)</h3>
+            <p>
+              Protocolo de mesa: mudar uma variável, jogar 30 segundos, registrar, restaurar e comparar.
+              O foco é verbalizar sensação com verbos de ação: entrar, arriscar e retornar.
+            </p>
+          </div>
         </div>
 
+        <section id="admin-gates" class="admin-gates" hidden>
+          <h3 class="lesson-subtitle">Controles de Censura (ADM)</h3>
+          <p class="admin-gates__hint">Ao liberar um bloco, todos os alunos passam a enxergar o conteúdo imediatamente.</p>
+          <div class="admin-gates__buttons">
+            <button type="button" class="lesson-cta lesson-cta--ghost" data-gate-toggle="aula1_referencias">Liberar Referências</button>
+            <button type="button" class="lesson-cta lesson-cta--ghost" data-gate-toggle="aula1_nota_instrutor">Liberar Nota do Instrutor</button>
+          </div>
+        </section>
       </article>
     </section>
 
-    <!-- ========== ABA II: SIMULAÇÃO INTERATIVA ========== -->
-    <section id="simulation" class="tab-panel" role="tabpanel" aria-labelledby="tab-simulation">
-      <div class="hades-frame simulation-panel">
-
-        <p class="simulation-instructions">
-          <strong>Clique na tela</strong> para iniciar a contagem regressiva. O Monstro nasce
-          próximo ao Robô, mas dorme por <strong>1 segundo</strong> — use esse tempo para fugir.
-          Depois disso, ele desperta e persegue o jogador pelo labirinto com um algoritmo de
-          <strong>pathfinding (BFS)</strong>, contornando as paredes de verdade. Use as
-          <strong>Setas do Teclado</strong> (↑ ↓ ← →) ou <strong>WASD</strong> para escapar pelos
-          gargalos e rotas de fuga e alcançar o <strong>núcleo dourado</strong> no extremo oposto
-          do labirinto — esse é o seu objetivo de vitória. Cada tentativa gera um
-          <strong>labirinto novo</strong>.
+    <section id="oficina" class="tab-panel" role="tabpanel">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Prática na Godot (100 min): laboratório de Game Feel</h2>
+        <p>
+          A interação fica nesta própria página: altere os parâmetros abaixo para sentir como o herói muda de comportamento.
+          Depois leve as hipóteses para o projeto base na Godot com CharacterBody2D.
         </p>
 
-        <!-- Moldura dourada do canvas -->
-        <div class="canvas-frame">
-          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: labirinto procedural com Robô fugindo do Monstro em busca do núcleo dourado no extremo oposto"></canvas>
+        <div class="feel-layout">
+          <section class="feel-controls" aria-label="Parâmetros de game feel">
+            <label> Aceleração
+              <input id="param-accel" type="range" min="300" max="1800" step="50" value="900" />
+              <span id="param-accel-value">900</span>
+            </label>
+            <label> Atrito / Desaceleração
+              <input id="param-friction" type="range" min="300" max="2400" step="50" value="1250" />
+              <span id="param-friction-value">1250</span>
+            </label>
+            <label> Gravidade
+              <input id="param-gravity" type="range" min="300" max="2200" step="50" value="1200" />
+              <span id="param-gravity-value">1200</span>
+            </label>
+            <label> Velocidade máxima
+              <input id="param-maxspeed" type="range" min="80" max="420" step="10" value="220" />
+              <span id="param-maxspeed-value">220</span>
+            </label>
+            <label> Multiplicador de corrida rápida
+              <input id="param-sprint" type="range" min="1" max="2.3" step="0.1" value="1.5" />
+              <span id="param-sprint-value">1.5x</span>
+            </label>
+            <div class="feel-actions">
+              <button type="button" id="btn-baseline" class="lesson-cta lesson-cta--ghost">Restaurar baseline</button>
+              <button type="button" id="btn-reflect" class="lesson-cta">Gerar leitura da sensação</button>
+            </div>
+          </section>
+
+          <section class="feel-playground" aria-label="Playground de movimento">
+            <canvas id="feel-canvas" width="640" height="280"></canvas>
+            <p class="simulation-legend">Mover: A/D ou ←/→ · Pular: W/↑/Espaço · Segurar Shift: corrida rápida</p>
+            <p id="feel-reading" class="feel-reading">Aguardando experimento...</p>
+          </section>
         </div>
 
-        <p class="simulation-legend">
-          <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Robô (Jogador)
-          &nbsp;&nbsp;&nbsp;
-          <span class="legend-dot legend-dot--enemy" aria-hidden="true"></span> Monstro (dorme 1s, depois persegue com BFS — 15% mais lento)
-          &nbsp;&nbsp;&nbsp;
-          <span class="legend-dot legend-dot--goal" aria-hidden="true"></span> Núcleo Dourado (objetivo de vitória)
-        </p>
+        <h3 class="lesson-subtitle">Integração documental (GDD)</h3>
+        <p>Escreva o primeiro parágrafo da Player Fantasy usando os verbos entrar, arriscar e retornar.</p>
+        <textarea id="gdd-text" class="gdd-text" rows="8" placeholder="No círculo mágico de [nome], o jogador vive a fantasia de...&#10;&#10;entra... arrisca... retorna..."></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta lesson-cta--ghost">Salvar parágrafo</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+        </div>
 
-      </div>
+        <div class="completion-box">
+          <button type="button" id="btn-complete-aula" class="lesson-cta" disabled>Preencha e salve o parágrafo para revelar código</button>
+          <div class="reward-codes" id="reward-codes" hidden>
+            <h3 class="lesson-subtitle">Código da Oferenda Desbloqueado</h3>
+            <p>Use no Altar do Salão dos Heróis para receber a recompensa da Aula 01.</p>
+            <p><strong id="reward-code-value">Carregando...</strong></p>
+            <p id="reward-code-meta"></p>
+          </div>
+        </div>
+      </article>
     </section>
 
+    <section id="slides" class="tab-panel" role="tabpanel">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 01</h2>
+        <p>
+          Visualização online do material e download dos arquivos originais.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 01" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 01" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
   </main>
 
   <footer class="lesson-footer">
-    <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 1 de N</p>
+    <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 01</p>
   </footer>
 
-  <!-- Script da página: tabs + simulação em Canvas API nativo (sem dependências externas) -->
-  <script src="../js/aula1.js"></script>
+  <script type="module" src="../js/aula1.js"></script>
 </body>
 </html>
