@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS sessions (
 ### Tabela `users` (existente)
 ```
 id: int4 PRIMARY KEY
+full_name: text (nome real do aluno)
 username: varchar
 password_hash: varchar (formato: salt:derivedHex com scrypt)
 password: varchar (legacy, plaintext - auto-migrado para hash)
@@ -114,6 +115,22 @@ xp: int4
 **Frontend**:
 1. Armazena em localStorage: `{token, name, role, username}`
 2. Redireciona para dashboard
+
+### POST `/api/auth` → Cadastro
+```javascript
+{
+  action: 'register',
+  fullName: 'Nome Completo do Aluno',
+  username: 'login_do_aluno',
+  password: 'senha'
+}
+```
+
+**Backend**:
+1. Valida `fullName`, `username` e senha
+2. Salva em `users.full_name` e `users.username`
+3. Cria sessão em `sessions`
+4. Retorna `user.name` priorizando nome real
 
 ### GET `/api/auth?token=XXX` → Validação
 **Backend**:
@@ -155,6 +172,8 @@ xp: int4
 - **[js/auth.js](../js/auth.js)**: Lógica de formulário e evento de submit
 - **[js/api.js](../js/api.js)**: Cliente HTTP e gerenciador de sessão
 - **[js/dashboard.js](../js/dashboard.js)**: Validação de sessão e proteção
+- **[pages/souls.html](../pages/souls.html)**: Página admin de alunos/almas registradas
+- **[js/souls.js](../js/souls.js)**: Renderização dos cards com avatar e métricas
 
 ---
 

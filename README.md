@@ -17,11 +17,14 @@ A interface segue uma estética **cinematográfica (Hades-like)**: dark mode pro
 O projeto está em fase **funcional**, com os seguintes fluxos já implementados e validados:
 
 - ✅ Autenticação (login/cadastro) com sessão via token opaco
+- ✅ Cadastro com nome completo real (`full_name`) + username de login
 - ✅ Proteção de rotas (páginas protegidas redirecionam sem sessão válida)
 - ✅ Dashboard do aluno ("Salão dos Heróis") com XP, nível, conquistas e avatar
 - ✅ Sistema de XP e resgate de código ("Oferenda ao Estige")
-- ✅ Painel administrativo (geração de códigos, listagem de usuários) para `role: admin`
+- ✅ Painel administrativo (geração de códigos e visão de alunos) para `role: admin`
+- ✅ Página administrativa dedicada de alunos (`/pages/souls.html`) com avatar e métricas
 - ✅ Troca de avatar persistida no backend via `/api/progress`
+- ✅ Tracking de visualização de aula por aluno (`lesson_views`) para relatórios
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
 - ✅ Módulo 01 — "A Regra do Jogo" (teoria MDA + simulação interativa em canvas)
 - ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api` sem depender do Vercel CLI
@@ -63,9 +66,11 @@ fundamentos-de-jogos-digitais/
 │   ├── style.css                  # Menu principal
 │   ├── auth.css                   # Tela de login/cadastro
 │   ├── dashboard.css              # Salão dos Heróis
-│   └── aula.css                   # Páginas de aula
+│   ├── aula.css                   # Páginas de aula
+│   └── souls.css                  # Página admin de almas/alunos
 ├── db/
-│   └── setup.sql                  # Schema de referência (users, sessions)
+│   ├── setup.sql                  # Schema de referência completo
+│   └── migrate-2026-09-01-fullname-lesson-views.sql # Migração aditiva
 ├── docs/
 │   └── vercel-dev-troubleshoot.md # Guia de troubleshooting de autenticação
 ├── js/
@@ -74,11 +79,13 @@ fundamentos-de-jogos-digitais/
 │   ├── auth.js                    # Lógica do formulário de login/cadastro
 │   ├── dashboard.js               # Lógica do painel do aluno
 │   ├── gamefeel.js                # Efeitos visuais (flash, shake, level up)
-│   └── aula1.js                   # Simulação interativa da Aula 1
+│   ├── aula1.js                   # Simulação interativa da Aula 1
+│   └── souls.js                   # Listagem visual de alunos (admin)
 ├── pages/
 │   ├── auth.html
 │   ├── dashboard.html
-│   └── aula1.html
+│   ├── aula1.html
+│   └── souls.html
 ├── tests/
 │   └── login-check.mjs            # Teste de fumaça do fluxo de login
 ├── .gitignore
@@ -121,7 +128,9 @@ fundamentos-de-jogos-digitais/
    SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
    ```
 
-3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas `users` e `sessions` e semear o usuário administrador.
+3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`) e semear o usuário administrador.
+
+4. Se seu banco já existia antes dessas mudanças, execute também [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para adicionar `full_name` e `lesson_views` com backfill seguro.
 
    > ⚠️ A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md) para o troubleshooting completo desse ponto).
 
@@ -156,7 +165,22 @@ Executa `node --check` em todos os módulos de front-end e das rotas de API.
 | POST   | `/api/auth`              | `login`, `register`, `logout`          |
 | GET    | `/api/auth?token=...`    | Valida sessão ativa                    |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
-| POST   | `/api/progress`          | `redeem`, `avatar`, `listCodes` (admin), `listUsers` (admin) |
+| POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin) |
+
+### Payload de cadastro (atual)
+
+`POST /api/auth` com `action: register`:
+
+```json
+{
+   "action": "register",
+   "fullName": "Nome Completo do Aluno",
+   "username": "username_login",
+   "password": "senha"
+}
+```
+
+O login continua por `username`, mas as respostas da API priorizam o nome real do aluno.
 
 ## Testes
 
