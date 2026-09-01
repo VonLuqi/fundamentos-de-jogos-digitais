@@ -166,8 +166,35 @@ body {
   color: var(--hades-gold-bright);
 }
 
-.souls-grid {
+.report-tabs {
+  display: flex;
+  gap: 0.5rem;
   margin-top: 1.1rem;
+  border-bottom: 1px solid rgba(127, 97, 48, 0.65);
+}
+
+.report-tab {
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--hades-text-dim);
+  cursor: pointer;
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0.65rem 0.85rem;
+  text-transform: uppercase;
+}
+
+.report-tab:hover,
+.report-tab.is-active {
+  border-bottom-color: var(--hades-gold);
+  color: var(--hades-gold-bright);
+}
+
+.souls-grid {
+  margin-top: 1rem;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1rem;
@@ -263,6 +290,53 @@ body {
   font-family: var(--font-title);
   font-size: 0.62rem;
   letter-spacing: 0.05em;
+}
+
+.activities-list {
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.activity-card {
+  border: 1px solid rgba(127, 97, 48, 0.72);
+  background: linear-gradient(150deg, rgba(19, 16, 24, 0.95), rgba(26, 20, 30, 0.95));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  padding: 1rem;
+  transform: translateY(14px);
+  opacity: 0;
+  animation: riseIn 420ms ease forwards;
+}
+
+.activity-card__title,
+.activity-card__details,
+.activity-card__paragraph {
+  margin: 0;
+}
+
+.activity-card__title {
+  color: var(--hades-gold-bright);
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.activity-card__details {
+  color: var(--hades-text-dim);
+  font-size: 0.98rem;
+  margin-top: 0.35rem;
+}
+
+.activity-card__paragraph {
+  border-left: 2px solid var(--hades-blood);
+  color: var(--hades-text);
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin-top: 0.75rem;
+  padding-left: 0.75rem;
+  white-space: pre-wrap;
 }
 
 .loading,

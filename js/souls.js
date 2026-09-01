@@ -148,16 +148,75 @@ function renderUsers(users) {
     });
 }
 
+function buildActivity(activity, index) {
+  const item = document.createElement('article');
+  item.className = 'activity-card';
+  item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+
+  const title = document.createElement('p');
+  title.className = 'activity-card__title';
+  title.textContent = 'GDD - Integracao documental';
+
+  const details = document.createElement('p');
+  details.className = 'activity-card__details';
+  details.textContent = `${activity.fullName} (@${activity.username}) | ${activity.turma || 'Turma nao informada'} | Atualizado em ${formatDate(activity.updatedAt)}`;
+
+  const paragraph = document.createElement('p');
+  paragraph.className = 'activity-card__paragraph';
+  paragraph.textContent = activity.paragraph;
+
+  item.append(title, details, paragraph);
+  return item;
+}
+
+function renderActivities(activities) {
+  const list = document.getElementById('activities-list');
+  if (!list) return;
+
+  list.innerHTML = '';
+  if (!activities.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'Nenhuma atividade GDD enviada ainda.';
+    list.appendChild(empty);
+    return;
+  }
+
+  activities.forEach((activity, index) => {
+    list.appendChild(buildActivity(activity, index));
+  });
+}
+
+function setActiveTab(tabName) {
+  const usersTab = document.getElementById('tab-users');
+  const activitiesTab = document.getElementById('tab-activities');
+  const usersPanel = document.getElementById('report-users');
+  const activitiesPanel = document.getElementById('report-activities');
+  const showingActivities = tabName === 'activities';
+
+  usersTab?.classList.toggle('is-active', !showingActivities);
+  usersTab?.setAttribute('aria-selected', String(!showingActivities));
+  activitiesTab?.classList.toggle('is-active', showingActivities);
+  activitiesTab?.setAttribute('aria-selected', String(showingActivities));
+  if (usersPanel) usersPanel.hidden = showingActivities;
+  if (activitiesPanel) activitiesPanel.hidden = !showingActivities;
+}
+
 async function loadSouls() {
   const grid = document.getElementById('souls-grid');
+  const activitiesList = document.getElementById('activities-list');
   if (grid) {
     grid.innerHTML = '<p class="loading">Consultando o submundo...</p>';
   }
+  if (activitiesList) {
+    activitiesList.innerHTML = '<p class="loading">Consultando atividades...</p>';
+  }
 
-  const { users } = await listUsers(currentToken);
+  const { users, activities } = await listUsers(currentToken);
   const students = (users || []).filter((user) => user.role !== 'admin');
   setSummary(students);
   renderUsers(students);
+  renderActivities(activities || []);
 }
 
 async function init() {
@@ -193,6 +252,9 @@ async function init() {
       showApiWarning(error instanceof ApiError ? error.message : 'Falha ao atualizar a lista de almas.');
     }
   });
+
+  document.getElementById('tab-users')?.addEventListener('click', () => setActiveTab('users'));
+  document.getElementById('tab-activities')?.addEventListener('click', () => setActiveTab('activities'));
 }
 
 document.addEventListener('DOMContentLoaded', init);

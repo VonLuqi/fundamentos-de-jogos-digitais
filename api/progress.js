@@ -533,6 +533,16 @@ export default async function handler(req, res) {
         .from(USERS_TABLE)
         .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, created_at');
 
+      let paragraphRows = [];
+      const { data: paragraphs, error: paragraphsError } = await supabase
+        .from(LESSON_PARAGRAPHS_TABLE)
+        .select('user_id, lesson_id, paragraph, updated_at')
+        .order('updated_at', { ascending: false });
+
+      if (!paragraphsError) {
+        paragraphRows = paragraphs || [];
+      }
+
       let viewRows = [];
       const { data: views, error: viewsError } = await supabase
         .from(LESSON_VIEWS_TABLE)
@@ -560,7 +570,23 @@ export default async function handler(req, res) {
         viewedLessons: viewsByUser.get(rest.id) || [],
       }));
 
-      return res.status(200).json({ ok: true, users: normalized });
+      const usersById = new Map(normalized.map((item) => [item.id, item]));
+      const activities = paragraphRows
+        .map((row) => {
+          const activityUser = usersById.get(row.user_id);
+          if (!activityUser || activityUser.role === 'admin') return null;
+          return {
+            lessonId: row.lesson_id,
+            paragraph: row.paragraph,
+            updatedAt: row.updated_at,
+            fullName: activityUser.fullName,
+            username: activityUser.username,
+            turma: activityUser.turma,
+          };
+        })
+        .filter(Boolean);
+
+      return res.status(200).json({ ok: true, users: normalized, activities });
     }
 
     return res.status(400).json({ ok: false, error: 'Ação desconhecida.' });

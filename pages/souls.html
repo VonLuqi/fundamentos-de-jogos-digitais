@@ -60,8 +60,21 @@
       </article>
     </section>
 
-    <section class="souls-grid" id="souls-grid" aria-live="polite">
-      <p class="loading">Consultando o submundo...</p>
+    <div class="report-tabs" role="tablist" aria-label="Seções do relatório">
+      <button class="report-tab is-active" id="tab-users" type="button" role="tab" aria-selected="true" aria-controls="report-users">Alunos</button>
+      <button class="report-tab" id="tab-activities" type="button" role="tab" aria-selected="false" aria-controls="report-activities">Atividades</button>
+    </div>
+
+    <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
+      <div class="souls-grid" id="souls-grid" aria-live="polite">
+        <p class="loading">Consultando o submundo...</p>
+      </div>
+    </section>
+
+    <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
+      <div class="activities-list" id="activities-list" aria-live="polite">
+        <p class="loading">Consultando atividades...</p>
+      </div>
     </section>
   </main>
 
