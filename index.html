@@ -43,10 +43,11 @@
 
     <!-- ========== PAINEL ESQUERDO: STATUS DO JOGADOR (dinâmico via API) ========== -->
     <aside class="player-panel" id="player-panel" aria-label="Status do jogador">
-      <!-- Retrato do jogador (moldura dupla dourada); ganha coroa/aura se admin -->
+      <!-- Retrato do jogador (moldura dupla dourada) -->
       <div class="player-portrait" id="player-portrait" role="img" aria-label="Retrato do jogador">
-        <span class="player-portrait__crown" aria-hidden="true">&#9819;</span>
-        <span class="player-portrait__glyph" id="player-glyph">&#9670;</span>
+        <!-- Imagem resolvida dinamicamente via loadAvatarImage() em js/main.js
+             (mesma lógica/pasta assets/avatars/ usada no Salão dos Heróis). -->
+        <img class="player-portrait__glyph" id="player-glyph" alt="Avatar do jogador" />
       </div>
 
       <!-- Identidade (preenchida pelo js/main.js com o usuário logado) -->
@@ -77,63 +78,13 @@
           </div>
         </dl>
 
-        <!-- Atalho para o painel completo -->
-        <a class="player-panel__link" href="./pages/dashboard.html">Ver Salão dos Heróis →</a>
       </div>
     </aside>
 
     <!-- ========== PAINEL CENTRAL: SELEÇÃO DE FASES ========== -->
     <section class="stage-select" aria-label="Seleção de aulas">
       <ul class="stage-select__list">
-
-        <!-- CARD 1: DESBLOQUEADO E EM DESTAQUE -->
-        <li>
-          <button class="stage-card stage-card--featured" type="button" data-stage="aula1" data-unlocked="true">
-            <span class="stage-card__number">01</span>
-            <span class="stage-card__content">
-              <span class="stage-card__title">A Regra do Jogo</span>
-              <span class="stage-card__subtitle">O Framework MDA e Mecânicas</span>
-            </span>
-            <span class="stage-card__reward">
-              <span class="stage-card__xp">+20 XP</span>
-            </span>
-          </button>
-        </li>
-
-        <!-- CARD 2: BLOQUEADO -->
-        <li>
-          <button class="stage-card" type="button" data-stage="aula-2" data-unlocked="false" disabled>
-            <span class="stage-card__number">02</span>
-            <span class="stage-card__content">
-              <span class="stage-card__title">????????</span>
-              <span class="stage-card__subtitle">Requisito: Concluir Aula Anterior</span>
-            </span>
-            <span class="stage-card__lock" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </span>
-          </button>
-        </li>
-
-        <!-- CARD 3: BLOQUEADO -->
-        <li>
-          <button class="stage-card" type="button" data-stage="aula-3" data-unlocked="false" disabled>
-            <span class="stage-card__number">03</span>
-            <span class="stage-card__content">
-              <span class="stage-card__title">????????</span>
-              <span class="stage-card__subtitle">Requisito: Concluir Aula Anterior</span>
-            </span>
-            <span class="stage-card__lock" aria-hidden="true">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-              </svg>
-            </span>
-          </button>
-        </li>
-
+        <!-- Preenchido via js/main.js (catálogo dinâmico de aulas) -->
       </ul>
     </section>
 

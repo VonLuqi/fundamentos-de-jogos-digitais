@@ -202,14 +202,27 @@ body {
 .avatar-frame:active {
   transform: scale(0.96);
 }
+/* Enquanto a troca está em andamento (botão desabilitado via JS),
+   suprime hover/active e o cursor de "clicável" até a animação
+   de flash terminar e o botão ser reabilitado. */
+.avatar-frame:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+.avatar-frame:disabled:hover,
+.avatar-frame:disabled:active {
+  transform: none;
+  box-shadow: var(--shadow-gold-glow), inset 0 0 22px rgba(0, 0, 0, 0.65);
+}
 /* JUICE: ao trocar o avatar, um flash dourado confirma a ação */
 .avatar-frame.is-swapping .avatar-frame__glyph {
   animation: avatarFlash 380ms ease-out both;
 }
 .avatar-frame__glyph {
-  font-size: 3.2rem;
-  color: var(--hades-gold-bright);
-  text-shadow: 0 0 14px rgba(242, 213, 154, 0.65);
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: 50%;
   user-select: none;
 }
 .avatar-frame__hint {
@@ -232,6 +245,16 @@ body {
 }
 .avatar-frame:hover .avatar-frame__hint {
   opacity: 1;
+}
+
+.avatar-frame__counter {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dim, var(--hades-gold-bright));
+  opacity: 0.85;
 }
 
 .profile-panel__name {
@@ -459,6 +482,16 @@ body {
   color: var(--hades-text-muted);
 }
 
+.achievement-empty {
+  grid-column: 1 / -1;
+  padding: 0.95rem 1rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--hades-text-dim);
+  border: 1px dashed var(--hades-gold-dark);
+  background: rgba(24, 18, 26, 0.7);
+}
+
 /* ---------- Lista de Aulas ---------- */
 .lessons-list {
   list-style: none;
@@ -541,6 +574,15 @@ body {
 .lesson-row.is-completed .lesson-row__action {
   color: var(--hades-gold-bright);
   border-color: var(--hades-gold);
+}
+
+.lesson-empty {
+  padding: 0.9rem 1rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--hades-text-dim);
+  border: 1px dashed var(--hades-gold-dark);
+  background: rgba(24, 18, 26, 0.7);
 }
 
 /* ============================================================
@@ -829,6 +871,12 @@ body {
   box-shadow: var(--shadow-blood-glow);
 }
 
+/* `hidden` deve sempre vencer regras de display locais. */
+.master-badge[hidden],
+.admin-tools[hidden] {
+  display: none !important;
+}
+
 /* Ferramentas do Admin */
 .admin-tools {
   display: flex;
@@ -890,10 +938,15 @@ body {
   padding: 1.5rem;
   background: rgba(6, 4, 8, 0.82);
   opacity: 0;
+  pointer-events: none;
   transition: opacity var(--transition-base);
+}
+.scroll-modal[hidden] {
+  display: none;
 }
 .scroll-modal.is-open {
   opacity: 1;
+  pointer-events: auto;
 }
 .scroll-modal__parchment {
   width: min(560px, 100%);

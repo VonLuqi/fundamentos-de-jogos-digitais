@@ -74,9 +74,15 @@
       <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
         <!-- Coroa exibida somente para role=admin (inserida/escondida via CSS) -->
         <span class="avatar-frame__crown" aria-hidden="true">♛</span>
-        <span class="avatar-frame__glyph" id="avatar-glyph" aria-hidden="true">◆</span>
+        <!-- Imagem do avatar: o src é resolvido dinamicamente via JS
+             (ver avatarCandidates()/AVATAR_EXTENSIONS em js/api.js),
+             que tenta várias extensões até achar o arquivo existente.
+             Coloque os arquivos de imagem em assets/avatars/
+             (ex.: avatar1.jpg, avatar2.png, avatar3.webp...). -->
+        <img class="avatar-frame__glyph" id="avatar-glyph" alt="Avatar do jogador" />
         <span class="avatar-frame__hint">Trocar avatar</span>
       </button>
+      <p class="avatar-frame__counter" id="avatar-counter">Avatar 1 de 6</p>
 
       <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
       <p class="profile-panel__rank" id="profile-rank">—</p>
@@ -181,39 +187,12 @@
     <p id="api-warning-text"></p>
   </div>
 
-  <script type="module">
-    import { requireSession, clearSession, ROUTES } from '../js/api.js';
-    import { renderProfile, bindAltar, bindAdmin } from '../js/gamefeel.js';
+  <!-- Boot real do painel. Antes havia um script inline legado que
+       importava js/gamefeel.js — uma implementação primitiva que nunca
+       vinculava o listener do botão "Ver Almas Registradas" e usava
+       alert() estático em vez da API real. js/dashboard.js é a
+       implementação completa (modais, admin tools, avatar, altar). -->
+  <script type="module" src="../js/dashboard.js"></script>
 
-    (async function boot() {
-      try {
-        const payload = await requireSession();
-        if (!payload) return; // requireSession already redirected
-        const { user, session } = payload;
-        renderProfile(user);
-        if (user.role === 'admin') {
-          const adminTools = document.getElementById('admin-tools');
-          const masterBadge = document.getElementById('master-badge');
-          if (adminTools) adminTools.hidden = false;
-          if (masterBadge) masterBadge.hidden = false;
-        }
-        bindAltar();
-        bindAdmin();
-
-        const btnLogout = document.getElementById('btn-logout');
-        if (btnLogout) btnLogout.addEventListener('click', async () => {
-          try {
-            await fetch('/api/auth', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'logout', token: session.token }) });
-          } catch (e) {}
-          clearSession();
-          window.location.href = ROUTES.auth();
-        });
-      } catch (err) {
-        console.error(err);
-        // Em caso de falha perigosa, redireciona para login
-        window.location.href = ROUTES.auth();
-      }
-    })();
-  </script>
 </body>
 </html>

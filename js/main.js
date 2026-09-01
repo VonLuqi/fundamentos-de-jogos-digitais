@@ -14,7 +14,8 @@
 'use strict';
 
 import {
-  AVATAR_GLYPHS,
+  detectAvatarCount,
+  loadAvatarImage,
   ACHIEVEMENTS,
   LESSONS,
   LEVEL_XP_BASE,
@@ -42,6 +43,9 @@ async function init() {
   logBoot();
   setupScreenFade();
   setupFooterNav();
+  // Mesma varredura dinâmica de assets/avatars/ usada no Salão dos
+  // Heróis, disparada em paralelo com o guard de sessão.
+  const avatarCountReady = detectAvatarCount();
 
   let result;
   try {
@@ -60,6 +64,7 @@ async function init() {
   if (!result) return; // requireSession já redirecionou
 
   currentUser = result.user;
+  await avatarCountReady;
   renderPlayerPanel(currentUser);
   renderStageCards(currentUser);
 }
@@ -76,14 +81,16 @@ function logBoot() {
    2. PAINEL ESQUERDO DINÂMICO
    ============================================================ */
 function renderPlayerPanel(user) {
+  const isAdmin = user.role === 'admin';
   setText('player-name', user.name.toUpperCase());
-  setText('player-rank', rankForXp(user.xp));
-  setText('player-level', String(levelForXp(user.xp)));
-  setText('player-lessons', String(user.completedLessons.length));
-  setText('player-achievements', `${user.achievements.length} / ${ACHIEVEMENTS.length}`);
+  setText('player-rank', isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp));
+  setText('player-level', isAdmin ? '∞' : String(levelForXp(user.xp)));
+  setText('player-lessons', String(isAdmin ? LESSONS.length : user.completedLessons.length));
+  setText('player-achievements', `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${ACHIEVEMENTS.length}`);
 
   // Avatar escolhido no Salão dos Heróis
-  setText('player-glyph', AVATAR_GLYPHS[user.avatarIndex % AVATAR_GLYPHS.length]);
+  const playerGlyph = document.getElementById('player-glyph');
+  if (playerGlyph) loadAvatarImage(playerGlyph, user.avatarIndex);
 
   // Pele de Mestre: coroa + aura vermelha (CSS reage à classe)
   document.getElementById('player-panel')?.classList.toggle('is-admin', user.role === 'admin');
@@ -93,6 +100,13 @@ function renderPlayerPanel(user) {
   const text = document.getElementById('player-xp-text');
   const bar = fill?.closest('.xp-bar');
   if (fill && text && bar) {
+    if (isAdmin) {
+      text.textContent = '∞ / ∞ XP';
+      bar.setAttribute('aria-valuenow', String(LEVEL_XP_BASE));
+      fill.style.width = '100%';
+      return;
+    }
+
     const xpInLevel = xpWithinLevel(user.xp);
     const percent = Math.min((xpInLevel / LEVEL_XP_BASE) * 100, 100);
 
@@ -119,33 +133,60 @@ function setText(id, value) {
    3. CARDS DE AULA — destravados pelo progresso REAL
    ============================================================ */
 function renderStageCards(user) {
-  const cards = document.querySelectorAll('.stage-card');
+  const list = document.querySelector('.stage-select__list');
+  if (!list) return;
 
-  cards.forEach((card, index) => {
-    const lesson = LESSONS[index];
-    if (!lesson) return;
+  list.innerHTML = '';
+  if (LESSONS.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'stage-empty';
+    li.textContent = 'Nenhuma aula cadastrada ainda. Novos módulos serão adicionados em breve.';
+    list.appendChild(li);
+    return;
+  }
 
+  LESSONS.forEach((lesson, index) => {
     const completed = user.completedLessons.includes(lesson.id);
-    const previousDone = index === 0 || user.completedLessons.includes(LESSONS[index - 1].id);
-    const unlocked = completed || previousDone;
 
-    card.dataset.unlocked = String(unlocked);
-    card.disabled = !unlocked;
+    const li = document.createElement('li');
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = ['stage-card', index === 0 ? 'stage-card--featured' : '', completed ? 'is-completed' : '']
+      .filter(Boolean)
+      .join(' ');
     card.dataset.stage = lesson.id;
+    card.dataset.unlocked = 'true';
 
-    // Marca visualmente a aula já concluída
-    card.classList.toggle('is-completed', completed);
+    const number = document.createElement('span');
+    number.className = 'stage-card__number';
+    number.textContent = lesson.number;
 
-    const reward = card.querySelector('.stage-card__xp');
-    if (reward) {
-      reward.textContent = completed ? 'CONCLUÍDA' : `+${lesson.rewardXp} XP`;
-    }
+    const content = document.createElement('span');
+    content.className = 'stage-card__content';
 
-    if (unlocked) {
-      card.addEventListener('mouseenter', () => selectCard(card));
-      card.addEventListener('mouseleave', () => deselectCard(card));
-      card.addEventListener('click', () => enterStage(lesson.id));
-    }
+    const title = document.createElement('span');
+    title.className = 'stage-card__title';
+    title.textContent = lesson.title;
+
+    const subtitle = document.createElement('span');
+    subtitle.className = 'stage-card__subtitle';
+    subtitle.textContent = lesson.subtitle;
+    content.append(title, subtitle);
+
+    const rewardWrap = document.createElement('span');
+    rewardWrap.className = 'stage-card__reward';
+    const reward = document.createElement('span');
+    reward.className = 'stage-card__xp';
+    reward.textContent = completed ? 'CONCLUÍDA' : `+${lesson.rewardXp} XP`;
+    rewardWrap.appendChild(reward);
+
+    card.append(number, content, rewardWrap);
+    card.addEventListener('mouseenter', () => selectCard(card));
+    card.addEventListener('mouseleave', () => deselectCard(card));
+    card.addEventListener('click', () => enterStage(lesson.id));
+
+    li.appendChild(card);
+    list.appendChild(li);
   });
 }
 
@@ -165,7 +206,7 @@ function enterStage(stageId) {
   fade?.classList.add('is-active');
 
   window.setTimeout(() => {
-    window.location.href = ROUTES.lesson(stageId === 'aula1' ? 'aula1' : 'aula1');
+    window.location.href = ROUTES.lesson(stageId);
   }, FADE_DURATION);
 }
 

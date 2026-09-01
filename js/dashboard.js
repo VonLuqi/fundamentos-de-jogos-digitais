@@ -16,7 +16,10 @@
 'use strict';
 
 import {
-  AVATAR_GLYPHS,
+  detectAvatarCount,
+  getAvatarCount,
+  avatarSafeIndex,
+  loadAvatarImage,
   ACHIEVEMENTS,
   LESSONS,
   LEVEL_XP_BASE,
@@ -24,6 +27,7 @@ import {
   ApiError,
   requireSession,
   redeemCode,
+  generateCode,
   setAvatar,
   listCodes,
   listUsers,
@@ -42,16 +46,29 @@ let currentToken = null;
    1. RENDERIZAÇÃO DO PERFIL
    ============================================================ */
 function renderProfile(user) {
+  const isAdmin = user.role === 'admin';
   document.getElementById('profile-name').textContent = user.name;
-  document.getElementById('profile-rank').textContent = rankForXp(user.xp);
-  document.getElementById('level-value').textContent = String(levelForXp(user.xp));
-  document.getElementById('avatar-glyph').textContent =
-    AVATAR_GLYPHS[user.avatarIndex % AVATAR_GLYPHS.length];
-  document.getElementById('stat-lessons').textContent = String(user.completedLessons.length);
+  document.getElementById('profile-rank').textContent = isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp);
+  document.getElementById('level-value').textContent = isAdmin ? '∞' : String(levelForXp(user.xp));
+  const avatarImg = document.getElementById('avatar-glyph');
+  if (avatarImg) loadAvatarImage(avatarImg, user.avatarIndex);
+  updateAvatarCounter(user.avatarIndex);
+  document.getElementById('stat-lessons').textContent = String(isAdmin ? LESSONS.length : user.completedLessons.length);
   document.getElementById('stat-achievements').textContent =
-    `${user.achievements.length} / ${ACHIEVEMENTS.length}`;
+    `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${ACHIEVEMENTS.length}`;
 
   applyAdminSkin(user);
+}
+
+/**
+ * Atualiza o indicador textual "Avatar X de N" abaixo da moldura,
+ * mantendo o jogador ciente de qual avatar está selecionado dentro
+ * da sequência progressiva (1-based para leitura humana).
+ */
+function updateAvatarCounter(avatarIndex) {
+  const counter = document.getElementById('avatar-counter');
+  if (!counter) return;
+  counter.textContent = `Avatar ${avatarSafeIndex(avatarIndex) + 1} de ${getAvatarCount()}`;
 }
 
 /**
@@ -83,6 +100,13 @@ function renderXpBar(user, { fromZero = false } = {}) {
   const barEl = fillEl?.closest('.xp-bar');
   if (!fillEl || !textEl || !barEl) return;
 
+  if (user.role === 'admin') {
+    textEl.textContent = '∞ / ∞ XP';
+    barEl.setAttribute('aria-valuenow', String(LEVEL_XP_BASE));
+    fillEl.style.width = '100%';
+    return;
+  }
+
   const xpInLevel = xpWithinLevel(user.xp);
   const targetPercent = Math.min((xpInLevel / LEVEL_XP_BASE) * 100, 100);
 
@@ -110,8 +134,16 @@ function renderAchievements(user, highlightIds = []) {
   if (!grid) return;
 
   grid.innerHTML = '';
+  if (ACHIEVEMENTS.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'achievement-empty';
+    li.textContent = 'Nenhuma conquista cadastrada ainda.';
+    grid.appendChild(li);
+    return;
+  }
+
   ACHIEVEMENTS.forEach((ach, index) => {
-    const unlocked = user.achievements.includes(ach.id);
+    const unlocked = user.role === 'admin' || user.achievements.includes(ach.id);
     const justUnlocked = highlightIds.includes(ach.id);
 
     const li = document.createElement('li');
@@ -150,10 +182,17 @@ function renderLessons(user) {
   if (!list) return;
 
   list.innerHTML = '';
+  if (LESSONS.length === 0) {
+    const li = document.createElement('li');
+    li.className = 'lesson-empty';
+    li.textContent = 'Nenhuma aula cadastrada ainda.';
+    list.appendChild(li);
+    return;
+  }
+
   LESSONS.forEach((lesson, index) => {
     const completed = user.completedLessons.includes(lesson.id);
-    const previousDone = index === 0 || user.completedLessons.includes(LESSONS[index - 1].id);
-    const locked = !completed && !previousDone;
+    const locked = false;
 
     const li = document.createElement('li');
     li.className = ['lesson-row', locked ? 'is-locked' : '', completed ? 'is-completed' : '']
@@ -185,7 +224,7 @@ function renderLessons(user) {
       // Oferenda ao Estige (validada no servidor) — não por clique.
       const action = document.createElement('a');
       action.className = 'lesson-row__action';
-      action.href = ROUTES.lesson(lesson.id === 'aula1' ? 'aula1' : 'aula1');
+      action.href = ROUTES.lesson(lesson.id);
       action.textContent = completed ? 'Rever' : 'Iniciar';
       action.setAttribute('aria-label', `${completed ? 'Rever' : 'Iniciar'} ${lesson.title}`);
       li.append(number, body, action);
@@ -315,21 +354,37 @@ function initAvatarSwap() {
   if (!frame || !glyph) return;
 
   frame.addEventListener('click', async () => {
-    const nextIndex = (currentUser.avatarIndex + 1) % AVATAR_GLYPHS.length;
-
-    // Atualização otimista: a UI responde na hora (Game Feel),
-    // e o servidor confirma logo depois.
-    glyph.textContent = AVATAR_GLYPHS[nextIndex];
-    frame.classList.remove('is-swapping');
-    void frame.offsetHeight;
-    frame.classList.add('is-swapping');
-
+    if (frame.disabled) return; // evita corrida caso um clique anterior ainda esteja em andamento
+    frame.disabled = true;
     try {
-      const { user } = await setAvatar(currentToken, nextIndex);
-      currentUser = user;
-    } catch {
-      // Reverte se o servidor recusar.
-      glyph.textContent = AVATAR_GLYPHS[currentUser.avatarIndex % AVATAR_GLYPHS.length];
+      const previousIndex = currentUser.avatarIndex;
+      const nextIndex = (previousIndex + 1) % getAvatarCount();
+
+      // Só troca visualmente se a imagem do próximo índice realmente
+      // existir (qualquer extensão suportada) — evita que a troca
+      // "suma" o avatar ao cair num índice sem arquivo correspondente.
+      const loaded = await loadAvatarImage(glyph, nextIndex);
+      if (!loaded) {
+        loadAvatarImage(glyph, previousIndex); // garante que a imagem atual permaneça visível
+        return;
+      }
+      updateAvatarCounter(nextIndex);
+
+      frame.classList.remove('is-swapping');
+      void frame.offsetHeight;
+      frame.classList.add('is-swapping');
+
+      try {
+        const { user } = await setAvatar(currentToken, nextIndex);
+        currentUser = user;
+      } catch {
+        // Reverte se o servidor recusar.
+        currentUser = { ...currentUser, avatarIndex: previousIndex };
+        loadAvatarImage(glyph, previousIndex);
+        updateAvatarCounter(previousIndex);
+      }
+    } finally {
+      frame.disabled = false;
     }
   });
 }
@@ -373,13 +428,86 @@ function initScrollModal() {
    9. FERRAMENTAS DO ADMIN
    ============================================================ */
 function initAdminTools() {
+  const tools = document.getElementById('admin-tools');
+  if (currentUser?.role !== 'admin') {
+    if (tools) tools.hidden = true;
+    return;
+  }
+  if (tools) tools.hidden = false;
+
   const btnCodes = document.getElementById('btn-generate-codes');
   const btnSouls = document.getElementById('btn-list-souls');
 
   btnCodes?.addEventListener('click', async () => {
+    const wrapper = document.createElement('div');
+
+    const help = document.createElement('p');
+    help.className = 'scroll-modal__note';
+    help.textContent = 'Escolha a aula para gerar um código único de 7 caracteres.';
+    wrapper.appendChild(help);
+
+    const lessons = LESSONS;
+    if (lessons.length === 0) {
+      const noLessons = document.createElement('p');
+      noLessons.className = 'scroll-modal__note';
+      noLessons.textContent = 'Não há aulas cadastradas no sistema. Cadastre as novas aulas para habilitar a geração de códigos.';
+      wrapper.appendChild(noLessons);
+    }
+
+    lessons.forEach((lesson) => {
+      const row = document.createElement('div');
+      row.className = 'code-row';
+
+      const left = document.createElement('span');
+      left.className = 'code-row__code';
+      left.textContent = `${lesson.number} ${lesson.title}`;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'lesson-row__action';
+      button.textContent = 'Gerar';
+
+      button.addEventListener('click', async () => {
+        button.disabled = true;
+        const original = button.textContent;
+        button.textContent = 'Gerando...';
+        try {
+          const result = await generateCode(currentToken, lesson.id);
+          const { code } = result;
+
+          const codeBlock = document.createElement('div');
+          codeBlock.className = 'code-row';
+
+          const codeValue = document.createElement('span');
+          codeValue.className = 'code-row__code';
+          codeValue.textContent = code.code;
+
+          const codeMeta = document.createElement('span');
+          codeMeta.className = 'code-row__meta';
+          codeMeta.textContent = `${code.lessonTitle} — +${code.xp} XP • expira em 20 min`;
+
+          codeBlock.append(codeValue, codeMeta);
+          openScrollModal('Código Gerado', codeBlock);
+        } catch (error) {
+          const p = document.createElement('p');
+          p.textContent = error instanceof ApiError ? error.message : 'Falha ao gerar código.';
+          openScrollModal('Erro', p);
+        } finally {
+          button.disabled = false;
+          button.textContent = original;
+        }
+      });
+
+      row.append(left, button);
+      wrapper.appendChild(row);
+    });
+
     try {
       const { codes } = await listCodes(currentToken);
-      const wrapper = document.createElement('div');
+      const historyTitle = document.createElement('p');
+      historyTitle.className = 'scroll-modal__note';
+      historyTitle.textContent = 'Histórico recente de códigos gerados:';
+      wrapper.appendChild(historyTitle);
 
       codes.forEach((entry) => {
         const row = document.createElement('div');
@@ -391,24 +519,25 @@ function initAdminTools() {
 
         const meta = document.createElement('span');
         meta.className = 'code-row__meta';
-        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP`;
+        const status = entry.used ? 'USADO' : entry.expired ? 'EXPIRADO' : 'ATIVO';
+        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP • ${status}`;
 
         row.append(code, meta);
         wrapper.appendChild(row);
       });
-
+    } catch {
       const note = document.createElement('p');
       note.className = 'scroll-modal__note';
-      note.textContent = 'Entregue estes códigos aos alunos ao concluírem a aula correspondente.';
+      note.textContent = 'Histórico indisponível no momento, mas você ainda pode gerar novos códigos.';
       wrapper.appendChild(note);
-
-      openScrollModal('Códigos de Acesso', wrapper);
-    } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Falha ao consultar os códigos.';
-      const p = document.createElement('p');
-      p.textContent = message;
-      openScrollModal('Erro', p);
     }
+
+    const footerNote = document.createElement('p');
+    footerNote.className = 'scroll-modal__note';
+    footerNote.textContent = 'Cada código é único e fica vinculado à aula escolhida.';
+    wrapper.appendChild(footerNote);
+
+    openScrollModal('Gerar Código de Acesso', wrapper);
   });
 
   btnSouls?.addEventListener('click', async () => {
@@ -468,6 +597,9 @@ function showApiWarning(message) {
    ============================================================ */
 async function init() {
   initScrollModal();
+  // Dispara a varredura de assets/avatars/ em paralelo com o guard de
+  // sessão, para não adicionar latência extra desnecessária ao boot.
+  const avatarCountReady = detectAvatarCount();
 
   let result;
   try {
@@ -486,11 +618,20 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
+  await avatarCountReady; // garante getAvatarCount()/avatarSafeIndex corretos antes de renderizar
 
-  renderProfile(currentUser);
-  renderAchievements(currentUser);
-  renderLessons(currentUser);
-  renderXpBar(currentUser, { fromZero: true }); // JUICE: enche de 0 até o valor real
+  // A hidratação visual (stats/cards) pode falhar por dado inesperado
+  // do servidor, mas isso NUNCA pode impedir os botões de funcionar.
+  // Por isso a renderização fica isolada em seu próprio try/catch,
+  // separado da vinculação dos event listeners logo abaixo.
+  try {
+    renderProfile(currentUser);
+    renderAchievements(currentUser);
+    renderLessons(currentUser);
+    renderXpBar(currentUser, { fromZero: true }); // JUICE: enche de 0 até o valor real
+  } catch (error) {
+    console.error('[dashboard] Falha ao renderizar os dados do perfil:', error);
+  }
 
   initAltar();
   initAvatarSwap();
