@@ -68,9 +68,10 @@ export default async function handler(req, res) {
     const { action } = req.body || {};
 
     if (action === 'register') {
-      const { fullName, username, password } = req.body;
+      const { fullName, turma, username, password } = req.body;
       const errors = [];
       if (!fullName || fullName.trim().length < 5) errors.push('Nome completo muito curto.');
+      if (!['TCG01', 'TCG02'].includes(turma)) errors.push('Turma inválida.');
       if (!username || username.trim().length < 3) errors.push('Username muito curto.');
       if (!password || password.length < 4) errors.push('Senha muito curta.');
       if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
@@ -84,6 +85,7 @@ export default async function handler(req, res) {
       const now = new Date().toISOString();
       const payload = {
         full_name: fullName.trim(),
+        turma,
         username: normalizedUsername,
         password_hash,
         role: 'student',

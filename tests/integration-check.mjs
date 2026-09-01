@@ -95,12 +95,22 @@ async function testRedeemValidAndInvalidCode() {
   const uniqueName = `qa_teste_${Date.now()}`;
   const registerRes = makeRes();
   await authHandler(
-    { method: 'POST', body: { action: 'register', username: uniqueName, password: 'SenhaTeste@123' } },
+    {
+      method: 'POST',
+      body: {
+        action: 'register',
+        fullName: 'Usuario de Teste',
+        turma: 'TCG01',
+        username: uniqueName,
+        password: 'SenhaTeste@123',
+      },
+    },
     registerRes
   );
 
   assert.equal(registerRes.statusCode, 201, 'Registro deve criar o usuário de teste.');
   assert.equal(registerRes.body?.ok, true, 'Registro deve retornar ok: true.');
+  assert.equal(registerRes.body?.user?.turma, 'TCG01', 'Registro deve persistir a turma do usuário.');
 
   const token = registerRes.body.token;
   assert.ok(token, 'Token de sessão deve ser retornado no registro.');
