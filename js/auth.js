@@ -111,7 +111,7 @@ async function handleLoginSubmit(event) {
   setBusy(form, true, 'Selando...');
   try {
     const { token, user } = await login(name, password);
-    saveSession({ token, name: user.name ?? user.username, role: user.role });
+    saveSession({ token, name: user.name, role: user.role });
     redirectToDashboard();
   } catch (error) {
     setBusy(form, false);
@@ -141,7 +141,7 @@ async function handleRegisterSubmit(event) {
   setBusy(form, true, 'Firmando...');
   try {
     const { token, user } = await register(name, password);
-    saveSession({ token, name: user.name ?? user.username, role: user.role });
+    saveSession({ token, name: user.name, role: user.role });
     redirectToDashboard();
   } catch (error) {
     setBusy(form, false);

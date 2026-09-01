@@ -46,7 +46,38 @@ export const REDEEM_CODES = {
     xp: 20,
     achievement: 'primeiro_sangue',
   },
+  LOOP2026: {
+    lessonId: 'aula2',
+    lessonTitle: 'Aula 2 — Loops e Ritmo',
+    xp: 25,
+    achievement: 'loop_master',
+  },
+  RITMO2026: {
+    lessonId: 'aula2',
+    lessonTitle: 'Aula 2 — Loops e Ritmo',
+    xp: 25,
+    achievement: 'ritmo_do_jogo',
+  },
 };
+
+/* ============================================================
+   2.1 DESBLOQUEIO SEQUENCIAL DE AULAS
+   ============================================================
+   Mapeia cada aula à aula-pré-requisito. Um código de resgate só
+   pode ser aceito se `completedLessons` já contiver a aula anterior
+   — impede pular etapas mesmo manipulando a chamada à API.
+   ============================================================ */
+export const LESSON_PREREQUISITES = {
+  aula2: 'aula1',
+  aula3: 'aula2',
+};
+
+/** Retorna true se o usuário já cumpriu o pré-requisito da aula informada. */
+export function hasUnlockedLesson(user, lessonId) {
+  const prerequisite = LESSON_PREREQUISITES[lessonId];
+  if (!prerequisite) return true; // aula sem pré-requisito (ex.: aula1)
+  return Array.isArray(user.completedLessons) && user.completedLessons.includes(prerequisite);
+}
 
 /* ============================================================
    3. CATÁLOGO DE CONQUISTAS (avaliadas no servidor)
@@ -62,6 +93,8 @@ export const ACHIEVEMENT_RULES = [
   { id: 'arquiteto', test: (u) => u.completedLessons.includes('aula1') && u.xp >= 20 },
   { id: 'desvendador', test: (u) => u.achievements.length >= 3 },
   { id: 'campeao', test: (u) => u.xp >= 120 },
+  { id: 'loop_master', test: (u) => u.completedLessons.includes('aula2') },
+  { id: 'ritmo_do_jogo', test: (u) => u.completedLessons.includes('aula2') && u.xp >= 45 },
 ];
 
 /* ============================================================

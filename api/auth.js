@@ -33,12 +33,15 @@ function verifyPassword(password, stored) {
 
 function sanitizeUser(u) {
   if (!u) return null;
-  const { password_hash, ...safe } = u;
+  const { password_hash, conquistas, ...safe } = u;
   const displayName = safe.name ?? safe.username;
   return {
     ...safe,
     name: displayName,
     username: safe.username ?? displayName,
+    // Contrato da API: o front-end recebe `achievements`; no banco a
+    // coluna real chama-se `conquistas` (schema de produção).
+    achievements: Array.isArray(conquistas) ? conquistas : [],
   };
 }
 
@@ -80,7 +83,7 @@ export default async function handler(req, res) {
         password_hash,
         role: 'student',
         xp: 0,
-        achievements: [],
+        conquistas: [],
         completed_lessons: [],
         redeemed_codes: [],
         avatar_index: 0,

@@ -18,8 +18,155 @@
 /* ---------- Única chave permitida no localStorage ---------- */
 const SESSION_KEY = 'activeSession';
 
-/* ---------- Avatares (espelhado no backend: AVATAR_COUNT = 6) ---------- */
-export const AVATAR_GLYPHS = ['◆', '♠', '♥', '♣', '♦', '★'];
+/* ---------- Imagens de avatar ----------
+   Arquivos esperados em assets/avatars/ (ver assets/avatars/README.md
+   para instruções de onde colocar as imagens). O índice corresponde
+   ao `avatarIndex`/`avatar_index` salvo no usuário.
+   Qualquer extensão de imagem comum é aceita: o cliente tenta, em
+   ordem, cada extensão de AVATAR_EXTENSIONS até encontrar um arquivo
+   que exista (ex.: avatar1.jpg, avatar2.png, avatar3.webp...).
+   A QUANTIDADE de avatares é detectada automaticamente em tempo de
+   execução (ver detectAvatarCount()) contando quantos arquivos
+   `avatarN.*` existem de fato em assets/avatars/ — basta adicionar
+   ou remover arquivos na pasta, nenhum número precisa ser editado
+   manualmente aqui. */
+export const AVATAR_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'];
+
+/* avatar1.* é sempre o fallback garantido, então o valor inicial (antes
+   da detecção terminar) é 1 — nunca 0, para não quebrar o módulo. */
+let avatarCount = 1;
+let avatarCountPromise = null;
+
+/* Cache: índice (0-based) -> URL já confirmada como existente. Evita
+   ter que re-testar todas as extensões (AVATAR_EXTENSIONS) do zero a
+   cada troca de avatar — sem isso, cada clique podia levar vários
+   round-trips de rede (404 em png/jpg/jpeg antes de achar o .webp
+   real, por exemplo), dando a impressão de que era preciso clicar
+   mais de uma vez para a imagem mudar. */
+const resolvedAvatarUrl = new Map();
+
+/** Testa se existe algum arquivo `avatar{fileNumber}.*` (qualquer extensão). Resolve a URL encontrada, ou `null`. */
+function probeAvatarFile(fileNumber) {
+  const candidates = AVATAR_EXTENSIONS.map((ext) => `${rootPath()}/assets/avatars/avatar${fileNumber}.${ext}`);
+  return new Promise((resolve) => {
+    let i = 0;
+    const img = new Image();
+    const attempt = () => {
+      if (i >= candidates.length) {
+        resolve(null);
+        return;
+      }
+      img.src = candidates[i++];
+    };
+    img.onload = () => resolve(img.src);
+    img.onerror = attempt;
+    attempt();
+  });
+}
+
+/**
+ * Detecta quantos avatares existem de fato em assets/avatars/, testando
+ * sequencialmente avatar1, avatar2, avatar3... até o primeiro número que
+ * não tenha nenhum arquivo correspondente (qualquer extensão). Cacheia
+ * o resultado (uma única varredura por carregamento de página) e
+ * atualiza o valor retornado por `getAvatarCount()`.
+ * Deve ser chamada (e aguardada) antes de renderizar/ciclar avatares.
+ */
+export function detectAvatarCount() {
+  if (avatarCountPromise) return avatarCountPromise;
+  const MAX_PROBE = 200; // limite de segurança contra pastas mal configuradas
+  avatarCountPromise = (async () => {
+    let count = 0;
+    for (let n = 1; n <= MAX_PROBE; n++) {
+      // eslint-disable-next-line no-await-in-loop -- varredura sequencial e intencional
+      const url = await probeAvatarFile(n);
+      if (!url) break;
+      resolvedAvatarUrl.set(n - 1, url);
+      count = n;
+    }
+    avatarCount = Math.max(count, 1);
+    return avatarCount;
+  })();
+  return avatarCountPromise;
+}
+
+/** Quantidade de avatares detectada (ver detectAvatarCount()). */
+export function getAvatarCount() {
+  return avatarCount;
+}
+
+/**
+ * Normaliza qualquer índice (inclusive valores antigos/fora do intervalo
+ * salvos antes de uma mudança na quantidade de arquivos) para o intervalo
+ * válido `[0, getAvatarCount())`, com wrap-around (módulo sempre positivo).
+ */
+export function avatarSafeIndex(index) {
+  const count = getAvatarCount();
+  return ((index % count) + count) % count;
+}
+
+/** Lista de caminhos candidatos (uma extensão por vez) para o avatar de índice `index`.
+ *  Se a extensão já foi descoberta (ver detectAvatarCount()/cache), ela vem
+ *  primeiro na lista — assim a troca de avatar resolve em 1 requisição, não N. */
+export function avatarCandidates(index) {
+  const safeIndex = avatarSafeIndex(index);
+  const file = safeIndex + 1;
+  const generated = AVATAR_EXTENSIONS.map((ext) => `${rootPath()}/assets/avatars/avatar${file}.${ext}`);
+  const cached = resolvedAvatarUrl.get(safeIndex);
+  if (cached) {
+    return [cached, ...generated.filter((url) => url !== cached)];
+  }
+  return generated;
+}
+
+
+/**
+ * Carrega, em `imgEl`, a imagem do avatar de índice `index`, tentando
+ * cada extensão suportada em ordem (ver AVATAR_EXTENSIONS) até um
+ * `load` bem-sucedido. Se NENHUMA extensão existir para esse índice
+ * (ex.: `avatarIndex` salvo aponta para um arquivo que o usuário ainda
+ * não colocou na pasta), cai de volta para o avatar de índice 0 — que
+ * deve sempre existir — em vez de deixar a tag <img> quebrada/vazia.
+ * Nunca lança: resolve `true`/`false` conforme o sucesso final.
+ */
+export function loadAvatarImage(imgEl, index) {
+  function tryIndex(candidateIndex, allowFallback) {
+    const candidates = avatarCandidates(candidateIndex);
+    return new Promise((resolve) => {
+      let i = 0;
+      const cleanup = () => {
+        imgEl.onload = null;
+        imgEl.onerror = null;
+      };
+      const attempt = () => {
+        if (i >= candidates.length) {
+          cleanup();
+          resolve(false);
+          return;
+        }
+        imgEl.src = candidates[i++];
+      };
+      imgEl.onload = () => {
+        // Cacheia a extensão descoberta (caso ainda não estivesse, ex.:
+        // avatar adicionado depois da varredura inicial) para que a
+        // próxima troca para este índice seja instantânea.
+        resolvedAvatarUrl.set(avatarSafeIndex(candidateIndex), imgEl.src);
+        cleanup();
+        resolve(true);
+      };
+      imgEl.onerror = attempt;
+      attempt();
+    }).then(async (loaded) => {
+      if (loaded) return true;
+      if (allowFallback && candidateIndex !== 0) {
+        return tryIndex(0, false); // último recurso: avatar padrão (índice 0)
+      }
+      return false;
+    });
+  }
+
+  return tryIndex(index, true);
+}
 
 /* ============================================================
    1. RESOLUÇÃO DE CAMINHOS
@@ -45,12 +192,11 @@ export const ROUTES = {
 /* ============================================================
    2. SESSÃO ATIVA (localStorage — só o token e o mínimo de UI)
    ============================================================ */
-export function saveSession({ token, name, username, role }) {
+export function saveSession({ token, name, role }) {
   try {
-    const displayName = name ?? username ?? 'Jogador';
     localStorage.setItem(
       SESSION_KEY,
-      JSON.stringify({ token, name: displayName, role, savedAt: new Date().toISOString() })
+      JSON.stringify({ token, name, role, savedAt: new Date().toISOString() })
     );
   } catch (error) {
     console.error('[API] Não foi possível salvar a sessão:', error);
@@ -98,6 +244,29 @@ async function request(path, options = {}) {
   return payload;
 }
 
+/* ============================================================
+   3.1 NORMALIZAÇÃO DE USUÁRIO
+   ============================================================
+   O backend (Supabase) usa snake_case (`completed_lessons`,
+   `avatar_index`) enquanto todo o frontend foi escrito esperando
+   camelCase (`completedLessons`, `avatarIndex`). Sem esta ponte,
+   `user.completedLessons` chega `undefined` e qualquer acesso a
+   `.length`/`.includes` lança TypeError — interrompendo o boot
+   ANTES de os event listeners serem vinculados.
+   ============================================================ */
+function normalizeUser(raw) {
+  if (!raw) return raw;
+  const name = raw.name ?? raw.username ?? 'Jogador';
+  return {
+    ...raw,
+    name,
+    username: raw.username ?? name,
+    completedLessons: raw.completedLessons ?? raw.completed_lessons ?? [],
+    avatarIndex: raw.avatarIndex ?? raw.avatar_index ?? 0,
+    achievements: raw.achievements ?? raw.conquistas ?? [],
+  };
+}
+
 /** Erro de API com status HTTP, para o frontend decidir a reação (shake, redirect...). */
 export class ApiError extends Error {
   constructor(message, status = 0, payload = null) {
@@ -140,29 +309,33 @@ export async function logout() {
 }
 
 /** Valida a sessão no servidor e devolve o usuário atualizado. */
-export function validateSession(token) {
-  return request(`/auth?token=${encodeURIComponent(token)}`, { method: 'GET' });
+export async function validateSession(token) {
+  const payload = await request(`/auth?token=${encodeURIComponent(token)}`, { method: 'GET' });
+  return { ...payload, user: normalizeUser(payload.user) };
 }
 
 /* ============================================================
    5. ROTAS DE PROGRESSO
    ============================================================ */
-export function fetchProfile(token) {
-  return request(`/progress?token=${encodeURIComponent(token)}`, { method: 'GET' });
+export async function fetchProfile(token) {
+  const payload = await request(`/progress?token=${encodeURIComponent(token)}`, { method: 'GET' });
+  return { ...payload, user: normalizeUser(payload.user) };
 }
 
-export function redeemCode(token, code) {
-  return request('/progress', {
+export async function redeemCode(token, code) {
+  const payload = await request('/progress', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'redeem', code }),
   });
+  return { ...payload, user: normalizeUser(payload.user) };
 }
 
-export function setAvatar(token, avatarIndex) {
-  return request('/progress', {
+export async function setAvatar(token, avatarIndex) {
+  const payload = await request('/progress', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'avatar', avatarIndex }),
   });
+  return { ...payload, user: normalizeUser(payload.user) };
 }
 
 export function listCodes(token) {
@@ -172,11 +345,54 @@ export function listCodes(token) {
   });
 }
 
-export function listUsers(token) {
+export function generateCode(token, lessonId) {
   return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'generateCode', lessonId }),
+  });
+}
+
+export function getLessonCode(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonCode', lessonId }),
+  });
+}
+
+export function fetchLessonGates(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonGates', lessonId }),
+  });
+}
+
+export function setLessonGate(token, lessonId, gateKey, released) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'setLessonGate', lessonId, gateKey, released }),
+  });
+}
+
+export function getLessonParagraph(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'getLessonParagraph', lessonId }),
+  });
+}
+
+export function saveLessonParagraph(token, lessonId, paragraph) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'saveLessonParagraph', lessonId, paragraph }),
+  });
+}
+
+export async function listUsers(token) {
+  const payload = await request('/progress', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'listUsers' }),
   });
+  return { ...payload, users: (payload.users ?? []).map(normalizeUser) };
 }
 
 /* ============================================================
@@ -196,11 +412,7 @@ export async function requireSession() {
   try {
     const { user } = await validateSession(session.token);
     // Mantém o cache de UI (nome/role) alinhado ao servidor.
-    saveSession({
-      token: session.token,
-      name: user.name ?? user.username,
-      role: user.role,
-    });
+    saveSession({ token: session.token, name: user.name, role: user.role });
     return { session, user };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
@@ -239,17 +451,14 @@ export function xpWithinLevel(xp) {
   return xp % LEVEL_XP_BASE;
 }
 
-export const ACHIEVEMENTS = [
-  { id: 'primeiro_sangue', icon: '🩸', name: 'Primeiro Sangue', desc: 'Completou a Aula 1.' },
-  { id: 'escudeiro', icon: '🛡️', name: 'Escudeiro', desc: 'Concluir 2 aulas.' },
-  { id: 'arquiteto', icon: '⚙️', name: 'Arquiteto de Mapas', desc: 'Concluir a Aula 1 com 20 XP.' },
-  { id: 'cacador_echos', icon: '🔥', name: 'Caçador de Ecos', desc: 'Alcançar 20 XP.' },
-  { id: 'desvendador', icon: '✦', name: 'Desvendador', desc: 'Desbloquear 3 conquistas.' },
-  { id: 'campeao', icon: '👑', name: 'Campeão do Submundo', desc: 'Alcançar 120 XP.' },
-];
+export const ACHIEVEMENTS = [];
 
 export const LESSONS = [
-  { id: 'aula1', number: '01', title: 'A Regra do Jogo', subtitle: 'O Framework MDA e Mecânicas', rewardXp: 20 },
-  { id: 'aula2', number: '02', title: '????????', subtitle: 'Requisito: Concluir Aula Anterior', rewardXp: 20 },
-  { id: 'aula3', number: '03', title: '????????', subtitle: 'Requisito: Concluir Aula Anterior', rewardXp: 20 },
+  {
+    id: 'aula1',
+    number: '01',
+    title: 'O Círculo Mágico do Roguelite',
+    subtitle: 'Teoria do jogo, Game Feel e prática na Godot',
+    rewardXp: 30,
+  },
 ];
