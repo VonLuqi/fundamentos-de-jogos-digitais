@@ -154,9 +154,14 @@ async function initParagraphPersistence() {
     const previous = saveButton.textContent;
     saveButton.textContent = 'Salvando...';
     try {
-      await saveLessonParagraph(currentToken, LESSON_ID, textarea.value);
+      const result = await saveLessonParagraph(currentToken, LESSON_ID, textarea.value);
       paragraphSaved = true;
-      setSaveStatus('Parágrafo salvo com sucesso no banco.', 'success');
+      if (result.awarded) {
+        const { xp, achievements } = result.awarded;
+        setSaveStatus(`Parágrafo salvo. +${xp} XP e conquista desbloqueada: ${achievements.join(', ')}.`, 'success');
+      } else {
+        setSaveStatus('Parágrafo salvo com sucesso no banco.', 'success');
+      }
     } catch (error) {
       paragraphSaved = false;
       const message = error instanceof ApiError ? error.message : 'Falha ao salvar o parágrafo.';

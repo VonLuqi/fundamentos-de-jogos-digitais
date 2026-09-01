@@ -20,6 +20,14 @@ const LESSON_GATES = {
   aula1: [],
 };
 
+const ACTIVITY_CATALOG = {
+  aula1_gdd: {
+    lessonId: 'aula1',
+    xp: 20,
+    achievementId: 'gdd_integracao_documental',
+  },
+};
+
 const ACHIEVEMENT_RULES = [
   {
     id: 'aula1_concluida',
@@ -401,6 +409,10 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Parágrafo vazio.' });
       }
 
+      const activity = ACTIVITY_CATALOG[`${normalizedLessonId}_gdd`];
+      const activityAlreadyAwarded = activity && Array.isArray(user.conquistas)
+        ? user.conquistas.includes(activity.achievementId)
+        : false;
       const nowIso = new Date().toISOString();
       const { error } = await supabase.from(LESSON_PARAGRAPHS_TABLE).upsert(
         {
@@ -419,7 +431,34 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Falha ao salvar parágrafo da aula.' });
       }
 
-      return res.status(200).json({ ok: true, lessonId: normalizedLessonId, paragraph: text, updatedAt: nowIso });
+      let awarded = null;
+      let updatedUser = user;
+      if (activity && !activityAlreadyAwarded) {
+        const xp = Number(user.xp || 0) + activity.xp;
+        const conquistas = [...(Array.isArray(user.conquistas) ? user.conquistas : []), activity.achievementId];
+        const { data, error: userUpdateError } = await supabase
+          .from(USERS_TABLE)
+          .update({ xp, conquistas })
+          .eq('id', userId)
+          .select('*')
+          .single();
+        if (userUpdateError) return res.status(500).json({ ok: false, error: 'Falha ao conceder recompensa da atividade.' });
+
+        updatedUser = data;
+        awarded = {
+          xp: activity.xp,
+          achievements: [activity.achievementId],
+        };
+      }
+
+      return res.status(200).json({
+        ok: true,
+        lessonId: normalizedLessonId,
+        paragraph: text,
+        updatedAt: nowIso,
+        user: sanitizeUser(updatedUser),
+        awarded,
+      });
     }
 
     if (action === 'lessonView') {
