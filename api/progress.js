@@ -531,7 +531,7 @@ export default async function handler(req, res) {
       if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
       const { data: users } = await supabase
         .from(USERS_TABLE)
-        .select('id, full_name, username, role, xp, conquistas, completed_lessons, avatar_index, created_at');
+        .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, created_at');
 
       let viewRows = [];
       const { data: views, error: viewsError } = await supabase

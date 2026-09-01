@@ -99,7 +99,8 @@ function buildSoulCard(user, index) {
     metric('Aulas vistas', String(viewedLessons.length)),
     metric('Aulas concluidas', String(Array.isArray(user.completedLessons) ? user.completedLessons.length : 0)),
     metric('Conquistas', String(Array.isArray(user.achievements) ? user.achievements.length : 0)),
-    metric('Perfil', user.role === 'admin' ? 'Administrador' : 'Aluno')
+    metric('Perfil', user.role === 'admin' ? 'Administrador' : 'Aluno'),
+    metric('Turma', user.turma || 'Nao informada')
   );
 
   const views = document.createElement('ul');
