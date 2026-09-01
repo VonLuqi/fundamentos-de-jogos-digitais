@@ -528,12 +528,24 @@ body {
     height: auto;
     overflow: visible;
     min-height: auto;
+    gap: 1rem;
+    padding: 0 0.75rem 1rem;
   }
+
+  .game-header {
+    padding: 1rem 0.75rem 0.25rem;
+  }
+
+  .ornate-divider {
+    padding: 0 0.75rem 0.75rem;
+  }
+
   html,
   body {
     height: auto;
     min-height: 100%;
     overflow: visible;
+    overflow-x: hidden;
   }
 
   body {
@@ -546,5 +558,69 @@ body {
     min-height: auto;
     height: auto;
     overflow: visible;
+  }
+
+  .player-panel {
+    padding: 1.25rem 1rem;
+  }
+
+  .stage-select__list {
+    gap: 0.75rem;
+    padding-inline: 0;
+  }
+
+  .stage-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'number content'
+      'reward reward';
+    align-items: start;
+    row-gap: 0.5rem;
+    padding: 1rem;
+  }
+
+  .stage-card__number {
+    grid-area: number;
+    margin-right: 0.75rem;
+    min-width: 0;
+    font-size: 1.9rem;
+  }
+
+  .stage-card__content {
+    grid-area: content;
+    min-width: 0;
+  }
+
+  .stage-card__title {
+    font-size: 1rem;
+    line-height: 1.25;
+  }
+
+  .stage-card__subtitle {
+    font-size: 0.95rem;
+    line-height: 1.35;
+  }
+
+  .stage-card__reward {
+    grid-area: reward;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+
+  .stage-card__xp {
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+  }
+
+  .controls-bar {
+    gap: 0.6rem;
+    padding: 0.75rem;
+  }
+
+  .controls-bar__btn {
+    flex: 1 1 160px;
+    justify-content: center;
+    padding: 0.6rem 0.75rem;
   }
 }

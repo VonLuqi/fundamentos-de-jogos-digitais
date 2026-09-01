@@ -1008,6 +1008,66 @@ body {
   text-align: right;
 }
 
+.avatar-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+
+.avatar-picker__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.65rem 0.45rem;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--hades-gold-dark);
+  color: var(--hades-text);
+  cursor: pointer;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.avatar-picker__option:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 12px rgba(207, 167, 89, 0.35);
+}
+
+.avatar-picker__option.is-selected {
+  border-color: var(--hades-gold-bright);
+  box-shadow: 0 0 14px rgba(242, 213, 154, 0.45);
+}
+
+.avatar-picker__option:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.avatar-picker__image {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(207, 167, 89, 0.6);
+}
+
+.avatar-picker__label {
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.avatar-picker__status {
+  min-height: 1.2em;
+  margin-top: 0.75rem;
+  text-align: center;
+  color: var(--hades-text-dim);
+  font-size: 0.86rem;
+}
+
 /* ============================================================
    12. AVISO DE API INDISPONÍVEL
    ============================================================ */
@@ -1099,6 +1159,10 @@ body {
 @media (max-width: 900px) {
   .dashboard-layout {
     grid-template-columns: 1fr;
+  }
+
+  .avatar-picker-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

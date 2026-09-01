@@ -350,42 +350,88 @@ function initAltar() {
    ============================================================ */
 function initAvatarSwap() {
   const frame = document.getElementById('avatar-frame');
-  const glyph = document.getElementById('avatar-glyph');
-  if (!frame || !glyph) return;
+  if (!frame) return;
 
-  frame.addEventListener('click', async () => {
-    if (frame.disabled) return; // evita corrida caso um clique anterior ainda esteja em andamento
-    frame.disabled = true;
-    try {
-      const previousIndex = currentUser.avatarIndex;
-      const nextIndex = (previousIndex + 1) % getAvatarCount();
+  function buildAvatarPickerContent() {
+    const wrapper = document.createElement('div');
 
-      // Só troca visualmente se a imagem do próximo índice realmente
-      // existir (qualquer extensão suportada) — evita que a troca
-      // "suma" o avatar ao cair num índice sem arquivo correspondente.
-      const loaded = await loadAvatarImage(glyph, nextIndex);
-      if (!loaded) {
-        loadAvatarImage(glyph, previousIndex); // garante que a imagem atual permaneça visível
-        return;
-      }
-      updateAvatarCounter(nextIndex);
+    const note = document.createElement('p');
+    note.className = 'scroll-modal__note';
+    note.textContent = 'Escolha diretamente um avatar da galeria.';
 
-      frame.classList.remove('is-swapping');
-      void frame.offsetHeight;
-      frame.classList.add('is-swapping');
+    const grid = document.createElement('div');
+    grid.className = 'avatar-picker-grid';
 
-      try {
-        const { user } = await setAvatar(currentToken, nextIndex);
-        currentUser = user;
-      } catch {
-        // Reverte se o servidor recusar.
-        currentUser = { ...currentUser, avatarIndex: previousIndex };
-        loadAvatarImage(glyph, previousIndex);
-        updateAvatarCounter(previousIndex);
-      }
-    } finally {
-      frame.disabled = false;
+    const status = document.createElement('p');
+    status.className = 'avatar-picker__status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+
+    const selectedIndex = avatarSafeIndex(currentUser?.avatarIndex ?? 0);
+    const allButtons = [];
+
+    function setBusy(busy) {
+      allButtons.forEach((button) => {
+        button.disabled = busy;
+      });
     }
+
+    for (let index = 0; index < getAvatarCount(); index += 1) {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'avatar-picker__option';
+      option.setAttribute('aria-label', `Selecionar Avatar ${index + 1}`);
+      if (index === selectedIndex) option.classList.add('is-selected');
+
+      const image = document.createElement('img');
+      image.className = 'avatar-picker__image';
+      image.alt = `Avatar ${index + 1}`;
+      loadAvatarImage(image, index);
+
+      const label = document.createElement('span');
+      label.className = 'avatar-picker__label';
+      label.textContent = `Avatar ${index + 1}`;
+
+      option.append(image, label);
+      allButtons.push(option);
+
+      option.addEventListener('click', async () => {
+        if (option.disabled) return;
+
+        if (avatarSafeIndex(currentUser.avatarIndex) === index) {
+          closeScrollModal();
+          return;
+        }
+
+        setBusy(true);
+        status.textContent = 'Salvando avatar...';
+
+        frame.classList.remove('is-swapping');
+        void frame.offsetHeight;
+        frame.classList.add('is-swapping');
+
+        try {
+          const { user } = await setAvatar(currentToken, index);
+          currentUser = user;
+          renderProfile(currentUser);
+          closeScrollModal();
+        } catch (error) {
+          status.textContent = error instanceof ApiError
+            ? error.message
+            : 'Não foi possível trocar o avatar agora.';
+          setBusy(false);
+        }
+      });
+
+      grid.appendChild(option);
+    }
+
+    wrapper.append(note, grid, status);
+    return wrapper;
+  }
+
+  frame.addEventListener('click', () => {
+    openScrollModal('Escolha seu Avatar', buildAvatarPickerContent());
   });
 }
 
