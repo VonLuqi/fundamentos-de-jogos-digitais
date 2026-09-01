@@ -7,6 +7,7 @@ import {
   getLessonCode,
   getLessonParagraph,
   saveLessonParagraph,
+  trackLessonView,
 } from './api.js';
 
 const LESSON_ID = 'aula1';
@@ -438,6 +439,10 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
+
+  trackLessonView(currentToken, LESSON_ID).catch(() => {
+    // Não bloqueia a aula se telemetria de visualização falhar.
+  });
 
   initAdminExample();
 

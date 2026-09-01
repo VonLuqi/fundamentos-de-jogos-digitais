@@ -34,10 +34,11 @@ function verifyPassword(password, stored) {
 function sanitizeUser(u) {
   if (!u) return null;
   const { password_hash, conquistas, ...safe } = u;
-  const displayName = safe.name ?? safe.username;
+  const displayName = safe.full_name ?? safe.name ?? safe.username;
   return {
     ...safe,
     name: displayName,
+    fullName: safe.full_name ?? safe.name ?? safe.username,
     username: safe.username ?? displayName,
     // Contrato da API: o front-end recebe `achievements`; no banco a
     // coluna real chama-se `conquistas` (schema de produção).
@@ -67,19 +68,23 @@ export default async function handler(req, res) {
     const { action } = req.body || {};
 
     if (action === 'register') {
-      const { username, password } = req.body;
+      const { fullName, username, password } = req.body;
       const errors = [];
-      if (!username || username.trim().length < 2) errors.push('Nome muito curto.');
+      if (!fullName || fullName.trim().length < 5) errors.push('Nome completo muito curto.');
+      if (!username || username.trim().length < 3) errors.push('Username muito curto.');
       if (!password || password.length < 4) errors.push('Senha muito curta.');
       if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
-      const { data: existing } = await supabase.from(USERS_TABLE).select('id').eq('username', username.trim().toLowerCase()).limit(1).single();
+      const normalizedUsername = username.trim().toLowerCase();
+
+      const { data: existing } = await supabase.from(USERS_TABLE).select('id').eq('username', normalizedUsername).limit(1).single();
       if (existing) return res.status(409).json({ ok: false, error: 'Usuário já existe.' });
 
       const password_hash = hashPassword(password);
       const now = new Date().toISOString();
       const payload = {
-        username: username.trim(),
+        full_name: fullName.trim(),
+        username: normalizedUsername,
         password_hash,
         role: 'student',
         xp: 0,

@@ -127,7 +127,8 @@ async function handleRegisterSubmit(event) {
   const errorEl = document.getElementById('register-error');
   clearError(errorEl);
 
-  const name = form.elements.name.value;
+  const fullName = form.elements.full_name.value;
+  const username = form.elements.username.value;
   const password = form.elements.password.value;
   const passwordConfirm = form.elements.password_confirm.value;
 
@@ -140,7 +141,7 @@ async function handleRegisterSubmit(event) {
 
   setBusy(form, true, 'Firmando...');
   try {
-    const { token, user } = await register(name, password);
+    const { token, user } = await register(fullName, username, password);
     saveSession({ token, name: user.name, role: user.role });
     redirectToDashboard();
   } catch (error) {

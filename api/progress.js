@@ -5,6 +5,7 @@ const USERS_TABLE = 'users';
 const CODES_TABLE = 'redeem_codes';
 const LESSON_GATES_TABLE = 'lesson_gates';
 const LESSON_PARAGRAPHS_TABLE = 'lesson_paragraphs';
+const LESSON_VIEWS_TABLE = 'lesson_views';
 const CODE_TTL_MINUTES = 20;
 
 const LESSON_CATALOG = {
@@ -38,10 +39,11 @@ function defaultGatesForLesson(lessonId) {
 function sanitizeUser(u) {
   if (!u) return null;
   const { password_hash, conquistas, ...safe } = u;
-  const displayName = safe.name ?? safe.username;
+  const displayName = safe.full_name ?? safe.name ?? safe.username;
   return {
     ...safe,
     name: displayName,
+    fullName: safe.full_name ?? safe.name ?? safe.username,
     username: safe.username ?? displayName,
     achievements: Array.isArray(conquistas) ? conquistas : [],
   };
@@ -420,6 +422,50 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, lessonId: normalizedLessonId, paragraph: text, updatedAt: nowIso });
     }
 
+    if (action === 'lessonView') {
+      const normalizedLessonId = String(lessonId || '');
+      if (!LESSON_CATALOG[normalizedLessonId]) {
+        return res.status(400).json({ ok: false, error: 'Aula inválida.' });
+      }
+
+      const nowIso = new Date().toISOString();
+      const { data: existing, error: selectError } = await supabase
+        .from(LESSON_VIEWS_TABLE)
+        .select('view_count')
+        .eq('user_id', userId)
+        .eq('lesson_id', normalizedLessonId)
+        .limit(1)
+        .maybeSingle();
+
+      if (selectError) {
+        if (selectError.code === '42P01' || /lesson_views/i.test(selectError.message || '')) {
+          return res.status(503).json({ ok: false, error: 'Tabela lesson_views não existe. Rode o SQL de migração.' });
+        }
+        return res.status(500).json({ ok: false, error: 'Falha ao registrar visualização da aula.' });
+      }
+
+      const nextCount = Number(existing?.view_count || 0) + 1;
+      const { error: upsertError } = await supabase.from(LESSON_VIEWS_TABLE).upsert(
+        {
+          user_id: userId,
+          lesson_id: normalizedLessonId,
+          first_viewed_at: existing ? undefined : nowIso,
+          last_viewed_at: nowIso,
+          view_count: nextCount,
+        },
+        { onConflict: 'user_id,lesson_id' }
+      );
+
+      if (upsertError) {
+        if (upsertError.code === '42P01' || /lesson_views/i.test(upsertError.message || '')) {
+          return res.status(503).json({ ok: false, error: 'Tabela lesson_views não existe. Rode o SQL de migração.' });
+        }
+        return res.status(500).json({ ok: false, error: 'Falha ao registrar visualização da aula.' });
+      }
+
+      return res.status(200).json({ ok: true, lessonId: normalizedLessonId, viewedAt: nowIso });
+    }
+
     if (action === 'setLessonGate') {
       if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
 
@@ -485,8 +531,35 @@ export default async function handler(req, res) {
       if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
       const { data: users } = await supabase
         .from(USERS_TABLE)
-        .select('id, username, role, xp, conquistas, completed_lessons, avatar_index');
-      const normalized = (users || []).map(({ conquistas, ...rest }) => ({ ...rest, achievements: conquistas || [] }));
+        .select('id, full_name, username, role, xp, conquistas, completed_lessons, avatar_index, created_at');
+
+      let viewRows = [];
+      const { data: views, error: viewsError } = await supabase
+        .from(LESSON_VIEWS_TABLE)
+        .select('user_id, lesson_id, last_viewed_at, view_count');
+
+      if (!viewsError) {
+        viewRows = views || [];
+      }
+
+      const viewsByUser = new Map();
+      viewRows.forEach((row) => {
+        const userViews = viewsByUser.get(row.user_id) || [];
+        userViews.push({
+          lessonId: row.lesson_id,
+          lastViewedAt: row.last_viewed_at,
+          viewCount: Number(row.view_count || 0),
+        });
+        viewsByUser.set(row.user_id, userViews);
+      });
+
+      const normalized = (users || []).map(({ conquistas, ...rest }) => ({
+        ...rest,
+        fullName: rest.full_name || rest.username,
+        achievements: conquistas || [],
+        viewedLessons: viewsByUser.get(rest.id) || [],
+      }));
+
       return res.status(200).json({ ok: true, users: normalized });
     }
 

@@ -186,6 +186,7 @@ export const ROUTES = {
   home: () => `${rootPath()}/index.html`,
   auth: () => `${rootPath()}/pages/auth.html`,
   dashboard: () => `${rootPath()}/pages/dashboard.html`,
+  souls: () => `${rootPath()}/pages/souls.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -256,11 +257,12 @@ async function request(path, options = {}) {
    ============================================================ */
 function normalizeUser(raw) {
   if (!raw) return raw;
-  const name = raw.name ?? raw.username ?? 'Jogador';
+  const fullName = raw.fullName ?? raw.full_name ?? raw.name ?? raw.username ?? 'Jogador';
   return {
     ...raw,
-    name,
-    username: raw.username ?? name,
+    name: fullName,
+    fullName,
+    username: raw.username ?? fullName,
     completedLessons: raw.completedLessons ?? raw.completed_lessons ?? [],
     avatarIndex: raw.avatarIndex ?? raw.avatar_index ?? 0,
     achievements: raw.achievements ?? raw.conquistas ?? [],
@@ -287,10 +289,17 @@ export function login(name, password) {
   });
 }
 
-export function register(name, password) {
+export function register(fullName, username, password) {
   return request('/auth', {
     method: 'POST',
-    body: JSON.stringify({ action: 'register', username: name, password }),
+    body: JSON.stringify({ action: 'register', fullName, username, password }),
+  });
+}
+
+export function trackLessonView(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonView', lessonId }),
   });
 }
 

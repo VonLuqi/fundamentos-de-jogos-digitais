@@ -30,7 +30,6 @@ import {
   generateCode,
   setAvatar,
   listCodes,
-  listUsers,
   logout,
   getSession,
   rankForXp,
@@ -587,33 +586,7 @@ function initAdminTools() {
   });
 
   btnSouls?.addEventListener('click', async () => {
-    try {
-      const { users } = await listUsers(currentToken);
-      const wrapper = document.createElement('div');
-
-      users.forEach((u) => {
-        const row = document.createElement('div');
-        row.className = 'code-row';
-
-        const name = document.createElement('span');
-        name.className = 'code-row__code';
-        name.textContent = u.role === 'admin' ? `♛ ${u.name}` : u.name;
-
-        const meta = document.createElement('span');
-        meta.className = 'code-row__meta';
-        meta.textContent = `${u.xp} XP • ${u.completedLessons.length} aula(s) • ${u.achievements.length} conquista(s)`;
-
-        row.append(name, meta);
-        wrapper.appendChild(row);
-      });
-
-      openScrollModal(`Almas Registradas (${users.length})`, wrapper);
-    } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Falha ao consultar as almas.';
-      const p = document.createElement('p');
-      p.textContent = message;
-      openScrollModal('Erro', p);
-    }
+    window.location.href = ROUTES.souls();
   });
 }
 
