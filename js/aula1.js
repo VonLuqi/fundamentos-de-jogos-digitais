@@ -422,6 +422,12 @@ function initCompletion() {
   });
 }
 
+function initAdminExample() {
+  const example = document.getElementById('gdd-example');
+  if (!example) return;
+  example.hidden = currentUser?.role !== 'admin';
+}
+
 async function init() {
   initTabs();
   initSlidesViewer();
@@ -432,6 +438,8 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
+
+  initAdminExample();
 
   await initParagraphPersistence();
   initCompletion();
