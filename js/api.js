@@ -30,7 +30,7 @@ const SESSION_KEY = 'activeSession';
    `avatarN.*` existem de fato em assets/avatars/ — basta adicionar
    ou remover arquivos na pasta, nenhum número precisa ser editado
    manualmente aqui. */
-export const AVATAR_EXTENSIONS = ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'];
+export const AVATAR_EXTENSIONS = ['png', 'jpg', 'jpeg', 'jfif', 'webp', 'gif', 'svg'];
 
 /* avatar1.* é sempre o fallback garantido, então o valor inicial (antes
    da detecção terminar) é 1 — nunca 0, para não quebrar o módulo. */
