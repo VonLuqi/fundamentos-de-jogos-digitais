@@ -5,14 +5,11 @@ import {
   requireSession,
   getSession,
   getLessonCode,
-  fetchLessonGates,
-  setLessonGate,
   getLessonParagraph,
   saveLessonParagraph,
 } from './api.js';
 
 const LESSON_ID = 'aula1';
-const GATE_KEYS = ['aula1_referencias', 'aula1_nota_instrutor'];
 const PPTX_FILE = 'aula01-circulo-magico-roguelite.pptx';
 const PDF_FILE = 'aula01-circulo-magico-roguelite.pdf';
 
@@ -168,73 +165,6 @@ async function initParagraphPersistence() {
       saveButton.textContent = previous;
       setCompletionAvailability();
     }
-  });
-}
-
-function applyGateState(gates) {
-  document.querySelectorAll('[data-gate]').forEach((card) => {
-    const key = card.getAttribute('data-gate');
-    const released = Boolean(gates?.[key]);
-    card.classList.toggle('is-released', released);
-  });
-
-  document.querySelectorAll('[data-gate-toggle]').forEach((button) => {
-    const key = button.getAttribute('data-gate-toggle');
-    const released = Boolean(gates?.[key]);
-    button.textContent = released
-      ? `Reaplicar censura: ${prettyGateName(key)}`
-      : `Liberar: ${prettyGateName(key)}`;
-    button.dataset.released = String(released);
-  });
-}
-
-function prettyGateName(key) {
-  if (key === 'aula1_referencias') return 'Referências';
-  if (key === 'aula1_nota_instrutor') return 'Nota do Instrutor';
-  return key;
-}
-
-async function loadGates() {
-  if (!currentToken) return;
-  try {
-    const { gates } = await fetchLessonGates(currentToken, LESSON_ID);
-    applyGateState(gates || {});
-  } catch {
-    const fallback = {};
-    GATE_KEYS.forEach((key) => {
-      fallback[key] = false;
-    });
-    applyGateState(fallback);
-  }
-}
-
-function initAdminGates() {
-  const panel = document.getElementById('admin-gates');
-  if (!panel) return;
-
-  const isAdmin = currentUser?.role === 'admin';
-  panel.hidden = !isAdmin;
-  if (!isAdmin) return;
-
-  panel.querySelectorAll('[data-gate-toggle]').forEach((button) => {
-    button.addEventListener('click', async () => {
-      const gateKey = button.getAttribute('data-gate-toggle');
-      const currentlyReleased = button.dataset.released === 'true';
-
-      button.disabled = true;
-      const previous = button.textContent;
-      button.textContent = 'Atualizando...';
-      try {
-        const { gates } = await setLessonGate(currentToken, LESSON_ID, gateKey, !currentlyReleased);
-        applyGateState(gates || {});
-      } catch (error) {
-        const message = error instanceof ApiError ? error.message : 'Falha ao atualizar censura.';
-        window.alert(message);
-        button.textContent = previous;
-      } finally {
-        button.disabled = false;
-      }
-    });
   });
 }
 
@@ -468,9 +398,6 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
-
-  initAdminGates();
-  await loadGates();
 
   await initParagraphPersistence();
   initFeelLab();

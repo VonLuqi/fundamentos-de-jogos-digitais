@@ -50,8 +50,6 @@
   <main class="lesson-main">
     <section id="fundamentos" class="tab-panel is-active" role="tabpanel">
       <article class="hades-frame lesson-content">
-        <p class="lesson-chip">Tópico da Ementa: Conceitos de jogos e Ontologia do Jogo</p>
-
         <h2 class="lesson-title">Quando a morte vira parte do jogo?</h2>
         <p>
           No roguelite, a morte não é somente punição: ela encerra a corrida atual, preserva leitura do sistema e prepara
@@ -95,46 +93,54 @@
           <li>Atrito/desaceleração: precisão versus deslizamento.</li>
           <li>Gravidade/impulso: queda, risco e recuperação.</li>
         </ul>
-
-        <div class="censored-card" data-gate="aula1_referencias" data-default="locked">
-          <div class="censored-card__veil" aria-hidden="true">CENSURADO · AGUARDANDO LIBERAÇÃO DO ADM</div>
-          <div class="censored-card__content">
-            <h3 class="lesson-subtitle">Referências essenciais da aula</h3>
-            <p>[15, 37, 52] Círculo Mágico e fronteiras normativas do jogo.</p>
-            <p>[85] Roguelite e tensão consentida no ciclo morrer-aprender-retornar.</p>
-            <p>[17, 30, 107] CharacterBody2D e parâmetros de game feel observáveis no Inspector.</p>
-          </div>
-        </div>
-
-        <div class="censored-card" data-gate="aula1_nota_instrutor" data-default="locked">
-          <div class="censored-card__veil" aria-hidden="true">CENSURADO · AGUARDANDO LIBERAÇÃO DO ADM</div>
-          <div class="censored-card__content">
-            <h3 class="lesson-subtitle">Nota do instrutor (liberação coletiva)</h3>
-            <p>
-              Protocolo de mesa: mudar uma variável, jogar 30 segundos, registrar, restaurar e comparar.
-              O foco é verbalizar sensação com verbos de ação: entrar, arriscar e retornar.
-            </p>
-          </div>
-        </div>
-
-        <section id="admin-gates" class="admin-gates" hidden>
-          <h3 class="lesson-subtitle">Controles de Censura (ADM)</h3>
-          <p class="admin-gates__hint">Ao liberar um bloco, todos os alunos passam a enxergar o conteúdo imediatamente.</p>
-          <div class="admin-gates__buttons">
-            <button type="button" class="lesson-cta lesson-cta--ghost" data-gate-toggle="aula1_referencias">Liberar Referências</button>
-            <button type="button" class="lesson-cta lesson-cta--ghost" data-gate-toggle="aula1_nota_instrutor">Liberar Nota do Instrutor</button>
-          </div>
-        </section>
       </article>
     </section>
 
     <section id="oficina" class="tab-panel" role="tabpanel">
       <article class="hades-frame lesson-content">
-        <h2 class="lesson-title">Prática na Godot (100 min): laboratório de Game Feel</h2>
+        <h2 class="lesson-title">Prática na Godot: laboratório de Game Feel</h2>
         <p>
           A interação fica nesta própria página: altere os parâmetros abaixo para sentir como o herói muda de comportamento.
           Depois leve as hipóteses para o projeto base na Godot com CharacterBody2D.
         </p>
+
+        <h3 class="lesson-subtitle">Passo a passo para o aluno na Godot</h3>
+        <ol class="lesson-list">
+          <li>Abrir a Godot e clicar em <strong>New Project</strong>. Nome sugerido: <strong>LabGameFeelAula1</strong>.</li>
+          <li>Escolher uma pasta vazia, manter o renderer padrão e clicar em <strong>Create &amp; Edit</strong>.</li>
+          <li>Na cena principal, clicar em <strong>+</strong> e criar um nó <strong>CharacterBody2D</strong> com nome <strong>Player</strong>.</li>
+          <li>Adicionar um <strong>CollisionShape2D</strong> como filho do Player e selecionar um formato simples (retângulo ou cápsula).</li>
+          <li>Adicionar um <strong>Sprite2D</strong> como filho do Player (pode usar qualquer imagem temporária).</li>
+          <li>Criar um <strong>StaticBody2D</strong> para o chão, com <strong>CollisionShape2D</strong>, para o personagem conseguir ficar em pé e pular.</li>
+          <li>Com o nó Player selecionado, clicar em <strong>Attach Script</strong> e aceitar o script padrão criado pela Godot para CharacterBody2D.</li>
+          <li>No script padrão, localizar as constantes <strong>SPEED</strong> e <strong>JUMP_VELOCITY</strong>. Exemplo inicial: SPEED = 300.0 e JUMP_VELOCITY = -400.0.</li>
+          <li>Salvar a cena como <strong>main.tscn</strong>, marcar como cena principal e executar para testar o comportamento base.</li>
+          <li>Parar o jogo e modificar apenas um valor por vez no script. Primeiro teste: SPEED = 200.0, depois SPEED = 420.0.</li>
+          <li>Executar após cada mudança e repetir o mesmo pequeno trajeto para comparar sensação de controle.</li>
+          <li>Testar salto alterando JUMP_VELOCITY. Exemplo: -320.0 (salto mais baixo) e -520.0 (salto mais alto).</li>
+          <li>Registrar em três linhas: "valor alterado", "efeito percebido", "isso melhorou ou piorou o controle".</li>
+          <li>Ao final, escolher uma combinação final de SPEED e JUMP_VELOCITY e justificar em uma frase curta.</li>
+        </ol>
+
+        <figure class="lesson-media">
+          <img
+            class="lesson-media__img"
+            src="../assets/images/Aula01-Img01.png"
+            alt="Árvore da cena na Godot com Player CharacterBody2D e nós filhos"
+            loading="lazy"
+          />
+          <figcaption class="lesson-media__caption">Estrutura básica da cena na Godot para iniciar o laboratório.</figcaption>
+        </figure>
+
+        <figure class="lesson-media">
+          <img
+            class="lesson-media__img"
+            src="../assets/images/Aula01-Img02.png"
+            alt="Script padrão do CharacterBody2D com destaque para SPEED e JUMP_VELOCITY"
+            loading="lazy"
+          />
+          <figcaption class="lesson-media__caption">Script padrão: altere apenas SPEED e JUMP_VELOCITY para comparar o game feel.</figcaption>
+        </figure>
 
         <div class="feel-layout">
           <section class="feel-controls" aria-label="Parâmetros de game feel">
@@ -173,6 +179,15 @@
 
         <h3 class="lesson-subtitle">Integração documental (GDD)</h3>
         <p>Escreva o primeiro parágrafo da Player Fantasy usando os verbos entrar, arriscar e retornar.</p>
+        <section class="gdd-example" aria-label="Exemplo pronto para o professor">
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            No círculo mágico de Ecos do Subsolo, o jogador vive a fantasia de entrar em ruínas vivas como um
+            explorador que lê o perigo em cada sala. A cada combate ele precisa arriscar rotas, recursos e tempo,
+            escolhendo entre avançar mais fundo ou recuar para preservar a corrida. Quando falha, ele retorna ao
+            início mais preparado, com melhor leitura dos padrões e decisões mais conscientes para a próxima tentativa.
+          </p>
+        </section>
         <textarea id="gdd-text" class="gdd-text" rows="8" placeholder="No círculo mágico de [nome], o jogador vive a fantasia de...&#10;&#10;entra... arrisca... retorna..."></textarea>
         <div class="gdd-actions">
           <button type="button" id="btn-save-gdd" class="lesson-cta lesson-cta--ghost">Salvar parágrafo</button>

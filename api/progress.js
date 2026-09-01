@@ -16,7 +16,7 @@ const LESSON_CATALOG = {
 };
 
 const LESSON_GATES = {
-  aula1: ['aula1_referencias', 'aula1_nota_instrutor'],
+  aula1: [],
 };
 
 const ACHIEVEMENT_RULES = [];
