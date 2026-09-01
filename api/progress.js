@@ -19,7 +19,12 @@ const LESSON_GATES = {
   aula1: [],
 };
 
-const ACHIEVEMENT_RULES = [];
+const ACHIEVEMENT_RULES = [
+  {
+    id: 'aula1_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula1'),
+  },
+];
 
 function defaultGatesForLesson(lessonId) {
   const gates = LESSON_GATES[String(lessonId || '')] || [];

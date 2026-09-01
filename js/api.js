@@ -451,7 +451,14 @@ export function xpWithinLevel(xp) {
   return xp % LEVEL_XP_BASE;
 }
 
-export const ACHIEVEMENTS = [];
+export const ACHIEVEMENTS = [
+  {
+    id: 'aula1_concluida',
+    icon: '🏁',
+    name: 'Primeira Travessia',
+    desc: 'Concluir a Aula 01 e realizar sua primeira oferenda ao Estige.',
+  },
+];
 
 export const LESSONS = [
   {
