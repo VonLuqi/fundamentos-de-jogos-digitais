@@ -46,3 +46,6 @@ coverage/
 
 .vercel
 .env*
+
+# ==================== Ferramentas Locais ====================
+threejs-skills/
