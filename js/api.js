@@ -56,6 +56,7 @@ const AVATAR_FILES = [
   'avatar30.webp',
   'avatar31.webp',
   'avatar32.webp',
+  'avatar33.webp',
 ];
 
 const AVATAR_COUNT = AVATAR_FILES.length;
