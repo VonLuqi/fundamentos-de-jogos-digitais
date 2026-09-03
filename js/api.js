@@ -19,80 +19,56 @@
 const SESSION_KEY = 'activeSession';
 
 /* ---------- Imagens de avatar ----------
-   Arquivos esperados em assets/avatars/ (ver assets/avatars/README.md
-   para instruções de onde colocar as imagens). O índice corresponde
-   ao `avatarIndex`/`avatar_index` salvo no usuário.
-   Qualquer extensão de imagem comum é aceita: o cliente tenta, em
-   ordem, cada extensão de AVATAR_EXTENSIONS até encontrar um arquivo
-   que exista (ex.: avatar1.jpg, avatar2.png, avatar3.webp...).
-   A QUANTIDADE de avatares é detectada automaticamente em tempo de
-   execução (ver detectAvatarCount()) contando quantos arquivos
-   `avatarN.*` existem de fato em assets/avatars/ — basta adicionar
-   ou remover arquivos na pasta, nenhum número precisa ser editado
-   manualmente aqui. */
-export const AVATAR_EXTENSIONS = ['png', 'jpg', 'jpeg', 'jfif', 'webp', 'gif', 'svg'];
+   A galeria é estática e explicitamente mapeada para evitar probing por
+   extensão e a fila de 404s que isso gerava no boot. O índice continua
+   sendo 0-based e corresponde ao `avatarIndex`/`avatar_index` salvo no
+   usuário. */
+const AVATAR_FILES = [
+  'avatar1.webp',
+  'avatar2.webp',
+  'avatar3.webp',
+  'avatar4.webp',
+  'avatar5.webp',
+  'avatar6.webp',
+  'avatar7.webp',
+  'avatar8.webp',
+  'avatar9.webp',
+  'avatar10.webp',
+  'avatar11.webp',
+  'avatar12.webp',
+  'avatar13.webp',
+  'avatar14.webp',
+  'avatar15.webp',
+  'avatar16.webp',
+  'avatar17.webp',
+  'avatar18.webp',
+  'avatar19.webp',
+  'avatar20.webp',
+  'avatar21.webp',
+  'avatar22.webp',
+  'avatar23.webp',
+  'avatar24.webp',
+  'avatar25.webp',
+  'avatar26.webp',
+  'avatar27.webp',
+  'avatar28.webp',
+  'avatar29.webp',
+  'avatar30.webp',
+  'avatar31.webp',
+  'avatar32.webp',
+];
 
-/* avatar1.* é sempre o fallback garantido, então o valor inicial (antes
-   da detecção terminar) é 1 — nunca 0, para não quebrar o módulo. */
-let avatarCount = 1;
-let avatarCountPromise = null;
+const AVATAR_COUNT = AVATAR_FILES.length;
+const AVATAR_URLS = AVATAR_FILES.map((file) => `${rootPath()}/assets/avatars/${file}`);
 
-/* Cache: índice (0-based) -> URL já confirmada como existente. Evita
-   ter que re-testar todas as extensões (AVATAR_EXTENSIONS) do zero a
-   cada troca de avatar — sem isso, cada clique podia levar vários
-   round-trips de rede (404 em png/jpg/jpeg antes de achar o .webp
-   real, por exemplo), dando a impressão de que era preciso clicar
-   mais de uma vez para a imagem mudar. */
-const resolvedAvatarUrl = new Map();
-
-/** Testa se existe algum arquivo `avatar{fileNumber}.*` (qualquer extensão). Resolve a URL encontrada, ou `null`. */
-function probeAvatarFile(fileNumber) {
-  const candidates = AVATAR_EXTENSIONS.map((ext) => `${rootPath()}/assets/avatars/avatar${fileNumber}.${ext}`);
-  return new Promise((resolve) => {
-    let i = 0;
-    const img = new Image();
-    const attempt = () => {
-      if (i >= candidates.length) {
-        resolve(null);
-        return;
-      }
-      img.src = candidates[i++];
-    };
-    img.onload = () => resolve(img.src);
-    img.onerror = attempt;
-    attempt();
-  });
-}
-
-/**
- * Detecta quantos avatares existem de fato em assets/avatars/, testando
- * sequencialmente avatar1, avatar2, avatar3... até o primeiro número que
- * não tenha nenhum arquivo correspondente (qualquer extensão). Cacheia
- * o resultado (uma única varredura por carregamento de página) e
- * atualiza o valor retornado por `getAvatarCount()`.
- * Deve ser chamada (e aguardada) antes de renderizar/ciclar avatares.
- */
+/** Quantidade de avatares disponível na galeria estática. */
 export function detectAvatarCount() {
-  if (avatarCountPromise) return avatarCountPromise;
-  const MAX_PROBE = 200; // limite de segurança contra pastas mal configuradas
-  avatarCountPromise = (async () => {
-    let count = 0;
-    for (let n = 1; n <= MAX_PROBE; n++) {
-      // eslint-disable-next-line no-await-in-loop -- varredura sequencial e intencional
-      const url = await probeAvatarFile(n);
-      if (!url) break;
-      resolvedAvatarUrl.set(n - 1, url);
-      count = n;
-    }
-    avatarCount = Math.max(count, 1);
-    return avatarCount;
-  })();
-  return avatarCountPromise;
+  return Promise.resolve(AVATAR_COUNT);
 }
 
-/** Quantidade de avatares detectada (ver detectAvatarCount()). */
+/** Quantidade de avatares disponível na galeria estática. */
 export function getAvatarCount() {
-  return avatarCount;
+  return AVATAR_COUNT;
 }
 
 /**
@@ -105,67 +81,40 @@ export function avatarSafeIndex(index) {
   return ((index % count) + count) % count;
 }
 
-/** Lista de caminhos candidatos (uma extensão por vez) para o avatar de índice `index`.
- *  Se a extensão já foi descoberta (ver detectAvatarCount()/cache), ela vem
- *  primeiro na lista — assim a troca de avatar resolve em 1 requisição, não N. */
-export function avatarCandidates(index) {
-  const safeIndex = avatarSafeIndex(index);
-  const file = safeIndex + 1;
-  const generated = AVATAR_EXTENSIONS.map((ext) => `${rootPath()}/assets/avatars/avatar${file}.${ext}`);
-  const cached = resolvedAvatarUrl.get(safeIndex);
-  if (cached) {
-    return [cached, ...generated.filter((url) => url !== cached)];
-  }
-  return generated;
-}
-
-
 /**
- * Carrega, em `imgEl`, a imagem do avatar de índice `index`, tentando
- * cada extensão suportada em ordem (ver AVATAR_EXTENSIONS) até um
- * `load` bem-sucedido. Se NENHUMA extensão existir para esse índice
- * (ex.: `avatarIndex` salvo aponta para um arquivo que o usuário ainda
- * não colocou na pasta), cai de volta para o avatar de índice 0 — que
- * deve sempre existir — em vez de deixar a tag <img> quebrada/vazia.
+ * Carrega, em `imgEl`, a imagem do avatar de índice `index` usando um
+ * caminho único e estático. Se a imagem não existir, cai de volta para
+ * o avatar 0, sem varrer extensões nem disparar a sequência de 404s.
  * Nunca lança: resolve `true`/`false` conforme o sucesso final.
  */
 export function loadAvatarImage(imgEl, index) {
-  function tryIndex(candidateIndex, allowFallback) {
-    const candidates = avatarCandidates(candidateIndex);
-    return new Promise((resolve) => {
-      let i = 0;
-      const cleanup = () => {
-        imgEl.onload = null;
-        imgEl.onerror = null;
-      };
-      const attempt = () => {
-        if (i >= candidates.length) {
-          cleanup();
-          resolve(false);
-          return;
-        }
-        imgEl.src = candidates[i++];
-      };
-      imgEl.onload = () => {
-        // Cacheia a extensão descoberta (caso ainda não estivesse, ex.:
-        // avatar adicionado depois da varredura inicial) para que a
-        // próxima troca para este índice seja instantânea.
-        resolvedAvatarUrl.set(avatarSafeIndex(candidateIndex), imgEl.src);
-        cleanup();
-        resolve(true);
-      };
-      imgEl.onerror = attempt;
-      attempt();
-    }).then(async (loaded) => {
-      if (loaded) return true;
-      if (allowFallback && candidateIndex !== 0) {
-        return tryIndex(0, false); // último recurso: avatar padrão (índice 0)
-      }
-      return false;
-    });
-  }
+  return new Promise((resolve) => {
+    const safeIndex = avatarSafeIndex(index);
+    const fallbackUrl = AVATAR_URLS[0];
+    let fallbackTried = safeIndex === 0;
+    const cleanup = () => {
+      imgEl.onload = null;
+      imgEl.onerror = null;
+    };
 
-  return tryIndex(index, true);
+    imgEl.onload = () => {
+      cleanup();
+      resolve(true);
+    };
+
+    imgEl.onerror = () => {
+      if (fallbackTried) {
+        cleanup();
+        resolve(false);
+        return;
+      }
+
+      fallbackTried = true;
+      imgEl.src = fallbackUrl;
+    };
+
+    imgEl.src = AVATAR_URLS[safeIndex] ?? fallbackUrl;
+  });
 }
 
 /* ============================================================
@@ -243,6 +192,10 @@ async function request(path, options = {}) {
     throw new ApiError(payload?.error ?? 'Erro desconhecido no Domínio.', response.status, payload);
   }
   return payload;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 /* ============================================================
@@ -347,6 +300,19 @@ export async function setAvatar(token, avatarIndex) {
   return { ...payload, user: normalizeUser(payload.user) };
 }
 
+export async function submitMinigameRun(token, xp, durationSeconds = 0) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'addRunXP',
+      xp: Number(xp) || 0,
+      duration: Number(durationSeconds) || 0,
+    }),
+  });
+  return { ...payload, user: normalizeUser(payload.user) };
+}
+
 export function listCodes(token) {
   return request('/progress', {
     method: 'POST',
@@ -425,9 +391,17 @@ export async function requireSession() {
     return { session, user };
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
-      clearSession();
-      window.location.replace(ROUTES.auth());
-      return null;
+      // Segunda chance para inconsistências transitórias entre login e leitura da sessão.
+      try {
+        await wait(250);
+        const { user } = await validateSession(session.token);
+        saveSession({ token: session.token, name: user.name, role: user.role });
+        return { session, user };
+      } catch {
+        clearSession();
+        window.location.replace(ROUTES.auth());
+        return null;
+      }
     }
     // Erro de rede/API fora do ar: propaga para a página exibir aviso.
     throw error;
@@ -466,21 +440,60 @@ export const ACHIEVEMENTS = [
     icon: '🏁',
     name: 'Primeira Travessia',
     desc: 'Concluir a Aula 01 e realizar sua primeira oferenda ao Estige.',
+    hidden: false,
   },
   {
     id: 'gdd_integracao_documental',
     icon: '📜',
     name: 'Escriba do Submundo',
     desc: 'Entregar a integração documental do GDD da Aula 01.',
+    hidden: false,
+  },
+  {
+    id: 'segredo_cartografo_do_inspector',
+    icon: '🧭',
+    name: 'Cartógrafo do Inspector',
+    desc: 'Segredo descoberto: registrar ao menos 3 testes diferentes na Aula 01.',
+    hidden: true,
+  },
+  {
+    id: 'segredo_alquimista_da_fisica',
+    icon: '⚗️',
+    name: 'Alquimista da Física',
+    desc: 'Segredo descoberto: relacionar massa, gravidade, fricção e elasticidade no relatório.',
+    hidden: true,
+  },
+  {
+    id: 'segredo_juramento_do_circulo',
+    icon: '🔮',
+    name: 'Juramento do Círculo',
+    desc: 'Segredo descoberto: fechar o relatório com a síntese completa das seis variáveis.',
+    hidden: true,
   },
 ];
 
-export const LESSONS = [
+export const MODULES = [
   {
-    id: 'aula1',
-    number: '01',
-    title: 'O Círculo Mágico do Roguelite',
-    subtitle: 'Teoria do jogo, Game Feel e prática na Godot',
-    rewardXp: 30,
+    id: 'modulo1',
+    number: 'M1',
+    title: 'Fundações, Cultura e Interface',
+    subtitle: 'Aulas 1 a 5 · 10h',
+    lessons: [
+      {
+        id: 'aula1',
+        number: '01',
+        title: 'O Círculo Mágico e a Interface Amigável da Engine',
+        subtitle: 'Conceitos de jogos, leitura da Godot 4 e prática no Inspector',
+        rewardXp: 30,
+      },
+    ],
   },
 ];
+
+export const LESSONS = MODULES.flatMap((module) => module.lessons.map((lesson) => ({
+  ...lesson,
+  moduleId: module.id,
+  moduleNumber: module.number,
+  moduleTitle: module.title,
+  moduleSubtitle: module.subtitle,
+})));

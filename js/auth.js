@@ -14,7 +14,7 @@
 
 'use strict';
 
-import { login, register, saveSession, getSession, ROUTES, ApiError } from './api.js';
+import { login, register, saveSession, getSession, clearSession, validateSession, ROUTES, ApiError } from './api.js';
 
 /* ============================
    1. UI HELPERS
@@ -60,6 +60,32 @@ function redirectToDashboard() {
   window.setTimeout(() => {
     window.location.href = ROUTES.dashboard();
   }, 320);
+}
+
+function wait(ms) {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
+async function confirmSessionBeforeRedirect(token, fallbackUser) {
+  const delays = [0, 220, 600];
+
+  for (const delay of delays) {
+    if (delay > 0) await wait(delay);
+    try {
+      const { user } = await validateSession(token);
+      saveSession({ token, name: user.name, role: user.role });
+      return user;
+    } catch {
+      // tenta novamente para absorver falhas transitórias de consistência/rede
+    }
+  }
+
+  if (fallbackUser) {
+    saveSession({ token, name: fallbackUser.name, role: fallbackUser.role });
+    return fallbackUser;
+  }
+
+  throw new ApiError('Sessão não pôde ser confirmada.', 401);
 }
 
 /* ============================
@@ -111,9 +137,10 @@ async function handleLoginSubmit(event) {
   setBusy(form, true, 'Selando...');
   try {
     const { token, user } = await login(name, password);
-    saveSession({ token, name: user.name, role: user.role });
+    await confirmSessionBeforeRedirect(token, user);
     redirectToDashboard();
   } catch (error) {
+    clearSession();
     setBusy(form, false);
     const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
     showError(errorEl, message);
@@ -143,9 +170,10 @@ async function handleRegisterSubmit(event) {
   setBusy(form, true, 'Firmando...');
   try {
     const { token, user } = await register(fullName, turma, username, password);
-    saveSession({ token, name: user.name, role: user.role });
+    await confirmSessionBeforeRedirect(token, user);
     redirectToDashboard();
   } catch (error) {
+    clearSession();
     setBusy(form, false);
     const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
     showError(errorEl, message);
@@ -153,15 +181,10 @@ async function handleRegisterSubmit(event) {
   }
 }
 
-/* ============================
-   4. BOOT
-   ============================ */
-function init() {
-  // Já autenticado? Vai direto para o Salão dos Heróis.
-  if (getSession()) {
-    window.location.replace(ROUTES.dashboard());
-    return;
-  }
+let authInteractionsBound = false;
+
+function bindAuthInteractions() {
+  if (authInteractionsBound) return;
 
   initModeToggle();
 
@@ -173,6 +196,40 @@ function init() {
   window.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') window.location.href = ROUTES.home();
   });
+
+  authInteractionsBound = true;
 }
 
-document.addEventListener('DOMContentLoaded', init);
+/* ============================
+   4. BOOT
+   ============================ */
+async function init() {
+  // Os handlers de submit precisam existir imediatamente para evitar
+  // envio nativo enquanto a checagem assíncrona de sessão roda.
+  bindAuthInteractions();
+
+  // Já autenticado? Só redireciona se a sessão ainda for válida no servidor.
+  const session = getSession();
+  if (session?.token) {
+    try {
+      await validateSession(session.token);
+      window.location.replace(ROUTES.dashboard());
+      return;
+    } catch {
+      // Sessão inválida/expirada: limpa e permanece na tela de login.
+      clearSession();
+    }
+  }
+}
+
+function bootAuthPage() {
+  init().catch(() => {
+    // Em erro de rede, mantém usuário na tela de login em vez de loopar.
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAuthPage, { once: true });
+} else {
+  bootAuthPage();
+}

@@ -48,6 +48,10 @@ function sanitizeUser(u) {
 
 export default async function handler(req, res) {
   try {
+    if (!supabase) {
+      return res.status(503).json({ ok: false, error: 'Autenticação offline: Supabase não configurado.' });
+    }
+
     if (req.method === 'GET') {
       const token = req.query?.token;
       if (!token) return res.status(400).json({ ok: false, error: 'Token ausente.' });
@@ -101,7 +105,14 @@ export default async function handler(req, res) {
       if (error) return res.status(500).json({ ok: false, error: 'Erro ao criar usuário.' });
 
       const token = crypto.randomBytes(24).toString('hex');
-      await supabase.from('sessions').insert({ token, user_id: data.id, created_at: new Date().toISOString() });
+      const { error: registerSessionError } = await supabase
+        .from('sessions')
+        .insert({ token, user_id: data.id, created_at: new Date().toISOString() });
+
+      if (registerSessionError) {
+        console.error('[api/auth] falha ao criar sessão após registro:', registerSessionError);
+        return res.status(500).json({ ok: false, error: 'Não foi possível criar a sessão agora. Tente novamente.' });
+      }
 
       return res.status(201).json({ ok: true, token, user: sanitizeUser(data) });
     }
@@ -132,7 +143,14 @@ export default async function handler(req, res) {
       if (!valid) return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
 
       const token = crypto.randomBytes(24).toString('hex');
-      await supabase.from('sessions').insert({ token, user_id: user.id, created_at: new Date().toISOString() });
+      const { error: loginSessionError } = await supabase
+        .from('sessions')
+        .insert({ token, user_id: user.id, created_at: new Date().toISOString() });
+
+      if (loginSessionError) {
+        console.error('[api/auth] falha ao criar sessão após login:', loginSessionError);
+        return res.status(500).json({ ok: false, error: 'Não foi possível iniciar a sessão agora. Tente novamente.' });
+      }
 
       return res.status(200).json({ ok: true, token, user: sanitizeUser(user) });
     }
