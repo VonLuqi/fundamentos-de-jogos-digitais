@@ -8,6 +8,32 @@ const LESSON_PARAGRAPHS_TABLE = 'lesson_paragraphs';
 const LESSON_VIEWS_TABLE = 'lesson_views';
 const CODE_TTL_MINUTES = 20;
 
+const ACHIEVEMENT_RARITY = Object.freeze({
+  STONE: 'stone',
+  COPPER: 'copper',
+  SILVER: 'silver',
+  GOLD: 'gold',
+  RAINBOW: 'rainbow',
+});
+
+const ACHIEVEMENT_DIFFICULTY = Object.freeze({
+  TRIVIAL: 'trivial',
+  EASY: 'easy',
+  MEDIUM: 'medium',
+  HARD: 'hard',
+  MYTHIC: 'mythic',
+});
+
+const DIFFICULTY_TO_RARITY = Object.freeze({
+  [ACHIEVEMENT_DIFFICULTY.TRIVIAL]: ACHIEVEMENT_RARITY.STONE,
+  [ACHIEVEMENT_DIFFICULTY.EASY]: ACHIEVEMENT_RARITY.COPPER,
+  [ACHIEVEMENT_DIFFICULTY.MEDIUM]: ACHIEVEMENT_RARITY.SILVER,
+  [ACHIEVEMENT_DIFFICULTY.HARD]: ACHIEVEMENT_RARITY.GOLD,
+  [ACHIEVEMENT_DIFFICULTY.MYTHIC]: ACHIEVEMENT_RARITY.RAINBOW,
+});
+
+const DEFAULT_ACHIEVEMENT_RARITY = ACHIEVEMENT_RARITY.STONE;
+
 const LESSON_CATALOG = {
   aula1: {
     lessonId: 'aula1',
@@ -59,6 +85,14 @@ const LESSON_SECRET_ACHIEVEMENTS = {
   ],
 };
 
+const ACHIEVEMENT_DIFFICULTY_BY_ID = Object.freeze({
+  aula1_concluida: ACHIEVEMENT_DIFFICULTY.TRIVIAL,
+  gdd_integracao_documental: ACHIEVEMENT_DIFFICULTY.EASY,
+  segredo_cartografo_do_inspector: ACHIEVEMENT_DIFFICULTY.MEDIUM,
+  segredo_alquimista_da_fisica: ACHIEVEMENT_DIFFICULTY.HARD,
+  segredo_juramento_do_circulo: ACHIEVEMENT_DIFFICULTY.MYTHIC,
+});
+
 const ACHIEVEMENT_RULES = [
   {
     id: 'aula1_concluida',
@@ -79,6 +113,22 @@ function normalizeForSecretCheck(text) {
     .replace(/[\u0300-\u036f]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function rarityFromDifficulty(difficulty) {
+  return DIFFICULTY_TO_RARITY[difficulty] || DEFAULT_ACHIEVEMENT_RARITY;
+}
+
+function rarityForAchievement(achievementId) {
+  return rarityFromDifficulty(ACHIEVEMENT_DIFFICULTY_BY_ID[achievementId]);
+}
+
+function mapAchievementDetails(ids = []) {
+  return ids.map((id) => ({
+    id,
+    difficulty: ACHIEVEMENT_DIFFICULTY_BY_ID[id] || ACHIEVEMENT_DIFFICULTY.TRIVIAL,
+    rarity: rarityForAchievement(id),
+  }));
 }
 
 function hasEveryKeyword(text, keywords) {
@@ -339,6 +389,7 @@ export default async function handler(req, res) {
         awarded: {
           xp: rewardRow.xp,
           achievements: awardedAchievements,
+          achievementDetails: mapAchievementDetails(awardedAchievements),
           lesson: rewardRow.lesson_title,
         },
         code: {
@@ -577,6 +628,7 @@ export default async function handler(req, res) {
         awarded = {
           xp: awardedXp,
           achievements: awardedAchievementIds,
+          achievementDetails: mapAchievementDetails(awardedAchievementIds),
         };
       }
 

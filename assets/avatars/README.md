@@ -1,10 +1,12 @@
 # Pasta de Avatares
 
 Esta pasta guarda a galeria fixa de avatares do projeto. O frontend
-carrega cada imagem por caminho exato, sem testar extensões em série.
+carrega cada imagem por caminho exato, sem testar extensoes em serie.
 A galeria foi padronizada para WebP para reduzir peso e simplificar a
-resolução. O índice salvo no banco (`avatar_index`) continua sendo
-0-based e corresponde à ordem abaixo.
+resolucao. O indice salvo no banco (avatar_index) continua sendo
+0-based e corresponde a ordem abaixo.
+
+Total de avatares ativos: 33
 
 Galeria atual:
 
@@ -41,11 +43,14 @@ assets/avatars/avatar29.webp
 assets/avatars/avatar30.webp
 assets/avatars/avatar31.webp
 assets/avatars/avatar32.webp
+assets/avatars/avatar33.webp
 ```
 
-Recomendações:
-- manter nomes e ordem estáveis para não alterar o avatar de usuários
-  que já escolheram um índice;
-- usar imagens quadradas, de preferência 256x256px;
-- manter WebP como formato padrão para os avatares;
-- se a galeria mudar, atualizar `js/api.js` junto com esta lista.
+Recomendacoes:
+- manter nomes e ordem estaveis para nao alterar o avatar de usuarios
+  que ja escolheram um indice;
+- usar imagens quadradas, de preferencia 256x256px;
+- manter WebP como formato padrao para os avatares;
+- ao importar novos avatares, usar o script scripts/import-avatars-webp.mjs;
+- apos importar/limpar, executar scripts/sync-avatar-catalog.mjs para
+  manter js/api.js e este README sincronizados.

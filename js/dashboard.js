@@ -21,6 +21,8 @@ import {
   avatarSafeIndex,
   loadAvatarImage,
   ACHIEVEMENTS,
+  ACHIEVEMENT_RARITY_LABELS,
+  normalizeAchievementRarity,
   LESSONS,
   LEVEL_XP_BASE,
   ROUTES,
@@ -40,11 +42,83 @@ import {
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
 let currentToken = null;
+let rainbowVfxInstancePromise = null;
+let rainbowVfxDisabled = false;
+const rainbowVfxBoundElements = new WeakSet();
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 function visibleAchievementsForUser(user) {
   const unlockedIds = new Set(user.achievements || []);
   if (user.role === 'admin') return ACHIEVEMENTS;
   return ACHIEVEMENTS.filter((achievement) => !achievement.hidden || unlockedIds.has(achievement.id));
+}
+
+function rarityLabelForAchievement(achievement) {
+  const rarity = normalizeAchievementRarity(achievement?.rarity, achievement?.difficulty);
+  return ACHIEVEMENT_RARITY_LABELS[rarity] || ACHIEVEMENT_RARITY_LABELS.stone;
+}
+
+async function loadVfxModuleWithFallback() {
+  const candidates = [
+    'https://esm.sh/@vfx-js/core@1.1.0',
+    new URL('../node_modules/@vfx-js/core/lib/esm/index.js', import.meta.url).href,
+  ];
+
+  for (const specifier of candidates) {
+    try {
+      const mod = await import(specifier);
+      if (mod?.VFX) return mod;
+    } catch {
+      // tenta o próximo candidato
+    }
+  }
+
+  return null;
+}
+
+async function getRainbowVfxInstance() {
+  if (rainbowVfxDisabled || reducedMotionQuery.matches) return null;
+  if (!rainbowVfxInstancePromise) {
+    rainbowVfxInstancePromise = loadVfxModuleWithFallback().then((mod) => {
+      if (!mod?.VFX) return null;
+      return new mod.VFX();
+    });
+  }
+
+  try {
+    return await rainbowVfxInstancePromise;
+  } catch {
+    rainbowVfxDisabled = true;
+    return null;
+  }
+}
+
+async function applyRainbowCardJuiceVfx() {
+  if (rainbowVfxDisabled || reducedMotionQuery.matches) return;
+
+  const rainbowCards = Array.from(document.querySelectorAll('.achievement-card[data-rarity="rainbow"]'));
+  if (rainbowCards.length === 0) return;
+
+  const vfx = await getRainbowVfxInstance();
+  if (!vfx) {
+    rainbowCards.forEach((card) => card.classList.add('is-rainbow-css-fallback'));
+    return;
+  }
+
+  rainbowCards.forEach((card) => {
+    if (rainbowVfxBoundElements.has(card)) return;
+
+    try {
+      vfx.add(card, {
+        shader: 'glitch',
+        overflow: 22,
+      });
+      rainbowVfxBoundElements.add(card);
+      card.classList.add('is-rainbow-vfx');
+    } catch {
+      card.classList.add('is-rainbow-css-fallback');
+    }
+  });
 }
 
 /* ============================================================
@@ -152,6 +226,7 @@ function renderAchievements(user, highlightIds = []) {
   visibleAchievements.forEach((ach, index) => {
     const unlocked = user.role === 'admin' || user.achievements.includes(ach.id);
     const justUnlocked = highlightIds.includes(ach.id);
+    const rarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);
 
     const li = document.createElement('li');
     li.className = [
@@ -162,6 +237,7 @@ function renderAchievements(user, highlightIds = []) {
       .filter(Boolean)
       .join(' ');
     li.style.setProperty('--ach-index', String(index));
+    li.dataset.rarity = rarity;
 
     const icon = document.createElement('span');
     icon.className = 'achievement-card__icon';
@@ -172,13 +248,24 @@ function renderAchievements(user, highlightIds = []) {
     name.className = 'achievement-card__name';
     name.textContent = ach.name;
 
+    const rarityBadge = document.createElement('p');
+    rarityBadge.className = 'achievement-card__rarity';
+    rarityBadge.textContent = rarityLabelForAchievement(ach);
+
     const desc = document.createElement('p');
     desc.className = 'achievement-card__desc';
     desc.textContent = ach.desc;
 
-    li.append(icon, name, desc);
+    li.append(icon, name, rarityBadge, desc);
+
+    if (rarity === 'rainbow' && justUnlocked) {
+      li.classList.add('is-rainbow-burst');
+    }
+
     grid.appendChild(li);
   });
+
+  void applyRainbowCardJuiceVfx();
 }
 
 /* ============================================================
@@ -361,39 +448,128 @@ function initAvatarSwap() {
 
   function buildAvatarPickerContent() {
     const wrapper = document.createElement('div');
+    wrapper.className = 'avatar-picker';
 
-    const note = document.createElement('p');
-    note.className = 'scroll-modal__note';
-    note.textContent = 'Escolha diretamente um avatar da galeria.';
+    const head = document.createElement('div');
+    head.className = 'avatar-picker__head';
+
+    const title = document.createElement('p');
+    title.className = 'avatar-picker__title';
+    title.textContent = 'Biblioteca de Avatares';
+
+    const subtitle = document.createElement('p');
+    subtitle.className = 'avatar-picker__subtitle';
+    subtitle.textContent = 'Selecione um avatar da galeria e confirme para aplicar.';
+
+    head.append(title, subtitle);
+
+    const searchWrap = document.createElement('div');
+    searchWrap.className = 'avatar-picker__search';
+
+    const searchLabel = document.createElement('label');
+    searchLabel.className = 'avatar-picker__search-label';
+    searchLabel.htmlFor = 'avatar-picker-search';
+    searchLabel.textContent = 'Buscar avatar';
+
+    const searchInput = document.createElement('input');
+    searchInput.id = 'avatar-picker-search';
+    searchInput.className = 'avatar-picker__search-input';
+    searchInput.type = 'search';
+    searchInput.placeholder = 'Ex.: Avatar 12';
+    searchInput.autocomplete = 'off';
+    searchInput.spellcheck = false;
+
+    searchWrap.append(searchLabel, searchInput);
 
     const grid = document.createElement('div');
     grid.className = 'avatar-picker-grid';
+
+    const empty = document.createElement('p');
+    empty.className = 'avatar-picker__empty';
+    empty.textContent = 'Nenhum avatar encontrado para esse filtro.';
+    empty.hidden = true;
+
+    const meta = document.createElement('p');
+    meta.className = 'avatar-picker__meta';
 
     const status = document.createElement('p');
     status.className = 'avatar-picker__status';
     status.setAttribute('role', 'status');
     status.setAttribute('aria-live', 'polite');
+    status.textContent = 'Carregando galeria...';
+
+    const actions = document.createElement('div');
+    actions.className = 'avatar-picker__actions';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn-gold btn-gold--ghost';
+    cancelBtn.textContent = 'Cancelar';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.type = 'button';
+    confirmBtn.className = 'btn-gold avatar-picker__confirm';
+    confirmBtn.textContent = 'Confirmar Avatar';
+
+    actions.append(cancelBtn, confirmBtn);
 
     const selectedIndex = avatarSafeIndex(currentUser?.avatarIndex ?? 0);
+    let pendingIndex = selectedIndex;
     const allButtons = [];
+    let loadedOk = 0;
+    let loadFailed = 0;
 
     function setBusy(busy) {
       allButtons.forEach((button) => {
         button.disabled = busy;
       });
+      searchInput.disabled = busy;
+      confirmBtn.disabled = busy;
+      cancelBtn.disabled = busy;
     }
 
-    for (let index = 0; index < getAvatarCount(); index += 1) {
+    function updateSelectionUi() {
+      allButtons.forEach((button) => {
+        const buttonIndex = Number(button.dataset.avatarIndex);
+        button.classList.toggle('is-selected', buttonIndex === pendingIndex);
+      });
+
+      meta.textContent = `Selecionado: Avatar ${pendingIndex + 1}`;
+      confirmBtn.disabled = pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0);
+    }
+
+    function applyFilter() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visibleCount = 0;
+
+      allButtons.forEach((button) => {
+        const index = Number(button.dataset.avatarIndex);
+        const label = `avatar ${index + 1}`;
+        const visible = query.length === 0 || label.includes(query) || String(index + 1).includes(query);
+        button.hidden = !visible;
+        if (visible) visibleCount += 1;
+      });
+
+      empty.hidden = visibleCount > 0;
+    }
+
+    const count = getAvatarCount();
+    if (count === 0) {
+      status.textContent = 'Galeria vazia. Adicione avatares para habilitar a seleção.';
+      confirmBtn.disabled = true;
+      searchInput.disabled = true;
+    }
+
+    for (let index = 0; index < count; index += 1) {
       const option = document.createElement('button');
       option.type = 'button';
       option.className = 'avatar-picker__option';
+      option.dataset.avatarIndex = String(index);
       option.setAttribute('aria-label', `Selecionar Avatar ${index + 1}`);
-      if (index === selectedIndex) option.classList.add('is-selected');
 
       const image = document.createElement('img');
       image.className = 'avatar-picker__image';
       image.alt = `Avatar ${index + 1}`;
-      loadAvatarImage(image, index);
 
       const label = document.createElement('span');
       label.className = 'avatar-picker__label';
@@ -402,62 +578,103 @@ function initAvatarSwap() {
       option.append(image, label);
       allButtons.push(option);
 
-      option.addEventListener('click', async () => {
+      loadAvatarImage(image, index)
+        .then((ok) => {
+          if (ok) loadedOk += 1;
+          else loadFailed += 1;
+
+          if (loadedOk + loadFailed === count) {
+            if (loadedOk === 0) {
+              status.textContent = 'Falha ao carregar os avatares agora.';
+              confirmBtn.disabled = true;
+            } else if (loadFailed > 0) {
+              status.textContent = `${loadedOk} avatares disponíveis. ${loadFailed} com falha de imagem.`;
+            } else {
+              status.textContent = `${loadedOk} avatares disponíveis na biblioteca.`;
+            }
+          }
+        });
+
+      option.addEventListener('click', () => {
         if (option.disabled) return;
-
-        if (avatarSafeIndex(currentUser.avatarIndex) === index) {
-          closeScrollModal();
-          return;
-        }
-
-        setBusy(true);
-        status.textContent = 'Salvando avatar...';
-
-        frame.classList.remove('is-swapping');
-        void frame.offsetHeight;
-        frame.classList.add('is-swapping');
-
-        try {
-          const { user } = await setAvatar(currentToken, index);
-          currentUser = user;
-          renderProfile(currentUser);
-          closeScrollModal();
-        } catch (error) {
-          status.textContent = error instanceof ApiError
-            ? error.message
-            : 'Não foi possível trocar o avatar agora.';
-          setBusy(false);
-        }
+        pendingIndex = index;
+        updateSelectionUi();
       });
 
       grid.appendChild(option);
     }
 
-    wrapper.append(note, grid, status);
-    return wrapper;
+    searchInput.addEventListener('input', applyFilter);
+    cancelBtn.addEventListener('click', closeScrollModal);
+
+    confirmBtn.addEventListener('click', async () => {
+      if (confirmBtn.disabled) {
+        if (pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0)) {
+          closeScrollModal();
+        }
+        return;
+      }
+
+      setBusy(true);
+      status.textContent = 'Salvando avatar...';
+
+      frame.classList.remove('is-swapping');
+      void frame.offsetHeight;
+      frame.classList.add('is-swapping');
+
+      try {
+        const { user } = await setAvatar(currentToken, pendingIndex);
+        currentUser = user;
+        renderProfile(currentUser);
+        closeScrollModal();
+      } catch (error) {
+        status.textContent = error instanceof ApiError
+          ? error.message
+          : 'Não foi possível trocar o avatar agora.';
+        setBusy(false);
+      }
+    });
+
+    updateSelectionUi();
+    applyFilter();
+
+    wrapper.append(head, searchWrap, grid, empty, meta, status, actions);
+    return { wrapper, focusElement: searchInput };
   }
 
   frame.addEventListener('click', () => {
-    openScrollModal('Escolha seu Avatar', buildAvatarPickerContent());
+    const picker = buildAvatarPickerContent();
+    openScrollModal('Escolha seu Avatar', picker.wrapper, {
+      closeLabel: 'Fechar galeria',
+      focusElement: picker.focusElement,
+    });
   });
 }
 
 /* ============================================================
    8. MODAL "PERGAMINHO" (substitui o alert nativo)
    ============================================================ */
-function openScrollModal(title, contentNode) {
+function openScrollModal(title, contentNode, options = {}) {
+  const { closeLabel = 'Selar o Pergaminho', focusElement = null } = options;
   const modal = document.getElementById('scroll-modal');
   const titleEl = document.getElementById('scroll-modal-title');
   const bodyEl = document.getElementById('scroll-modal-body');
+  const closeButton = document.getElementById('scroll-modal-close');
   if (!modal || !titleEl || !bodyEl) return;
 
   titleEl.textContent = title;
   bodyEl.innerHTML = '';
   bodyEl.appendChild(contentNode);
 
+  if (closeButton) closeButton.textContent = closeLabel;
+
   modal.hidden = false;
   modal.classList.add('is-open');
-  document.getElementById('scroll-modal-close')?.focus();
+  if (focusElement && typeof focusElement.focus === 'function') {
+    focusElement.focus();
+  } else {
+    closeButton?.focus();
+  }
 }
 
 function closeScrollModal() {

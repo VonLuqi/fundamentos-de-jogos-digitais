@@ -11,7 +11,11 @@
     "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js",
     "dev": "node local-server.mjs",
     "start": "node local-server.mjs",
-    "test": "echo \"No tests defined\""
+    "test": "echo \"No tests defined\"",
+    "avatars:import": "node scripts/import-avatars-webp.mjs",
+    "avatars:import:replace": "node scripts/import-avatars-webp.mjs --mode replace",
+    "avatars:sync": "node scripts/sync-avatar-catalog.mjs",
+    "avatars:sync:clean": "node scripts/sync-avatar-catalog.mjs --clean-legacy"
   },
   "optionalDependencies": {
     "@vercel/kv": "^3.0.0"
@@ -22,6 +26,7 @@
     "bcryptjs": "^3.0.3",
     "cannon": "^0.6.2",
     "dotenv": "^16.1.4",
+    "sharp": "^0.34.4",
     "three": "^0.185.1",
     "three-nebula": "^13.0.0"
   },

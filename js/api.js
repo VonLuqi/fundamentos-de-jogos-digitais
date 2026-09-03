@@ -435,12 +435,58 @@ export function xpWithinLevel(xp) {
   return xp % LEVEL_XP_BASE;
 }
 
-export const ACHIEVEMENTS = [
+export const ACHIEVEMENT_RARITY = Object.freeze({
+  STONE: 'stone',
+  COPPER: 'copper',
+  SILVER: 'silver',
+  GOLD: 'gold',
+  RAINBOW: 'rainbow',
+});
+
+export const ACHIEVEMENT_RARITY_LABELS = Object.freeze({
+  [ACHIEVEMENT_RARITY.STONE]: 'Pedra',
+  [ACHIEVEMENT_RARITY.COPPER]: 'Cobre',
+  [ACHIEVEMENT_RARITY.SILVER]: 'Prata',
+  [ACHIEVEMENT_RARITY.GOLD]: 'Ouro',
+  [ACHIEVEMENT_RARITY.RAINBOW]: 'Arco-íris',
+});
+
+export const ACHIEVEMENT_DIFFICULTY = Object.freeze({
+  TRIVIAL: 'trivial',
+  EASY: 'easy',
+  MEDIUM: 'medium',
+  HARD: 'hard',
+  MYTHIC: 'mythic',
+});
+
+export const DIFFICULTY_TO_RARITY = Object.freeze({
+  [ACHIEVEMENT_DIFFICULTY.TRIVIAL]: ACHIEVEMENT_RARITY.STONE,
+  [ACHIEVEMENT_DIFFICULTY.EASY]: ACHIEVEMENT_RARITY.COPPER,
+  [ACHIEVEMENT_DIFFICULTY.MEDIUM]: ACHIEVEMENT_RARITY.SILVER,
+  [ACHIEVEMENT_DIFFICULTY.HARD]: ACHIEVEMENT_RARITY.GOLD,
+  [ACHIEVEMENT_DIFFICULTY.MYTHIC]: ACHIEVEMENT_RARITY.RAINBOW,
+});
+
+export const DEFAULT_ACHIEVEMENT_RARITY = ACHIEVEMENT_RARITY.STONE;
+
+export function rarityFromDifficulty(difficulty) {
+  return DIFFICULTY_TO_RARITY[difficulty] || DEFAULT_ACHIEVEMENT_RARITY;
+}
+
+export function normalizeAchievementRarity(rarity, difficulty = null) {
+  if (typeof rarity === 'string' && ACHIEVEMENT_RARITY_LABELS[rarity]) {
+    return rarity;
+  }
+  return rarityFromDifficulty(difficulty);
+}
+
+const RAW_ACHIEVEMENTS = [
   {
     id: 'aula1_concluida',
     icon: '🏁',
     name: 'Primeira Travessia',
     desc: 'Concluir a Aula 01 e realizar sua primeira oferenda ao Estige.',
+    difficulty: ACHIEVEMENT_DIFFICULTY.TRIVIAL,
     hidden: false,
   },
   {
@@ -448,6 +494,7 @@ export const ACHIEVEMENTS = [
     icon: '📜',
     name: 'Escriba do Submundo',
     desc: 'Entregar a integração documental do GDD da Aula 01.',
+    difficulty: ACHIEVEMENT_DIFFICULTY.EASY,
     hidden: false,
   },
   {
@@ -455,6 +502,7 @@ export const ACHIEVEMENTS = [
     icon: '🧭',
     name: 'Cartógrafo do Inspector',
     desc: 'Segredo descoberto: registrar ao menos 3 testes diferentes na Aula 01.',
+    difficulty: ACHIEVEMENT_DIFFICULTY.MEDIUM,
     hidden: true,
   },
   {
@@ -462,6 +510,7 @@ export const ACHIEVEMENTS = [
     icon: '⚗️',
     name: 'Alquimista da Física',
     desc: 'Segredo descoberto: relacionar massa, gravidade, fricção e elasticidade no relatório.',
+    difficulty: ACHIEVEMENT_DIFFICULTY.HARD,
     hidden: true,
   },
   {
@@ -469,9 +518,15 @@ export const ACHIEVEMENTS = [
     icon: '🔮',
     name: 'Juramento do Círculo',
     desc: 'Segredo descoberto: fechar o relatório com a síntese completa das seis variáveis.',
+    difficulty: ACHIEVEMENT_DIFFICULTY.MYTHIC,
     hidden: true,
   },
 ];
+
+export const ACHIEVEMENTS = RAW_ACHIEVEMENTS.map((achievement) => ({
+  ...achievement,
+  rarity: normalizeAchievementRarity(achievement.rarity, achievement.difficulty),
+}));
 
 export const MODULES = [
   {
