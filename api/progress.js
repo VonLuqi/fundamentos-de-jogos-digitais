@@ -28,6 +28,37 @@ const ACTIVITY_CATALOG = {
   },
 };
 
+const LESSON_SECRET_ACHIEVEMENTS = {
+  aula1: [
+    {
+      id: 'segredo_cartografo_do_inspector',
+      xp: 15,
+      test: (ctx) => countUniqueTestMarkers(ctx.normalizedText) >= 3,
+    },
+    {
+      id: 'segredo_alquimista_da_fisica',
+      xp: 15,
+      test: (ctx) =>
+        hasEveryKeyword(ctx.normalizedText, ['massa', 'gravidade', 'friccao', 'elasticidade'])
+        && hasAnyKeyword(ctx.normalizedText, ['inercia', 'queda', 'quique', 'desliza', 'deslizamento']),
+    },
+    {
+      id: 'segredo_juramento_do_circulo',
+      xp: 25,
+      test: (ctx) =>
+        hasEveryKeyword(ctx.normalizedText, [
+          'forca de movimento',
+          'impulso de pulo',
+          'massa',
+          'gravidade da cena',
+          'friccao',
+          'elasticidade',
+          'neste mundo, a bola',
+        ]),
+    },
+  ],
+};
+
 const ACHIEVEMENT_RULES = [
   {
     id: 'aula1_concluida',
@@ -38,7 +69,48 @@ const ACHIEVEMENT_RULES = [
 const ALL_ACHIEVEMENT_IDS = [
   ...ACHIEVEMENT_RULES.map((rule) => rule.id),
   ...Object.values(ACTIVITY_CATALOG).map((activity) => activity.achievementId),
+  ...Object.values(LESSON_SECRET_ACHIEVEMENTS).flatMap((entries) => entries.map((entry) => entry.id)),
 ];
+
+function normalizeForSecretCheck(text) {
+  return String(text || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function hasEveryKeyword(text, keywords) {
+  return keywords.every((keyword) => text.includes(keyword));
+}
+
+function hasAnyKeyword(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function countUniqueTestMarkers(text) {
+  const matches = [...text.matchAll(/teste\s*(\d+)/g)].map((entry) => entry[1]);
+  return new Set(matches).size;
+}
+
+function evaluateSecretAchievements(lessonId, paragraphText, alreadyUnlocked = []) {
+  const rules = LESSON_SECRET_ACHIEVEMENTS[String(lessonId || '')] || [];
+  if (rules.length === 0) return [];
+
+  const normalizedText = normalizeForSecretCheck(paragraphText);
+  const context = { normalizedText };
+
+  return rules
+    .filter((rule) => !alreadyUnlocked.includes(rule.id))
+    .filter((rule) => {
+      try {
+        return Boolean(rule.test(context));
+      } catch {
+        return false;
+      }
+    });
+}
 
 function defaultGatesForLesson(lessonId) {
   const gates = LESSON_GATES[String(lessonId || '')] || [];
@@ -190,7 +262,7 @@ export default async function handler(req, res) {
       return res.status(405).json({ ok: false, error: 'Método não permitido.' });
     }
 
-    const { action, token, code, avatarIndex, lessonId, gateKey, released, paragraph } = req.body || {};
+    const { action, token, code, avatarIndex, lessonId, gateKey, released, paragraph, xp, duration } = req.body || {};
     const { data: session } = await supabase
       .from('sessions')
       .select('user_id')
@@ -271,6 +343,36 @@ export default async function handler(req, res) {
           expiresAt: codeExpiresAt(rewardRow),
         },
         leveledUp: levelAfter > levelBefore,
+      });
+    }
+
+    if (action === 'addRunXP') {
+      const xpDelta = Number(xp);
+      const durationSeconds = Number(duration) || 0;
+      if (!Number.isFinite(xpDelta) || xpDelta < 0) {
+        return res.status(400).json({ ok: false, error: 'XP da run inválido.' });
+      }
+
+      const nextXp = Math.max(0, Number(user.xp || 0) + xpDelta);
+      const { data: updated, error: updateError } = await supabase
+        .from(USERS_TABLE)
+        .update({ xp: nextXp })
+        .eq('id', userId)
+        .select('*')
+        .single();
+
+      if (updateError) {
+        return res.status(500).json({ ok: false, error: 'Falha ao salvar XP da run.' });
+      }
+
+      return res.status(200).json({
+        ok: true,
+        user: sanitizeUser(updated),
+        awarded: {
+          xp: xpDelta,
+          durationSeconds,
+        },
+        totalXp: nextXp,
       });
     }
 
@@ -417,8 +519,9 @@ export default async function handler(req, res) {
       }
 
       const activity = ACTIVITY_CATALOG[`${normalizedLessonId}_gdd`];
-      const activityAlreadyAwarded = activity && Array.isArray(user.conquistas)
-        ? user.conquistas.includes(activity.achievementId)
+      const existingAchievements = Array.isArray(user.conquistas) ? [...user.conquistas] : [];
+      const activityAlreadyAwarded = activity
+        ? existingAchievements.includes(activity.achievementId)
         : false;
       const nowIso = new Date().toISOString();
       const { error } = await supabase.from(LESSON_PARAGRAPHS_TABLE).upsert(
@@ -440,9 +543,26 @@ export default async function handler(req, res) {
 
       let awarded = null;
       let updatedUser = user;
+      const awardedAchievementIds = [];
+      let awardedXp = 0;
+
       if (activity && !activityAlreadyAwarded) {
-        const xp = Number(user.xp || 0) + activity.xp;
-        const conquistas = [...(Array.isArray(user.conquistas) ? user.conquistas : []), activity.achievementId];
+        awardedAchievementIds.push(activity.achievementId);
+        awardedXp += Number(activity.xp || 0);
+      }
+
+      const secretAwards = evaluateSecretAchievements(normalizedLessonId, text, existingAchievements);
+      secretAwards.forEach((secret) => {
+        awardedAchievementIds.push(secret.id);
+        awardedXp += Number(secret.xp || 0);
+      });
+
+      if (awardedAchievementIds.length > 0 || awardedXp > 0) {
+        const conquistas = [...existingAchievements];
+        awardedAchievementIds.forEach((id) => {
+          if (!conquistas.includes(id)) conquistas.push(id);
+        });
+        const xp = Number(user.xp || 0) + awardedXp;
         const { data, error: userUpdateError } = await supabase
           .from(USERS_TABLE)
           .update({ xp, conquistas })
@@ -453,8 +573,8 @@ export default async function handler(req, res) {
 
         updatedUser = data;
         awarded = {
-          xp: activity.xp,
-          achievements: [activity.achievementId],
+          xp: awardedXp,
+          achievements: awardedAchievementIds,
         };
       }
 

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Arcane Survivors – Minigame</title>
+  <link rel="stylesheet" href="../css/style.css"> <!-- CSS global da plataforma -->
+  <style>
+    /* Estilos específicos para o minigame */
+    #game-canvas {
+      width:100%; height:100%;
+      display:none; /* Inicia oculto */
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 50; /* Acima dos elementos da UI, mas abaixo do screen-fade */
+    }
+
+    #minigame-hud {
+      position: absolute;
+      left: 1.2rem;
+      right: 1.2rem;
+      bottom: 5.5rem;
+      display: none;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      z-index: 80;
+      pointer-events: none;
+    }
+
+    .minigame-hud__left,
+    .minigame-hud__right {
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .minigame-hud__left {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .minigame-hud__right {
+      justify-content: flex-end;
+      align-self: flex-end;
+    }
+
+    .minigame-hud__panel {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: linear-gradient(180deg, rgba(18, 14, 12, 0.9), rgba(30, 20, 18, 0.78));
+      border: 1px solid rgba(219, 184, 89, 0.9);
+      box-shadow: 0 0 0 1px rgba(207, 167, 89, 0.2), 0 16px 24px rgba(0, 0, 0, 0.38);
+      padding: 0.7rem 0.9rem 0.7rem 0.8rem;
+      min-width: 280px;
+      min-height: 84px;
+    }
+
+    .minigame-hud__portrait {
+      position: relative;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 2px solid rgba(207, 167, 89, 0.9);
+      background: radial-gradient(circle at 50% 35%, rgba(255, 227, 171, 0.9), rgba(207, 167, 89, 0.4) 40%, rgba(0, 0, 0, 0.1) 70%);
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.18), 0 0 10px rgba(207, 167, 89, 0.35);
+      overflow: hidden;
+    }
+
+    .minigame-hud__portrait::before {
+      content: "";
+      position: absolute;
+      inset: 10px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.1));
+      border-radius: 50%;
+      transform: scale(0.85);
+    }
+
+    .minigame-hud__meta {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+
+    .minigame-hud__topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--hades-text-dim);
+    }
+
+    .minigame-hud__level {
+      color: var(--hades-gold-bright);
+      font-weight: 700;
+      text-shadow: 0 0 8px rgba(207, 167, 89, 0.4);
+    }
+
+    .minigame-hud__bar {
+      position: relative;
+      height: 11px;
+      border: 1px solid rgba(207, 167, 89, 0.5);
+      background: rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    .minigame-hud__bar > span {
+      position: absolute;
+      inset: 0 auto 0 0;
+      display: block;
+      width: 50%;
+      background: linear-gradient(90deg, #a7102a, #f06a3d 30%, #f7d76a 100%);
+      box-shadow: 0 0 12px rgba(247, 215, 106, 0.45);
+    }
+
+    .minigame-hud__bar--xp > span {
+      background: linear-gradient(90deg, #4c7362, #8fe3d0 40%, #d9f7f2 100%);
+      box-shadow: 0 0 12px rgba(143, 227, 208, 0.45);
+    }
+
+    .minigame-hud__numbers {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--hades-text);
+    }
+
+    .minigame-hud__stats {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      pointer-events: none;
+    }
+
+    .minigame-stat {
+      min-width: 72px;
+      padding: 0.52rem 0.52rem 0.4rem;
+      text-align: center;
+      background: rgba(17, 15, 13, 0.8);
+      border: 1px solid rgba(207, 167, 89, 0.45);
+      color: var(--hades-text-dim);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+    }
+
+    .minigame-stat strong {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.9rem;
+      color: var(--hades-gold-bright);
+      letter-spacing: 0.06em;
+    }
+
+    .minigame-build {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 210px;
+      padding: 0.7rem 0.8rem;
+      background: rgba(17, 15, 13, 0.8);
+      border: 1px solid rgba(207, 167, 89, 0.45);
+      box-shadow: inset 0 0 12px rgba(255, 255, 255, 0.02);
+      pointer-events: none;
+    }
+
+    .minigame-build--status {
+      min-width: 240px;
+      margin-left: auto;
+    }
+
+    .minigame-build__label {
+      display: block;
+      font-size: 0.62rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--hades-text-dim);
+    }
+
+    .minigame-build__list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.38rem;
+    }
+
+    .minigame-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.45rem;
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--hades-text);
+      background: rgba(241, 196, 97, 0.12);
+      border: 1px solid rgba(207, 167, 89, 0.4);
+      border-radius: 999px;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .minigame-chip--empty {
+      opacity: 0.7;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .minigame-chip__count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.2rem;
+      height: 1.2rem;
+      padding: 0 0.2rem;
+      border-radius: 999px;
+      background: rgba(207, 167, 89, 0.18);
+      border: 1px solid rgba(207, 167, 89, 0.7);
+      color: var(--hades-gold-bright);
+      font-size: 0.56rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .minigame-upgrade {
+      background: linear-gradient(180deg, rgba(20, 17, 15, 0.96), rgba(28, 22, 18, 0.94));
+      border: 1px solid rgba(219, 184, 89, 0.8);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+      max-width: 760px;
+      width: min(92vw, 760px);
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+    }
+
+    .minigame-upgrade h2 {
+      margin: 0 0 1.1rem;
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      color: var(--hades-gold-bright);
+      text-shadow: var(--shadow-gold-glow);
+    }
+
+    .minigame-upgrade__grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .minigame-upgrade__card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.6rem;
+      width: 100%;
+      padding: 1rem 1rem 1.2rem;
+      text-align: left;
+      background: rgba(11, 12, 17, 0.9);
+      border: 1px solid var(--rarity-color, rgba(207, 167, 89, 0.45));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 0 16px rgba(255, 255, 255, 0.02);
+      color: var(--hades-text);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .minigame-upgrade__card:hover {
+      transform: translateY(-2px);
+      border-color: var(--rarity-color, var(--hades-gold-bright));
+      box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 10px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .minigame-upgrade__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 0.5rem;
+    }
+
+    .minigame-upgrade__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      gap: 0.5rem;
+      margin-top: -0.1rem;
+    }
+
+    .minigame-upgrade__tag {
+      display: inline-block;
+      padding: 0.18rem 0.45rem;
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--hades-gold-bright);
+      background: rgba(241, 196, 97, 0.12);
+      border: 1px solid rgba(207, 167, 89, 0.45);
+    }
+
+    .minigame-upgrade__rarity,
+    .minigame-upgrade__state,
+    .minigame-upgrade__impact {
+      display: inline-block;
+      padding: 0.16rem 0.45rem;
+      font-size: 0.54rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid var(--rarity-color, rgba(207, 167, 89, 0.45));
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .minigame-upgrade__rarity {
+      color: var(--rarity-color, var(--hades-gold-bright));
+    }
+
+    .minigame-upgrade__state {
+      color: var(--hades-text);
+    }
+
+    .minigame-upgrade__impact {
+      color: var(--hades-gold-bright);
+    }
+
+    .minigame-upgrade__card strong {
+      font-family: var(--font-title);
+      font-size: 1.2rem;
+      color: var(--hades-text);
+    }
+
+    .minigame-upgrade__card small {
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--hades-text-dim);
+    }
+
+    #minigame-result-overlay,
+    #minigame-upgrade-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 5, 12, 0.72);
+      backdrop-filter: blur(6px);
+      z-index: 90;
+      transition: opacity 0.25s ease;
+    }
+
+    .minigame-result {
+      background: linear-gradient(180deg, var(--hades-panel), var(--hades-panel-alt));
+      border: 1px solid var(--hades-gold-dark);
+      box-shadow: var(--shadow-panel);
+      max-width: 520px;
+      width: min(90vw, 520px);
+      padding: var(--space-8);
+      text-align: center;
+    }
+
+    .minigame-result__eyebrow {
+      margin: 0 0 var(--space-2);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--hades-gold-bright);
+      font-size: 0.75rem;
+    }
+
+    .minigame-result h2 {
+      margin: 0 0 var(--space-3);
+      font-family: var(--font-title);
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--hades-text);
+    }
+
+    .minigame-result p {
+      margin: 0 0 var(--space-6);
+      color: var(--hades-text-dim);
+      line-height: 1.6;
+    }
+
+    /* Sobrescrita de estilo para o menu do minigame, usando classes existentes */
+    #menu-layer.stage-select__list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #menu-layer .stage-select__item {
+      text-align: center;
+      background: linear-gradient(180deg, var(--hades-panel), var(--hades-panel-alt));
+      border: 6px double var(--hades-gold-dark);
+      padding: var(--space-8) var(--space-6);
+      box-shadow: var(--shadow-panel);
+      max-width: 900px;
+      width: min(90vw, 900px);
+    }
+
+    .character-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0 1.25rem;
+    }
+
+    .character-card {
+      background: rgba(17, 17, 24, 0.9);
+      border: 1px solid rgba(219, 184, 89, 0.3);
+      color: var(--hades-text);
+      padding: 1rem 0.8rem;
+      cursor: pointer;
+      text-align: left;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .character-card:hover,
+    .character-card.is-selected {
+      transform: translateY(-2px);
+      border-color: var(--hades-gold-bright);
+      box-shadow: 0 0 0 1px rgba(219, 184, 89, 0.35);
+    }
+
+    .character-card__name {
+      display: block;
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      color: var(--hades-gold-bright);
+      margin-bottom: 0.45rem;
+    }
+
+    .character-card__weapon {
+      display: block;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--hades-text-dim);
+      margin-bottom: 0.6rem;
+    }
+
+    .character-card__stats {
+      font-size: 0.9rem;
+      color: var(--hades-text-dim);
+      line-height: 1.5;
+    }
+
+    #selected-character-summary {
+      margin: 0 0 1rem;
+      color: var(--hades-text-dim);
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+    }
+
+    #menu-layer h2.title {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 2.2rem;
+      color: var(--hades-gold-bright);
+      text-shadow: var(--shadow-gold-glow);
+      margin-bottom: var(--space-4);
+    }
+    #menu-layer p.description {
+      font-family: var(--font-body);
+      font-size: 1.1rem;
+      color: var(--hades-text-dim);
+      margin-bottom: var(--space-6);
+    }
+    #menu-layer button.start-button {
+      background: var(--hades-panel);
+      border: 1px solid var(--hades-gold-dark);
+      color: var(--hades-text);
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      padding: var(--space-4) var(--space-8);
+      cursor: pointer;
+      box-shadow: var(--shadow-panel);
+      transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+      display: block;
+      margin: auto;
+    }
+    #menu-layer button.start-button:hover {
+      background: var(--hades-panel-alt);
+      border-color: var(--hades-gold-bright);
+      color: var(--hades-gold-bright);
+    }
+  </style>
+</head>
+<body class="game-screen">
+  <!-- Vinheta escura nas bordas (profundidade de tela de menu) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- Overlay de transição (fade para "carregar fase") -->
+  <div class="screen-fade" aria-hidden="true"></div>
+
+  <!-- HUD superior: título do jogo -->
+  <header class="game-header">
+    <h1 class="game-header__title">FUNDAMENTOS DE <span class="accent">JOGOS DIGITAIS</span></h1>
+    <p class="game-header__subtitle">// Minigame</p>
+  </header>
+
+  <!-- Layout principal em grid (aqui usado para centralizar o menu) -->
+  <main class="game-layout" style="display: flex; align-items: center; justify-content: center;">
+    <section class="stage-select" aria-label="Minigame">
+      <ul class="stage-select__list" id="menu-layer">
+        <li class="stage-select__item">
+          <h2 class="title">Arcane Survivors</h2>
+          <p class="description">Escolha seu herói e sobreviva até 20 minutos enfrentando ondas crescentes.</p>
+
+          <div class="character-grid" aria-label="Seleção de personagem">
+            <button type="button" class="character-card" data-character-card="soulblade" aria-pressed="false">
+              <span class="character-card__name">Soulblade</span>
+              <span class="character-card__weapon">Lâmina Arcana</span>
+              <span class="character-card__stats">HP 100<br>Velocidade 15<br>Foco em dano rápido</span>
+            </button>
+
+            <button type="button" class="character-card" data-character-card="graveguard" aria-pressed="false">
+              <span class="character-card__name">Graveguard</span>
+              <span class="character-card__weapon">Lança de Ossos</span>
+              <span class="character-card__stats">HP 130<br>Velocidade 12<br>Foco em resistência</span>
+            </button>
+
+            <button type="button" class="character-card" data-character-card="warden" aria-pressed="false">
+              <span class="character-card__name">Warden of Echoes</span>
+              <span class="character-card__weapon">Orbe de Fogo</span>
+              <span class="character-card__stats">HP 90<br>Velocidade 17<br>Foco em ataque ágil</span>
+            </button>
+          </div>
+
+          <p id="selected-character-summary">Soulblade • Lâmina Arcana • HP 100</p>
+          <button class="start-button" id="start-btn">Iniciar Partida</button>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Canvas do jogo (inicialmente oculto) -->
+  <canvas id="game-canvas"></canvas>
+
+  <div id="minigame-hud" class="minigame-hud" aria-live="polite">
+    <div class="minigame-hud__left">
+      <div class="minigame-hud__panel">
+        <div class="minigame-hud__portrait" aria-hidden="true"></div>
+        <div class="minigame-hud__meta">
+          <div class="minigame-hud__topline">
+            <span>HP</span>
+            <span class="minigame-hud__level" id="minigame-level">Lv 1</span>
+          </div>
+          <div class="minigame-hud__bar"><span id="minigame-health-fill" style="width:100%"></span></div>
+          <div class="minigame-hud__numbers">
+            <span id="minigame-hp">100 / 100</span>
+            <span id="minigame-time">00:00 / 20:00</span>
+          </div>
+          <div class="minigame-hud__bar minigame-hud__bar--xp"><span id="minigame-xp-fill" style="width:0%"></span></div>
+          <div class="minigame-hud__numbers">
+            <span id="minigame-xp">0 / 100</span>
+            <span id="minigame-status">Velocidade</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="minigame-hud__stats" aria-label="Status rápidos da build">
+        <div class="minigame-stat">Dano<strong id="minigame-dmg">1</strong></div>
+        <div class="minigame-stat">Spd<strong id="minigame-speed">15</strong></div>
+        <div class="minigame-stat">Atk<strong id="minigame-atk">0.42s</strong></div>
+      </div>
+
+      <div class="minigame-build" aria-label="Armas ativas do personagem">
+        <span class="minigame-build__label">Armas</span>
+        <div id="minigame-weapons" class="minigame-build__list"></div>
+      </div>
+    </div>
+
+    <div class="minigame-hud__right">
+      <div class="minigame-build minigame-build--status" aria-label="Status do personagem">
+        <span class="minigame-build__label">Status</span>
+        <div id="minigame-status-list" class="minigame-build__list"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="minigame-result-overlay" aria-live="polite">
+    <div class="minigame-result" role="dialog" aria-modal="false">
+      <p class="minigame-result__eyebrow">Run concluída</p>
+      <h2 data-role="title">Vitória</h2>
+      <p data-role="summary">Você acumulou XP e concluiu a missão.</p>
+      <button type="button" class="start-button" data-action="return-dashboard">Voltar ao Painel</button>
+    </div>
+  </div>
+
+  <div id="minigame-upgrade-overlay" aria-live="polite">
+    <div class="minigame-upgrade" role="dialog" aria-modal="false">
+      <p class="minigame-result__eyebrow">Level up</p>
+      <h2>Escolha sua evolução</h2>
+      <div id="minigame-upgrade-options" class="minigame-upgrade__grid"></div>
+    </div>
+  </div>
+
+  <!-- BARRA INFERIOR: CONTROLES (igual ao index.html) -->
+  <footer class="controls-bar" aria-label="Controles do jogo">
+    <a href="../index.html" class="controls-bar__btn" role="button" data-action="dashboard" aria-label="Ir para o Painel do Aluno (tecla P)">
+      <span class="controls-bar__key">P</span>
+      <span class="controls-bar__action">Painel do Herói</span>
+    </a>
+    <button class="controls-bar__btn" type="button" data-action="logout" aria-label="Encerrar a sessão atual (tecla L)">
+      <span class="controls-bar__key">L</span>
+      <span class="controls-bar__action">Encerrar Sessão</span>
+    </button>
+  </footer>
+
+  <!-- Cannon.js CDN -->
+  <script src="https://unpkg.com/cannon@0.6.2/build/cannon.min.js"></script>
+  <script type="module" src="../js/minigame/main.js"></script>
+</body>
+</html>

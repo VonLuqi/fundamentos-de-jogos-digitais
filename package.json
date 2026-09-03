@@ -8,15 +8,22 @@
     "node": ">=18"
   },
   "scripts": {
-    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js"
+    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js",
+    "dev": "node local-server.mjs",
+    "start": "node local-server.mjs",
+    "test": "echo \"No tests defined\""
   },
   "optionalDependencies": {
     "@vercel/kv": "^3.0.0"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.112.4",
+    "@vfx-js/core": "^1.1.0",
     "bcryptjs": "^3.0.3",
-    "dotenv": "^16.1.4"
+    "cannon": "^0.6.2",
+    "dotenv": "^16.1.4",
+    "three": "^0.185.1",
+    "three-nebula": "^13.0.0"
   },
   "main": "index.js",
   "repository": {

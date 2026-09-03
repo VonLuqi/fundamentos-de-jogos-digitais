@@ -1,26 +1,51 @@
 # Pasta de Avatares
 
-Coloque aqui os arquivos de imagem dos avatares jogáveis, nomeados
-sequencialmente como `avatar1`, `avatar2`, ... `avatar6` — **qualquer
-extensão de imagem comum é aceita** (`.png`, `.jpg`, `.jpeg`, `.webp`,
-`.gif`, `.svg`). O cliente tenta cada extensão em ordem até achar o
-arquivo existente, então não é preciso usar a mesma extensão para
-todos os avatares:
+Esta pasta guarda a galeria fixa de avatares do projeto. O frontend
+carrega cada imagem por caminho exato, sem testar extensões em série.
+A galeria foi padronizada para WebP para reduzir peso e simplificar a
+resolução. O índice salvo no banco (`avatar_index`) continua sendo
+0-based e corresponde à ordem abaixo.
+
+Galeria atual:
 
 ```
-assets/avatars/avatar1.jpg
-assets/avatars/avatar2.png
+assets/avatars/avatar1.webp
+assets/avatars/avatar2.webp
 assets/avatars/avatar3.webp
-assets/avatars/avatar4.png
-assets/avatars/avatar5.png
-assets/avatars/avatar6.png
+assets/avatars/avatar4.webp
+assets/avatars/avatar5.webp
+assets/avatars/avatar6.webp
+assets/avatars/avatar7.webp
+assets/avatars/avatar8.webp
+assets/avatars/avatar9.webp
+assets/avatars/avatar10.webp
+assets/avatars/avatar11.webp
+assets/avatars/avatar12.webp
+assets/avatars/avatar13.webp
+assets/avatars/avatar14.webp
+assets/avatars/avatar15.webp
+assets/avatars/avatar16.webp
+assets/avatars/avatar17.webp
+assets/avatars/avatar18.webp
+assets/avatars/avatar19.webp
+assets/avatars/avatar20.webp
+assets/avatars/avatar21.webp
+assets/avatars/avatar22.webp
+assets/avatars/avatar23.webp
+assets/avatars/avatar24.webp
+assets/avatars/avatar25.webp
+assets/avatars/avatar26.webp
+assets/avatars/avatar27.webp
+assets/avatars/avatar28.webp
+assets/avatars/avatar29.webp
+assets/avatars/avatar30.webp
+assets/avatars/avatar31.webp
+assets/avatars/avatar32.webp
 ```
 
 Recomendações:
-- Formato quadrado (ex.: 256x256px), fundo transparente (PNG/WebP) ou
-  fundo sólido que combine com o tema dark/cyber-gótico do painel.
-- Se quiser aceitar outras extensões, edite `AVATAR_EXTENSIONS` em
-  `js/api.js`.
-- O `avatarIndex` salvo no banco (coluna `avatar_index`) é o índice
-  (0-based) desta lista — trocar a ordem dos arquivos muda o avatar
-  exibido para jogadores que já escolheram um índice específico.
+- manter nomes e ordem estáveis para não alterar o avatar de usuários
+  que já escolheram um índice;
+- usar imagens quadradas, de preferência 256x256px;
+- manter WebP como formato padrão para os avatares;
+- se a galeria mudar, atualizar `js/api.js` junto com esta lista.

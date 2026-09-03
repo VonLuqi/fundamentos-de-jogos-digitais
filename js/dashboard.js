@@ -41,11 +41,18 @@ import {
 let currentUser = null;
 let currentToken = null;
 
+function visibleAchievementsForUser(user) {
+  const unlockedIds = new Set(user.achievements || []);
+  if (user.role === 'admin') return ACHIEVEMENTS;
+  return ACHIEVEMENTS.filter((achievement) => !achievement.hidden || unlockedIds.has(achievement.id));
+}
+
 /* ============================================================
    1. RENDERIZAÇÃO DO PERFIL
    ============================================================ */
 function renderProfile(user) {
   const isAdmin = user.role === 'admin';
+  const visibleAchievements = visibleAchievementsForUser(user);
   document.getElementById('profile-name').textContent = user.name;
   document.getElementById('profile-rank').textContent = isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp);
   document.getElementById('level-value').textContent = isAdmin ? '∞' : String(levelForXp(user.xp));
@@ -54,7 +61,7 @@ function renderProfile(user) {
   updateAvatarCounter(user.avatarIndex);
   document.getElementById('stat-lessons').textContent = String(isAdmin ? LESSONS.length : user.completedLessons.length);
   document.getElementById('stat-achievements').textContent =
-    `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${ACHIEVEMENTS.length}`;
+    `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${visibleAchievements.length}`;
 
   applyAdminSkin(user);
 }
@@ -131,9 +138,10 @@ function renderXpBar(user, { fromZero = false } = {}) {
 function renderAchievements(user, highlightIds = []) {
   const grid = document.getElementById('achievements-grid');
   if (!grid) return;
+  const visibleAchievements = visibleAchievementsForUser(user);
 
   grid.innerHTML = '';
-  if (ACHIEVEMENTS.length === 0) {
+  if (visibleAchievements.length === 0) {
     const li = document.createElement('li');
     li.className = 'achievement-empty';
     li.textContent = 'Nenhuma conquista cadastrada ainda.';
@@ -141,7 +149,7 @@ function renderAchievements(user, highlightIds = []) {
     return;
   }
 
-  ACHIEVEMENTS.forEach((ach, index) => {
+  visibleAchievements.forEach((ach, index) => {
     const unlocked = user.role === 'admin' || user.achievements.includes(ach.id);
     const justUnlocked = highlightIds.includes(ach.id);
 
@@ -616,8 +624,7 @@ function showApiWarning(message) {
    ============================================================ */
 async function init() {
   initScrollModal();
-  // Dispara a varredura de assets/avatars/ em paralelo com o guard de
-  // sessão, para não adicionar latência extra desnecessária ao boot.
+  // Carrega a galeria fixa de avatares em paralelo com o guard de sessão.
   const avatarCountReady = detectAvatarCount();
 
   let result;

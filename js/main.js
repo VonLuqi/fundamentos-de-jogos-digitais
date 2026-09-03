@@ -36,6 +36,12 @@ const FADE_DURATION = 400; // ms — casar com o CSS .screen-fade transition
 /* ---------- Estado da sessão ---------- */
 let currentUser = null;
 
+function visibleAchievementCount(user) {
+  if (user.role === 'admin') return ACHIEVEMENTS.length;
+  const unlocked = new Set(user.achievements || []);
+  return ACHIEVEMENTS.filter((achievement) => !achievement.hidden || unlocked.has(achievement.id)).length;
+}
+
 /* ============================================================
    1. BOOT
    ============================================================ */
@@ -43,8 +49,7 @@ async function init() {
   logBoot();
   setupScreenFade();
   setupFooterNav();
-  // Mesma varredura dinâmica de assets/avatars/ usada no Salão dos
-  // Heróis, disparada em paralelo com o guard de sessão.
+  // Carrega a galeria fixa de avatares em paralelo com o guard de sessão.
   const avatarCountReady = detectAvatarCount();
 
   let result;
@@ -82,11 +87,12 @@ function logBoot() {
    ============================================================ */
 function renderPlayerPanel(user) {
   const isAdmin = user.role === 'admin';
+  const visibleTotal = visibleAchievementCount(user);
   setText('player-name', user.name.toUpperCase());
   setText('player-rank', isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp));
   setText('player-level', isAdmin ? '∞' : String(levelForXp(user.xp)));
   setText('player-lessons', String(isAdmin ? LESSONS.length : user.completedLessons.length));
-  setText('player-achievements', `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${ACHIEVEMENTS.length}`);
+  setText('player-achievements', `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${visibleTotal}`);
 
   // Avatar escolhido no Salão dos Heróis
   const playerGlyph = document.getElementById('player-glyph');
@@ -145,48 +151,120 @@ function renderStageCards(user) {
     return;
   }
 
-  LESSONS.forEach((lesson, index) => {
-    const completed = user.completedLessons.includes(lesson.id);
+  const modules = LESSONS.reduce((accumulator, lesson) => {
+    const moduleId = lesson.moduleId || 'module-default';
+    let module = accumulator.find((item) => item.id === moduleId);
+    if (!module) {
+      module = {
+        id: moduleId,
+        number: lesson.moduleNumber || 'M?',
+        title: lesson.moduleTitle || 'Módulo',
+        subtitle: lesson.moduleSubtitle || '',
+        lessons: [],
+      };
+      accumulator.push(module);
+    }
+    module.lessons.push(lesson);
+    return accumulator;
+  }, []);
 
-    const li = document.createElement('li');
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.className = ['stage-card', index === 0 ? 'stage-card--featured' : '', completed ? 'is-completed' : '']
-      .filter(Boolean)
-      .join(' ');
-    card.dataset.stage = lesson.id;
-    card.dataset.unlocked = 'true';
+  modules.forEach((module, moduleIndex) => {
+    const moduleItem = document.createElement('li');
+    moduleItem.className = 'stage-module';
 
-    const number = document.createElement('span');
-    number.className = 'stage-card__number';
-    number.textContent = lesson.number;
+    const moduleHeader = document.createElement('div');
+    moduleHeader.className = 'stage-module__header';
+    moduleHeader.id = `module-${module.id}`;
 
-    const content = document.createElement('span');
-    content.className = 'stage-card__content';
+    const moduleBadge = document.createElement('span');
+    moduleBadge.className = 'stage-module__badge';
+    moduleBadge.textContent = module.number;
 
-    const title = document.createElement('span');
-    title.className = 'stage-card__title';
-    title.textContent = lesson.title;
+    const moduleContent = document.createElement('div');
+    moduleContent.className = 'stage-module__content';
 
-    const subtitle = document.createElement('span');
-    subtitle.className = 'stage-card__subtitle';
-    subtitle.textContent = lesson.subtitle;
-    content.append(title, subtitle);
+    const moduleTitle = document.createElement('span');
+    moduleTitle.className = 'stage-module__title';
+    moduleTitle.textContent = module.title;
 
-    const rewardWrap = document.createElement('span');
-    rewardWrap.className = 'stage-card__reward';
-    const reward = document.createElement('span');
-    reward.className = 'stage-card__xp';
-    reward.textContent = completed ? 'CONCLUÍDA' : `+${lesson.rewardXp} XP`;
-    rewardWrap.appendChild(reward);
+    const moduleSubtitle = document.createElement('span');
+    moduleSubtitle.className = 'stage-module__subtitle';
+    moduleSubtitle.textContent = module.subtitle;
 
-    card.append(number, content, rewardWrap);
-    card.addEventListener('mouseenter', () => selectCard(card));
-    card.addEventListener('mouseleave', () => deselectCard(card));
-    card.addEventListener('click', () => enterStage(lesson.id));
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'stage-module__toggle';
+    toggle.setAttribute('aria-expanded', 'true');
+    toggle.setAttribute('aria-label', `Recolher aulas do módulo ${module.number}`);
 
-    li.appendChild(card);
-    list.appendChild(li);
+    const toggleArrow = document.createElement('span');
+    toggleArrow.className = 'stage-module__arrow';
+    toggleArrow.setAttribute('aria-hidden', 'true');
+    toggleArrow.textContent = '▾';
+
+    toggle.appendChild(toggleArrow);
+    moduleContent.append(moduleTitle, moduleSubtitle);
+    moduleHeader.append(moduleBadge, moduleContent);
+    moduleHeader.append(toggle);
+
+    const moduleLessons = document.createElement('ul');
+    moduleLessons.className = 'stage-module__lessons';
+    moduleLessons.id = `module-lessons-${module.id}`;
+
+    toggle.addEventListener('click', () => {
+      const isCollapsed = moduleItem.classList.toggle('is-collapsed');
+      moduleLessons.hidden = isCollapsed;
+      toggle.setAttribute('aria-expanded', String(!isCollapsed));
+      toggle.setAttribute('aria-label', `${isCollapsed ? 'Expandir' : 'Recolher'} aulas do módulo ${module.number}`);
+      toggleArrow.textContent = isCollapsed ? '▸' : '▾';
+    });
+
+    module.lessons.forEach((lesson, lessonIndex) => {
+      const completed = user.completedLessons.includes(lesson.id);
+
+      const lessonItem = document.createElement('li');
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = ['stage-card', moduleIndex === 0 && lessonIndex === 0 ? 'stage-card--featured' : '', completed ? 'is-completed' : '']
+        .filter(Boolean)
+        .join(' ');
+      card.dataset.stage = lesson.id;
+      card.dataset.unlocked = 'true';
+
+      const number = document.createElement('span');
+      number.className = 'stage-card__number';
+      number.textContent = lesson.number;
+
+      const content = document.createElement('span');
+      content.className = 'stage-card__content';
+
+      const title = document.createElement('span');
+      title.className = 'stage-card__title';
+      title.textContent = lesson.title;
+
+      const subtitle = document.createElement('span');
+      subtitle.className = 'stage-card__subtitle';
+      subtitle.textContent = lesson.subtitle;
+      content.append(title, subtitle);
+
+      const rewardWrap = document.createElement('span');
+      rewardWrap.className = 'stage-card__reward';
+      const reward = document.createElement('span');
+      reward.className = 'stage-card__xp';
+      reward.textContent = completed ? 'CONCLUÍDA' : `+${lesson.rewardXp} XP`;
+      rewardWrap.appendChild(reward);
+
+      card.append(number, content, rewardWrap);
+      card.addEventListener('mouseenter', () => selectCard(card));
+      card.addEventListener('mouseleave', () => deselectCard(card));
+      card.addEventListener('click', () => enterStage(lesson.id));
+
+      lessonItem.appendChild(card);
+      moduleLessons.appendChild(lessonItem);
+    });
+
+    moduleItem.append(moduleHeader, moduleLessons);
+    list.appendChild(moduleItem);
   });
 }
 

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 01 — Atividade Prática | Fundamentos de Jogos Digitais</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0a10;
+      --panel: #17131a;
+      --panel-2: #211a24;
+      --gold: #cfa759;
+      --gold-soft: #f2d59a;
+      --text: #ece1d1;
+      --muted: #ab9c8a;
+      --border: #5c4322;
+      --accent: #c23548;
+      --shadow: 0 14px 40px rgba(0, 0, 0, 0.6);
+      --title: "Cinzel", serif;
+      --body: "Crimson Text", serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, rgba(90, 30, 45, 0.14), transparent 50%), var(--bg);
+      color: var(--text);
+      font-family: var(--body);
+      line-height: 1.6;
+      padding: 2rem;
+    }
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    h1, h2, .eyebrow {
+      font-family: var(--title);
+      letter-spacing: 0.05em;
+    }
+    h1 {
+      margin: 0 0 0.75rem;
+      color: var(--gold-soft);
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+    }
+    .eyebrow {
+      margin: 0 0 0.5rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+    }
+    p { margin: 0 0 1rem; }
+    .card {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border: 1px solid rgba(207, 167, 89, 0.35);
+      background: rgba(12, 9, 14, 0.7);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gold);
+      color: var(--gold-soft);
+      text-decoration: none;
+      font-family: var(--title);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: linear-gradient(180deg, rgba(194, 53, 72, 0.72), rgba(62, 18, 28, 0.9));
+    }
+    .btn:hover { filter: brightness(1.05); }
+    ul { margin: 0.75rem 0 0 1.25rem; }
+    li { margin-bottom: 0.35rem; }
+    .hint { color: var(--muted); }
+    code { color: var(--gold-soft); }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Aula 01 · Atividade Prática</p>
+    <h1>Brincando no Inspector</h1>
+    <p>
+      Esta é a pasta da atividade prática da Aula 01 com a cena da bola física.
+      Use o material para testar <strong>Forca De Movimento</strong>, <strong>Impulso De Pulo</strong>,
+      <strong>Massa</strong>, <strong>Gravidade Da Cena</strong>, <strong>Friccao</strong> e <strong>Elasticidade</strong>.
+    </p>
+
+    <div class="card">
+      <h2>Como usar</h2>
+      <ul>
+        <li>Baixe ou copie esta pasta para a máquina do aluno.</li>
+        <li>Abra a cena pré-configurada na Godot 4.</li>
+        <li>Altere uma variável por vez no Inspector e observe o resultado.</li>
+        <li>Registre o valor alterado, o comportamento observado e a regra inferida.</li>
+      </ul>
+      <p class="hint">O pacote oficial da bola física está disponível em ZIP para facilitar o download dos alunos.</p>
+      <a class="btn" href="../bola-fisica.zip" download>Baixar pasta da bola física</a>
+    </div>
+
+    <div class="card">
+      <h2>Arquivos esperados</h2>
+      <p>Este pacote entrega a base prática da Aula 01, incluindo:</p>
+      <ul>
+        <li><code>Main.tscn</code> com a cena da bola física;</li>
+        <li><code>character_body_2d.gd</code> com os controles expostos no Inspector;</li>
+        <li><code>project.godot</code> e os arquivos do projeto necessários para abrir a prática;</li>
+        <li>as configurações para o aluno mexer em movimento, salto e física sem editar o código.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>O que o aluno pode alterar</h2>
+      <ul>
+        <li><code>Forca De Movimento</code> para deixar a bola mais rápida ou mais lenta.</li>
+        <li><code>Impulso De Pulo</code> para aumentar ou reduzir o salto.</li>
+        <li><code>Massa</code> para deixar a bola mais leve ou mais pesada.</li>
+        <li><code>Gravidade Da Cena</code> para testar uma queda mais lenta ou mais forte.</li>
+        <li><code>Friccao</code> para ver a bola deslizar mais ou menos.</li>
+        <li><code>Elasticidade</code> para aumentar ou reduzir o quique.</li>
+      </ul>
+    </div>
+  </main>
+</body>
+</html>
