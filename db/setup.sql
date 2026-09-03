@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 
 -- Tabela de códigos de resgate (histórico)
+-- O código é compartilhado pela turma: `redeemed_at`/`redeemed_by` registram apenas o
+-- primeiro resgate (telemetria). A única trava de invalidação é `expires_at`.
 CREATE TABLE IF NOT EXISTS redeem_codes (
   code text PRIMARY KEY,
   lesson_id text NOT NULL,
@@ -40,7 +42,7 @@ CREATE TABLE IF NOT EXISTS redeem_codes (
 );
 
 CREATE INDEX IF NOT EXISTS redeem_codes_lesson_created_idx ON redeem_codes (lesson_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS redeem_codes_active_idx ON redeem_codes (lesson_id, expires_at) WHERE redeemed_at IS NULL;
+CREATE INDEX IF NOT EXISTS redeem_codes_active_idx ON redeem_codes (lesson_id, expires_at DESC);
 
 -- Tabela de gates de conteúdo por aula (censura/liberação por admin)
 CREATE TABLE IF NOT EXISTS lesson_gates (

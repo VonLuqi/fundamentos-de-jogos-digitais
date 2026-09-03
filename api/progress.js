@@ -170,8 +170,7 @@ function normalizeCodes(rows) {
   const nowIso = new Date().toISOString();
   return (rows || []).map((row) => {
     const expiresAt = codeExpiresAt(row);
-    const used = Boolean(row.redeemed_at);
-    const expired = !used && expiresAt <= nowIso;
+    const expired = expiresAt <= nowIso;
     return {
       code: row.code,
       lessonId: row.lesson_id,
@@ -181,7 +180,7 @@ function normalizeCodes(rows) {
       expiresAt,
       redeemedAt: row.redeemed_at,
       redeemedBy: row.redeemed_by,
-      used,
+      used: Boolean(row.redeemed_at),
       expired,
     };
   });
@@ -289,9 +288,14 @@ export default async function handler(req, res) {
       if (!LESSON_CATALOG[rewardRow.lesson_id]) {
         return res.status(410).json({ ok: false, error: 'Código vinculado a uma aula desativada.' });
       }
-      if (rewardRow.redeemed_at) return res.status(409).json({ ok: false, error: 'Código já usado.' });
+      // O código é compartilhado pela turma: a única invalidação é o tempo.
       if (isCodeExpired(rewardRow)) {
         return res.status(410).json({ ok: false, error: 'Código expirado (validade de 20 minutos).' });
+      }
+
+      const redeemed = Array.isArray(user.redeemed_codes) ? [...user.redeemed_codes] : [];
+      if (redeemed.includes(raw)) {
+        return res.status(409).json({ ok: false, error: 'Você já resgatou este código.' });
       }
 
       const levelBefore = levelForXp(user.xp || 0);
@@ -299,8 +303,7 @@ export default async function handler(req, res) {
       const completed = Array.isArray(user.completed_lessons) ? [...user.completed_lessons] : [];
       if (!completed.includes(rewardRow.lesson_id)) completed.push(rewardRow.lesson_id);
 
-      const redeemed = Array.isArray(user.redeemed_codes) ? [...user.redeemed_codes] : [];
-      if (!redeemed.includes(raw)) redeemed.push(raw);
+      redeemed.push(raw);
 
       const newAchievements = recalculateAchievements({
         xp: newXp,
@@ -320,12 +323,12 @@ export default async function handler(req, res) {
         .eq('id', userId);
       if (userUpdateError) return res.status(500).json({ ok: false, error: 'Erro ao atualizar usuário.' });
 
-      const { error: markCodeError } = await supabase
+      // Telemetria do primeiro resgate; não invalida o código para os demais alunos.
+      await supabase
         .from(CODES_TABLE)
         .update({ redeemed_at: new Date().toISOString(), redeemed_by: userId })
         .eq('code', raw)
         .is('redeemed_at', null);
-      if (markCodeError) return res.status(500).json({ ok: false, error: 'Erro ao registrar resgate do código.' });
 
       const levelAfter = levelForXp(newXp);
       const { data: updated } = await supabase.from(USERS_TABLE).select('*').eq('id', userId).limit(1).single();
@@ -423,7 +426,6 @@ export default async function handler(req, res) {
         .from(CODES_TABLE)
         .select('*')
         .eq('lesson_id', lesson.lessonId)
-        .is('redeemed_at', null)
         .order('created_at', { ascending: false })
         .limit(50);
 

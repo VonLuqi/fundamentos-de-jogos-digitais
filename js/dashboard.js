@@ -572,8 +572,9 @@ function initAdminTools() {
 
         const meta = document.createElement('span');
         meta.className = 'code-row__meta';
-        const status = entry.used ? 'USADO' : entry.expired ? 'EXPIRADO' : 'ATIVO';
-        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP • ${status}`;
+        const status = entry.expired ? 'EXPIRADO' : 'ATIVO';
+        const usage = entry.used ? ' • já resgatado' : '';
+        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP • ${status}${usage}`;
 
         row.append(code, meta);
         wrapper.appendChild(row);
@@ -587,7 +588,7 @@ function initAdminTools() {
 
     const footerNote = document.createElement('p');
     footerNote.className = 'scroll-modal__note';
-    footerNote.textContent = 'Cada código é único e fica vinculado à aula escolhida.';
+    footerNote.textContent = 'O código vale para a turma inteira e só deixa de funcionar quando expira (20 min). Cada aluno pode resgatá-lo uma única vez.';
     wrapper.appendChild(footerNote);
 
     openScrollModal('Gerar Código de Acesso', wrapper);

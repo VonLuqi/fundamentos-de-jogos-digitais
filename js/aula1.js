@@ -24,12 +24,6 @@ const CONFIG_NOTES_TEMPLATE = [
   'Friccao: valor -> efeito observado',
   'Elasticidade: valor -> efeito observado',
 ].join('\n');
-const VFX_MODULE_CANDIDATES = [
-  'https://esm.sh/@vfx-js/core@1.1.0',
-  'https://cdn.jsdelivr.net/npm/@vfx-js/core@1.1.0/lib/esm/index.js',
-  '/node_modules/@vfx-js/core/lib/esm/index.js',
-  '../node_modules/@vfx-js/core/lib/esm/index.js',
-];
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 let currentUser = null;
@@ -40,17 +34,14 @@ let secretBurstTimerId = null;
 let discoveryQueueStartTimerId = null;
 const discoveryQueue = [];
 let isDiscoveryQueueRunning = false;
-let discoveryVfx = null;
-let discoveryVfxReady = false;
-let discoveryVfxPulseTimerId = null;
-const discoveryVfxBoundElements = new WeakSet();
+let discoveryPulseTimerId = null;
 let prefersReducedMotion = reducedMotionQuery.matches;
 let lastFocusedElement = null;
 
 const DISCOVERY_TOAST_DURATION_MS = 1500;
 let DISCOVERY_TOAST_EXIT_MS = prefersReducedMotion ? 0 : 240;
 let DISCOVERY_TOAST_GAP_MS = prefersReducedMotion ? 80 : 120;
-const SECRET_BURST_DURATION_MS = 5000;
+const SECRET_BURST_DURATION_MS = 2400;
 
 function rememberFocusedElement() {
   const active = document.activeElement;
@@ -231,114 +222,22 @@ function flashDiscovery() {
   flash.classList.add('is-active');
 }
 
-function markDiscoveryFallbackMode() {
-  document.body.classList.remove('is-discovery-vfx-ready');
-  document.body.classList.add('is-discovery-vfx-fallback');
-  discoveryVfxReady = false;
-  discoveryVfx = null;
-}
-
-async function loadDiscoveryVfxModule() {
-  for (const modulePath of VFX_MODULE_CANDIDATES) {
-    try {
-      return await import(modulePath);
-    } catch {
-      // Tenta o próximo caminho de módulo.
-    }
-  }
-  return null;
-}
-
-async function initDiscoveryVfx() {
+function triggerDiscoveryPulse() {
   if (prefersReducedMotion) {
-    markDiscoveryFallbackMode();
+    document.body.classList.remove('is-discovery-pulse');
     return;
   }
 
-  try {
-    const vfxModule = await loadDiscoveryVfxModule();
-    const VFX = vfxModule?.VFX;
-    if (!VFX) {
-      markDiscoveryFallbackMode();
-      return;
-    }
-
-    const instance = (typeof VFX.init === 'function' ? VFX.init() : null) ?? new VFX();
-    if (!instance) {
-      markDiscoveryFallbackMode();
-      return;
-    }
-
-    discoveryVfx = instance;
-    discoveryVfxReady = true;
-    document.body.classList.add('is-discovery-vfx-ready');
-    document.body.classList.remove('is-discovery-vfx-fallback');
-  } catch {
-    markDiscoveryFallbackMode();
-  }
-}
-
-async function ensureDiscoveryVfxBinding(target) {
-  if (!discoveryVfxReady || !discoveryVfx || !target || discoveryVfxBoundElements.has(target)) {
-    return;
-  }
-
-  const targetId = target.id;
-  let opts = null;
-
-  if (targetId === 'discovery-secret-burst') {
-    opts = { shader: 'shine', overflow: 44, overlay: true };
-  } else if (targetId === 'discovery-card') {
-    opts = { shader: 'chromatic', overflow: 20, overlay: true };
-  } else if (targetId === 'discovery-flash') {
-    opts = { shader: 'rgbShift', overflow: true, overlay: true };
-  }
-
-  if (!opts) return;
-
-  await discoveryVfx.add(target, opts);
-  discoveryVfxBoundElements.add(target);
-}
-
-function triggerDiscoveryVfxPulse() {
-  if (prefersReducedMotion) {
-    document.body.classList.remove('is-discovery-vfx-pulse', 'is-discovery-css-pulse');
-    return;
-  }
-
-  document.body.classList.remove('is-discovery-vfx-pulse', 'is-discovery-css-pulse');
+  document.body.classList.remove('is-discovery-pulse');
   void document.body.offsetHeight;
+  document.body.classList.add('is-discovery-pulse');
 
-  if (discoveryVfxReady && discoveryVfx) {
-    const burst = document.getElementById('discovery-secret-burst');
-    const card = document.getElementById('discovery-card');
-    const flash = document.getElementById('discovery-flash');
-    const vfxTargets = [burst, card, flash].filter(Boolean);
-
-    if (vfxTargets.length === 0) {
-      markDiscoveryFallbackMode();
-      document.body.classList.add('is-discovery-css-pulse');
-      return;
-    }
-
-    document.body.classList.add('is-discovery-vfx-pulse');
-    Promise.all(vfxTargets.map((target) => ensureDiscoveryVfxBinding(target)))
-      .then(() => Promise.all(vfxTargets.map((target) => discoveryVfx.update(target))))
-      .catch(() => {
-        markDiscoveryFallbackMode();
-        document.body.classList.remove('is-discovery-vfx-pulse');
-        document.body.classList.add('is-discovery-css-pulse');
-      });
-  } else {
-    document.body.classList.add('is-discovery-css-pulse');
+  if (discoveryPulseTimerId) {
+    window.clearTimeout(discoveryPulseTimerId);
   }
-
-  if (discoveryVfxPulseTimerId) {
-    window.clearTimeout(discoveryVfxPulseTimerId);
-  }
-  discoveryVfxPulseTimerId = window.setTimeout(() => {
-    document.body.classList.remove('is-discovery-vfx-pulse', 'is-discovery-css-pulse');
-    discoveryVfxPulseTimerId = null;
+  discoveryPulseTimerId = window.setTimeout(() => {
+    document.body.classList.remove('is-discovery-pulse');
+    discoveryPulseTimerId = null;
   }, 950);
 }
 
@@ -376,7 +275,7 @@ function showSecretBurst() {
   burst.classList.remove('is-active');
   void burst.offsetHeight;
   burst.classList.add('is-active');
-  triggerDiscoveryVfxPulse();
+  triggerDiscoveryPulse();
 
   if (secretBurstTimerId) {
     window.clearTimeout(secretBurstTimerId);
@@ -399,7 +298,8 @@ function showDiscoveryOverlay(achievement, queueOrder = 0) {
   const list = document.getElementById('discovery-list');
   if (!overlay || !title || !list) return;
 
-  title.textContent = 'Conquista Descoberta';
+  const headline = achievement.hidden ? 'Conquista Secreta Desbloqueada' : 'Conquista Desbloqueada';
+  title.textContent = headline;
   list.innerHTML = '';
 
   const item = document.createElement('li');
@@ -415,7 +315,7 @@ function showDiscoveryOverlay(achievement, queueOrder = 0) {
 
   const kicker = document.createElement('span');
   kicker.className = 'discovery-card__item-kicker';
-  kicker.textContent = 'Conquista liberada';
+  kicker.textContent = headline;
 
   const name = document.createElement('span');
   name.className = 'discovery-card__item-name';
@@ -446,7 +346,7 @@ function showDiscoveryOverlay(achievement, queueOrder = 0) {
   void overlay.offsetHeight;
   overlay.classList.add('is-active');
   flashDiscovery();
-  triggerDiscoveryVfxPulse();
+  triggerDiscoveryPulse();
 
   discoveryTimerId = window.setTimeout(() => {
     hideDiscoveryOverlay({ animated: true });
@@ -516,9 +416,9 @@ function clearDiscoveryTimersAndEffects() {
     window.clearTimeout(discoveryQueueStartTimerId);
     discoveryQueueStartTimerId = null;
   }
-  if (discoveryVfxPulseTimerId) {
-    window.clearTimeout(discoveryVfxPulseTimerId);
-    discoveryVfxPulseTimerId = null;
+  if (discoveryPulseTimerId) {
+    window.clearTimeout(discoveryPulseTimerId);
+    discoveryPulseTimerId = null;
   }
 
   discoveryQueue.length = 0;
@@ -526,6 +426,7 @@ function clearDiscoveryTimersAndEffects() {
 
   const burst = document.getElementById('discovery-secret-burst');
   const overlay = document.getElementById('discovery-overlay');
+  const flash = document.getElementById('discovery-flash');
   if (burst) {
     burst.classList.remove('is-active');
     burst.hidden = true;
@@ -534,7 +435,10 @@ function clearDiscoveryTimersAndEffects() {
     overlay.classList.remove('is-active', 'is-leaving');
     overlay.hidden = true;
   }
-  document.body.classList.remove('is-discovery-vfx-pulse', 'is-discovery-css-pulse');
+  if (flash) {
+    flash.classList.remove('is-active');
+  }
+  document.body.classList.remove('is-discovery-pulse');
 }
 
 async function initParagraphPersistence() {
@@ -876,7 +780,6 @@ async function init() {
   initSlidesViewer();
   initFeelLab();
   initMotionPreference();
-  initDiscoveryVfx();
 
   window.addEventListener('pagehide', clearDiscoveryTimersAndEffects);
   document.addEventListener('visibilitychange', () => {
