@@ -19,57 +19,131 @@
 const SESSION_KEY = 'activeSession';
 
 /* ---------- Imagens de avatar ----------
-   A galeria é estática e explicitamente mapeada para evitar probing por
-   extensão e a fila de 404s que isso gerava no boot. O índice continua
-   sendo 0-based e corresponde ao `avatarIndex`/`avatar_index` salvo no
-   usuário. */
-const AVATAR_FILES = [
-  'avatar1.webp',
-  'avatar2.webp',
-  'avatar3.webp',
-  'avatar4.webp',
-  'avatar5.webp',
-  'avatar6.webp',
-  'avatar7.webp',
-  'avatar8.webp',
-  'avatar9.webp',
-  'avatar10.webp',
-  'avatar11.webp',
-  'avatar12.webp',
-  'avatar13.webp',
-  'avatar14.webp',
-  'avatar15.webp',
-  'avatar16.webp',
-  'avatar17.webp',
-  'avatar18.webp',
-  'avatar19.webp',
-  'avatar20.webp',
-  'avatar21.webp',
-  'avatar22.webp',
-  'avatar23.webp',
-  'avatar24.webp',
-  'avatar25.webp',
-  'avatar26.webp',
-  'avatar27.webp',
-  'avatar28.webp',
-  'avatar29.webp',
-  'avatar30.webp',
-  'avatar31.webp',
-  'avatar32.webp',
-  'avatar33.webp',
-];
+   Fonte de verdade: assets/avatars/catalog.stub.json.
+   O arquivo é carregado uma vez e cacheado para manter a UI responsiva. */
+const AVATAR_CATALOG_FILE = 'assets/avatars/catalog.stub.json';
+const AVATAR_FALLBACK_FILE = 'hades.webp';
 
-const AVATAR_COUNT = AVATAR_FILES.length;
-const AVATAR_URLS = AVATAR_FILES.map((file) => `${rootPath()}/assets/avatars/${file}`);
+let avatarCatalog = [];
+let avatarCatalogPromise = null;
+
+function normalizeAvatarSearchTerm(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+function labelFromAvatarFile(fileName) {
+  const base = String(fileName || '')
+    .replace(/\.webp$/i, '')
+    .replace(/-/g, ' ')
+    .trim();
+
+  if (!base) return 'Avatar';
+
+  return base
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+function normalizeAvatarCatalog(rawCatalog) {
+  const safeRaw = Array.isArray(rawCatalog) ? rawCatalog : [];
+
+  return safeRaw
+    .map((entry, index) => {
+      const file = String(entry?.file || '').trim();
+      if (!file || !/\.webp$/i.test(file)) return null;
+
+      const label = String(entry?.label || '').trim() || labelFromAvatarFile(file);
+      const aliases = Array.isArray(entry?.searchTerms) ? entry.searchTerms : [];
+      const baseName = file.replace(/\.webp$/i, '').replace(/-/g, ' ');
+
+      const searchTerms = Array.from(new Set([
+        label,
+        baseName,
+        file,
+        `avatar ${index + 1}`,
+        String(index + 1),
+        ...aliases,
+      ].map(normalizeAvatarSearchTerm).filter(Boolean)));
+
+      return Object.freeze({
+        file,
+        label,
+        searchTerms,
+        legacyIndex: index,
+      });
+    })
+    .filter(Boolean);
+}
+
+function avatarCatalogUrl() {
+  return `${rootPath()}/${AVATAR_CATALOG_FILE}`;
+}
+
+function defaultAvatarCatalog() {
+  return [Object.freeze({
+    file: AVATAR_FALLBACK_FILE,
+    label: 'Hades',
+    searchTerms: [normalizeAvatarSearchTerm('hades'), 'avatar 1', '1'],
+    legacyIndex: 0,
+  })];
+}
+
+function currentAvatarCatalog() {
+  return avatarCatalog.length > 0 ? avatarCatalog : defaultAvatarCatalog();
+}
+
+async function ensureAvatarCatalogLoaded() {
+  if (!avatarCatalogPromise) {
+    avatarCatalogPromise = fetch(avatarCatalogUrl(), { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar catalogo (${response.status})`);
+        }
+
+        const payload = await response.json();
+        const normalized = normalizeAvatarCatalog(payload);
+        avatarCatalog = normalized.length > 0 ? normalized : defaultAvatarCatalog();
+        return avatarCatalog;
+      })
+      .catch(() => {
+        avatarCatalog = defaultAvatarCatalog();
+        return avatarCatalog;
+      });
+  }
+
+  return avatarCatalogPromise;
+}
+
+function avatarUrlByIndex(index) {
+  const meta = getAvatarMetaByIndex(index);
+  const file = meta?.file || AVATAR_FALLBACK_FILE;
+  return `${rootPath()}/assets/avatars/${file}`;
+}
+
+export function getAvatarCatalog() {
+  return currentAvatarCatalog();
+}
+
+export function getAvatarMetaByIndex(index) {
+  const catalog = currentAvatarCatalog();
+  return catalog[avatarSafeIndex(index)] || catalog[0] || null;
+}
 
 /** Quantidade de avatares disponível na galeria estática. */
-export function detectAvatarCount() {
-  return Promise.resolve(AVATAR_COUNT);
+export async function detectAvatarCount() {
+  const catalog = await ensureAvatarCatalogLoaded();
+  return catalog.length;
 }
 
 /** Quantidade de avatares disponível na galeria estática. */
 export function getAvatarCount() {
-  return AVATAR_COUNT;
+  const count = currentAvatarCatalog().length;
+  return count > 0 ? count : 1;
 }
 
 /**
@@ -79,6 +153,7 @@ export function getAvatarCount() {
  */
 export function avatarSafeIndex(index) {
   const count = getAvatarCount();
+  if (count <= 0) return 0;
   return ((index % count) + count) % count;
 }
 
@@ -91,7 +166,7 @@ export function avatarSafeIndex(index) {
 export function loadAvatarImage(imgEl, index) {
   return new Promise((resolve) => {
     const safeIndex = avatarSafeIndex(index);
-    const fallbackUrl = AVATAR_URLS[0];
+    const fallbackUrl = avatarUrlByIndex(0);
     let fallbackTried = safeIndex === 0;
     const cleanup = () => {
       imgEl.onload = null;
@@ -114,7 +189,7 @@ export function loadAvatarImage(imgEl, index) {
       imgEl.src = fallbackUrl;
     };
 
-    imgEl.src = AVATAR_URLS[safeIndex] ?? fallbackUrl;
+    imgEl.src = avatarUrlByIndex(safeIndex) || fallbackUrl;
   });
 }
 

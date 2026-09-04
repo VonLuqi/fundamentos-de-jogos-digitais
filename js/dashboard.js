@@ -18,6 +18,8 @@
 import {
   detectAvatarCount,
   getAvatarCount,
+  getAvatarCatalog,
+  getAvatarMetaByIndex,
   avatarSafeIndex,
   loadAvatarImage,
   ACHIEVEMENTS,
@@ -46,6 +48,14 @@ let rainbowVfxInstancePromise = null;
 let rainbowVfxDisabled = false;
 const rainbowVfxBoundElements = new WeakSet();
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+function normalizeSearchText(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
 
 function visibleAchievementsForUser(user) {
   const unlockedIds = new Set(user.achievements || []);
@@ -148,7 +158,10 @@ function renderProfile(user) {
 function updateAvatarCounter(avatarIndex) {
   const counter = document.getElementById('avatar-counter');
   if (!counter) return;
-  counter.textContent = `Avatar ${avatarSafeIndex(avatarIndex) + 1} de ${getAvatarCount()}`;
+  const safeIndex = avatarSafeIndex(avatarIndex);
+  const avatarMeta = getAvatarMetaByIndex(safeIndex);
+  const name = avatarMeta?.label || `Avatar ${safeIndex + 1}`;
+  counter.textContent = `Avatar ${safeIndex + 1} de ${getAvatarCount()} - ${name}`;
 }
 
 /**
@@ -475,7 +488,7 @@ function initAvatarSwap() {
     searchInput.id = 'avatar-picker-search';
     searchInput.className = 'avatar-picker__search-input';
     searchInput.type = 'search';
-    searchInput.placeholder = 'Ex.: Avatar 12';
+    searchInput.placeholder = 'Ex.: Kratos';
     searchInput.autocomplete = 'off';
     searchInput.spellcheck = false;
 
@@ -513,6 +526,17 @@ function initAvatarSwap() {
 
     actions.append(cancelBtn, confirmBtn);
 
+    const avatars = getAvatarCatalog().map((avatar, index) => ({
+      ...avatar,
+      index,
+      searchableText: normalizeSearchText([
+        avatar.label,
+        ...(avatar.searchTerms || []),
+        `avatar ${index + 1}`,
+        String(index + 1),
+      ].join(' ')),
+    }));
+
     const selectedIndex = avatarSafeIndex(currentUser?.avatarIndex ?? 0);
     let pendingIndex = selectedIndex;
     const allButtons = [];
@@ -534,18 +558,19 @@ function initAvatarSwap() {
         button.classList.toggle('is-selected', buttonIndex === pendingIndex);
       });
 
-      meta.textContent = `Selecionado: Avatar ${pendingIndex + 1}`;
+      const selectedAvatar = avatars[pendingIndex];
+      const selectedName = selectedAvatar?.label || `Avatar ${pendingIndex + 1}`;
+      meta.textContent = `Selecionado: Avatar ${pendingIndex + 1} - ${selectedName}`;
       confirmBtn.disabled = pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0);
     }
 
     function applyFilter() {
-      const query = searchInput.value.trim().toLowerCase();
+      const query = normalizeSearchText(searchInput.value);
       let visibleCount = 0;
 
       allButtons.forEach((button) => {
-        const index = Number(button.dataset.avatarIndex);
-        const label = `avatar ${index + 1}`;
-        const visible = query.length === 0 || label.includes(query) || String(index + 1).includes(query);
+        const searchableText = button.dataset.searchableText || '';
+        const visible = query.length === 0 || searchableText.includes(query);
         button.hidden = !visible;
         if (visible) visibleCount += 1;
       });
@@ -553,32 +578,33 @@ function initAvatarSwap() {
       empty.hidden = visibleCount > 0;
     }
 
-    const count = getAvatarCount();
+    const count = avatars.length;
     if (count === 0) {
       status.textContent = 'Galeria vazia. Adicione avatares para habilitar a seleção.';
       confirmBtn.disabled = true;
       searchInput.disabled = true;
     }
 
-    for (let index = 0; index < count; index += 1) {
+    avatars.forEach((avatar) => {
       const option = document.createElement('button');
       option.type = 'button';
       option.className = 'avatar-picker__option';
-      option.dataset.avatarIndex = String(index);
-      option.setAttribute('aria-label', `Selecionar Avatar ${index + 1}`);
+      option.dataset.avatarIndex = String(avatar.index);
+      option.dataset.searchableText = avatar.searchableText;
+      option.setAttribute('aria-label', `Selecionar ${avatar.label}`);
 
       const image = document.createElement('img');
       image.className = 'avatar-picker__image';
-      image.alt = `Avatar ${index + 1}`;
+      image.alt = avatar.label;
 
       const label = document.createElement('span');
       label.className = 'avatar-picker__label';
-      label.textContent = `Avatar ${index + 1}`;
+      label.textContent = avatar.label;
 
       option.append(image, label);
       allButtons.push(option);
 
-      loadAvatarImage(image, index)
+      loadAvatarImage(image, avatar.index)
         .then((ok) => {
           if (ok) loadedOk += 1;
           else loadFailed += 1;
@@ -597,12 +623,12 @@ function initAvatarSwap() {
 
       option.addEventListener('click', () => {
         if (option.disabled) return;
-        pendingIndex = index;
+        pendingIndex = avatar.index;
         updateSelectionUi();
       });
 
       grid.appendChild(option);
-    }
+    });
 
     searchInput.addEventListener('input', applyFilter);
     cancelBtn.addEventListener('click', closeScrollModal);

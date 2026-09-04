@@ -6,44 +6,54 @@ A galeria foi padronizada para WebP para reduzir peso e simplificar a
 resolucao. O indice salvo no banco (avatar_index) continua sendo
 0-based e corresponde a ordem abaixo.
 
-Total de avatares ativos: 33
+Total de avatares ativos: 43
 
 Galeria atual:
 
 ```
-assets/avatars/avatar1.webp
-assets/avatars/avatar2.webp
-assets/avatars/avatar3.webp
-assets/avatars/avatar4.webp
-assets/avatars/avatar5.webp
-assets/avatars/avatar6.webp
-assets/avatars/avatar7.webp
-assets/avatars/avatar8.webp
-assets/avatars/avatar9.webp
-assets/avatars/avatar10.webp
-assets/avatars/avatar11.webp
-assets/avatars/avatar12.webp
-assets/avatars/avatar13.webp
-assets/avatars/avatar14.webp
-assets/avatars/avatar15.webp
-assets/avatars/avatar16.webp
-assets/avatars/avatar17.webp
-assets/avatars/avatar18.webp
-assets/avatars/avatar19.webp
-assets/avatars/avatar20.webp
-assets/avatars/avatar21.webp
-assets/avatars/avatar22.webp
-assets/avatars/avatar23.webp
-assets/avatars/avatar24.webp
-assets/avatars/avatar25.webp
-assets/avatars/avatar26.webp
-assets/avatars/avatar27.webp
-assets/avatars/avatar28.webp
-assets/avatars/avatar29.webp
-assets/avatars/avatar30.webp
-assets/avatars/avatar31.webp
-assets/avatars/avatar32.webp
-assets/avatars/avatar33.webp
+assets/avatars/afrodite.webp
+assets/avatars/beluga.webp
+assets/avatars/blinking-white-guy.webp
+assets/avatars/capitao-picard.webp
+assets/avatars/catioro.webp
+assets/avatars/cellbitos.webp
+assets/avatars/chara.webp
+assets/avatars/cry-girl.webp
+assets/avatars/crying-jordan.webp
+assets/avatars/fry.webp
+assets/avatars/giga-chad-transcendente.webp
+assets/avatars/giga-chad.webp
+assets/avatars/goku-sombrio.webp
+assets/avatars/grandao.webp
+assets/avatars/hades.webp
+assets/avatars/homem-aranha.webp
+assets/avatars/ishowspeed.webp
+assets/avatars/itadori.webp
+assets/avatars/kratos-madruga.webp
+assets/avatars/kratos.webp
+assets/avatars/lara-croft.webp
+assets/avatars/lloyd.webp
+assets/avatars/mano-motoserra.webp
+assets/avatars/manoel-gomes.webp
+assets/avatars/menininha.webp
+assets/avatars/michael-jackson.webp
+assets/avatars/mileena.webp
+assets/avatars/o-mago.webp
+assets/avatars/omni-man.webp
+assets/avatars/patolino-mago.webp
+assets/avatars/roblox-man-face.webp
+assets/avatars/rusbe.webp
+assets/avatars/salsicha-instinto.webp
+assets/avatars/scorpion.webp
+assets/avatars/shrek.webp
+assets/avatars/snoopy.webp
+assets/avatars/sub-zero.webp
+assets/avatars/tails.webp
+assets/avatars/tangirina.webp
+assets/avatars/tio-patinhas.webp
+assets/avatars/vini-jr-branco.webp
+assets/avatars/zagreus.webp
+assets/avatars/zeus.webp
 ```
 
 Recomendacoes:
@@ -53,4 +63,4 @@ Recomendacoes:
 - manter WebP como formato padrao para os avatares;
 - ao importar novos avatares, usar o script scripts/import-avatars-webp.mjs;
 - apos importar/limpar, executar scripts/sync-avatar-catalog.mjs para
-  manter js/api.js e este README sincronizados.
+  manter catalog.stub.json e este README sincronizados.

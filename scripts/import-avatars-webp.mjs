@@ -19,11 +19,14 @@ const SUPPORTED_INPUT_EXTENSIONS = new Set([
 
 const DEFAULTS = {
   mode: 'append',
+  naming: 'index',
   quality: 82,
   size: 256,
   fit: 'cover',
   recursive: false,
   output: 'assets/avatars',
+  stubFile: '',
+  overwriteStub: false,
 };
 
 function printHelp() {
@@ -35,15 +38,19 @@ Opcoes:
   --input <pasta>        Pasta de origem com as imagens (obrigatorio)
   --output <pasta>       Pasta de destino (padrao: assets/avatars)
   --mode <append|replace> Modo de escrita (padrao: append)
+  --naming <index|source> Estrategia de nome final (padrao: index)
   --size <numero>        Lado da imagem final quadrada em px (padrao: 256)
   --fit <cover|contain>  Estrategia de resize (padrao: cover)
   --quality <1-100>      Qualidade WebP (padrao: 82)
+  --stub-file <arquivo>  Gera/atualiza stub JSON de metadata
+  --overwrite-stub       Sobrescreve o stub inteiro (use com cuidado)
   --recursive            Le subpastas da origem
   --help                 Exibe esta ajuda
 
 Exemplos:
   node scripts/import-avatars-webp.mjs --input "D:/imagens/novos-avatares"
   node scripts/import-avatars-webp.mjs --input ./entrada --mode replace --size 320 --fit contain
+  node scripts/import-avatars-webp.mjs --input ./entrada --naming source --stub-file assets/avatars/catalog.stub.json
 `);
 }
 
@@ -81,6 +88,12 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--naming') {
+      out.naming = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
     if (arg === '--size' || arg === '-s') {
       out.size = Number(argv[i + 1]);
       i += 1;
@@ -99,6 +112,17 @@ function parseArgs(argv) {
       continue;
     }
 
+    if (arg === '--stub-file') {
+      out.stubFile = argv[i + 1];
+      i += 1;
+      continue;
+    }
+
+    if (arg === '--overwrite-stub') {
+      out.overwriteStub = true;
+      continue;
+    }
+
     throw new Error(`Argumento desconhecido: ${arg}`);
   }
 
@@ -114,6 +138,10 @@ function validateOptions(options) {
 
   if (!['append', 'replace'].includes(options.mode)) {
     throw new Error('Modo invalido. Use --mode append ou --mode replace.');
+  }
+
+  if (!['index', 'source'].includes(options.naming)) {
+    throw new Error('Valor invalido para --naming. Use index ou source.');
   }
 
   if (!['cover', 'contain'].includes(options.fit)) {
@@ -180,13 +208,26 @@ async function getExistingAvatarIndexes(outputDir) {
   return indexes;
 }
 
+async function getExistingWebpNames(outputDir) {
+  const entries = await fs.readdir(outputDir, { withFileTypes: true });
+  const names = new Set();
+
+  for (const entry of entries) {
+    if (!entry.isFile()) continue;
+    if (!/\.webp$/i.test(entry.name)) continue;
+    names.add(entry.name.toLowerCase());
+  }
+
+  return names;
+}
+
 async function removeExistingWebpAvatars(outputDir) {
   const entries = await fs.readdir(outputDir, { withFileTypes: true });
   let removed = 0;
 
   for (const entry of entries) {
     if (!entry.isFile()) continue;
-    if (!/^avatar\d+\.webp$/i.test(entry.name)) continue;
+    if (!/\.webp$/i.test(entry.name)) continue;
     await fs.unlink(path.join(outputDir, entry.name));
     removed += 1;
   }
@@ -196,6 +237,76 @@ async function removeExistingWebpAvatars(outputDir) {
 
 function buildTargetPath(outputDir, index) {
   return path.join(outputDir, `avatar${index}.webp`);
+}
+
+function slugifyBaseName(input) {
+  const normalized = String(input ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return normalized || 'avatar';
+}
+
+function buildSourceNamedPath(outputDir, sourcePath, usedNames) {
+  const base = slugifyBaseName(path.parse(sourcePath).name);
+  let attempt = base;
+  let suffix = 2;
+
+  while (usedNames.has(`${attempt}.webp`)) {
+    attempt = `${base}-${suffix}`;
+    suffix += 1;
+  }
+
+  const fileName = `${attempt}.webp`;
+  usedNames.add(fileName);
+  return {
+    targetPath: path.join(outputDir, fileName),
+    fileName,
+  };
+}
+
+function toDisplayLabelFromFileName(fileName) {
+  const base = fileName.replace(/\.webp$/i, '');
+  return base
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
+async function upsertMetadataStub(stubPath, converted, overwriteStub) {
+  const generated = converted.map((entry) => ({
+    file: entry.fileName,
+    label: toDisplayLabelFromFileName(entry.fileName),
+    searchTerms: [],
+  }));
+
+  const stat = await fs.stat(stubPath).catch(() => null);
+  if (!stat || overwriteStub) {
+    await fs.mkdir(path.dirname(stubPath), { recursive: true });
+    await fs.writeFile(stubPath, `${JSON.stringify(generated, null, 2)}\n`, 'utf8');
+    return { created: !stat, merged: false, overwritten: Boolean(stat && overwriteStub), count: generated.length };
+  }
+
+  const raw = await fs.readFile(stubPath, 'utf8');
+  const parsed = JSON.parse(raw);
+  const existing = Array.isArray(parsed) ? parsed : [];
+  const existingByFile = new Map(existing.map((item) => [String(item?.file || '').toLowerCase(), item]));
+
+  let inserted = 0;
+  for (const item of generated) {
+    const key = item.file.toLowerCase();
+    if (existingByFile.has(key)) continue;
+    existingByFile.set(key, item);
+    inserted += 1;
+  }
+
+  const merged = Array.from(existingByFile.values());
+  await fs.writeFile(stubPath, `${JSON.stringify(merged, null, 2)}\n`, 'utf8');
+  return { created: false, merged: true, overwritten: false, count: inserted };
 }
 
 async function convertToWebp(sourcePath, targetPath, options) {
@@ -263,9 +374,12 @@ async function main() {
 
     let removedExisting = 0;
     let startIndex = 1;
+    const existingWebpNames = await getExistingWebpNames(outputDir);
+    const usedNames = new Set(existingWebpNames);
 
     if (options.mode === 'replace') {
       removedExisting = await removeExistingWebpAvatars(outputDir);
+      usedNames.clear();
     } else {
       const existingIndexes = await getExistingAvatarIndexes(outputDir);
       startIndex = existingIndexes.length > 0 ? Math.max(...existingIndexes) + 1 : 1;
@@ -277,11 +391,18 @@ async function main() {
     for (let i = 0; i < validSourceFiles.length; i += 1) {
       const sourcePath = validSourceFiles[i];
       const targetIndex = startIndex + i;
-      const targetPath = buildTargetPath(outputDir, targetIndex);
+      const namedTarget = options.naming === 'source'
+        ? buildSourceNamedPath(outputDir, sourcePath, usedNames)
+        : { targetPath: buildTargetPath(outputDir, targetIndex), fileName: `avatar${targetIndex}.webp` };
 
       try {
-        await convertToWebp(sourcePath, targetPath, options);
-        converted.push({ sourcePath, targetPath, targetIndex });
+        await convertToWebp(sourcePath, namedTarget.targetPath, options);
+        converted.push({
+          sourcePath,
+          targetPath: namedTarget.targetPath,
+          targetIndex,
+          fileName: namedTarget.fileName,
+        });
       } catch (error) {
         failures.push({ sourcePath, message: error?.message || 'Erro desconhecido' });
       }
@@ -293,6 +414,7 @@ async function main() {
 
     console.log('Importacao de avatares concluida.');
     console.log(`Modo: ${options.mode}`);
+    console.log(`Naming: ${options.naming}`);
     console.log(`Entrada: ${toPosixPath(inputDir)}`);
     console.log(`Saida: ${toPosixPath(outputDir)}`);
     console.log(`Arquivos lidos: ${sortedSourceFiles.length}`);
@@ -305,6 +427,18 @@ async function main() {
     console.log(`Falhas na conversao: ${failCount}`);
     console.log(`Indice inicial: ${startIndex}`);
     console.log(`Indice final: ${endIndex}`);
+
+    if (options.stubFile) {
+      const stubPath = path.resolve(rootDir, options.stubFile);
+      const stubResult = await upsertMetadataStub(stubPath, converted, options.overwriteStub);
+      if (stubResult.created) {
+        console.log(`Stub criado: ${toPosixPath(stubPath)} (${stubResult.count} itens)`);
+      } else if (stubResult.overwritten) {
+        console.log(`Stub sobrescrito com confirmacao: ${toPosixPath(stubPath)} (${stubResult.count} itens)`);
+      } else if (stubResult.merged) {
+        console.log(`Stub mesclado sem sobrescrever metadados existentes: ${toPosixPath(stubPath)} (+${stubResult.count} itens novos)`);
+      }
+    }
 
     if (failCount > 0) {
       console.log('Falhas:');
