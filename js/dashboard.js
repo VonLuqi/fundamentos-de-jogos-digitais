@@ -15,6 +15,14 @@
 
 'use strict';
 
+import { initAppShell } from './app-shell.js';
+import {
+  getAchievementCollectionStats,
+  renderAchievementsList,
+  setRainbowVfxSuspended,
+} from './achievements-ui.js';
+import { isLessonPublished, renderLessonsList } from './lessons-ui.js';
+
 import {
   detectAvatarCount,
   getAvatarCount,
@@ -23,8 +31,6 @@ import {
   avatarSafeIndex,
   loadAvatarImage,
   ACHIEVEMENTS,
-  ACHIEVEMENT_RARITY_LABELS,
-  normalizeAchievementRarity,
   LESSONS,
   LEVEL_XP_BASE,
   ROUTES,
@@ -39,15 +45,15 @@ import {
   rankForXp,
   levelForXp,
   xpWithinLevel,
+  fetchLessonsPublishMap,
+  normalizeAchievementRarity,
 } from './api.js';
+import { initCompanionsPanel } from './friends-ui.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
 let currentToken = null;
-let rainbowVfxInstancePromise = null;
-let rainbowVfxDisabled = false;
-const rainbowVfxBoundElements = new WeakSet();
-const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+let publishMap = {};
 
 function normalizeSearchText(value) {
   return String(value ?? '')
@@ -57,87 +63,18 @@ function normalizeSearchText(value) {
     .trim();
 }
 
-function visibleAchievementsForUser(user) {
-  const unlockedIds = new Set(user.achievements || []);
-  if (user.role === 'admin') return ACHIEVEMENTS;
-  return ACHIEVEMENTS.filter((achievement) => !achievement.hidden || unlockedIds.has(achievement.id));
-}
-
-function rarityLabelForAchievement(achievement) {
-  const rarity = normalizeAchievementRarity(achievement?.rarity, achievement?.difficulty);
-  return ACHIEVEMENT_RARITY_LABELS[rarity] || ACHIEVEMENT_RARITY_LABELS.stone;
-}
-
-async function loadVfxModuleWithFallback() {
-  const candidates = [
-    'https://esm.sh/@vfx-js/core@1.1.0',
-    new URL('../node_modules/@vfx-js/core/lib/esm/index.js', import.meta.url).href,
-  ];
-
-  for (const specifier of candidates) {
-    try {
-      const mod = await import(specifier);
-      if (mod?.VFX) return mod;
-    } catch {
-      // tenta o próximo candidato
-    }
-  }
-
-  return null;
-}
-
-async function getRainbowVfxInstance() {
-  if (rainbowVfxDisabled || reducedMotionQuery.matches) return null;
-  if (!rainbowVfxInstancePromise) {
-    rainbowVfxInstancePromise = loadVfxModuleWithFallback().then((mod) => {
-      if (!mod?.VFX) return null;
-      return new mod.VFX();
-    });
-  }
-
-  try {
-    return await rainbowVfxInstancePromise;
-  } catch {
-    rainbowVfxDisabled = true;
-    return null;
-  }
-}
-
-async function applyRainbowCardJuiceVfx() {
-  if (rainbowVfxDisabled || reducedMotionQuery.matches) return;
-
-  const rainbowCards = Array.from(document.querySelectorAll('.achievement-card[data-rarity="rainbow"]'));
-  if (rainbowCards.length === 0) return;
-
-  const vfx = await getRainbowVfxInstance();
-  if (!vfx) {
-    rainbowCards.forEach((card) => card.classList.add('is-rainbow-css-fallback'));
-    return;
-  }
-
-  rainbowCards.forEach((card) => {
-    if (rainbowVfxBoundElements.has(card)) return;
-
-    try {
-      vfx.add(card, {
-        shader: 'glitch',
-        overflow: 22,
-      });
-      rainbowVfxBoundElements.add(card);
-      card.classList.add('is-rainbow-vfx');
-    } catch {
-      card.classList.add('is-rainbow-css-fallback');
-    }
-  });
-}
-
 /* ============================================================
    1. RENDERIZAÇÃO DO PERFIL
    ============================================================ */
 function renderProfile(user) {
   const isAdmin = user.role === 'admin';
-  const visibleAchievements = visibleAchievementsForUser(user);
-  document.getElementById('profile-name').textContent = user.name;
+  const collection = getAchievementCollectionStats(user);
+  const username = user.username || user.name || '—';
+  const fullName = user.fullName || user.name || username;
+
+  const usernameEl = document.getElementById('profile-username');
+  if (usernameEl) usernameEl.textContent = `@${username}`;
+  document.getElementById('profile-name').textContent = fullName;
   document.getElementById('profile-rank').textContent = isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp);
   document.getElementById('level-value').textContent = isAdmin ? '∞' : String(levelForXp(user.xp));
   const avatarImg = document.getElementById('avatar-glyph');
@@ -145,7 +82,7 @@ function renderProfile(user) {
   updateAvatarCounter(user.avatarIndex);
   document.getElementById('stat-lessons').textContent = String(isAdmin ? LESSONS.length : user.completedLessons.length);
   document.getElementById('stat-achievements').textContent =
-    `${isAdmin ? ACHIEVEMENTS.length : user.achievements.length} / ${visibleAchievements.length}`;
+    `${collection.unlocked} / ${collection.total}`;
 
   applyAdminSkin(user);
 }
@@ -220,124 +157,93 @@ function renderXpBar(user, { fromZero = false } = {}) {
 }
 
 /* ============================================================
-   3. CONQUISTAS
+   3. PREVIEWS DO HUB (álbum + trilha)
    ============================================================ */
-function renderAchievements(user, highlightIds = []) {
-  const grid = document.getElementById('achievements-grid');
-  if (!grid) return;
-  const visibleAchievements = visibleAchievementsForUser(user);
+const ACHIEVEMENT_PREVIEW_LIMIT = 5;
 
-  grid.innerHTML = '';
-  if (visibleAchievements.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'achievement-empty';
-    li.textContent = 'Nenhuma conquista cadastrada ainda.';
-    grid.appendChild(li);
-    return;
-  }
+/** Ordem decrescente: arco-íris → ouro → prata → cobre → pedra. */
+const RARITY_RANK = Object.freeze({
+  rainbow: 5,
+  gold: 4,
+  silver: 3,
+  copper: 2,
+  stone: 1,
+});
 
-  visibleAchievements.forEach((ach, index) => {
-    const unlocked = user.role === 'admin' || user.achievements.includes(ach.id);
-    const justUnlocked = highlightIds.includes(ach.id);
-    const rarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);
-
-    const li = document.createElement('li');
-    li.className = [
-      'achievement-card',
-      unlocked ? 'is-unlocked' : 'is-locked',
-      justUnlocked ? 'is-just-unlocked' : '',
-    ]
-      .filter(Boolean)
-      .join(' ');
-    li.style.setProperty('--ach-index', String(index));
-    li.dataset.rarity = rarity;
-
-    const icon = document.createElement('span');
-    icon.className = 'achievement-card__icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = ach.icon;
-
-    const name = document.createElement('p');
-    name.className = 'achievement-card__name';
-    name.textContent = ach.name;
-
-    const rarityBadge = document.createElement('p');
-    rarityBadge.className = 'achievement-card__rarity';
-    rarityBadge.textContent = rarityLabelForAchievement(ach);
-
-    const desc = document.createElement('p');
-    desc.className = 'achievement-card__desc';
-    desc.textContent = ach.desc;
-
-    li.append(icon, name, rarityBadge, desc);
-
-    if (rarity === 'rainbow' && justUnlocked) {
-      li.classList.add('is-rainbow-burst');
-    }
-
-    grid.appendChild(li);
-  });
-
-  void applyRainbowCardJuiceVfx();
+function rarityRankFor(achievement) {
+  const rarity = normalizeAchievementRarity(achievement?.rarity, achievement?.difficulty);
+  return RARITY_RANK[rarity] || 0;
 }
 
-/* ============================================================
-   4. TRILHA DE AULAS
-   ============================================================ */
-function renderLessons(user) {
-  const list = document.getElementById('lessons-list');
-  if (!list) return;
+function pickAchievementPreview(user, highlightIds = []) {
+  const unlockedIds = new Set(user?.achievements || []);
+  const unlocked = user?.role === 'admin'
+    ? [...ACHIEVEMENTS]
+    : ACHIEVEMENTS.filter((achievement) => unlockedIds.has(achievement.id));
 
-  list.innerHTML = '';
-  if (LESSONS.length === 0) {
-    const li = document.createElement('li');
-    li.className = 'lesson-empty';
-    li.textContent = 'Nenhuma aula cadastrada ainda.';
-    list.appendChild(li);
-    return;
+  const highlightSet = new Set(highlightIds);
+
+  return unlocked
+    .sort((a, b) => {
+      const rarityDiff = rarityRankFor(b) - rarityRankFor(a);
+      if (rarityDiff !== 0) return rarityDiff;
+      // Empate de raridade: recém-desbloqueadas primeiro.
+      const aHot = highlightSet.has(a.id) ? 1 : 0;
+      const bHot = highlightSet.has(b.id) ? 1 : 0;
+      return bHot - aHot;
+    })
+    .slice(0, ACHIEVEMENT_PREVIEW_LIMIT);
+}
+
+function pickLessonPreview(user) {
+  const completed = new Set(user?.completedLessons || []);
+  const published = LESSONS.filter((lesson) => isLessonPublished(lesson.id, publishMap));
+
+  const nextOpen = published.find((lesson) => !completed.has(lesson.id));
+  if (nextOpen) return [nextOpen];
+
+  const lastCompleted = [...LESSONS].reverse().find((lesson) => completed.has(lesson.id));
+  if (lastCompleted) return [lastCompleted];
+
+  if (published.length > 0) return [published[0]];
+  return LESSONS.slice(0, 1);
+}
+
+function renderAchievements(user, highlightIds = []) {
+  const summary = document.getElementById('achievements-summary');
+  const grid = document.getElementById('achievements-preview');
+  if (!grid) return;
+
+  const collection = getAchievementCollectionStats(user);
+  if (summary) {
+    summary.textContent = `${collection.unlocked} / ${collection.total} relíquias no álbum`;
   }
 
-  LESSONS.forEach((lesson, index) => {
-    const completed = user.completedLessons.includes(lesson.id);
-    const locked = false;
+  const preview = pickAchievementPreview(user, highlightIds);
+  renderAchievementsList(grid, user, {
+    highlightIds,
+    mode: 'cards',
+    achievements: preview,
+    emptyMessage: 'Nenhuma relíquia descoberta ainda — explore a Trilha e o Altar.',
+  });
+}
 
-    const li = document.createElement('li');
-    li.className = ['lesson-row', locked ? 'is-locked' : '', completed ? 'is-completed' : '']
-      .filter(Boolean)
-      .join(' ');
-    li.style.setProperty('--lesson-index', String(index));
+function renderLessons(user) {
+  const summary = document.getElementById('lessons-summary');
+  const list = document.getElementById('lessons-preview');
+  if (!list) return;
 
-    const number = document.createElement('span');
-    number.className = 'lesson-row__number';
-    number.textContent = lesson.number;
+  const completed = Array.isArray(user?.completedLessons) ? user.completedLessons.length : 0;
+  const publishedCount = LESSONS.filter((lesson) => isLessonPublished(lesson.id, publishMap)).length;
+  if (summary) {
+    summary.textContent = user?.role === 'admin'
+      ? `${publishedCount} de ${LESSONS.length} aulas liberadas para a turma`
+      : `${completed} concluída(s) · ${publishedCount} liberada(s) de ${LESSONS.length}`;
+  }
 
-    const body = document.createElement('div');
-    body.className = 'lesson-row__body';
-    const title = document.createElement('p');
-    title.className = 'lesson-row__title';
-    title.textContent = lesson.title;
-    const subtitle = document.createElement('p');
-    subtitle.className = 'lesson-row__subtitle';
-    subtitle.textContent = completed ? `Concluída — +${lesson.rewardXp} XP recebidos` : lesson.subtitle;
-    body.append(title, subtitle);
-
-    if (locked) {
-      const lock = document.createElement('span');
-      lock.setAttribute('aria-hidden', 'true');
-      lock.textContent = '🔒';
-      li.append(number, body, lock);
-    } else {
-      // Apenas navega para a aula. O XP é concedido SOMENTE pela
-      // Oferenda ao Estige (validada no servidor) — não por clique.
-      const action = document.createElement('a');
-      action.className = 'lesson-row__action';
-      action.href = ROUTES.lesson(lesson.id);
-      action.textContent = completed ? 'Rever' : 'Iniciar';
-      action.setAttribute('aria-label', `${completed ? 'Rever' : 'Iniciar'} ${lesson.title}`);
-      li.append(number, body, action);
-    }
-
-    list.appendChild(li);
+  renderLessonsList(list, user, {
+    lessons: pickLessonPreview(user),
+    publishMap,
   });
 }
 
@@ -439,7 +345,10 @@ function initAltar() {
       renderAchievements(currentUser, result.awarded.achievements);
       renderLessons(currentUser);
 
-      setAltarFeedback(`Oferenda aceita: ${detailParts.join(' • ')}`, 'success');
+      const albumHint = result.awarded.achievements.length > 0
+        ? ' · Nova figurinha no Álbum de Relíquias.'
+        : '';
+      setAltarFeedback(`Oferenda aceita: ${detailParts.join(' • ')}${albumHint}`, 'success');
       input.value = '';
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
@@ -576,6 +485,19 @@ function initAvatarSwap() {
       });
 
       empty.hidden = visibleCount > 0;
+
+      // Meta/confirm usam pendingIndex — seleção sobrevive ao filtro mesmo se o card sumir.
+      if (count > 0 && loadFailed + loadedOk === count) {
+        if (query.length > 0) {
+          status.textContent = visibleCount === 0
+            ? 'Nenhum avatar encontrado para esse filtro.'
+            : `${visibleCount} avatar${visibleCount === 1 ? '' : 'es'} encontrado${visibleCount === 1 ? '' : 's'}.`;
+        } else if (loadFailed > 0) {
+          status.textContent = `${loadedOk} avatares disponíveis. ${loadFailed} com falha de imagem.`;
+        } else if (loadedOk > 0) {
+          status.textContent = `${loadedOk} avatares disponíveis na biblioteca.`;
+        }
+      }
     }
 
     const count = avatars.length;
@@ -613,10 +535,8 @@ function initAvatarSwap() {
             if (loadedOk === 0) {
               status.textContent = 'Falha ao carregar os avatares agora.';
               confirmBtn.disabled = true;
-            } else if (loadFailed > 0) {
-              status.textContent = `${loadedOk} avatares disponíveis. ${loadFailed} com falha de imagem.`;
             } else {
-              status.textContent = `${loadedOk} avatares disponíveis na biblioteca.`;
+              applyFilter();
             }
           }
         });
@@ -664,7 +584,19 @@ function initAvatarSwap() {
     updateSelectionUi();
     applyFilter();
 
-    wrapper.append(head, searchWrap, grid, empty, meta, status, actions);
+    const chrome = document.createElement('div');
+    chrome.className = 'avatar-picker__chrome';
+    chrome.append(head, searchWrap);
+
+    const scrollRegion = document.createElement('div');
+    scrollRegion.className = 'avatar-picker__scroll';
+    scrollRegion.append(grid);
+
+    const footer = document.createElement('div');
+    footer.className = 'avatar-picker__footer';
+    footer.append(empty, meta, status, actions);
+
+    wrapper.append(chrome, scrollRegion, footer);
     return { wrapper, focusElement: searchInput };
   }
 
@@ -673,6 +605,7 @@ function initAvatarSwap() {
     openScrollModal('Escolha seu Avatar', picker.wrapper, {
       closeLabel: 'Fechar galeria',
       focusElement: picker.focusElement,
+      variant: 'avatar',
     });
   });
 }
@@ -681,7 +614,11 @@ function initAvatarSwap() {
    8. MODAL "PERGAMINHO" (substitui o alert nativo)
    ============================================================ */
 function openScrollModal(title, contentNode, options = {}) {
-  const { closeLabel = 'Selar o Pergaminho', focusElement = null } = options;
+  const {
+    closeLabel = 'Selar o Pergaminho',
+    focusElement = null,
+    variant = null,
+  } = options;
   const modal = document.getElementById('scroll-modal');
   const titleEl = document.getElementById('scroll-modal-title');
   const bodyEl = document.getElementById('scroll-modal-body');
@@ -692,22 +629,33 @@ function openScrollModal(title, contentNode, options = {}) {
   bodyEl.innerHTML = '';
   bodyEl.appendChild(contentNode);
 
-  if (closeButton) closeButton.textContent = closeLabel;
+  modal.classList.toggle('scroll-modal--avatar', variant === 'avatar');
+
+  if (closeButton) {
+    closeButton.textContent = closeLabel;
+    // No modo avatar, Cancelar/Confirmar cobrem o fechamento — evita 3 CTAs.
+    closeButton.hidden = variant === 'avatar';
+  }
 
   modal.hidden = false;
   modal.classList.add('is-open');
+  // Canvas VFX arco-íris (mesmo com z-index baixo) some enquanto o pergaminho está aberto.
+  setRainbowVfxSuspended(true);
   if (focusElement && typeof focusElement.focus === 'function') {
     focusElement.focus();
-  } else {
-    closeButton?.focus();
+  } else if (closeButton && !closeButton.hidden) {
+    closeButton.focus();
   }
 }
 
 function closeScrollModal() {
   const modal = document.getElementById('scroll-modal');
   if (!modal) return;
-  modal.classList.remove('is-open');
+  modal.classList.remove('is-open', 'scroll-modal--avatar');
   modal.hidden = true;
+  const closeButton = document.getElementById('scroll-modal-close');
+  if (closeButton) closeButton.hidden = false;
+  setRainbowVfxSuspended(false);
 }
 
 function initScrollModal() {
@@ -732,7 +680,12 @@ function initAdminTools() {
   if (tools) tools.hidden = false;
 
   const btnCodes = document.getElementById('btn-generate-codes');
+  const btnManageLessons = document.getElementById('btn-manage-lessons');
   const btnSouls = document.getElementById('btn-list-souls');
+
+  btnManageLessons?.addEventListener('click', () => {
+    window.location.href = ROUTES.aulas();
+  });
 
   btnCodes?.addEventListener('click', async () => {
     const wrapper = document.createElement('div');
@@ -845,11 +798,9 @@ function initAdminTools() {
 /* ============================================================
    10. LOGOUT
    ============================================================ */
-function initLogout() {
-  document.getElementById('btn-logout')?.addEventListener('click', async () => {
-    await logout();
-    window.location.href = ROUTES.auth();
-  });
+async function handleDashboardLogout() {
+  await logout();
+  window.location.href = ROUTES.auth();
 }
 
 /* ============================================================
@@ -888,7 +839,20 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
+
+  initAppShell({
+    route: 'dashboard',
+    role: currentUser.role === 'admin' ? 'admin' : 'student',
+    onLogout: handleDashboardLogout,
+  });
+
   await avatarCountReady; // garante getAvatarCount()/avatarSafeIndex corretos antes de renderizar
+
+  try {
+    publishMap = await fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id));
+  } catch {
+    publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
+  }
 
   // A hidratação visual (stats/cards) pode falhar por dado inesperado
   // do servidor, mas isso NUNCA pode impedir os botões de funcionar.
@@ -906,7 +870,10 @@ async function init() {
   initAltar();
   initAvatarSwap();
   initAdminTools();
-  initLogout();
+  initCompanionsPanel({
+    root: document.getElementById('companions-panel'),
+    getToken: () => currentToken || getSession()?.token || null,
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);

@@ -15,9 +15,11 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/companheiros.css" />
 </head>
-<body>
+<body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
 
   <!-- Vinheta escura nas bordas -->
   <div class="vignette" aria-hidden="true"></div>
@@ -43,32 +45,94 @@
     </div>
   </div>
 
-  <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
-  <header class="dashboard-header">
-    <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
-      <span aria-hidden="true">←</span> Voltar
-    </a>
-    <div class="dashboard-header__titles">
-      <p class="dashboard-header__eyebrow">Fundamentos de Jogos Digitais</p>
-      <h1 class="dashboard-header__title">SALÃO DOS <span class="accent">HERÓIS</span></h1>
+  <!-- Confirmação: Romper vínculo (Companheiros de Jornada) -->
+  <div
+    class="bond-confirm"
+    id="bond-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="bond-confirm-title"
+    aria-describedby="bond-confirm-desc"
+    hidden
+  >
+    <div class="bond-confirm__panel">
+      <h2 class="bond-confirm__title" id="bond-confirm-title">Romper vínculo</h2>
+      <p class="bond-confirm__desc" id="bond-confirm-desc">
+        Deseja romper o vínculo com este companheiro?
+      </p>
+      <div class="bond-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="bond-confirm-cancel">
+          Manter vínculo
+        </button>
+        <button class="btn-gold" type="button" id="bond-confirm-ok">
+          Romper
+        </button>
+      </div>
     </div>
-    <button class="btn-logout" type="button" id="btn-logout" aria-label="Encerrar sessão corrente">
-      Encerrar Sessão
-    </button>
-  </header>
-
-  <!-- Divisor ornamentado -->
-  <div class="ornate-divider" aria-hidden="true">
-    <span class="ornate-divider__line"></span>
-    <span class="ornate-divider__gem">◆</span>
-    <span class="ornate-divider__line"></span>
   </div>
 
-  <!-- ========== LAYOUT PRINCIPAL ========== -->
-  <main class="dashboard-layout">
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
-    <!-- ========== COLUNA ESQUERDA: PERFIL DINÂMICO ========== -->
-    <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="dashboard-page-title">SALÃO DOS <span class="accent">HERÓIS</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Painel do Heroi</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content dashboard-shell__content" aria-label="Progresso e conquistas">
+          <main class="app-shell__content dashboard-shell__content" aria-labelledby="dashboard-page-title">
+        <section class="dashboard-layout">
+
+          <!-- ========== COLUNA ESQUERDA: PERFIL DINÂMICO ========== -->
+          <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
 
       <!-- Avatar clicável (persistido via /api/progress) -->
       <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
@@ -84,6 +148,7 @@
       </button>
       <p class="avatar-frame__counter" id="avatar-counter">Avatar 1 de 6</p>
 
+      <p class="profile-panel__username" id="profile-username">@—</p>
       <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
       <p class="profile-panel__rank" id="profile-rank">—</p>
 
@@ -117,19 +182,84 @@
         </div>
       </dl>
 
+      <!-- ========== COMPANHEIROS DE JORNADA ========== -->
+      <section class="companions-panel" id="companions-panel" aria-label="Companheiros de Jornada">
+        <header class="companions-panel__head">
+          <h3 class="companions-panel__title">Companheiros de Jornada</h3>
+          <p class="companions-panel__count" id="companions-count" aria-live="polite">— / 25</p>
+        </header>
+
+        <form class="companions-invite" id="companions-invite-form" autocomplete="off">
+          <label class="companions-invite__label" for="companions-search">Oferecer vínculo</label>
+          <div class="companions-invite__row">
+            <div class="companions-search">
+              <input
+                class="companions-search__input"
+                type="text"
+                id="companions-search"
+                name="username"
+                placeholder="Username do aluno"
+                maxlength="32"
+                spellcheck="false"
+                aria-autocomplete="list"
+                aria-controls="companions-suggestions"
+                aria-expanded="false"
+              />
+              <ul
+                class="companions-suggestions"
+                id="companions-suggestions"
+                role="listbox"
+                aria-label="Sugestões de username"
+                hidden
+              ></ul>
+            </div>
+            <button class="btn-gold btn-gold--ghost companions-invite__btn" type="submit" id="companions-invite-btn">
+              Convidar
+            </button>
+          </div>
+          <p class="companions-feedback" id="companions-feedback" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="companions-section" id="companions-incoming-wrap" hidden>
+          <h4 class="companions-section__title">
+            Convites recebidos
+            <span class="companions-section__badge" id="companions-incoming-badge">0</span>
+          </h4>
+          <ul class="companions-list" id="companions-incoming" aria-label="Convites recebidos"></ul>
+        </div>
+
+        <div class="companions-section" id="companions-outgoing-wrap" hidden>
+          <h4 class="companions-section__title">Convites enviados</h4>
+          <ul class="companions-list" id="companions-outgoing" aria-label="Convites enviados"></ul>
+        </div>
+
+        <div class="companions-section companions-section--accepted">
+          <h4 class="companions-section__title">Ao seu lado</h4>
+          <ul class="companions-list" id="companions-accepted" aria-label="Companheiros aceitos"></ul>
+          <p class="companions-empty" id="companions-empty" hidden>
+            Nenhum companheiro ao seu lado… ainda.
+          </p>
+        </div>
+
+        <p class="companions-status" id="companions-status" role="status" aria-live="polite"></p>
+      </section>
+
       <!-- ========== PAINEL EXCLUSIVO DO ADMIN ========== -->
       <div class="admin-tools" id="admin-tools" hidden>
         <button class="btn-gold btn-gold--pulse" type="button" id="btn-generate-codes">
           Gerar Códigos de Acesso
         </button>
+        <button class="btn-gold btn-gold--ghost" type="button" id="btn-manage-lessons">
+          Liberar Aulas na Trilha
+        </button>
         <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
           Ver Almas Registradas
         </button>
       </div>
-    </aside>
+          </aside>
 
-    <!-- ========== COLUNA DIREITA ========== -->
-    <section class="hall-content" aria-label="Progresso e conquistas">
+          <!-- ========== COLUNA DIREITA ========== -->
+          <section class="hall-content" aria-label="Progresso e conquistas">
 
       <!-- ========== ALTAR: OFERENDA AO ESTIGE ========== -->
       <article class="altar-block">
@@ -162,25 +292,32 @@
         <p class="altar__feedback" id="altar-feedback" role="status" aria-live="polite"></p>
       </article>
 
-      <!-- CONQUISTAS -->
-      <article class="achievements-block">
-        <h3 class="block-title">Quadro de Honra <span class="block-title__sub">(Conquistas)</span></h3>
-        <ul class="achievements-grid" id="achievements-grid">
-          <!-- Preenchido via JS a partir dos dados vindos da API -->
-        </ul>
+      <!-- CONQUISTAS — preview do Álbum -->
+      <article class="hub-preview achievements-block">
+        <div class="hub-preview__head">
+          <h3 class="block-title">Álbum de Relíquias <span class="block-title__sub">(Resumo)</span></h3>
+          <a class="hub-preview__cta" href="./conquistas.html">Abrir álbum</a>
+        </div>
+        <p class="hub-preview__summary" id="achievements-summary">Carregando coleção…</p>
+        <ul class="achievements-grid is-preview" id="achievements-preview" aria-label="Prévia de conquistas"></ul>
       </article>
 
-      <!-- PROGRESSO DAS AULAS -->
-      <article class="lessons-block">
-        <h3 class="block-title">Trilha do Herói <span class="block-title__sub">(Módulos)</span></h3>
-        <ul class="lessons-list" id="lessons-list">
-          <!-- Preenchido via JS — status: locked / available / completed -->
-        </ul>
+      <!-- AULAS — preview da Trilha -->
+      <article class="hub-preview lessons-block">
+        <div class="hub-preview__head">
+          <h3 class="block-title">Trilha do Herói <span class="block-title__sub">(Resumo)</span></h3>
+          <a class="hub-preview__cta" href="./aulas.html">Ver trilha</a>
+        </div>
+        <p class="hub-preview__summary" id="lessons-summary">Carregando trilha…</p>
+        <ul class="lessons-list is-preview" id="lessons-preview" aria-label="Prévia da próxima aula"></ul>
       </article>
 
-    </section>
+          </section>
 
-  </main>
+        </section>
+      </main>
+    </div>
+  </div>
 
   <!-- Aviso exibido quando a API não está acessível (ex.: abrir o HTML via file://) -->
   <div class="api-warning" id="api-warning" hidden>
