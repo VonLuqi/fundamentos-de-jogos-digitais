@@ -10,7 +10,163 @@ import {
   ACHIEVEMENTS,
   ACHIEVEMENT_RARITY_LABELS,
   normalizeAchievementRarity,
+  rootPath,
 } from './api.js';
+
+/** Fonte de verdade das artes: `assets/achievements/catalog.json` (igual aos avatares). */
+const ACHIEVEMENT_ART_CATALOG_FILE = 'assets/achievements/catalog.json';
+
+/** @type {Map<string, string>} id → nome do arquivo webp */
+let achievementArtById = new Map();
+let achievementArtCatalogPromise = null;
+
+/**
+ * Set vivo dos ids com arte. Preferir o catalog.json; este Set é preenchido no load.
+ * Mantido exportado para smoke/compat.
+ */
+export const ACHIEVEMENT_ART_IDS = new Set();
+
+function achievementArtCatalogUrl() {
+  return `${rootPath()}/${ACHIEVEMENT_ART_CATALOG_FILE}`;
+}
+
+function normalizeAchievementArtCatalog(rawCatalog) {
+  const safeRaw = Array.isArray(rawCatalog) ? rawCatalog : [];
+  const map = new Map();
+
+  safeRaw.forEach((entry) => {
+    const file = String(entry?.file || '').trim();
+    if (!file || !/\.webp$/i.test(file)) return;
+
+    const idFromFile = file.replace(/\.webp$/i, '');
+    const id = String(entry?.id || idFromFile).trim();
+    if (!id) return;
+
+    map.set(id, file);
+  });
+
+  return map;
+}
+
+function applyAchievementArtCatalog(map) {
+  achievementArtById = map;
+  ACHIEVEMENT_ART_IDS.clear();
+  map.forEach((_file, id) => ACHIEVEMENT_ART_IDS.add(id));
+  return map;
+}
+
+/**
+ * Carrega e cacheia `assets/achievements/catalog.json`.
+ * Sem arte listada → UI usa emoji (sem 404).
+ */
+export async function ensureAchievementArtCatalogLoaded() {
+  if (!achievementArtCatalogPromise) {
+    achievementArtCatalogPromise = fetch(achievementArtCatalogUrl(), { cache: 'no-store' })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Falha ao carregar catalogo de artes (${response.status})`);
+        }
+        const payload = await response.json();
+        return applyAchievementArtCatalog(normalizeAchievementArtCatalog(payload));
+      })
+      .catch(() => applyAchievementArtCatalog(new Map()));
+  }
+
+  return achievementArtCatalogPromise;
+}
+
+/**
+ * URL da arte WebP se o id estiver no catálogo; senão `null` (usar emoji).
+ * Chame `ensureAchievementArtCatalogLoaded()` antes do render.
+ */
+export function achievementArtUrl(achievementId) {
+  const id = String(achievementId || '');
+  if (!id) return null;
+  const file = achievementArtById.get(id);
+  if (!file) return null;
+  return `${rootPath()}/assets/achievements/${encodeURIComponent(file)}`;
+}
+
+/**
+ * Nó de arte: `<img>` se houver WebP no catálogo, senão `<span>` com emoji.
+ * @param {object} achievement
+ * @param {{ className?: string, grayscale?: boolean }} [options]
+ */
+export function createAchievementArtNode(achievement, {
+  className = 'achievement-slot__art',
+  grayscale = false,
+} = {}) {
+  const url = achievementArtUrl(achievement?.id);
+  const classes = [
+    className,
+    url ? 'has-art' : 'has-emoji',
+    grayscale ? 'is-bw' : '',
+    grayscale && !url ? 'is-silhouette' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  if (url) {
+    const img = document.createElement('img');
+    img.className = classes;
+    img.src = url;
+    img.alt = '';
+    img.decoding = 'async';
+    img.draggable = false;
+    img.setAttribute('aria-hidden', 'true');
+    img.onerror = () => {
+      const span = document.createElement('span');
+      span.className = [
+        className,
+        'has-emoji',
+        grayscale ? 'is-bw is-silhouette' : '',
+      ]
+        .filter(Boolean)
+        .join(' ');
+      span.setAttribute('aria-hidden', 'true');
+      span.textContent = achievement?.icon || '?';
+      img.replaceWith(span);
+    };
+    return img;
+  }
+
+  const span = document.createElement('span');
+  span.className = classes;
+  span.setAttribute('aria-hidden', 'true');
+  span.textContent = achievement?.icon || '?';
+  return span;
+}
+
+/**
+ * Preenche o host do modal (`#relic-modal-art`) com img ou emoji.
+ * Mistério / locked: use `grayscale: true` (arte P&B — sem `?` tipográfico).
+ */
+export async function fillAchievementArtHost(hostEl, achievement, {
+  grayscale = false,
+} = {}) {
+  if (!hostEl) return;
+  await ensureAchievementArtCatalogLoaded();
+
+  hostEl.replaceChildren();
+  hostEl.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
+  hostEl.textContent = '';
+
+  const node = createAchievementArtNode(achievement, {
+    className: 'relic-modal__art-media',
+    grayscale,
+  });
+
+  if (node?.tagName === 'IMG') {
+    hostEl.classList.add('has-art');
+    if (grayscale) hostEl.classList.add('is-bw');
+    hostEl.appendChild(node);
+    return;
+  }
+
+  hostEl.textContent = achievement?.icon || '?';
+  hostEl.classList.add('has-emoji');
+  if (grayscale) hostEl.classList.add('is-silhouette');
+}
 
 const rainbowVfxBoundElements = new WeakSet();
 let rainbowVfxInstancePromise = null;
@@ -245,10 +401,15 @@ export async function applyRainbowCardJuiceVfx(root = document) {
   if (rainbowVfxDisabled || reducedMotionQuery.matches) return;
 
   const scope = root?.querySelectorAll ? root : document;
-  const rainbowTargets = Array.from(scope.querySelectorAll([
-    '.achievement-card[data-rarity="rainbow"]',
-    '.achievement-slot.is-unlocked[data-rarity="rainbow"] .achievement-slot__face',
-  ].join(', ')));
+
+  // Hub cards: só CSS — o shader glitch do @vfx-js torce a arte WebP.
+  scope.querySelectorAll('.achievement-card[data-rarity="rainbow"]').forEach((el) => {
+    el.classList.add('is-rainbow-css-fallback');
+  });
+
+  const rainbowTargets = Array.from(scope.querySelectorAll(
+    '.achievement-slot.is-unlocked[data-rarity="rainbow"] .achievement-slot__face'
+  ));
   if (rainbowTargets.length === 0) return;
 
   const vfx = await getRainbowVfxInstance();
@@ -262,6 +423,13 @@ export async function applyRainbowCardJuiceVfx(root = document) {
 
   rainbowTargets.forEach((el) => {
     if (rainbowVfxBoundElements.has(el)) return;
+
+    // Álbum com WebP: glitch também distorce a figurinha — preferir CSS.
+    if (el.querySelector('img.has-art')) {
+      el.classList.add('is-rainbow-css-fallback');
+      el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
+      return;
+    }
 
     try {
       vfx.add(el, {
@@ -279,6 +447,35 @@ export async function applyRainbowCardJuiceVfx(root = document) {
 
   rainbowVfxCanvas = findRainbowVfxCanvas() || rainbowVfxCanvas;
   syncRainbowVfxCanvasVisibility();
+}
+
+function appendRelicFaceContent(parent, {
+  title,
+  achievement,
+  rarityLabel = '',
+  showRarityBadge = true,
+  grayscale = false,
+  nameClassName,
+  artClassName,
+  rarityClassName,
+}) {
+  const name = document.createElement('p');
+  name.className = nameClassName;
+  name.textContent = title;
+
+  const art = createAchievementArtNode(achievement, {
+    className: artClassName,
+    grayscale,
+  });
+
+  parent.append(name, art);
+
+  if (showRarityBadge && rarityLabel) {
+    const badge = document.createElement('p');
+    badge.className = rarityClassName;
+    badge.textContent = rarityLabel;
+    parent.append(badge);
+  }
 }
 
 function renderCardsMode(container, user, { highlightIds, emptyMessage, achievements }) {
@@ -312,24 +509,17 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
     li.dataset.rarity = rarity;
     li.dataset.achievementId = ach.id;
 
-    const icon = document.createElement('span');
-    icon.className = 'achievement-card__icon';
-    icon.setAttribute('aria-hidden', 'true');
-    icon.textContent = ach.icon;
-
-    const name = document.createElement('p');
-    name.className = 'achievement-card__name';
-    name.textContent = ach.name;
-
-    const rarityBadge = document.createElement('p');
-    rarityBadge.className = 'achievement-card__rarity';
-    rarityBadge.textContent = rarityLabelForAchievement(ach);
-
-    const desc = document.createElement('p');
-    desc.className = 'achievement-card__desc';
-    desc.textContent = ach.desc;
-
-    li.append(icon, name, rarityBadge, desc);
+    // Layout: título → arte → badge (sem descrição no face).
+    appendRelicFaceContent(li, {
+      title: ach.name,
+      achievement: ach,
+      rarityLabel: rarityLabelForAchievement(ach),
+      showRarityBadge: true,
+      grayscale: !unlocked,
+      nameClassName: 'achievement-card__name',
+      artClassName: 'achievement-card__art',
+      rarityClassName: 'achievement-card__rarity',
+    });
 
     if (rarity === 'rainbow' && justUnlocked) {
       li.classList.add('is-rainbow-burst');
@@ -341,8 +531,8 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
 
 /**
  * Álbum: um slot por entrada do catálogo.
- * Álbum próprio: hidden não descoberta → “?” (raridade unknown).
- * Espelho (`visitorView`): texto ← observador; estilo ← espelhado (eixos independentes).
+ * Layout: título → arte → badge. Mistério / locked / secret-known → arte P&B.
+ * Espelho (`visitorView`): texto ← observador; estilo ← espelhado.
  */
 function renderAlbumMode(container, user, {
   highlightIds,
@@ -381,6 +571,8 @@ function renderAlbumMode(container, user, {
     const isSecretKnownLocked = Boolean(
       visitorView && model.isSecret && model.revealText && !model.applySecretStyle
     );
+    const useGrayscale = model.kind !== 'unlocked';
+
     li.className = [
       'achievement-slot',
       model.kind === 'unlocked' ? 'is-unlocked' : 'is-locked',
@@ -416,20 +608,16 @@ function renderAlbumMode(container, user, {
             : 'Segredo desconhecido e ainda não conquistado neste Espelho.')
           : 'Relíquia misteriosa ainda não descoberta. Raridade desconhecida.'
       );
-      const mark = document.createElement('span');
-      mark.className = 'achievement-slot__mystery';
-      mark.setAttribute('aria-hidden', 'true');
-      mark.textContent = '?';
-      const label = document.createElement('p');
-      label.className = 'achievement-slot__name';
-      label.textContent = '???';
-      button.append(mark, label);
-      if (model.showRarityBadge) {
-        const rarityBadge = document.createElement('p');
-        rarityBadge.className = 'achievement-slot__rarity';
-        rarityBadge.textContent = rarityName;
-        button.append(rarityBadge);
-      }
+      appendRelicFaceContent(button, {
+        title: '???',
+        achievement: ach,
+        rarityLabel: rarityName,
+        showRarityBadge: model.showRarityBadge,
+        grayscale: true,
+        nameClassName: 'achievement-slot__name',
+        artClassName: 'achievement-slot__art',
+        rarityClassName: 'achievement-slot__rarity',
+      });
     } else if (model.kind === 'locked') {
       button.setAttribute(
         'aria-label',
@@ -437,22 +625,16 @@ function renderAlbumMode(container, user, {
           ? `Segredo que você conhece, ainda não conquistado neste Espelho: ${ach.name}.`
           : `Relíquia bloqueada: ${ach.name}. Raridade ${rarityName}.`
       );
-      const icon = document.createElement('span');
-      icon.className = isSecretKnownLocked
-        ? 'achievement-slot__icon'
-        : 'achievement-slot__icon is-silhouette';
-      icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = ach.icon;
-      const name = document.createElement('p');
-      name.className = 'achievement-slot__name';
-      name.textContent = ach.name;
-      button.append(icon, name);
-      if (model.showRarityBadge) {
-        const rarityBadge = document.createElement('p');
-        rarityBadge.className = 'achievement-slot__rarity';
-        rarityBadge.textContent = rarityName;
-        button.append(rarityBadge);
-      }
+      appendRelicFaceContent(button, {
+        title: ach.name,
+        achievement: ach,
+        rarityLabel: rarityName,
+        showRarityBadge: model.showRarityBadge,
+        grayscale: true,
+        nameClassName: 'achievement-slot__name',
+        artClassName: 'achievement-slot__art',
+        rarityClassName: 'achievement-slot__rarity',
+      });
     } else {
       button.setAttribute(
         'aria-label',
@@ -460,20 +642,16 @@ function renderAlbumMode(container, user, {
           ? `Segredo revelado neste Espelho: ${ach.name}. Raridade ${rarityName}.`
           : `Relíquia descoberta: ${ach.name}. Raridade ${rarityName}.`
       );
-      const icon = document.createElement('span');
-      icon.className = 'achievement-slot__icon';
-      icon.setAttribute('aria-hidden', 'true');
-      icon.textContent = ach.icon;
-      const name = document.createElement('p');
-      name.className = 'achievement-slot__name';
-      name.textContent = ach.name;
-      button.append(icon, name);
-      if (model.showRarityBadge) {
-        const rarityBadge = document.createElement('p');
-        rarityBadge.className = 'achievement-slot__rarity';
-        rarityBadge.textContent = rarityName;
-        button.append(rarityBadge);
-      }
+      appendRelicFaceContent(button, {
+        title: ach.name,
+        achievement: ach,
+        rarityLabel: rarityName,
+        showRarityBadge: model.showRarityBadge,
+        grayscale: useGrayscale,
+        nameClassName: 'achievement-slot__name',
+        artClassName: 'achievement-slot__art',
+        rarityClassName: 'achievement-slot__rarity',
+      });
       const realRarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);
       if (realRarity === 'rainbow' && justUnlocked) {
         li.classList.add('is-rainbow-burst');
@@ -504,8 +682,10 @@ function renderAlbumMode(container, user, {
  * @param {object[]} [options.achievements] — subconjunto (ex.: preview do hub)
  * @param {(achievement: object, state: string, slotEl: HTMLElement) => void} [options.onSlotClick]
  */
-export function renderAchievementsList(container, user, options = {}) {
+export async function renderAchievementsList(container, user, options = {}) {
   if (!container) return;
+
+  await ensureAchievementArtCatalogLoaded();
 
   const {
     highlightIds = [],

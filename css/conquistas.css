@@ -120,7 +120,7 @@ body.is-relic-modal-open {
   margin: 0;
   padding: 1.1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1rem;
   overflow: visible;
   background:
@@ -148,7 +148,9 @@ body.is-relic-modal-open {
 
 .achievement-slot {
   position: relative;
-  min-height: 176px;
+  min-height: 268px;
+  min-width: 0;
+  overflow: hidden;
   --rarity-accent: var(--rarity-stone);
   --rarity-glow: 0 0 8px rgba(156, 147, 136, 0.28);
   animation: albumEnter 520ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
@@ -187,21 +189,25 @@ body.is-relic-modal-open {
 }
 
 .achievement-slot__face {
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   height: 100%;
-  min-height: 176px;
+  min-height: 268px;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: 0.35rem;
-  padding: 0.85rem 0.65rem;
+  padding: 0.55rem 0 0.5rem;
   cursor: pointer;
   color: inherit;
   font: inherit;
   text-align: center;
   background: var(--hades-panel-alt);
   border: 1px solid var(--hades-gold-dark);
+  overflow-x: hidden;
   transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .achievement-slot__face:hover,
@@ -212,35 +218,68 @@ body.is-relic-modal-open {
   box-shadow: var(--rarity-glow);
 }
 
-.achievement-slot__icon {
-  font-size: 2rem;
-  line-height: 1;
-}
-.achievement-slot__icon.is-silhouette {
-  filter: grayscale(1) brightness(0.35);
-  opacity: 0.55;
-}
-.achievement-slot__mystery {
-  font-family: var(--font-title);
-  font-size: 2.4rem;
-  font-weight: 900;
-  line-height: 1;
-  color: var(--hades-gold-dark);
-}
 .achievement-slot__name {
   margin: 0;
+  padding: 0 0.45rem;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
   font-family: var(--font-title);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  line-height: 1.3;
+  line-height: 1.25;
 }
+
+.achievement-slot__art {
+  flex: 1 1 auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 168px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0;
+  background: transparent;
+  font-size: 3.4rem;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+}
+img.achievement-slot__art.has-art {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  min-height: 168px;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  border-radius: 0;
+  background: transparent;
+}
+.achievement-slot__art.has-emoji {
+  color: inherit;
+}
+.achievement-slot__art.is-silhouette,
+.achievement-slot__art.is-bw {
+  filter: grayscale(1) brightness(0.72);
+  opacity: 0.88;
+}
+
 .achievement-slot__rarity {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin: 0.15rem 0 0;
+  align-self: center;
+  flex: 0 0 auto;
+  margin: 0.1rem 0.45rem 0;
   padding: 0.14rem 0.48rem;
   font-family: var(--font-title);
   font-size: 0.55rem;
@@ -266,7 +305,7 @@ body.is-relic-modal-open {
   border-color: var(--hades-gold-dark);
 }
 
-/* Espelho: segredo com chrome de raridade + conteúdo “?” */
+/* Espelho: segredo com chrome de raridade + arte P&B (nome ???) */
 .achievement-slot.is-mystery--styled.is-locked .achievement-slot__face {
   opacity: 1;
   filter: none;
@@ -277,7 +316,7 @@ body.is-relic-modal-open {
   border-color: var(--rarity-accent);
   box-shadow: var(--rarity-glow);
 }
-.achievement-slot.is-mystery--styled .achievement-slot__mystery {
+.achievement-slot.is-mystery--styled .achievement-slot__art {
   color: var(--rarity-accent);
   text-shadow: 0 0 12px color-mix(in srgb, var(--rarity-accent) 70%, white 30%);
 }
@@ -293,11 +332,11 @@ body.is-relic-modal-open {
     linear-gradient(160deg, rgba(36, 28, 40, 0.96), rgba(16, 12, 20, 0.98));
   box-shadow: none;
 }
-.achievement-slot.is-secret-known .achievement-slot__icon {
+.achievement-slot.is-secret-known .achievement-slot__art {
   color: var(--hades-text-dim);
   opacity: 0.92;
   text-shadow: none;
-  filter: grayscale(0.35);
+  filter: grayscale(1) brightness(0.72);
 }
 .achievement-slot.is-secret-known .achievement-slot__name {
   color: var(--hades-text-dim);
@@ -320,7 +359,7 @@ body.is-relic-modal-open {
   border-color: var(--rarity-accent);
   box-shadow: var(--rarity-glow);
 }
-.achievement-slot.is-unlocked .achievement-slot__icon {
+.achievement-slot.is-unlocked .achievement-slot__art {
   color: var(--rarity-accent);
   text-shadow: 0 0 12px color-mix(in srgb, var(--rarity-accent) 70%, white 30%);
 }
@@ -364,12 +403,12 @@ body.is-relic-modal-open {
     linear-gradient(115deg, #fff0ad, #e5b04a, #ffd97a, #b57d2f) border-box;
   color: #fff4c6;
 }
-.achievement-slot.is-unlocked[data-rarity='gold'] .achievement-slot__icon {
+.achievement-slot.is-unlocked[data-rarity='gold'] .achievement-slot__art {
   text-shadow:
     0 0 8px rgba(255, 235, 170, 0.5),
     0 0 16px rgba(227, 179, 79, 0.45);
 }
-.achievement-slot.is-mystery--styled[data-rarity='gold'] .achievement-slot__mystery {
+.achievement-slot.is-mystery--styled[data-rarity='gold'] .achievement-slot__art {
   text-shadow:
     0 0 8px rgba(255, 235, 170, 0.5),
     0 0 16px rgba(227, 179, 79, 0.45);
@@ -410,14 +449,14 @@ body.is-relic-modal-open {
   color: #fef6ff;
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
 }
-.achievement-slot.is-unlocked[data-rarity='rainbow'] .achievement-slot__icon {
+.achievement-slot.is-unlocked[data-rarity='rainbow'] .achievement-slot__art {
   color: #ffffff;
   text-shadow:
     0 0 8px rgba(255, 77, 109, 0.7),
     0 0 16px rgba(100, 214, 255, 0.75),
     0 0 22px rgba(255, 226, 94, 0.55);
 }
-.achievement-slot.is-mystery--styled[data-rarity='rainbow'] .achievement-slot__mystery {
+.achievement-slot.is-mystery--styled[data-rarity='rainbow'] .achievement-slot__art {
   color: #ffffff;
   text-shadow:
     0 0 8px rgba(255, 77, 109, 0.7),
@@ -444,16 +483,24 @@ body.is-relic-modal-open {
   display: grid;
   place-items: center;
   padding: 1.25rem;
+  box-sizing: border-box;
   background: rgba(5, 3, 8, 0.78);
   backdrop-filter: blur(3px);
+  overflow-x: hidden;
 }
 .relic-modal[hidden] {
   display: none !important;
 }
 .relic-modal__panel {
   position: relative;
-  width: min(420px, 100%);
-  padding: 1.75rem 1.5rem 1.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(460px, 100%);
+  max-width: 100%;
+  max-height: min(92vh, 760px);
+  padding: 1.5rem 0 1.35rem;
   text-align: center;
   background:
     radial-gradient(circle at 50% 0%, rgba(207, 167, 89, 0.14), transparent 48%),
@@ -461,11 +508,14 @@ body.is-relic-modal-open {
   border: 1px solid var(--hades-gold-dark);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
   animation: albumEnter 280ms ease both;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 .relic-modal__close {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
+  z-index: 1;
   padding: 0.3rem 0.6rem;
   font-family: var(--font-title);
   font-size: 0.55rem;
@@ -482,46 +532,104 @@ body.is-relic-modal-open {
   border-color: var(--hades-gold);
   outline: none;
 }
+.relic-modal__title {
+  margin: 0 2.6rem 0.75rem 1.15rem;
+  flex: 0 0 auto;
+  width: auto;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
 .relic-modal__art {
-  margin: 0.35rem auto 0.75rem;
-  width: 5.5rem;
-  height: 5.5rem;
+  flex: 0 0 auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  margin: 0 0 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  aspect-ratio: 1 / 1;
   display: grid;
   place-items: center;
-  font-size: 3rem;
-  border: 1px solid var(--hades-gold-dark);
-  background: var(--hades-panel-alt);
+  font-size: 5rem;
+  line-height: 1;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: hidden;
+}
+.relic-modal__art.has-art {
+  font-size: 0;
+  padding: 0;
+}
+.relic-modal__art.has-emoji {
+  color: var(--hades-gold-bright);
+}
+.relic-modal__art-media {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: transparent;
+}
+.relic-modal__art.has-art .relic-modal__art-media {
+  animation: relicArtFloat 4.2s ease-in-out infinite;
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45));
+  transform-origin: center center;
+}
+.relic-modal__art.is-bw .relic-modal__art-media,
+.relic-modal__art.is-bw {
+  filter: grayscale(1) brightness(0.72);
+}
+.relic-modal__art.is-bw.has-art .relic-modal__art-media {
+  filter:
+    grayscale(1)
+    brightness(0.72)
+    drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4));
 }
 .relic-modal__art.is-silhouette {
   filter: grayscale(1) brightness(0.35);
   opacity: 0.6;
 }
+.relic-modal__art.is-silhouette.has-art .relic-modal__art-media {
+  animation: none;
+  filter: none;
+}
 .relic-modal__rarity {
-  margin: 0 0 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex: 0 0 auto;
+  margin: 0 1.15rem 0.85rem;
+  padding: 0.14rem 0.55rem;
   font-family: var(--font-title);
-  font-size: 0.65rem;
-  letter-spacing: 0.18em;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--hades-text-muted);
+  border: 1px solid var(--hades-gold-dark);
 }
 .relic-modal__rarity[hidden] {
   display: none !important;
 }
-.relic-modal__title {
-  margin: 0 0 0.65rem;
-  font-family: var(--font-title);
-  font-size: 1.15rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
 .relic-modal__desc {
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
-  line-height: 1.5;
+  margin: 0 1.15rem 0.85rem;
+  flex: 0 0 auto;
+  width: auto;
+  font-size: 1.02rem;
+  line-height: 1.55;
   color: var(--hades-text-dim);
 }
 .relic-modal__meta {
-  margin: 0;
+  margin: 0 1.15rem;
+  flex: 0 0 auto;
   font-family: var(--font-title);
   font-size: 0.58rem;
   letter-spacing: 0.14em;
@@ -572,14 +680,10 @@ body.is-relic-modal-open {
 .relic-modal__panel[data-rarity='silver'] .relic-modal__rarity,
 .relic-modal__panel[data-rarity='gold'] .relic-modal__rarity {
   color: var(--rarity-accent);
-  border: 1px solid var(--rarity-accent);
-  display: inline-flex;
-  padding: 0.14rem 0.5rem;
+  border-color: var(--rarity-accent);
 }
 .relic-modal__panel[data-rarity='rainbow'] .relic-modal__rarity {
-  display: inline-flex;
-  padding: 0.14rem 0.5rem;
-  border: 1px solid transparent;
+  border-color: transparent;
   background:
     linear-gradient(rgba(9, 7, 12, 0.92), rgba(9, 7, 12, 0.92)) padding-box,
     linear-gradient(115deg, #ff4d6d, #ff9e3d, #ffe45e, #66e48f, #64d6ff, #8f7aff, #ff61d5) border-box;
@@ -589,7 +693,6 @@ body.is-relic-modal-open {
   font-family: var(--font-title);
   font-weight: 900;
   color: var(--hades-gold-dark);
-  border-style: dashed;
 }
 .relic-modal__panel[data-rarity='unknown'] {
   border-style: dashed;
@@ -603,7 +706,6 @@ body.is-relic-modal-open {
   color: var(--hades-text-dim);
   filter: grayscale(0.35);
   opacity: 0.92;
-  border-style: dashed;
 }
 .relic-modal__panel[data-secret='known'] .relic-modal__title {
   color: var(--hades-text-dim);
@@ -620,6 +722,15 @@ body.is-relic-modal-open {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes relicArtFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-0.28rem);
   }
 }
 
@@ -686,7 +797,11 @@ body.is-relic-modal-open {
   }
   .achievement-slot,
   .achievement-slot__face {
-    min-height: 150px;
+    min-height: 240px;
+  }
+  .achievement-slot__art,
+  img.achievement-slot__art.has-art {
+    min-height: 140px;
   }
   .achievement-slot__name {
     font-size: 0.62rem;
@@ -697,7 +812,27 @@ body.is-relic-modal-open {
   }
   .relic-modal__panel {
     width: 100%;
-    padding: 1.5rem 1.15rem 1.25rem;
+    max-width: 100%;
+    padding: 1.35rem 0 1.15rem;
+  }
+  .relic-modal__title {
+    margin-right: 2.6rem;
+    margin-left: 1rem;
+    font-size: 0.95rem;
+  }
+  .relic-modal__desc,
+  .relic-modal__meta {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  .relic-modal__rarity {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  .relic-modal__art {
+    width: 100%;
+    max-width: 100%;
+    font-size: 4rem;
   }
 }
 
@@ -712,6 +847,7 @@ body.is-relic-modal-open {
 @media (prefers-reduced-motion: reduce) {
   .achievement-slot,
   .relic-modal__panel,
+  .relic-modal__art.has-art .relic-modal__art-media,
   .achievement-slot.is-unlocked[data-rarity='silver'] .achievement-slot__face,
   .achievement-slot.is-unlocked[data-rarity='gold'] .achievement-slot__face,
   .achievement-slot.is-unlocked[data-rarity='rainbow'] .achievement-slot__face,

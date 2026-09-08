@@ -279,6 +279,10 @@ body.is-discovery-pulse .discovery-secret-burst {
   position: relative;
   box-sizing: border-box;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
   padding: 1rem 0.85rem;
   text-align: center;
   background:
@@ -314,17 +318,9 @@ body.is-discovery-pulse .discovery-secret-burst {
   pointer-events: none;
 }
 
-.discovery-card__item-icon {
-  display: block;
-  font-size: 1.9rem;
-  margin-bottom: 0.45rem;
-  color: var(--hades-gold-bright);
-  text-shadow: 0 0 12px rgba(242, 213, 154, 0.7);
-  filter: none;
-}
-
 .discovery-card__item-body {
   min-width: 0;
+  width: 100%;
   display: block;
 }
 
@@ -348,11 +344,41 @@ body.is-discovery-pulse .discovery-secret-burst {
   text-transform: uppercase;
   color: var(--hades-gold-bright);
   line-height: 1.35;
-  margin-bottom: 0.35rem;
+}
+
+.discovery-card__item-art {
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  font-size: 3.2rem;
+  line-height: 1;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 12px rgba(242, 213, 154, 0.7);
+}
+
+img.discovery-card__item-art.has-art {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  color: inherit;
+  text-shadow: none;
+  background: transparent;
 }
 
 .discovery-card__item-desc {
   display: block;
+  width: 100%;
   font-size: 0.78rem;
   line-height: 1.35;
   color: #c1b3a1;
@@ -1197,8 +1223,13 @@ body.is-discovery-pulse .discovery-secret-burst {
     padding: 0.9rem 0.78rem;
   }
 
-  .discovery-card__item-icon {
-    font-size: 2rem;
+  .discovery-card__item-art {
+    width: 100%;
+    font-size: 2.8rem;
+  }
+
+  img.discovery-card__item-art.has-art {
+    width: 100%;
   }
 
   .discovery-card__item-name {

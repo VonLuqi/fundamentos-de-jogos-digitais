@@ -16,6 +16,7 @@ import {
   fetchFriendProfile,
 } from './api.js';
 import {
+  fillAchievementArtHost,
   getAchievementById,
   getAchievementCollectionStats,
   getAlbumSlotModel,
@@ -121,7 +122,7 @@ function mirrorSlotOptions() {
   return { visitorView: true, viewerUser };
 }
 
-function openRelicModal(achievement, model = null) {
+async function openRelicModal(achievement, model = null) {
   const modal = document.getElementById('relic-modal');
   const panel = modal?.querySelector('.relic-modal__panel');
   const art = document.getElementById('relic-modal-art');
@@ -147,20 +148,22 @@ function openRelicModal(achievement, model = null) {
   } else {
     delete panel.dataset.secret;
   }
-  art.classList.remove('is-silhouette');
+  art.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
   rarityEl.hidden = false;
 
   if (slot.isSecret) {
     // Q2-C: texto pelo observador; chrome pelo espelhado.
     if (slot.revealText) {
-      art.textContent = achievement.icon;
+      await fillAchievementArtHost(art, achievement, {
+        grayscale: !slot.applySecretStyle,
+      });
       titleEl.textContent = achievement.name;
       descEl.textContent = achievement.desc;
       metaEl.textContent = slot.applySecretStyle
         ? 'Segredo revelado neste Espelho'
         : 'Segredo conhecido — ainda não conquistado neste Espelho';
     } else {
-      art.textContent = '?';
+      await fillAchievementArtHost(art, achievement, { grayscale: true });
       titleEl.textContent = '???';
       descEl.textContent = MIRROR_SECRET_DESC;
       metaEl.textContent = slot.applySecretStyle
@@ -175,14 +178,13 @@ function openRelicModal(achievement, model = null) {
       rarityEl.hidden = true;
     }
   } else if (slot.kind === 'locked') {
-    art.textContent = achievement.icon;
-    art.classList.add('is-silhouette');
+    await fillAchievementArtHost(art, achievement, { grayscale: true });
     rarityEl.textContent = rarityName;
     titleEl.textContent = achievement.name;
     descEl.textContent = 'Esta relíquia ainda não foi conquistada por este companheiro.';
     metaEl.textContent = 'Figurinha bloqueada no Espelho';
   } else {
-    art.textContent = achievement.icon;
+    await fillAchievementArtHost(art, achievement, { grayscale: false });
     rarityEl.textContent = rarityName;
     titleEl.textContent = achievement.name;
     descEl.textContent = achievement.desc;

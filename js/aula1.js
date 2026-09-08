@@ -13,6 +13,7 @@ import {
   saveLessonParagraph,
   trackLessonView,
 } from './api.js';
+import { createAchievementArtNode, ensureAchievementArtCatalogLoaded } from './achievements-ui.js';
 
 const LESSON_ID = 'aula1';
 const PPTX_FILE = 'aula01_godot_slides.pptx';
@@ -294,13 +295,15 @@ function showSecretBurst() {
   }, SECRET_BURST_DURATION_MS);
 }
 
-function showDiscoveryOverlay(achievement, queueOrder = 0) {
+async function showDiscoveryOverlay(achievement, queueOrder = 0) {
   if (!achievement) return;
 
   const overlay = document.getElementById('discovery-overlay');
   const title = document.getElementById('discovery-title');
   const list = document.getElementById('discovery-list');
   if (!overlay || !title || !list) return;
+
+  await ensureAchievementArtCatalogLoaded();
 
   const headline = achievement.hidden ? 'Conquista Secreta Desbloqueada' : 'Conquista Desbloqueada';
   title.textContent = headline;
@@ -309,10 +312,6 @@ function showDiscoveryOverlay(achievement, queueOrder = 0) {
   const item = document.createElement('li');
   item.className = 'discovery-card__item';
   item.style.setProperty('--item-index', '0');
-
-  const icon = document.createElement('span');
-  icon.className = 'discovery-card__item-icon';
-  icon.textContent = achievement.icon;
 
   const body = document.createElement('span');
   body.className = 'discovery-card__item-body';
@@ -325,12 +324,17 @@ function showDiscoveryOverlay(achievement, queueOrder = 0) {
   name.className = 'discovery-card__item-name';
   name.textContent = achievement.name;
 
+  const art = createAchievementArtNode(achievement, {
+    className: 'discovery-card__item-art',
+    grayscale: false,
+  });
+
   const desc = document.createElement('span');
   desc.className = 'discovery-card__item-desc';
   desc.textContent = achievement.desc;
 
-  body.append(kicker, name, desc);
-  item.append(icon, body);
+  body.append(kicker, name);
+  item.append(body, art, desc);
   list.appendChild(item);
 
   if (discoveryTimerId) {
