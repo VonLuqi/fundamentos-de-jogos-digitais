@@ -251,7 +251,7 @@ function toFriendCard(row) {
     username: row.username,
     fullName: row.full_name || row.username,
     turma: row.turma || null,
-    avatarIndex: Number(row.avatar_index || 0),
+    avatarIndex: Number(row.avatar_index ?? 0),
     role: row.role || 'student',
     xp: isAdmin ? null : xp,
     rank: isAdmin ? 'Mestre do Infinito' : rankForXp(xp),

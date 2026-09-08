@@ -161,9 +161,12 @@ export function avatarSafeIndex(index) {
  * Carrega, em `imgEl`, a imagem do avatar de índice `index` usando um
  * caminho único e estático. Se a imagem não existir, cai de volta para
  * o avatar 0, sem varrer extensões nem disparar a sequência de 404s.
+ * Aguarda o catálogo (senão `avatarSafeIndex` colapsa tudo no fallback único).
  * Nunca lança: resolve `true`/`false` conforme o sucesso final.
  */
-export function loadAvatarImage(imgEl, index) {
+export async function loadAvatarImage(imgEl, index) {
+  await ensureAvatarCatalogLoaded();
+
   return new Promise((resolve) => {
     const safeIndex = avatarSafeIndex(index);
     const fallbackUrl = avatarUrlByIndex(0);

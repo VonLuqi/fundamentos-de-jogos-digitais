@@ -72,11 +72,13 @@ function toAlbumUser(profile) {
   };
 }
 
-function renderMirrorProfile(profile) {
+async function renderMirrorProfile(profile) {
   const section = document.getElementById('mirror-profile');
   const avatar = document.getElementById('mirror-avatar');
   if (section) section.hidden = false;
-  if (avatar) loadAvatarImage(avatar, profile.avatarIndex ?? 0);
+  if (avatar) {
+    await loadAvatarImage(avatar, profile.avatarIndex ?? 0);
+  }
 
   const nameEl = document.getElementById('mirror-name');
   const handleEl = document.getElementById('mirror-handle');
@@ -367,7 +369,7 @@ async function init() {
       return;
     }
     friendUser = toAlbumUser(profile);
-    renderMirrorProfile(profile);
+    await renderMirrorProfile(profile);
     renderAlbum();
     handleDeepLink();
   } catch (error) {
