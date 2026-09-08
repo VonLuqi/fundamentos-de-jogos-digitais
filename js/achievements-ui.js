@@ -397,19 +397,18 @@ async function getRainbowVfxInstance() {
   }
 }
 
+/** Overflow do shader glitch — baixo p/ conviver com `overflow: hidden` no card/face. */
+const RAINBOW_VFX_OVERFLOW_PX = 8;
+
 export async function applyRainbowCardJuiceVfx(root = document) {
   if (rainbowVfxDisabled || reducedMotionQuery.matches) return;
 
   const scope = root?.querySelectorAll ? root : document;
-
-  // Hub cards: só CSS — o shader glitch do @vfx-js torce a arte WebP.
-  scope.querySelectorAll('.achievement-card[data-rarity="rainbow"]').forEach((el) => {
-    el.classList.add('is-rainbow-css-fallback');
-  });
-
-  const rainbowTargets = Array.from(scope.querySelectorAll(
-    '.achievement-slot.is-unlocked[data-rarity="rainbow"] .achievement-slot__face'
-  ));
+  /* Só desbloqueadas: locked rainbow não deve “viver” como Juramento. */
+  const rainbowTargets = Array.from(scope.querySelectorAll([
+    '.achievement-card.is-unlocked[data-rarity="rainbow"]',
+    '.achievement-slot.is-unlocked[data-rarity="rainbow"] .achievement-slot__face',
+  ].join(', ')));
   if (rainbowTargets.length === 0) return;
 
   const vfx = await getRainbowVfxInstance();
@@ -424,17 +423,10 @@ export async function applyRainbowCardJuiceVfx(root = document) {
   rainbowTargets.forEach((el) => {
     if (rainbowVfxBoundElements.has(el)) return;
 
-    // Álbum com WebP: glitch também distorce a figurinha — preferir CSS.
-    if (el.querySelector('img.has-art')) {
-      el.classList.add('is-rainbow-css-fallback');
-      el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
-      return;
-    }
-
     try {
       vfx.add(el, {
         shader: 'glitch',
-        overflow: 22,
+        overflow: RAINBOW_VFX_OVERFLOW_PX,
       });
       rainbowVfxBoundElements.add(el);
       el.classList.add('is-rainbow-vfx');
@@ -449,6 +441,16 @@ export async function applyRainbowCardJuiceVfx(root = document) {
   syncRainbowVfxCanvasVisibility();
 }
 
+if (typeof reducedMotionQuery.addEventListener === 'function') {
+  reducedMotionQuery.addEventListener('change', () => {
+    if (reducedMotionQuery.matches) {
+      setRainbowVfxSuspended(true);
+    } else {
+      setRainbowVfxSuspended(false);
+    }
+  });
+}
+
 function appendRelicFaceContent(parent, {
   title,
   achievement,
@@ -458,17 +460,25 @@ function appendRelicFaceContent(parent, {
   nameClassName,
   artClassName,
   rarityClassName,
+  stageClassName,
 }) {
   const name = document.createElement('p');
   name.className = nameClassName;
   name.textContent = title;
 
+  const stage = document.createElement('div');
+  stage.className = stageClassName
+    || String(artClassName || '').replace(/__art\b/, '__art-stage')
+    || 'achievement-slot__art-stage';
+  stage.setAttribute('aria-hidden', 'true');
+
   const art = createAchievementArtNode(achievement, {
     className: artClassName,
     grayscale,
   });
+  stage.append(art);
 
-  parent.append(name, art);
+  parent.append(name, stage);
 
   if (showRarityBadge && rarityLabel) {
     const badge = document.createElement('p');
@@ -518,6 +528,7 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
       grayscale: !unlocked,
       nameClassName: 'achievement-card__name',
       artClassName: 'achievement-card__art',
+      stageClassName: 'achievement-card__art-stage',
       rarityClassName: 'achievement-card__rarity',
     });
 
@@ -616,6 +627,7 @@ function renderAlbumMode(container, user, {
         grayscale: true,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',
+        stageClassName: 'achievement-slot__art-stage',
         rarityClassName: 'achievement-slot__rarity',
       });
     } else if (model.kind === 'locked') {
@@ -633,6 +645,7 @@ function renderAlbumMode(container, user, {
         grayscale: true,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',
+        stageClassName: 'achievement-slot__art-stage',
         rarityClassName: 'achievement-slot__rarity',
       });
     } else {
@@ -650,6 +663,7 @@ function renderAlbumMode(container, user, {
         grayscale: useGrayscale,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',
+        stageClassName: 'achievement-slot__art-stage',
         rarityClassName: 'achievement-slot__rarity',
       });
       const realRarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);

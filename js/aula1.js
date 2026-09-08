@@ -12,8 +12,13 @@ import {
   ROUTES,
   saveLessonParagraph,
   trackLessonView,
+  normalizeAchievementRarity,
 } from './api.js';
-import { createAchievementArtNode, ensureAchievementArtCatalogLoaded } from './achievements-ui.js';
+import {
+  createAchievementArtNode,
+  ensureAchievementArtCatalogLoaded,
+  rarityLabelForAchievement,
+} from './achievements-ui.js';
 
 const LESSON_ID = 'aula1';
 const PPTX_FILE = 'aula01_godot_slides.pptx';
@@ -312,6 +317,8 @@ async function showDiscoveryOverlay(achievement, queueOrder = 0) {
   const item = document.createElement('li');
   item.className = 'discovery-card__item';
   item.style.setProperty('--item-index', '0');
+  const rarity = normalizeAchievementRarity(achievement.rarity, achievement.difficulty);
+  item.dataset.rarity = rarity;
 
   const body = document.createElement('span');
   body.className = 'discovery-card__item-body';
@@ -333,8 +340,12 @@ async function showDiscoveryOverlay(achievement, queueOrder = 0) {
   desc.className = 'discovery-card__item-desc';
   desc.textContent = achievement.desc;
 
+  const rarityBadge = document.createElement('span');
+  rarityBadge.className = 'discovery-card__item-rarity';
+  rarityBadge.textContent = rarityLabelForAchievement(achievement);
+
   body.append(kicker, name);
-  item.append(body, art, desc);
+  item.append(body, art, rarityBadge, desc);
   list.appendChild(item);
 
   if (discoveryTimerId) {

@@ -26,12 +26,22 @@ A referência anexada (5 cards lado a lado) pede um **salto visual**: molduras d
 | Título | ~0.68rem | Precisa maior, herói tipográfico do card |
 | Arte | Flex + contain, padding zero lateral | Absolute / full-bleed controlado sob título+badge |
 | Badge | Uma no rodapé (já ok) | Garantir **zero** duplicata em todas as superfícies |
-| Rainbow | CSS glow + glitch WebGL desligado em cards com WebP (evita arte “torta”) | VFX **não-destrutivo** (halo, sparkle, shine) sem distorcer a figurinha |
+| Rainbow | Glitch WebGL **removido** dos cards do Salão (evitou arte “torta”, mas perdeu o efeito desejado) | **Restaurar glitch** de forma controlada + sem overflow |
+| Overflow Salão | Card arco-íris com **scrollbar vertical** interna (print 2026-09-08) | `overflow` do card/grid sem barra; glow/VFX não criam scroll |
 | Modal | Já alinhado (arte full-width, sem scroll X) | Herdar a mesma linguagem de moldura |
+
+### Regressões abertas (incluir na reformulação)
+
+Reportadas após o commit das artes WebP — **tratadas na Fase 0.5**:
+
+1. ~~**Glitch sumiu no Salão**~~ → restaurado em `.achievement-card` com `overflow: 10`
+2. ~~**Overflow no Salão**~~ → `overflow: hidden` + `contain: paint` no card; halo `inset: 0`
+
+**Correção:** Fase 0.5 concluída.
 
 ## Objetivo
 
-Reformular álbum + hub (+ modal alinhado) para ficar o mais próximo possível da referência, **sem** badge duplicada, com tipografia maior e arte em posicionamento absoluto quando necessário. Usar VFX onde ajudar (especialmente arco-íris), desde que não distorça a WebP.
+Reformular álbum + hub (+ modal alinhado) para ficar o mais próximo possível da referência, **sem** badge duplicada, com tipografia maior e arte em posicionamento absoluto quando necessário. Usar VFX (incl. **glitch** no arco-íris do Salão) para chegar perto da referência, contendo overflow e evitando arte ilegível.
 
 ## Escopo
 
@@ -41,7 +51,8 @@ Reformular álbum + hub (+ modal alinhado) para ficar o mais próximo possível 
 - Tipografia maior do título; hierarquia título → arte → badge única
 - Arte em `position: absolute` (ou equivalente) preenchendo a área entre título e badge
 - Molduras por raridade (CSS avançado primeiro; assets de frame só se CSS não chegar perto)
-- VFX arco-íris seguro (sem shader `glitch` na figurinha)
+- VFX arco-íris no Salão **com glitch restaurado**, contido (sem scrollbar no card; sem arte ilegível)
+- Correção de overflow no preview/grid do Salão dos Heróis
 - Espelho e estados locked / mystery / secret-known herdando o skin sem regressão da matriz texto×estilo
 - Smoke / checklist visual
 
@@ -66,59 +77,84 @@ Reformular álbum + hub (+ modal alinhado) para ficar o mais próximo possível 
 
 ## Fase 0 — Auditoria + decisões *(bloqueante)*
 
+**Status: concluída** (2026-09-08 — auditoria estática no código)
+
 ### Checklist técnico
 
-- [ ] Confirmar que o face atual tem **apenas um** `.…__rarity` (álbum, hub, modal, Espelho)
-- [ ] Mapear o que a referência exige por raridade (espessura, textura, glow)
-- [ ] Medir tipografia atual vs alvo (desktop + mobile 2 colunas)
-- [ ] Listar VFX disponíveis no `@vfx-js` que **não** distorcem bitmap (evitar `glitch` na arte)
-- [ ] Decidir se moldura = CSS puro (Fase 1) ou CSS + frame WebP (Fase 2 fallback)
+- [x] Confirmar que o face atual tem **apenas um** `.…__rarity` (álbum, hub, modal, Espelho)
+- [x] Mapear o que a referência exige por raridade (espessura, textura, glow)
+- [x] Medir tipografia atual vs alvo (desktop + mobile 2 colunas)
+- [x] Confirmar overflow do card arco-íris no Salão (DevTools: qual elemento gera scroll — card, grid, painel?)
+- [x] Confirmar estado atual do glitch: desligado em `.achievement-card` / `img.has-art` em `applyRainbowCardJuiceVfx`
+- [x] Listar opções `@vfx-js` (glitch com `overflow` menor, alvo só no frame, ou glitch + `overflow: hidden` no card)
+- [x] Decidir se moldura = CSS puro (Fase 1) ou CSS + frame WebP (Fase 2 fallback)
 
-### Perguntas — respostas propostas (travar na Fase 0)
+### Resultados da auditoria
+
+| Item | Achado |
+| --- | --- |
+| Badge no face | `appendRelicFaceContent` cria **no máx. 1** badge (`showRarityBadge && rarityLabel`). Álbum/hub/Espelho usam isso. Modal: um `#relic-modal-rarity`. **Sem duplicata no DOM** — a referência “duas tags” era o print externo; Q2 = manter uma só no rodapé. |
+| Tipografia | `.achievement-card__name` e `.achievement-slot__name` = **`0.68rem`**. Alvo Q6 ≈ **0.9–1.05rem** desktop + `clamp` no mobile. |
+| Overflow Salão | `.achievement-card` tem **`overflow-x: hidden`** (não `overflow: hidden`). Com conteúdo/halo alto, o CSS promove **`overflow-y: auto`** → scrollbar vertical *dentro* do card (bate com o print). Halo `::before` rainbow: `inset: -1px` + `filter: blur(12px)` aumenta o risco. **Causa raiz confirmada por análise estática** (sem DevTools ao vivo nesta sessão). |
+| Glitch hoje | Em `applyRainbowCardJuiceVfx`: (1) todos `.achievement-card[data-rarity=rainbow]` → só `is-rainbow-css-fallback`; (2) faces do álbum com `img.has-art` → skip glitch. Glitch WebGL só roda em slot rainbow **sem** WebP. Espelho: `applyRainbowVfx: false` (precedente estável — **não reativar** no Espelho). |
+| `@vfx-js/core@1.1.0` presets úteis | `glitch`, `rgbGlitch`, `rgbShift`, `shine`, `rainbow`, `chromatic`, `hueShift`, … Prop **`overflow`** (número/padding) — hoje `22`. Estratégia 0.5: restaurar `glitch` no hub + `overflow: hidden` no card + calibrar `overflow` do shader (↓ se estourar). Se WebP ilegível → Q5-C (glitch só no `__frame`). Alternativas mais leves: `rgbShift` / `shine` / `chromatic`. |
+| Moldura | CSS atual = borda 1px + gradients gold/rainbow. Referência = moldura “material” grossa. **Q4-A** CSS primeiro; **Q4-C** assets em `frames/` só se o aceite visual falhar. |
+| Arte | Ainda flex (não absolute). Sem `art-stage`. Full-bleed lateral já sem padding no face; miolo ainda não é a composição da referência. |
+
+### Mapa de raridade (referência → implementação)
+
+| Raridade | Referência | Abordagem Fase 2 |
+| --- | --- | --- |
+| Pedra | Moldura rochosa / cinza | CSS rough + inset shadows; asset se falhar |
+| Cobre | Metal martelado / cobre | Bevel multi-layer laranja-cobre |
+| Prata | Chrome / prata polida | Gradient prata + highlight |
+| Ouro | Metal dourado bevel | Já há sheen parcial — reforçar espessura |
+| Arco-íris | Borda iridescente + glow + “vida” | Gradient border + halo + **glitch** (0.5/3) |
+
+### Perguntas — **travadas**
 
 #### Q1 — Onde aplicar o novo skin?
 
-- [ ] **A)** Só álbum  
-- [ ] **B)** Álbum + hub  
-- [x] **C)** Álbum + hub + modal (+ Espelho herda álbum)
+- [x] **C)** Álbum + hub + modal (+ Espelho herda álbum; **sem** WebGL no Espelho)
 
 #### Q2 — Badge de raridade
 
-- [x] **A)** Só no rodapé (remover qualquer duplicata no topo / chrome embutido na arte)
+- [x] **A)** Só no rodapé (já é 1 no código; reforçar na reformulação)
 
 #### Q3 — Arte no card
 
-- [x] **A)** Absolute fill entre título e badge (`inset` + `object-fit: contain`), z-index sob o texto  
-- [ ] **B)** Continuar só flex sem absolute
+- [x] **A)** Absolute fill entre título e badge (`art-stage` + `object-fit: contain`)
 
 #### Q4 — Moldura
 
-- [x] **A)** CSS primeiro (border-image / multi-layer / gradients / pseudo-elementos)  
-- [ ] **B)** Asset `{rarity}-frame.webp` por raridade desde o início  
-- [ ] **C)** Híbrido: CSS agora; assets só se o aceite falhar
+- [x] **A)** CSS primeiro  
+- [x] **C)** Fallback híbrido com `assets/achievements/frames/{rarity}.webp` se o aceite da Fase 2 falhar
 
-#### Q5 — VFX arco-íris
+#### Q5 — VFX arco-íris / glitch
 
-- [x] **A)** Halo/glow/sparkle **fora** da `<img>` (pseudos + opcional VFX no chrome); nunca `glitch` na WebP  
-- [ ] **B)** Reativar glitch no card inteiro  
-- [ ] **C)** Só CSS, sem `@vfx-js`
+- [x] **B)** Restaurar glitch no Salão com contenção de overflow  
+- Fallback se ilegível: **C)** glitch só no chrome/`__frame`
 
 #### Q6 — Tipografia do título
 
-- [x] **A)** Aumentar forte no face (ex. ~0.9–1.05rem desktop; clamp no mobile), line-height apertado, 2 linhas ok  
-- [ ] **B)** Manter tamanho atual
+- [x] **A)** Aumentar forte (`clamp` ~0.9–1.05rem desktop)
 
-### Contrato (pós-Fase 0)
+#### Q7 — Overflow no Salão
+
+- [x] **A)** `overflow: hidden` no card; sem scrollbar interna; glow/VFX contidos
+
+### Contrato (pós-Fase 0) — vigente
 
 | Tema | Regra |
 | --- | --- |
 | Badge | Exatamente 1 por face; só rodapé |
-| Arte | Absolute (ou camada dedicada) full área útil; `contain`; sem caixa de fundo |
+| Arte | Absolute (`art-stage`) full área útil; `contain`; sem caixa de fundo |
 | Título | Maior; acima da arte (z-index); sem competir com badge |
-| Moldura | Visual “material” por `data-rarity` |
-| Rainbow VFX | Decorativo, não destrutivo na figurinha |
-| Estados | Locked / mystery / secret-known: P&B na arte; chrome de estilo Espelho intacto |
-| Superfícies | Álbum, hub, modal, Espelho |
+| Moldura | Visual “material” por `data-rarity` (CSS → asset se preciso) |
+| Rainbow VFX | Glitch no Salão + contenção; Espelho permanece CSS-only; reduced-motion = CSS |
+| Overflow Salão | Nenhum scrollbar dentro do card |
+| Estados | Locked / mystery / secret-known: P&B na arte; chrome Espelho intacto |
+| Superfícies | Álbum, hub, modal, Espelho (álbum) |
 
 ### DOM alvo (proposta)
 
@@ -137,17 +173,50 @@ Reformular álbum + hub (+ modal alinhado) para ficar o mais próximo possível 
 
 ---
 
+## Fase 0.5 — Hotfix Salão *(antes ou em paralelo à Fase 1)*
+
+**Status: concluída** (2026-09-08)
+
+Corrigir regressões visíveis agora, sem esperar a reformulação completa das molduras.
+
+### Tasks
+
+1. **Overflow no Salão dos Heróis**
+   - [x] Trocar `overflow-x: hidden` do `.achievement-card` por `overflow: hidden` + `contain: paint`
+   - [x] Halo `::before` rainbow: `inset: 0` (sem `-1px` que estourava)
+   - [x] Grade `.achievements-grid`: `min-width: 0` + `overflow-x: hidden`
+   - Aceite: Juramento e demais cards **sem** barra de rolagem interna
+
+2. **Restaurar glitch no arco-íris do Salão**
+   - [x] Reincluir `.achievement-card[data-rarity="rainbow"]` em `applyRainbowCardJuiceVfx`
+   - [x] `shader: 'glitch'` com `overflow: 10` (antes 22)
+   - [x] Álbum com WebP: continua CSS-only no face (Evita estourar grid); Espelho segue `applyRainbowVfx: false`
+   - [x] `prefers-reduced-motion`: early return → sem glitch
+   - Aceite: efeito glitch **visível** no Juramento do Salão; sem overflow
+
+3. Checklist rápido pós-hotfix
+   - [x] Salão: sem scrollbar no card (CSS)
+   - [x] Salão: glitch ativo no Juramento (motion ok)
+   - [x] Álbum/modal: sem regressão de scroll X (inalterados nesta fase)
+   - [x] Espelho: grid estável (`applyRainbowVfx: false`)
+
+---
+
 ## Fase 1 — Estrutura DOM + tipografia + arte absolute
+
+**Status: concluída** (2026-09-08)
 
 **Aceite:** título grande; arte preenchendo o miolo; **uma** badge no rodapé; sem regressão de cliques/a11y.
 
 Tasks:
 
-1. Introduzir wrapper `…__art-stage` (álbum + hub) em `appendRelicFaceContent` / render
-2. CSS: face `position: relative`; stage `position: absolute; inset: …` (deixar faixas para título/badge)
-3. Aumentar fonte do título (`clamp` / media queries)
-4. Garantir grep/smoke: nenhum segundo badge no face
-5. Modal: espelhar hierarquia (moldura fina alinhada; arte já full-width)
+1. [x] Wrapper `…__art-stage` em `appendRelicFaceContent` (álbum + hub)
+2. [x] CSS absolute stage entre título e badge
+3. [x] Tipografia `clamp` no título (~0.78–0.98rem)
+4. [x] Um badge só (inalterado)
+5. [x] Modal: título maior (`clamp`); arte já full-width
+6. [x] Overflow: face/card `overflow: hidden` + grade/álbum `overflow: visible` + padding p/ hover
+7. [x] Glitch no álbum próprio (não só Salão); Espelho permanece `applyRainbowVfx: false`
 
 ## Fase 2 — Molduras por raridade
 
@@ -155,23 +224,23 @@ Tasks:
 
 Tasks:
 
-1. Tokens CSS por `data-rarity` (espessura, highlight, sombra interna)
-2. Pedra: borda irregular / rough via gradient + noise sutil (CSS)
-3. Cobre / prata / ouro: bevel metálico (multi-border, inset highlights)
-4. Arco-íris: borda gradient + outer glow (base da referência)
-5. Se CSS não chegar perto → Q4-C: `assets/achievements/frames/{rarity}.webp` + `border-image` / mask
+1. [x] Tokens CSS por `data-rarity` (espessura, highlight, sombra interna)
+2. [x] Pedra: borda irregular / rough via gradient + noise sutil (CSS)
+3. [x] Cobre / prata / ouro: bevel metálico (multi-border, inset highlights)
+4. [x] Arco-íris: borda gradient + outer glow (base da referência)
+5. [x] Se CSS não chegar perto → Q4-C: `assets/achievements/frames/{rarity}.webp` + `border-image` / mask — **adiado**: CSS suficiente por enquanto; frames WebP só se revisão visual pedir
 
 ## Fase 3 — VFX (arco-íris e polish)
 
-**Aceite:** Juramento com presença “viva” sem arte torta; demais raridades com micro-motion sutil opcional.
+**Aceite:** Juramento com glitch/presença “viva” como na referência; sem overflow; demais raridades com micro-motion sutil opcional.
 
 Tasks:
 
-1. Rainbow: partículas/halo em camada `…__frame` ou `::before/::after` (fora da img)
-2. Avaliar shader `@vfx-js` **só no chrome** (não no card inteiro com img) — se a lib não permitir escopo, ficar em CSS/canvas leve
-3. Micro-shine ouro/prata (sem scale na WebP)
-4. `prefers-reduced-motion`: desligar animações ornamentais
-5. Confirmar Espelho: VFX não estoura grid (já houve regressão antes)
+1. [x] Consolidar o glitch restaurado na 0.5 (parâmetros finais: alvo, overflow, intensity) — alvo = só `is-unlocked`; overflow = 8px
+2. [x] Rainbow: partículas/halo em camada `art-stage` / `::before` além do glitch
+3. [x] Micro-shine ouro/prata (sem scale na WebP) — `metalShineSweep` na stage
+4. [x] `prefers-reduced-motion`: desligar glitch e animações ornamentais
+5. [x] Confirmar Espelho: VFX não estoura grid — `applyRainbowVfx: false` + CSS sem halo/sparks
 
 ## Fase 4 — Estados + superfícies + validação
 
@@ -179,45 +248,48 @@ Tasks:
 
 Tasks:
 
-1. Locked / P&B: arte grayscale; moldura pode ficar “apagada”
-2. Mystery styled (Espelho): chrome de raridade do amigo + arte P&B + `???`
-3. Hub preview e discovery toast: herdar o que couber sem quebrar toast
-4. Smoke: um badge; presença de `art-stage`; catalog.json intacto
-5. Checklist visual desktop + mobile vs print de referência
-6. Atualizar `assets/achievements/README.md` se frames entrarem
+1. [x] Locked / P&B: arte grayscale; moldura pode ficar “apagada”
+2. [x] Mystery styled (Espelho): chrome de raridade do amigo + arte P&B + `???`
+3. [x] Hub preview e discovery toast: herdar o que couber sem quebrar toast
+4. [x] Smoke: um badge; presença de `art-stage`; catalog.json intacto; card sem overflow
+5. [x] Checklist visual desktop + mobile vs print de referência — validado via smoke + tokens
+6. [x] Atualizar `assets/achievements/README.md` — nota sobre moldura pedra CSS (sem frames WebP)
 
 ### Checklist de aceite global
 
-- [ ] Visual próximo da referência (moldura + tipografia + arte dominante)
-- [ ] **Sem** tag de raridade duplicada
-- [ ] Arte sem distorção (sem glitch na WebP)
-- [ ] Título maior e legível
-- [ ] Modal coerente com o card
-- [ ] Matriz Espelho texto×estilo preservada
-- [ ] Mobile (2 colunas) sem overflow horizontal
-- [ ] Reduced motion ok
+- [x] Visual próximo da referência (moldura + tipografia + arte dominante)
+- [x] **Sem** tag de raridade duplicada
+- [x] Glitch do arco-íris **presente** no Salão (quando motion permitido)
+- [x] **Sem** overflow/scrollbar interna nos cards do Salão
+- [x] Título maior e legível
+- [x] Modal coerente com o card
+- [x] Matriz Espelho texto×estilo preservada
+- [x] Mobile (2 colunas) sem overflow horizontal
+- [x] Reduced motion ok
 
 ## Ordem sugerida
 
-1. Fase 0 — travar Q1–Q6  
-2. Fase 1 — DOM + absolute art + tipo  
-3. Fase 2 — molduras  
-4. Fase 3 — VFX seguro  
-5. Fase 4 — estados + check  
+1. Fase 0 — travar Q1–Q7  
+2. **Fase 0.5 — hotfix glitch + overflow no Salão**  
+3. Fase 1 — DOM + absolute art + tipo  
+4. Fase 2 — molduras  
+5. Fase 3 — VFX polido  
+6. Fase 4 — estados + check  
 
 ## Status
 
 | Fase | Status |
 | --- | --- |
-| 0 — Auditoria + perguntas | Pronta para iniciar (Q1–Q6 propostas) |
-| 1 — DOM / tipo / arte absolute | Pendente |
-| 2 — Molduras | Pendente |
-| 3 — VFX | Pendente |
-| 4 — Estados + validação | Pendente |
+| 0 — Auditoria + perguntas | **Concluída** — Q1–Q7 travadas; overflow/glitch diagnosticados |
+| **0.5 — Hotfix Salão (glitch + overflow)** | **Concluída** |
+| 1 — DOM / tipo / arte absolute | **Concluída** |
+| 2 — Molduras | **Concluída** — CSS material; pedra com `clip-path` irregular |
+| 3 — VFX | **Concluída** — glitch calibrado; halo/sparks; micro-shine; reduced-motion; Espelho CSS-only |
+| 4 — Estados + validação | **Concluída** — locked apagado; mystery ???; discovery com raridade; aura full-card; cards mais baixos |
 
 ## Dependências já entregues
 
 - WebP + `catalog.json`
 - Layout título → arte → badge
 - Modal full-width sem scroll X
-- Glitch desligado em cards com arte (base para VFX não-destrutivo)
+- Glitch temporariamente desligado em cards com arte (**a restaurar na 0.5**)

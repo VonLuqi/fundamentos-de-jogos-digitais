@@ -31,6 +31,10 @@ Sem entrada no catálogo, a UI continua com emoji (sem 404).
 
 Presentes hoje: ver `catalog.json`.
 
+## Molduras
+
+As molduras são **CSS** (borda material por raridade). Pedra usa `clip-path` irregular — não há `frames/*.webp` no momento.
+
 ## IDs das conquistas
 
 Fonte de verdade do *conteúdo* (nome, raridade, etc.): `RAW_ACHIEVEMENTS` em `js/api.js`.

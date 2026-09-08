@@ -438,6 +438,10 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 1rem;
+  min-width: 0;
+  overflow: visible;
+  padding-block: 0.45rem;
+  margin-block: -0.45rem;
 }
 .achievements-grid.is-preview {
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -453,7 +457,7 @@ body {
   box-sizing: border-box;
   --rarity-accent: var(--rarity-stone);
   --rarity-glow: 0 0 8px rgba(156, 147, 136, 0.28);
-  min-height: 260px;
+  min-height: 220px;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -463,7 +467,8 @@ body {
   text-align: center;
   background: var(--hades-panel-alt);
   border: 1px solid var(--hades-gold-dark);
-  overflow-x: hidden;
+  overflow: hidden;
+  contain: paint;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 
   /* Só opacity — animar transform bloqueava o :hover (fill-mode both). */
@@ -474,8 +479,11 @@ body {
   transform: translateY(-3px);
   border-color: var(--rarity-accent);
   box-shadow: var(--rarity-glow);
+  z-index: 2;
 }
 .achievement-card__name {
+  position: relative;
+  z-index: 2;
   margin: 0;
   padding: 0 0.45rem;
   box-sizing: border-box;
@@ -484,26 +492,34 @@ body {
   width: 100%;
   max-width: 100%;
   font-family: var(--font-title);
-  font-size: 0.68rem;
+  font-size: clamp(0.78rem, 1.55vw, 0.98rem);
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  line-height: 1.25;
+  line-height: 1.2;
+}
+.achievement-card__art-stage {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  top: 2.25rem;
+  bottom: 1.9rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  pointer-events: none;
 }
 .achievement-card__art {
-  flex: 1 1 auto;
-  align-self: stretch;
-  box-sizing: border-box;
   width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  min-height: 148px;
+  height: 100%;
+  min-height: 0;
   display: grid;
   place-items: center;
   overflow: hidden;
   border-radius: 0;
   background: transparent;
-  font-size: 3rem;
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
   line-height: 1;
   margin: 0;
   padding: 0;
@@ -513,7 +529,7 @@ img.achievement-card__art.has-art {
   width: 100%;
   max-width: 100%;
   height: 100%;
-  min-height: 148px;
+  min-height: 0;
   object-fit: contain;
   object-position: center;
   border-radius: 0;
@@ -526,12 +542,14 @@ img.achievement-card__art.has-art {
   opacity: 0.88;
 }
 .achievement-card__rarity {
+  position: relative;
+  z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   align-self: center;
   flex: 0 0 auto;
-  margin: 0.1rem 0.45rem 0;
+  margin: auto 0.45rem 0;
   padding: 0.14rem 0.48rem;
   font-family: var(--font-title);
   font-size: 0.56rem;
@@ -548,56 +566,143 @@ img.achievement-card__art.has-art {
 
 .achievement-card[data-rarity='stone'] {
   --rarity-accent: var(--rarity-stone);
-  --rarity-glow: 0 0 12px rgba(156, 147, 136, 0.5), 0 0 24px rgba(156, 147, 136, 0.24);
+  --rarity-glow: 0 0 10px rgba(156, 147, 136, 0.4), 0 0 20px rgba(90, 84, 76, 0.28);
+  --frame-a: #6e675e;
+  --frame-b: #9c9388;
+  --frame-c: #4a453e;
+  --frame-d: #b8aea0;
+  --frame-fill-top: rgba(58, 52, 46, 0.97);
+  --frame-fill-bot: rgba(28, 24, 20, 0.98);
+  --frame-inset-hi: rgba(220, 210, 198, 0.22);
+  --frame-inset-lo: rgba(0, 0, 0, 0.55);
+  --frame-aura: rgba(156, 147, 136, 0.28);
 }
 
 .achievement-card[data-rarity='copper'] {
   --rarity-accent: var(--rarity-copper);
-  --rarity-glow: 0 0 12px rgba(181, 121, 71, 0.55), 0 0 26px rgba(181, 121, 71, 0.28);
+  --rarity-glow: 0 0 12px rgba(181, 121, 71, 0.5), 0 0 24px rgba(120, 70, 35, 0.3);
+  --frame-a: #8a4e28;
+  --frame-b: #d08a4a;
+  --frame-c: #5c3218;
+  --frame-d: #e8b078;
+  --frame-fill-top: rgba(62, 36, 20, 0.97);
+  --frame-fill-bot: rgba(28, 14, 8, 0.98);
+  --frame-inset-hi: rgba(255, 200, 140, 0.28);
+  --frame-inset-lo: rgba(0, 0, 0, 0.55);
+  --frame-aura: rgba(181, 121, 71, 0.32);
 }
 
 .achievement-card[data-rarity='silver'] {
   --rarity-accent: var(--rarity-silver);
-  --rarity-glow: 0 0 11px rgba(199, 210, 220, 0.45), 0 0 22px rgba(199, 210, 220, 0.2);
+  --rarity-glow: 0 0 12px rgba(199, 210, 220, 0.45), 0 0 22px rgba(170, 185, 203, 0.28);
+  --frame-a: #9eafc1;
+  --frame-b: #f5fbff;
+  --frame-c: #6d7d8e;
+  --frame-d: #e3eef8;
+  --frame-fill-top: rgba(42, 50, 62, 0.97);
+  --frame-fill-bot: rgba(22, 28, 38, 0.98);
+  --frame-inset-hi: rgba(255, 255, 255, 0.35);
+  --frame-inset-lo: rgba(0, 0, 0, 0.5);
+  --frame-aura: rgba(199, 210, 220, 0.34);
 }
 
 .achievement-card[data-rarity='gold'] {
   --rarity-accent: var(--rarity-gold);
-  --rarity-glow: 0 0 14px rgba(227, 179, 79, 0.55), 0 0 26px rgba(227, 179, 79, 0.26);
+  --rarity-glow: 0 0 14px rgba(227, 179, 79, 0.55), 0 0 26px rgba(184, 132, 45, 0.3);
+  --frame-a: #b8842d;
+  --frame-b: #fff1b3;
+  --frame-c: #7a5518;
+  --frame-d: #f6dd8d;
+  --frame-fill-top: rgba(56, 36, 12, 0.97);
+  --frame-fill-bot: rgba(30, 18, 6, 0.98);
+  --frame-inset-hi: rgba(255, 240, 180, 0.35);
+  --frame-inset-lo: rgba(0, 0, 0, 0.55);
+  --frame-aura: rgba(227, 179, 79, 0.36);
+}
+
+.achievement-card[data-rarity='rainbow'] {
+  --rarity-accent: var(--rarity-rainbow);
+  --rarity-glow: 0 0 16px rgba(255, 102, 163, 0.5), 0 0 26px rgba(124, 222, 255, 0.5), 0 0 38px rgba(255, 210, 102, 0.4);
+  --frame-a: #ff4d6d;
+  --frame-b: #ffe45e;
+  --frame-c: #64d6ff;
+  --frame-d: #8f7aff;
+  --frame-fill-top: rgba(36, 22, 42, 0.97);
+  --frame-fill-bot: rgba(22, 12, 30, 0.98);
+  --frame-inset-hi: rgba(255, 255, 255, 0.28);
+  --frame-inset-lo: rgba(0, 0, 0, 0.55);
+  --frame-aura: rgba(255, 140, 200, 0.28);
+}
+
+/* Moldura material (Fase 2) — borda grossa + bevel + aura full-card */
+.achievement-card.is-unlocked[data-rarity='stone'],
+.achievement-card.is-unlocked[data-rarity='copper'],
+.achievement-card.is-unlocked[data-rarity='silver'],
+.achievement-card.is-unlocked[data-rarity='gold'],
+.achievement-card.is-unlocked[data-rarity='rainbow'] {
+  border: 5px solid transparent;
+  background:
+    radial-gradient(ellipse 120% 100% at 50% 42%, var(--frame-aura), transparent 72%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--frame-fill-top) 78%, var(--rarity-accent) 22%),
+      color-mix(in srgb, var(--frame-fill-bot) 82%, var(--rarity-accent) 18%)
+    ) padding-box,
+    linear-gradient(145deg, var(--frame-b), var(--frame-a) 28%, var(--frame-c) 55%, var(--frame-d) 78%, var(--frame-a)) border-box;
+  box-shadow:
+    inset 0 1px 0 var(--frame-inset-hi),
+    inset 0 -3px 6px var(--frame-inset-lo),
+    inset 0 0 28px color-mix(in srgb, var(--rarity-accent) 18%, transparent),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
+    var(--rarity-glow);
+}
+
+.achievement-card.is-unlocked[data-rarity='stone']::after,
+.achievement-card.is-unlocked[data-rarity='copper']::after,
+.achievement-card.is-unlocked[data-rarity='silver']::after,
+.achievement-card.is-unlocked[data-rarity='gold']::after,
+.achievement-card.is-unlocked[data-rarity='rainbow']::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid color-mix(in srgb, var(--frame-b) 45%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  z-index: 3;
 }
 
 .achievement-card.is-unlocked[data-rarity='silver'] {
-  border: 1px solid transparent;
-  background:
-    linear-gradient(180deg, rgba(30, 35, 44, 0.94), rgba(16, 19, 28, 0.98)) padding-box,
-    linear-gradient(120deg, #f5fbff, #bac6d3, #e3eef8, #9eafc1) border-box;
-  box-shadow:
-    0 0 10px rgba(199, 210, 220, 0.35),
-    0 0 18px rgba(170, 185, 203, 0.2);
   animation: silverSheen 3.2s ease-in-out infinite;
 }
 
 .achievement-card.is-unlocked[data-rarity='silver'] .achievement-card__rarity {
-  border-color: transparent;
+  border: 2px solid transparent;
   background:
     linear-gradient(rgba(12, 15, 22, 0.92), rgba(12, 15, 22, 0.92)) padding-box,
     linear-gradient(115deg, #f8fdff, #c9d4e0, #eef6ff, #a9b8c9) border-box;
   color: #eef6ff;
 }
 
-.achievement-card.is-unlocked[data-rarity='gold'] {
-  border: 1px solid transparent;
+.achievement-card.is-unlocked[data-rarity='copper'] .achievement-card__rarity {
+  border: 2px solid transparent;
   background:
-    linear-gradient(180deg, rgba(42, 27, 8, 0.95), rgba(22, 14, 4, 0.98)) padding-box,
-    linear-gradient(120deg, #fff1b3, #e3b34f, #f6dd8d, #b8842d) border-box;
-  box-shadow:
-    0 0 12px rgba(227, 179, 79, 0.45),
-    0 0 22px rgba(227, 179, 79, 0.24);
+    linear-gradient(rgba(28, 14, 6, 0.92), rgba(28, 14, 6, 0.92)) padding-box,
+    linear-gradient(115deg, #e8b078, #b56a32, #f0c090, #8a4e28) border-box;
+  color: #f3d2ad;
+}
+
+.achievement-card.is-unlocked[data-rarity='stone'] .achievement-card__rarity {
+  border: 2px solid var(--frame-b);
+  color: #d8d0c4;
+  background: rgba(12, 10, 8, 0.72);
+}
+
+.achievement-card.is-unlocked[data-rarity='gold'] {
   animation: goldShimmer 2.6s ease-in-out infinite;
 }
 
 .achievement-card.is-unlocked[data-rarity='gold'] .achievement-card__rarity {
-  border-color: transparent;
+  border: 2px solid transparent;
   background:
     linear-gradient(rgba(23, 14, 4, 0.9), rgba(23, 14, 4, 0.9)) padding-box,
     linear-gradient(115deg, #fff0ad, #e5b04a, #ffd97a, #b57d2f) border-box;
@@ -610,13 +715,8 @@ img.achievement-card__art.has-art {
     0 0 16px rgba(227, 179, 79, 0.45);
 }
 
-.achievement-card[data-rarity='rainbow'] {
-  --rarity-accent: var(--rarity-rainbow);
-  --rarity-glow: 0 0 16px rgba(255, 102, 163, 0.5), 0 0 26px rgba(124, 222, 255, 0.5), 0 0 38px rgba(255, 210, 102, 0.4);
-}
-
 .achievement-card[data-rarity='rainbow'] .achievement-card__rarity {
-  border-color: transparent;
+  border: 2px solid transparent;
   background:
     linear-gradient(rgba(9, 7, 12, 0.92), rgba(9, 7, 12, 0.92)) padding-box,
     linear-gradient(115deg, #ff4d6d, #ff9e3d, #ffe45e, #66e48f, #64d6ff, #8f7aff, #ff61d5) border-box;
@@ -625,14 +725,14 @@ img.achievement-card__art.has-art {
 }
 
 .achievement-card.is-unlocked[data-rarity='rainbow'] {
-  border: 1px solid transparent;
   background:
-    linear-gradient(180deg, rgba(22, 15, 26, 0.95), rgba(16, 10, 22, 0.98)) padding-box,
-    linear-gradient(115deg, #ff4d6d, #ff9e3d, #ffe45e, #66e48f, #64d6ff, #8f7aff, #ff61d5) border-box;
-  box-shadow:
-    0 0 18px rgba(255, 105, 180, 0.45),
-    0 0 32px rgba(100, 214, 255, 0.4),
-    0 0 54px rgba(255, 226, 94, 0.25);
+    radial-gradient(ellipse 120% 100% at 50% 42%, var(--frame-aura), transparent 72%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--frame-fill-top) 78%, #ff61d5 22%),
+      color-mix(in srgb, var(--frame-fill-bot) 82%, #64d6ff 18%)
+    ) padding-box,
+    linear-gradient(115deg, #ff4d6d, #ff9e3d, #ffe45e, #66e48f, #64d6ff, #8f7aff, #ff61d5, #ff4d6d) border-box;
   animation: rainbowCardGlow 2.6s ease-in-out infinite;
 }
 
@@ -650,7 +750,7 @@ img.achievement-card__art.has-art {
 .achievement-card.is-unlocked[data-rarity='rainbow']::before {
   content: '';
   position: absolute;
-  inset: -1px;
+  inset: 0;
   pointer-events: none;
   background: conic-gradient(
     from 0deg,
@@ -666,6 +766,55 @@ img.achievement-card__art.has-art {
   filter: blur(12px);
   z-index: -1;
   animation: rainbowHaloSpin 3.6s linear infinite;
+}
+
+/* Partículas / spark — camada na art-stage (não escala a WebP) */
+.achievement-card.is-unlocked[data-rarity='rainbow'] .achievement-card__art-stage::before {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255, 255, 255, 0.9) 0 1px, transparent 2px),
+    radial-gradient(circle at 72% 22%, rgba(255, 210, 102, 0.85) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 42% 68%, rgba(100, 214, 255, 0.8) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 82% 58%, rgba(255, 105, 180, 0.75) 0 1px, transparent 2.5px),
+    radial-gradient(circle at 30% 48%, rgba(143, 122, 255, 0.7) 0 1px, transparent 2px);
+  opacity: 0.5;
+  mix-blend-mode: screen;
+  animation: rainbowSparkTwinkle 2.8s ease-in-out infinite;
+}
+
+/* Micro-shine metálico — sweep no card inteiro (não na WebP) */
+.achievement-card.is-unlocked[data-rarity='silver']::before,
+.achievement-card.is-unlocked[data-rarity='gold']::before,
+.achievement-card.is-unlocked[data-rarity='copper']::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 68%
+  );
+  background-size: 220% 100%;
+  background-position: 100% 0;
+  animation: metalShineSweep 3.6s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+}
+.achievement-card.is-unlocked[data-rarity='gold']::before {
+  background: linear-gradient(
+    115deg,
+    transparent 28%,
+    rgba(255, 236, 170, 0.2) 48%,
+    transparent 68%
+  );
+  background-size: 220% 100%;
+  animation-duration: 3.1s;
 }
 
 .achievement-card[data-rarity='rainbow'].is-rainbow-burst {
@@ -696,11 +845,50 @@ img.achievement-card__art.has-art {
   text-shadow: 0 0 12px color-mix(in srgb, var(--rarity-accent) 70%, white 30%);
 }
 
-/* Estado BLOQUEADO — preto e branco, opaco, "apagado" */
+/* Pedra: silhueta irregular (clip-path) — sem framework */
+.achievement-card.is-unlocked[data-rarity='stone'] {
+  clip-path: polygon(
+    1.2% 2.2%, 4% 0.6%, 9% 1.8%, 14% 0.4%, 20% 1.6%, 26% 0.5%, 32% 1.9%, 38% 0.4%, 44% 1.5%, 50% 0.6%, 56% 1.8%, 62% 0.5%, 68% 1.6%, 74% 0.4%, 80% 1.7%, 86% 0.6%, 92% 1.5%, 96.5% 0.8%, 99% 3.5%,
+    98.2% 9%, 99.4% 16%, 98.1% 23%, 99.5% 31%, 98.2% 39%, 99.4% 47%, 98.1% 55%, 99.5% 63%, 98.2% 71%, 99.4% 79%, 98.3% 87%, 99% 93.5%,
+    96% 98.8%, 90% 97.6%, 84% 99.2%, 78% 97.8%, 72% 99.3%, 66% 97.7%, 60% 99.1%, 54% 98%, 48% 99.3%, 42% 97.8%, 36% 99.2%, 30% 97.9%, 24% 99.3%, 18% 97.8%, 12% 99.1%, 6% 98%, 1.4% 95.5%,
+    0.4% 90%, 1.6% 82%, 0.3% 74%, 1.5% 66%, 0.4% 58%, 1.6% 50%, 0.3% 42%, 1.5% 34%, 0.5% 26%, 1.5% 18%, 0.4% 11%, 1.2% 5%
+  );
+  overflow: hidden;
+}
+.achievement-card.is-unlocked[data-rarity='stone']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  padding: 6px;
+  background:
+    linear-gradient(145deg, #c4b8a8, #6e675e 28%, #3d3832 52%, #a89f92 78%, #5a544c);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.92;
+}
+.achievement-card.is-unlocked[data-rarity='stone']::after {
+  inset: 9px;
+  border-color: rgba(184, 174, 160, 0.35);
+  clip-path: polygon(
+    0.8% 1.5%, 8% 0.4%, 18% 1.4%, 28% 0.3%, 40% 1.3%, 52% 0.4%, 64% 1.4%, 76% 0.3%, 88% 1.2%, 99% 2%,
+    98.5% 12%, 99.5% 28%, 98.4% 44%, 99.5% 60%, 98.4% 76%, 99% 90%,
+    92% 98.8%, 78% 97.8%, 64% 99.1%, 50% 97.9%, 36% 99.2%, 22% 97.8%, 8% 99%, 1% 96%,
+    0.4% 84%, 1.4% 68%, 0.3% 52%, 1.4% 36%, 0.4% 20%, 1% 8%
+  );
+}
+
+/* Estado BLOQUEADO — moldura apagada (Fase 4) */
 .achievement-card.is-locked {
   opacity: 0.45;
   filter: grayscale(1);
   border-style: dashed;
+  --rarity-glow: none;
+  --frame-aura: transparent;
 }
 .achievement-card.is-locked .achievement-card__art {
   color: var(--hades-text-muted);
@@ -1542,12 +1730,20 @@ img.achievement-card__art.has-art {
 @keyframes rainbowCardGlow {
   0%, 100% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 255, 255, 0.28)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.55)),
+      inset 0 0 28px color-mix(in srgb, var(--rarity-accent, #ff6ea8) 18%, transparent),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 14px rgba(255, 105, 180, 0.35),
       0 0 26px rgba(100, 214, 255, 0.35),
       0 0 40px rgba(255, 226, 94, 0.2);
   }
   50% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 255, 255, 0.28)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.55)),
+      inset 0 0 36px color-mix(in srgb, var(--rarity-accent, #ff6ea8) 28%, transparent),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 20px rgba(255, 105, 180, 0.62),
       0 0 38px rgba(100, 214, 255, 0.58),
       0 0 66px rgba(255, 226, 94, 0.35);
@@ -1557,12 +1753,20 @@ img.achievement-card__art.has-art {
 @keyframes silverSheen {
   0%, 100% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 255, 255, 0.35)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.5)),
+      inset 0 0 28px rgba(199, 210, 220, 0.2),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 8px rgba(199, 210, 220, 0.25),
       0 0 14px rgba(170, 185, 203, 0.16);
     filter: saturate(1) brightness(1);
   }
   50% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 255, 255, 0.35)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.5)),
+      inset 0 0 40px rgba(199, 210, 220, 0.32),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 14px rgba(222, 234, 246, 0.42),
       0 0 22px rgba(170, 185, 203, 0.24);
     filter: saturate(1.08) brightness(1.04);
@@ -1572,12 +1776,20 @@ img.achievement-card__art.has-art {
 @keyframes goldShimmer {
   0%, 100% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 240, 180, 0.35)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.55)),
+      inset 0 0 28px rgba(227, 179, 79, 0.22),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 10px rgba(227, 179, 79, 0.34),
       0 0 18px rgba(227, 179, 79, 0.18);
     filter: saturate(1) brightness(1);
   }
   50% {
     box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(255, 240, 180, 0.35)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.55)),
+      inset 0 0 42px rgba(227, 179, 79, 0.34),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.35),
       0 0 18px rgba(255, 215, 122, 0.56),
       0 0 30px rgba(227, 179, 79, 0.3);
     filter: saturate(1.14) brightness(1.06);
@@ -1592,6 +1804,19 @@ img.achievement-card__art.has-art {
 @keyframes rainbowHaloSpin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes rainbowSparkTwinkle {
+  0%, 100% { opacity: 0.35; filter: brightness(0.95); }
+  40% { opacity: 0.7; filter: brightness(1.15); }
+  70% { opacity: 0.5; filter: brightness(1.05); }
+}
+
+@keyframes metalShineSweep {
+  0%, 18% { background-position: 120% 0; opacity: 0; }
+  35% { opacity: 0.9; }
+  55% { background-position: -20% 0; opacity: 0.55; }
+  70%, 100% { background-position: -40% 0; opacity: 0; }
 }
 
 @keyframes rainbowTextShift {

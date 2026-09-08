@@ -103,8 +103,8 @@ await ensureAchievementArtCatalogLoaded();
 assert(ACHIEVEMENT_ART_IDS.has('segredo_juramento_do_circulo'), 'manifest inclui Juramento');
 assert(ACHIEVEMENT_ART_IDS.has('segredo_alquimista_da_fisica'), 'manifest inclui Alquimista');
 assert(
-  !ACHIEVEMENT_ART_IDS.has('aula1_concluida'),
-  'manifest não inclui ids sem arte ainda'
+  !ACHIEVEMENT_ART_IDS.has('conquista_inexistente_sem_arte'),
+  'manifest não inclui ids sem arte'
 );
 
 const juramentoUrl = achievementArtUrl('segredo_juramento_do_circulo');
@@ -112,7 +112,7 @@ assert(
   juramentoUrl === '../assets/achievements/segredo_juramento_do_circulo.webp',
   `URL Juramento esperada (got ${juramentoUrl})`
 );
-assert(achievementArtUrl('aula1_concluida') === null, 'sem arte → null');
+assert(achievementArtUrl('conquista_inexistente_sem_arte') === null, 'sem arte → null');
 
 const imgNode = createAchievementArtNode(
   { id: 'segredo_juramento_do_circulo', icon: '🔮' },
@@ -127,7 +127,7 @@ assert(
 );
 
 const emojiNode = createAchievementArtNode(
-  { id: 'aula1_concluida', icon: '🏁' },
+  { id: 'conquista_inexistente_sem_arte', icon: '🏁' },
   { className: 'achievement-slot__art' }
 );
 assert(emojiNode.tagName === 'SPAN', 'sem arte → <span>');
@@ -137,12 +137,41 @@ assert(emojiNode.classList.contains('has-emoji'), 'span tem has-emoji');
 const uiSrc = read('js/achievements-ui.js');
 assert(uiSrc.includes('catalog.json'), 'UI carrega catalog.json');
 assert(uiSrc.includes('ensureAchievementArtCatalogLoaded'), 'UI tem ensure do catálogo');
-assert(uiSrc.includes('appendRelicFaceContent'), 'face usa appendRelicFaceContent');
 assert(
-  /appendRelicFaceContent[\s\S]*parent\.append\(name, art\)/.test(uiSrc),
-  'ordem face: nome → arte'
+  uiSrc.includes('.achievement-card.is-unlocked[data-rarity="rainbow"]'),
+  'glitch do Salão só em rainbow desbloqueado (Fase 3)'
+);
+assert(uiSrc.includes('RAINBOW_VFX_OVERFLOW_PX'), 'overflow do glitch calibrado');
+assert(
+  /RAINBOW_VFX_OVERFLOW_PX\s*=\s*8/.test(uiSrc),
+  'overflow do glitch = 8px (Fase 3)'
+);
+assert(
+  uiSrc.includes("prefers-reduced-motion: reduce"),
+  'JS respeita prefers-reduced-motion'
+);
+assert(
+  read('js/companheiro.js').includes('applyRainbowVfx: false'),
+  'Espelho sem WebGL rainbow (Fase 3)'
+);
+const dashCss = read('css/dashboard.css');
+assert(dashCss.includes('overflow: hidden'), 'dashboard usa overflow hidden');
+assert(
+  /\.achievement-card\s*\{[\s\S]*?overflow:\s*hidden;/.test(dashCss),
+  'achievement-card define overflow: hidden (não só overflow-x)'
+);
+assert(dashCss.includes('contain: paint'), 'card usa contain:paint para clipar halo');
+assert(uiSrc.includes('appendRelicFaceContent'), 'face usa appendRelicFaceContent');
+assert(uiSrc.includes('__art-stage'), 'face monta art-stage (Fase 1)');
+assert(
+  /appendRelicFaceContent[\s\S]*parent\.append\(name, stage\)/.test(uiSrc),
+  'ordem face: nome → stage(arte)'
 );
 assert(!uiSrc.includes('mysteryMark'), 'modal/álbum sem ? tipográfico via mysteryMark');
+assert(
+  !uiSrc.includes('isAlbumFace && el.querySelector'),
+  'glitch não pula álbum com WebP'
+);
 assert(
   !uiSrc.includes("className: 'achievement-slot__icon'")
     && !uiSrc.includes("className: 'achievement-card__icon'"),
@@ -182,16 +211,66 @@ for (const [label, html] of [['conquistas', conquistasHtml], ['companheiro', com
 
 const albumCss = read('css/conquistas.css');
 assert(albumCss.includes('.achievement-slot__art'), 'CSS álbum tem __art');
+assert(albumCss.includes('.achievement-slot__art-stage'), 'CSS álbum tem art-stage');
 assert(albumCss.includes('object-fit: contain'), 'arte álbum usa contain');
+assert(albumCss.includes('clamp('), 'título álbum usa clamp (Fase 1)');
 assert(!albumCss.includes('.achievement-slot__icon'), 'CSS álbum sem __icon legado');
 assert(!albumCss.includes('.achievement-slot__mystery'), 'CSS álbum sem __mystery tipográfico');
 
 const cardCss = read('css/dashboard.css');
 assert(cardCss.includes('.achievement-card__art'), 'CSS hub tem __art');
+assert(cardCss.includes('.achievement-card__art-stage'), 'CSS hub tem art-stage');
+assert(cardCss.includes('overflow: visible'), 'grade hub permite hover sem cortar');
 assert(
   /achievement-card__desc,\s*\n\.achievement-card__icon/.test(cardCss)
     || cardCss.includes('.achievement-card__desc'),
   'desc/icon legado escondidos no hub'
+);
+assert(cardCss.includes('--frame-a:'), 'hub tem tokens de moldura (Fase 2)');
+assert(
+  /border:\s*5px\s+solid\s+transparent/.test(cardCss),
+  'hub usa borda grossa de moldura (Fase 2)'
+);
+assert(albumCss.includes('--frame-a:'), 'álbum tem tokens de moldura (Fase 2)');
+assert(
+  /border:\s*5px\s+solid\s+transparent/.test(albumCss),
+  'álbum usa borda grossa de moldura (Fase 2)'
+);
+assert(
+  /relic-modal__panel\[data-rarity='rainbow'\][\s\S]*?border:\s*5px\s+solid\s+transparent/.test(albumCss)
+    || /relic-modal__panel\[data-rarity='stone'\][\s\S]{0,400}border:\s*5px\s+solid\s+transparent/.test(albumCss),
+  'modal herda moldura grossa (Fase 2)'
+);
+assert(cardCss.includes('rainbowSparkTwinkle'), 'hub tem sparks rainbow (Fase 3)');
+assert(cardCss.includes('metalShineSweep'), 'hub tem micro-shine metal (Fase 3)');
+assert(cardCss.includes('--frame-aura'), 'hub tem aura full-card');
+assert(cardCss.includes('min-height: 220px'), 'hub cards mais baixos');
+assert(cardCss.includes('clip-path: polygon'), 'pedra irregular no hub');
+assert(albumCss.includes('rainbowSparkTwinkle'), 'álbum tem sparks rainbow (Fase 3)');
+assert(albumCss.includes('metalShineSweep'), 'álbum tem micro-shine metal (Fase 3)');
+assert(albumCss.includes('--frame-aura'), 'álbum tem aura full-card');
+assert(albumCss.includes('min-height: 220px'), 'álbum slots mais baixos');
+assert(albumCss.includes('clip-path: polygon'), 'pedra irregular no álbum');
+assert(
+  /prefers-reduced-motion:\s*reduce[\s\S]*art-stage::before/.test(albumCss),
+  'álbum desliga sparks em reduced-motion (Fase 3)'
+);
+assert(
+  read('css/companheiros.css').includes('content: none'),
+  'Espelho desliga halo/sparks rainbow (Fase 3)'
+);
+assert(
+  read('js/aula1.js').includes('discovery-card__item-rarity'),
+  'discovery toast mostra badge de raridade (Fase 4)'
+);
+assert(
+  read('css/aula.css').includes('discovery-card__item-rarity'),
+  'CSS discovery tem badge de raridade (Fase 4)'
+);
+assert(
+  /is-mystery--styled[\s\S]*grayscale:\s*true/.test(uiSrc)
+    || uiSrc.includes("title: '???'"),
+  'mystery styled usa ??? + P&B (Fase 4)'
 );
 
 if (errors.length > 0) {
