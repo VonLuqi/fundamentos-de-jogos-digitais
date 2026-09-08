@@ -1,5 +1,3 @@
-  <main class="souls-main" aria-labelledby="souls-page-title">
-  <h1 class="souls-header__title" id="souls-page-title">ALMAS <span class="accent">REGISTRADAS</span></h1>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -18,67 +16,91 @@
 
   <link rel="stylesheet" href="../css/souls.css" />
 </head>
-<body>
+<body class="souls-page" data-role-scope="admin">
   <div class="vignette" aria-hidden="true"></div>
 
-  <header class="souls-header">
-    <a class="btn-back" href="../pages/dashboard.html" aria-label="Voltar para o Salão dos Heróis">
-      <span aria-hidden="true">←</span> Voltar ao Salão
-    </a>
+  <!-- Conteúdo admin só aparece após requireAdmin (evita flash em deep link de aluno). -->
+  <div id="souls-app" hidden>
 
-    <div class="souls-header__titles">
-      <p class="souls-header__eyebrow">Painel Administrativo</p>
-      <h1 class="souls-header__title">ALMAS <span class="accent">REGISTRADAS</span></h1>
+    <header class="souls-header">
+      <a class="btn-back" href="./dashboard.html" aria-label="Voltar para o Salão dos Heróis">
+        <span aria-hidden="true">←</span> Voltar ao Salão
+      </a>
+
+      <div class="souls-header__titles">
+        <p class="souls-header__eyebrow">Painel Administrativo</p>
+        <h1 class="souls-header__title" id="souls-page-title">ALMAS <span class="accent">REGISTRADAS</span></h1>
+      </div>
+
+      <button class="btn-refresh" type="button" id="btn-refresh" aria-label="Atualizar listagem">
+        Atualizar
+      </button>
+    </header>
+
+    <div class="ornate-divider" aria-hidden="true">
+      <span class="ornate-divider__line"></span>
+      <span class="ornate-divider__gem">◆</span>
+      <span class="ornate-divider__line"></span>
     </div>
 
-    <button class="btn-refresh" type="button" id="btn-refresh" aria-label="Atualizar listagem">
-      Atualizar
-    </button>
-  </header>
+    <main class="souls-main" aria-labelledby="souls-page-title">
+      <section class="summary" id="summary">
+        <article class="summary-card">
+          <p class="summary-card__label">Total de Almas</p>
+          <p class="summary-card__value" id="sum-users">0</p>
+        </article>
+        <article class="summary-card">
+          <p class="summary-card__label">Aulas Vistas (eventos)</p>
+          <p class="summary-card__value" id="sum-views">0</p>
+        </article>
+        <article class="summary-card">
+          <p class="summary-card__label">Aulas Concluídas</p>
+          <p class="summary-card__value" id="sum-completed">0</p>
+        </article>
+        <article class="summary-card">
+          <p class="summary-card__label">Conquistas</p>
+          <p class="summary-card__value" id="sum-achievements">0</p>
+        </article>
+      </section>
 
-  <div class="ornate-divider" aria-hidden="true">
-    <span class="ornate-divider__line"></span>
-    <span class="ornate-divider__gem">◆</span>
-    <span class="ornate-divider__line"></span>
+      <div class="report-tabs" role="tablist" aria-label="Seções do relatório">
+        <button class="report-tab is-active" id="tab-users" type="button" role="tab" aria-selected="true" aria-controls="report-users">Alunos</button>
+        <button class="report-tab" id="tab-activities" type="button" role="tab" aria-selected="false" aria-controls="report-activities">Atividades</button>
+        <button class="report-tab" id="tab-grimorios" type="button" role="tab" aria-selected="false" aria-controls="report-grimorios">Grimórios sob Vigília</button>
+      </div>
+
+      <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
+        <div class="souls-grid" id="souls-grid" aria-live="polite">
+          <p class="loading">Consultando o submundo...</p>
+        </div>
+      </section>
+
+      <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
+        <div class="activities-list" id="activities-list" aria-live="polite">
+          <p class="loading">Consultando atividades...</p>
+        </div>
+      </section>
+
+      <section class="report-panel" id="report-grimorios" role="tabpanel" aria-labelledby="tab-grimorios" hidden>
+        <p class="vigilia-lead">
+          Alunos com inscrições no Grimório Pessoal. O Mestre pode abrir cada página em modo somente leitura.
+        </p>
+        <div class="vigilia-layout">
+          <div class="vigilia-owners" id="vigilia-owners" aria-live="polite">
+            <p class="loading">Consultando grimórios...</p>
+          </div>
+          <div class="vigilia-detail" id="vigilia-detail" hidden>
+            <header class="vigilia-detail__head">
+              <h2 class="vigilia-detail__title" id="vigilia-detail-title">Grimório</h2>
+              <button class="btn-refresh vigilia-detail__close" type="button" id="vigilia-detail-close">Fechar</button>
+            </header>
+            <ul class="vigilia-notes" id="vigilia-notes" aria-label="Inscrições do aluno"></ul>
+            <p class="empty" id="vigilia-notes-empty" hidden>Este grimório está vazio.</p>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-
-  <main class="souls-main" aria-label="Lista de alunos cadastrados">
-    <section class="summary" id="summary">
-      <article class="summary-card">
-        <p class="summary-card__label">Total de Almas</p>
-        <p class="summary-card__value" id="sum-users">0</p>
-      </article>
-      <article class="summary-card">
-        <p class="summary-card__label">Aulas Vistas (eventos)</p>
-        <p class="summary-card__value" id="sum-views">0</p>
-      </article>
-      <article class="summary-card">
-        <p class="summary-card__label">Aulas Concluídas</p>
-        <p class="summary-card__value" id="sum-completed">0</p>
-      </article>
-      <article class="summary-card">
-        <p class="summary-card__label">Conquistas</p>
-        <p class="summary-card__value" id="sum-achievements">0</p>
-      </article>
-    </section>
-
-    <div class="report-tabs" role="tablist" aria-label="Seções do relatório">
-      <button class="report-tab is-active" id="tab-users" type="button" role="tab" aria-selected="true" aria-controls="report-users">Alunos</button>
-      <button class="report-tab" id="tab-activities" type="button" role="tab" aria-selected="false" aria-controls="report-activities">Atividades</button>
-    </div>
-
-    <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
-      <div class="souls-grid" id="souls-grid" aria-live="polite">
-        <p class="loading">Consultando o submundo...</p>
-      </div>
-    </section>
-
-    <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
-      <div class="activities-list" id="activities-list" aria-live="polite">
-        <p class="loading">Consultando atividades...</p>
-      </div>
-    </section>
-  </main>
 
   <div class="api-warning" id="api-warning" hidden>
     <p id="api-warning-text"></p>

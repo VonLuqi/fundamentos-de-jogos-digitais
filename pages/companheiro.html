@@ -14,6 +14,7 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/conquistas.css" />
   <link rel="stylesheet" href="../css/companheiros.css" />
@@ -56,6 +57,8 @@
         <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
         <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
         <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
       </nav>
 
@@ -83,11 +86,12 @@
           <div class="app-shell__titles">
             <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
             <h1 class="app-shell__title" id="mirror-page-title">ESPELHO DO <span class="accent">COMPANHEIRO</span></h1>
+            <p class="app-shell__subtitle mirror-mode-sub" id="mirror-mode-sub">Reflexo completo do companheiro</p>
           </div>
         </div>
 
         <div class="app-shell__header-actions" data-shell-actions>
-          <span class="app-shell__context-chip">Painel do Heroi</span>
+          <span class="app-shell__context-chip" id="mirror-context-chip">Salão Espiritual</span>
         </div>
       </header>
 
@@ -103,10 +107,10 @@
         </div>
 
         <p class="mirror-back">
-          <a class="mirror-back__link" href="./dashboard.html">← Voltar ao Painel do Herói</a>
+          <a class="mirror-back__link" id="mirror-back-link" href="./salao-espiritual.html">← Voltar ao Salão</a>
         </p>
 
-        <section class="mirror-profile" id="mirror-profile" aria-label="Perfil do companheiro" hidden>
+        <section class="mirror-profile" id="mirror-profile" aria-label="Perfil espelhado" hidden>
           <div class="mirror-profile__avatar" aria-hidden="true">
             <img class="mirror-profile__glyph" id="mirror-avatar" alt="" width="96" height="96" />
           </div>
@@ -123,11 +127,11 @@
                 <dt>Nível</dt>
                 <dd id="mirror-level">—</dd>
               </div>
-              <div>
+              <div id="mirror-stat-xp" hidden>
                 <dt>XP</dt>
                 <dd id="mirror-xp">—</dd>
               </div>
-              <div>
+              <div id="mirror-stat-lessons" hidden>
                 <dt>Aulas</dt>
                 <dd id="mirror-lessons">—</dd>
               </div>
@@ -135,11 +139,11 @@
           </div>
         </section>
 
-        <section class="album-intro mirror-album-intro" aria-label="Álbum do companheiro">
+        <section class="album-intro mirror-album-intro" id="mirror-album-intro" aria-label="Álbum do companheiro" hidden>
           <p class="album-intro__counter" id="mirror-album-counter" role="status">Carregando coleção…</p>
         </section>
 
-        <ul class="achievement-album" id="mirror-album-grid" aria-label="Álbum do companheiro" aria-live="polite"></ul>
+        <ul class="achievement-album" id="mirror-album-grid" aria-label="Álbum do companheiro" aria-live="polite" hidden></ul>
       </main>
     </div>
   </div>

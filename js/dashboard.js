@@ -47,8 +47,10 @@ import {
   xpWithinLevel,
   fetchLessonsPublishMap,
   normalizeAchievementRarity,
+  listFriends,
+  listClassmates,
+  listNotes,
 } from './api.js';
-import { initCompanionsPanel } from './friends-ui.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
@@ -105,16 +107,142 @@ function updateAvatarCounter(avatarIndex) {
  * PAINEL DO ADMIN — a interface se adapta ao papel do usuário.
  * A classe `is-admin` no painel ativa, via CSS: coroa sobre o avatar,
  * aura vermelha pulsante na moldura e borda diferenciada.
+ * Ferramentas do Mestre ficam na mini-barra `#master-tools` (topo).
  */
 function applyAdminSkin(user) {
   const isAdmin = user.role === 'admin';
   const panel = document.getElementById('profile-panel');
   const badge = document.getElementById('master-badge');
-  const tools = document.getElementById('admin-tools');
+  const tools = document.getElementById('master-tools');
 
-  panel.classList.toggle('is-admin', isAdmin);
+  panel?.classList.toggle('is-admin', isAdmin);
   if (badge) badge.hidden = !isAdmin;
-  if (tools) tools.hidden = !isAdmin;
+  if (tools) {
+    tools.hidden = !isAdmin;
+    tools.setAttribute('aria-hidden', String(!isAdmin));
+  }
+}
+
+/**
+ * Previews do trilho esquerdo (Salão + Grimório).
+ * Contagem da turma completa chega na Task 4 (`classmatesList`).
+ */
+async function renderRailPreviews(token) {
+  const summaryEl = document.getElementById('salao-preview-summary');
+  const companionsEl = document.getElementById('salao-preview-companions');
+  const turmaEl = document.getElementById('salao-preview-turma');
+  const invitesWrap = document.getElementById('salao-preview-invites-wrap');
+  const invitesEl = document.getElementById('salao-preview-invites');
+  const grimorioSummary = document.getElementById('grimorio-preview-summary');
+
+  if (turmaEl) {
+    const turma = currentUser?.turma;
+    turmaEl.textContent = turma ? String(turma) : 'Ver no Salão';
+  }
+
+  if (grimorioSummary) {
+    grimorioSummary.textContent = 'O Grimório espera a primeira inscrição.';
+  }
+
+  if (!token) {
+    if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
+    return;
+  }
+
+  try {
+    const [friendsPayload, classmatesPayload, notesPayload] = await Promise.all([
+      listFriends(token),
+      listClassmates(token).catch(() => ({ count: null, classmates: [] })),
+      listNotes(token).catch(() => ({ notes: [], count: 0 })),
+    ]);
+
+    const { accepted = [], incoming = [], outgoing = [] } = friendsPayload;
+    const acceptedCount = accepted.length;
+    const incomingCount = incoming.length;
+    const classmateCount = Number.isFinite(classmatesPayload?.count)
+      ? classmatesPayload.count
+      : (classmatesPayload?.classmates?.length ?? null);
+
+    if (turmaEl && classmateCount != null) {
+      const label = classmateCount === 1 ? '1 aluno' : `${classmateCount} alunos`;
+      if (currentUser?.role === 'admin') {
+        const turmaCode = classmatesPayload?.turma
+          ? String(classmatesPayload.turma)
+          : null;
+        turmaEl.textContent = turmaCode ? `${turmaCode} · ${label}` : `Todas · ${label}`;
+      } else {
+        const turmaCode = currentUser?.turma ? String(currentUser.turma) : null;
+        turmaEl.textContent = turmaCode ? `${turmaCode} · ${label}` : label;
+      }
+    }
+
+    if (companionsEl) companionsEl.textContent = `${acceptedCount} / 25`;
+
+    if (invitesWrap && invitesEl) {
+      if (incomingCount > 0) {
+        invitesWrap.hidden = false;
+        invitesEl.textContent = String(incomingCount);
+      } else {
+        invitesWrap.hidden = true;
+      }
+    }
+
+    if (summaryEl) {
+      if (incomingCount > 0) {
+        summaryEl.textContent =
+          incomingCount === 1
+            ? '1 convite aguarda sua resposta.'
+            : `${incomingCount} convites aguardam sua resposta.`;
+      } else if (acceptedCount === 0 && outgoing.length === 0) {
+        summaryEl.textContent = 'Nenhum companheiro ao seu lado… ainda.';
+      } else {
+        summaryEl.textContent = 'Turma e companheiros no Salão Espiritual.';
+      }
+    }
+
+    if (grimorioSummary) {
+      const notes = notesPayload.notes || [];
+      const count = notesPayload.count ?? notes.length;
+      if (count === 0) {
+        grimorioSummary.textContent = 'O Grimório espera a primeira inscrição.';
+      } else if (notesPayload.softWarning) {
+        grimorioSummary.textContent = notesPayload.softWarningMessage
+          || `O Grimório engrossa… (${count} inscrições).`;
+      } else {
+        grimorioSummary.textContent = count === 1
+          ? '1 inscrição no Grimório.'
+          : `${count} inscrições no Grimório.`;
+      }
+
+      const previewHost = document.getElementById('grimorio-preview');
+      let list = document.getElementById('grimorio-preview-list');
+      if (previewHost && !list) {
+        list = document.createElement('ul');
+        list.id = 'grimorio-preview-list';
+        list.className = 'grimorio-preview-list';
+        list.setAttribute('aria-label', 'Inscrições recentes');
+        previewHost.appendChild(list);
+      }
+      if (list) {
+        list.replaceChildren();
+        notes
+          .slice()
+          .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+          .slice(0, 3)
+          .forEach((note) => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = `./grimorio-nota.html?id=${encodeURIComponent(note.id)}`;
+            a.textContent = note.pinned ? `◆ ${note.title}` : note.title;
+            li.appendChild(a);
+            list.appendChild(li);
+          });
+      }
+    }
+  } catch {
+    if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
+    if (companionsEl) companionsEl.textContent = '— / 25';
+  }
 }
 
 /* ============================================================
@@ -672,16 +800,24 @@ function initScrollModal() {
    9. FERRAMENTAS DO ADMIN
    ============================================================ */
 function initAdminTools() {
-  const tools = document.getElementById('admin-tools');
+  const tools = document.getElementById('master-tools');
   if (currentUser?.role !== 'admin') {
-    if (tools) tools.hidden = true;
+    if (tools) {
+      tools.hidden = true;
+      tools.setAttribute('aria-hidden', 'true');
+    }
+    // Defesa: não registra listeners de Gerar / Liberar / Almas para student.
     return;
   }
-  if (tools) tools.hidden = false;
+  if (tools) {
+    tools.hidden = false;
+    tools.setAttribute('aria-hidden', 'false');
+  }
 
   const btnCodes = document.getElementById('btn-generate-codes');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
   const btnSouls = document.getElementById('btn-list-souls');
+  const btnVigilancia = document.getElementById('btn-vigilancia');
 
   btnManageLessons?.addEventListener('click', () => {
     window.location.href = ROUTES.aulas();
@@ -793,6 +929,10 @@ function initAdminTools() {
   btnSouls?.addEventListener('click', async () => {
     window.location.href = ROUTES.souls();
   });
+
+  btnVigilancia?.addEventListener('click', () => {
+    window.location.href = `${ROUTES.souls()}?tab=grimorios`;
+  });
 }
 
 /* ============================================================
@@ -870,9 +1010,8 @@ async function init() {
   initAltar();
   initAvatarSwap();
   initAdminTools();
-  initCompanionsPanel({
-    root: document.getElementById('companions-panel'),
-    getToken: () => currentToken || getSession()?.token || null,
+  renderRailPreviews(currentToken).catch((error) => {
+    console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
   });
 }
 

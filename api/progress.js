@@ -7,9 +7,22 @@ const LESSON_GATES_TABLE = 'lesson_gates';
 const LESSON_PARAGRAPHS_TABLE = 'lesson_paragraphs';
 const LESSON_VIEWS_TABLE = 'lesson_views';
 const FRIENDSHIPS_TABLE = 'friendships';
+const NOTES_TABLE = 'user_notes';
+const NOTE_SHARES_TABLE = 'user_note_shares';
 const CODE_TTL_MINUTES = 20;
 const FRIEND_LIMIT = 25;
 const FRIEND_SEARCH_LIMIT = 8;
+const NOTE_TITLE_MAX = 120;
+const NOTE_BODY_MAX = 8000;
+const NOTE_SOFT_WARN_COUNT = 50;
+/** Copy alinhada à microcopy Task 1 — respostas 403 de tools do Mestre. */
+const ADMIN_FORBIDDEN = 'Esta senda é só do Mestre.';
+
+function rejectUnlessAdmin(user, res) {
+  if (user?.role === 'admin') return false;
+  res.status(403).json({ ok: false, error: ADMIN_FORBIDDEN });
+  return true;
+}
 
 const RANKS = [
   { minXp: 0, title: 'Alma Novata' },
@@ -243,6 +256,170 @@ function friendshipsUnavailableResponse(res) {
   });
 }
 
+function isMissingNotesTable(error) {
+  return Boolean(
+    error
+    && (
+      error.code === '42P01'
+      || /user_notes|user_note_shares/i.test(error.message || '')
+    )
+  );
+}
+
+function notesUnavailableResponse(res) {
+  return res.status(503).json({
+    ok: false,
+    error: 'Tabela user_notes não existe. Rode o SQL de migração.',
+  });
+}
+
+function normalizeNoteTags(raw) {
+  let list = [];
+  if (Array.isArray(raw)) list = raw;
+  else if (typeof raw === 'string') {
+    list = raw.split(/[,;#]+/);
+  }
+  const cleaned = [...new Set(
+    list
+      .map((tag) => String(tag || '').trim().slice(0, 32))
+      .filter(Boolean)
+  )].slice(0, 12);
+  return cleaned;
+}
+
+function normalizeNoteLessonId(raw) {
+  const id = String(raw || '').trim();
+  if (!id) return null;
+  if (!LESSON_CATALOG[id]) return null;
+  return id;
+}
+
+/** Gate `published` efetivo (defaults + lesson_gates), alinhado à Trilha. */
+async function isLessonPublishedForNotes(lessonId) {
+  const id = String(lessonId || '');
+  if (!LESSON_CATALOG[id]) return false;
+  const defaults = defaultGatesForLesson(id);
+  let published = Boolean(defaults.published);
+
+  const { data: rows, error } = await supabase
+    .from(LESSON_GATES_TABLE)
+    .select('gate_key, released')
+    .eq('lesson_id', id);
+
+  if (error) {
+    if (error.code === '42P01' || /lesson_gates/i.test(error.message || '')) {
+      return published;
+    }
+    throw error;
+  }
+
+  (rows || []).forEach((row) => {
+    if (String(row.gate_key || '') === 'published') {
+      published = Boolean(row.released);
+    }
+  });
+  return published;
+}
+
+/**
+ * Valida lesson_id em create/update de notas.
+ * @param {*} rawLessonId
+ * @param {{ allowExistingId?: string|null }} [options] — update: permite manter vínculo já salvo mesmo se a aula foi re-trancada
+ */
+async function resolveNoteLessonIdOrReject(rawLessonId, options = {}) {
+  const normalized = normalizeNoteLessonId(rawLessonId);
+  if (!normalized) return { ok: true, lessonId: null };
+
+  const allowExisting = options.allowExistingId
+    ? normalizeNoteLessonId(options.allowExistingId)
+    : null;
+  if (allowExisting && normalized === allowExisting) {
+    return { ok: true, lessonId: normalized };
+  }
+
+  const published = await isLessonPublishedForNotes(normalized);
+  if (!published) {
+    return {
+      ok: false,
+      error: 'Esta aula ainda não foi liberada na Trilha.',
+    };
+  }
+  return { ok: true, lessonId: normalized };
+}
+
+function toNoteSummary(row, shareMeta = {}) {
+  const tags = Array.isArray(row.tags) ? row.tags : normalizeNoteTags(row.tags);
+  return {
+    id: row.id,
+    title: row.title,
+    pinned: Boolean(row.pinned),
+    tags,
+    lessonId: row.lesson_id || null,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    sharedWithCount: Number(shareMeta.sharedWithCount || 0),
+    sharedWithUsernames: Array.isArray(shareMeta.sharedWithUsernames)
+      ? shareMeta.sharedWithUsernames
+      : [],
+  };
+}
+
+function toNoteDetail(row, sharedWith = []) {
+  return {
+    ...toNoteSummary(row, {
+      sharedWithCount: sharedWith.length,
+      sharedWithUsernames: sharedWith.map((u) => u.username).filter(Boolean),
+    }),
+    body: row.body || '',
+    userId: row.user_id,
+    sharedWith,
+  };
+}
+
+async function countUserNotes(ownerId) {
+  const { count, error } = await supabase
+    .from(NOTES_TABLE)
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', ownerId);
+  if (error) throw error;
+  return Number(count || 0);
+}
+
+async function fetchSharesForNotes(noteIds = []) {
+  const unique = [...new Set(noteIds.map((id) => Number(id)).filter((id) => id > 0))];
+  if (unique.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from(NOTE_SHARES_TABLE)
+    .select('note_id, shared_with_user_id')
+    .in('note_id', unique);
+  if (error) throw error;
+
+  const userIds = (data || []).map((row) => row.shared_with_user_id);
+  const usersById = await fetchUsersByIds(userIds);
+  const byNote = new Map();
+
+  (data || []).forEach((row) => {
+    const noteId = Number(row.note_id);
+    const user = usersById.get(Number(row.shared_with_user_id));
+    if (!byNote.has(noteId)) byNote.set(noteId, []);
+    if (user) {
+      byNote.get(noteId).push({
+        userId: user.id,
+        username: user.username,
+        fullName: user.full_name || user.username,
+      });
+    }
+  });
+
+  return byNote;
+}
+
+async function assertAcceptedBond(userA, userB) {
+  const bond = await findFriendshipBetween(userA, userB);
+  return Boolean(bond && bond.status === 'accepted');
+}
+
 function toFriendCard(row) {
   const xp = Number(row?.xp || 0);
   const isAdmin = row?.role === 'admin';
@@ -259,16 +436,64 @@ function toFriendCard(row) {
   };
 }
 
+function toClassmateCard(row, bondStatus = 'none', friendshipId = null) {
+  const card = toFriendCard(row);
+  return {
+    id: card.id,
+    username: card.username,
+    fullName: card.fullName,
+    avatarIndex: card.avatarIndex,
+    turma: card.turma,
+    rank: card.rank,
+    level: card.level,
+    bondStatus,
+    friendshipId: friendshipId || null,
+  };
+}
+
+/** Espelho completo — bond aceito. */
 function toPublicFriendProfile(row) {
   const card = toFriendCard(row);
-  // Espelho: conquistas reais do banco (admin não recebe catálogo completo — evita spoiler).
   const achievements = Array.isArray(row.conquistas) ? row.conquistas : [];
   const completed = Array.isArray(row.completed_lessons) ? row.completed_lessons : [];
   return {
     ...card,
     achievements,
     completedLessonsCount: completed.length,
+    mirrorMode: 'companion',
   };
+}
+
+/** Espelho da Turma — mesma turma, sem bond; sem álbum/XP detalhado. */
+function toTurmaMirrorProfile(row) {
+  const card = toFriendCard(row);
+  return {
+    id: card.id,
+    username: card.username,
+    fullName: card.fullName,
+    turma: card.turma,
+    avatarIndex: card.avatarIndex,
+    rank: card.rank,
+    level: card.level,
+    role: card.role,
+    mirrorMode: 'turma',
+  };
+}
+
+function resolveBondStatus(bond, viewerId) {
+  if (!bond) return 'none';
+  if (bond.status === 'accepted') return 'accepted';
+  if (bond.status === 'pending') {
+    if (sameUserId(bond.requester_id, viewerId)) return 'outgoing';
+    if (sameUserId(bond.addressee_id, viewerId)) return 'incoming';
+  }
+  return 'none';
+}
+
+function sameTurma(a, b) {
+  const left = String(a || '').trim();
+  const right = String(b || '').trim();
+  return Boolean(left) && left === right;
 }
 
 function normalizeUsernameQuery(value) {
@@ -465,6 +690,15 @@ export default async function handler(req, res) {
       decision,
       friendUserId,
       friendshipId,
+      noteId,
+      title,
+      body,
+      pinned,
+      tags,
+      sharedWithUserId,
+      targetUserId,
+      includeShared,
+      turma: turmaFilterBody,
     } = req.body || {};
     const { data: session } = await supabase
       .from('sessions')
@@ -539,6 +773,120 @@ export default async function handler(req, res) {
         if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
         console.error('[api/progress] friendsList', error);
         return res.status(500).json({ ok: false, error: 'Falha ao listar companheiros.' });
+      }
+    }
+
+    if (action === 'classmatesList') {
+      try {
+        const isAdmin = user.role === 'admin';
+        const ownTurma = String(user.turma || '').trim();
+
+        // Lista de turmas com ≥1 aluno (para o filtro do Mestre).
+        let turmasDisponiveis = [];
+        {
+          const { data: turmaRows, error: turmaListError } = await supabase
+            .from(USERS_TABLE)
+            .select('turma')
+            .eq('role', 'student')
+            .not('turma', 'is', null)
+            .neq('turma', '');
+          if (turmaListError) {
+            return res.status(500).json({ ok: false, error: 'Falha ao listar a turma.' });
+          }
+          turmasDisponiveis = [...new Set(
+            (turmaRows || [])
+              .map((row) => String(row.turma || '').trim())
+              .filter(Boolean)
+          )].sort((a, b) => a.localeCompare(b, 'pt'));
+        }
+
+        let filterTurma = null;
+        if (isAdmin) {
+          const requested = String(turmaFilterBody || '').trim();
+          if (requested && requested !== '*' && requested.toLowerCase() !== 'all') {
+            filterTurma = requested;
+          }
+        } else {
+          // Aluno: sempre a própria turma (ignora turma do body).
+          if (!ownTurma) {
+            return res.status(200).json({
+              ok: true,
+              turma: null,
+              adminView: false,
+              turmasDisponiveis: [],
+              count: 0,
+              classmates: [],
+            });
+          }
+          filterTurma = ownTurma;
+        }
+
+        let query = supabase
+          .from(USERS_TABLE)
+          .select('id, full_name, username, turma, role, xp, avatar_index')
+          .eq('role', 'student')
+          .neq('id', userId)
+          .order('username', { ascending: true })
+          .limit(isAdmin && !filterTurma ? 300 : 100);
+
+        if (filterTurma) {
+          query = query.eq('turma', filterTurma);
+        }
+
+        const { data: rows, error } = await query;
+
+        if (error) {
+          return res.status(500).json({ ok: false, error: 'Falha ao listar a turma.' });
+        }
+
+        let bondByOtherId = new Map();
+        try {
+          const { data: bonds, error: bondError } = await supabase
+            .from(FRIENDSHIPS_TABLE)
+            .select('id, requester_id, addressee_id, status')
+            .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+          if (bondError) {
+            if (isMissingFriendshipsTable(bondError)) return friendshipsUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao listar a turma.' });
+          }
+
+          bondByOtherId = new Map();
+          (bonds || []).forEach((bond) => {
+            const otherId = sameUserId(bond.requester_id, userId)
+              ? Number(bond.addressee_id)
+              : Number(bond.requester_id);
+            bondByOtherId.set(otherId, {
+              status: resolveBondStatus(bond, userId),
+              friendshipId: bond.id,
+            });
+          });
+        } catch (bondErr) {
+          if (isMissingFriendshipsTable(bondErr)) return friendshipsUnavailableResponse(res);
+          throw bondErr;
+        }
+
+        const classmates = (rows || []).map((row) => {
+          const bondMeta = bondByOtherId.get(Number(row.id));
+          return toClassmateCard(
+            row,
+            bondMeta?.status || 'none',
+            bondMeta?.friendshipId || null
+          );
+        });
+
+        return res.status(200).json({
+          ok: true,
+          turma: filterTurma,
+          adminView: isAdmin,
+          turmasDisponiveis,
+          count: classmates.length,
+          classmates,
+        });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] classmatesList', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao listar a turma.' });
       }
     }
 
@@ -654,30 +1002,30 @@ export default async function handler(req, res) {
           return res.status(500).json({ ok: false, error: 'Falha ao enviar convite.' });
         }
         if (!target) {
-          return res.status(404).json({ ok: false, error: 'Aluno não encontrado.' });
+          return res.status(404).json({ ok: false, error: 'Nenhuma alma com esse username.' });
         }
         if (target.id === userId) {
-          return res.status(400).json({ ok: false, error: 'Não é possível convidar a si mesmo.' });
+          return res.status(400).json({ ok: false, error: 'Não se oferece vínculo a si mesmo.' });
         }
 
         // Match global exato: exige igualdade case-insensitive completa (não prefixo).
         if (String(target.username).toLowerCase() !== targetUsername.toLowerCase()) {
-          return res.status(404).json({ ok: false, error: 'Aluno não encontrado.' });
+          return res.status(404).json({ ok: false, error: 'Nenhuma alma com esse username.' });
         }
 
         const existing = await findFriendshipBetween(userId, target.id);
         if (existing?.status === 'accepted') {
-          return res.status(409).json({ ok: false, error: 'Vocês já são companheiros.' });
+          return res.status(409).json({ ok: false, error: 'Este vínculo já foi selado.' });
         }
         if (existing?.status === 'pending') {
-          return res.status(409).json({ ok: false, error: 'Já existe um convite pendente.' });
+          return res.status(409).json({ ok: false, error: 'Este convite já está em viagem.' });
         }
 
         const myCount = await countAcceptedFriends(userId);
         if (myCount >= FRIEND_LIMIT) {
           return res.status(409).json({
             ok: false,
-            error: `Limite de ${FRIEND_LIMIT} companheiros atingido.`,
+            error: `Sua companhia já está completa (${FRIEND_LIMIT}). Rompa um vínculo para oferecer outro.`,
           });
         }
 
@@ -685,7 +1033,7 @@ export default async function handler(req, res) {
         if (theirCount >= FRIEND_LIMIT) {
           return res.status(409).json({
             ok: false,
-            error: 'Este aluno já atingiu o limite de companheiros.',
+            error: 'A companhia deste aluno já está completa.',
           });
         }
 
@@ -705,7 +1053,7 @@ export default async function handler(req, res) {
         if (insertError) {
           if (isMissingFriendshipsTable(insertError)) return friendshipsUnavailableResponse(res);
           if (insertError.code === '23505') {
-            return res.status(409).json({ ok: false, error: 'Já existe um convite pendente.' });
+            return res.status(409).json({ ok: false, error: 'Este convite já está em viagem.' });
           }
           return res.status(500).json({ ok: false, error: 'Falha ao enviar convite.' });
         }
@@ -776,14 +1124,14 @@ export default async function handler(req, res) {
         if (myCount >= FRIEND_LIMIT) {
           return res.status(409).json({
             ok: false,
-            error: `Limite de ${FRIEND_LIMIT} companheiros atingido.`,
+            error: `Sua companhia já está completa (${FRIEND_LIMIT}). Rompa um vínculo para oferecer outro.`,
           });
         }
         const theirCount = await countAcceptedFriends(row.requester_id);
         if (theirCount >= FRIEND_LIMIT) {
           return res.status(409).json({
             ok: false,
-            error: 'Este aluno já atingiu o limite de companheiros.',
+            error: 'A companhia deste aluno já está completa.',
           });
         }
 
@@ -937,19 +1285,576 @@ export default async function handler(req, res) {
         }
 
         const bond = await findFriendshipBetween(userId, target.id);
-        if (!bond || bond.status !== 'accepted') {
-          // 404 genérico: não vaza existência de perfil sem vínculo aceito.
-          return res.status(404).json({ ok: false, error: 'Companheiro não encontrado.' });
+        const bondStatus = resolveBondStatus(bond, userId);
+
+        if (bondStatus === 'accepted') {
+          return res.status(200).json({
+            ok: true,
+            bondStatus,
+            includeAchievements: true,
+            profile: toPublicFriendProfile(target),
+          });
         }
 
-        return res.status(200).json({
-          ok: true,
-          profile: toPublicFriendProfile(target),
+        // Espelho da Turma: mesma turma, alvo aluno (não admin).
+        const canTurmaMirror = (
+          target.role !== 'admin'
+          && user.role !== 'admin'
+          && sameTurma(user.turma, target.turma)
+        );
+
+        if (canTurmaMirror) {
+          return res.status(200).json({
+            ok: true,
+            bondStatus,
+            includeAchievements: false,
+            profile: toTurmaMirrorProfile(target),
+          });
+        }
+
+        if (bondStatus === 'outgoing' || bondStatus === 'incoming') {
+          return res.status(403).json({
+            ok: false,
+            error: 'É preciso um vínculo para contemplar este espelho.',
+            bondStatus,
+          });
+        }
+
+        return res.status(403).json({
+          ok: false,
+          error: 'Este espelho não se abre a estranhos da jornada.',
+          bondStatus: 'none',
         });
       } catch (error) {
         if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
         console.error('[api/progress] friendProfile', error);
         return res.status(500).json({ ok: false, error: 'Falha ao carregar perfil do companheiro.' });
+      }
+    }
+
+    /* ---------- Grimório Pessoal (user_notes) ---------- */
+
+    if (action === 'notesList') {
+      try {
+        const { data: ownRows, error } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .eq('user_id', userId)
+          .order('pinned', { ascending: false })
+          .order('updated_at', { ascending: false });
+
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao listar o Grimório.' });
+        }
+
+        const ownIds = (ownRows || []).map((row) => row.id);
+        const sharesByNote = await fetchSharesForNotes(ownIds);
+        const notes = (ownRows || []).map((row) => {
+          const sharedWith = sharesByNote.get(Number(row.id)) || [];
+          return toNoteSummary(row, {
+            sharedWithCount: sharedWith.length,
+            sharedWithUsernames: sharedWith.map((u) => u.username),
+          });
+        });
+
+        let sharedWithMe = [];
+        if (includeShared) {
+          const { data: shareRows, error: shareError } = await supabase
+            .from(NOTE_SHARES_TABLE)
+            .select('note_id')
+            .eq('shared_with_user_id', userId);
+          if (shareError) {
+            if (isMissingNotesTable(shareError)) return notesUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao listar revelações.' });
+          }
+          const sharedIds = (shareRows || []).map((row) => Number(row.note_id));
+          if (sharedIds.length > 0) {
+            const { data: sharedNotes, error: sharedNotesError } = await supabase
+              .from(NOTES_TABLE)
+              .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+              .in('id', sharedIds)
+              .order('updated_at', { ascending: false });
+            if (sharedNotesError) {
+              return res.status(500).json({ ok: false, error: 'Falha ao listar revelações.' });
+            }
+            const owners = await fetchUsersByIds((sharedNotes || []).map((row) => row.user_id));
+            sharedWithMe = (sharedNotes || []).map((row) => ({
+              ...toNoteSummary(row),
+              owner: (() => {
+                const owner = owners.get(Number(row.user_id));
+                return owner
+                  ? {
+                      userId: owner.id,
+                      username: owner.username,
+                      fullName: owner.full_name || owner.username,
+                    }
+                  : null;
+              })(),
+            }));
+          }
+        }
+
+        const count = notes.length;
+        return res.status(200).json({
+          ok: true,
+          count,
+          softWarning: count >= NOTE_SOFT_WARN_COUNT,
+          softWarningMessage: count >= NOTE_SOFT_WARN_COUNT
+            ? `O Grimório engrossa… (${count} inscrições).`
+            : null,
+          notes,
+          sharedWithMe,
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] notesList', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao listar o Grimório.' });
+      }
+    }
+
+    if (action === 'noteGet') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: row, error } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao abrir a inscrição.' });
+        }
+        if (!row) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const isOwner = sameUserId(row.user_id, userId);
+        const isAdmin = user.role === 'admin';
+        let isSharedViewer = false;
+        if (!isOwner && !isAdmin) {
+          const { data: share, error: shareError } = await supabase
+            .from(NOTE_SHARES_TABLE)
+            .select('note_id')
+            .eq('note_id', id)
+            .eq('shared_with_user_id', userId)
+            .maybeSingle();
+          if (shareError) {
+            if (isMissingNotesTable(shareError)) return notesUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao abrir a inscrição.' });
+          }
+          isSharedViewer = Boolean(share);
+        }
+
+        if (!isOwner && !isAdmin && !isSharedViewer) {
+          return res.status(403).json({ ok: false, error: 'Esta inscrição não foi revelada a você.' });
+        }
+
+        const sharesByNote = await fetchSharesForNotes([id]);
+        const sharedWith = sharesByNote.get(id) || [];
+        const canEdit = isOwner;
+
+        return res.status(200).json({
+          ok: true,
+          canEdit,
+          readOnly: !canEdit,
+          note: toNoteDetail(row, sharedWith),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteGet', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao abrir a inscrição.' });
+      }
+    }
+
+    if (action === 'noteCreate') {
+      try {
+        const cleanTitle = String(title || '').trim();
+        const cleanBody = String(body ?? '');
+        if (!cleanTitle) {
+          return res.status(400).json({ ok: false, error: 'Toda inscrição precisa de um título.' });
+        }
+        if (cleanTitle.length > NOTE_TITLE_MAX) {
+          return res.status(400).json({
+            ok: false,
+            error: `O título ultrapassou o limite do pergaminho (${NOTE_TITLE_MAX}).`,
+          });
+        }
+        if (cleanBody.length > NOTE_BODY_MAX) {
+          return res.status(400).json({
+            ok: false,
+            error: `A inscrição é longa demais para este Grimório (${NOTE_BODY_MAX}).`,
+          });
+        }
+
+        let resolvedLesson;
+        try {
+          resolvedLesson = await resolveNoteLessonIdOrReject(lessonId);
+        } catch (gateError) {
+          console.error('[api/progress] noteCreate lesson gate', gateError);
+          return res.status(500).json({ ok: false, error: 'Falha ao validar a aula da inscrição.' });
+        }
+        if (!resolvedLesson.ok) {
+          return res.status(400).json({ ok: false, error: resolvedLesson.error });
+        }
+
+        const nowIso = new Date().toISOString();
+        const payload = {
+          user_id: userId,
+          title: cleanTitle,
+          body: cleanBody,
+          pinned: Boolean(pinned),
+          tags: normalizeNoteTags(tags),
+          lesson_id: resolvedLesson.lessonId,
+          created_at: nowIso,
+          updated_at: nowIso,
+        };
+
+        const { data: created, error } = await supabase
+          .from(NOTES_TABLE)
+          .insert(payload)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .single();
+
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao criar inscrição.' });
+        }
+
+        const count = await countUserNotes(userId);
+        return res.status(201).json({
+          ok: true,
+          count,
+          softWarning: count >= NOTE_SOFT_WARN_COUNT,
+          softWarningMessage: count >= NOTE_SOFT_WARN_COUNT
+            ? `O Grimório engrossa… (${count} inscrições).`
+            : null,
+          note: toNoteDetail(created, []),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteCreate', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao criar inscrição.' });
+      }
+    }
+
+    if (action === 'noteUpdate') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: existing, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, lesson_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao atualizar inscrição.' });
+        }
+        if (!existing || !sameUserId(existing.user_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const patch = { updated_at: new Date().toISOString() };
+        if (title !== undefined) {
+          const cleanTitle = String(title || '').trim();
+          if (!cleanTitle) {
+            return res.status(400).json({ ok: false, error: 'Toda inscrição precisa de um título.' });
+          }
+          if (cleanTitle.length > NOTE_TITLE_MAX) {
+            return res.status(400).json({
+              ok: false,
+              error: `O título ultrapassou o limite do pergaminho (${NOTE_TITLE_MAX}).`,
+            });
+          }
+          patch.title = cleanTitle;
+        }
+        if (body !== undefined) {
+          const cleanBody = String(body ?? '');
+          if (cleanBody.length > NOTE_BODY_MAX) {
+            return res.status(400).json({
+              ok: false,
+              error: `A inscrição é longa demais para este Grimório (${NOTE_BODY_MAX}).`,
+            });
+          }
+          patch.body = cleanBody;
+        }
+        if (pinned !== undefined) patch.pinned = Boolean(pinned);
+        if (tags !== undefined) patch.tags = normalizeNoteTags(tags);
+        if (lessonId !== undefined) {
+          let resolvedLesson;
+          try {
+            resolvedLesson = await resolveNoteLessonIdOrReject(lessonId, {
+              allowExistingId: existing.lesson_id,
+            });
+          } catch (gateError) {
+            console.error('[api/progress] noteUpdate lesson gate', gateError);
+            return res.status(500).json({ ok: false, error: 'Falha ao validar a aula da inscrição.' });
+          }
+          if (!resolvedLesson.ok) {
+            return res.status(400).json({ ok: false, error: resolvedLesson.error });
+          }
+          patch.lesson_id = resolvedLesson.lessonId;
+        }
+
+        const { data: updated, error } = await supabase
+          .from(NOTES_TABLE)
+          .update(patch)
+          .eq('id', id)
+          .eq('user_id', userId)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .single();
+
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao atualizar inscrição.' });
+        }
+
+        const sharesByNote = await fetchSharesForNotes([id]);
+        return res.status(200).json({
+          ok: true,
+          note: toNoteDetail(updated, sharesByNote.get(id) || []),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteUpdate', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao atualizar inscrição.' });
+      }
+    }
+
+    if (action === 'noteDelete') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: existing, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao rasgar inscrição.' });
+        }
+        if (!existing || !sameUserId(existing.user_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const { error } = await supabase
+          .from(NOTES_TABLE)
+          .delete()
+          .eq('id', id)
+          .eq('user_id', userId);
+
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao rasgar inscrição.' });
+        }
+
+        return res.status(200).json({ ok: true, deleted: true, noteId: id });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteDelete', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao rasgar inscrição.' });
+      }
+    }
+
+    if (action === 'noteShare') {
+      try {
+        const id = Number(noteId);
+        const targetId = Number(sharedWithUserId || friendUserId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+        if (!Number.isInteger(targetId) || targetId <= 0) {
+          return res.status(400).json({ ok: false, error: 'Informe o companheiro.' });
+        }
+        if (sameUserId(targetId, userId)) {
+          return res.status(400).json({ ok: false, error: 'Não se revela inscrição a si mesmo.' });
+        }
+
+        const { data: existing, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao revelar inscrição.' });
+        }
+        if (!existing || !sameUserId(existing.user_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const bonded = await assertAcceptedBond(userId, targetId);
+        if (!bonded) {
+          return res.status(403).json({
+            ok: false,
+            error: 'Só é possível revelar a quem está ao seu lado.',
+          });
+        }
+
+        const { error } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .upsert(
+            { note_id: id, shared_with_user_id: targetId, created_at: new Date().toISOString() },
+            { onConflict: 'note_id,shared_with_user_id' }
+          );
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao revelar inscrição.' });
+        }
+
+        const sharesByNote = await fetchSharesForNotes([id]);
+        const { data: row } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .eq('id', id)
+          .single();
+
+        return res.status(200).json({
+          ok: true,
+          note: toNoteDetail(row, sharesByNote.get(id) || []),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error) || isMissingFriendshipsTable(error)) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return friendshipsUnavailableResponse(res);
+        }
+        console.error('[api/progress] noteShare', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao revelar inscrição.' });
+      }
+    }
+
+    if (action === 'noteUnshare') {
+      try {
+        const id = Number(noteId);
+        const targetId = Number(sharedWithUserId || friendUserId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+        if (!Number.isInteger(targetId) || targetId <= 0) {
+          return res.status(400).json({ ok: false, error: 'Informe o companheiro.' });
+        }
+
+        const { data: existing, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao velar inscrição.' });
+        }
+        if (!existing || !sameUserId(existing.user_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const { error } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .delete()
+          .eq('note_id', id)
+          .eq('shared_with_user_id', targetId);
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao velar inscrição.' });
+        }
+
+        const sharesByNote = await fetchSharesForNotes([id]);
+        const { data: row } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .eq('id', id)
+          .single();
+
+        return res.status(200).json({
+          ok: true,
+          note: toNoteDetail(row, sharesByNote.get(id) || []),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteUnshare', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao velar inscrição.' });
+      }
+    }
+
+    if (action === 'notesListAdmin' || action === 'notesListForUser') {
+      if (rejectUnlessAdmin(user, res)) return;
+      try {
+        if (action === 'notesListAdmin') {
+          const { data: rows, error } = await supabase
+            .from(NOTES_TABLE)
+            .select('user_id');
+          if (error) {
+            if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao listar grimórios.' });
+          }
+          const counts = new Map();
+          (rows || []).forEach((row) => {
+            const id = Number(row.user_id);
+            counts.set(id, (counts.get(id) || 0) + 1);
+          });
+          const usersById = await fetchUsersByIds([...counts.keys()]);
+          const owners = [...counts.entries()]
+            .map(([id, notesCount]) => {
+              const owner = usersById.get(id);
+              if (!owner || owner.role === 'admin') return null;
+              return {
+                userId: id,
+                username: owner.username,
+                fullName: owner.full_name || owner.username,
+                turma: owner.turma || null,
+                notesCount,
+              };
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.notesCount - a.notesCount);
+
+          return res.status(200).json({ ok: true, owners });
+        }
+
+        const ownerId = Number(targetUserId || friendUserId);
+        if (!Number.isInteger(ownerId) || ownerId <= 0) {
+          return res.status(400).json({ ok: false, error: 'Informe targetUserId.' });
+        }
+        const { data: ownRows, error } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .eq('user_id', ownerId)
+          .order('pinned', { ascending: false })
+          .order('updated_at', { ascending: false });
+        if (error) {
+          if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao listar grimório do aluno.' });
+        }
+        const sharesByNote = await fetchSharesForNotes((ownRows || []).map((row) => row.id));
+        const notes = (ownRows || []).map((row) => {
+          const sharedWith = sharesByNote.get(Number(row.id)) || [];
+          return toNoteSummary(row, {
+            sharedWithCount: sharedWith.length,
+            sharedWithUsernames: sharedWith.map((u) => u.username),
+          });
+        });
+        return res.status(200).json({ ok: true, userId: ownerId, notes, count: notes.length });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] notes admin', error);
+        return res.status(500).json({ ok: false, error: 'Falha na vigília do Grimório.' });
       }
     }
 
@@ -1068,7 +1973,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'generateCode') {
-      if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
+      if (rejectUnlessAdmin(user, res)) return;
       if (Object.keys(LESSON_CATALOG).length === 0) {
         return res.status(409).json({ ok: false, error: 'Não há aulas cadastradas para gerar códigos.' });
       }
@@ -1317,7 +2222,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'setLessonGate') {
-      if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
+      if (rejectUnlessAdmin(user, res)) return;
 
       const normalizedLessonId = String(lessonId || '');
       const normalizedGateKey = String(gateKey || '');
@@ -1368,7 +2273,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'listCodes') {
-      if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
+      if (rejectUnlessAdmin(user, res)) return;
       const { data: rows, error } = await supabase
         .from(CODES_TABLE)
         .select('code, lesson_id, lesson_title, xp, created_at, redeemed_at, redeemed_by')
@@ -1379,7 +2284,7 @@ export default async function handler(req, res) {
     }
 
     if (action === 'listUsers') {
-      if (user.role !== 'admin') return res.status(403).json({ ok: false, error: 'Somente admin.' });
+      if (rejectUnlessAdmin(user, res)) return;
       const { data: users } = await supabase
         .from(USERS_TABLE)
         .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, created_at');

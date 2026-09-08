@@ -12,10 +12,18 @@ const FOCUSABLE_SELECTOR = [
 
 let lastFocusedBeforeOpen = null;
 
+/**
+ * Destinos primários do aside (aluno):
+ * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal
+ * Condicional admin: Almas Registradas (não conta no teto do aluno).
+ */
 function mapRouteToNavItem(route) {
-  if (route === 'dashboard' || route === 'companheiro') return 'dashboard';
+  if (route === 'dashboard') return 'dashboard';
+  if (route === 'companheiro') return 'salao';
   if (route === 'aulas') return 'aulas';
   if (route === 'conquistas') return 'conquistas';
+  if (route === 'salao') return 'salao';
+  if (route === 'grimorio' || route === 'grimorio-nota') return 'grimorio';
   if (route === 'souls') return 'souls';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;
@@ -94,7 +102,14 @@ export function initAppShell({ route, role = 'student', onLogout } = {}) {
   document.body.classList.toggle('is-admin-context', role === 'admin');
 
   shell.querySelectorAll('[data-admin-only]').forEach((item) => {
-    item.hidden = role !== 'admin';
+    const allow = role === 'admin';
+    item.hidden = !allow;
+    item.setAttribute('aria-hidden', String(!allow));
+    if (!allow) {
+      item.setAttribute('tabindex', '-1');
+    } else {
+      item.removeAttribute('tabindex');
+    }
   });
 
   shell.querySelectorAll('[data-nav-item]').forEach((item) => {

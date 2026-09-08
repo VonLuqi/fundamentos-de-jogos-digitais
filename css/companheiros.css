@@ -1,5 +1,5 @@
 /* ============================================================
-   COMPANHEIROS DE JORNADA — seção do profile-panel + base Espelho
+   COMPANHEIROS DE JORNADA — Salão Espiritual + base Espelho
    Tokens alinhados ao Design System Hades (dashboard / shell)
    ============================================================ */
 
@@ -90,8 +90,14 @@
     0 0 12px rgba(207, 167, 89, 0.35);
 }
 
+.companions-search__input:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
 .companions-invite__btn {
   padding: 0.55rem 0.7rem;
+  min-height: 2.75rem;
   font-size: 0.58rem;
   letter-spacing: 0.12em;
   white-space: nowrap;
@@ -292,7 +298,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.22rem 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.65rem;
   font-family: var(--font-title);
   font-size: 0.52rem;
   font-weight: 700;
@@ -345,9 +352,9 @@
 .companions-empty {
   margin: 0.35rem 0 0;
   font-family: var(--font-body);
-  font-size: 0.92rem;
+  font-size: 0.95rem;
   font-style: italic;
-  color: var(--hades-text-muted);
+  color: var(--hades-text-dim);
   text-align: center;
 }
 
@@ -402,6 +409,13 @@
     grid-area: actions;
     flex-direction: row;
     flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .companions-list__link,
+  .companions-list__action {
+    flex: 1 1 auto;
+    min-width: 6.5rem;
   }
 }
 
@@ -417,6 +431,27 @@
   margin-inline: auto;
   padding: 0 0 3rem;
   box-sizing: border-box;
+}
+
+.mirror-mode-sub {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--hades-text-dim, #b8aa97);
+  text-transform: none;
+}
+
+#mirror-album-intro[hidden],
+#mirror-album-grid[hidden],
+#mirror-stat-xp[hidden],
+#mirror-stat-lessons[hidden] {
+  display: none !important;
+}
+
+body[data-mirror-mode='turma'] .relic-modal {
+  display: none !important;
 }
 
 .mirror-shell__content .achievement-album {
@@ -588,6 +623,13 @@
 
   .mirror-shell__content .achievement-album {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .mirror-shell__content {
+    width: min(100%, 640px);
+    margin-inline: auto;
   }
 }
 

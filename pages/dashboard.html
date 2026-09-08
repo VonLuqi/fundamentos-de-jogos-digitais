@@ -15,9 +15,9 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
-  <link rel="stylesheet" href="../css/companheiros.css" />
 </head>
 <body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
 
@@ -45,32 +45,6 @@
     </div>
   </div>
 
-  <!-- Confirmação: Romper vínculo (Companheiros de Jornada) -->
-  <div
-    class="bond-confirm"
-    id="bond-confirm"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="bond-confirm-title"
-    aria-describedby="bond-confirm-desc"
-    hidden
-  >
-    <div class="bond-confirm__panel">
-      <h2 class="bond-confirm__title" id="bond-confirm-title">Romper vínculo</h2>
-      <p class="bond-confirm__desc" id="bond-confirm-desc">
-        Deseja romper o vínculo com este companheiro?
-      </p>
-      <div class="bond-confirm__actions">
-        <button class="btn-gold btn-gold--ghost" type="button" id="bond-confirm-cancel">
-          Manter vínculo
-        </button>
-        <button class="btn-gold" type="button" id="bond-confirm-ok">
-          Romper
-        </button>
-      </div>
-    </div>
-  </div>
-
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
@@ -85,6 +59,8 @@
         <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
         <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
         <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
       </nav>
 
@@ -127,134 +103,97 @@
       </div>
 
       <main class="app-shell__content dashboard-shell__content" aria-labelledby="dashboard-page-title">
-        <section class="dashboard-layout">
 
-          <!-- ========== COLUNA ESQUERDA: PERFIL DINÂMICO ========== -->
-          <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
-
-      <!-- Avatar clicável (persistido via /api/progress) -->
-      <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
-        <!-- Coroa exibida somente para role=admin (inserida/escondida via CSS) -->
-        <span class="avatar-frame__crown" aria-hidden="true">♛</span>
-        <!-- Imagem do avatar: o src é resolvido dinamicamente via JS
-             (ver avatarCandidates()/AVATAR_EXTENSIONS em js/api.js),
-             que tenta várias extensões até achar o arquivo existente.
-             Coloque os arquivos de imagem em assets/avatars/
-             (ex.: avatar1.jpg, avatar2.png, avatar3.webp...). -->
-        <img class="avatar-frame__glyph" id="avatar-glyph" alt="Avatar do jogador" />
-        <span class="avatar-frame__hint">Trocar avatar</span>
-      </button>
-      <p class="avatar-frame__counter" id="avatar-counter">Avatar 1 de 6</p>
-
-      <p class="profile-panel__username" id="profile-username">@—</p>
-      <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
-      <p class="profile-panel__rank" id="profile-rank">—</p>
-
-      <!-- Selo de Mestre (apenas admin) -->
-      <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
-
-      <!-- Nível + XP (barra "juicy": enche gradativamente ao carregar) -->
-      <div class="profile-panel__stats">
-        <div class="level-badge" aria-label="Nível atual">
-          <span class="level-badge__label">Nível</span>
-          <span class="level-badge__value" id="level-value">—</span>
-        </div>
-
-        <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Experiência do aluno">
-          <div class="xp-bar__fill" id="xp-fill" style="width: 0%;">
-            <span class="xp-bar__tip" aria-hidden="true"></span>
-          </div>
-          <span class="xp-bar__text" id="xp-text">— / — XP</span>
-        </div>
-      </div>
-
-      <!-- Estatísticas rápidas -->
-      <dl class="profile-panel__quickstats">
-        <div class="profile-panel__stat">
-          <dt>Aulas Concluídas</dt>
-          <dd id="stat-lessons">—</dd>
-        </div>
-        <div class="profile-panel__stat">
-          <dt>Conquistas</dt>
-          <dd id="stat-achievements">—</dd>
-        </div>
-      </dl>
-
-      <!-- ========== COMPANHEIROS DE JORNADA ========== -->
-      <section class="companions-panel" id="companions-panel" aria-label="Companheiros de Jornada">
-        <header class="companions-panel__head">
-          <h3 class="companions-panel__title">Companheiros de Jornada</h3>
-          <p class="companions-panel__count" id="companions-count" aria-live="polite">— / 25</p>
-        </header>
-
-        <form class="companions-invite" id="companions-invite-form" autocomplete="off">
-          <label class="companions-invite__label" for="companions-search">Oferecer vínculo</label>
-          <div class="companions-invite__row">
-            <div class="companions-search">
-              <input
-                class="companions-search__input"
-                type="text"
-                id="companions-search"
-                name="username"
-                placeholder="Username do aluno"
-                maxlength="32"
-                spellcheck="false"
-                aria-autocomplete="list"
-                aria-controls="companions-suggestions"
-                aria-expanded="false"
-              />
-              <ul
-                class="companions-suggestions"
-                id="companions-suggestions"
-                role="listbox"
-                aria-label="Sugestões de username"
-                hidden
-              ></ul>
-            </div>
-            <button class="btn-gold btn-gold--ghost companions-invite__btn" type="submit" id="companions-invite-btn">
-              Convidar
+        <!-- Ferramentas do Mestre — mini-barra no topo (somente admin) -->
+        <section class="master-tools" id="master-tools" data-admin-only hidden aria-label="Ferramentas do Mestre">
+          <p class="master-tools__label">Ferramentas do Mestre</p>
+          <div class="master-tools__actions">
+            <button class="btn-gold btn-gold--pulse" type="button" id="btn-generate-codes">
+              Gerar Códigos de Acesso
+            </button>
+            <button class="btn-gold btn-gold--ghost" type="button" id="btn-manage-lessons">
+              Liberar Aulas na Trilha
+            </button>
+            <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
+              Ver Almas Registradas
+            </button>
+            <button class="btn-gold btn-gold--ghost" type="button" id="btn-vigilancia">
+              Grimórios sob Vigília
             </button>
           </div>
-          <p class="companions-feedback" id="companions-feedback" role="status" aria-live="polite"></p>
-        </form>
+        </section>
 
-        <div class="companions-section" id="companions-incoming-wrap" hidden>
-          <h4 class="companions-section__title">
-            Convites recebidos
-            <span class="companions-section__badge" id="companions-incoming-badge">0</span>
-          </h4>
-          <ul class="companions-list" id="companions-incoming" aria-label="Convites recebidos"></ul>
-        </div>
+        <section class="dashboard-layout">
 
-        <div class="companions-section" id="companions-outgoing-wrap" hidden>
-          <h4 class="companions-section__title">Convites enviados</h4>
-          <ul class="companions-list" id="companions-outgoing" aria-label="Convites enviados"></ul>
-        </div>
+          <!-- ========== TRILHO ESQUERDO: identidade + previews ========== -->
+          <div class="dashboard-rail">
+            <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
 
-        <div class="companions-section companions-section--accepted">
-          <h4 class="companions-section__title">Ao seu lado</h4>
-          <ul class="companions-list" id="companions-accepted" aria-label="Companheiros aceitos"></ul>
-          <p class="companions-empty" id="companions-empty" hidden>
-            Nenhum companheiro ao seu lado… ainda.
-          </p>
-        </div>
+              <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
+                <span class="avatar-frame__crown" aria-hidden="true">♛</span>
+                <img class="avatar-frame__glyph" id="avatar-glyph" alt="Avatar do jogador" />
+                <span class="avatar-frame__hint">Trocar avatar</span>
+              </button>
+              <p class="avatar-frame__counter" id="avatar-counter">Avatar 1 de 6</p>
 
-        <p class="companions-status" id="companions-status" role="status" aria-live="polite"></p>
-      </section>
+              <p class="profile-panel__username" id="profile-username">@—</p>
+              <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
+              <p class="profile-panel__rank" id="profile-rank">—</p>
 
-      <!-- ========== PAINEL EXCLUSIVO DO ADMIN ========== -->
-      <div class="admin-tools" id="admin-tools" hidden>
-        <button class="btn-gold btn-gold--pulse" type="button" id="btn-generate-codes">
-          Gerar Códigos de Acesso
-        </button>
-        <button class="btn-gold btn-gold--ghost" type="button" id="btn-manage-lessons">
-          Liberar Aulas na Trilha
-        </button>
-        <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
-          Ver Almas Registradas
-        </button>
-      </div>
-          </aside>
+              <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
+
+              <div class="profile-panel__stats">
+                <div class="level-badge" aria-label="Nível atual">
+                  <span class="level-badge__label">Nível</span>
+                  <span class="level-badge__value" id="level-value">—</span>
+                </div>
+
+                <div class="xp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Experiência do aluno">
+                  <div class="xp-bar__fill" id="xp-fill" style="width: 0%;">
+                    <span class="xp-bar__tip" aria-hidden="true"></span>
+                  </div>
+                  <span class="xp-bar__text" id="xp-text">— / — XP</span>
+                </div>
+              </div>
+
+              <dl class="profile-panel__quickstats">
+                <div class="profile-panel__stat">
+                  <dt>Aulas Concluídas</dt>
+                  <dd id="stat-lessons">—</dd>
+                </div>
+                <div class="profile-panel__stat">
+                  <dt>Conquistas</dt>
+                  <dd id="stat-achievements">—</dd>
+                </div>
+              </dl>
+            </aside>
+
+            <article class="hub-preview rail-preview" id="salao-preview" aria-label="Salão Espiritual">
+              <div class="hub-preview__head">
+                <h3 class="block-title">Salão Espiritual</h3>
+                <a class="hub-preview__cta" href="./salao-espiritual.html">Entrar no Salão</a>
+              </div>
+              <p class="hub-preview__summary" id="salao-preview-summary">Carregando laços…</p>
+              <ul class="rail-preview__stats" id="salao-preview-stats" aria-label="Resumo do Salão">
+                <li><span class="rail-preview__stat-label">Turma</span> <span id="salao-preview-turma">—</span></li>
+                <li><span class="rail-preview__stat-label">Companheiros</span> <span id="salao-preview-companions">— / 25</span></li>
+                <li id="salao-preview-invites-wrap" hidden>
+                  <span class="rail-preview__stat-label">Convites</span>
+                  <span id="salao-preview-invites">0</span>
+                </li>
+              </ul>
+            </article>
+
+            <article class="hub-preview rail-preview" id="grimorio-preview" aria-label="Grimório Pessoal">
+              <div class="hub-preview__head">
+                <h3 class="block-title">Grimório Pessoal</h3>
+                <a class="hub-preview__cta" href="./grimorio.html">Abrir o Grimório</a>
+              </div>
+              <p class="hub-preview__summary" id="grimorio-preview-summary">
+                O Grimório espera a primeira inscrição.
+              </p>
+            </article>
+          </div>
 
           <!-- ========== COLUNA DIREITA ========== -->
           <section class="hall-content" aria-label="Progresso e conquistas">

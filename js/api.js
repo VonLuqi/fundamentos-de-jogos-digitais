@@ -216,6 +216,13 @@ export const ROUTES = {
   dashboard: () => `${rootPath()}/pages/dashboard.html`,
   aulas: () => `${rootPath()}/pages/aulas.html`,
   conquistas: () => `${rootPath()}/pages/conquistas.html`,
+  salao: () => `${rootPath()}/pages/salao-espiritual.html`,
+  grimorio: () => `${rootPath()}/pages/grimorio.html`,
+  grimorioNota: (id) => {
+    const base = `${rootPath()}/pages/grimorio-nota.html`;
+    if (!id) return base;
+    return `${base}?id=${encodeURIComponent(id)}`;
+  },
   companheiro: (username) => {
     const base = `${rootPath()}/pages/companheiro.html`;
     if (!username) return base;
@@ -512,6 +519,32 @@ export async function listFriends(token) {
   };
 }
 
+function normalizeClassmateCard(raw) {
+  if (!raw) return raw;
+  return {
+    ...normalizeFriendCard(raw),
+    bondStatus: raw.bondStatus || 'none',
+    friendshipId: raw.friendshipId ?? null,
+  };
+}
+
+/** Colegas da turma (Salão Espiritual). Admin pode passar `{ turma }` ou omitir para todas. */
+export async function listClassmates(token, { turma } = {}) {
+  const body = { token, action: 'classmatesList' };
+  if (turma != null && String(turma).trim() !== '') {
+    body.turma = String(turma).trim();
+  }
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+  return {
+    ...payload,
+    turmasDisponiveis: Array.isArray(payload.turmasDisponiveis) ? payload.turmasDisponiveis : [],
+    classmates: (payload.classmates ?? []).map(normalizeClassmateCard),
+  };
+}
+
 export function searchFriends(token, query) {
   return request('/progress', {
     method: 'POST',
@@ -571,15 +604,147 @@ export async function fetchFriendProfile(token, { username, friendUserId } = {})
       friendUserId,
     }),
   });
+  const mirrorMode = payload.profile?.mirrorMode
+    || (payload.includeAchievements === false ? 'turma' : 'companion');
   return {
     ...payload,
+    bondStatus: payload.bondStatus || null,
+    includeAchievements: Boolean(payload.includeAchievements),
     profile: payload.profile
       ? {
           ...normalizeFriendCard(payload.profile),
-          achievements: payload.profile.achievements ?? [],
-          completedLessonsCount: payload.profile.completedLessonsCount ?? 0,
+          mirrorMode,
+          achievements: mirrorMode === 'companion'
+            ? (payload.profile.achievements ?? [])
+            : [],
+          completedLessonsCount: mirrorMode === 'companion'
+            ? (payload.profile.completedLessonsCount ?? 0)
+            : undefined,
+          xp: mirrorMode === 'companion' ? payload.profile.xp : undefined,
         }
       : null,
+  };
+}
+
+/* ============================================================
+   5c. GRIMÓRIO PESSOAL
+   ============================================================ */
+function normalizeNote(raw) {
+  if (!raw) return raw;
+  return {
+    ...raw,
+    tags: Array.isArray(raw.tags) ? raw.tags : [],
+    sharedWith: Array.isArray(raw.sharedWith) ? raw.sharedWith : [],
+    sharedWithUsernames: Array.isArray(raw.sharedWithUsernames) ? raw.sharedWithUsernames : [],
+    lessonId: raw.lessonId ?? raw.lesson_id ?? null,
+    pinned: Boolean(raw.pinned),
+  };
+}
+
+export async function listNotes(token, { includeShared = false } = {}) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'notesList', includeShared }),
+  });
+  return {
+    ...payload,
+    notes: (payload.notes ?? []).map(normalizeNote),
+    sharedWithMe: (payload.sharedWithMe ?? []).map(normalizeNote),
+  };
+}
+
+export async function getNote(token, noteId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'noteGet', noteId }),
+  });
+  return {
+    ...payload,
+    note: normalizeNote(payload.note),
+  };
+}
+
+export async function createNote(token, fields = {}) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'noteCreate',
+      title: fields.title,
+      body: fields.body,
+      pinned: fields.pinned,
+      tags: fields.tags,
+      lessonId: fields.lessonId,
+    }),
+  });
+  return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export async function updateNote(token, noteId, fields = {}) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'noteUpdate',
+      noteId,
+      title: fields.title,
+      body: fields.body,
+      pinned: fields.pinned,
+      tags: fields.tags,
+      lessonId: fields.lessonId,
+    }),
+  });
+  return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export function deleteNote(token, noteId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'noteDelete', noteId }),
+  });
+}
+
+export async function shareNote(token, noteId, sharedWithUserId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'noteShare',
+      noteId,
+      sharedWithUserId,
+    }),
+  });
+  return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export async function unshareNote(token, noteId, sharedWithUserId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'noteUnshare',
+      noteId,
+      sharedWithUserId,
+    }),
+  });
+  return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export async function listNotesAdmin(token) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'notesListAdmin' }),
+  });
+}
+
+export async function listNotesForUser(token, targetUserId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'notesListForUser', targetUserId }),
+  });
+  return {
+    ...payload,
+    notes: (payload.notes ?? []).map(normalizeNote),
   };
 }
 
@@ -619,6 +784,24 @@ export async function requireSession() {
     // Erro de rede/API fora do ar: propaga para a página exibir aviso.
     throw error;
   }
+}
+
+/**
+ * Guard de páginas/ações do Mestre.
+ * Aluno autenticado é redirecionado ao Painel (deep link de Almas, etc.).
+ * @param {{ redirectTo?: string }} [options]
+ */
+export async function requireAdmin(options = {}) {
+  const result = await requireSession();
+  if (!result) return null;
+
+  if (result.user?.role !== 'admin') {
+    const target = options.redirectTo || ROUTES.dashboard();
+    window.location.replace(target);
+    return null;
+  }
+
+  return result;
 }
 
 /* ============================================================

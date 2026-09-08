@@ -1,6 +1,8 @@
 /**
- * Espelho do Companheiro — perfil público + álbum read-only.
+ * Espelho do Companheiro / Espelho da Turma — perfil público.
  * Rota: pages/companheiro.html?u=<username>[#achievementId]
+ * Modo companion (bond aceito): álbum read-only.
+ * Modo turma (mesma turma, sem bond): perfil leve, sem conquistas.
  */
 
 'use strict';
@@ -47,13 +49,13 @@ function showApiWarning(message) {
   box.hidden = false;
 }
 
-function redirectToDashboard(message) {
+function redirectToSalao(message) {
   try {
     if (message) sessionStorage.setItem(COMPANIONS_FLASH_KEY, message);
   } catch {
     // ignore storage failures
   }
-  window.location.replace(ROUTES.dashboard());
+  window.location.replace(ROUTES.salao());
 }
 
 function usernameFromQuery() {
@@ -73,7 +75,44 @@ function toAlbumUser(profile) {
   };
 }
 
+function applyMirrorChrome(mirrorMode) {
+  const isTurma = mirrorMode === 'turma';
+  const titleEl = document.getElementById('mirror-page-title');
+  const subEl = document.getElementById('mirror-mode-sub');
+  const chipEl = document.getElementById('mirror-context-chip');
+  const backEl = document.getElementById('mirror-back-link');
+  const albumIntro = document.getElementById('mirror-album-intro');
+  const albumGrid = document.getElementById('mirror-album-grid');
+  const xpStat = document.getElementById('mirror-stat-xp');
+  const lessonsStat = document.getElementById('mirror-stat-lessons');
+
+  if (titleEl) {
+    titleEl.innerHTML = isTurma
+      ? 'ESPELHO DA <span class="accent">TURMA</span>'
+      : 'ESPELHO DO <span class="accent">COMPANHEIRO</span>';
+  }
+  if (subEl) {
+    subEl.textContent = isTurma
+      ? 'Visão parcial do colega'
+      : 'Reflexo completo do companheiro';
+  }
+  if (chipEl) chipEl.textContent = 'Salão Espiritual';
+  if (backEl) {
+    backEl.href = ROUTES.salao();
+    backEl.textContent = '← Voltar ao Salão';
+  }
+  if (albumIntro) albumIntro.hidden = isTurma;
+  if (albumGrid) albumGrid.hidden = isTurma;
+  if (xpStat) xpStat.hidden = isTurma;
+  if (lessonsStat) lessonsStat.hidden = isTurma;
+
+  document.body.dataset.mirrorMode = isTurma ? 'turma' : 'companion';
+}
+
 async function renderMirrorProfile(profile) {
+  const mirrorMode = profile.mirrorMode === 'turma' ? 'turma' : 'companion';
+  applyMirrorChrome(mirrorMode);
+
   const section = document.getElementById('mirror-profile');
   const avatar = document.getElementById('mirror-avatar');
   if (section) section.hidden = false;
@@ -95,10 +134,16 @@ async function renderMirrorProfile(profile) {
   if (rankEl) rankEl.textContent = profile.rank || (isAdmin ? 'Mestre do Infinito' : '—');
   if (turmaEl) turmaEl.textContent = isAdmin ? 'Domínio' : (profile.turma || '—');
   if (levelEl) levelEl.textContent = isAdmin ? '∞' : String(profile.level ?? '—');
-  if (xpEl) xpEl.textContent = isAdmin ? '∞ XP' : `${Number(profile.xp || 0)} XP`;
-  if (lessonsEl) lessonsEl.textContent = String(profile.completedLessonsCount ?? 0);
 
-  document.title = `${profile.fullName || profile.username} — Espelho | Fundamentos de Jogos Digitais`;
+  if (mirrorMode === 'companion') {
+    if (xpEl) xpEl.textContent = isAdmin ? '∞ XP' : `${Number(profile.xp || 0)} XP`;
+    if (lessonsEl) lessonsEl.textContent = String(profile.completedLessonsCount ?? 0);
+  }
+
+  const label = profile.fullName || profile.username;
+  document.title = mirrorMode === 'turma'
+    ? `${label} — Espelho da Turma | Fundamentos de Jogos Digitais`
+    : `${label} — Espelho do Companheiro | Fundamentos de Jogos Digitais`;
 }
 
 function updateAlbumCounter() {
@@ -328,7 +373,7 @@ async function init() {
 
   const username = usernameFromQuery();
   if (!username) {
-    redirectToDashboard('Informe um companheiro para abrir o Espelho.');
+    redirectToSalao('Informe um companheiro para abrir o Espelho.');
     return;
   }
 
@@ -349,7 +394,7 @@ async function init() {
   viewerUser = result.user;
   const token = getSession()?.token;
   if (!token) {
-    redirectToDashboard('Sessão inválida.');
+    redirectToSalao('Sessão inválida.');
     return;
   }
 
@@ -365,20 +410,31 @@ async function init() {
   }
 
   try {
-    const { profile } = await fetchFriendProfile(token, { username });
+    const { profile, includeAchievements } = await fetchFriendProfile(token, { username });
     if (!profile) {
-      redirectToDashboard('Companheiro não encontrado ou vínculo ainda não aceito.');
+      redirectToSalao('Companheiro não encontrado ou vínculo ainda não aceito.');
       return;
     }
-    friendUser = toAlbumUser(profile);
+
+    const mirrorMode = profile.mirrorMode === 'turma' || includeAchievements === false
+      ? 'turma'
+      : 'companion';
+    profile.mirrorMode = mirrorMode;
+
     await renderMirrorProfile(profile);
-    renderAlbum();
-    handleDeepLink();
+
+    if (mirrorMode === 'companion') {
+      friendUser = toAlbumUser(profile);
+      renderAlbum();
+      handleDeepLink();
+    } else {
+      friendUser = null;
+    }
   } catch (error) {
     const message = error instanceof ApiError
       ? error.message
       : 'Não foi possível abrir o Espelho deste companheiro.';
-    redirectToDashboard(message);
+    redirectToSalao(message);
   }
 }
 

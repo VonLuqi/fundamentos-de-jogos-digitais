@@ -1,91 +1,22 @@
 /* ============================================================
    PAINEL DO ALUNO ("SALÃO DOS HERÓIS") — Hades UI / Juicy
+   Tokens: css/hades-tokens.css (shell)
    Preto / roxo-quase-negro + dourado metálico + vermelho-sangue
    Tipografia: Cinzel (títulos) + Crimson Text (leitura)
    ============================================================ */
 
-/* ---------- 1. Design Tokens (mesmos da "style.css", "aula.css" e "auth.css") ---------- */
-:root {
-  --hades-bg: #0d0a10;
-  --hades-bg-alt: #14101a;
-  --hades-panel: rgba(24, 18, 26, 0.92);
-  --hades-panel-alt: rgba(32, 24, 30, 0.9);
-
-  --hades-gold: #cfa759;
-  --hades-gold-bright: #f2d59a;
-  --hades-gold-dark: #7a5c2e;
-  --hades-bronze: #5c4322;
-
-  --rarity-stone: #9c9388;
-  --rarity-copper: #b57947;
-  --rarity-silver: #c7d2dc;
-  --rarity-gold: #e3b34f;
-  --rarity-rainbow: #7ed8ff;
-
-  --hades-blood: #7a1f2b;
-  --hades-blood-bright: #c23548;
-
-  --hades-text: #ece1d1;
-  --hades-text-dim: #ab9c8a;
-  --hades-text-muted: #6f6459;
-
-  --font-title: "Cinzel", serif;
-  --font-body: "Crimson Text", serif;
-
-  --shadow-gold-glow: 0 0 10px rgba(207, 167, 89, 0.55), 0 0 24px rgba(207, 167, 89, 0.25);
-  --shadow-blood-glow: 0 0 10px rgba(194, 53, 72, 0.55), 0 0 26px rgba(194, 53, 72, 0.28);
-  --shadow-panel: 0 14px 40px rgba(0, 0, 0, 0.65);
-
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-}
-
-/* ---------- 2. Reset ---------- */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ---------- 2. Reset / page chrome (tokens já definem body shell) ---------- */
 html {
-  color-scheme: dark;
   scroll-behavior: smooth;
 }
 
 body {
   position: relative;
-  min-height: 100vh;
-  font-family: var(--font-body);
-  font-size: 1.125rem;
-  line-height: 1.6;
-  color: var(--hades-text);
-  background:
-    radial-gradient(ellipse at 20% 10%, rgba(122, 31, 43, 0.18), transparent 55%),
-    radial-gradient(ellipse at 80% 90%, rgba(207, 167, 89, 0.08), transparent 50%),
-    var(--hades-bg);
   overflow-x: hidden;
 }
 
 .vignette {
-  position: fixed;
-  top: 0;
-  left: 0;
   z-index: 10;
-  width: 100%;
-  /* Evita “pulo” no mobile: inset/100vh mudam com a barra do browser. */
-  height: 100vh;
-  height: 100lvh;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
-}
-
-/* ============================================================
-   3. LAYOUT — Shell + Grid principal
-   ============================================================ */
-.accent {
-  color: var(--hades-gold-bright);
 }
 
 /* Divisor ornamentado (mesmo padrão das outras telas) */
@@ -120,10 +51,11 @@ body {
   padding-top: 0;
 }
 
-/* ============================================================
-   4. COLUNA ESQUERDA — PERFIL
-   ============================================================ */
-.profile-panel {
+/* Trilho esquerdo: identidade + previews (Salão / Grimório) */
+.dashboard-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   position: sticky;
   top: 1rem;
   align-self: start;
@@ -131,6 +63,15 @@ body {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--hades-gold-dark) transparent;
+}
+
+/* ============================================================
+   4. COLUNA ESQUERDA — PERFIL
+   ============================================================ */
+.profile-panel {
+  position: static;
+  max-height: none;
+  overflow: visible;
   padding: 1.75rem 1.5rem;
   background: var(--hades-panel);
   border: 2px solid var(--hades-gold-dark);
@@ -1295,11 +1236,52 @@ img.achievement-card__art.has-art {
 
 /* `hidden` deve sempre vencer regras de display locais. */
 .master-badge[hidden],
+.master-tools[hidden],
 .admin-tools[hidden] {
   display: none !important;
 }
 
-/* Ferramentas do Admin */
+/* Mini-barra Ferramentas do Mestre (topo do dashboard) */
+.master-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.25rem;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1.1rem;
+  max-width: 1320px;
+  background: linear-gradient(180deg, rgba(74, 0, 0, 0.55), rgba(18, 12, 20, 0.92));
+  border: 1px solid rgba(194, 53, 72, 0.55);
+  outline: 1px solid rgba(207, 167, 89, 0.35);
+  outline-offset: 2px;
+  box-shadow: inset 0 0 28px rgba(194, 53, 72, 0.12), 0 8px 28px rgba(0, 0, 0, 0.35);
+  animation: panelEnter 450ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+.master-tools__label {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.master-tools__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.master-tools__actions .btn-gold {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.62rem;
+}
+
+/* Legado: coluna antiga de admin (não deve mais aparecer no DOM) */
 .admin-tools {
   display: flex;
   flex-direction: column;
@@ -1307,6 +1289,78 @@ img.achievement-card__art.has-art {
   margin-top: 1.25rem;
   padding-top: 1.25rem;
   border-top: 1px solid rgba(194, 53, 72, 0.35);
+}
+
+/* Previews do trilho (Salão / Grimório) */
+.rail-preview {
+  padding: 1.1rem 1.15rem;
+  text-align: left;
+  background: var(--hades-panel);
+  border: 2px solid var(--hades-gold-dark);
+  outline: 1px solid var(--hades-gold);
+  outline-offset: 2px;
+  box-shadow: var(--shadow-panel), inset 0 0 24px rgba(207, 167, 89, 0.04);
+}
+
+.rail-preview .block-title {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.rail-preview .hub-preview__summary {
+  margin-bottom: 0.65rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  line-height: 1.45;
+  text-transform: none;
+  font-family: var(--font-body);
+  opacity: 0.9;
+}
+
+.rail-preview__stats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rail-preview__stats li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-parchment);
+}
+
+.rail-preview__stat-label {
+  color: var(--hades-gold);
+  opacity: 0.85;
+}
+
+.grimorio-preview-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.grimorio-preview-list a {
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: var(--hades-parchment);
+}
+
+.grimorio-preview-list a:hover {
+  color: var(--hades-gold-bright);
 }
 
 /* Botão dourado em destaque */
@@ -1872,8 +1926,27 @@ img.achievement-card__art.has-art {
     grid-template-columns: 1fr;
   }
 
+  .dashboard-rail {
+    position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
   .profile-panel {
     position: static;
+  }
+
+  .master-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .master-tools__actions {
+    flex-direction: column;
+  }
+
+  .master-tools__actions .btn-gold {
+    width: 100%;
   }
 
   .hub-preview__head {

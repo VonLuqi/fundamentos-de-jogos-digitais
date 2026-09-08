@@ -27,7 +27,7 @@ Direção visual obrigatória: **preservar o Design System Hades-like** já defi
 
 | Peça                            | Onde                                                 | Reuso esperado                                             |
 | ------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
-| Perfil do aluno                 | `profile-panel` em `dashboard.html` + `dashboard.js` | Âncora UX para a seção de amigos                           |
+| Perfil do aluno                 | `profile-panel` em `dashboard.html` + `dashboard.js` | Identidade; social migrou para **Salão Espiritual** (ver addendum) |
 | Avatar + nome + rank + XP       | `avatar-frame`, `rankForXp`, `levelForXp`            | Cards de amigo e perfil visitado                           |
 | Catálogo / render de conquistas | `js/achievements-ui.js`, `css/conquistas.css`        | Álbum **somente leitura** no perfil do amigo               |
 | Progresso server-authoritative  | `api/progress.js` + `js/api.js`                      | Novas actions no mesmo endpoint (padrão do projeto)        |
@@ -221,29 +221,60 @@ Respostas marcadas com `(X)`. Hipótese original: `(H)`. Decisões finais na se�
 
 
 
+## Addendum — Âncora UX (2026-09)
+
+A âncora social migrou para o plano [`plano-area-social-turma-anotacoes.md`](./plano-area-social-turma-anotacoes.md) (**Fase 0 fechada**, Task 1):
+
+| Antes | Agora |
+| --- | --- |
+| Seção **Companheiros de Jornada** só no `#profile-panel` | Página **`pages/salao-espiritual.html`** (**Salão Espiritual**) + **preview** no Painel do Herói |
+| Um único bloco social | Subseções **Turma** (descoberta de colegas) + **Companheiros de Jornada** (vínculos aceitos / convites) |
+| Só Espelho completo (bond) | **Espelho da Turma** (sem conquistas) **ou** **Espelho do Companheiro** (completo) |
+| Sem item no shell | Item de menu **Salão Espiritual** (ver plano social) |
+
+O modelo `friendships`, limite **25**, busca por turma, convite por username exato e DTO do **Espelho do Companheiro** **permanecem** válidos. Microcopy/empty states oficiais: seção **Microcopy congelada (Task 1)** no plano social.
+
+### Espelho da Turma vs Espelho do Companheiro
+
+Mesma rota base: `pages/companheiro.html?u=<username>` (o servidor decide o modo; a UI adapta título e blocos).
+
+| | **Espelho da Turma** | **Espelho do Companheiro** |
+| --- | --- | --- |
+| Quem acessa | Aluno da **mesma `turma`**, **sem** bond aceito | Bond **`accepted`** (qualquer turma, se já vinculados) |
+| Título UI | Espelho da Turma | Espelho do Companheiro |
+| Campos | avatar, nome, @username, turma, rank, nível | + XP, `completedLessonsCount`, **Álbum de Relíquias** |
+| Conquistas | **Não renderizar** (API não envia `achievements`) | Read-only; secretas = matriz texto × estilo abaixo |
+| CTAs típicos | Oferecer vínculo / ver pendência | Romper vínculo / voltar ao Salão |
+| Fora da turma + sem bond | **403** / “É preciso um vínculo para contemplar este espelho.” | — |
+
+Authz: `friendProfile` (ou equivalente) com `includeAchievements: true` **somente** se `bondStatus === 'accepted'`. Mesma turma sem bond → payload leve. Implementação UI: `js/companheiro.js` ramifica layout; não reutilizar slot de álbum no modo turma.
+
+
 ## Decisões congeladas (Fase 0 fechada)
 
 
 | Tema | Decisão |
 | --- | --- |
-| Âncora UX | Seção **Companheiros de Jornada** no `profile-panel` do dashboard |
-| Perfil do amigo | Página `pages/companheiro.html?u=<username>` (**Espelho do Companheiro**) |
-| Nome de produto | **Companheiros de Jornada** / **Espelho do Companheiro** |
+| Âncora UX | **Salão Espiritual** (página + preview no Painel). Histórico: seção no `profile-panel` |
+| Perfil do amigo | `companheiro.html?u=` — modo **Turma** ou **Companheiro** conforme authz |
+| Nome de produto | **Salão Espiritual** (hub); subseção **Companheiros de Jornada**; espelhos conforme tabela acima |
 | Escopo de busca | Autocomplete na **mesma turma**; convite também por **username exato global** |
 | Identificador | Username com **autocomplete** (não full_name) |
-| Visibilidade (Espelho) | avatar, nome, username, turma, rank, nível/XP, álbum read-only |
-| DTO público | `id`, `username`, `fullName`, `turma`, `avatarIndex`, `xp`, `rank`, `level`, `achievements[]`, `completedLessonsCount` |
-| Hidden (visitante) | Catálogo completo no Espelho. **Texto** ← observador; **estilo** ← espelhado (ver addendum) |
+| Visibilidade (Espelho completo) | avatar, nome, username, turma, rank, nível/XP, álbum read-only |
+| Visibilidade (Espelho da Turma) | avatar, nome, username, turma, rank, nível — **sem** álbum / XP detalhado obrigatório |
+| DTO público (completo) | `id`, `username`, `fullName`, `turma`, `avatarIndex`, `xp`, `rank`, `level`, `achievements[]`, `completedLessonsCount` |
+| DTO público (turma) | `id`, `username`, `fullName`, `turma`, `avatarIndex`, `rank`, `level`, `mirrorMode: 'turma'` |
+| Hidden (visitante) | Só no Espelho **completo**. **Texto** ← observador; **estilo** ← espelhado (ver addendum) |
 | Limite | Soft **25** companheiros aceitos |
-| Backend | Tabela `friendships` + actions em `api/progress.js` |
-| CSS / JS | `css/companheiros.css` + `js/friends-ui.js` + `js/companheiro.js` |
-| Shell | Sem item novo no aside; nav destaca **Painel do Herói** no Espelho |
+| Backend | Tabela `friendships` + actions em `api/progress.js` (+ `classmatesList` no plano social) |
+| CSS / JS | `companheiros.css` / `friends-ui.js` / `companheiro.js` + página Salão (`salao-espiritual.*`) |
+| Shell | Item **Salão Espiritual**; no Espelho, nav pode destacar Salão ou Painel conforme origem |
 
 ### Nota de escopo — busca e hidden
 
 - **Autocomplete:** sugere alunos da mesma `turma` (prefixo de username); não lista a plataforma inteira.
 - **Convite global:** se o username existir em outra turma e for digitado **exato**, o convite é permitido.
-- **Hidden no Espelho:** ver **Addendum — secretas (matriz texto × estilo)** abaixo. O álbum **próprio** continua com `?` até desbloquear.
+- **Hidden no Espelho:** aplica-se **apenas** ao Espelho do Companheiro. Ver **Addendum — secretas** abaixo. O álbum **próprio** continua com `?` até desbloquear.
 
 ### Addendum — secretas (matriz texto × estilo)
 
@@ -268,20 +299,21 @@ Atualiza a decisão antiga de “omitir hidden” / “sempre ?”. Plano: [plan
 
 ```
 dashboard.html (Painel do Herói)
-  profile-panel
-    … avatar, rank, XP, quickstats
-    … [Companheiros de Jornada]
-         lista + convites + campo username
-         → companheiro.html?u=<username>
+  profile-panel … identidade
+  preview → Salão Espiritual
 
-companheiro.html (Espelho do Companheiro)
-  perfil público (read-only)
-  Álbum de Relíquias do amigo (achievements-ui, read-only)
-  Voltar ao Painel
+pages/salao-espiritual.html
+  Oferecer vínculo | Convites | Turma | Companheiros
+  → companheiro.html?u=<username>
+
+companheiro.html
+  mode turma     → Espelho da Turma (sem álbum)
+  mode companion → Espelho do Companheiro + Álbum read-only
 
 api/progress.js
+  classmatesList
   friendsList | friendSearch | friendRequest
-  friendRespond | friendRemove | friendProfile
+  friendRespond | friendRemove | friendProfile (includeAchievements se bond)
 
 db/friendships
   requester_id, addressee_id, status, timestamps

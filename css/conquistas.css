@@ -1,100 +1,16 @@
 /* ============================================================
    ÁLBUM DE RELÍQUIAS — página de conquistas
+   Tokens: css/hades-tokens.css (shell)
    ============================================================ */
-
-:root {
-  --hades-bg: #0d0a10;
-  --hades-bg-alt: #14101a;
-  --hades-panel: rgba(24, 18, 26, 0.92);
-  --hades-panel-alt: rgba(32, 24, 30, 0.9);
-
-  --hades-gold: #cfa759;
-  --hades-gold-bright: #f2d59a;
-  --hades-gold-dark: #7a5c2e;
-  --hades-blood: #7a1f2b;
-
-  --hades-text: #ece1d1;
-  --hades-text-dim: #ab9c8a;
-  --hades-text-muted: #6f6459;
-
-  --rarity-stone: #9c9388;
-  --rarity-copper: #b57947;
-  --rarity-silver: #c7d2dc;
-  --rarity-gold: #e3b34f;
-  --rarity-rainbow: #7ed8ff;
-
-  --font-title: "Cinzel", serif;
-  --font-body: "Crimson Text", serif;
-
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body.app-shell-page {
-  margin: 0;
-  min-height: 100vh;
-  font-family: var(--font-body);
-  color: var(--hades-text);
-  background:
-    radial-gradient(ellipse at 12% 8%, rgba(122, 31, 43, 0.22), transparent 40%),
-    radial-gradient(ellipse at 88% 0%, rgba(207, 167, 89, 0.1), transparent 34%),
-    linear-gradient(180deg, #151018 0%, var(--hades-bg) 50%, #08060b 100%);
-}
 
 body.is-relic-modal-open {
   overflow: hidden;
-}
-
-.vignette {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 1;
-  width: 100%;
-  height: 100vh;
-  height: 100lvh;
-  background: radial-gradient(ellipse at center, transparent 42%, rgba(0, 0, 0, 0.75) 100%);
-}
-
-.accent {
-  color: var(--hades-gold-bright);
-}
-
-.ornate-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin: 0 1.5rem 1.25rem;
-}
-.ornate-divider__line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--hades-gold-dark), transparent);
-}
-.ornate-divider__gem {
-  color: var(--hades-blood);
-  font-size: 0.7rem;
 }
 
 .album-shell__content {
   max-width: 980px;
   margin: 0 auto;
   padding: 0 1.5rem 3rem;
-}
-
-.api-warning {
-  margin-bottom: 1.25rem;
-  padding: 0.85rem 1rem;
-  border: 1px solid var(--hades-blood);
-  background: rgba(122, 31, 43, 0.2);
-  color: var(--hades-gold-bright);
 }
 
 .album-intro {

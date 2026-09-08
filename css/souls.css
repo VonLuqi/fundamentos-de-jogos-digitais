@@ -20,6 +20,10 @@
   box-sizing: border-box;
 }
 
+#souls-app[hidden] {
+  display: none !important;
+}
+
 html {
   color-scheme: dark;
 }
@@ -397,6 +401,146 @@ body {
   }
 
   .soul-card__meta {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Grimórios sob Vigília */
+.vigilia-lead {
+  margin: 0 0 1rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--hades-text-dim);
+}
+
+.vigilia-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.vigilia-owners {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.vigilia-owner {
+  text-align: left;
+  padding: 0.85rem 0.95rem;
+  cursor: pointer;
+  color: inherit;
+  background: linear-gradient(150deg, rgba(19, 16, 24, 0.95), rgba(26, 20, 30, 0.95));
+  border: 1px solid rgba(127, 97, 48, 0.72);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.vigilia-owner:hover,
+.vigilia-owner.is-active {
+  border-color: var(--hades-gold-bright);
+  box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.35), 0 12px 28px rgba(0, 0, 0, 0.4);
+}
+
+.vigilia-owner__name,
+.vigilia-owner__handle,
+.vigilia-owner__meta {
+  margin: 0;
+}
+
+.vigilia-owner__name {
+  font-family: var(--font-title);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--hades-gold-bright);
+}
+
+.vigilia-owner__handle {
+  margin-top: 0.2rem;
+  font-family: var(--font-body);
+  color: var(--hades-text-dim);
+}
+
+.vigilia-owner__meta {
+  margin-top: 0.45rem;
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.vigilia-detail {
+  border: 1px solid rgba(127, 97, 48, 0.72);
+  background: linear-gradient(150deg, rgba(19, 16, 24, 0.95), rgba(26, 20, 30, 0.95));
+  padding: 1rem;
+  min-height: 12rem;
+}
+
+.vigilia-detail__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.vigilia-detail__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.vigilia-detail__close {
+  flex: 0 0 auto;
+}
+
+.vigilia-notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.vigilia-note {
+  margin: 0;
+  border: 1px solid rgba(207, 167, 89, 0.32);
+}
+
+.vigilia-note__link {
+  display: block;
+  padding: 0.75rem 0.85rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.vigilia-note__link:hover,
+.vigilia-note__link:focus-visible {
+  outline: none;
+  background: rgba(207, 167, 89, 0.08);
+}
+
+.vigilia-note__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  color: var(--hades-gold-bright);
+}
+
+.vigilia-note__meta {
+  margin: 0.3rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--hades-text-dim);
+}
+
+@media (max-width: 900px) {
+  .vigilia-layout {
     grid-template-columns: 1fr;
   }
 }

@@ -1,5 +1,5 @@
 /**
- * Companheiros de Jornada — UI do profile-panel (Painel do Herói).
+ * Companheiros de Jornada — UI do Salão Espiritual (`pages/salao-espiritual.html`).
  * Consome as actions de amigos em /api/progress via js/api.js.
  */
 
@@ -41,11 +41,32 @@ function setFeedback(node, message, tone = '') {
   node.dataset.tone = tone || '';
 }
 
+function friendlyFriendError(message) {
+  const text = String(message || '');
+  if (/limite|completa \(25\)|companheiros atingido/i.test(text)) {
+    return 'Sua companhia já está completa (25). Rompa um vínculo para oferecer outro.';
+  }
+  if (/já existe|pendente|em viagem/i.test(text)) {
+    return 'Este convite já está em viagem.';
+  }
+  if (/já.*companheiro|já.*vínculo|selado|already/i.test(text)) {
+    return 'Este vínculo já foi selado.';
+  }
+  if (/não encontrado|nenhuma alma|username/i.test(text) && /alma|aluno|encontrad/i.test(text)) {
+    return 'Nenhuma alma com esse username.';
+  }
+  if (/si mesmo|a si/i.test(text)) {
+    return 'Não se oferece vínculo a si mesmo.';
+  }
+  return text || 'Os laços estão inacessíveis no momento.';
+}
+
+
 function companionMirrorHref(username) {
   return ROUTES.companheiro(username);
 }
 
-function confirmBreakBond(label) {
+export function confirmBreakBond(label) {
   const dialog = document.getElementById('bond-confirm');
   const desc = document.getElementById('bond-confirm-desc');
   const cancelBtn = document.getElementById('bond-confirm-cancel');
@@ -109,7 +130,7 @@ function confirmBreakBond(label) {
       }
     };
 
-    desc.textContent = `Deseja romper o vínculo com ${label}? O Espelho deste companheiro deixará de ser acessível.`;
+    desc.textContent = `Deseja romper o vínculo com ${label}?`;
     dialog.hidden = false;
     dialog.classList.add('is-open');
     document.body.classList.add('is-bond-confirm-open');
@@ -156,9 +177,9 @@ function buildCompanionRow(entry, { mode, onAction }) {
   const actions = el('div', 'companions-list__actions');
 
   if (mode === 'accepted') {
-    const open = el('a', 'companions-list__link', 'Espelho');
+    const open = el('a', 'companions-list__link', 'Espelho completo');
     open.href = companionMirrorHref(user.username);
-    open.setAttribute('aria-label', `Ver Espelho de ${handle}`);
+    open.setAttribute('aria-label', `Ver Espelho completo de ${handle}`);
     const remove = el('button', 'companions-list__action companions-list__action--danger', 'Romper');
     remove.type = 'button';
     remove.setAttribute('aria-label', `Romper vínculo com ${handle}`);
@@ -187,14 +208,19 @@ function buildCompanionRow(entry, { mode, onAction }) {
 }
 
 /**
- * @param {{ root: HTMLElement, getToken: () => string|null }} options
+ * @param {{
+ *   root: HTMLElement,
+ *   getToken: () => string|null,
+ *   onChange?: () => void | Promise<void>,
+ * }} options
  */
-export function initCompanionsPanel({ root, getToken }) {
+export function initCompanionsPanel({ root, getToken, onChange } = {}) {
   if (!root) {
     return { refresh: async () => {} };
   }
 
-  const countEl = root.querySelector('#companions-count');
+  const countEl = root.querySelector('#companions-count')
+    || document.getElementById('companions-count');
   const feedbackEl = root.querySelector('#companions-feedback');
   const statusEl = root.querySelector('#companions-status');
   const form = root.querySelector('#companions-invite-form');
@@ -203,10 +229,13 @@ export function initCompanionsPanel({ root, getToken }) {
   const incomingWrap = root.querySelector('#companions-incoming-wrap');
   const incomingList = root.querySelector('#companions-incoming');
   const incomingBadge = root.querySelector('#companions-incoming-badge');
+  const incomingEmpty = root.querySelector('#companions-incoming-empty');
   const outgoingWrap = root.querySelector('#companions-outgoing-wrap');
   const outgoingList = root.querySelector('#companions-outgoing');
+  const outgoingEmpty = root.querySelector('#companions-outgoing-empty');
   const acceptedList = root.querySelector('#companions-accepted');
   const emptyEl = root.querySelector('#companions-empty');
+  const inviteBtn = root.querySelector('#companions-invite-btn');
 
   let searchTimer = null;
   let lastQuery = '';
@@ -305,13 +334,36 @@ export function initCompanionsPanel({ root, getToken }) {
       countEl.setAttribute('aria-label', `${count} de ${limit} companheiros`);
     }
 
+    const atLimit = count >= limit;
+    if (inviteBtn) {
+      inviteBtn.disabled = atLimit;
+      inviteBtn.title = atLimit
+        ? 'Sua companhia já está completa (25). Rompa um vínculo para oferecer outro.'
+        : '';
+    }
+    if (searchInput) searchInput.disabled = atLimit;
+    if (atLimit && feedbackEl && !feedbackEl.textContent) {
+      setFeedback(
+        feedbackEl,
+        'Sua companhia já está completa (25). Rompa um vínculo para oferecer outro.',
+        'error'
+      );
+    } else if (!atLimit && feedbackEl?.dataset.tone === 'error'
+      && /companhia já está completa/i.test(feedbackEl.textContent || '')) {
+      setFeedback(feedbackEl, '');
+    }
+
     if (incomingList && incomingWrap && incomingBadge) {
       incomingList.replaceChildren();
       incoming.forEach((entry) => {
         incomingList.appendChild(buildCompanionRow(entry, { mode: 'incoming', onAction: handleRowAction }));
       });
       incomingBadge.textContent = String(incoming.length);
-      incomingWrap.hidden = incoming.length === 0;
+      incomingWrap.hidden = false;
+      if (incomingEmpty) {
+        incomingEmpty.hidden = incoming.length > 0;
+        incomingEmpty.textContent = 'Nenhum convite aguarda sua resposta.';
+      }
     }
 
     if (outgoingList && outgoingWrap) {
@@ -319,7 +371,11 @@ export function initCompanionsPanel({ root, getToken }) {
       outgoing.forEach((entry) => {
         outgoingList.appendChild(buildCompanionRow(entry, { mode: 'outgoing', onAction: handleRowAction }));
       });
-      outgoingWrap.hidden = outgoing.length === 0;
+      outgoingWrap.hidden = false;
+      if (outgoingEmpty) {
+        outgoingEmpty.hidden = outgoing.length > 0;
+        outgoingEmpty.textContent = 'Nenhum convite em viagem.';
+      }
     }
 
     if (acceptedList && emptyEl) {
@@ -328,6 +384,7 @@ export function initCompanionsPanel({ root, getToken }) {
         acceptedList.appendChild(buildCompanionRow(entry, { mode: 'accepted', onAction: handleRowAction }));
       });
       emptyEl.hidden = accepted.length > 0;
+      emptyEl.textContent = 'Nenhum companheiro ao seu lado… ainda.';
     }
   }
 
@@ -342,18 +399,23 @@ export function initCompanionsPanel({ root, getToken }) {
     try {
       const payload = await listFriends(activeToken);
       renderLists(payload);
-      if (emptyEl) {
-        emptyEl.textContent = 'Nenhum companheiro ao seu lado… ainda.';
-      }
       if (statusEl) setFeedback(statusEl, '');
     } catch (error) {
-      const message = error instanceof ApiError
-        ? error.message
-        : 'Não foi possível carregar os companheiros.';
+      const message = friendlyFriendError(
+        error instanceof ApiError ? error.message : 'Os laços estão inacessíveis no momento.'
+      );
       if (statusEl) setFeedback(statusEl, message, 'error');
       if (emptyEl) {
         emptyEl.hidden = false;
         emptyEl.textContent = 'Os laços estão inacessíveis no momento.';
+      }
+      if (incomingEmpty) {
+        incomingEmpty.hidden = false;
+        incomingEmpty.textContent = 'Os laços estão inacessíveis no momento.';
+      }
+      if (outgoingEmpty) {
+        outgoingEmpty.hidden = false;
+        outgoingEmpty.textContent = 'Os laços estão inacessíveis no momento.';
       }
     }
   }
@@ -395,10 +457,11 @@ export function initCompanionsPanel({ root, getToken }) {
         setFeedback(feedbackEl, `Vínculo com ${label} rompido.`, 'ok');
       }
       await refresh({ silent: true });
+      if (typeof onChange === 'function') await onChange();
     } catch (error) {
-      const message = error instanceof ApiError
-        ? error.message
-        : 'Não foi possível atualizar o vínculo.';
+      const message = friendlyFriendError(
+        error instanceof ApiError ? error.message : 'Não foi possível atualizar o vínculo.'
+      );
       setFeedback(feedbackEl, message, 'error');
     } finally {
       busy = false;
@@ -471,7 +534,6 @@ export function initCompanionsPanel({ root, getToken }) {
     if (!activeToken) return;
 
     busy = true;
-    const inviteBtn = root.querySelector('#companions-invite-btn');
     if (inviteBtn) inviteBtn.disabled = true;
 
     try {
@@ -480,14 +542,17 @@ export function initCompanionsPanel({ root, getToken }) {
       if (searchInput) searchInput.value = '';
       hideSuggestions();
       await refresh({ silent: true });
+      if (typeof onChange === 'function') await onChange();
     } catch (error) {
-      const message = error instanceof ApiError
-        ? error.message
-        : 'Não foi possível enviar o convite.';
+      const message = friendlyFriendError(
+        error instanceof ApiError ? error.message : 'Não foi possível enviar o convite.'
+      );
       setFeedback(feedbackEl, message, 'error');
+      const countNow = Number.parseInt(String(countEl?.textContent || '0').split('/')[0], 10);
+      if (inviteBtn) inviteBtn.disabled = Number.isFinite(countNow) && countNow >= 25;
+      if (searchInput) searchInput.disabled = Number.isFinite(countNow) && countNow >= 25;
     } finally {
       busy = false;
-      if (inviteBtn) inviteBtn.disabled = false;
     }
   });
 

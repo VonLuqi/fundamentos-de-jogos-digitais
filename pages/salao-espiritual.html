@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Salão Espiritual — turma e companheiros | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Salão Espiritual | Fundamentos de Jogos Digitais</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/companheiros.css" />
+  <link rel="stylesheet" href="../css/salao.css" />
+</head>
+<body class="app-shell-page" data-route="salao" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div
+    class="bond-confirm"
+    id="bond-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="bond-confirm-title"
+    aria-describedby="bond-confirm-desc"
+    hidden
+  >
+    <div class="bond-confirm__panel">
+      <h2 class="bond-confirm__title" id="bond-confirm-title">Romper vínculo</h2>
+      <p class="bond-confirm__desc" id="bond-confirm-desc">
+        Deseja romper o vínculo com este companheiro?
+      </p>
+      <div class="bond-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="bond-confirm-cancel">
+          Manter vínculo
+        </button>
+        <button class="btn-gold" type="button" id="bond-confirm-ok">
+          Romper
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link is-active" data-nav-item="salao" href="./salao-espiritual.html" aria-current="page">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="salao-page-title">SALÃO <span class="accent">ESPIRITUAL</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Salão Espiritual</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content salao-page" aria-labelledby="salao-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <p class="salao-intro">
+          Aqui habitam a <strong>Turma</strong> e os <strong>Companheiros de Jornada</strong>.
+          Ofereça vínculos, responda convites e contemple quem caminha ao seu lado.
+        </p>
+
+        <header class="salao-summary" aria-live="polite">
+          <p class="salao-summary__item">
+            <span class="salao-summary__label">Turma</span>
+            <span class="salao-summary__value" id="salao-turma-summary">—</span>
+          </p>
+          <p class="salao-summary__item">
+            <span class="salao-summary__label">Companheiros</span>
+            <span class="salao-summary__value" id="companions-count">— / 25</span>
+          </p>
+        </header>
+
+        <section class="salao-panel companions-panel companions-panel--page" id="companions-panel" aria-label="Vínculos e companheiros">
+          <form class="companions-invite" id="companions-invite-form" autocomplete="off">
+            <label class="companions-invite__label" for="companions-search">Oferecer vínculo</label>
+            <div class="companions-invite__row">
+              <div class="companions-search">
+                <input
+                  class="companions-search__input"
+                  type="text"
+                  id="companions-search"
+                  name="username"
+                  placeholder="Username do aluno"
+                  maxlength="32"
+                  spellcheck="false"
+                  aria-autocomplete="list"
+                  aria-controls="companions-suggestions"
+                  aria-expanded="false"
+                />
+                <ul
+                  class="companions-suggestions"
+                  id="companions-suggestions"
+                  role="listbox"
+                  aria-label="Sugestões de username"
+                  hidden
+                ></ul>
+              </div>
+              <button class="btn-gold btn-gold--ghost companions-invite__btn" type="submit" id="companions-invite-btn">
+                Convidar
+              </button>
+            </div>
+            <p class="companions-feedback" id="companions-feedback" role="status" aria-live="polite"></p>
+          </form>
+
+          <div class="companions-section" id="companions-incoming-wrap">
+            <h2 class="companions-section__title">
+              Convites recebidos
+              <span class="companions-section__badge" id="companions-incoming-badge">0</span>
+            </h2>
+            <ul class="companions-list" id="companions-incoming" aria-label="Convites recebidos"></ul>
+            <p class="companions-empty" id="companions-incoming-empty" hidden>
+              Nenhum convite aguarda sua resposta.
+            </p>
+          </div>
+
+          <div class="companions-section" id="companions-outgoing-wrap">
+            <h2 class="companions-section__title">Convites enviados</h2>
+            <ul class="companions-list" id="companions-outgoing" aria-label="Convites enviados"></ul>
+            <p class="companions-empty" id="companions-outgoing-empty" hidden>
+              Nenhum convite em viagem.
+            </p>
+          </div>
+
+          <div class="companions-section companions-section--accepted">
+            <h2 class="companions-section__title">Ao seu lado</h2>
+            <ul class="companions-list" id="companions-accepted" aria-label="Companheiros aceitos"></ul>
+            <p class="companions-empty" id="companions-empty" hidden>
+              Nenhum companheiro ao seu lado… ainda.
+            </p>
+          </div>
+
+          <p class="companions-status" id="companions-status" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="salao-panel turma-panel" id="turma-panel" aria-label="Turma">
+          <header class="turma-panel__head">
+            <div>
+              <h2 class="turma-panel__title">Turma</h2>
+              <p class="turma-panel__count" id="turma-count" aria-live="polite">—</p>
+            </div>
+          </header>
+
+          <div class="turma-toolbar">
+            <label class="turma-toolbar__filter" id="turma-admin-filter-wrap" for="turma-admin-filter" hidden>
+              <span class="visually-hidden">Filtrar turma</span>
+              <select
+                class="turma-toolbar__select"
+                id="turma-admin-filter"
+                aria-label="Filtrar por turma"
+              >
+                <option value="">Todas as turmas</option>
+              </select>
+            </label>
+            <label class="turma-toolbar__search" for="turma-search">
+              <span class="visually-hidden">Buscar na turma</span>
+              <input
+                class="turma-toolbar__input"
+                type="search"
+                id="turma-search"
+                placeholder="Buscar na turma…"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </label>
+            <label class="turma-toolbar__sort" for="turma-sort">
+              <span class="visually-hidden">Ordenar</span>
+              <select class="turma-toolbar__select" id="turma-sort">
+                <option value="alpha">A–Z</option>
+                <option value="bonded">Vinculados primeiro</option>
+                <option value="pending">Pendentes primeiro</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="turma-skeleton" id="turma-skeleton" hidden aria-hidden="true">
+            <div class="turma-skeleton__row"></div>
+            <div class="turma-skeleton__row"></div>
+            <div class="turma-skeleton__row"></div>
+          </div>
+
+          <ul class="companions-list turma-list" id="turma-list" aria-label="Colegas da turma"></ul>
+          <p class="companions-empty" id="turma-empty" hidden>
+            A turma ainda não despertou neste Salão.
+          </p>
+          <p class="companions-status" id="turma-status" role="status" aria-live="polite"></p>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/salao-espiritual.js"></script>
+</body>
+</html>

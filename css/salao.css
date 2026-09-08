@@ -1,0 +1,294 @@
+/* Salão Espiritual — layout da página */
+
+.salao-page {
+  width: min(100%, 760px);
+  max-width: 760px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.salao-intro {
+  margin: 0 0 1.25rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--hades-text-dim);
+  text-align: left;
+}
+
+.salao-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1.1rem;
+  background: rgba(18, 12, 20, 0.75);
+  border: 1px solid rgba(207, 167, 89, 0.35);
+}
+
+.salao-summary__item {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.salao-summary__label {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold, #cfa759);
+}
+
+.salao-summary__value {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.salao-panel {
+  margin-bottom: 1.25rem;
+}
+
+.companions-panel--page {
+  margin-top: 0;
+  padding: 1.5rem 1.35rem;
+  text-align: left;
+  background: var(--hades-panel, rgba(18, 12, 20, 0.92));
+  border: 2px solid var(--hades-gold-dark, #8a6a2f);
+  outline: 1px solid var(--hades-gold, #cfa759);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-panel, 0 12px 40px rgba(0, 0, 0, 0.45));
+}
+
+.companions-panel--page .companions-panel__title,
+.turma-panel__title {
+  font-size: 0.95rem;
+}
+
+.turma-panel {
+  padding: 1.5rem 1.35rem;
+  text-align: left;
+  background: var(--hades-panel, rgba(18, 12, 20, 0.92));
+  border: 2px solid var(--hades-gold-dark, #8a6a2f);
+  outline: 1px solid var(--hades-gold, #cfa759);
+  outline-offset: 3px;
+  box-shadow: var(--shadow-panel, 0 12px 40px rgba(0, 0, 0, 0.45));
+}
+
+.turma-panel__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.turma-panel__title {
+  margin: 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.turma-panel__count {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.turma-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.turma-toolbar__search {
+  flex: 1 1 12rem;
+  margin: 0;
+}
+
+.turma-toolbar__input,
+.turma-toolbar__select {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-body, 'Crimson Text', serif);
+  font-size: 1rem;
+  color: var(--hades-text);
+  background: rgba(8, 6, 10, 0.85);
+  border: 1px solid var(--hades-gold-dark);
+  box-sizing: border-box;
+}
+
+.turma-toolbar__input::placeholder {
+  color: var(--hades-text-muted);
+}
+
+.turma-toolbar__input:focus-visible,
+.turma-toolbar__select:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+  border-color: var(--hades-gold);
+}
+
+.turma-toolbar__select {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.turma-toolbar__sort {
+  flex: 0 1 11rem;
+  margin: 0;
+}
+
+.turma-toolbar__filter {
+  flex: 0 1 10rem;
+  margin: 0;
+}
+
+.turma-toolbar__filter[hidden] {
+  display: none !important;
+}
+
+.turma-list__rank {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.turma-badge {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.12rem 0.45rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid rgba(207, 167, 89, 0.4);
+  color: var(--hades-gold, #cfa759);
+}
+
+.turma-badge--accepted {
+  color: var(--hades-gold-bright, #f2d59a);
+  border-color: rgba(242, 213, 154, 0.55);
+}
+
+.turma-badge--incoming {
+  color: #f0c48a;
+  border-color: rgba(194, 53, 72, 0.55);
+}
+
+.turma-badge--outgoing {
+  opacity: 0.85;
+}
+
+.turma-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 0.75rem;
+}
+
+.turma-skeleton__row {
+  height: 3.1rem;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    rgba(207, 167, 89, 0.08),
+    rgba(207, 167, 89, 0.18),
+    rgba(207, 167, 89, 0.08)
+  );
+  background-size: 200% 100%;
+  animation: turmaShimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes turmaShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.turma-skeleton[hidden],
+.turma-list[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Botões: herdam de hades-tokens.css */
+
+@media (prefers-reduced-motion: reduce) {
+  .turma-skeleton__row {
+    animation: none;
+  }
+}
+
+@media (max-width: 980px) {
+  .salao-page {
+    width: min(100%, 720px);
+  }
+
+  .salao-summary {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .salao-summary__item {
+    align-items: center;
+    min-width: 7rem;
+  }
+
+  .companions-panel--page,
+  .turma-panel {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 640px) {
+  .salao-intro {
+    text-align: center;
+  }
+
+  .turma-toolbar {
+    flex-direction: column;
+  }
+
+  .turma-toolbar__search,
+  .turma-toolbar__sort,
+  .turma-toolbar__filter {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .companions-panel--page,
+  .turma-panel {
+    padding: 1.15rem 1rem;
+  }
+}

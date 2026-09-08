@@ -1,0 +1,416 @@
+/* Grimório Pessoal */
+
+.grimorio-page {
+  width: min(100%, 760px);
+  max-width: 760px;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.grimorio-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.grimorio-toolbar__search {
+  flex: 1 1 14rem;
+  margin: 0;
+}
+
+.grimorio-toolbar__input,
+.note-form__input,
+.note-form__textarea,
+.note-form__select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--hades-text);
+  background: rgba(8, 6, 10, 0.85);
+  border: 1px solid var(--hades-gold-dark);
+  box-shadow: inset 0 4px 12px rgba(0, 0, 0, 0.55);
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.grimorio-toolbar__input::placeholder,
+.note-form__input::placeholder,
+.note-form__textarea::placeholder {
+  color: var(--hades-text-muted);
+}
+
+.grimorio-toolbar__input:focus,
+.note-form__input:focus,
+.note-form__textarea:focus,
+.note-form__select:focus {
+  outline: none;
+  border-color: var(--hades-gold);
+  box-shadow:
+    inset 0 4px 12px rgba(0, 0, 0, 0.55),
+    0 0 12px rgba(207, 167, 89, 0.35);
+}
+
+.grimorio-toolbar__input:focus-visible,
+.note-form__input:focus-visible,
+.note-form__textarea:focus-visible,
+.note-form__select:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
+.note-form__textarea {
+  resize: vertical;
+  min-height: 12rem;
+  line-height: 1.5;
+}
+
+.grimorio-softwarn,
+.grimorio-status {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold, #cfa759);
+}
+
+.grimorio-status[data-tone='error'],
+.grimorio-softwarn {
+  color: #f0c48a;
+}
+
+.grimorio-section {
+  margin-bottom: 1.75rem;
+}
+
+.grimorio-section__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.grimorio-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.grimorio-card {
+  margin: 0;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: var(--hades-panel, rgba(18, 12, 20, 0.92));
+}
+
+.grimorio-card__link {
+  display: block;
+  padding: 0.9rem 1rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.grimorio-card__link:hover,
+.grimorio-card__link:focus-visible {
+  outline: none;
+  background: rgba(207, 167, 89, 0.08);
+}
+
+.grimorio-card__title {
+  margin: 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.95rem;
+  letter-spacing: 0.06em;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.grimorio-card__pin {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: 1px solid rgba(242, 213, 154, 0.5);
+  vertical-align: middle;
+}
+
+.grimorio-card__meta,
+.grimorio-card__tags {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-body, 'Crimson Text', serif);
+  font-size: 0.95rem;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.grimorio-empty {
+  margin: 0;
+  padding: 1.25rem;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--hades-text-dim);
+  border: 1px dashed rgba(207, 167, 89, 0.4);
+  background: rgba(18, 12, 20, 0.45);
+}
+
+.grimorio-back {
+  margin: 0 0 1rem;
+}
+
+.grimorio-back__link {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--hades-gold, #cfa759);
+}
+
+.note-form,
+.note-share {
+  padding: 1.35rem;
+  background: var(--hades-panel, rgba(18, 12, 20, 0.92));
+  border: 2px solid var(--hades-gold-dark, #8a6a2f);
+  outline: 1px solid var(--hades-gold, #cfa759);
+  outline-offset: 3px;
+}
+
+.note-share {
+  margin-top: 1.25rem;
+}
+
+.note-form__label {
+  display: block;
+  margin: 0.85rem 0 0.35rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hades-gold, #cfa759);
+}
+
+.note-form__label:first-child {
+  margin-top: 0;
+}
+
+.note-form__check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-parchment, #f2e6c9);
+}
+
+.note-form__meta {
+  margin: 0.5rem 0;
+  font-family: var(--font-body, 'Crimson Text', serif);
+  font-size: 0.95rem;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.note-form__actions,
+.note-share__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.note-share__title {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.note-share__lead {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body, 'Crimson Text', serif);
+  color: var(--hades-parchment, #f2e6c9);
+}
+
+.note-share__row .note-form__select {
+  flex: 1 1 12rem;
+}
+
+.note-share__list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.note-share__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(207, 167, 89, 0.28);
+}
+
+.note-share__veil {
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+  background: transparent;
+  border: 1px solid rgba(207, 167, 89, 0.45);
+  cursor: pointer;
+}
+
+.grimorio-confirm[hidden] {
+  display: none !important;
+}
+
+.grimorio-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 3, 8, 0.72);
+}
+
+.grimorio-confirm__panel {
+  width: min(100%, 420px);
+  padding: 1.5rem;
+  background: var(--hades-panel, rgba(18, 12, 20, 0.96));
+  border: 2px solid var(--hades-gold-dark, #8a6a2f);
+  outline: 1px solid var(--hades-gold, #cfa759);
+  outline-offset: 3px;
+  text-align: center;
+}
+
+.grimorio-confirm__title {
+  margin: 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.grimorio-confirm__desc {
+  margin: 0.85rem 0 1.25rem;
+  font-family: var(--font-body, 'Crimson Text', serif);
+  font-size: 1.05rem;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.grimorio-confirm__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: center;
+}
+
+.grimorio-preview-list {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.grimorio-preview-list a {
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  color: var(--hades-parchment);
+}
+
+.grimorio-preview-list a:hover {
+  color: var(--hades-gold-bright);
+}
+
+.note-form__count {
+  margin: 0.25rem 0 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim);
+}
+
+.note-form__hint {
+  margin: 0.35rem 0 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #f0c48a;
+}
+
+.note-form__count[data-tone='warn'] {
+  color: #f0c48a;
+}
+
+.note-share__empty {
+  margin: 0;
+  padding: 0.55rem 0;
+  font-family: var(--font-body);
+  color: var(--hades-text-dim);
+  list-style: none;
+}
+
+body.is-grimorio-confirm-open {
+  overflow: hidden;
+}
+
+@media (max-width: 640px) {
+  .grimorio-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .grimorio-toolbar .btn-gold,
+  .note-form__actions .btn-gold {
+    min-height: 2.75rem;
+    width: 100%;
+  }
+
+  .note-form__actions {
+    flex-direction: column;
+  }
+
+  .grimorio-page {
+    width: min(100%, 640px);
+  }
+
+  .note-form,
+  .note-share {
+    padding: 1.1rem 1rem;
+  }
+}

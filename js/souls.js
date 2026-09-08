@@ -5,12 +5,15 @@ import {
   loadAvatarImage,
   ROUTES,
   ApiError,
-  requireSession,
+  requireAdmin,
   listUsers,
+  listNotesAdmin,
+  listNotesForUser,
   getSession,
 } from './api.js';
 
 let currentToken = null;
+let selectedOwnerId = null;
 
 function showApiWarning(message) {
   const box = document.getElementById('api-warning');
@@ -20,11 +23,24 @@ function showApiWarning(message) {
   box.hidden = false;
 }
 
+function revealSoulsApp() {
+  const app = document.getElementById('souls-app');
+  if (app) app.hidden = false;
+  document.body.classList.add('is-admin-ready');
+}
+
 function formatDate(value) {
   if (!value) return 'indisponivel';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return 'indisponivel';
   return date.toLocaleDateString('pt-BR');
+}
+
+function formatDateTime(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleString('pt-BR');
 }
 
 function sumViewEvents(users) {
@@ -188,18 +204,182 @@ function renderActivities(activities) {
 }
 
 function setActiveTab(tabName) {
-  const usersTab = document.getElementById('tab-users');
-  const activitiesTab = document.getElementById('tab-activities');
-  const usersPanel = document.getElementById('report-users');
-  const activitiesPanel = document.getElementById('report-activities');
-  const showingActivities = tabName === 'activities';
+  const tabs = [
+    { name: 'users', btn: 'tab-users', panel: 'report-users' },
+    { name: 'activities', btn: 'tab-activities', panel: 'report-activities' },
+    { name: 'grimorios', btn: 'tab-grimorios', panel: 'report-grimorios' },
+  ];
 
-  usersTab?.classList.toggle('is-active', !showingActivities);
-  usersTab?.setAttribute('aria-selected', String(!showingActivities));
-  activitiesTab?.classList.toggle('is-active', showingActivities);
-  activitiesTab?.setAttribute('aria-selected', String(showingActivities));
-  if (usersPanel) usersPanel.hidden = showingActivities;
-  if (activitiesPanel) activitiesPanel.hidden = !showingActivities;
+  tabs.forEach(({ name, btn, panel }) => {
+    const active = tabName === name;
+    const button = document.getElementById(btn);
+    const panelEl = document.getElementById(panel);
+    button?.classList.toggle('is-active', active);
+    button?.setAttribute('aria-selected', String(active));
+    if (panelEl) panelEl.hidden = !active;
+  });
+
+  try {
+    const url = new URL(window.location.href);
+    if (tabName === 'users') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', tabName);
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  } catch {
+    // ignore
+  }
+}
+
+function closeVigiliaDetail() {
+  selectedOwnerId = null;
+  const detail = document.getElementById('vigilia-detail');
+  if (detail) detail.hidden = true;
+  document.querySelectorAll('.vigilia-owner.is-active').forEach((node) => {
+    node.classList.remove('is-active');
+  });
+}
+
+async function openOwnerGrimorio(owner) {
+  selectedOwnerId = owner.userId;
+  const detail = document.getElementById('vigilia-detail');
+  const title = document.getElementById('vigilia-detail-title');
+  const notesList = document.getElementById('vigilia-notes');
+  const empty = document.getElementById('vigilia-notes-empty');
+
+  document.querySelectorAll('.vigilia-owner').forEach((node) => {
+    node.classList.toggle('is-active', Number(node.dataset.userId) === Number(owner.userId));
+  });
+
+  if (detail) detail.hidden = false;
+  if (title) {
+    title.textContent = `Grimório de @${owner.username}`;
+  }
+  if (notesList) {
+    notesList.innerHTML = '<li class="loading">Abrindo grimório...</li>';
+  }
+  if (empty) empty.hidden = true;
+
+  try {
+    const payload = await listNotesForUser(currentToken, owner.userId);
+    const notes = payload.notes || [];
+    if (!notesList) return;
+
+    notesList.innerHTML = '';
+    if (notes.length === 0) {
+      if (empty) empty.hidden = false;
+      return;
+    }
+    if (empty) empty.hidden = true;
+
+    notes.forEach((note) => {
+      const li = document.createElement('li');
+      li.className = 'vigilia-note';
+
+      const link = document.createElement('a');
+      link.className = 'vigilia-note__link';
+      link.href = ROUTES.grimorioNota(note.id);
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+
+      const name = document.createElement('p');
+      name.className = 'vigilia-note__title';
+      name.textContent = note.pinned ? `◆ ${note.title}` : note.title;
+
+      const meta = document.createElement('p');
+      meta.className = 'vigilia-note__meta';
+      const parts = [
+        formatDateTime(note.updatedAt),
+        note.sharedWithCount
+          ? (note.sharedWithCount === 1 ? '1 revelação' : `${note.sharedWithCount} revelações`)
+          : null,
+        Array.isArray(note.tags) && note.tags.length
+          ? note.tags.map((tag) => `#${tag}`).join(' ')
+          : null,
+      ].filter(Boolean);
+      meta.textContent = parts.join(' · ');
+
+      link.append(name, meta);
+      li.appendChild(link);
+      notesList.appendChild(li);
+    });
+  } catch (error) {
+    if (notesList) {
+      notesList.innerHTML = '';
+      const err = document.createElement('li');
+      err.className = 'empty';
+      err.textContent = error instanceof ApiError
+        ? error.message
+        : 'Falha ao abrir o grimório do aluno.';
+      notesList.appendChild(err);
+    }
+  }
+}
+
+function renderVigiliaOwners(owners) {
+  const host = document.getElementById('vigilia-owners');
+  if (!host) return;
+
+  host.innerHTML = '';
+  if (!owners.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'Nenhum grimório sob vigília.';
+    host.appendChild(empty);
+    closeVigiliaDetail();
+    return;
+  }
+
+  owners.forEach((owner) => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'vigilia-owner';
+    card.dataset.userId = String(owner.userId);
+    if (Number(selectedOwnerId) === Number(owner.userId)) {
+      card.classList.add('is-active');
+    }
+
+    const name = document.createElement('p');
+    name.className = 'vigilia-owner__name';
+    name.textContent = owner.fullName || owner.username;
+
+    const handle = document.createElement('p');
+    handle.className = 'vigilia-owner__handle';
+    handle.textContent = `@${owner.username}`;
+
+    const meta = document.createElement('p');
+    meta.className = 'vigilia-owner__meta';
+    const countLabel = owner.notesCount === 1
+      ? '1 inscrição'
+      : `${owner.notesCount} inscrições`;
+    meta.textContent = [owner.turma || 'Sem turma', countLabel].join(' · ');
+
+    card.append(name, handle, meta);
+    card.addEventListener('click', () => {
+      openOwnerGrimorio(owner);
+    });
+    host.appendChild(card);
+  });
+}
+
+async function loadVigilancia() {
+  const host = document.getElementById('vigilia-owners');
+  if (host) {
+    host.innerHTML = '<p class="loading">Consultando grimórios...</p>';
+  }
+
+  try {
+    const payload = await listNotesAdmin(currentToken);
+    renderVigiliaOwners(payload.owners || []);
+  } catch (error) {
+    if (host) {
+      host.innerHTML = '';
+      const empty = document.createElement('p');
+      empty.className = 'empty';
+      empty.textContent = error instanceof ApiError
+        ? error.message
+        : 'Falha ao consultar grimórios sob vigília.';
+      host.appendChild(empty);
+    }
+  }
 }
 
 async function loadSouls() {
@@ -217,6 +397,23 @@ async function loadSouls() {
   setSummary(students);
   renderUsers(students);
   renderActivities(activities || []);
+  await loadVigilancia();
+}
+
+function tabFromLocation() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const tab = String(params.get('tab') || '').toLowerCase();
+    if (tab === 'activities' || tab === 'grimorios' || tab === 'vigilancia') {
+      return tab === 'vigilancia' ? 'grimorios' : tab;
+    }
+    if (window.location.hash === '#grimorios' || window.location.hash === '#vigilancia') {
+      return 'grimorios';
+    }
+  } catch {
+    // ignore
+  }
+  return 'users';
 }
 
 async function init() {
@@ -224,37 +421,46 @@ async function init() {
 
   let result;
   try {
-    result = await requireSession();
+    result = await requireAdmin();
   } catch (error) {
     showApiWarning(error instanceof ApiError ? error.message : 'A API nao respondeu.');
     return;
   }
 
   if (!result) return;
-  if (result.user.role !== 'admin') {
-    window.location.replace(ROUTES.dashboard());
-    return;
-  }
 
+  revealSoulsApp();
   currentToken = getSession()?.token ?? null;
   await avatarCountReady;
 
   try {
     await loadSouls();
   } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      window.location.replace(ROUTES.dashboard());
+      return;
+    }
     showApiWarning(error instanceof ApiError ? error.message : 'Falha ao consultar as almas registradas.');
   }
+
+  setActiveTab(tabFromLocation());
 
   document.getElementById('btn-refresh')?.addEventListener('click', async () => {
     try {
       await loadSouls();
     } catch (error) {
+      if (error instanceof ApiError && error.status === 403) {
+        window.location.replace(ROUTES.dashboard());
+        return;
+      }
       showApiWarning(error instanceof ApiError ? error.message : 'Falha ao atualizar a lista de almas.');
     }
   });
 
   document.getElementById('tab-users')?.addEventListener('click', () => setActiveTab('users'));
   document.getElementById('tab-activities')?.addEventListener('click', () => setActiveTab('activities'));
+  document.getElementById('tab-grimorios')?.addEventListener('click', () => setActiveTab('grimorios'));
+  document.getElementById('vigilia-detail-close')?.addEventListener('click', () => closeVigiliaDetail());
 }
 
 document.addEventListener('DOMContentLoaded', init);

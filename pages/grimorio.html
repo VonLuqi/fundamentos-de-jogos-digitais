@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 3 — conteúdo em preparação." />
+  <meta name="description" content="Grimório Pessoal — anotações do herói | Fundamentos de Jogos Digitais." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 3 — Em Preparação | Fundamentos de Jogos Digitais</title>
+  <title>Grimório Pessoal | Fundamentos de Jogos Digitais</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,9 +16,9 @@
 
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/aula.css" />
+  <link rel="stylesheet" href="../css/grimorio.css" />
 </head>
-<body class="app-shell-page" data-route="aula3" data-role-scope="protected">
+<body class="app-shell-page" data-route="grimorio" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
 
   <div class="app-shell" data-shell>
@@ -36,7 +36,7 @@
         <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
         <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
         <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
-        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-active" data-nav-item="grimorio" href="./grimorio.html" aria-current="page">Grimório Pessoal</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
       </nav>
 
@@ -63,12 +63,12 @@
 
           <div class="app-shell__titles">
             <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="lesson-page-title">AULA 03: CONTEÚDO OCULTO <span class="accent">(EM BREVE)</span></h1>
+            <h1 class="app-shell__title" id="grimorio-page-title">GRIMÓRIO <span class="accent">PESSOAL</span></h1>
           </div>
         </div>
 
         <div class="app-shell__header-actions" data-shell-actions>
-          <span class="app-shell__context-chip">Aula 03</span>
+          <span class="app-shell__context-chip">Grimório Pessoal</span>
         </div>
       </header>
 
@@ -78,26 +78,47 @@
         <span class="ornate-divider__line"></span>
       </div>
 
-      <div class="app-shell__content lesson-shell__content">
-        <main class="lesson-main" aria-labelledby="lesson-page-title">
-          <section class="tab-panel is-active" role="tabpanel">
-            <article class="hades-frame lesson-content">
-              <h2 class="lesson-title">Forja em andamento</h2>
-              <p>
-                Esta aula está em desenvolvimento e será liberada com novos desafios em breve.
-                Enquanto isso, siga evoluindo no Salão dos Heróis com as aulas já disponíveis.
-              </p>
-            </article>
-          </section>
-        </main>
+      <main class="app-shell__content grimorio-page" aria-labelledby="grimorio-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
 
-        <footer class="lesson-footer">
-          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 3 de N</p>
-        </footer>
-      </div>
+        <header class="grimorio-toolbar">
+          <label class="grimorio-toolbar__search" for="grimorio-search">
+            <span class="visually-hidden">Buscar no Grimório</span>
+            <input
+              class="grimorio-toolbar__input"
+              type="search"
+              id="grimorio-search"
+              placeholder="Buscar no Grimório…"
+              autocomplete="off"
+            />
+          </label>
+          <a class="btn-gold" id="grimorio-new" href="./grimorio-nota.html">Nova inscrição</a>
+        </header>
+
+        <p class="grimorio-softwarn" id="grimorio-softwarn" hidden role="status"></p>
+        <p class="grimorio-status" id="grimorio-status" role="status" aria-live="polite"></p>
+
+        <section class="grimorio-section" aria-labelledby="grimorio-own-title">
+          <h2 class="grimorio-section__title" id="grimorio-own-title">Suas inscrições</h2>
+          <ul class="grimorio-list" id="grimorio-list" aria-label="Inscrições do Grimório"></ul>
+          <p class="grimorio-empty" id="grimorio-empty" hidden>
+            O Grimório espera a primeira inscrição.
+          </p>
+        </section>
+
+        <section class="grimorio-section" id="grimorio-shared-wrap" aria-labelledby="grimorio-shared-title">
+          <h2 class="grimorio-section__title" id="grimorio-shared-title">Reveladas a você</h2>
+          <ul class="grimorio-list" id="grimorio-shared-list" aria-label="Inscrições reveladas"></ul>
+          <p class="grimorio-empty" id="grimorio-shared-empty">
+            Nada foi revelado a você… ainda.
+          </p>
+        </section>
+      </main>
     </div>
   </div>
 
-  <script type="module" src="../js/aula3.js"></script>
+  <script type="module" src="../js/grimorio.js"></script>
 </body>
 </html>

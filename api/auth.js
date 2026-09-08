@@ -56,9 +56,9 @@ export default async function handler(req, res) {
       const token = req.query?.token;
       if (!token) return res.status(400).json({ ok: false, error: 'Token ausente.' });
 
-      const { data: session, error: sessionError } = await supabase.from('sessions').select('token, user_id').eq('token', token).limit(1).single();
-      console.log(`[api/auth] GET /api/auth token search:`, { token: token.substring(0, 10) + '...', sessionError, sessionExists: !!session, session });
-      if (sessionError || !session) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
+      const { data: session, error: sessionLookup } = await supabase.from('sessions').select('token, user_id').eq('token', token).limit(1).single();
+      console.log(`[api/auth] GET /api/auth token search:`, { token: token.substring(0, 10) + '...', sessionLookup: sessionLookup?.message || null, sessionExists: !!session, session });
+      if (sessionLookup || !session) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
 
       const { data: user } = await supabase.from(USERS_TABLE).select('*').eq('id', session.user_id).limit(1).single();
       return res.status(200).json({ ok: true, user: sanitizeUser(user) });
