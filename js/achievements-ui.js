@@ -72,7 +72,7 @@ export function rarityLabelForAchievement(achievement) {
 
 /**
  * Contador do álbum: X descobertas / Y slots (Y = catálogo completo).
- * No Espelho (`visitorView`): segredos nunca contam como revelados (sempre “?”).
+ * No Espelho (`visitorView`): X = tudo que o espelhado desbloqueou, inclusive secretas (Q3-B).
  */
 export function getAchievementCollectionStats(user, { visitorView = false } = {}) {
   const catalog = achievementsCatalogForViewer(user, { visitorView });
@@ -80,8 +80,8 @@ export function getAchievementCollectionStats(user, { visitorView = false } = {}
   const total = catalog.length;
 
   if (visitorView) {
-    const unlocked = catalog.filter(
-      (achievement) => !achievement.hidden && unlockedIds.has(String(achievement.id))
+    const unlocked = catalog.filter((achievement) =>
+      unlockedIds.has(String(achievement.id))
     ).length;
     return { unlocked, total };
   }
@@ -105,18 +105,101 @@ export function getAchievementById(achievementId) {
 }
 
 /**
- * Estado de um slot do álbum.
- * No Espelho, segredos são sempre `mystery` (anti-spoiler).
- * @returns {'unlocked'|'locked'|'mystery'}
+ * Eixos independentes das conquistas secretas no Espelho.
+ * Texto ← observador; estilo ← espelhado.
  */
-export function getAlbumSlotState(user, achievement, { visitorView = false } = {}) {
-  if (visitorView && achievement?.hidden) return 'mystery';
+export function resolveMirrorSecretAxes(achievement, { friendUser, viewerUser } = {}) {
+  if (!achievement?.hidden) {
+    return { isSecret: false, revealText: false, applySecretStyle: false };
+  }
+
+  const applySecretStyle = isAchievementUnlocked(friendUser, achievement.id, {
+    ignoreAdminPrivilege: true,
+  });
+  const revealText = viewerUser
+    ? isAchievementUnlocked(viewerUser, achievement.id)
+    : false;
+
+  return { isSecret: true, revealText, applySecretStyle };
+}
+
+/**
+ * Modelo completo de um slot do álbum (próprio ou Espelho).
+ * @returns {{
+ *   kind: 'unlocked'|'locked'|'mystery',
+ *   isSecret: boolean,
+ *   revealText: boolean,
+ *   applySecretStyle: boolean,
+ *   rarity: string,
+ *   showRarityBadge: boolean,
+ * }}
+ */
+export function getAlbumSlotModel(user, achievement, { visitorView = false, viewerUser = null } = {}) {
+  const rarity = normalizeAchievementRarity(achievement?.rarity, achievement?.difficulty);
+
+  if (visitorView && achievement?.hidden) {
+    const { revealText, applySecretStyle } = resolveMirrorSecretAxes(achievement, {
+      friendUser: user,
+      viewerUser,
+    });
+
+    let kind = 'mystery';
+    if (revealText && applySecretStyle) kind = 'unlocked';
+    else if (revealText) kind = 'locked';
+
+    return {
+      kind,
+      isSecret: true,
+      revealText,
+      applySecretStyle,
+      rarity: applySecretStyle ? rarity : 'unknown',
+      showRarityBadge: applySecretStyle,
+    };
+  }
+
   const unlocked = isAchievementUnlocked(user, achievement.id, {
     ignoreAdminPrivilege: visitorView,
   });
-  if (unlocked) return 'unlocked';
-  if (achievement.hidden) return 'mystery';
-  return 'locked';
+
+  if (unlocked) {
+    return {
+      kind: 'unlocked',
+      isSecret: Boolean(achievement?.hidden),
+      revealText: true,
+      applySecretStyle: false,
+      rarity,
+      showRarityBadge: true,
+    };
+  }
+
+  if (achievement?.hidden) {
+    return {
+      kind: 'mystery',
+      isSecret: true,
+      revealText: false,
+      applySecretStyle: false,
+      rarity: 'unknown',
+      showRarityBadge: false,
+    };
+  }
+
+  return {
+    kind: 'locked',
+    isSecret: false,
+    revealText: true,
+    applySecretStyle: false,
+    rarity,
+    showRarityBadge: true,
+  };
+}
+
+/**
+ * Estado resumido de um slot (`kind`).
+ * No Espelho, passe `viewerUser` para o eixo de texto das secretas.
+ * @returns {'unlocked'|'locked'|'mystery'}
+ */
+export function getAlbumSlotState(user, achievement, options = {}) {
+  return getAlbumSlotModel(user, achievement, options).kind;
 }
 
 async function loadVfxModuleWithFallback() {
@@ -259,9 +342,16 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
 /**
  * Álbum: um slot por entrada do catálogo.
  * Álbum próprio: hidden não descoberta → “?” (raridade unknown).
- * Espelho (`visitorView`): todo hidden → “?” com estilos de raridade (anti-spoiler).
+ * Espelho (`visitorView`): texto ← observador; estilo ← espelhado (eixos independentes).
  */
-function renderAlbumMode(container, user, { highlightIds, emptyMessage, onSlotClick, achievements, visitorView }) {
+function renderAlbumMode(container, user, {
+  highlightIds,
+  emptyMessage,
+  onSlotClick,
+  achievements,
+  visitorView,
+  viewerUser,
+}) {
   container.innerHTML = '';
   container.classList.add('achievement-album');
 
@@ -278,43 +368,52 @@ function renderAlbumMode(container, user, { highlightIds, emptyMessage, onSlotCl
   }
 
   catalog.forEach((ach, index) => {
-    const unlocked = isAchievementUnlocked(user, ach.id, {
-      ignoreAdminPrivilege: visitorView,
-    });
+    const model = getAlbumSlotModel(user, ach, { visitorView, viewerUser });
     const justUnlocked = highlightIds.includes(ach.id);
-    // Espelho: todo segredo fica “?” (anti-spoiler). Álbum próprio: “?” só se não desbloqueado.
-    const isMystery = Boolean(ach.hidden) && (visitorView || !unlocked);
-    const rarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);
-    const slotState = isMystery ? 'mystery' : unlocked ? 'unlocked' : 'locked';
+    const rarityName = rarityLabelForAchievement(ach);
+    const slotState = model.kind;
 
     const li = document.createElement('li');
+    const isMysteryFace = model.kind === 'mystery';
+    const isStyledMystery = Boolean(
+      visitorView && model.isSecret && model.applySecretStyle && !model.revealText
+    );
+    const isSecretKnownLocked = Boolean(
+      visitorView && model.isSecret && model.revealText && !model.applySecretStyle
+    );
     li.className = [
       'achievement-slot',
-      unlocked && !isMystery ? 'is-unlocked' : 'is-locked',
-      isMystery ? 'is-mystery' : '',
-      visitorView && isMystery ? 'is-mystery--styled' : '',
+      model.kind === 'unlocked' ? 'is-unlocked' : 'is-locked',
+      isMysteryFace ? 'is-mystery' : '',
+      isStyledMystery ? 'is-mystery--styled' : '',
+      isSecretKnownLocked ? 'is-secret-known' : '',
       justUnlocked ? 'is-just-unlocked' : '',
     ]
       .filter(Boolean)
       .join(' ');
+
     li.id = `relic-${ach.id}`;
     li.style.setProperty('--ach-index', String(index));
     li.dataset.achievementId = ach.id;
-    // No Espelho, o “?” mantém a raridade visual (borda/brilho), sem revelar o nome.
-    li.dataset.rarity = isMystery && !visitorView ? 'unknown' : rarity;
+    li.dataset.rarity = model.rarity;
     li.dataset.state = slotState;
+    if (visitorView && model.isSecret) {
+      li.dataset.revealText = String(model.revealText);
+      li.dataset.secretStyle = String(model.applySecretStyle);
+    }
 
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'achievement-slot__face';
     button.dataset.achievementId = ach.id;
 
-    if (isMystery) {
-      const rarityName = rarityLabelForAchievement(ach);
+    if (isMysteryFace) {
       button.setAttribute(
         'aria-label',
         visitorView
-          ? `Segredo velado no Espelho. Raridade ${rarityName}.`
+          ? (isStyledMystery
+            ? `Segredo desconhecido no Espelho, com raridade ${rarityName}.`
+            : 'Segredo desconhecido e ainda não conquistado neste Espelho.')
           : 'Relíquia misteriosa ainda não descoberta. Raridade desconhecida.'
       );
       const mark = document.createElement('span');
@@ -324,36 +423,42 @@ function renderAlbumMode(container, user, { highlightIds, emptyMessage, onSlotCl
       const label = document.createElement('p');
       label.className = 'achievement-slot__name';
       label.textContent = '???';
-      if (visitorView) {
+      button.append(mark, label);
+      if (model.showRarityBadge) {
         const rarityBadge = document.createElement('p');
         rarityBadge.className = 'achievement-slot__rarity';
-        rarityBadge.textContent = '???';
-        button.append(mark, label, rarityBadge);
-      } else {
-        button.append(mark, label);
+        rarityBadge.textContent = rarityName;
+        button.append(rarityBadge);
       }
-    } else if (!unlocked) {
-      const rarityName = rarityLabelForAchievement(ach);
+    } else if (model.kind === 'locked') {
       button.setAttribute(
         'aria-label',
-        `Relíquia bloqueada: ${ach.name}. Raridade ${rarityName}.`
+        isSecretKnownLocked
+          ? `Segredo que você conhece, ainda não conquistado neste Espelho: ${ach.name}.`
+          : `Relíquia bloqueada: ${ach.name}. Raridade ${rarityName}.`
       );
       const icon = document.createElement('span');
-      icon.className = 'achievement-slot__icon is-silhouette';
+      icon.className = isSecretKnownLocked
+        ? 'achievement-slot__icon'
+        : 'achievement-slot__icon is-silhouette';
       icon.setAttribute('aria-hidden', 'true');
       icon.textContent = ach.icon;
       const name = document.createElement('p');
       name.className = 'achievement-slot__name';
       name.textContent = ach.name;
-      const rarityBadge = document.createElement('p');
-      rarityBadge.className = 'achievement-slot__rarity';
-      rarityBadge.textContent = rarityName;
-      button.append(icon, name, rarityBadge);
+      button.append(icon, name);
+      if (model.showRarityBadge) {
+        const rarityBadge = document.createElement('p');
+        rarityBadge.className = 'achievement-slot__rarity';
+        rarityBadge.textContent = rarityName;
+        button.append(rarityBadge);
+      }
     } else {
-      const rarityName = rarityLabelForAchievement(ach);
       button.setAttribute(
         'aria-label',
-        `Relíquia descoberta: ${ach.name}. Raridade ${rarityName}.`
+        visitorView && model.isSecret
+          ? `Segredo revelado neste Espelho: ${ach.name}. Raridade ${rarityName}.`
+          : `Relíquia descoberta: ${ach.name}. Raridade ${rarityName}.`
       );
       const icon = document.createElement('span');
       icon.className = 'achievement-slot__icon';
@@ -362,11 +467,15 @@ function renderAlbumMode(container, user, { highlightIds, emptyMessage, onSlotCl
       const name = document.createElement('p');
       name.className = 'achievement-slot__name';
       name.textContent = ach.name;
-      const rarityBadge = document.createElement('p');
-      rarityBadge.className = 'achievement-slot__rarity';
-      rarityBadge.textContent = rarityName;
-      button.append(icon, name, rarityBadge);
-      if (rarity === 'rainbow' && justUnlocked) {
+      button.append(icon, name);
+      if (model.showRarityBadge) {
+        const rarityBadge = document.createElement('p');
+        rarityBadge.className = 'achievement-slot__rarity';
+        rarityBadge.textContent = rarityName;
+        button.append(rarityBadge);
+      }
+      const realRarity = normalizeAchievementRarity(ach.rarity, ach.difficulty);
+      if (realRarity === 'rainbow' && justUnlocked) {
         li.classList.add('is-rainbow-burst');
       }
     }
@@ -384,13 +493,14 @@ function renderAlbumMode(container, user, { highlightIds, emptyMessage, onSlotCl
 
 /**
  * @param {HTMLElement} container
- * @param {object} user
+ * @param {object} user — no Espelho: o espelhado
  * @param {object} [options]
  * @param {string[]} [options.highlightIds]
  * @param {'cards'|'album'} [options.mode]
  * @param {string} [options.emptyMessage]
  * @param {boolean} [options.applyRainbowVfx]
- * @param {boolean} [options.visitorView] — Espelho: segredos sempre “?” com raridade visual
+ * @param {boolean} [options.visitorView] — Espelho: eixos texto/estilo independentes
+ * @param {object|null} [options.viewerUser] — observador (eixo de texto das secretas)
  * @param {object[]} [options.achievements] — subconjunto (ex.: preview do hub)
  * @param {(achievement: object, state: string, slotEl: HTMLElement) => void} [options.onSlotClick]
  */
@@ -404,6 +514,7 @@ export function renderAchievementsList(container, user, options = {}) {
     applyRainbowVfx = true,
     achievements,
     visitorView = false,
+    viewerUser = null,
     onSlotClick,
   } = options;
 
@@ -414,6 +525,7 @@ export function renderAchievementsList(container, user, options = {}) {
       onSlotClick,
       achievements,
       visitorView,
+      viewerUser,
     });
   } else {
     renderCardsMode(container, user, { highlightIds, emptyMessage, achievements });

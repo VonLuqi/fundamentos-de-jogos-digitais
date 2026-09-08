@@ -181,6 +181,10 @@ body.is-relic-modal-open {
   --rarity-accent: var(--rarity-rainbow);
   --rarity-glow: 0 0 16px rgba(255, 102, 163, 0.5), 0 0 26px rgba(124, 222, 255, 0.5), 0 0 38px rgba(255, 210, 102, 0.4);
 }
+.achievement-slot[data-rarity='unknown'] {
+  --rarity-accent: var(--hades-gold-dark);
+  --rarity-glow: 0 0 0 transparent;
+}
 
 .achievement-slot__face {
   width: 100%;
@@ -276,6 +280,39 @@ body.is-relic-modal-open {
 .achievement-slot.is-mystery--styled .achievement-slot__mystery {
   color: var(--rarity-accent);
   text-shadow: 0 0 12px color-mix(in srgb, var(--rarity-accent) 70%, white 30%);
+}
+
+/* Espelho: observador conhece o segredo, espelhado ainda não conquistou.
+   Texto/ícone legíveis, sem chrome de raridade (não parece desbloqueado). */
+.achievement-slot.is-secret-known.is-locked .achievement-slot__face {
+  opacity: 0.78;
+  filter: none;
+  border-style: dashed;
+  border-color: rgba(207, 167, 89, 0.42);
+  background:
+    linear-gradient(160deg, rgba(36, 28, 40, 0.96), rgba(16, 12, 20, 0.98));
+  box-shadow: none;
+}
+.achievement-slot.is-secret-known .achievement-slot__icon {
+  color: var(--hades-text-dim);
+  opacity: 0.92;
+  text-shadow: none;
+  filter: grayscale(0.35);
+}
+.achievement-slot.is-secret-known .achievement-slot__name {
+  color: var(--hades-text-dim);
+}
+.achievement-slot.is-secret-known .achievement-slot__face:hover,
+.achievement-slot.is-secret-known .achievement-slot__face:focus-visible {
+  border-color: rgba(207, 167, 89, 0.62);
+  box-shadow: 0 0 0 1px rgba(207, 167, 89, 0.18);
+}
+
+/* Mistério sem estilo (ninguém desbloqueou): reforça bloqueio sem vazamento de raridade */
+.achievement-slot.is-mystery:not(.is-mystery--styled)[data-rarity='unknown'] .achievement-slot__face:hover,
+.achievement-slot.is-mystery:not(.is-mystery--styled)[data-rarity='unknown'] .achievement-slot__face:focus-visible {
+  border-color: var(--hades-gold-dark);
+  box-shadow: none;
 }
 
 .achievement-slot.is-unlocked .achievement-slot__face {
@@ -467,6 +504,9 @@ body.is-relic-modal-open {
   text-transform: uppercase;
   color: var(--hades-text-muted);
 }
+.relic-modal__rarity[hidden] {
+  display: none !important;
+}
 .relic-modal__title {
   margin: 0 0 0.65rem;
   font-family: var(--font-title);
@@ -550,6 +590,26 @@ body.is-relic-modal-open {
   font-weight: 900;
   color: var(--hades-gold-dark);
   border-style: dashed;
+}
+.relic-modal__panel[data-rarity='unknown'] {
+  border-style: dashed;
+  border-color: var(--hades-gold-dark);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+}
+/* Segredo conhecido pelo observador, sem conquista do espelhado */
+.relic-modal__panel[data-secret='known'] .relic-modal__art {
+  font-family: inherit;
+  font-weight: inherit;
+  color: var(--hades-text-dim);
+  filter: grayscale(0.35);
+  opacity: 0.92;
+  border-style: dashed;
+}
+.relic-modal__panel[data-secret='known'] .relic-modal__title {
+  color: var(--hades-text-dim);
+}
+.relic-modal__panel[data-secret='known'] .relic-modal__meta {
+  color: var(--hades-text-muted);
 }
 
 @keyframes albumEnter {

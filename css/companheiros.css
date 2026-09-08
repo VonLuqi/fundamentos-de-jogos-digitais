@@ -445,6 +445,13 @@
     0 0 28px rgba(255, 210, 102, 0.22);
 }
 
+/* Segredo conhecido + bloqueado: evita overflow do nome longo no grid do Espelho */
+.mirror-shell__content .achievement-slot.is-secret-known .achievement-slot__name {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+
 .mirror-back {
   margin: 0 0 1.25rem;
 }

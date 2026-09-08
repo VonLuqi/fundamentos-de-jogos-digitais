@@ -112,7 +112,8 @@ fundamentos-de-jogos-digitais/
 ├── tests/
 │   ├── login-check.mjs
 │   ├── friends-phase1-smoke.mjs
-│   └── friends-phase4-smoke.mjs
+│   ├── friends-phase4-smoke.mjs
+│   └── mirror-secret-axes-smoke.mjs
 ├── .gitignore
 └── README.md
 ```
@@ -202,9 +203,16 @@ No **Painel do Herói**, a seção do perfil permite:
 - aceitar / recusar / cancelar convites;
 - abrir o **Espelho do Companheiro** (`/pages/companheiro.html?u=<username>`).
 
-O Espelho mostra perfil público + Álbum de Relíquias **somente leitura**. Segredos ainda não revelados pelo companheiro aparecem como `?` (igual ao álbum próprio). Se já revelados, mostram nome/ícone/raridade com **descrição velada**. Limite soft: **25** vínculos aceitos.
+O Espelho mostra perfil público + Álbum de Relíquias **somente leitura**. Conquistas secretas (`hidden`) usam **dois eixos independentes**:
 
-Plano e decisões: [docs/plano-sistema-amigos.md](docs/plano-sistema-amigos.md).
+| Eixo | Quem controla | Se sim | Se não |
+| --- | --- | --- | --- |
+| **Texto** | Observador (quem olha) | Nome + ícone (e descrição no modal) | `?` / `???` |
+| **Estilo** | Espelhado | Chrome de raridade (prata / ouro / arco-íris) + badge | Visual bloqueado |
+
+O placar `X / Y relíquias neste Espelho` conta **tudo** que o espelhado desbloqueou, inclusive secretas. O álbum **próprio** (página Conquistas) não muda. Limite soft: **25** vínculos aceitos.
+
+Plano geral: [docs/plano-sistema-amigos.md](docs/plano-sistema-amigos.md). Correção da matriz: [docs/plano-correcao-espelho-conquistas-secretas.md](docs/plano-correcao-espelho-conquistas-secretas.md).
 
 ### Payload de cadastro (atual)
 
@@ -228,12 +236,14 @@ node tests/login-check.mjs
 node tests/integration-check.mjs
 node tests/friends-phase1-smoke.mjs
 node tests/friends-phase4-smoke.mjs
+node tests/mirror-secret-axes-smoke.mjs
 ```
 
 - [tests/login-check.mjs](tests/login-check.mjs): valida login com credenciais corretas e incorretas.
 - [tests/integration-check.mjs](tests/integration-check.mjs): valida sessão inválida, cálculo de XP/nível e resgate de código válido vs. inválido.
 - [tests/friends-phase1-smoke.mjs](tests/friends-phase1-smoke.mjs): actions de amigos rejeitam sessão inválida.
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
+- [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
 
 ## Contribuindo
 

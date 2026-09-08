@@ -45,7 +45,7 @@ Direção visual obrigatória: **preservar o Design System Hades-like** já defi
 3. **Privacidade** — `conquistas`, XP e `full_name` hoje só aparecem para self ou admin; amigos precisam de um **DTO público** (campos seguros).
 4. **UI social no DS** — não há padrões de lista de pessoas, convite ou estados pending; precisam nascer a partir de `profile-panel` / `hub-preview` / `btn-gold`, sem cards genéricos fora do idioma visual.
 5. **Shell** — amigos não precisam de item novo no aside (máx. 5–6 destinos); ficam **dentro do Painel do Herói** (+ página de perfil do amigo).
-6. **Hidden achievements** — no álbum do amigo (visitante), conquistas `hidden` ainda não desbloqueadas pelo amigo **não aparecem** (sem slot `?`). Decisão Fase 0.
+6. **Hidden achievements** — no Espelho, slots secretos **sempre aparecem**; texto e estilo seguem eixos independentes (ver addendum abaixo). O álbum próprio mantém `?` até o herói desbloquear.
 
 ---
 
@@ -145,7 +145,7 @@ DTO público proposto (nunca senha / tokens / códigos / role admin detalhado):
   - app-shell (`data-route="dashboard"` ativo — ainda é área do Painel);
   - layout espelhando o perfil: avatar, nome, username, turma, rank, nível/XP, contador de relíquias;
   - grade do álbum **somente leitura** (reusar `achievements-ui` / modo `album`);
-  - hidden não desbloqueadas pelo amigo: **omitidas** da grade do visitante;
+  - hidden no Espelho: matriz texto (observador) × estilo (espelhado) — ver addendum;
   - sem altar, sem troca de avatar, sem admin tools.
 
 ### S4 — Design System (regras de implementação visual)
@@ -233,7 +233,7 @@ Respostas marcadas com `(X)`. Hipótese original: `(H)`. Decisões finais na se�
 | Identificador | Username com **autocomplete** (não full_name) |
 | Visibilidade (Espelho) | avatar, nome, username, turma, rank, nível/XP, álbum read-only |
 | DTO público | `id`, `username`, `fullName`, `turma`, `avatarIndex`, `xp`, `rank`, `level`, `achievements[]`, `completedLessonsCount` |
-| Hidden (visitante) | Usa conquistas **reais** (admin sem catálogo completo). Não revelado → `?`; revelado → nome/ícone, descrição velada |
+| Hidden (visitante) | Catálogo completo no Espelho. **Texto** ← observador; **estilo** ← espelhado (ver addendum) |
 | Limite | Soft **25** companheiros aceitos |
 | Backend | Tabela `friendships` + actions em `api/progress.js` |
 | CSS / JS | `css/companheiros.css` + `js/friends-ui.js` + `js/companheiro.js` |
@@ -243,8 +243,22 @@ Respostas marcadas com `(X)`. Hipótese original: `(H)`. Decisões finais na se�
 
 - **Autocomplete:** sugere alunos da mesma `turma` (prefixo de username); não lista a plataforma inteira.
 - **Convite global:** se o username existir em outra turma e for digitado **exato**, o convite é permitido.
-- **Hidden no Espelho:** o visitante não vê lacunas misteriosas do amigo; conquistas `hidden` só entram na grade se o amigo já as tiver desbloqueado. O álbum **próprio** continua com a regra atual (`?`).
+- **Hidden no Espelho:** ver **Addendum — secretas (matriz texto × estilo)** abaixo. O álbum **próprio** continua com `?` até desbloquear.
 
+### Addendum — secretas (matriz texto × estilo)
+
+Atualiza a decisão antiga de “omitir hidden” / “sempre ?”. Plano: [plano-correcao-espelho-conquistas-secretas.md](./plano-correcao-espelho-conquistas-secretas.md).
+
+| Observador tem? | Espelhado tem? | Texto | Estilo |
+| --- | --- | --- | --- |
+| Não | Sim | `?` | Raridade secreta |
+| Sim | Sim | Nome + ícone | Raridade secreta |
+| Sim | Não | Nome + ícone | Bloqueado (`is-secret-known`) |
+| Não | Não | `?` | Bloqueado |
+
+- Modal: nome + descrição completa se o observador tem; senão `???` + texto velado. Chrome segue o espelhado.
+- Contador `X / Y`: inclui secretas desbloqueadas pelo espelhado.
+- Implementação: `resolveMirrorSecretAxes` / `getAlbumSlotModel` em `js/achievements-ui.js`; wire em `js/companheiro.js`.
 
 ---
 
@@ -359,7 +373,7 @@ db/friendships
 - [x] Criar `js/companheiro.js`: `requireSession`, fetch `friendProfile`, guard se não for amigo → voltar ao dashboard com mensagem.
 - [x] Header: título **Espelho do Companheiro** + chip de contexto.
 - [x] Bloco de perfil read-only (avatar, rank, nível, contadores).
-- [x] Reusar `achievements-ui` em modo álbum read-only + contador `X / Y` (Y sem hidden não desbloqueadas).
+- [x] Reusar `achievements-ui` em modo álbum read-only + contador `X / Y` (X inclui secretas do espelhado).
 - [x] Modal de relíquia reutilizado (sem ações de self).
 - [x] Deep link estável: `companheiro.html?u=<username>` (e opcional `#achievementId`).
 - [x] Highlight do nav: Painel do Herói ativo.
@@ -441,7 +455,7 @@ db/friendships
 - [x] Convite pendente pode ser aceito ou recusado pelo destinatário.
 - [x] Amigo aceito abre o **Espelho** com perfil público e **Álbum de Relíquias** read-only.
 - [x] Sem amizade aceita, `friendProfile` não vaza dados (403/404 seguro).
-- [x] Conquistas `hidden` não desbloqueadas pelo amigo **não aparecem** no Espelho (sem slot `?`).
+- [x] Conquistas `hidden` no Espelho seguem a matriz texto (observador) × estilo (espelhado); slots secretos permanecem visíveis.
 - [x] Visual consistente com o Design System (tokens, tipografia, shell, sem UI “social genérica”).
 - [x] Sem item novo no aside; no Espelho o nav destaca Painel do Herói.
 - [x] Admin tools / altar / troca de avatar **não** aparecem no Espelho.

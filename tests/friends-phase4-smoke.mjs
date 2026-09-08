@@ -52,10 +52,14 @@ assert(mirror.includes('mirror-album-grid'), 'Espelho precisa do álbum');
 
 const companheiroJs = read('js/companheiro.js');
 assert(companheiroJs.includes('visitorView'), 'companheiro.js usa visitorView no álbum');
+assert(companheiroJs.includes('viewerUser'), 'companheiro.js passa viewerUser ao álbum');
+assert(companheiroJs.includes('getAlbumSlotModel'), 'companheiro.js usa getAlbumSlotModel no modal');
 assert(companheiroJs.includes('fetchFriendProfile'), 'companheiro.js busca perfil via API');
 
 const achievementsUi = read('js/achievements-ui.js');
 assert(achievementsUi.includes('visitorView'), 'achievements-ui deve expor visitorView');
+assert(achievementsUi.includes('resolveMirrorSecretAxes'), 'achievements-ui deve expor eixos do Espelho');
+assert(achievementsUi.includes('getAlbumSlotModel'), 'achievements-ui deve expor getAlbumSlotModel');
 
 const apiJs = read('js/api.js');
 assert(apiJs.includes('listFriends'), 'api.js exporta listFriends');
@@ -76,6 +80,17 @@ assert(
 const readme = read('README.md');
 assert(/Companheiros|companheiro/i.test(readme), 'README deve documentar Companheiros / Espelho');
 assert(readme.includes('friendships') || readme.includes('migrate-2026-09-08-friendships'), 'README deve citar migração de friendships');
+assert(
+  readme.includes('plano-correcao-espelho-conquistas-secretas')
+    || /texto.*observador|eixos independentes/i.test(readme),
+  'README deve documentar a matriz das secretas no Espelho'
+);
+
+const amigosPlan = read('docs/plano-sistema-amigos.md');
+assert(
+  amigosPlan.includes('Addendum — secretas') || amigosPlan.includes('matriz texto'),
+  'plano-sistema-amigos deve ter addendum das secretas'
+);
 
 if (errors.length > 0) {
   console.error('friends-phase4-smoke FAILED:');

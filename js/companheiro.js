@@ -12,14 +12,13 @@ import {
   getSession,
   loadAvatarImage,
   logout,
-  normalizeAchievementRarity,
   requireSession,
   fetchFriendProfile,
 } from './api.js';
 import {
   getAchievementById,
   getAchievementCollectionStats,
-  getAlbumSlotState,
+  getAlbumSlotModel,
   rarityLabelForAchievement,
   renderAchievementsList,
 } from './achievements-ui.js';
@@ -116,7 +115,11 @@ function setShellInert(inert) {
 const MIRROR_SECRET_DESC =
   'O segredo desta relíquia permanece velado neste Espelho. Descubra-a por conta própria na Trilha e nas oferendas.';
 
-function openRelicModal(achievement, state) {
+function mirrorSlotOptions() {
+  return { visitorView: true, viewerUser };
+}
+
+function openRelicModal(achievement, model = null) {
   const modal = document.getElementById('relic-modal');
   const panel = modal?.querySelector('.relic-modal__panel');
   const art = document.getElementById('relic-modal-art');
@@ -125,32 +128,60 @@ function openRelicModal(achievement, state) {
   const descEl = document.getElementById('relic-modal-desc');
   const metaEl = document.getElementById('relic-modal-meta');
   const closeBtn = document.getElementById('relic-modal-close');
-  if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl) return;
+  if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl || !friendUser) return;
 
-  const rarity = normalizeAchievementRarity(achievement.rarity, achievement.difficulty);
-  const isSecret = Boolean(achievement.hidden);
-  // No Espelho, segredos nunca revelam nome/descrição — só o mistério estilizado.
-  const effectiveState = isSecret ? 'mystery' : state;
-  panel.dataset.rarity = effectiveState === 'mystery' ? rarity : rarity;
-  panel.dataset.state = effectiveState;
+  const slot = model && typeof model === 'object' && model.kind
+    ? model
+    : getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+
+  const rarityName = rarityLabelForAchievement(achievement);
+  panel.dataset.rarity = slot.rarity;
+  panel.dataset.state = slot.kind;
+  if (slot.isSecret) {
+    if (slot.revealText && slot.applySecretStyle) panel.dataset.secret = 'revealed';
+    else if (slot.revealText) panel.dataset.secret = 'known';
+    else if (slot.applySecretStyle) panel.dataset.secret = 'veiled-styled';
+    else panel.dataset.secret = 'veiled';
+  } else {
+    delete panel.dataset.secret;
+  }
   art.classList.remove('is-silhouette');
+  rarityEl.hidden = false;
 
-  if (effectiveState === 'mystery') {
-    art.textContent = '?';
-    rarityEl.textContent = '???';
-    titleEl.textContent = '???';
-    descEl.textContent = MIRROR_SECRET_DESC;
-    metaEl.textContent = 'Segredo velado no Espelho';
-  } else if (state === 'locked') {
+  if (slot.isSecret) {
+    // Q2-C: texto pelo observador; chrome pelo espelhado.
+    if (slot.revealText) {
+      art.textContent = achievement.icon;
+      titleEl.textContent = achievement.name;
+      descEl.textContent = achievement.desc;
+      metaEl.textContent = slot.applySecretStyle
+        ? 'Segredo revelado neste Espelho'
+        : 'Segredo conhecido — ainda não conquistado neste Espelho';
+    } else {
+      art.textContent = '?';
+      titleEl.textContent = '???';
+      descEl.textContent = MIRROR_SECRET_DESC;
+      metaEl.textContent = slot.applySecretStyle
+        ? 'Segredo velado no Espelho'
+        : 'Segredo velado — ainda não conquistado neste Espelho';
+    }
+
+    if (slot.showRarityBadge) {
+      rarityEl.textContent = rarityName;
+    } else {
+      rarityEl.textContent = '';
+      rarityEl.hidden = true;
+    }
+  } else if (slot.kind === 'locked') {
     art.textContent = achievement.icon;
     art.classList.add('is-silhouette');
-    rarityEl.textContent = rarityLabelForAchievement(achievement);
+    rarityEl.textContent = rarityName;
     titleEl.textContent = achievement.name;
     descEl.textContent = 'Esta relíquia ainda não foi conquistada por este companheiro.';
     metaEl.textContent = 'Figurinha bloqueada no Espelho';
   } else {
     art.textContent = achievement.icon;
-    rarityEl.textContent = rarityLabelForAchievement(achievement);
+    rarityEl.textContent = rarityName;
     titleEl.textContent = achievement.name;
     descEl.textContent = achievement.desc;
     metaEl.textContent = 'Relíquia revelada no Espelho';
@@ -195,8 +226,8 @@ function focusAlbumSlot(achievementId, { openModal = true } = {}) {
   const achievement = getAchievementById(achievementId);
   if (!achievement || !friendUser) return true;
 
-  const state = getAlbumSlotState(friendUser, achievement, { visitorView: true });
-  if (openModal) openRelicModal(achievement, state);
+  const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+  if (openModal) openRelicModal(achievement, model);
   return true;
 }
 
@@ -217,17 +248,19 @@ function renderAlbum() {
   renderAchievementsList(grid, friendUser, {
     mode: 'album',
     visitorView: true,
+    viewerUser,
     // VFX WebGL estoura o grid do álbum no Espelho; usa só o fallback CSS.
     applyRainbowVfx: false,
     emptyMessage: 'Nenhuma relíquia neste Espelho ainda.',
-    onSlotClick: (achievement, state, slotEl) => {
+    onSlotClick: (achievement, _state, slotEl) => {
       lastFocusedSlot = slotEl;
       window.history.replaceState(
         null,
         '',
         `${window.location.pathname}${window.location.search}#${achievement.id}`
       );
-      openRelicModal(achievement, state);
+      const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+      openRelicModal(achievement, model);
       slotEl.classList.add('is-focused');
       document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
         if (el !== slotEl) el.classList.remove('is-focused');
