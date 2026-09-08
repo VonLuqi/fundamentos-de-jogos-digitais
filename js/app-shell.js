@@ -39,6 +39,8 @@ function syncShellState(shell, sidebar, toggle, overlay) {
     return;
   }
 
+  // No mobile, só trava o scroll do body com o drawer aberto.
+  document.body.classList.toggle('is-shell-locked', isOpen);
   toggle?.setAttribute('aria-label', isOpen ? 'Fechar navegação' : 'Abrir navegação');
   sidebar?.setAttribute('aria-hidden', String(!isOpen));
   sidebar?.setAttribute('tabindex', '-1');

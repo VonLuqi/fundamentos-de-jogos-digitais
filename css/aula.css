@@ -1083,9 +1083,12 @@ body.is-discovery-pulse .discovery-secret-burst {
 
 /* ---------- 11. Responsividade ---------- */
 @media (max-width: 860px) {
-  html,
+  /* Não aplicar overflow no html — overflow-x no html+body
+     cria scrollports aninhados e trava o scroll por toque. */
   body {
-    overflow-x: hidden;
+    overflow-x: clip;
+    height: auto;
+    min-height: 100%;
   }
 
   .lesson-header {
