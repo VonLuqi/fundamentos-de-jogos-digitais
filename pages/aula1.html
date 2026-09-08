@@ -14,9 +14,10 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/aula.css" />
 </head>
-<body>
+<body class="app-shell-page" data-route="aula1" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
 
   <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
@@ -30,36 +31,77 @@
     </div>
   </div>
 
-  <header class="lesson-header">
-    <a class="btn-back" href="../index.html" aria-label="Voltar para a Home">
-      <span aria-hidden="true">←</span> Voltar
-    </a>
-    <div class="lesson-header__titles">
-      <p class="lesson-header__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
-      <h1 class="lesson-header__title">AULA 01: O CÍRCULO MÁGICO E A <span class="accent">INTERFACE AMIGÁVEL</span> DA ENGINE</h1>
-    </div>
-  </header>
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
-  <div class="ornate-divider" aria-hidden="true">
-    <span class="ornate-divider__line"></span>
-    <span class="ornate-divider__gem">◆</span>
-    <span class="ornate-divider__line"></span>
-  </div>
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
 
-  <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
-    <button class="tab is-active" type="button" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
-      I. Fundamentos
-    </button>
-    <button class="tab" type="button" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
-      II. Oficina no Inspector
-    </button>
-    <button class="tab" type="button" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
-      III. Slides
-    </button>
-  </nav>
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
 
-  <main class="lesson-main">
-    <section id="fundamentos" class="tab-panel is-active" role="tabpanel">
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 01: O CÍRCULO MÁGICO E A <span class="accent">INTERFACE AMIGÁVEL</span> DA ENGINE</h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 01</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina no Inspector
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
       <article class="hades-frame lesson-content">
         <p class="lesson-chip">Módulo 1 · Aulas 1 a 5 · 10h</p>
         <h2 class="lesson-title">Conceitos de jogos e espaço delimitado</h2>
@@ -107,7 +149,7 @@
       </article>
     </section>
 
-    <section id="oficina" class="tab-panel" role="tabpanel">
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
       <article class="hades-frame lesson-content">
         <p class="lesson-chip">Atividade guiada · Brincando no Inspector</p>
         <h2 class="lesson-title">Prática na Godot Engine</h2>
@@ -199,7 +241,7 @@
       </article>
     </section>
 
-    <section id="slides" class="tab-panel" role="tabpanel">
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
       <article class="hades-frame lesson-content">
         <h2 class="lesson-title">Slides da Aula 01</h2>
         <p>
@@ -226,11 +268,14 @@
         </div>
       </article>
     </section>
-  </main>
+        </main>
 
-  <footer class="lesson-footer">
-    <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 01</p>
-  </footer>
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 01</p>
+        </footer>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="../js/aula1.js"></script>
 </body>

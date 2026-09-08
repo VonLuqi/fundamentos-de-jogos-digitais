@@ -1,9 +1,6 @@
 /* ============================================================
-   FUNDAMENTOS DE JOGOS DIGITAIS — Menu Principal
-   Estética "HADES UI" (Supergiant Games)
-   Fundo chumbo/quase-preto + roxo profundo + vermelho-sangue
-   Molduras em ouro envelhecido / bronze — bordas duplas
-   ============================================================ */
+  FUNDAMENTOS DE JOGOS DIGITAIS — Home / Introdução
+  ============================================================ */
 
 /* ---------- 1. Design Tokens ---------- */
 :root {
@@ -67,19 +64,14 @@
 /* ---------- 3. Base / Tela Cheia ---------- */
 html,
 body {
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow-y: auto;
   color-scheme: dark;
 }
 
-body {
-  position: relative;
-  /* Layout em coluna flexível: header/divisor/rodapé têm altura própria
-     e o conteúdo central (.game-layout) ocupa o espaço restante. Isso
-     evita o "cálculo mágico" de altura (ex.: calc(100vh - 190px)) que
-     quebra e corta o rodapé sempre que o cabeçalho muda de tamanho. */
-  display: flex;
-  flex-direction: column;
+body.game-screen {
+  min-height: 100vh;
+  display: block;
   background:
     radial-gradient(circle at 50% 0%, rgba(106, 63, 143, 0.16), transparent 55%),
     radial-gradient(circle at 50% 100%, rgba(194, 53, 72, 0.12), transparent 55%),
@@ -104,255 +96,150 @@ body {
   box-shadow: inset 0 0 180px 60px rgba(0, 0, 0, 0.85);
 }
 
-/* ---------- 4. Overlay de transição ---------- */
-.screen-fade {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background-color: var(--hades-bg);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-slow);
-}
-.screen-fade.is-active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* ---------- 5. Header ---------- */
-.game-header {
+/* ---------- 4. Introdução ---------- */
+.intro-shell {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto; /* altura definida pelo próprio conteúdo, nunca encolhe */
-  padding: var(--space-6) var(--space-8) var(--space-2);
+  width: min(1180px, calc(100% - 3rem));
+  margin: 0 auto;
+  padding: 4.5rem 0 4rem;
+}
+
+.intro-hero {
+  padding: 3.5rem 2.5rem;
+  border: 1px solid rgba(207, 167, 89, 0.22);
+  background:
+    radial-gradient(circle at top left, rgba(207, 167, 89, 0.14), transparent 38%),
+    radial-gradient(circle at bottom right, rgba(194, 53, 72, 0.1), transparent 32%),
+    linear-gradient(180deg, rgba(24, 18, 26, 0.94), rgba(14, 10, 16, 0.98));
+  box-shadow:
+    var(--shadow-panel),
+    inset 0 0 0 1px rgba(242, 213, 154, 0.06),
+    inset 0 0 44px rgba(0, 0, 0, 0.22);
   text-align: center;
+  max-width: 860px;
+  margin: 0 auto;
 }
 
-.game-header__title {
+.intro-hero__eyebrow {
   font-family: var(--font-title);
-  font-weight: 700;
-  font-size: clamp(1.1rem, 3vw, 1.9rem);
-  letter-spacing: 0.15em;
-  color: var(--hades-gold-bright);
-  text-shadow: 0 0 20px rgba(207, 167, 89, 0.45), 0 2px 2px rgba(0, 0, 0, 0.8);
-}
-
-.stage-module {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  padding: var(--space-5);
-  border: 1px solid rgba(207, 167, 89, 0.3);
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at top left, rgba(207, 167, 89, 0.12), transparent 34%),
-    radial-gradient(circle at top right, rgba(194, 53, 72, 0.08), transparent 32%),
-    linear-gradient(180deg, rgba(28, 21, 30, 0.98), rgba(12, 9, 14, 0.93));
-  box-shadow:
-    inset 0 0 0 1px rgba(242, 213, 154, 0.08),
-    inset 0 0 34px rgba(0, 0, 0, 0.22),
-    0 14px 36px rgba(0, 0, 0, 0.38);
-  overflow: hidden;
-  isolation: isolate;
-}
-
-.stage-module::before,
-.stage-module::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.stage-module::before {
-  border: 1px solid rgba(242, 213, 154, 0.06);
-  border-radius: inherit;
-}
-
-.stage-module::after {
-  inset: auto 1rem 0.75rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(242, 213, 154, 0.25), transparent);
-}
-
-.stage-module__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  justify-content: space-between;
-  padding: var(--space-4);
-  border: 1px solid rgba(92, 67, 34, 0.45);
-  border-radius: 18px;
-  background:
-    linear-gradient(180deg, rgba(29, 22, 27, 0.9), rgba(16, 12, 17, 0.96));
-  box-shadow:
-    inset 0 1px 0 rgba(242, 213, 154, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.45);
-}
-
-.stage-module__badge {
-  flex-shrink: 0;
-  min-width: 3.4rem;
-  padding: 0.7rem 0.8rem 0.65rem;
-  border: 1px solid rgba(207, 167, 89, 0.62);
-  border-radius: 999px;
-  font-family: var(--font-title);
-  font-size: 0.78rem;
-  letter-spacing: 0.14em;
-  text-align: center;
-  color: var(--hades-gold-bright);
-  background:
-    radial-gradient(circle at 35% 30%, rgba(242, 213, 154, 0.16), transparent 55%),
-    linear-gradient(180deg, rgba(20, 15, 22, 0.98), rgba(10, 8, 12, 0.95));
-  box-shadow:
-    inset 0 0 18px rgba(207, 167, 89, 0.08),
-    0 0 14px rgba(207, 167, 89, 0.08);
-}
-
-.stage-module__content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  min-width: 0;
-}
-
-.stage-module__row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.stage-module__title {
-  display: block;
-  font-family: var(--font-title);
-  font-size: 1.05rem;
-  letter-spacing: 0.09em;
-  color: var(--hades-gold-bright);
-  line-height: 1.2;
-}
-
-.stage-module__subtitle {
-  display: block;
-  font-family: var(--font-body);
-  color: var(--hades-text-dim);
-  font-size: 0.9rem;
-  font-style: italic;
-  line-height: 1.2;
-}
-
-.stage-module__toggle {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border: 1px solid rgba(207, 167, 89, 0.58);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 35% 35%, rgba(242, 213, 154, 0.16), rgba(12, 9, 14, 0.96));
-  color: var(--hades-gold-bright);
-  cursor: pointer;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
-    0 0 0 1px rgba(0, 0, 0, 0.25);
-  transition:
-    transform var(--transition-fast),
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast),
-    background-color var(--transition-fast);
-}
-
-.stage-module__toggle:hover,
-.stage-module__toggle:focus-visible {
-  border-color: var(--hades-gold);
-  box-shadow:
-    var(--shadow-gold-glow),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-  transform: translateY(-1px) scale(1.03);
-}
-
-.stage-module__arrow {
-  display: inline-block;
-  transform: translateY(-1px);
-  font-size: 0.95rem;
-  line-height: 1;
-}
-
-.stage-module__lessons {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: 0 var(--space-2) var(--space-2);
-  padding-left: 0;
-}
-
-.stage-module__lessons[hidden] {
-  display: none !important;
-}
-
-.stage-module__lessons > li {
-  position: relative;
-  padding-left: var(--space-4);
-}
-
-.stage-module__lessons > li::before {
-  content: "";
-  position: absolute;
-  left: 0.25rem;
-  top: 1rem;
-  width: 2px;
-  height: calc(100% - 1rem);
-  background: linear-gradient(180deg, rgba(207, 167, 89, 0.45), transparent);
-}
-
-.stage-module.is-collapsed {
-  border-color: rgba(207, 167, 89, 0.18);
-  background:
-    radial-gradient(circle at top left, rgba(207, 167, 89, 0.05), transparent 32%),
-    linear-gradient(180deg, rgba(18, 14, 20, 0.94), rgba(10, 8, 12, 0.9));
-}
-
-.stage-module.is-collapsed .stage-module__header {
-  border-bottom-color: rgba(92, 67, 34, 0.35);
-}
-
-.stage-module.is-collapsed .stage-module__title {
-  color: var(--hades-text-dim);
-}
-
-.stage-module.is-collapsed .stage-module__subtitle {
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
   color: var(--hades-text-muted);
 }
+
+.intro-hero__title {
+  margin-top: 1rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: 0.08em;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 24px rgba(207, 167, 89, 0.28), 0 6px 20px rgba(0, 0, 0, 0.42);
+}
+
 .accent {
   color: var(--hades-blood-bright);
   text-shadow: 0 0 16px rgba(194, 53, 72, 0.55);
 }
 
-.game-header__subtitle {
+.intro-hero__lead {
+  width: min(62rem, 100%);
+  margin: 1.25rem auto 0;
+  color: var(--hades-text-dim);
+  font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+}
+
+.intro-hero__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.75rem;
+}
+
+.intro-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.8rem;
+  padding: 1rem 2.2rem;
+  border: 1px solid rgba(207, 167, 89, 0.55);
+  background:
+    linear-gradient(180deg, rgba(122, 31, 43, 0.38), rgba(40, 19, 26, 0.98)),
+    radial-gradient(circle at top, rgba(242, 213, 154, 0.2), transparent 60%);
+  color: var(--hades-gold-bright);
   font-family: var(--font-title);
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: var(--shadow-gold-glow), 0 14px 32px rgba(0, 0, 0, 0.36);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    background-color var(--transition-fast);
+  filter: saturate(110%) contrast(108%);
+}
+
+.intro-cta:hover,
+.intro-cta:focus-visible {
+  transform: translateY(-2px);
+  border-color: var(--hades-gold-bright);
+  box-shadow: 0 0 18px rgba(207, 167, 89, 0.38), 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+.intro-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+
+.intro-card {
+  padding: 1.35rem 1.15rem;
+  border: 1px solid rgba(207, 167, 89, 0.14);
+  background:
+    linear-gradient(180deg, rgba(24, 18, 26, 0.9), rgba(13, 10, 16, 0.96)),
+    radial-gradient(circle at top right, rgba(207, 167, 89, 0.06), transparent 34%);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 213, 154, 0.03),
+    0 10px 24px rgba(0, 0, 0, 0.16);
+}
+
+.intro-card__eyebrow {
+  font-family: var(--font-title);
+  font-size: 0.66rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   color: var(--hades-text-muted);
-  margin-top: var(--space-2);
+}
+
+.intro-card__title {
+  margin-top: 0.7rem;
+  font-family: var(--font-title);
+  font-size: 1.2rem;
+  line-height: 1.25;
+  color: var(--hades-gold-bright);
+}
+
+.intro-card__text {
+  margin-top: 0.7rem;
+  color: var(--hades-text-dim);
 }
 
 /* Divisor ornamentado (linha + gema central) */
 .ornate-divider {
   position: relative;
   z-index: 2;
-  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   max-width: 640px;
   width: 100%;
   margin: 0 auto;
-  padding: 0 var(--space-8) var(--space-4);
+  padding: var(--space-6) var(--space-8) var(--space-4);
 }
 .ornate-divider__line {
   flex: 1;
@@ -365,386 +252,7 @@ body {
   text-shadow: var(--shadow-blood-glow);
 }
 
-/* ---------- 6. Layout Principal ---------- */
-.game-layout {
-  position: relative;
-  z-index: 2;
-  /* Ocupa todo o espaço restante entre o header e o rodapé, sem
-     depender de nenhum valor fixo/calculado em pixels. */
-  flex: 1 1 auto;
-  min-height: 0; /* evita overflow por min-content implícito do flex */
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: var(--space-6);
-  padding: 0 var(--space-8) var(--space-6);
-  max-width: 1400px;
-  margin-inline: auto;
-  width: 100%;
-}
-
-/* ---------- 7. Painel Esquerdo: Status do Jogador ---------- */
-.player-panel {
-  position: relative;
-  min-height: 0; /* item de grid: permite encolher em vez de vazar */
-  overflow-y: auto;
-  background: linear-gradient(180deg, var(--hades-panel), var(--hades-panel-alt));
-  border: 6px double var(--hades-gold-dark);
-  padding: var(--space-8) var(--space-6);
-  box-shadow:
-    var(--shadow-panel),
-    inset 0 0 50px rgba(106, 63, 143, 0.1);
-  /* Rebites dourados nos 4 cantos */
-  background-image:
-    radial-gradient(circle at 14px 14px, var(--hades-gold) 0 2.5px, transparent 3.5px),
-    radial-gradient(circle at calc(100% - 14px) 14px, var(--hades-gold) 0 2.5px, transparent 3.5px),
-    radial-gradient(circle at 14px calc(100% - 14px), var(--hades-gold) 0 2.5px, transparent 3.5px),
-    radial-gradient(circle at calc(100% - 14px) calc(100% - 14px), var(--hades-gold) 0 2.5px, transparent 3.5px),
-    linear-gradient(180deg, var(--hades-panel), var(--hades-panel-alt));
-  background-repeat: no-repeat;
-}
-
-/* Retrato do jogador — moldura dupla dourada */
-.player-portrait {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto var(--space-6);
-  border-radius: 50%;
-  border: 6px double var(--hades-gold-dark);
-  background: radial-gradient(circle at 35% 32%, var(--hades-purple-bright), var(--hades-purple) 55%, var(--hades-bg));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-gold-glow), inset 0 2px 10px rgba(0, 0, 0, 0.6);
-}
-.player-portrait__glyph {
-  width: 76px;
-  height: 76px;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.player-panel__name {
-  font-family: var(--font-title);
-  font-size: 1.7rem;
-  font-weight: 700;
-  text-align: center;
-  letter-spacing: 0.1em;
-  color: var(--hades-gold-bright);
-  text-shadow: 0 0 14px rgba(207, 167, 89, 0.4);
-  margin-bottom: var(--space-2);
-}
-.player-panel__class {
-  text-align: center;
-  font-family: var(--font-body);
-  font-style: italic;
-  color: var(--hades-text-dim);
-  font-size: 0.95rem;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-8);
-}
-
-.player-stats__level {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
-  padding: var(--space-4);
-  background: rgba(10, 8, 7, 0.6);
-  border: 1px solid var(--hades-bronze);
-}
-.player-stats__level-label {
-  font-family: var(--font-title);
-  color: var(--hades-text-dim);
-  letter-spacing: 0.12em;
-  font-size: 0.8rem;
-}
-.player-stats__level-value {
-  font-family: var(--font-title);
-  font-size: 1.9rem;
-  color: var(--hades-gold-bright);
-  text-shadow: var(--shadow-gold-glow);
-}
-
-/* Barra de XP — dourada, estilo Hades */
-.xp-bar {
-  position: relative;
-  height: 22px;
-  background: rgba(10, 8, 7, 0.8);
-  border: 2px solid var(--hades-bronze);
-  margin-bottom: var(--space-6);
-  overflow: hidden;
-}
-.xp-bar::after {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent);
-}
-.xp-bar__fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--hades-gold-dark), var(--hades-gold-bright));
-  box-shadow: 0 0 14px rgba(207, 167, 89, 0.6);
-  transition: width var(--transition-base);
-}
-.xp-bar__text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-title);
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  color: var(--hades-text);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
-}
-
-.player-stats__list {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-}
-.player-stats__item {
-  padding: var(--space-4);
-  background: rgba(10, 8, 7, 0.6);
-  border: 1px solid var(--hades-bronze);
-  text-align: center;
-}
-.player-stats__item dt {
-  font-family: var(--font-title);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  color: var(--hades-text-dim);
-  margin-bottom: var(--space-2);
-}
-.player-stats__item dd {
-  font-family: var(--font-title);
-  font-size: 1.4rem;
-  color: var(--hades-blood-bright);
-  text-shadow: var(--shadow-blood-glow);
-}
-
-/* ---------- 8. Painel Central: Seleção de Fases ---------- */
-.stage-select {
-  min-height: 0; /* item de grid: permite encolher em vez de vazar */
-}
-
-.stage-select__list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  /* `overflow-y: auto` força o eixo X a também recortar (regra da spec
-     CSS: um eixo != visible converte o outro para auto). Sem espaço de
-     sobra, o `transform: scale()` do hover do .stage-card era cortado
-     nas laterais. O padding horizontal dá essa folga. */
-  overflow-x: hidden;
-  padding-inline: var(--space-2);
-  scrollbar-width: none;
-}
-.stage-select__list::-webkit-scrollbar { display: none; }
-
-.stage-empty {
-  padding: 1rem 1.2rem;
-  text-align: center;
-  font-family: var(--font-title);
-  font-size: 0.85rem;
-  letter-spacing: 0.08em;
-  color: var(--hades-text-dim);
-  border: 1px dashed var(--hades-gold-dark);
-  background: rgba(20, 16, 14, 0.65);
-}
-
-.stage-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  padding: var(--space-6) var(--space-8);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at top left, rgba(207, 167, 89, 0.08), transparent 28%),
-    linear-gradient(180deg, rgba(22, 17, 20, 0.98), rgba(14, 10, 13, 0.96));
-  border: 3px double rgba(92, 67, 34, 0.96);
-  cursor: pointer;
-  text-align: left;
-  font-family: inherit;
-  color: inherit;
-  overflow: hidden;
-  box-shadow:
-    inset 0 0 0 1px rgba(242, 213, 154, 0.04),
-    0 10px 24px rgba(0, 0, 0, 0.22);
-  transition:
-    transform var(--transition-base),
-    border-color var(--transition-base),
-    box-shadow var(--transition-base),
-    background-color var(--transition-base);
-}
-
-.stage-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%);
-  pointer-events: none;
-}
-
-/* Card em destaque (Aula 1): brilho sutil constante */
-.stage-card--featured {
-  border-color: var(--hades-gold-dark);
-  box-shadow:
-    0 0 18px rgba(207, 167, 89, 0.2),
-    inset 0 0 24px rgba(207, 167, 89, 0.05),
-    0 10px 24px rgba(0, 0, 0, 0.24);
-}
-
-/* Foco / Hover no card desbloqueado */
-.stage-card:not([data-unlocked="false"]):hover,
-.stage-card:not([data-unlocked="false"]).is-selected {
-  transform: translateY(-2px) scale(1.012);
-  border-color: var(--hades-gold);
-  box-shadow:
-    0 0 32px rgba(207, 167, 89, 0.4),
-    inset 0 0 26px rgba(207, 167, 89, 0.1);
-  background:
-    radial-gradient(circle at top left, rgba(242, 213, 154, 0.12), transparent 28%),
-    linear-gradient(180deg, #221b16, #17120e);
-}
-.stage-card:not([data-unlocked="false"]):hover .stage-card__title,
-.stage-card:not([data-unlocked="false"]).is-selected .stage-card__title {
-  text-shadow: 0 0 18px rgba(207, 167, 89, 0.7);
-}
-.stage-card:not([data-unlocked="false"]):hover .stage-card__xp,
-.stage-card:not([data-unlocked="false"]).is-selected .stage-card__xp {
-  text-shadow: 0 0 16px rgba(194, 53, 72, 0.8);
-}
-
-/* Cards bloqueados: opacidade reduzida, sem hover, cadeado visível */
-.stage-card[data-unlocked="false"] {
-  opacity: 0.4;
-  filter: grayscale(0.4);
-  cursor: not-allowed;
-  box-shadow: none !important;
-}
-
-.stage-card__number {
-  font-family: var(--font-title);
-  font-size: 2.25rem;
-  color: var(--hades-gold);
-  margin-right: var(--space-6);
-  text-shadow: var(--shadow-gold-glow);
-  min-width: 48px;
-  position: relative;
-  z-index: 1;
-}
-.stage-card__content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  position: relative;
-  z-index: 1;
-}
-.stage-card__title {
-  font-family: var(--font-title);
-  font-size: 1.15rem;
-  letter-spacing: 0.06em;
-  color: var(--hades-gold-bright);
-  transition: text-shadow var(--transition-base);
-}
-.stage-card__subtitle {
-  font-family: var(--font-body);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: var(--hades-text-dim);
-}
-.stage-card__reward,
-.stage-card__lock {
-  margin-left: var(--space-6);
-  display: flex;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-.stage-card__xp {
-  font-family: var(--font-title);
-  font-size: 0.9rem;
-  color: var(--hades-blood-bright);
-  text-shadow: 0 0 8px rgba(194, 53, 72, 0.5);
-  transition: text-shadow var(--transition-base);
-  padding: 0.4rem 0.75rem;
-  border-radius: 999px;
-  border: 1px solid rgba(194, 53, 72, 0.35);
-  background: rgba(28, 14, 16, 0.7);
-}
-.stage-card__lock {
-  color: var(--hades-text-muted);
-}
-
-/* ---------- 9. Barra Inferior: Controles ---------- */
-.controls-bar {
-  position: relative;
-  z-index: 2;
-  flex: 0 0 auto; /* nunca é comprimido pelo restante do layout */
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-8);
-  justify-content: center;
-  padding: var(--space-4) var(--space-8);
-  border-top: 1px solid var(--hades-bronze);
-}
-.controls-bar__btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3, 0.75rem) var(--space-6);
-  background: linear-gradient(180deg, #201a16, #120e0b);
-  border: 2px solid var(--hades-bronze);
-  color: var(--hades-text-dim);
-  font-family: var(--font-title);
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
-}
-.controls-bar__btn:disabled,
-.controls-bar__btn[aria-disabled="true"] {
-  cursor: not-allowed;
-  opacity: 0.45;
-  filter: grayscale(0.35);
-  box-shadow: none;
-  border-color: rgba(92, 67, 34, 0.65);
-}
-.controls-bar__btn:disabled .controls-bar__key,
-.controls-bar__btn[aria-disabled="true"] .controls-bar__key {
-  color: var(--hades-text-muted);
-  border-color: rgba(122, 92, 46, 0.7);
-  text-shadow: none;
-}
-.controls-bar__btn:disabled .controls-bar__action,
-.controls-bar__btn[aria-disabled="true"] .controls-bar__action {
-  color: var(--hades-text-muted);
-}
-.controls-bar__key {
-  font-family: var(--font-title);
-  padding: 4px 10px;
-  background: rgba(10, 8, 7, 0.8);
-  border: 1px solid var(--hades-gold-dark);
-  color: var(--hades-gold-bright);
-  text-shadow: 0 0 8px rgba(207, 167, 89, 0.5);
-}
-.controls-bar__btn:not([disabled]):hover {
-  border-color: var(--hades-gold);
-  box-shadow: var(--shadow-gold-glow);
-}
-
-/* ---------- 10. Motion / Acessibilidade ---------- */
+/* ---------- 5. Motion / Acessibilidade ---------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -753,7 +261,6 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .screen-fade { transition: none; }
 }
 
 :focus-visible {
@@ -761,19 +268,24 @@ body {
   outline-offset: 2px;
 }
 
-/* ---------- 11. Responsividade ---------- */
+/* ---------- 6. Responsividade ---------- */
 @media (max-width: 860px) {
-  .game-layout {
-    grid-template-columns: 1fr;
-    height: auto;
-    overflow: visible;
-    min-height: auto;
-    gap: 1rem;
-    padding: 0 0.75rem 1rem;
+  .intro-shell {
+    width: min(100%, calc(100% - 1.5rem));
+    padding: 2rem 0 2.5rem;
   }
 
-  .game-header {
-    padding: 1rem 0.75rem 0.25rem;
+  .intro-hero {
+    padding: 1.6rem 1rem;
+  }
+
+  .intro-hero__title {
+    font-size: clamp(1.6rem, 7.2vw, 2.5rem);
+  }
+
+  .intro-overview {
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
   }
 
   .ornate-divider {
@@ -782,85 +294,6 @@ body {
 
   html,
   body {
-    height: auto;
-    min-height: 100%;
-    overflow: visible;
-    overflow-x: hidden;
-  }
-
-  body {
-    display: block;
-  }
-
-  .player-panel,
-  .stage-select,
-  .stage-select__list {
-    min-height: auto;
-    height: auto;
-    overflow: visible;
-  }
-
-  .player-panel {
-    padding: 1.25rem 1rem;
-  }
-
-  .stage-select__list {
-    gap: 0.75rem;
-    padding-inline: 0;
-  }
-
-  .stage-card {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      'number content'
-      'reward reward';
-    align-items: start;
-    row-gap: 0.5rem;
-    padding: 1rem;
-  }
-
-  .stage-card__number {
-    grid-area: number;
-    margin-right: 0.75rem;
-    min-width: 0;
-    font-size: 1.9rem;
-  }
-
-  .stage-card__content {
-    grid-area: content;
-    min-width: 0;
-  }
-
-  .stage-card__title {
-    font-size: 1rem;
-    line-height: 1.25;
-  }
-
-  .stage-card__subtitle {
-    font-size: 0.95rem;
-    line-height: 1.35;
-  }
-
-  .stage-card__reward {
-    grid-area: reward;
-    margin-left: 0;
-    justify-content: flex-start;
-  }
-
-  .stage-card__xp {
-    font-size: 0.82rem;
-    letter-spacing: 0.08em;
-  }
-
-  .controls-bar {
-    gap: 0.6rem;
     padding: 0.75rem;
-  }
-
-  .controls-bar__btn {
-    flex: 1 1 160px;
-    justify-content: center;
-    padding: 0.6rem 0.75rem;
   }
 }

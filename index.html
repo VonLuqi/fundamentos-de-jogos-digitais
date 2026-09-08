@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="Fundamentos de Jogos Digitais — Plataforma gamificada de ensino de design de jogos." />
   <meta name="theme-color" content="#0a0908" />
-  <title>Fundamentos de Jogos Digitais — Menu Principal</title>
+  <title>Fundamentos de Jogos Digitais — Introdução</title>
 
   <!-- Fonts: Cinzel (títulos/botões, inscrições clássicas) + Crimson Text (leitura) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,89 +22,43 @@
   <!-- Vinheta escura nas bordas (profundidade de tela de menu) -->
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- Overlay de transição (fade para "carregar fase") -->
-  <div class="screen-fade" aria-hidden="true"></div>
+  <main class="intro-shell">
+    <section class="intro-hero" aria-labelledby="intro-title">
+      <p class="intro-hero__eyebrow">Fundamentos de Jogos Digitais</p>
+      <h1 class="intro-hero__title" id="intro-title">Aprenda design de jogos em uma plataforma com aulas, conquistas e progressão real</h1>
+      <p class="intro-hero__lead">Esta plataforma organiza sua jornada de aprendizagem em trilhas de conteúdo, atividades guiadas e um sistema de evolução que transforma estudo em progresso visível.</p>
 
-  <!-- HUD superior: título do jogo -->
-  <header class="game-header">
-    <h1 class="game-header__title">FUNDAMENTOS DE <span class="accent">JOGOS DIGITAIS</span></h1>
-    <p class="game-header__subtitle">// Seleção de Módulo</p>
-  </header>
-
-  <!-- Divisor ornamentado -->
-  <div class="ornate-divider" aria-hidden="true">
-    <span class="ornate-divider__line"></span>
-    <span class="ornate-divider__gem">◆</span>
-    <span class="ornate-divider__line"></span>
-  </div>
-
-  <!-- Layout principal em grid -->
-  <main class="game-layout">
-
-    <!-- ========== PAINEL ESQUERDO: STATUS DO JOGADOR (dinâmico via API) ========== -->
-    <aside class="player-panel" id="player-panel" aria-label="Status do jogador">
-      <!-- Retrato do jogador (moldura dupla dourada) -->
-      <div class="player-portrait" id="player-portrait" role="img" aria-label="Retrato do jogador">
-        <!-- Imagem resolvida dinamicamente via loadAvatarImage() em js/main.js
-             (mesma lógica/pasta assets/avatars/ usada no Salão dos Heróis). -->
-        <img class="player-portrait__glyph" id="player-glyph" alt="Avatar do jogador" />
+      <div class="intro-hero__actions">
+        <button class="intro-cta" type="button" id="btn-enter-system">Acessar Plataforma</button>
       </div>
-
-      <!-- Identidade (preenchida pelo js/main.js com o usuário logado) -->
-      <h2 class="player-panel__name" id="player-name">Carregando&hellip;</h2>
-      <p class="player-panel__class" id="player-rank">&mdash;</p>
-
-      <!-- Nível e Barra de XP -->
-      <div class="player-stats">
-        <div class="player-stats__level">
-          <span class="player-stats__level-label">Nível</span>
-          <span class="player-stats__level-value" id="player-level">&mdash;</span>
-        </div>
-
-        <div class="xp-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Experiência do jogador">
-          <div class="xp-bar__fill" id="player-xp-fill" style="width: 0%;"></div>
-          <span class="xp-bar__text" id="player-xp-text">&mdash; / &mdash; XP</span>
-        </div>
-
-        <!-- Estatísticas -->
-        <dl class="player-stats__list">
-          <div class="player-stats__item">
-            <dt>Aulas Concluídas</dt>
-            <dd id="player-lessons">&mdash;</dd>
-          </div>
-          <div class="player-stats__item">
-            <dt>Conquistas</dt>
-            <dd id="player-achievements">&mdash;</dd>
-          </div>
-        </dl>
-
-      </div>
-    </aside>
-
-    <!-- ========== PAINEL CENTRAL: SELEÇÃO DE FASES ========== -->
-    <section class="stage-select" aria-label="Seleção de aulas">
-      <ul class="stage-select__list">
-        <!-- Preenchido via js/main.js (catálogo dinâmico de aulas) -->
-      </ul>
     </section>
 
-  </main>
+    <div class="ornate-divider" aria-hidden="true">
+      <span class="ornate-divider__line"></span>
+      <span class="ornate-divider__gem">◆</span>
+      <span class="ornate-divider__line"></span>
+    </div>
 
-  <!-- ========== BARRA INFERIOR: CONTROLES ========== -->
-  <footer class="controls-bar" aria-label="Controles do jogo">
-    <button class="controls-bar__btn" type="button" data-action="dashboard" aria-label="Ir para o Painel do Aluno (tecla P)">
-      <span class="controls-bar__key">P</span>
-      <span class="controls-bar__action">Painel do Herói</span>
-    </button>
-    <button class="controls-bar__btn" type="button" data-action="logout" aria-label="Encerrar a sessão atual (tecla L)">
-      <span class="controls-bar__key">L</span>
-      <span class="controls-bar__action">Encerrar Sessão</span>
-    </button>
-    <button class="controls-bar__btn" type="button" aria-label="Minigame indisponível no momento" aria-disabled="true" disabled>
-      <span class="controls-bar__key">M</span>
-      <span class="controls-bar__action">Minigame em breve</span>
-    </button>
-  </footer>
+    <section class="intro-overview" aria-label="Visão geral da plataforma">
+      <article class="intro-card">
+        <p class="intro-card__eyebrow">Aulas</p>
+        <h2 class="intro-card__title">Trilhas organizadas por módulo</h2>
+        <p class="intro-card__text">A navegação principal leva à <strong>Trilha do Herói</strong>, onde os módulos crescem com clareza e o Mestre libera cada aula quando a turma começa.</p>
+      </article>
+
+      <article class="intro-card">
+        <p class="intro-card__eyebrow">Conquistas</p>
+        <h2 class="intro-card__title">Relíquias, figurinhas e coleção</h2>
+        <p class="intro-card__text">As conquistas vivem no <strong>Álbum de Relíquias</strong>, com slots fixos, raridade e linguagem de coleção visual.</p>
+      </article>
+
+      <article class="intro-card">
+        <p class="intro-card__eyebrow">Progresso</p>
+        <h2 class="intro-card__title">Painel autenticado como centro real</h2>
+        <p class="intro-card__text">Depois de entrar, o aluno acessa o Painel do Herói como entrada principal do sistema, com progresso, atalhos e navegação interna consistente.</p>
+      </article>
+    </section>
+  </main>
 
   <script type="module" src="./js/main.js"></script>
 </body>

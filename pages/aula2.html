@@ -15,58 +15,97 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/aula.css" />
 </head>
-<body>
+<body class="app-shell-page" data-route="aula2" data-role-scope="protected">
 
   <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
   <div class="vignette" aria-hidden="true"></div>
 
-  <!-- ========== NAVEGAÇÃO SUPERIOR ========== -->
-  <header class="lesson-header">
-    <a class="btn-back" href="../pages/dashboard.html" aria-label="Voltar para o Salão dos Heróis">
-      <span aria-hidden="true">←</span> Voltar
-    </a>
-    <div class="lesson-header__titles">
-      <p class="lesson-header__eyebrow">Fundamentos de Jogos Digitais</p>
-      <h1 class="lesson-header__title">AULA 2: LOOPS E RITMO <span class="accent">(SISTEMAS CÍCLICOS)</span></h1>
-    </div>
-  </header>
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
-  <!-- Divisor ornamentado -->
-  <div class="ornate-divider" aria-hidden="true">
-    <span class="ornate-divider__line"></span>
-    <span class="ornate-divider__gem">◆</span>
-    <span class="ornate-divider__line"></span>
-  </div>
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
 
-  <!-- ========== SISTEMA DE ABAS ========== -->
-  <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
-    <button
-      class="tab is-active"
-      type="button"
-      id="tab-theory"
-      data-tab="theory"
-      role="tab"
-      aria-selected="true"
-      aria-controls="theory"
-    >
-      I. Teoria e Manuais
-    </button>
-    <button
-      class="tab"
-      type="button"
-      id="tab-simulation"
-      data-tab="simulation"
-      role="tab"
-      aria-selected="false"
-      aria-controls="simulation"
-    >
-      II. Simulação Interativa
-    </button>
-  </nav>
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
 
-  <main class="lesson-main">
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 02: LOOPS E RITMO <span class="accent">(SISTEMAS CÍCLICOS)</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 02</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button
+            class="tab is-active"
+            type="button"
+            id="tab-theory"
+            data-tab="theory"
+            role="tab"
+            aria-selected="true"
+            aria-controls="theory"
+          >
+            I. Teoria e Manuais
+          </button>
+          <button
+            class="tab"
+            type="button"
+            id="tab-simulation"
+            data-tab="simulation"
+            role="tab"
+            aria-selected="false"
+            aria-controls="simulation"
+          >
+            II. Simulação Interativa
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
 
     <!-- ========== ABA I: TEORIA E MANUAIS ========== -->
     <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-theory">
@@ -168,11 +207,14 @@
       </div>
     </section>
 
-  </main>
+        </main>
 
-  <footer class="lesson-footer">
-    <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 2 de N</p>
-  </footer>
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 2 de N</p>
+        </footer>
+      </div>
+    </div>
+  </div>
 
   <!-- Script da página: tabs + minigame de ritmo em Canvas API nativo (sem dependências externas) -->
   <script type="module" src="../js/aula2.js"></script>

@@ -8,7 +8,7 @@
     "node": ">=18"
   },
   "scripts": {
-    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js",
+    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/friends-ui.js && node --check js/companheiro.js && node --check js/lessons-ui.js && node --check js/achievements-ui.js && node --check js/aulas.js && node --check js/conquistas.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js && node tests/phase5-pages-smoke.mjs && node tests/friends-phase1-smoke.mjs && node tests/friends-phase4-smoke.mjs",
     "dev": "node local-server.mjs",
     "start": "node local-server.mjs",
     "test": "echo \"No tests defined\"",

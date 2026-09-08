@@ -1,11 +1,15 @@
 'use strict';
 
+import { initAppShell } from './app-shell.js';
+
 import {
   ACHIEVEMENTS,
   ApiError,
   requireSession,
   getSession,
   getLessonParagraph,
+  logout,
+  ROUTES,
   saveLessonParagraph,
   trackLessonView,
 } from './api.js';
@@ -791,6 +795,15 @@ async function init() {
 
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
+
+  initAppShell({
+    route: 'aula1',
+    role: currentUser.role === 'admin' ? 'admin' : 'student',
+    onLogout: async () => {
+      await logout();
+      window.location.href = ROUTES.auth();
+    },
+  });
 
   trackLessonView(currentToken, LESSON_ID).catch(() => {
     // Não bloqueia a aula se telemetria de visualização falhar.

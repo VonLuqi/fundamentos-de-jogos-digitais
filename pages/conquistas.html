@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 3 — conteúdo em preparação." />
+  <meta name="description" content="Álbum de Relíquias — conquistas e figurinhas | Fundamentos de Jogos Digitais." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 3 — Em Preparação | Fundamentos de Jogos Digitais</title>
+  <title>Álbum de Relíquias | Fundamentos de Jogos Digitais</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,10 +15,31 @@
   />
 
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/aula.css" />
+  <link rel="stylesheet" href="../css/conquistas.css" />
 </head>
-<body class="app-shell-page" data-route="aula3" data-role-scope="protected">
+<body class="app-shell-page" data-route="conquistas" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
+
+  <div
+    class="relic-modal"
+    id="relic-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="relic-modal-title"
+    aria-describedby="relic-modal-desc relic-modal-rarity relic-modal-meta"
+    hidden
+  >
+    <div class="relic-modal__panel" data-rarity="stone">
+      <button class="relic-modal__close" type="button" id="relic-modal-close" aria-label="Fechar relíquia">
+        Fechar
+      </button>
+      <div class="relic-modal__art" id="relic-modal-art" aria-hidden="true">?</div>
+      <p class="relic-modal__rarity" id="relic-modal-rarity">Pedra</p>
+      <h2 class="relic-modal__title" id="relic-modal-title">Relíquia</h2>
+      <p class="relic-modal__desc" id="relic-modal-desc"></p>
+      <p class="relic-modal__meta" id="relic-modal-meta"></p>
+    </div>
+  </div>
 
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
@@ -59,14 +80,13 @@
           </button>
 
           <div class="app-shell__titles">
-          <div class="app-shell__titles">
             <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="lesson-page-title">AULA 03: CONTEÚDO OCULTO <span class="accent">(EM BREVE)</span></h1>
+            <h1 class="app-shell__title" id="conquistas-page-title">ÁLBUM DE <span class="accent">RELÍQUIAS</span></h1>
           </div>
         </div>
 
         <div class="app-shell__header-actions" data-shell-actions>
-          <span class="app-shell__context-chip">Aula 03</span>
+          <span class="app-shell__context-chip">Conquistas</span>
         </div>
       </header>
 
@@ -76,26 +96,24 @@
         <span class="ornate-divider__line"></span>
       </div>
 
-      <div class="app-shell__content lesson-shell__content">
-        <main class="lesson-main" aria-labelledby="lesson-page-title">
-          <section class="tab-panel is-active" role="tabpanel">
-            <article class="hades-frame lesson-content">
-              <h2 class="lesson-title">Forja em andamento</h2>
-              <p>
-                Esta aula está em desenvolvimento e será liberada com novos desafios em breve.
-                Enquanto isso, siga evoluindo no Salão dos Heróis com as aulas já disponíveis.
-              </p>
-            </article>
-          </section>
-        </main>
+      <main class="app-shell__content album-shell__content" aria-labelledby="conquistas-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
 
-        <footer class="lesson-footer">
-          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 3 de N</p>
-        </footer>
-      </div>
+        <section class="album-intro" aria-label="Introdução do álbum">
+          <p class="album-intro__lead">
+            Cada conquista ocupa um slot fixo. Segredos ainda não revelados aparecem como
+            <strong>?</strong>. Examine uma figurinha para ver o detalhe completo.
+          </p>
+          <p class="album-intro__counter" id="album-counter" role="status">Carregando coleção…</p>
+        </section>
+
+        <ul class="achievement-album" id="album-grid" aria-label="Álbum de Relíquias" aria-live="polite"></ul>
+      </main>
     </div>
   </div>
 
-  <script type="module" src="../js/aula3.js"></script>
+  <script type="module" src="../js/conquistas.js"></script>
 </body>
 </html>

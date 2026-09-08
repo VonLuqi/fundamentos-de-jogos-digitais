@@ -1,0 +1,303 @@
+/* ============================================================
+   TRILHA DO HERÓI — página de aulas
+   Tokens alinhados ao Salão / app-shell (Hades).
+   ============================================================ */
+
+:root {
+  --hades-bg: #0d0a10;
+  --hades-bg-alt: #14101a;
+  --hades-panel: rgba(24, 18, 26, 0.92);
+  --hades-panel-alt: rgba(32, 24, 30, 0.9);
+
+  --hades-gold: #cfa759;
+  --hades-gold-bright: #f2d59a;
+  --hades-gold-dark: #7a5c2e;
+
+  --hades-blood: #7a1f2b;
+
+  --hades-text: #ece1d1;
+  --hades-text-dim: #ab9c8a;
+  --hades-text-muted: #6f6459;
+
+  --font-title: "Cinzel", serif;
+  --font-body: "Crimson Text", serif;
+
+  --transition-fast: 150ms ease;
+  --transition-base: 250ms ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body.app-shell-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--hades-text);
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(122, 31, 43, 0.18), transparent 42%),
+    radial-gradient(ellipse at 90% 20%, rgba(207, 167, 89, 0.08), transparent 36%),
+    linear-gradient(180deg, #120e16 0%, var(--hades-bg) 48%, #09070d 100%);
+}
+
+.vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.72) 100%);
+}
+
+.accent {
+  color: var(--hades-gold-bright);
+}
+
+.ornate-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 1.5rem 1.25rem;
+}
+.ornate-divider__line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--hades-gold-dark), transparent);
+}
+.ornate-divider__gem {
+  color: var(--hades-blood);
+  font-size: 0.7rem;
+}
+
+.trail-shell__content {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 0 1.5rem 3rem;
+}
+
+.api-warning {
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--hades-blood);
+  background: rgba(122, 31, 43, 0.2);
+  color: var(--hades-gold-bright);
+}
+
+.trail-intro {
+  margin-bottom: 1.75rem;
+}
+.trail-intro__lead {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  line-height: 1.55;
+  color: var(--hades-text-dim);
+}
+.trail-intro__meta {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.trail-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.trail-module {
+  padding: 1.25rem 1.35rem 1.35rem;
+  background: var(--hades-panel);
+  border: 1px solid var(--hades-gold-dark);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+  animation: trailEnter 520ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  animation-delay: calc(var(--module-index, 0) * 80ms);
+}
+
+.trail-module__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.trail-module__badge {
+  flex: 0 0 auto;
+  min-width: 2.75rem;
+  padding: 0.35rem 0.45rem;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-align: center;
+  color: var(--hades-bg);
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+}
+.trail-module__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.trail-module__subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.9rem;
+  color: var(--hades-text-muted);
+  font-style: italic;
+}
+
+.lessons-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lesson-empty,
+.trail-empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--hades-text-dim);
+  border: 1px dashed var(--hades-gold-dark);
+  background: rgba(24, 18, 26, 0.7);
+}
+
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--hades-panel-alt);
+  border: 1px solid var(--hades-gold-dark);
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  animation: trailEnter 550ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  animation-delay: calc(var(--lesson-index, 0) * 90ms);
+}
+.lesson-row:hover:not(.is-locked) {
+  transform: translateX(4px);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.25);
+}
+.lesson-row.is-locked,
+.lesson-row.is-coming-soon {
+  opacity: 0.55;
+  filter: grayscale(0.85);
+}
+.lesson-row.is-unpublished {
+  border-style: dashed;
+}
+.lesson-row.is-completed {
+  border-color: rgba(207, 167, 89, 0.55);
+}
+
+.lesson-row__number {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--hades-gold);
+  min-width: 2.4rem;
+  text-align: center;
+}
+.lesson-row__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.lesson-row__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.lesson-row__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.8rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+.lesson-row__lock {
+  font-size: 1rem;
+}
+.lesson-row__action,
+.lesson-row__publish {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid var(--hades-gold-dark);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+.lesson-row__action:hover,
+.lesson-row__publish:hover {
+  color: var(--hades-gold-bright);
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 8px rgba(207, 167, 89, 0.3);
+}
+.lesson-row.is-completed .lesson-row__action {
+  color: var(--hades-gold-bright);
+}
+.lesson-row__publish.is-on {
+  color: var(--hades-bg);
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+  border-color: var(--hades-gold);
+}
+.lesson-row__publish.is-off {
+  color: var(--hades-text-dim);
+}
+
+@keyframes trailEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .trail-shell__content {
+    padding: 0 1rem 2.5rem;
+  }
+  .trail-module {
+    padding: 1rem;
+  }
+  .trail-module__header {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .lesson-row {
+    flex-wrap: wrap;
+  }
+  .lesson-row__action,
+  .lesson-row__publish {
+    margin-left: auto;
+  }
+  .lesson-row__publish {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.25rem;
+  }
+}

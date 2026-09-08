@@ -19,7 +19,11 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Autenticação (login/cadastro) com sessão via token opaco
 - ✅ Cadastro com nome completo real (`full_name`) + username de login
 - ✅ Proteção de rotas (páginas protegidas redirecionam sem sessão válida)
-- ✅ Dashboard do aluno ("Salão dos Heróis") com XP, nível, conquistas e avatar
+- ✅ Dashboard do aluno ("Salão dos Heróis") como hub: altar, perfil, prévias e CTAs
+- ✅ Trilha do Herói (`pages/aulas.html`) com liberação por admin (`lesson_gates`)
+- ✅ Álbum de Relíquias (`pages/conquistas.html`) com slots, modal e deep link
+- ✅ Companheiros de Jornada no Painel do Herói (convites, vínculos, limite 25)
+- ✅ Espelho do Companheiro (`pages/companheiro.html?u=…`) com perfil e álbum read-only
 - ✅ Sistema de XP e resgate de código ("Oferenda ao Estige")
 - ✅ Painel administrativo (geração de códigos e visão de alunos) para `role: admin`
 - ✅ Página administrativa dedicada de alunos (`/pages/souls.html`) com avatar e métricas
@@ -39,6 +43,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - [x] Conquistas (badges) e HUD de progresso
 - [x] Persistência de progresso via Supabase (PostgreSQL)
 - [x] Painel administrativo e troca de avatar persistida
+- [x] Companheiros de Jornada + Espelho do Companheiro
 - [ ] Módulo 02 e 03 — Próximas aulas do curso
 - [ ] Cobertura de testes automatizados ampliada (dashboard, XP, resgate)
 - [ ] Expiração de sessão e rate limiting no login
@@ -47,7 +52,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 
 ```text
 fundamentos-de-jogos-digitais/
-├── index.html                   # Menu principal (hub gamificado)
+├── index.html                   # Introdução / landing da plataforma
 ├── local-server.mjs              # Servidor local de desenvolvimento (Node http)
 ├── migrate-passwords.js          # Script utilitário de migração de senhas legadas
 ├── package.json
@@ -63,31 +68,51 @@ fundamentos-de-jogos-digitais/
 │   └── docs/
 │       └── aulas/                 # PDFs das aulas
 ├── css/
-│   ├── style.css                  # Menu principal
+│   ├── style.css                  # Introdução / Home
 │   ├── auth.css                   # Tela de login/cadastro
-│   ├── dashboard.css              # Salão dos Heróis
+│   ├── app-shell.css              # Shell de navegação interna
+│   ├── dashboard.css              # Salão dos Heróis (hub)
+│   ├── aulas.css                  # Trilha do Herói
+│   ├── conquistas.css             # Álbum de Relíquias
+│   ├── companheiros.css           # Companheiros + Espelho
 │   ├── aula.css                   # Páginas de aula
 │   └── souls.css                  # Página admin de almas/alunos
 ├── db/
 │   ├── setup.sql                  # Schema de referência completo
-│   └── migrate-2026-09-01-fullname-lesson-views.sql # Migração aditiva
+│   ├── migrate-2026-09-01-fullname-lesson-views.sql
+│   └── migrate-2026-09-08-friendships.sql # Vínculos entre alunos
 ├── docs/
-│   └── vercel-dev-troubleshoot.md # Guia de troubleshooting de autenticação
+│   ├── plano-sistema-amigos.md    # Plano Companheiros / Espelho
+│   └── vercel-dev-troubleshoot.md
 ├── js/
-│   ├── main.js                    # Entry point do menu principal
+│   ├── main.js                    # CTA de entrada da introdução (auth ou dashboard)
 │   ├── api.js                     # Cliente HTTP + gerenciamento de sessão
 │   ├── auth.js                    # Lógica do formulário de login/cadastro
-│   ├── dashboard.js               # Lógica do painel do aluno
+│   ├── app-shell.js               # Navegação lateral / drawer
+│   ├── dashboard.js               # Hub do painel do aluno
+│   ├── friends-ui.js              # Seção Companheiros no perfil
+│   ├── companheiro.js             # Espelho do Companheiro
+│   ├── aulas.js                   # Trilha do Herói
+│   ├── conquistas.js              # Álbum de Relíquias
+│   ├── lessons-ui.js              # Render compartilhado de aulas
+│   ├── achievements-ui.js         # Render compartilhado de conquistas
 │   ├── gamefeel.js                # Efeitos visuais (flash, shake, level up)
 │   ├── aula1.js                   # Simulação interativa da Aula 1
 │   └── souls.js                   # Listagem visual de alunos (admin)
 ├── pages/
 │   ├── auth.html
 │   ├── dashboard.html
+│   ├── aulas.html
+│   ├── conquistas.html
+│   ├── companheiro.html           # Espelho do Companheiro (?u=username)
 │   ├── aula1.html
+│   ├── aula2.html
+│   ├── aula3.html
 │   └── souls.html
 ├── tests/
-│   └── login-check.mjs            # Teste de fumaça do fluxo de login
+│   ├── login-check.mjs
+│   ├── friends-phase1-smoke.mjs
+│   └── friends-phase4-smoke.mjs
 ├── .gitignore
 └── README.md
 ```
@@ -128,9 +153,11 @@ fundamentos-de-jogos-digitais/
    SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
    ```
 
-3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`) e semear o usuário administrador.
+3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`, `friendships`) e semear o usuário administrador.
 
-4. Se seu banco já existia antes dessas mudanças, execute também [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para adicionar `full_name` e `lesson_views` com backfill seguro.
+4. Se seu banco já existia antes dessas mudanças, execute também:
+   - [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para `full_name` e `lesson_views`;
+   - [db/migrate-2026-09-08-friendships.sql](db/migrate-2026-09-08-friendships.sql) para **Companheiros de Jornada**.
 
    > ⚠️ A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md) para o troubleshooting completo desse ponto).
 
@@ -165,7 +192,19 @@ Executa `node --check` em todos os módulos de front-end e das rotas de API.
 | POST   | `/api/auth`              | `login`, `register`, `logout`          |
 | GET    | `/api/auth?token=...`    | Valida sessão ativa                    |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
-| POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin) |
+| POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile` |
+
+### Companheiros de Jornada
+
+No **Painel do Herói**, a seção do perfil permite:
+
+- convidar por username (autocomplete na mesma turma; match **exato** global);
+- aceitar / recusar / cancelar convites;
+- abrir o **Espelho do Companheiro** (`/pages/companheiro.html?u=<username>`).
+
+O Espelho mostra perfil público + Álbum de Relíquias **somente leitura**. Segredos ainda não revelados pelo companheiro aparecem como `?` (igual ao álbum próprio). Se já revelados, mostram nome/ícone/raridade com **descrição velada**. Limite soft: **25** vínculos aceitos.
+
+Plano e decisões: [docs/plano-sistema-amigos.md](docs/plano-sistema-amigos.md).
 
 ### Payload de cadastro (atual)
 
@@ -187,10 +226,14 @@ O login continua por `username`, mas as respostas da API priorizam o nome real d
 ```bash
 node tests/login-check.mjs
 node tests/integration-check.mjs
+node tests/friends-phase1-smoke.mjs
+node tests/friends-phase4-smoke.mjs
 ```
 
 - [tests/login-check.mjs](tests/login-check.mjs): valida login com credenciais corretas e incorretas.
 - [tests/integration-check.mjs](tests/integration-check.mjs): valida sessão inválida, cálculo de XP/nível e resgate de código válido vs. inválido.
+- [tests/friends-phase1-smoke.mjs](tests/friends-phase1-smoke.mjs): actions de amigos rejeitam sessão inválida.
+- [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 
 ## Contribuindo
 

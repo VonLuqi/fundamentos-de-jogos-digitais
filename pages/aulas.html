@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 3 — conteúdo em preparação." />
+  <meta name="description" content="Trilha do Herói — aulas e módulos | Fundamentos de Jogos Digitais." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 3 — Em Preparação | Fundamentos de Jogos Digitais</title>
+  <title>Trilha do Herói | Fundamentos de Jogos Digitais</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,9 +15,9 @@
   />
 
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/aula.css" />
+  <link rel="stylesheet" href="../css/aulas.css" />
 </head>
-<body class="app-shell-page" data-route="aula3" data-role-scope="protected">
+<body class="app-shell-page" data-route="aulas" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
 
   <div class="app-shell" data-shell>
@@ -59,14 +59,13 @@
           </button>
 
           <div class="app-shell__titles">
-          <div class="app-shell__titles">
             <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="lesson-page-title">AULA 03: CONTEÚDO OCULTO <span class="accent">(EM BREVE)</span></h1>
+            <h1 class="app-shell__title" id="aulas-page-title">TRILHA DO <span class="accent">HERÓI</span></h1>
           </div>
         </div>
 
         <div class="app-shell__header-actions" data-shell-actions>
-          <span class="app-shell__context-chip">Aula 03</span>
+          <span class="app-shell__context-chip">Aulas</span>
         </div>
       </header>
 
@@ -76,26 +75,24 @@
         <span class="ornate-divider__line"></span>
       </div>
 
-      <div class="app-shell__content lesson-shell__content">
-        <main class="lesson-main" aria-labelledby="lesson-page-title">
-          <section class="tab-panel is-active" role="tabpanel">
-            <article class="hades-frame lesson-content">
-              <h2 class="lesson-title">Forja em andamento</h2>
-              <p>
-                Esta aula está em desenvolvimento e será liberada com novos desafios em breve.
-                Enquanto isso, siga evoluindo no Salão dos Heróis com as aulas já disponíveis.
-              </p>
-            </article>
-          </section>
-        </main>
+      <main class="app-shell__content trail-shell__content" aria-labelledby="aulas-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
 
-        <footer class="lesson-footer">
-          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 3 de N</p>
-        </footer>
-      </div>
+        <section class="trail-intro" aria-label="Introdução da trilha">
+          <p class="trail-intro__lead">
+            Avance pelos módulos liberados pelo Mestre. O XP continua sendo concedido apenas pela
+            <strong>Oferenda ao Estige</strong> no Salão dos Heróis.
+          </p>
+          <p class="trail-intro__meta" id="trail-meta" role="status">Carregando a trilha…</p>
+        </section>
+
+        <div class="trail-modules" id="trail-modules" aria-live="polite"></div>
+      </main>
     </div>
   </div>
 
-  <script type="module" src="../js/aula3.js"></script>
+  <script type="module" src="../js/aulas.js"></script>
 </body>
 </html>

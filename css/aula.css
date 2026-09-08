@@ -485,6 +485,10 @@ body.is-discovery-pulse .discovery-secret-burst {
 }
 
 /* ---------- 5. Conteúdo Principal ---------- */
+.lesson-shell__content {
+  padding-top: 0;
+}
+
 .lesson-main {
   position: relative;
   z-index: 2;
@@ -1113,6 +1117,10 @@ body.is-discovery-pulse .discovery-secret-burst {
 
   .lesson-main {
     padding: 1.2rem 0.75rem 2.4rem;
+  }
+
+  .lesson-shell__content {
+    padding-top: 0;
   }
 
   .hades-frame {

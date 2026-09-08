@@ -21,7 +21,8 @@
 
 'use strict';
 
-import { requireSession, getLessonCode, ROUTES } from './api.js';
+import { initAppShell } from './app-shell.js';
+import { requireSession, getLessonCode, ROUTES, logout } from './api.js';
 
 let currentToken = null;
 
@@ -263,6 +264,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (!result) return;
+    initAppShell({
+      route: 'aula2',
+      role: result.user?.role === 'admin' ? 'admin' : 'student',
+      onLogout: async () => {
+        await logout();
+        window.location.href = ROUTES.auth();
+      },
+    });
     currentToken = result.session?.token ?? null;
     initSimulation();
   })();
