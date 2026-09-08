@@ -6,7 +6,18 @@ const CODES_TABLE = 'redeem_codes';
 const LESSON_GATES_TABLE = 'lesson_gates';
 const LESSON_PARAGRAPHS_TABLE = 'lesson_paragraphs';
 const LESSON_VIEWS_TABLE = 'lesson_views';
+const FRIENDSHIPS_TABLE = 'friendships';
 const CODE_TTL_MINUTES = 20;
+const FRIEND_LIMIT = 25;
+const FRIEND_SEARCH_LIMIT = 8;
+
+const RANKS = [
+  { minXp: 0, title: 'Alma Novata' },
+  { minXp: 20, title: 'Iniciado do Tártaro' },
+  { minXp: 60, title: 'Operador do Tártaro' },
+  { minXp: 120, title: 'Veterano do Submundo' },
+  { minXp: 240, title: 'Campeão Érebo' },
+];
 
 const ACHIEVEMENT_RARITY = Object.freeze({
   STONE: 'stone',
@@ -40,10 +51,23 @@ const LESSON_CATALOG = {
     lessonTitle: 'Aula 01 — O Círculo Mágico do Roguelite',
     xp: 30,
   },
+  aula2: {
+    lessonId: 'aula2',
+    lessonTitle: 'Aula 02 — Loops e Ritmo',
+    xp: 30,
+  },
+  aula3: {
+    lessonId: 'aula3',
+    lessonTitle: 'Aula 03 — Em preparação',
+    xp: 30,
+  },
 };
 
+/** Gates por aula: objeto { gateKey: defaultReleased }. `published` controla liberação global na Trilha. */
 const LESSON_GATES = {
-  aula1: [],
+  aula1: { published: true },
+  aula2: { published: false },
+  aula3: { published: false },
 };
 
 const ACTIVITY_CATALOG = {
@@ -163,12 +187,21 @@ function evaluateSecretAchievements(lessonId, paragraphText, alreadyUnlocked = [
 }
 
 function defaultGatesForLesson(lessonId) {
-  const gates = LESSON_GATES[String(lessonId || '')] || [];
-  const out = {};
-  gates.forEach((key) => {
-    out[key] = false;
-  });
-  return out;
+  const configured = LESSON_GATES[String(lessonId || '')];
+  if (Array.isArray(configured)) {
+    const out = {};
+    configured.forEach((key) => {
+      out[key] = false;
+    });
+    if (!Object.prototype.hasOwnProperty.call(out, 'published')) {
+      out.published = String(lessonId) === 'aula1';
+    }
+    return out;
+  }
+  if (configured && typeof configured === 'object') {
+    return { ...configured };
+  }
+  return { published: String(lessonId) === 'aula1' };
 }
 
 function sanitizeUser(u) {
@@ -189,6 +222,111 @@ function sanitizeUser(u) {
 function levelForXp(xp) {
   const LEVEL_XP_BASE = 100;
   return Math.max(1, Math.floor(xp / LEVEL_XP_BASE) + 1);
+}
+
+function rankForXp(xp) {
+  const match = RANKS.filter((entry) => xp >= entry.minXp).pop();
+  return match ? match.title : RANKS[0].title;
+}
+
+function isMissingFriendshipsTable(error) {
+  return Boolean(
+    error
+    && (error.code === '42P01' || /friendships/i.test(error.message || ''))
+  );
+}
+
+function friendshipsUnavailableResponse(res) {
+  return res.status(503).json({
+    ok: false,
+    error: 'Tabela friendships não existe. Rode o SQL de migração.',
+  });
+}
+
+function toFriendCard(row) {
+  const xp = Number(row?.xp || 0);
+  const isAdmin = row?.role === 'admin';
+  return {
+    id: row.id,
+    username: row.username,
+    fullName: row.full_name || row.username,
+    turma: row.turma || null,
+    avatarIndex: Number(row.avatar_index || 0),
+    role: row.role || 'student',
+    xp: isAdmin ? null : xp,
+    rank: isAdmin ? 'Mestre do Infinito' : rankForXp(xp),
+    level: isAdmin ? '∞' : levelForXp(xp),
+  };
+}
+
+function toPublicFriendProfile(row) {
+  const card = toFriendCard(row);
+  // Espelho: conquistas reais do banco (admin não recebe catálogo completo — evita spoiler).
+  const achievements = Array.isArray(row.conquistas) ? row.conquistas : [];
+  const completed = Array.isArray(row.completed_lessons) ? row.completed_lessons : [];
+  return {
+    ...card,
+    achievements,
+    completedLessonsCount: completed.length,
+  };
+}
+
+function normalizeUsernameQuery(value) {
+  return String(value || '').trim();
+}
+
+async function fetchUsersByIds(ids = []) {
+  const unique = [...new Set(
+    ids
+      .map((id) => Number(id))
+      .filter((id) => Number.isInteger(id) && id > 0)
+  )];
+  if (unique.length === 0) return new Map();
+
+  const { data, error } = await supabase
+    .from(USERS_TABLE)
+    .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index')
+    .in('id', unique);
+
+  if (error) throw error;
+
+  return new Map((data || []).map((row) => [Number(row.id), row]));
+}
+
+function sameUserId(a, b) {
+  return Number(a) === Number(b);
+}
+
+async function countAcceptedFriends(userId) {
+  const { count: asRequester, error: reqError } = await supabase
+    .from(FRIENDSHIPS_TABLE)
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'accepted')
+    .eq('requester_id', userId);
+  if (reqError) throw reqError;
+
+  const { count: asAddressee, error: addrError } = await supabase
+    .from(FRIENDSHIPS_TABLE)
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'accepted')
+    .eq('addressee_id', userId);
+  if (addrError) throw addrError;
+
+  return Number(asRequester || 0) + Number(asAddressee || 0);
+}
+
+async function findFriendshipBetween(userA, userB) {
+  const { data, error } = await supabase
+    .from(FRIENDSHIPS_TABLE)
+    .select('id, requester_id, addressee_id, status, created_at, updated_at')
+    .or(
+      `and(requester_id.eq.${userA},addressee_id.eq.${userB}),and(requester_id.eq.${userB},addressee_id.eq.${userA})`
+    )
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data || null;
 }
 
 function generateCode(length = 7) {
@@ -311,7 +449,23 @@ export default async function handler(req, res) {
       return res.status(405).json({ ok: false, error: 'Método não permitido.' });
     }
 
-    const { action, token, code, avatarIndex, lessonId, gateKey, released, paragraph, xp, duration } = req.body || {};
+    const {
+      action,
+      token,
+      code,
+      avatarIndex,
+      lessonId,
+      gateKey,
+      released,
+      paragraph,
+      xp,
+      duration,
+      username,
+      query,
+      decision,
+      friendUserId,
+      friendshipId,
+    } = req.body || {};
     const { data: session } = await supabase
       .from('sessions')
       .select('user_id')
@@ -323,6 +477,481 @@ export default async function handler(req, res) {
     const userId = session.user_id;
     const { data: user } = await supabase.from(USERS_TABLE).select('*').eq('id', userId).limit(1).single();
     if (!user) return res.status(404).json({ ok: false, error: 'Usuário não encontrado.' });
+
+    if (action === 'friendsList') {
+      try {
+        const { data: rows, error } = await supabase
+          .from(FRIENDSHIPS_TABLE)
+          .select('id, requester_id, addressee_id, status, created_at, updated_at')
+          .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+          .order('updated_at', { ascending: false });
+
+        if (error) {
+          if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao listar companheiros.' });
+        }
+
+        const otherIds = (rows || []).map((row) => (
+          sameUserId(row.requester_id, userId) ? row.addressee_id : row.requester_id
+        ));
+        const usersById = await fetchUsersByIds(otherIds);
+
+        const accepted = [];
+        const incoming = [];
+        const outgoing = [];
+
+        (rows || []).forEach((row) => {
+          const otherId = sameUserId(row.requester_id, userId) ? row.addressee_id : row.requester_id;
+          const other = usersById.get(Number(otherId));
+          // Mostra o outro lado mesmo se for admin (ex.: mestre convidou o aluno).
+          if (!other) return;
+
+          const entry = {
+            friendshipId: row.id,
+            status: row.status,
+            createdAt: row.created_at,
+            updatedAt: row.updated_at,
+            user: toFriendCard(other),
+          };
+
+          if (row.status === 'accepted') {
+            accepted.push(entry);
+            return;
+          }
+          if (row.status === 'pending' && sameUserId(row.addressee_id, userId)) {
+            incoming.push(entry);
+            return;
+          }
+          if (row.status === 'pending' && sameUserId(row.requester_id, userId)) {
+            outgoing.push(entry);
+          }
+        });
+
+        return res.status(200).json({
+          ok: true,
+          limit: FRIEND_LIMIT,
+          count: accepted.length,
+          accepted,
+          incoming,
+          outgoing,
+        });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendsList', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao listar companheiros.' });
+      }
+    }
+
+    if (action === 'friendSearch') {
+      try {
+        const rawQuery = normalizeUsernameQuery(query ?? username);
+        if (rawQuery.length < 1) {
+          return res.status(200).json({ ok: true, results: [] });
+        }
+
+        const resultsById = new Map();
+        const escaped = rawQuery.replace(/[%_]/g, '');
+        if (!escaped) {
+          return res.status(200).json({ ok: true, results: [] });
+        }
+
+        // Autocomplete: mesma turma, prefixo de username (não enumera a plataforma).
+        if (user.turma) {
+          const { data: turmaMatches, error: turmaError } = await supabase
+            .from(USERS_TABLE)
+            .select('id, full_name, username, turma, role, xp, avatar_index')
+            .eq('turma', user.turma)
+            .neq('id', userId)
+            .neq('role', 'admin')
+            .ilike('username', `${escaped}%`)
+            .order('username', { ascending: true })
+            .limit(FRIEND_SEARCH_LIMIT);
+
+          if (turmaError) {
+            return res.status(500).json({ ok: false, error: 'Falha na busca de companheiros.' });
+          }
+
+          (turmaMatches || []).forEach((row) => {
+            resultsById.set(row.id, row);
+          });
+        }
+
+        // Match exato global (outra turma / mestre) — só se username bater exatamente.
+        const { data: exactMatch, error: exactError } = await supabase
+          .from(USERS_TABLE)
+          .select('id, full_name, username, turma, role, xp, avatar_index')
+          .ilike('username', escaped)
+          .neq('id', userId)
+          .limit(1)
+          .maybeSingle();
+
+        if (exactError) {
+          return res.status(500).json({ ok: false, error: 'Falha na busca de companheiros.' });
+        }
+        if (exactMatch) {
+          resultsById.set(exactMatch.id, exactMatch);
+        }
+
+        const candidateIds = [...resultsById.keys()];
+        const relationByUserId = new Map();
+
+        if (candidateIds.length > 0) {
+          const { data: relations, error: relError } = await supabase
+            .from(FRIENDSHIPS_TABLE)
+            .select('id, requester_id, addressee_id, status')
+            .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`);
+
+          if (relError) {
+            if (isMissingFriendshipsTable(relError)) return friendshipsUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha na busca de companheiros.' });
+          }
+
+          (relations || []).forEach((row) => {
+            const otherId = sameUserId(row.requester_id, userId) ? row.addressee_id : row.requester_id;
+            if (!candidateIds.includes(Number(otherId)) && !candidateIds.includes(otherId)) return;
+            let relation = 'none';
+            if (row.status === 'accepted') relation = 'accepted';
+            else if (row.status === 'pending' && sameUserId(row.requester_id, userId)) relation = 'outgoing';
+            else if (row.status === 'pending' && sameUserId(row.addressee_id, userId)) relation = 'incoming';
+            relationByUserId.set(Number(otherId), { relation, friendshipId: row.id });
+          });
+        }
+
+        const results = [...resultsById.values()]
+          .slice(0, FRIEND_SEARCH_LIMIT)
+          .map((row) => {
+            const rel = relationByUserId.get(Number(row.id)) || { relation: 'none', friendshipId: null };
+            return {
+              ...toFriendCard(row),
+              relation: rel.relation,
+              friendshipId: rel.friendshipId,
+            };
+          });
+
+        return res.status(200).json({ ok: true, results });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendSearch', error);
+        return res.status(500).json({ ok: false, error: 'Falha na busca de companheiros.' });
+      }
+    }
+
+    if (action === 'friendRequest') {
+      try {
+        const targetUsername = normalizeUsernameQuery(username);
+        if (!targetUsername) {
+          return res.status(400).json({ ok: false, error: 'Username ausente.' });
+        }
+
+        const { data: target, error: targetError } = await supabase
+          .from(USERS_TABLE)
+          .select('id, full_name, username, turma, role, xp, avatar_index')
+          .ilike('username', targetUsername)
+          .limit(1)
+          .maybeSingle();
+
+        if (targetError) {
+          return res.status(500).json({ ok: false, error: 'Falha ao enviar convite.' });
+        }
+        if (!target) {
+          return res.status(404).json({ ok: false, error: 'Aluno não encontrado.' });
+        }
+        if (target.id === userId) {
+          return res.status(400).json({ ok: false, error: 'Não é possível convidar a si mesmo.' });
+        }
+
+        // Match global exato: exige igualdade case-insensitive completa (não prefixo).
+        if (String(target.username).toLowerCase() !== targetUsername.toLowerCase()) {
+          return res.status(404).json({ ok: false, error: 'Aluno não encontrado.' });
+        }
+
+        const existing = await findFriendshipBetween(userId, target.id);
+        if (existing?.status === 'accepted') {
+          return res.status(409).json({ ok: false, error: 'Vocês já são companheiros.' });
+        }
+        if (existing?.status === 'pending') {
+          return res.status(409).json({ ok: false, error: 'Já existe um convite pendente.' });
+        }
+
+        const myCount = await countAcceptedFriends(userId);
+        if (myCount >= FRIEND_LIMIT) {
+          return res.status(409).json({
+            ok: false,
+            error: `Limite de ${FRIEND_LIMIT} companheiros atingido.`,
+          });
+        }
+
+        const theirCount = await countAcceptedFriends(target.id);
+        if (theirCount >= FRIEND_LIMIT) {
+          return res.status(409).json({
+            ok: false,
+            error: 'Este aluno já atingiu o limite de companheiros.',
+          });
+        }
+
+        const nowIso = new Date().toISOString();
+        const { data: created, error: insertError } = await supabase
+          .from(FRIENDSHIPS_TABLE)
+          .insert({
+            requester_id: userId,
+            addressee_id: target.id,
+            status: 'pending',
+            created_at: nowIso,
+            updated_at: nowIso,
+          })
+          .select('id, requester_id, addressee_id, status, created_at, updated_at')
+          .single();
+
+        if (insertError) {
+          if (isMissingFriendshipsTable(insertError)) return friendshipsUnavailableResponse(res);
+          if (insertError.code === '23505') {
+            return res.status(409).json({ ok: false, error: 'Já existe um convite pendente.' });
+          }
+          return res.status(500).json({ ok: false, error: 'Falha ao enviar convite.' });
+        }
+
+        return res.status(201).json({
+          ok: true,
+          friendship: {
+            friendshipId: created.id,
+            status: created.status,
+            createdAt: created.created_at,
+            updatedAt: created.updated_at,
+            user: toFriendCard(target),
+          },
+        });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendRequest', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao enviar convite.' });
+      }
+    }
+
+    if (action === 'friendRespond') {
+      try {
+        const verdict = String(decision || '').trim().toLowerCase();
+        if (!['accept', 'decline'].includes(verdict)) {
+          return res.status(400).json({ ok: false, error: 'Decisão inválida. Use accept ou decline.' });
+        }
+
+        let row = null;
+        const normalizedFriendshipId = Number(friendshipId);
+        const normalizedFriendUserId = Number(friendUserId);
+
+        if (Number.isInteger(normalizedFriendshipId) && normalizedFriendshipId > 0) {
+          const { data, error } = await supabase
+            .from(FRIENDSHIPS_TABLE)
+            .select('id, requester_id, addressee_id, status, created_at, updated_at')
+            .eq('id', normalizedFriendshipId)
+            .limit(1)
+            .maybeSingle();
+          if (error) {
+            if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao responder convite.' });
+          }
+          row = data;
+        } else if (Number.isInteger(normalizedFriendUserId) && normalizedFriendUserId > 0) {
+          row = await findFriendshipBetween(userId, normalizedFriendUserId);
+        } else {
+          return res.status(400).json({ ok: false, error: 'Informe friendshipId ou friendUserId.' });
+        }
+
+        if (!row || row.status !== 'pending' || !sameUserId(row.addressee_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Convite pendente não encontrado.' });
+        }
+
+        if (verdict === 'decline') {
+          const { error: deleteError } = await supabase
+            .from(FRIENDSHIPS_TABLE)
+            .delete()
+            .eq('id', row.id);
+          if (deleteError) {
+            if (isMissingFriendshipsTable(deleteError)) return friendshipsUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao recusar convite.' });
+          }
+          return res.status(200).json({ ok: true, decision: 'decline' });
+        }
+
+        const myCount = await countAcceptedFriends(userId);
+        if (myCount >= FRIEND_LIMIT) {
+          return res.status(409).json({
+            ok: false,
+            error: `Limite de ${FRIEND_LIMIT} companheiros atingido.`,
+          });
+        }
+        const theirCount = await countAcceptedFriends(row.requester_id);
+        if (theirCount >= FRIEND_LIMIT) {
+          return res.status(409).json({
+            ok: false,
+            error: 'Este aluno já atingiu o limite de companheiros.',
+          });
+        }
+
+        const nowIso = new Date().toISOString();
+        const { data: updated, error: updateError } = await supabase
+          .from(FRIENDSHIPS_TABLE)
+          .update({ status: 'accepted', updated_at: nowIso })
+          .eq('id', row.id)
+          .eq('status', 'pending')
+          .select('id, requester_id, addressee_id, status, created_at, updated_at')
+          .single();
+
+        if (updateError) {
+          if (isMissingFriendshipsTable(updateError)) return friendshipsUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao aceitar convite.' });
+        }
+
+        const usersById = await fetchUsersByIds([updated.requester_id]);
+        const other = usersById.get(updated.requester_id);
+
+        return res.status(200).json({
+          ok: true,
+          decision: 'accept',
+          friendship: {
+            friendshipId: updated.id,
+            status: updated.status,
+            createdAt: updated.created_at,
+            updatedAt: updated.updated_at,
+            user: other ? toFriendCard(other) : null,
+          },
+        });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendRespond', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao responder convite.' });
+      }
+    }
+
+    if (action === 'friendRemove') {
+      try {
+        let row = null;
+        const normalizedFriendshipId = Number(friendshipId);
+        const normalizedFriendUserId = Number(friendUserId);
+        const targetUsername = normalizeUsernameQuery(username);
+
+        if (Number.isInteger(normalizedFriendshipId) && normalizedFriendshipId > 0) {
+          const { data, error } = await supabase
+            .from(FRIENDSHIPS_TABLE)
+            .select('id, requester_id, addressee_id, status')
+            .eq('id', normalizedFriendshipId)
+            .limit(1)
+            .maybeSingle();
+          if (error) {
+            if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+            return res.status(500).json({ ok: false, error: 'Falha ao remover vínculo.' });
+          }
+          row = data;
+        } else if (Number.isInteger(normalizedFriendUserId) && normalizedFriendUserId > 0) {
+          row = await findFriendshipBetween(userId, normalizedFriendUserId);
+        } else if (targetUsername) {
+          const { data: target, error: targetError } = await supabase
+            .from(USERS_TABLE)
+            .select('id')
+            .ilike('username', targetUsername)
+            .limit(1)
+            .maybeSingle();
+          if (targetError) {
+            return res.status(500).json({ ok: false, error: 'Falha ao remover vínculo.' });
+          }
+          if (!target) {
+            return res.status(404).json({ ok: false, error: 'Vínculo não encontrado.' });
+          }
+          row = await findFriendshipBetween(userId, target.id);
+        } else {
+          return res.status(400).json({
+            ok: false,
+            error: 'Informe friendshipId, friendUserId ou username.',
+          });
+        }
+
+        if (!row) {
+          return res.status(404).json({ ok: false, error: 'Vínculo não encontrado.' });
+        }
+        if (!sameUserId(row.requester_id, userId) && !sameUserId(row.addressee_id, userId)) {
+          return res.status(403).json({ ok: false, error: 'Sem permissão para este vínculo.' });
+        }
+
+        // Aceito: qualquer lado remove. Pending: requester cancela OU addressee recusa via respond.
+        if (row.status === 'pending' && !sameUserId(row.requester_id, userId)) {
+          return res.status(403).json({
+            ok: false,
+            error: 'Use friendRespond para aceitar ou recusar este convite.',
+          });
+        }
+
+        const { error: deleteError } = await supabase
+          .from(FRIENDSHIPS_TABLE)
+          .delete()
+          .eq('id', row.id);
+
+        if (deleteError) {
+          if (isMissingFriendshipsTable(deleteError)) return friendshipsUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao remover vínculo.' });
+        }
+
+        return res.status(200).json({ ok: true, removed: true, friendshipId: row.id });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendRemove', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao remover vínculo.' });
+      }
+    }
+
+    if (action === 'friendProfile') {
+      try {
+        const targetUsername = normalizeUsernameQuery(username);
+        const normalizedFriendUserId = Number(friendUserId);
+        let target = null;
+
+        if (targetUsername) {
+          const { data, error } = await supabase
+            .from(USERS_TABLE)
+            .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index')
+            .ilike('username', targetUsername)
+            .limit(1)
+            .maybeSingle();
+          if (error) {
+            return res.status(500).json({ ok: false, error: 'Falha ao carregar perfil do companheiro.' });
+          }
+          target = data;
+        } else if (Number.isInteger(normalizedFriendUserId) && normalizedFriendUserId > 0) {
+          const { data, error } = await supabase
+            .from(USERS_TABLE)
+            .select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index')
+            .eq('id', normalizedFriendUserId)
+            .limit(1)
+            .maybeSingle();
+          if (error) {
+            return res.status(500).json({ ok: false, error: 'Falha ao carregar perfil do companheiro.' });
+          }
+          target = data;
+        } else {
+          return res.status(400).json({ ok: false, error: 'Informe username ou friendUserId.' });
+        }
+
+        if (!target) {
+          return res.status(404).json({ ok: false, error: 'Companheiro não encontrado.' });
+        }
+        if (sameUserId(target.id, userId)) {
+          return res.status(400).json({ ok: false, error: 'Não é possível espelhar a si mesmo.' });
+        }
+
+        const bond = await findFriendshipBetween(userId, target.id);
+        if (!bond || bond.status !== 'accepted') {
+          // 404 genérico: não vaza existência de perfil sem vínculo aceito.
+          return res.status(404).json({ ok: false, error: 'Companheiro não encontrado.' });
+        }
+
+        return res.status(200).json({
+          ok: true,
+          profile: toPublicFriendProfile(target),
+        });
+      } catch (error) {
+        if (isMissingFriendshipsTable(error)) return friendshipsUnavailableResponse(res);
+        console.error('[api/progress] friendProfile', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao carregar perfil do companheiro.' });
+      }
+    }
 
     if (action === 'redeem') {
       const raw = typeof code === 'string' ? code.trim().toUpperCase() : '';
@@ -523,8 +1152,9 @@ export default async function handler(req, res) {
 
       const gates = { ...defaults };
       (rows || []).forEach((row) => {
-        if (Object.prototype.hasOwnProperty.call(gates, row.gate_key)) {
-          gates[row.gate_key] = Boolean(row.released);
+        const key = String(row.gate_key || '');
+        if (key === 'published' || Object.prototype.hasOwnProperty.call(gates, key)) {
+          gates[key] = Boolean(row.released);
         }
       });
 
@@ -728,8 +1358,9 @@ export default async function handler(req, res) {
 
       const gates = { ...gateDefaults };
       (rows || []).forEach((row) => {
-        if (Object.prototype.hasOwnProperty.call(gates, row.gate_key)) {
-          gates[row.gate_key] = Boolean(row.released);
+        const key = String(row.gate_key || '');
+        if (key === 'published' || Object.prototype.hasOwnProperty.call(gates, key)) {
+          gates[key] = Boolean(row.released);
         }
       });
 

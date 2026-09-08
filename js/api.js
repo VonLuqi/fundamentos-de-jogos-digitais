@@ -211,6 +211,13 @@ export const ROUTES = {
   home: () => `${rootPath()}/index.html`,
   auth: () => `${rootPath()}/pages/auth.html`,
   dashboard: () => `${rootPath()}/pages/dashboard.html`,
+  aulas: () => `${rootPath()}/pages/aulas.html`,
+  conquistas: () => `${rootPath()}/pages/conquistas.html`,
+  companheiro: (username) => {
+    const base = `${rootPath()}/pages/companheiro.html`;
+    if (!username) return base;
+    return `${base}?u=${encodeURIComponent(username)}`;
+  },
   souls: () => `${rootPath()}/pages/souls.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
@@ -424,6 +431,29 @@ export function setLessonGate(token, lessonId, gateKey, released) {
   });
 }
 
+/** Mapa lessonId → published (boolean). Fallback local se a API falhar. */
+export async function fetchLessonsPublishMap(token, lessonIds = []) {
+  const ids = lessonIds.length > 0
+    ? lessonIds
+    : LESSONS.map((lesson) => lesson.id);
+
+  const entries = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const result = await fetchLessonGates(token, id);
+        if (typeof result?.gates?.published === 'boolean') {
+          return [id, result.gates.published];
+        }
+      } catch {
+        // fallback abaixo
+      }
+      return [id, id === 'aula1'];
+    })
+  );
+
+  return Object.fromEntries(entries);
+}
+
 export function getLessonParagraph(token, lessonId) {
   return request('/progress', {
     method: 'POST',
@@ -444,6 +474,110 @@ export async function listUsers(token) {
     body: JSON.stringify({ token, action: 'listUsers' }),
   });
   return { ...payload, users: (payload.users ?? []).map(normalizeUser) };
+}
+
+/* ============================================================
+   5b. COMPANHEIROS DE JORNADA
+   ============================================================ */
+function normalizeFriendCard(raw) {
+  if (!raw) return raw;
+  return {
+    ...raw,
+    fullName: raw.fullName ?? raw.full_name ?? raw.username,
+    avatarIndex: raw.avatarIndex ?? raw.avatar_index ?? 0,
+  };
+}
+
+function normalizeFriendshipEntry(entry) {
+  if (!entry) return entry;
+  return {
+    ...entry,
+    user: normalizeFriendCard(entry.user),
+  };
+}
+
+export async function listFriends(token) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'friendsList' }),
+  });
+  return {
+    ...payload,
+    accepted: (payload.accepted ?? []).map(normalizeFriendshipEntry),
+    incoming: (payload.incoming ?? []).map(normalizeFriendshipEntry),
+    outgoing: (payload.outgoing ?? []).map(normalizeFriendshipEntry),
+  };
+}
+
+export function searchFriends(token, query) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'friendSearch', query }),
+  }).then((payload) => ({
+    ...payload,
+    results: (payload.results ?? []).map(normalizeFriendCard),
+  }));
+}
+
+export function requestFriend(token, username) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'friendRequest', username }),
+  }).then((payload) => ({
+    ...payload,
+    friendship: normalizeFriendshipEntry(payload.friendship),
+  }));
+}
+
+export function respondFriend(token, { decision, friendshipId, friendUserId } = {}) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'friendRespond',
+      decision,
+      friendshipId,
+      friendUserId,
+    }),
+  }).then((payload) => ({
+    ...payload,
+    friendship: normalizeFriendshipEntry(payload.friendship),
+  }));
+}
+
+export function removeFriend(token, { friendshipId, friendUserId, username } = {}) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'friendRemove',
+      friendshipId,
+      friendUserId,
+      username,
+    }),
+  });
+}
+
+export async function fetchFriendProfile(token, { username, friendUserId } = {}) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'friendProfile',
+      username,
+      friendUserId,
+    }),
+  });
+  return {
+    ...payload,
+    profile: payload.profile
+      ? {
+          ...normalizeFriendCard(payload.profile),
+          achievements: payload.profile.achievements ?? [],
+          completedLessonsCount: payload.profile.completedLessonsCount ?? 0,
+        }
+      : null,
+  };
 }
 
 /* ============================================================
@@ -608,13 +742,27 @@ export const MODULES = [
     id: 'modulo1',
     number: 'M1',
     title: 'Fundações, Cultura e Interface',
-    subtitle: 'Aulas 1 a 5 · 10h',
+    subtitle: 'Aulas 1 a 3 · trilha inicial',
     lessons: [
       {
         id: 'aula1',
         number: '01',
         title: 'O Círculo Mágico e a Interface Amigável da Engine',
         subtitle: 'Conceitos de jogos, leitura da Godot 4 e prática no Inspector',
+        rewardXp: 30,
+      },
+      {
+        id: 'aula2',
+        number: '02',
+        title: 'Loops e Ritmo',
+        subtitle: 'Sistemas cíclicos, timing window e o Tambor do Estige',
+        rewardXp: 30,
+      },
+      {
+        id: 'aula3',
+        number: '03',
+        title: 'Conteúdo em preparação',
+        subtitle: 'Em breve — aguardando liberação do Mestre',
         rewardXp: 30,
       },
     ],

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Espelho do Companheiro — perfil e álbum | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Espelho do Companheiro | Fundamentos de Jogos Digitais</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/conquistas.css" />
+  <link rel="stylesheet" href="../css/companheiros.css" />
+</head>
+<body class="app-shell-page" data-route="companheiro" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div
+    class="relic-modal"
+    id="relic-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="relic-modal-title"
+    aria-describedby="relic-modal-desc relic-modal-rarity relic-modal-meta"
+    hidden
+  >
+    <div class="relic-modal__panel" data-rarity="stone">
+      <button class="relic-modal__close" type="button" id="relic-modal-close" aria-label="Fechar relíquia">
+        Fechar
+      </button>
+      <div class="relic-modal__art" id="relic-modal-art" aria-hidden="true">?</div>
+      <p class="relic-modal__rarity" id="relic-modal-rarity">Pedra</p>
+      <h2 class="relic-modal__title" id="relic-modal-title">Relíquia</h2>
+      <p class="relic-modal__desc" id="relic-modal-desc"></p>
+      <p class="relic-modal__meta" id="relic-modal-meta"></p>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="mirror-page-title">ESPELHO DO <span class="accent">COMPANHEIRO</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Painel do Heroi</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content mirror-shell__content" aria-labelledby="mirror-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <p class="mirror-back">
+          <a class="mirror-back__link" href="./dashboard.html">← Voltar ao Painel do Herói</a>
+        </p>
+
+        <section class="mirror-profile" id="mirror-profile" aria-label="Perfil do companheiro" hidden>
+          <div class="mirror-profile__avatar" aria-hidden="true">
+            <img class="mirror-profile__glyph" id="mirror-avatar" alt="" width="96" height="96" />
+          </div>
+          <div class="mirror-profile__body">
+            <p class="mirror-profile__handle" id="mirror-handle">@—</p>
+            <h2 class="mirror-profile__name" id="mirror-name">—</h2>
+            <p class="mirror-profile__rank" id="mirror-rank">—</p>
+            <dl class="mirror-profile__stats">
+              <div>
+                <dt>Turma</dt>
+                <dd id="mirror-turma">—</dd>
+              </div>
+              <div>
+                <dt>Nível</dt>
+                <dd id="mirror-level">—</dd>
+              </div>
+              <div>
+                <dt>XP</dt>
+                <dd id="mirror-xp">—</dd>
+              </div>
+              <div>
+                <dt>Aulas</dt>
+                <dd id="mirror-lessons">—</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <section class="album-intro mirror-album-intro" aria-label="Álbum do companheiro">
+          <p class="album-intro__counter" id="mirror-album-counter" role="status">Carregando coleção…</p>
+        </section>
+
+        <ul class="achievement-album" id="mirror-album-grid" aria-label="Álbum do companheiro" aria-live="polite"></ul>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/companheiro.js"></script>
+</body>
+</html>
