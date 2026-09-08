@@ -70,8 +70,13 @@ body {
 
 .vignette {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
   z-index: 10;
+  width: 100%;
+  /* Evita “pulo” no mobile: inset/100vh mudam com a barra do browser. */
+  height: 100vh;
+  height: 100lvh;
   pointer-events: none;
   background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.85) 100%);
 }
