@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Editar inscrição do Grimório | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Editar inscrição | Grimório Pessoal</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/grimorio.css" />
+</head>
+<body class="app-shell-page" data-route="grimorio" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link is-active" data-nav-item="grimorio" href="./grimorio.html" aria-current="page">Grimório Pessoal</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="note-page-title">NOVA <span class="accent">INSCRIÇÃO</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Grimório Pessoal</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content grimorio-page grimorio-page--editor" aria-labelledby="note-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <p class="grimorio-back">
+          <a class="grimorio-back__link" id="note-back-link" href="./grimorio.html">← Voltar ao Grimório</a>
+        </p>
+
+        <form class="note-form" id="note-form" novalidate>
+          <label class="note-form__label" for="note-title">Título</label>
+          <input class="note-form__input" id="note-title" name="title" maxlength="120" required aria-describedby="note-title-count" />
+          <p class="note-form__count" id="note-title-count" aria-live="polite">0 / 120</p>
+
+          <label class="note-form__label" for="note-body">Inscrição</label>
+          <textarea class="note-form__textarea" id="note-body" name="body" maxlength="8000" rows="12" aria-describedby="note-body-count"></textarea>
+          <p class="note-form__count" id="note-body-count" aria-live="polite">0 / 8000</p>
+
+          <label class="note-form__label" for="note-tags-input">Marcas</label>
+          <div class="note-tags" id="note-tags">
+            <div class="note-tags__chips" id="note-tags-chips" hidden></div>
+            <input
+              class="note-form__input note-tags__input"
+              id="note-tags-input"
+              type="text"
+              placeholder="Escreva e pressione Enter"
+              maxlength="32"
+              autocomplete="off"
+              aria-describedby="note-tags-hint"
+            />
+            <input type="hidden" id="note-tags-hidden" name="tags" value="" />
+          </div>
+          <p class="note-form__hint" id="note-tags-hint">Enter, vírgula ou ponto-e-vírgula criam uma marca (máx. 12).</p>
+
+          <label class="note-form__label" for="note-lesson">Ligar à Trilha (opcional)</label>
+          <select class="note-form__select" id="note-lesson" name="lessonId" aria-describedby="note-lesson-hint">
+            <option value="">— Nenhuma —</option>
+          </select>
+          <p class="note-form__hint" id="note-lesson-hint" hidden role="status"></p>
+
+          <label class="note-form__check">
+            <input type="checkbox" id="note-pinned" name="pinned" />
+            Fixar no Grimório
+          </label>
+
+          <p class="grimorio-softwarn" id="note-softwarn" hidden role="status"></p>
+          <p class="grimorio-status" id="note-feedback" role="status" aria-live="polite"></p>
+
+          <div class="note-form__actions" id="note-actions">
+            <button class="btn-gold" type="submit" id="note-save">Guardar</button>
+            <a class="btn-gold btn-gold--ghost" id="note-cancel" href="./grimorio.html">Cancelar</a>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/grimorio-editar.js"></script>
+</body>
+</html>

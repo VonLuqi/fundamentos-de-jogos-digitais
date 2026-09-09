@@ -16,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = ROUTES.auth();
         },
       });
+      const { initFromNoteBanner } = await import('./grimorio-from-note.js');
+      initFromNoteBanner({ token: result.session?.token });
     } catch {
       window.location.replace(ROUTES.dashboard());
     }

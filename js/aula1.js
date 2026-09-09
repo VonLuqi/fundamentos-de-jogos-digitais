@@ -820,6 +820,9 @@ async function init() {
     },
   });
 
+  const { initFromNoteBanner } = await import('./grimorio-from-note.js');
+  initFromNoteBanner({ token: currentToken });
+
   trackLessonView(currentToken, LESSON_ID).catch(() => {
     // Não bloqueia a aula se telemetria de visualização falhar.
   });

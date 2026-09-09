@@ -171,10 +171,12 @@ export async function fillAchievementArtHost(hostEl, achievement, {
 const rainbowVfxBoundElements = new WeakSet();
 let rainbowVfxInstancePromise = null;
 let rainbowVfxDisabled = false;
-/** Canvas WebGL do @vfx-js — default da lib é z-index 9999; mantemos abaixo dos modais. */
-const RAINBOW_VFX_CANVAS_Z_INDEX = 40;
+/** Canvas WebGL do @vfx-js — default da lib é z-index 9999; abaixo do header mobile (40). */
+const RAINBOW_VFX_CANVAS_Z_INDEX = 25;
 let rainbowVfxCanvas = null;
 let rainbowVfxSuspended = false;
+/** Motivos concorrentes (drawer, modal, reduced-motion) — suspende se qualquer um estiver ativo. */
+const rainbowVfxSuspendReasons = new Set();
 const reducedMotionQuery = typeof window !== 'undefined'
   ? window.matchMedia('(prefers-reduced-motion: reduce)')
   : { matches: false };
@@ -187,20 +189,31 @@ function findRainbowVfxCanvas() {
   }) || null;
 }
 
+function pinRainbowVfxCanvasLayer(canvas) {
+  if (!canvas) return;
+  canvas.style.zIndex = String(RAINBOW_VFX_CANVAS_Z_INDEX);
+}
+
 function syncRainbowVfxCanvasVisibility() {
   if (!rainbowVfxCanvas || !rainbowVfxCanvas.isConnected) {
     rainbowVfxCanvas = findRainbowVfxCanvas();
   }
   if (!rainbowVfxCanvas) return;
+  pinRainbowVfxCanvasLayer(rainbowVfxCanvas);
   rainbowVfxCanvas.style.visibility = rainbowVfxSuspended ? 'hidden' : '';
 }
 
 /**
- * Esconde o canvas WebGL arco-íris enquanto overlays de UI (ex.: scroll-modal) estão abertos.
- * Não destrói a instância — ao retomar, o juice volta sem rebind.
+ * Esconde o canvas WebGL arco-íris enquanto overlays de UI estão abertos
+ * (scroll-modal, drawer mobile, etc.). Não destrói a instância.
+ * @param {boolean} suspended
+ * @param {string} [reason='default'] chave para sobreposição de overlays
  */
-export function setRainbowVfxSuspended(suspended) {
-  rainbowVfxSuspended = Boolean(suspended);
+export function setRainbowVfxSuspended(suspended, reason = 'default') {
+  const key = String(reason || 'default');
+  if (suspended) rainbowVfxSuspendReasons.add(key);
+  else rainbowVfxSuspendReasons.delete(key);
+  rainbowVfxSuspended = rainbowVfxSuspendReasons.size > 0;
   syncRainbowVfxCanvasVisibility();
 }
 
@@ -384,6 +397,7 @@ async function getRainbowVfxInstance() {
       // zIndex explícito: default da lib (9999) estoura por cima de .scroll-modal / .relic-modal.
       const vfx = new mod.VFX({ zIndex: RAINBOW_VFX_CANVAS_Z_INDEX });
       rainbowVfxCanvas = findRainbowVfxCanvas();
+      pinRainbowVfxCanvasLayer(rainbowVfxCanvas);
       syncRainbowVfxCanvasVisibility();
       return vfx;
     });
@@ -444,9 +458,9 @@ export async function applyRainbowCardJuiceVfx(root = document) {
 if (typeof reducedMotionQuery.addEventListener === 'function') {
   reducedMotionQuery.addEventListener('change', () => {
     if (reducedMotionQuery.matches) {
-      setRainbowVfxSuspended(true);
+      setRainbowVfxSuspended(true, 'reduced-motion');
     } else {
-      setRainbowVfxSuspended(false);
+      setRainbowVfxSuspended(false, 'reduced-motion');
     }
   });
 }

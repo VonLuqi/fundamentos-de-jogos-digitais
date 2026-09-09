@@ -9,6 +9,8 @@ const LESSON_VIEWS_TABLE = 'lesson_views';
 const FRIENDSHIPS_TABLE = 'friendships';
 const NOTES_TABLE = 'user_notes';
 const NOTE_SHARES_TABLE = 'user_note_shares';
+const NOTE_EVENTS_TABLE = 'user_note_events';
+const NOTE_ROW_SELECT = 'id, user_id, title, body, pinned, tags, lesson_id, cloned_from_note_id, created_at, updated_at';
 const CODE_TTL_MINUTES = 20;
 const FRIEND_LIMIT = 25;
 const FRIEND_SEARCH_LIMIT = 8;
@@ -355,24 +357,122 @@ function toNoteSummary(row, shareMeta = {}) {
     pinned: Boolean(row.pinned),
     tags,
     lessonId: row.lesson_id || null,
+    clonedFromNoteId: row.cloned_from_note_id || null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     sharedWithCount: Number(shareMeta.sharedWithCount || 0),
     sharedWithUsernames: Array.isArray(shareMeta.sharedWithUsernames)
       ? shareMeta.sharedWithUsernames
       : [],
+    unreadEventsCount: Number(shareMeta.unreadEventsCount || 0),
   };
 }
 
-function toNoteDetail(row, sharedWith = []) {
+function toNoteDetail(row, sharedWith = [], extras = {}) {
   return {
     ...toNoteSummary(row, {
       sharedWithCount: sharedWith.length,
       sharedWithUsernames: sharedWith.map((u) => u.username).filter(Boolean),
+      unreadEventsCount: extras.unreadEventsCount,
     }),
     body: row.body || '',
     userId: row.user_id,
     sharedWith,
+    clonedFrom: extras.clonedFrom || null,
+    events: Array.isArray(extras.events) ? extras.events : [],
+  };
+}
+
+async function insertNoteEvent(noteId, actorUserId, kind) {
+  const { error } = await supabase.from(NOTE_EVENTS_TABLE).insert({
+    note_id: noteId,
+    actor_user_id: actorUserId,
+    kind,
+    created_at: new Date().toISOString(),
+  });
+  if (error) {
+    if (error.code === '42P01' || /user_note_events/i.test(error.message || '')) {
+      return;
+    }
+    throw error;
+  }
+}
+
+async function fetchNoteEventsForOwner(noteId, { limit = 20 } = {}) {
+  const { data: rows, error } = await supabase
+    .from(NOTE_EVENTS_TABLE)
+    .select('id, note_id, actor_user_id, kind, created_at, read_at')
+    .eq('note_id', noteId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) {
+    if (error.code === '42P01' || /user_note_events/i.test(error.message || '')) {
+      return [];
+    }
+    throw error;
+  }
+  const actors = await fetchUsersByIds((rows || []).map((row) => row.actor_user_id));
+  return (rows || []).map((row) => {
+    const actor = actors.get(Number(row.actor_user_id));
+    return {
+      id: row.id,
+      kind: row.kind,
+      createdAt: row.created_at,
+      readAt: row.read_at || null,
+      actor: actor
+        ? {
+            userId: actor.id,
+            username: actor.username,
+            fullName: actor.full_name || actor.username,
+          }
+        : null,
+    };
+  });
+}
+
+async function countUnreadNoteEvents(noteIds = []) {
+  const unique = [...new Set(noteIds.map((id) => Number(id)).filter((id) => id > 0))];
+  const counts = new Map();
+  if (unique.length === 0) return counts;
+  const { data: rows, error } = await supabase
+    .from(NOTE_EVENTS_TABLE)
+    .select('note_id')
+    .in('note_id', unique)
+    .is('read_at', null);
+  if (error) {
+    if (error.code === '42P01' || /user_note_events/i.test(error.message || '')) {
+      return counts;
+    }
+    throw error;
+  }
+  (rows || []).forEach((row) => {
+    const id = Number(row.note_id);
+    counts.set(id, (counts.get(id) || 0) + 1);
+  });
+  return counts;
+}
+
+async function resolveClonedFrom(clonedFromNoteId) {
+  const id = Number(clonedFromNoteId);
+  if (!Number.isInteger(id) || id <= 0) return null;
+  const { data: row, error } = await supabase
+    .from(NOTES_TABLE)
+    .select('id, user_id, title')
+    .eq('id', id)
+    .maybeSingle();
+  if (error || !row) return null;
+  const owners = await fetchUsersByIds([row.user_id]);
+  const owner = owners.get(Number(row.user_id));
+  return {
+    noteId: row.id,
+    title: row.title,
+    owner: owner
+      ? {
+          userId: owner.id,
+          username: owner.username,
+          fullName: owner.full_name || owner.username,
+        }
+      : null,
   };
 }
 
@@ -1338,7 +1438,7 @@ export default async function handler(req, res) {
       try {
         const { data: ownRows, error } = await supabase
           .from(NOTES_TABLE)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .eq('user_id', userId)
           .order('pinned', { ascending: false })
           .order('updated_at', { ascending: false });
@@ -1350,11 +1450,13 @@ export default async function handler(req, res) {
 
         const ownIds = (ownRows || []).map((row) => row.id);
         const sharesByNote = await fetchSharesForNotes(ownIds);
+        const unreadByNote = await countUnreadNoteEvents(ownIds);
         const notes = (ownRows || []).map((row) => {
           const sharedWith = sharesByNote.get(Number(row.id)) || [];
           return toNoteSummary(row, {
             sharedWithCount: sharedWith.length,
             sharedWithUsernames: sharedWith.map((u) => u.username),
+            unreadEventsCount: unreadByNote.get(Number(row.id)) || 0,
           });
         });
 
@@ -1372,7 +1474,7 @@ export default async function handler(req, res) {
           if (sharedIds.length > 0) {
             const { data: sharedNotes, error: sharedNotesError } = await supabase
               .from(NOTES_TABLE)
-              .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+              .select(NOTE_ROW_SELECT)
               .in('id', sharedIds)
               .order('updated_at', { ascending: false });
             if (sharedNotesError) {
@@ -1422,7 +1524,7 @@ export default async function handler(req, res) {
 
         const { data: row, error } = await supabase
           .from(NOTES_TABLE)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .eq('id', id)
           .limit(1)
           .maybeSingle();
@@ -1438,7 +1540,7 @@ export default async function handler(req, res) {
         const isOwner = sameUserId(row.user_id, userId);
         const isAdmin = user.role === 'admin';
         let isSharedViewer = false;
-        if (!isOwner && !isAdmin) {
+        if (!isOwner) {
           const { data: share, error: shareError } = await supabase
             .from(NOTE_SHARES_TABLE)
             .select('note_id')
@@ -1459,12 +1561,45 @@ export default async function handler(req, res) {
         const sharesByNote = await fetchSharesForNotes([id]);
         const sharedWith = sharesByNote.get(id) || [];
         const canEdit = isOwner;
+        const canClone = isSharedViewer && !isOwner;
+        const canRefuse = isSharedViewer && !isOwner;
+
+        let events = [];
+        let unreadEventsCount = 0;
+        if (isOwner) {
+          events = await fetchNoteEventsForOwner(id);
+          unreadEventsCount = events.filter((event) => !event.readAt).length;
+        }
+
+        const clonedFrom = await resolveClonedFrom(row.cloned_from_note_id);
+
+        let owner = null;
+        if (!isOwner) {
+          const owners = await fetchUsersByIds([row.user_id]);
+          const ownerRow = owners.get(Number(row.user_id));
+          owner = ownerRow
+            ? {
+                userId: ownerRow.id,
+                username: ownerRow.username,
+                fullName: ownerRow.full_name || ownerRow.username,
+              }
+            : null;
+        }
 
         return res.status(200).json({
           ok: true,
           canEdit,
+          canClone,
+          canRefuse,
           readOnly: !canEdit,
-          note: toNoteDetail(row, sharedWith),
+          note: {
+            ...toNoteDetail(row, sharedWith, {
+              clonedFrom,
+              events,
+              unreadEventsCount,
+            }),
+            owner,
+          },
         });
       } catch (error) {
         if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
@@ -1519,7 +1654,7 @@ export default async function handler(req, res) {
         const { data: created, error } = await supabase
           .from(NOTES_TABLE)
           .insert(payload)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .single();
 
         if (error) {
@@ -1612,7 +1747,7 @@ export default async function handler(req, res) {
           .update(patch)
           .eq('id', id)
           .eq('user_id', userId)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .single();
 
         if (error) {
@@ -1722,7 +1857,7 @@ export default async function handler(req, res) {
         const sharesByNote = await fetchSharesForNotes([id]);
         const { data: row } = await supabase
           .from(NOTES_TABLE)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .eq('id', id)
           .single();
 
@@ -1778,7 +1913,7 @@ export default async function handler(req, res) {
         const sharesByNote = await fetchSharesForNotes([id]);
         const { data: row } = await supabase
           .from(NOTES_TABLE)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .eq('id', id)
           .single();
 
@@ -1790,6 +1925,210 @@ export default async function handler(req, res) {
         if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
         console.error('[api/progress] noteUnshare', error);
         return res.status(500).json({ ok: false, error: 'Falha ao velar inscrição.' });
+      }
+    }
+
+    if (action === 'noteClone') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: source, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select(NOTE_ROW_SELECT)
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao clonar inscrição.' });
+        }
+        if (!source) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+        if (sameUserId(source.user_id, userId)) {
+          return res.status(400).json({ ok: false, error: 'Essa inscrição já é sua.' });
+        }
+
+        const { data: share, error: shareError } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .select('note_id')
+          .eq('note_id', id)
+          .eq('shared_with_user_id', userId)
+          .maybeSingle();
+        if (shareError) {
+          if (isMissingNotesTable(shareError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao clonar inscrição.' });
+        }
+        if (!share) {
+          return res.status(403).json({ ok: false, error: 'Esta inscrição não foi revelada a você.' });
+        }
+
+        let resolvedLesson = { ok: true, lessonId: null };
+        if (source.lesson_id) {
+          try {
+            resolvedLesson = await resolveNoteLessonIdOrReject(source.lesson_id);
+          } catch (gateError) {
+            console.error('[api/progress] noteClone lesson gate', gateError);
+            return res.status(500).json({ ok: false, error: 'Falha ao validar a aula da inscrição.' });
+          }
+          if (!resolvedLesson.ok) {
+            resolvedLesson = { ok: true, lessonId: null };
+          }
+        }
+
+        const nowIso = new Date().toISOString();
+        const payload = {
+          user_id: userId,
+          title: source.title,
+          body: source.body || '',
+          pinned: false,
+          tags: normalizeNoteTags(source.tags),
+          lesson_id: resolvedLesson.lessonId,
+          cloned_from_note_id: source.id,
+          created_at: nowIso,
+          updated_at: nowIso,
+        };
+
+        const { data: created, error: createError } = await supabase
+          .from(NOTES_TABLE)
+          .insert(payload)
+          .select(NOTE_ROW_SELECT)
+          .single();
+        if (createError) {
+          if (isMissingNotesTable(createError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao clonar inscrição.' });
+        }
+
+        const { error: deleteShareError } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .delete()
+          .eq('note_id', id)
+          .eq('shared_with_user_id', userId);
+        if (deleteShareError) {
+          console.error('[api/progress] noteClone unshare', deleteShareError);
+        }
+
+        try {
+          await insertNoteEvent(id, userId, 'cloned_by');
+        } catch (eventError) {
+          console.error('[api/progress] noteClone event', eventError);
+        }
+
+        const clonedFrom = await resolveClonedFrom(created.cloned_from_note_id);
+        return res.status(201).json({
+          ok: true,
+          note: toNoteDetail(created, [], { clonedFrom }),
+        });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteClone', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao clonar inscrição.' });
+      }
+    }
+
+    if (action === 'noteRefuseShare') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: source, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao recusar revelação.' });
+        }
+        if (!source) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+        if (sameUserId(source.user_id, userId)) {
+          return res.status(400).json({ ok: false, error: 'Use Velar novamente para remover companheiros.' });
+        }
+
+        const { data: share, error: shareError } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .select('note_id')
+          .eq('note_id', id)
+          .eq('shared_with_user_id', userId)
+          .maybeSingle();
+        if (shareError) {
+          if (isMissingNotesTable(shareError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao recusar revelação.' });
+        }
+        if (!share) {
+          return res.status(403).json({ ok: false, error: 'Esta inscrição não foi revelada a você.' });
+        }
+
+        const { error: deleteError } = await supabase
+          .from(NOTE_SHARES_TABLE)
+          .delete()
+          .eq('note_id', id)
+          .eq('shared_with_user_id', userId);
+        if (deleteError) {
+          if (isMissingNotesTable(deleteError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao recusar revelação.' });
+        }
+
+        try {
+          await insertNoteEvent(id, userId, 'veiled_by_recipient');
+        } catch (eventError) {
+          console.error('[api/progress] noteRefuseShare event', eventError);
+        }
+
+        return res.status(200).json({ ok: true, refused: true, noteId: id });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteRefuseShare', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao recusar revelação.' });
+      }
+    }
+
+    if (action === 'noteEventsAck') {
+      try {
+        const id = Number(noteId);
+        if (!Number.isInteger(id) || id <= 0) {
+          return res.status(400).json({ ok: false, error: 'noteId inválido.' });
+        }
+
+        const { data: existing, error: loadError } = await supabase
+          .from(NOTES_TABLE)
+          .select('id, user_id')
+          .eq('id', id)
+          .limit(1)
+          .maybeSingle();
+        if (loadError) {
+          if (isMissingNotesTable(loadError)) return notesUnavailableResponse(res);
+          return res.status(500).json({ ok: false, error: 'Falha ao marcar eventos.' });
+        }
+        if (!existing || !sameUserId(existing.user_id, userId)) {
+          return res.status(404).json({ ok: false, error: 'Inscrição não encontrada.' });
+        }
+
+        const { error } = await supabase
+          .from(NOTE_EVENTS_TABLE)
+          .update({ read_at: new Date().toISOString() })
+          .eq('note_id', id)
+          .is('read_at', null);
+        if (error) {
+          if (error.code === '42P01' || /user_note_events/i.test(error.message || '')) {
+            return res.status(200).json({ ok: true, acknowledged: 0 });
+          }
+          return res.status(500).json({ ok: false, error: 'Falha ao marcar eventos.' });
+        }
+
+        return res.status(200).json({ ok: true, acknowledged: true });
+      } catch (error) {
+        if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
+        console.error('[api/progress] noteEventsAck', error);
+        return res.status(500).json({ ok: false, error: 'Falha ao marcar eventos.' });
       }
     }
 
@@ -1834,7 +2173,7 @@ export default async function handler(req, res) {
         }
         const { data: ownRows, error } = await supabase
           .from(NOTES_TABLE)
-          .select('id, user_id, title, body, pinned, tags, lesson_id, created_at, updated_at')
+          .select(NOTE_ROW_SELECT)
           .eq('user_id', ownerId)
           .order('pinned', { ascending: false })
           .order('updated_at', { ascending: false });

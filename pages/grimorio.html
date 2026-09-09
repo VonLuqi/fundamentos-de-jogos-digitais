@@ -21,6 +21,90 @@
 <body class="app-shell-page" data-route="grimorio" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
 
+  <div
+    class="grimorio-confirm"
+    id="note-delete-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="note-delete-title"
+    aria-describedby="note-delete-desc"
+    hidden
+  >
+    <div class="grimorio-confirm__panel">
+      <h2 class="grimorio-confirm__title" id="note-delete-title">Rasgar inscrição</h2>
+      <p class="grimorio-confirm__desc" id="note-delete-desc">
+        Esta página do Grimório será perdida. Confirma?
+      </p>
+      <div class="grimorio-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="note-delete-cancel">Manter</button>
+        <button class="btn-gold" type="button" id="note-delete-ok">Rasgar</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="grimorio-confirm"
+    id="note-veil-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="note-veil-title"
+    aria-describedby="note-veil-desc"
+    hidden
+  >
+    <div class="grimorio-confirm__panel">
+      <h2 class="grimorio-confirm__title" id="note-veil-title">Velar novamente</h2>
+      <p class="grimorio-confirm__desc" id="note-veil-desc">
+        O companheiro deixará de ver esta inscrição.
+      </p>
+      <div class="grimorio-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="note-veil-cancel">Manter revelada</button>
+        <button class="btn-gold" type="button" id="note-veil-ok">Velar</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="grimorio-confirm"
+    id="note-refuse-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="note-refuse-title"
+    aria-describedby="note-refuse-desc"
+    hidden
+  >
+    <div class="grimorio-confirm__panel">
+      <h2 class="grimorio-confirm__title" id="note-refuse-title">Recusar revelação</h2>
+      <p class="grimorio-confirm__desc" id="note-refuse-desc">
+        Esta inscrição sumirá das Reveladas a você. O autor será avisado.
+      </p>
+      <div class="grimorio-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="note-refuse-cancel">Manter</button>
+        <button class="btn-gold" type="button" id="note-refuse-ok">Recusar</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="grimorio-confirm"
+    id="note-clone-confirm"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="note-clone-title"
+    aria-describedby="note-clone-desc"
+    hidden
+  >
+    <div class="grimorio-confirm__panel">
+      <h2 class="grimorio-confirm__title" id="note-clone-title">Clonar inscrição</h2>
+      <p class="grimorio-confirm__desc" id="note-clone-desc">
+        Uma cópia entrará no seu Grimório e esta revelação será removida. O autor será avisado.
+      </p>
+      <div class="grimorio-confirm__actions">
+        <button class="btn-gold btn-gold--ghost" type="button" id="note-clone-cancel">Cancelar</button>
+        <button class="btn-gold" type="button" id="note-clone-ok">Clonar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
@@ -78,43 +162,165 @@
         <span class="ornate-divider__line"></span>
       </div>
 
-      <main class="app-shell__content grimorio-page" aria-labelledby="grimorio-page-title">
+      <main class="app-shell__content grimorio-page grimorio-page--workspace" aria-labelledby="grimorio-page-title">
         <div class="api-warning" id="api-warning" hidden>
           <p id="api-warning-text"></p>
         </div>
 
-        <header class="grimorio-toolbar">
-          <label class="grimorio-toolbar__search" for="grimorio-search">
-            <span class="visually-hidden">Buscar no Grimório</span>
-            <input
-              class="grimorio-toolbar__input"
-              type="search"
-              id="grimorio-search"
-              placeholder="Buscar no Grimório…"
-              autocomplete="off"
-            />
-          </label>
-          <a class="btn-gold" id="grimorio-new" href="./grimorio-nota.html">Nova inscrição</a>
-        </header>
-
         <p class="grimorio-softwarn" id="grimorio-softwarn" hidden role="status"></p>
         <p class="grimorio-status" id="grimorio-status" role="status" aria-live="polite"></p>
 
-        <section class="grimorio-section" aria-labelledby="grimorio-own-title">
-          <h2 class="grimorio-section__title" id="grimorio-own-title">Suas inscrições</h2>
-          <ul class="grimorio-list" id="grimorio-list" aria-label="Inscrições do Grimório"></ul>
-          <p class="grimorio-empty" id="grimorio-empty" hidden>
-            O Grimório espera a primeira inscrição.
-          </p>
-        </section>
+        <div class="grimorio-workspace" id="grimorio-workspace" data-mobile-view="list">
+          <aside class="grimorio-workspace__filters" aria-label="Coleções do Grimório">
+            <h2 class="grimorio-workspace__pane-title">Coleções</h2>
+            <nav class="grimorio-collections" id="grimorio-collections" aria-label="Filtrar por coleção"></nav>
+          </aside>
 
-        <section class="grimorio-section" id="grimorio-shared-wrap" aria-labelledby="grimorio-shared-title">
-          <h2 class="grimorio-section__title" id="grimorio-shared-title">Reveladas a você</h2>
-          <ul class="grimorio-list" id="grimorio-shared-list" aria-label="Inscrições reveladas"></ul>
-          <p class="grimorio-empty" id="grimorio-shared-empty">
-            Nada foi revelado a você… ainda.
-          </p>
-        </section>
+          <section class="grimorio-workspace__list" aria-labelledby="grimorio-list-heading">
+            <header class="grimorio-toolbar grimorio-toolbar--stack">
+              <div class="grimorio-list-head">
+                <h2 class="grimorio-workspace__pane-title" id="grimorio-list-heading">Inscrições</h2>
+                <p class="grimorio-list-count" id="grimorio-list-count" aria-live="polite"></p>
+              </div>
+              <label class="grimorio-toolbar__search" for="grimorio-search">
+                <span class="visually-hidden">Buscar no Grimório</span>
+                <input
+                  class="grimorio-toolbar__input"
+                  type="search"
+                  id="grimorio-search"
+                  placeholder="Buscar no Grimório…"
+                  autocomplete="off"
+                />
+              </label>
+              <a class="btn-gold grimorio-toolbar__add" id="grimorio-new" href="./grimorio-editar.html">+ Nova inscrição</a>
+            </header>
+
+            <ul class="grimorio-feed" id="grimorio-list" aria-label="Inscrições do Grimório"></ul>
+            <p class="grimorio-empty" id="grimorio-empty" hidden>
+              O Grimório espera a primeira inscrição.
+            </p>
+          </section>
+
+          <section class="grimorio-workspace__reading" aria-labelledby="grimorio-reading-heading">
+            <div class="grimorio-reading-bar">
+              <button
+                class="grimorio-reading-back"
+                type="button"
+                id="grimorio-reading-back"
+                hidden
+              >
+                ← Inscrições
+              </button>
+              <h2 class="visually-hidden" id="grimorio-reading-heading">Leitura</h2>
+            </div>
+
+            <p class="grimorio-reading-empty" id="grimorio-reading-empty">
+              Escolha uma inscrição para contemplar.
+            </p>
+
+            <article class="note-view note-canvas" id="note-view" hidden>
+              <div class="note-canvas__toolbar" id="note-view-quick" aria-label="Ferramentas da inscrição">
+                <div class="note-canvas__context">
+                  <span class="note-canvas__dot" id="note-view-context-dot" aria-hidden="true"></span>
+                  <span class="note-canvas__context-label" id="note-view-context-label">Inscrição</span>
+                </div>
+                <div class="note-canvas__actions">
+                  <a
+                    class="note-icon-btn"
+                    id="note-view-lesson-link"
+                    href="#"
+                    hidden
+                    title="Abrir na Trilha"
+                    aria-label="Abrir na Trilha"
+                  >
+                    <span class="note-icon-btn__glyph" aria-hidden="true" data-icon="trilha">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M4 19V7m0 0 6 4 5-6 5 5" stroke-linecap="round" stroke-linejoin="round" />
+                        <circle cx="20" cy="10" r="1.4" fill="currentColor" stroke="none" />
+                      </svg>
+                    </span>
+                  </a>
+                  <a
+                    class="note-icon-btn"
+                    id="note-edit-link"
+                    href="#"
+                    hidden
+                    title="Editar inscrição"
+                    aria-label="Editar inscrição"
+                  >
+                    <span class="note-icon-btn__glyph" aria-hidden="true" data-icon="editar">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M4 20h4l10.5-10.5a1.8 1.8 0 0 0-2.5-2.5L5.5 17.5 4 20z" stroke-linejoin="round" />
+                        <path d="M13.5 6.5l2.5 2.5" stroke-linecap="round" />
+                      </svg>
+                    </span>
+                  </a>
+                  <button
+                    class="note-icon-btn"
+                    type="button"
+                    id="note-delete"
+                    hidden
+                    title="Rasgar inscrição"
+                    aria-label="Rasgar inscrição"
+                  >
+                    <span class="note-icon-btn__glyph" aria-hidden="true" data-icon="rasgar">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M6 7h12M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7m-7 0 1 12h6l1-12" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </button>
+                  <button
+                    class="note-canvas__text-btn"
+                    type="button"
+                    id="note-clone"
+                    hidden
+                  >
+                    Clonar
+                  </button>
+                  <button
+                    class="note-canvas__text-btn note-canvas__text-btn--ghost"
+                    type="button"
+                    id="note-refuse"
+                    hidden
+                  >
+                    Recusar
+                  </button>
+                </div>
+              </div>
+
+              <header class="note-view__header note-canvas__header">
+                <h3 class="note-view__title note-canvas__title" id="note-view-title"></h3>
+                <div class="note-canvas__meta-row">
+                  <span class="note-canvas__pin" id="note-view-pin" hidden title="Fixada" aria-label="Fixada">◆</span>
+                  <div class="note-tags__chips note-tags__chips--readonly note-tags__chips--hash" id="note-view-tags" hidden></div>
+                </div>
+                <p class="note-view__meta" id="note-view-meta"></p>
+                <p class="note-view__origin" id="note-view-origin" hidden></p>
+              </header>
+
+              <div class="note-view__body note-canvas__body" id="note-view-body"></div>
+
+              <p class="grimorio-status" id="note-feedback" role="status" aria-live="polite"></p>
+
+              <section class="note-events" id="note-events" hidden>
+                <h3 class="note-events__title">Ecos desta inscrição</h3>
+                <ul class="note-events__list" id="note-events-list"></ul>
+              </section>
+
+              <section class="note-share" id="note-share" hidden>
+                <h2 class="note-share__title">Revelar ao Companheiro</h2>
+                <p class="note-share__lead">Escolha quem está ao seu lado para contemplar esta inscrição.</p>
+                <div class="note-share__row">
+                  <select class="note-form__select" id="note-share-select" aria-label="Companheiro">
+                    <option value="">— Companheiro —</option>
+                  </select>
+                  <button class="btn-gold btn-gold--ghost" type="button" id="note-share-btn">Revelar</button>
+                </div>
+                <ul class="note-share__list" id="note-share-list" aria-label="Já revelado a"></ul>
+              </section>
+            </article>
+          </section>
+        </div>
       </main>
     </div>
   </div>

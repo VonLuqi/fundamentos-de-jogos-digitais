@@ -66,7 +66,8 @@ body.is-relic-modal-open {
   position: relative;
   min-height: 220px;
   min-width: 0;
-  overflow: visible;
+  overflow: hidden;
+  contain: paint;
   --rarity-accent: var(--rarity-stone);
   --rarity-glow: 0 0 8px rgba(156, 147, 136, 0.28);
   animation: albumEnter 520ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
@@ -571,7 +572,8 @@ img.achievement-slot__art.has-art {
 
 .achievement-slot.is-unlocked[data-rarity='rainbow'],
 .achievement-slot.is-mystery--styled[data-rarity='rainbow'] {
-  overflow: visible;
+  overflow: hidden;
+  contain: paint;
   z-index: 0;
 }
 .achievement-slot.is-unlocked[data-rarity='rainbow']:hover,

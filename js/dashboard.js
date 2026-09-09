@@ -768,7 +768,7 @@ function openScrollModal(title, contentNode, options = {}) {
   modal.hidden = false;
   modal.classList.add('is-open');
   // Canvas VFX arco-íris (mesmo com z-index baixo) some enquanto o pergaminho está aberto.
-  setRainbowVfxSuspended(true);
+  setRainbowVfxSuspended(true, 'scroll-modal');
   if (focusElement && typeof focusElement.focus === 'function') {
     focusElement.focus();
   } else if (closeButton && !closeButton.hidden) {
@@ -783,7 +783,7 @@ function closeScrollModal() {
   modal.hidden = true;
   const closeButton = document.getElementById('scroll-modal-close');
   if (closeButton) closeButton.hidden = false;
-  setRainbowVfxSuspended(false);
+  setRainbowVfxSuspended(false, 'scroll-modal');
 }
 
 function initScrollModal() {

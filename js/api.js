@@ -219,7 +219,12 @@ export const ROUTES = {
   salao: () => `${rootPath()}/pages/salao-espiritual.html`,
   grimorio: () => `${rootPath()}/pages/grimorio.html`,
   grimorioNota: (id) => {
-    const base = `${rootPath()}/pages/grimorio-nota.html`;
+    const base = `${rootPath()}/pages/grimorio.html`;
+    if (!id) return base;
+    return `${base}?id=${encodeURIComponent(id)}`;
+  },
+  grimorioEditar: (id) => {
+    const base = `${rootPath()}/pages/grimorio-editar.html`;
     if (!id) return base;
     return `${base}?id=${encodeURIComponent(id)}`;
   },
@@ -637,6 +642,10 @@ function normalizeNote(raw) {
     sharedWith: Array.isArray(raw.sharedWith) ? raw.sharedWith : [],
     sharedWithUsernames: Array.isArray(raw.sharedWithUsernames) ? raw.sharedWithUsernames : [],
     lessonId: raw.lessonId ?? raw.lesson_id ?? null,
+    clonedFromNoteId: raw.clonedFromNoteId ?? raw.cloned_from_note_id ?? null,
+    clonedFrom: raw.clonedFrom || null,
+    events: Array.isArray(raw.events) ? raw.events : [],
+    unreadEventsCount: Number(raw.unreadEventsCount || 0),
     pinned: Boolean(raw.pinned),
   };
 }
@@ -728,6 +737,28 @@ export async function unshareNote(token, noteId, sharedWithUserId) {
     }),
   });
   return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export async function cloneNote(token, noteId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'noteClone', noteId }),
+  });
+  return { ...payload, note: normalizeNote(payload.note) };
+}
+
+export async function refuseNoteShare(token, noteId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'noteRefuseShare', noteId }),
+  });
+}
+
+export async function ackNoteEvents(token, noteId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'noteEventsAck', noteId }),
+  });
 }
 
 export async function listNotesAdmin(token) {

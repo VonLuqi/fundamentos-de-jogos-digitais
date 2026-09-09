@@ -1,5 +1,7 @@
 'use strict';
 
+import { setRainbowVfxSuspended } from './achievements-ui.js';
+
 const mobileQuery = window.matchMedia('(max-width: 980px)');
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -23,7 +25,7 @@ function mapRouteToNavItem(route) {
   if (route === 'aulas') return 'aulas';
   if (route === 'conquistas') return 'conquistas';
   if (route === 'salao') return 'salao';
-  if (route === 'grimorio' || route === 'grimorio-nota') return 'grimorio';
+  if (route === 'grimorio' || route === 'grimorio-nota' || route === 'grimorio-editar') return 'grimorio';
   if (route === 'souls') return 'souls';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;
@@ -44,6 +46,7 @@ function syncShellState(shell, sidebar, toggle, overlay) {
     if (overlay) overlay.hidden = true;
     sidebar?.removeAttribute('aria-hidden');
     sidebar?.removeAttribute('tabindex');
+    setRainbowVfxSuspended(false, 'shell-drawer');
     return;
   }
 
@@ -54,6 +57,7 @@ function syncShellState(shell, sidebar, toggle, overlay) {
   sidebar?.setAttribute('tabindex', '-1');
   if (overlay) overlay.hidden = !isOpen;
   toggle?.setAttribute('aria-expanded', String(isOpen));
+  setRainbowVfxSuspended(isOpen, 'shell-drawer');
 }
 
 function closeDrawer(shell, toggle, overlay, { restoreFocus = true } = {}) {

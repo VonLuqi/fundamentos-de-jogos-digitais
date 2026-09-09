@@ -273,6 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
       },
     });
     currentToken = result.session?.token ?? null;
+    const { initFromNoteBanner } = await import('./grimorio-from-note.js');
+    initFromNoteBanner({ token: currentToken || result.token });
     initSimulation();
   })();
 });

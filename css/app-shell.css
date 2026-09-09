@@ -138,6 +138,13 @@ body.is-shell-mobile.is-shell-locked {
     box-shadow var(--transition-fast);
 }
 
+/* `display: inline-flex` acima vence o [hidden] da UA — força Almas / admin-only ocultos. */
+.app-shell__link[hidden],
+.app-shell__link[data-admin-only][hidden],
+.app-shell [data-admin-only][hidden] {
+  display: none !important;
+}
+
 .app-shell__link::before,
 .app-shell__logout::before {
   content: "";
@@ -240,6 +247,7 @@ body.is-shell-mobile.is-shell-locked {
   min-width: 0;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0));
 }
@@ -301,6 +309,8 @@ body.is-shell-mobile.is-shell-locked {
   margin-inline: auto;
   padding: 0 1.5rem 2.5rem;
   box-sizing: border-box;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .app-shell__menu-toggle {
@@ -379,8 +389,11 @@ body.is-shell-mobile.is-shell-locked {
     height: 100vh;
     height: 100dvh;
     z-index: 60;
-    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.75rem;
+    padding-top: calc(0.65rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+    padding-inline: 0.85rem;
+    /* overflow-y: auto permanece como rede de segurança (zoom / telas mínimas). */
     transform: translateX(-100%);
     transition: transform var(--transition-base), box-shadow var(--transition-base);
     box-shadow:
@@ -390,6 +403,34 @@ body.is-shell-mobile.is-shell-locked {
 
   .app-shell.is-open .app-shell__sidebar {
     transform: translateX(0);
+  }
+
+  .app-shell__brand {
+    padding: 0.55rem 0.7rem 0.65rem;
+  }
+
+  .app-shell__brand::after {
+    margin-top: 0.5rem;
+  }
+
+  .app-shell__brand-eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.2em;
+  }
+
+  .app-shell__brand-title {
+    margin-top: 0.35rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+  }
+
+  .app-shell__nav {
+    gap: 0.35rem;
+  }
+
+  .app-shell__footer {
+    padding-top: 0.25rem;
   }
 
   .app-shell__overlay {
@@ -480,11 +521,19 @@ body.is-shell-mobile.is-shell-locked {
     text-wrap: balance;
   }
 
+  /* Densidade: 7 itens (admin) + brand + logout cabem em ~640dvh com safe-area. */
   .app-shell__link,
   .app-shell__logout {
-    min-height: 3.45rem;
-    padding-inline: 1rem;
-    font-size: 0.74rem;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.85rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+
+  .app-shell__link::before,
+  .app-shell__logout::before {
+    top: 0.4rem;
+    bottom: 0.4rem;
   }
 
   .app-shell__link:focus-visible,
@@ -492,6 +541,43 @@ body.is-shell-mobile.is-shell-locked {
   .app-shell__menu-toggle:focus-visible {
     outline: 2px solid var(--hades-gold-bright);
     outline-offset: 2px;
+  }
+}
+
+/* Telas curtas (ex. landscape / SE com chrome): comprimir mais sem matar toque ~44px. */
+@media (max-width: 980px) and (max-height: 640px) {
+  .app-shell__sidebar {
+    gap: 0.55rem;
+    padding-top: calc(0.45rem + env(safe-area-inset-top, 0px));
+    padding-bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .app-shell__brand {
+    padding: 0.4rem 0.6rem 0.5rem;
+  }
+
+  .app-shell__brand::after {
+    margin-top: 0.35rem;
+  }
+
+  .app-shell__brand-title {
+    margin-top: 0.25rem;
+    font-size: 0.88rem;
+  }
+
+  .app-shell__nav {
+    gap: 0.28rem;
+  }
+
+  .app-shell__footer {
+    padding-top: 0.15rem;
+  }
+
+  .app-shell__link,
+  .app-shell__logout {
+    min-height: 2.55rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.64rem;
   }
 }
 
