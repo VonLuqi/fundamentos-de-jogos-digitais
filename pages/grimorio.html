@@ -105,6 +105,40 @@
     </div>
   </div>
 
+  <div
+    class="note-share-modal"
+    id="note-share-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="note-share-title"
+    aria-describedby="note-share-lead"
+    hidden
+  >
+    <div class="note-share-modal__panel">
+      <button
+        class="note-share-modal__close"
+        type="button"
+        id="note-share-close"
+        aria-label="Fechar revelação"
+      >
+        ×
+      </button>
+      <section class="note-share" id="note-share">
+        <h2 class="note-share__title" id="note-share-title">Revelar ao Companheiro</h2>
+        <p class="note-share__lead" id="note-share-lead">
+          Escolha quem está ao seu lado para contemplar esta inscrição.
+        </p>
+        <div class="note-share__row">
+          <select class="note-form__select" id="note-share-select" aria-label="Companheiro">
+            <option value="">— Companheiro —</option>
+          </select>
+          <button class="btn-gold btn-gold--ghost" type="button" id="note-share-btn">Revelar</button>
+        </div>
+        <ul class="note-share__list" id="note-share-list" aria-label="Já revelado a"></ul>
+      </section>
+    </div>
+  </div>
+
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
@@ -240,6 +274,25 @@
                       </svg>
                     </span>
                   </a>
+                  <button
+                    class="note-share-trigger"
+                    type="button"
+                    id="note-share-open"
+                    hidden
+                    aria-haspopup="dialog"
+                    aria-controls="note-share-modal"
+                    aria-expanded="false"
+                  >
+                    <span class="note-share-trigger__icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6">
+                        <path d="M12 3v3M8.5 5.2 10 7.5M15.5 5.2 14 7.5" stroke-linecap="round" />
+                        <circle cx="12" cy="12.5" r="3.2" />
+                        <path d="M5.5 19c.8-2.4 3-4 6.5-4s5.7 1.6 6.5 4" stroke-linecap="round" />
+                      </svg>
+                    </span>
+                    <span class="note-share-trigger__label">Revelar</span>
+                    <span class="note-share-trigger__badge" id="note-share-badge" hidden>0</span>
+                  </button>
                   <a
                     class="note-icon-btn"
                     id="note-edit-link"
@@ -306,24 +359,20 @@
                 <h3 class="note-events__title">Ecos desta inscrição</h3>
                 <ul class="note-events__list" id="note-events-list"></ul>
               </section>
-
-              <section class="note-share" id="note-share" hidden>
-                <h2 class="note-share__title">Revelar ao Companheiro</h2>
-                <p class="note-share__lead">Escolha quem está ao seu lado para contemplar esta inscrição.</p>
-                <div class="note-share__row">
-                  <select class="note-form__select" id="note-share-select" aria-label="Companheiro">
-                    <option value="">— Companheiro —</option>
-                  </select>
-                  <button class="btn-gold btn-gold--ghost" type="button" id="note-share-btn">Revelar</button>
-                </div>
-                <ul class="note-share__list" id="note-share-list" aria-label="Já revelado a"></ul>
-              </section>
             </article>
           </section>
         </div>
       </main>
     </div>
   </div>
+
+  <div
+    class="grimorio-award-toast"
+    id="grimorio-award-toast"
+    hidden
+    role="status"
+    aria-live="polite"
+  ></div>
 
   <script type="module" src="../js/grimorio.js"></script>
 </body>

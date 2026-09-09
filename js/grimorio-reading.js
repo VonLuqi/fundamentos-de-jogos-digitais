@@ -18,6 +18,7 @@ import {
   unshareNote,
 } from './api.js';
 import { renderTagChips } from './grimorio-tags.js';
+import { presentGrimoireAwards } from './grimorio-awards.js';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -138,6 +139,114 @@ function eventLabel(event) {
   return `${who} · ${event.kind}`;
 }
 
+function updateShareBadge(count) {
+  const badge = document.getElementById('note-share-badge');
+  const openBtn = document.getElementById('note-share-open');
+  if (!badge) return;
+  const n = Math.max(0, Number(count) || 0);
+  if (n > 0) {
+    badge.hidden = false;
+    badge.textContent = String(n);
+    openBtn?.setAttribute('aria-label', `Revelar ao companheiro, ${n} já revelado${n === 1 ? '' : 's'}`);
+  } else {
+    badge.hidden = true;
+    badge.textContent = '0';
+    openBtn?.setAttribute('aria-label', 'Revelar ao companheiro');
+  }
+}
+
+function setShareTriggerVisible(visible) {
+  const openBtn = document.getElementById('note-share-open');
+  if (!openBtn) return;
+  openBtn.hidden = !visible;
+  if (!visible) {
+    openBtn.setAttribute('aria-expanded', 'false');
+    updateShareBadge(0);
+    if (isShareModalOpen()) closeShareModal({ restoreFocus: false });
+  }
+}
+
+function isShareModalOpen() {
+  const modal = document.getElementById('note-share-modal');
+  return Boolean(modal && !modal.hidden && modal.classList.contains('is-open'));
+}
+
+function closeShareModal({ restoreFocus = true } = {}) {
+  const modal = document.getElementById('note-share-modal');
+  const openBtn = document.getElementById('note-share-open');
+  if (!modal || modal.hidden) return;
+
+  modal.classList.remove('is-open');
+  modal.hidden = true;
+  document.body.classList.remove('is-note-share-open');
+  openBtn?.setAttribute('aria-expanded', 'false');
+  window.removeEventListener('keydown', onShareModalKeyDown);
+  modal.removeEventListener('click', onShareModalBackdrop);
+
+  if (restoreFocus && openBtn && !openBtn.hidden) {
+    openBtn.focus({ preventScroll: true });
+  }
+}
+
+function onShareModalKeyDown(event) {
+  const modal = document.getElementById('note-share-modal');
+  const panel = modal?.querySelector('.note-share-modal__panel');
+  if (!modal || modal.hidden || !panel) return;
+
+  if (event.key === 'Escape') {
+    const nestedConfirm = document.querySelector('.grimorio-confirm.is-open');
+    if (nestedConfirm) return;
+    event.preventDefault();
+    closeShareModal();
+    return;
+  }
+
+  if (event.key !== 'Tab') return;
+  const focusable = Array.from(panel.querySelectorAll(FOCUSABLE_SELECTOR))
+    .filter((node) => !node.hasAttribute('disabled') && node.offsetParent !== null);
+  if (focusable.length === 0) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
+function onShareModalBackdrop(event) {
+  if (event.target?.id === 'note-share-modal') {
+    closeShareModal();
+  }
+}
+
+function openShareModal() {
+  const modal = document.getElementById('note-share-modal');
+  const panel = modal?.querySelector('.note-share-modal__panel');
+  const openBtn = document.getElementById('note-share-open');
+  const select = document.getElementById('note-share-select');
+  const closeBtn = document.getElementById('note-share-close');
+  if (!modal || !panel) return;
+  if (!modal.hidden && modal.classList.contains('is-open')) return;
+
+  window.removeEventListener('keydown', onShareModalKeyDown);
+  modal.removeEventListener('click', onShareModalBackdrop);
+
+  modal.hidden = false;
+  document.body.classList.add('is-note-share-open');
+  openBtn?.setAttribute('aria-expanded', 'true');
+  window.addEventListener('keydown', onShareModalKeyDown);
+  modal.addEventListener('click', onShareModalBackdrop);
+
+  window.requestAnimationFrame(() => {
+    modal.classList.add('is-open');
+    const focusTarget = select && !select.disabled ? select : closeBtn;
+    focusTarget?.focus({ preventScroll: true });
+  });
+}
+
 function renderShareList(note, companions, onUnshare) {
   const list = document.getElementById('note-share-list');
   const select = document.getElementById('note-share-select');
@@ -145,6 +254,7 @@ function renderShareList(note, companions, onUnshare) {
 
   const shared = note.sharedWith || [];
   list.replaceChildren();
+  updateShareBadge(shared.length);
 
   if (shared.length === 0) {
     list.appendChild(el('li', 'note-share__empty', 'Nada revelado a companheiros… ainda.'));
@@ -209,7 +319,6 @@ export async function loadGrimorioReading(options) {
   const deleteBtn = document.getElementById('note-delete');
   const cloneBtn = document.getElementById('note-clone');
   const refuseBtn = document.getElementById('note-refuse');
-  const shareSection = document.getElementById('note-share');
   const shareBtn = document.getElementById('note-share-btn');
   const shareSelect = document.getElementById('note-share-select');
   const eventsSection = document.getElementById('note-events');
@@ -231,11 +340,11 @@ export async function loadGrimorioReading(options) {
   }
 
   function refreshShareUi(note) {
-    if (!shareSection || !canEdit || !note?.id) {
-      if (shareSection) shareSection.hidden = true;
+    if (!canEdit || !note?.id) {
+      setShareTriggerVisible(false);
       return;
     }
-    shareSection.hidden = false;
+    setShareTriggerVisible(true);
     renderShareList(note, companions, async (userId) => {
       const confirmed = await openConfirmDialog({
         dialogId: 'note-veil-confirm',
@@ -370,6 +479,8 @@ export async function loadGrimorioReading(options) {
 
   function clearReading() {
     currentNote = null;
+    setShareTriggerVisible(false);
+    if (isShareModalOpen()) closeShareModal({ restoreFocus: false });
     if (viewRoot) viewRoot.hidden = true;
     if (emptyEl) emptyEl.hidden = false;
     setFeedback('');
@@ -432,6 +543,7 @@ export async function loadGrimorioReading(options) {
     try {
       setFeedback('Clonando inscrição…');
       const result = await cloneNote(token, currentNote.id);
+      presentGrimoireAwards(result.awarded);
       onCloned?.(result.note.id);
     } catch (error) {
       setFeedback(
@@ -475,7 +587,13 @@ export async function loadGrimorioReading(options) {
       const result = await shareNote(token, currentNote.id, targetId);
       currentNote = result.note;
       refreshShareUi(currentNote);
-      setFeedback('Inscrição revelada ao companheiro.', 'ok');
+      presentGrimoireAwards(result.awarded);
+      setFeedback(
+        result.awarded?.achievements?.length
+          ? 'Inscrição revelada · relíquia despertou.'
+          : 'Inscrição revelada ao companheiro.',
+        'ok'
+      );
     } catch (error) {
       setFeedback(
         error instanceof ApiError ? error.message : 'Falha ao revelar.',
@@ -488,20 +606,35 @@ export async function loadGrimorioReading(options) {
   cloneBtn?.replaceWith(cloneBtn.cloneNode(true));
   refuseBtn?.replaceWith(refuseBtn.cloneNode(true));
   shareBtn?.replaceWith(shareBtn.cloneNode(true));
+  document.getElementById('note-share-open')?.replaceWith(
+    document.getElementById('note-share-open').cloneNode(true)
+  );
+  document.getElementById('note-share-close')?.replaceWith(
+    document.getElementById('note-share-close').cloneNode(true)
+  );
 
   const deleteFresh = document.getElementById('note-delete');
   const cloneFresh = document.getElementById('note-clone');
   const refuseFresh = document.getElementById('note-refuse');
   const shareFresh = document.getElementById('note-share-btn');
+  const shareOpenFresh = document.getElementById('note-share-open');
+  const shareCloseFresh = document.getElementById('note-share-close');
 
   if (deleteFresh) deleteFresh.hidden = !canEdit;
   if (cloneFresh) cloneFresh.hidden = !canClone;
   if (refuseFresh) refuseFresh.hidden = !canRefuse;
+  setShareTriggerVisible(canEdit);
+  if (canEdit) updateShareBadge((currentNote?.sharedWith || []).length);
 
   deleteFresh?.addEventListener('click', onDelete);
   cloneFresh?.addEventListener('click', onClone);
   refuseFresh?.addEventListener('click', onRefuse);
   shareFresh?.addEventListener('click', onShare);
+  shareOpenFresh?.addEventListener('click', () => {
+    if (!canEdit || !currentNote?.id) return;
+    openShareModal();
+  });
+  shareCloseFresh?.addEventListener('click', () => closeShareModal());
 
   return {
     clear: clearReading,
@@ -512,6 +645,8 @@ export async function loadGrimorioReading(options) {
 export function hideGrimorioReading() {
   const viewRoot = document.getElementById('note-view');
   const emptyEl = document.getElementById('grimorio-reading-empty');
+  if (isShareModalOpen()) closeShareModal({ restoreFocus: false });
+  setShareTriggerVisible(false);
   if (viewRoot) viewRoot.hidden = true;
   if (emptyEl) emptyEl.hidden = false;
   setFeedback('');

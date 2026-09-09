@@ -1,0 +1,266 @@
+/* Submundo ARG — salas Hades / ferro / névoa / tribunal / estige */
+:root {
+  --sub-bg: #0d0d11;
+  --shadow-color: #0d0d11;
+  --sub-gold: #cfa759;
+  --sub-parchment: #f2e6c9;
+  --sub-dim: #8a8074;
+  --sub-blood: #c23548;
+  --font-title: Cinzel, serif;
+  --font-body: 'Crimson Text', Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body.submundo {
+  min-height: 100vh;
+  color: var(--sub-parchment);
+  background: var(--sub-bg);
+  font-family: var(--font-body);
+}
+
+.submundo__shell {
+  width: min(100%, 42rem);
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 3rem;
+}
+
+.submundo__eyebrow {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--sub-gold);
+}
+
+.submundo__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.35rem, 4vw, 1.85rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sub-gold);
+}
+
+.submundo__riddle {
+  margin: 0 0 1.5rem;
+  font-size: 1.15rem;
+  line-height: 1.45;
+  color: var(--sub-dim);
+  font-style: italic;
+}
+
+.submundo__panel {
+  padding: 1.25rem;
+  border: 2px solid #8a6a2f;
+  outline: 1px solid var(--sub-gold);
+  outline-offset: 3px;
+  background: rgba(18, 12, 20, 0.92);
+}
+
+.submundo__label {
+  display: block;
+  margin: 0 0 0.45rem;
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sub-gold);
+}
+
+.submundo__input,
+.submundo__select {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  color: var(--sub-parchment);
+  background: rgba(8, 6, 10, 0.85);
+  border: 1px solid rgba(207, 167, 89, 0.45);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.95rem;
+}
+
+.submundo__btn {
+  margin-top: 0.85rem;
+  padding: 0.7rem 1.1rem;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sub-gold);
+  background: transparent;
+  border: 1px solid var(--sub-gold);
+  cursor: pointer;
+}
+
+.submundo__btn:hover,
+.submundo__btn:focus-visible {
+  color: #0d0a10;
+  background: var(--sub-gold);
+  outline: none;
+}
+
+.submundo__status {
+  min-height: 1.4em;
+  margin: 0.85rem 0 0;
+  color: var(--sub-dim);
+}
+
+.submundo__status[data-tone='error'] {
+  color: var(--sub-blood);
+}
+
+.submundo__status[data-tone='ok'] {
+  color: var(--sub-gold);
+}
+
+/* Tártaro */
+.submundo--tartaro {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(80, 60, 40, 0.25), transparent 55%),
+    var(--sub-bg);
+}
+
+.hidden-rune {
+  margin: 0 0 1.25rem;
+  color: var(--shadow-color);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.18em;
+  user-select: none;
+}
+
+.submundo__greek {
+  margin: 0 0 1rem;
+  opacity: 0.35;
+  letter-spacing: 0.35em;
+  font-size: 0.85rem;
+}
+
+/* Asfódelos */
+.submundo--asfodelos {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(160, 170, 180, 0.12), transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(120, 130, 140, 0.1), transparent 45%),
+    #101218;
+}
+
+.submundo__fog {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 40%, rgba(200, 210, 220, 0.08), transparent 40%),
+    radial-gradient(ellipse at 80% 60%, rgba(180, 190, 200, 0.07), transparent 42%);
+  animation: subFog 12s ease-in-out infinite alternate;
+}
+
+@keyframes subFog {
+  from { opacity: 0.55; transform: translateX(-1%); }
+  to { opacity: 0.95; transform: translateX(1%); }
+}
+
+.submundo__audio {
+  width: 100%;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.submundo__hint a {
+  color: var(--sub-gold);
+}
+
+/* Elísios */
+.submundo--elisios {
+  background:
+    linear-gradient(180deg, rgba(40, 36, 28, 0.5), transparent 40%),
+    #0c0b0f;
+}
+
+.submundo__judges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin: 0 0 1.25rem;
+}
+
+.submundo__judge {
+  padding: 1rem 0.5rem;
+  text-align: center;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: rgba(30, 28, 24, 0.7);
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sub-dim);
+}
+
+.submundo__judge::before {
+  content: '🗿';
+  display: block;
+  margin-bottom: 0.45rem;
+  font-size: 1.6rem;
+}
+
+/* Estige */
+.submundo--estige {
+  background:
+    radial-gradient(ellipse at 50% 110%, rgba(30, 80, 120, 0.35), transparent 50%),
+    linear-gradient(180deg, #0a0c12, #061018 70%);
+}
+
+.submundo__boat {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-size: 2.5rem;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55));
+}
+
+.submundo__celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 3, 8, 0.78);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.submundo__celebrate.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.submundo__celebrate-card {
+  width: min(100%, 26rem);
+  padding: 1.5rem;
+  text-align: center;
+  border: 2px solid var(--sub-gold);
+  background: rgba(18, 12, 20, 0.96);
+  animation: subPop 420ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+@keyframes subPop {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submundo__fog,
+  .submundo__celebrate-card {
+    animation: none;
+  }
+}

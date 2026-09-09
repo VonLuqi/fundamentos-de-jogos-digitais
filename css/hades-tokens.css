@@ -40,6 +40,25 @@
   --transition-base: 250ms ease;
 }
 
+/* Ângulos animáveis — loop perfeito em conic-gradient (raridade Única) */
+@property --unique-border-angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --unique-halo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@property --unique-name-pos {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
 html {
   color-scheme: dark;
 }

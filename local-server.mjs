@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import handler from './api/auth.js';
+import progressHandler from './api/progress.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,7 +49,8 @@ const mimeTypes = {
   '.jpeg': 'image/jpeg',
   '.jfif': 'image/jpeg',
   '.gif': 'image/gif',
-  '.ico': 'image/x-icon',
+  '.wav': 'audio/wav',
+  '.webp': 'image/webp',
 };
 
 const server = http.createServer(async (req, res) => {
@@ -56,9 +58,9 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = decodeURIComponent(url.pathname);
 
-    if (pathname === '/api/auth') {
+    if (pathname === '/api/auth' || pathname === '/api/progress') {
       const body = req.method === 'POST' ? await parseBody(req) : {};
-      console.log(`[${new Date().toISOString()}] ${req.method} /api/auth`, { body, query: Object.fromEntries(url.searchParams.entries()) });
+      console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`, { body, query: Object.fromEntries(url.searchParams.entries()) });
       const request = {
         method: req.method,
         headers: req.headers,
@@ -81,7 +83,8 @@ const server = http.createServer(async (req, res) => {
           return payload;
         },
       };
-      await handler(request, response);
+      const routeHandler = pathname === '/api/progress' ? progressHandler : handler;
+      await routeHandler(request, response);
       if (!res.writableEnded) {
         const payload = response.body || { ok: true };
         console.log(`[${new Date().toISOString()}] final response status: ${response.statusCode}`, payload);
@@ -91,6 +94,17 @@ const server = http.createServer(async (req, res) => {
     }
 
     let filePath = pathname === '/' ? '/index.html' : pathname;
+
+    const submundoPages = {
+      '/submundo/tartaro-oculto': '/pages/submundo/tartaro-oculto.html',
+      '/submundo/asfodelos-sussurros': '/pages/submundo/asfodelos-sussurros.html',
+      '/submundo/elisios-julgamento': '/pages/submundo/elisios-julgamento.html',
+      '/submundo/estige-obolo': '/pages/submundo/estige-obolo.html',
+    };
+    if (submundoPages[pathname]) {
+      filePath = submundoPages[pathname];
+    }
+
     const safePath = path.normalize(filePath).replace(/^\/+/, '');
     const fullPath = path.join(__dirname, safePath);
     let finalPath = fullPath;

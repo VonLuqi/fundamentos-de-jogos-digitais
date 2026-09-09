@@ -131,7 +131,36 @@ const unlockedCommon = getAlbumSlotModel(user([COMMON.id]), COMMON, {
 });
 assert(unlockedCommon.kind === 'unlocked', 'comum: espelhado com → unlocked');
 
-// Contador Q3-B: secretas do espelhado entram no X
+// Única (Soberano) no Espelho — eixos iguais às demais secretas
+const UNIQUE = {
+  id: 'soberano_do_submundo',
+  name: 'Soberano do Submundo',
+  icon: '👑',
+  hidden: true,
+  rarity: 'unique',
+  difficulty: 'legendary',
+  desc: 'desc unica',
+};
+const uniqueModel = getAlbumSlotModel(user([UNIQUE.id]), UNIQUE, {
+  visitorView: true,
+  viewerUser: user([UNIQUE.id]),
+});
+assert(uniqueModel.kind === 'unlocked', 'Única: obs+esp → unlocked');
+assert(uniqueModel.rarity === 'unique', 'Única: rarity unique no estilo');
+assert(uniqueModel.showRarityBadge === true, 'Única: badge');
+
+const uniqueMystery = getAlbumSlotModel(user([UNIQUE.id]), UNIQUE, {
+  visitorView: true,
+  viewerUser: user([]),
+});
+assert(uniqueMystery.kind === 'mystery', 'Única: obs sem texto → mystery');
+assert(uniqueMystery.applySecretStyle === true, 'Única: estilo do espelhado');
+assert(uniqueMystery.rarity === 'unique', 'Única mystery styled mantém rarity');
+
+assert(
+  read('css/conquistas.css').includes("is-mystery--styled[data-rarity='unique']"),
+  'CSS mystery unique no Espelho'
+);
 const stats = getAchievementCollectionStats(
   user([COMMON.id, SECRET.id, 'segredo_juramento_do_circulo']),
   { visitorView: true }

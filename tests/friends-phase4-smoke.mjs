@@ -23,21 +23,24 @@ function assert(condition, message) {
 
 [
   'pages/companheiro.html',
+  'pages/salao-espiritual.html',
   'pages/dashboard.html',
   'js/friends-ui.js',
   'js/companheiro.js',
+  'js/salao-espiritual.js',
   'css/companheiros.css',
   'db/migrate-2026-09-08-friendships.sql',
 ].forEach((rel) => {
   assert(fs.existsSync(path.join(root, rel)), `Arquivo ausente: ${rel}`);
 });
 
-const dashboard = read('pages/dashboard.html');
-assert(dashboard.includes('companions-panel'), 'dashboard precisa da seção Companheiros');
-assert(dashboard.includes('bond-confirm'), 'dashboard precisa do diálogo Romper vínculo');
-assert(dashboard.includes('aria-labelledby="bond-confirm-title"'), 'bond-confirm precisa de aria-labelledby');
-assert(dashboard.includes('aria-describedby="bond-confirm-desc"'), 'bond-confirm precisa de aria-describedby');
-assert(dashboard.includes('companheiros.css'), 'dashboard deve carregar companheiros.css');
+const salao = read('pages/salao-espiritual.html');
+assert(salao.includes('companions-panel'), 'Salão precisa da seção Companheiros');
+assert(salao.includes('bond-confirm'), 'Salão precisa do diálogo Romper vínculo');
+assert(salao.includes('aria-labelledby="bond-confirm-title"'), 'bond-confirm precisa de aria-labelledby');
+assert(salao.includes('aria-describedby="bond-confirm-desc"'), 'bond-confirm precisa de aria-describedby');
+assert(salao.includes('companheiros.css'), 'Salão deve carregar companheiros.css');
+assert(salao.includes('salao-espiritual.js') || read('js/salao-espiritual.js').includes('initCompanionsPanel'), 'Salão carrega companions UI');
 
 const friendsUi = read('js/friends-ui.js');
 assert(friendsUi.includes('confirmBreakBond'), 'friends-ui deve usar diálogo de confirmação');

@@ -32,7 +32,6 @@ import {
   loadAvatarImage,
   ACHIEVEMENTS,
   LESSONS,
-  LEVEL_XP_BASE,
   ROUTES,
   ApiError,
   requireSession,
@@ -42,9 +41,7 @@ import {
   listCodes,
   logout,
   getSession,
-  rankForXp,
-  levelForXp,
-  xpWithinLevel,
+  describeLevelProgress,
   fetchLessonsPublishMap,
   normalizeAchievementRarity,
   listFriends,
@@ -77,8 +74,9 @@ function renderProfile(user) {
   const usernameEl = document.getElementById('profile-username');
   if (usernameEl) usernameEl.textContent = `@${username}`;
   document.getElementById('profile-name').textContent = fullName;
-  document.getElementById('profile-rank').textContent = isAdmin ? 'Mestre do Infinito' : rankForXp(user.xp);
-  document.getElementById('level-value').textContent = isAdmin ? '∞' : String(levelForXp(user.xp));
+  const progress = describeLevelProgress(user.xp, { isAdmin });
+  document.getElementById('profile-rank').textContent = progress.rank;
+  document.getElementById('level-value').textContent = progress.levelLabel;
   const avatarImg = document.getElementById('avatar-glyph');
   if (avatarImg) loadAvatarImage(avatarImg, user.avatarIndex);
   updateAvatarCounter(user.avatarIndex);
@@ -252,36 +250,47 @@ async function renderRailPreviews(token) {
    sensação de progresso conquistado. Ao carregar a página usamos
    animação; após um resgate, animamos do valor antigo para o novo.
    ============================================================ */
-function renderXpBar(user, { fromZero = false } = {}) {
+function renderXpBar(user, { fromZero = false, surge = false } = {}) {
   const fillEl = document.getElementById('xp-fill');
   const textEl = document.getElementById('xp-text');
   const barEl = fillEl?.closest('.xp-bar');
   if (!fillEl || !textEl || !barEl) return;
 
-  if (user.role === 'admin') {
-    textEl.textContent = '∞ / ∞ XP';
-    barEl.setAttribute('aria-valuenow', String(LEVEL_XP_BASE));
-    fillEl.style.width = '100%';
-    return;
-  }
+  const progress = describeLevelProgress(user.xp, { isAdmin: user.role === 'admin' });
+  const targetPercent = progress.barPercent;
 
-  const xpInLevel = xpWithinLevel(user.xp);
-  const targetPercent = Math.min((xpInLevel / LEVEL_XP_BASE) * 100, 100);
-
-  textEl.textContent = `${xpInLevel} / ${LEVEL_XP_BASE} XP`;
-  barEl.setAttribute('aria-valuenow', String(xpInLevel));
+  textEl.textContent = progress.barLabel;
+  barEl.setAttribute(
+    'aria-valuenow',
+    String(progress.atMax ? (progress.quota || 100) : (progress.within || 0))
+  );
+  barEl.setAttribute('aria-valuemax', String(progress.quota || 100));
+  barEl.style.setProperty('--xp-pct', String(Math.round(targetPercent)));
+  if (progress.atMax) barEl.dataset.max = 'true';
+  else delete barEl.dataset.max;
 
   if (fromZero) {
     fillEl.style.transition = 'none';
     fillEl.style.width = '0%';
-    void fillEl.offsetHeight; // reflow: garante que o 0% seja aplicado
+    barEl.style.setProperty('--xp-pct', '0');
+    void fillEl.offsetHeight;
     fillEl.style.transition = '';
   }
 
-  // Pequeno atraso para que a transição CSS seja perceptível.
   window.setTimeout(() => {
     fillEl.style.width = `${targetPercent}%`;
+    barEl.style.setProperty('--xp-pct', String(Math.round(targetPercent)));
   }, 180);
+
+  if (surge) {
+    barEl.classList.remove('is-surging');
+    void barEl.offsetHeight;
+    barEl.classList.add('is-surging');
+    window.clearTimeout(barEl._surgeTimer);
+    barEl._surgeTimer = window.setTimeout(() => {
+      barEl.classList.remove('is-surging');
+    }, 1200);
+  }
 }
 
 /* ============================================================
@@ -291,6 +300,7 @@ const ACHIEVEMENT_PREVIEW_LIMIT = 5;
 
 /** Ordem decrescente: arco-íris → ouro → prata → cobre → pedra. */
 const RARITY_RANK = Object.freeze({
+  unique: 6,
   rainbow: 5,
   gold: 4,
   silver: 3,
@@ -462,6 +472,12 @@ function initAltar() {
       if (achievementNames.length > 0) {
         detailParts.push(`Conquista: ${achievementNames.join(', ')}`);
       }
+      if (result.leveledUp) {
+        const after = describeLevelProgress(currentUser.xp, {
+          isAdmin: currentUser.role === 'admin',
+        });
+        detailParts.push(`Nível ${after.levelLabel}`);
+      }
 
       showLevelUpOverlay(
         result.leveledUp ? 'LEVEL UP!' : 'Oferenda Aceita',
@@ -469,7 +485,7 @@ function initAltar() {
       );
 
       renderProfile(currentUser);
-      renderXpBar(currentUser);
+      renderXpBar(currentUser, { surge: true });
       renderAchievements(currentUser, result.awarded.achievements);
       renderLessons(currentUser);
 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0c0b0f" />
+  <title>O Palácio dos Elísios</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/submundo.css" />
+</head>
+<body class="submundo submundo--elisios">
+  <main class="submundo__shell">
+    <p class="submundo__eyebrow">Julgamento da Rede</p>
+    <h1 class="submundo__title">O Palácio dos Elísios</h1>
+    <p class="submundo__riddle">
+      O oráculo não profetiza na interface dos mortais. Examine as correntes de dados que trafegam nos bastidores da rede antes que o payload se desfaça.
+    </p>
+    <div class="submundo__judges" aria-hidden="true">
+      <div class="submundo__judge">Minos</div>
+      <div class="submundo__judge">Radamanto</div>
+      <div class="submundo__judge">Éaco</div>
+    </div>
+    <div class="submundo__panel">
+      <button class="submundo__btn" type="button" id="elisios-judge">Solicitar Julgamento dos Juízes</button>
+      <p class="submundo__status" id="elisios-status" role="status"></p>
+      <form id="elisios-form" hidden>
+        <label class="submundo__label" for="elisios-pass">Chave do oráculo</label>
+        <input class="submundo__input" id="elisios-pass" autocomplete="off" spellcheck="false" />
+        <button class="submundo__btn" type="submit">Apresentar ao tribunal</button>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="../../js/submundo/elisios.js"></script>
+</body>
+</html>

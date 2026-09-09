@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#101218" />
+  <title>Os Campos de Asfódelos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/submundo.css" />
+</head>
+<body class="submundo submundo--asfodelos">
+  <div class="submundo__fog" aria-hidden="true"></div>
+  <main class="submundo__shell">
+    <p class="submundo__eyebrow">Nevoeiro dos Ecos</p>
+    <h1 class="submundo__title">Os Campos de Asfódelos</h1>
+    <p class="submundo__riddle">
+      Nem todo som é feito para ser ouvido; algumas verdades só se revelam quando você decide olhar para a frequência do invisível.
+    </p>
+    <div class="submundo__panel">
+      <p class="submundo__label">Eco dos campos</p>
+      <audio class="submundo__audio" controls preload="metadata" src="../../assets/submundo/asfodelos_echo.wav">
+        Seu navegador não reproduz áudio HTML5.
+      </audio>
+      <p class="submundo__hint">
+        Baixe o WAV e abra em Audacity (visão <strong>Spectrogram</strong>, ~2–4&nbsp;kHz)
+        ou use um
+        <a href="https://spectrogram.sciencemusic.org/" rel="noopener noreferrer" target="_blank">analisador espectral web</a>.
+      </p>
+      <form id="asfodelos-form">
+        <label class="submundo__label" for="asfodelos-pass">Chave do espectro</label>
+        <input class="submundo__input" id="asfodelos-pass" autocomplete="off" spellcheck="false" />
+        <button class="submundo__btn" type="submit">Seguir o eco</button>
+        <p class="submundo__status" id="asfodelos-status" role="status"></p>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="../../js/submundo/asfodelos.js"></script>
+</body>
+</html>

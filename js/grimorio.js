@@ -16,6 +16,7 @@ import {
 } from './api.js';
 import { hideGrimorioReading, loadGrimorioReading } from './grimorio-reading.js';
 import { renderTagChips } from './grimorio-tags.js';
+import { flushQueuedGrimoireAwards } from './grimorio-awards.js';
 
 const EXCERPT_MAX = 120;
 
@@ -108,6 +109,8 @@ async function init() {
       await logout();
     },
   });
+
+  flushQueuedGrimoireAwards();
 
   const token = session.token || getSession()?.token;
   const workspace = document.getElementById('grimorio-workspace');

@@ -446,8 +446,99 @@
 #mirror-album-intro[hidden],
 #mirror-album-grid[hidden],
 #mirror-stat-xp[hidden],
-#mirror-stat-lessons[hidden] {
+#mirror-stat-lessons[hidden],
+#mirror-xp-bar[hidden] {
   display: none !important;
+}
+
+.mirror-xp-bar {
+  margin-top: 0.85rem;
+  max-width: 18rem;
+  --xp-pct: 0;
+}
+
+.mirror-xp-bar__track {
+  position: relative;
+  height: 0.55rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--hades-gold) 40%, transparent);
+  background: linear-gradient(180deg, rgba(8, 5, 10, 0.95), rgba(20, 12, 16, 0.9));
+  box-shadow: inset 0 1px 6px rgba(0, 0, 0, 0.65);
+}
+
+.mirror-xp-bar__fill {
+  position: relative;
+  height: 100%;
+  width: 0%;
+  overflow: hidden;
+  background: var(--hades-gold-dark);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.45);
+  transition: width 0.45s ease;
+}
+
+.mirror-xp-bar__fill::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 200%;
+  height: 100%;
+  background-image: linear-gradient(
+    90deg,
+    var(--hades-gold-dark),
+    var(--hades-gold),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-gold-dark),
+    var(--hades-gold),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-gold-dark)
+  );
+  animation: mirrorXpFlow 3s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.mirror-xp-bar[data-max='true'] .mirror-xp-bar__fill::before {
+  background-image: linear-gradient(
+    90deg,
+    #c9a227,
+    #f5e6a3,
+    var(--hades-blood-bright, #c23548),
+    #c9a227,
+    #f5e6a3,
+    var(--hades-blood-bright, #c23548),
+    #c9a227
+  );
+}
+
+@keyframes mirrorXpFlow {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mirror-xp-bar__fill::before {
+    animation: none;
+  }
+}
+
+.mirror-xp-bar__text {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim, #b8aa97);
+}
+
+.companions-list__rank {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-title);
+  font-size: 0.52rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim, #b8aa97);
 }
 
 body[data-mirror-mode='turma'] .relic-modal {

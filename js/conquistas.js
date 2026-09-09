@@ -8,12 +8,14 @@ import { initAppShell } from './app-shell.js';
 import {
   ApiError,
   ROUTES,
+  fillTrailheadField,
   logout,
   normalizeAchievementRarity,
   requireSession,
 } from './api.js';
 import {
   fillAchievementArtHost,
+  fillAchievementDescription,
   getAchievementById,
   getAchievementCollectionStats,
   getAlbumSlotState,
@@ -80,14 +82,14 @@ async function openRelicModal(achievement, state) {
   } else if (state === 'locked') {
     await fillAchievementArtHost(art, achievement, { grayscale: true });
     rarityEl.textContent = rarityLabelForAchievement(achievement);
-    titleEl.textContent = achievement.name;
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
     descEl.textContent = 'Esta relíquia ainda não foi conquistada. O caminho continua no Salão e na Trilha.';
     metaEl.textContent = 'Figurinha bloqueada';
   } else {
     await fillAchievementArtHost(art, achievement, { grayscale: false });
     rarityEl.textContent = rarityLabelForAchievement(achievement);
-    titleEl.textContent = achievement.name;
-    descEl.textContent = achievement.desc;
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
+    fillAchievementDescription(descEl, achievement);
     metaEl.textContent = currentUser?.role === 'admin'
       ? 'Visão do Mestre — catálogo completo'
       : 'Relíquia descoberta';

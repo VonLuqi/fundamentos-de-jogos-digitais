@@ -34,7 +34,7 @@ const shellPages = [
   'pages/companheiro.html',
   'pages/salao-espiritual.html',
   'pages/grimorio.html',
-  'pages/grimorio-nota.html',
+  'pages/grimorio-editar.html',
   'pages/aula1.html',
   'pages/aula2.html',
   'pages/aula3.html',

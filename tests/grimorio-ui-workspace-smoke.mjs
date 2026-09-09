@@ -49,6 +49,7 @@ assert(html.includes('note-canvas__toolbar'), 'toolbar estilo referência');
 assert(html.includes('data-icon="trilha"'), 'slot ícone trilha');
 assert(html.includes('note-clone'), 'CTA clonar');
 assert(html.includes('note-refuse'), 'CTA recusar');
+assert(html.includes('note-share-open') && html.includes('note-share-modal'), 'Revelar em modal');
 assert(!html.includes('note-copy-link') && !html.includes('data-icon="copiar"'), 'sem copiar link');
 assert(html.includes('grimorio-reading-empty'), 'empty state leitura');
 assert(!/Inter|Roboto|#4[Aa]90[Ee][Dd]|background:\s*#fff/i.test(html), 'HTML sem UI light/azul genérica');

@@ -390,6 +390,28 @@ export async function redeemCode(token, code) {
   return { ...payload, user: normalizeUser(payload.user) };
 }
 
+export async function underworldJudgment(token) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'underworldJudgment' }),
+  });
+}
+
+export async function underworldRedeem(token, submittedHash) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'underworldRedeem',
+      submittedHash,
+    }),
+  });
+  return {
+    ...payload,
+    user: payload.user ? normalizeUser(payload.user) : null,
+  };
+}
+
 export async function setAvatar(token, avatarIndex) {
   const payload = await request('/progress', {
     method: 'POST',
@@ -837,122 +859,39 @@ export async function requireAdmin(options = {}) {
 
 /* ============================================================
    7. REGRAS DE APRESENTAÇÃO COMPARTILHADAS
+   (conquistas + níveis: data/game-catalog.json via js/game-catalog.js)
    ============================================================ */
-export const LEVEL_XP_BASE = 100;
-
-export const RANKS = [
-  { minXp: 0, title: 'Alma Novata' },
-  { minXp: 20, title: 'Iniciado do Tártaro' },
-  { minXp: 60, title: 'Operador do Tártaro' },
-  { minXp: 120, title: 'Veterano do Submundo' },
-  { minXp: 240, title: 'Campeão Érebo' },
-];
-
-export function rankForXp(xp) {
-  const match = RANKS.filter((r) => xp >= r.minXp).pop();
-  return match ? match.title : RANKS[0].title;
-}
-
-export function levelForXp(xp) {
-  return Math.max(1, Math.floor(xp / LEVEL_XP_BASE) + 1);
-}
-
-export function xpWithinLevel(xp) {
-  return xp % LEVEL_XP_BASE;
-}
-
-export const ACHIEVEMENT_RARITY = Object.freeze({
-  STONE: 'stone',
-  COPPER: 'copper',
-  SILVER: 'silver',
-  GOLD: 'gold',
-  RAINBOW: 'rainbow',
-});
-
-export const ACHIEVEMENT_RARITY_LABELS = Object.freeze({
-  [ACHIEVEMENT_RARITY.STONE]: 'Pedra',
-  [ACHIEVEMENT_RARITY.COPPER]: 'Cobre',
-  [ACHIEVEMENT_RARITY.SILVER]: 'Prata',
-  [ACHIEVEMENT_RARITY.GOLD]: 'Ouro',
-  [ACHIEVEMENT_RARITY.RAINBOW]: 'Arco-íris',
-});
-
-export const ACHIEVEMENT_DIFFICULTY = Object.freeze({
-  TRIVIAL: 'trivial',
-  EASY: 'easy',
-  MEDIUM: 'medium',
-  HARD: 'hard',
-  MYTHIC: 'mythic',
-});
-
-export const DIFFICULTY_TO_RARITY = Object.freeze({
-  [ACHIEVEMENT_DIFFICULTY.TRIVIAL]: ACHIEVEMENT_RARITY.STONE,
-  [ACHIEVEMENT_DIFFICULTY.EASY]: ACHIEVEMENT_RARITY.COPPER,
-  [ACHIEVEMENT_DIFFICULTY.MEDIUM]: ACHIEVEMENT_RARITY.SILVER,
-  [ACHIEVEMENT_DIFFICULTY.HARD]: ACHIEVEMENT_RARITY.GOLD,
-  [ACHIEVEMENT_DIFFICULTY.MYTHIC]: ACHIEVEMENT_RARITY.RAINBOW,
-});
-
-export const DEFAULT_ACHIEVEMENT_RARITY = ACHIEVEMENT_RARITY.STONE;
-
-export function rarityFromDifficulty(difficulty) {
-  return DIFFICULTY_TO_RARITY[difficulty] || DEFAULT_ACHIEVEMENT_RARITY;
-}
-
-export function normalizeAchievementRarity(rarity, difficulty = null) {
-  if (typeof rarity === 'string' && ACHIEVEMENT_RARITY_LABELS[rarity]) {
-    return rarity;
-  }
-  return rarityFromDifficulty(difficulty);
-}
-
-const RAW_ACHIEVEMENTS = [
-  {
-    id: 'aula1_concluida',
-    icon: '🏁',
-    name: 'Primeira Travessia',
-    desc: 'Concluir a Aula 01 e realizar sua primeira oferenda ao Estige.',
-    difficulty: ACHIEVEMENT_DIFFICULTY.TRIVIAL,
-    hidden: false,
-  },
-  {
-    id: 'gdd_integracao_documental',
-    icon: '📜',
-    name: 'Escriba do Submundo',
-    desc: 'Entregar a integração documental do GDD da Aula 01.',
-    difficulty: ACHIEVEMENT_DIFFICULTY.EASY,
-    hidden: false,
-  },
-  {
-    id: 'segredo_cartografo_do_inspector',
-    icon: '🧭',
-    name: 'Cartógrafo do Inspector',
-    desc: 'Segredo descoberto: registrar ao menos 3 testes diferentes na Aula 01.',
-    difficulty: ACHIEVEMENT_DIFFICULTY.MEDIUM,
-    hidden: true,
-  },
-  {
-    id: 'segredo_alquimista_da_fisica',
-    icon: '⚗️',
-    name: 'Alquimista da Física',
-    desc: 'Segredo descoberto: relacionar massa, gravidade, fricção e elasticidade no relatório.',
-    difficulty: ACHIEVEMENT_DIFFICULTY.HARD,
-    hidden: true,
-  },
-  {
-    id: 'segredo_juramento_do_circulo',
-    icon: '🔮',
-    name: 'Juramento do Círculo',
-    desc: 'Segredo descoberto: fechar o relatório com a síntese completa das seis variáveis.',
-    difficulty: ACHIEVEMENT_DIFFICULTY.MYTHIC,
-    hidden: true,
-  },
-];
-
-export const ACHIEVEMENTS = RAW_ACHIEVEMENTS.map((achievement) => ({
-  ...achievement,
-  rarity: normalizeAchievementRarity(achievement.rarity, achievement.difficulty),
-}));
+export {
+  ACHIEVEMENT_DIFFICULTY,
+  ACHIEVEMENT_RARITY,
+  ACHIEVEMENT_RARITY_LABELS,
+  ACHIEVEMENTS,
+  DEFAULT_ACHIEVEMENT_RARITY,
+  DIFFICULTY_TO_RARITY,
+  GAME_CATALOG,
+  LEVEL_BANDS,
+  LEVEL_XP_BASE,
+  MAX_LEVEL,
+  RANKS,
+  getAchievementById,
+  getAchievementDifficulty,
+  getAchievementRarity,
+  getAchievementXp,
+  isMaxLevel,
+  levelForXp,
+  mapAchievementDetails,
+  normalizeAchievementRarity,
+  describeLevelProgress,
+  rankForLevel,
+  rankForXp,
+  rarityFromDifficulty,
+  buildTrailheadTextNode,
+  fillTrailheadField,
+  xpQuotaForXp,
+  xpRequiredForLevel,
+  xpToReachLevel,
+  xpWithinLevel,
+} from './game-catalog.js';
 
 export const MODULES = [
   {

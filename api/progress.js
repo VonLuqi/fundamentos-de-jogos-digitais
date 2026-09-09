@@ -1,5 +1,17 @@
 import crypto from 'node:crypto';
 import supabase from './supabaseClient.js';
+import {
+  ACHIEVEMENTS,
+  getAchievementXp,
+  levelForXp,
+  mapAchievementDetails,
+  rankForXp,
+} from '../js/game-catalog.js';
+import { evaluateGrimoireAchievementIds } from './_lib/grimoire-achievements.js';
+import {
+  allLessonSecretIds,
+  evaluateSecretAchievements as evaluateLessonSecretAchievements,
+} from './_lib/lesson-secret-achievements.js';
 
 const USERS_TABLE = 'users';
 const CODES_TABLE = 'redeem_codes';
@@ -20,45 +32,31 @@ const NOTE_SOFT_WARN_COUNT = 50;
 /** Copy alinhada à microcopy Task 1 — respostas 403 de tools do Mestre. */
 const ADMIN_FORBIDDEN = 'Esta senda é só do Mestre.';
 
+const UNDERWORLD_SOBERANO_ID = 'soberano_do_submundo';
+const UNDERWORLD_ESTIGE_HASH = '18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c';
+const UNDERWORLD_ORACLE_TOKEN = Buffer.from('key_elestial_hades', 'utf8').toString('base64');
+const underworldRedeemAttempts = new Map();
+
+function underworldRateLimited(userId) {
+  const key = String(userId);
+  const now = Date.now();
+  const windowMs = 60_000;
+  const maxAttempts = 12;
+  const recent = (underworldRedeemAttempts.get(key) || []).filter((ts) => now - ts < windowMs);
+  if (recent.length >= maxAttempts) {
+    underworldRedeemAttempts.set(key, recent);
+    return true;
+  }
+  recent.push(now);
+  underworldRedeemAttempts.set(key, recent);
+  return false;
+}
+
 function rejectUnlessAdmin(user, res) {
   if (user?.role === 'admin') return false;
   res.status(403).json({ ok: false, error: ADMIN_FORBIDDEN });
   return true;
 }
-
-const RANKS = [
-  { minXp: 0, title: 'Alma Novata' },
-  { minXp: 20, title: 'Iniciado do Tártaro' },
-  { minXp: 60, title: 'Operador do Tártaro' },
-  { minXp: 120, title: 'Veterano do Submundo' },
-  { minXp: 240, title: 'Campeão Érebo' },
-];
-
-const ACHIEVEMENT_RARITY = Object.freeze({
-  STONE: 'stone',
-  COPPER: 'copper',
-  SILVER: 'silver',
-  GOLD: 'gold',
-  RAINBOW: 'rainbow',
-});
-
-const ACHIEVEMENT_DIFFICULTY = Object.freeze({
-  TRIVIAL: 'trivial',
-  EASY: 'easy',
-  MEDIUM: 'medium',
-  HARD: 'hard',
-  MYTHIC: 'mythic',
-});
-
-const DIFFICULTY_TO_RARITY = Object.freeze({
-  [ACHIEVEMENT_DIFFICULTY.TRIVIAL]: ACHIEVEMENT_RARITY.STONE,
-  [ACHIEVEMENT_DIFFICULTY.EASY]: ACHIEVEMENT_RARITY.COPPER,
-  [ACHIEVEMENT_DIFFICULTY.MEDIUM]: ACHIEVEMENT_RARITY.SILVER,
-  [ACHIEVEMENT_DIFFICULTY.HARD]: ACHIEVEMENT_RARITY.GOLD,
-  [ACHIEVEMENT_DIFFICULTY.MYTHIC]: ACHIEVEMENT_RARITY.RAINBOW,
-});
-
-const DEFAULT_ACHIEVEMENT_RARITY = ACHIEVEMENT_RARITY.STONE;
 
 const LESSON_CATALOG = {
   aula1: {
@@ -93,45 +91,6 @@ const ACTIVITY_CATALOG = {
   },
 };
 
-const LESSON_SECRET_ACHIEVEMENTS = {
-  aula1: [
-    {
-      id: 'segredo_cartografo_do_inspector',
-      xp: 15,
-      test: (ctx) => countUniqueTestMarkers(ctx.normalizedText) >= 3,
-    },
-    {
-      id: 'segredo_alquimista_da_fisica',
-      xp: 15,
-      test: (ctx) =>
-        hasEveryKeyword(ctx.normalizedText, ['massa', 'gravidade', 'friccao', 'elasticidade'])
-        && hasAnyKeyword(ctx.normalizedText, ['inercia', 'queda', 'quique', 'desliza', 'deslizamento']),
-    },
-    {
-      id: 'segredo_juramento_do_circulo',
-      xp: 25,
-      test: (ctx) =>
-        hasEveryKeyword(ctx.normalizedText, [
-          'forca de movimento',
-          'impulso de pulo',
-          'massa',
-          'gravidade da cena',
-          'friccao',
-          'elasticidade',
-          'neste mundo, a bola',
-        ]),
-    },
-  ],
-};
-
-const ACHIEVEMENT_DIFFICULTY_BY_ID = Object.freeze({
-  aula1_concluida: ACHIEVEMENT_DIFFICULTY.TRIVIAL,
-  gdd_integracao_documental: ACHIEVEMENT_DIFFICULTY.EASY,
-  segredo_cartografo_do_inspector: ACHIEVEMENT_DIFFICULTY.MEDIUM,
-  segredo_alquimista_da_fisica: ACHIEVEMENT_DIFFICULTY.HARD,
-  segredo_juramento_do_circulo: ACHIEVEMENT_DIFFICULTY.MYTHIC,
-});
-
 const ACHIEVEMENT_RULES = [
   {
     id: 'aula1_concluida',
@@ -140,65 +99,20 @@ const ACHIEVEMENT_RULES = [
 ];
 
 const ALL_ACHIEVEMENT_IDS = [
-  ...ACHIEVEMENT_RULES.map((rule) => rule.id),
-  ...Object.values(ACTIVITY_CATALOG).map((activity) => activity.achievementId),
-  ...Object.values(LESSON_SECRET_ACHIEVEMENTS).flatMap((entries) => entries.map((entry) => entry.id)),
+  ...new Set([
+    ...ACHIEVEMENTS.map((entry) => entry.id),
+    ...ACHIEVEMENT_RULES.map((rule) => rule.id),
+    ...Object.values(ACTIVITY_CATALOG).map((activity) => activity.achievementId),
+    ...allLessonSecretIds(),
+  ]),
 ];
 
-function normalizeForSecretCheck(text) {
-  return String(text || '')
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-function rarityFromDifficulty(difficulty) {
-  return DIFFICULTY_TO_RARITY[difficulty] || DEFAULT_ACHIEVEMENT_RARITY;
-}
-
-function rarityForAchievement(achievementId) {
-  return rarityFromDifficulty(ACHIEVEMENT_DIFFICULTY_BY_ID[achievementId]);
-}
-
-function mapAchievementDetails(ids = []) {
-  return ids.map((id) => ({
-    id,
-    difficulty: ACHIEVEMENT_DIFFICULTY_BY_ID[id] || ACHIEVEMENT_DIFFICULTY.TRIVIAL,
-    rarity: rarityForAchievement(id),
-  }));
-}
-
-function hasEveryKeyword(text, keywords) {
-  return keywords.every((keyword) => text.includes(keyword));
-}
-
-function hasAnyKeyword(text, keywords) {
-  return keywords.some((keyword) => text.includes(keyword));
-}
-
-function countUniqueTestMarkers(text) {
-  const matches = [...text.matchAll(/teste\s*(\d+)/g)].map((entry) => entry[1]);
-  return new Set(matches).size;
-}
-
 function evaluateSecretAchievements(lessonId, paragraphText, alreadyUnlocked = []) {
-  const rules = LESSON_SECRET_ACHIEVEMENTS[String(lessonId || '')] || [];
-  if (rules.length === 0) return [];
-
-  const normalizedText = normalizeForSecretCheck(paragraphText);
-  const context = { normalizedText };
-
-  return rules
-    .filter((rule) => !alreadyUnlocked.includes(rule.id))
-    .filter((rule) => {
-      try {
-        return Boolean(rule.test(context));
-      } catch {
-        return false;
-      }
-    });
+  return evaluateLessonSecretAchievements(lessonId, paragraphText, alreadyUnlocked)
+    .map((entry) => ({
+      id: entry.id,
+      xp: getAchievementXp(entry.id),
+    }));
 }
 
 function defaultGatesForLesson(lessonId) {
@@ -232,16 +146,6 @@ function sanitizeUser(u) {
       ? ALL_ACHIEVEMENT_IDS
       : (Array.isArray(conquistas) ? conquistas : []),
   };
-}
-
-function levelForXp(xp) {
-  const LEVEL_XP_BASE = 100;
-  return Math.max(1, Math.floor(xp / LEVEL_XP_BASE) + 1);
-}
-
-function rankForXp(xp) {
-  const match = RANKS.filter((entry) => xp >= entry.minXp).pop();
-  return match ? match.title : RANKS[0].title;
 }
 
 function isMissingFriendshipsTable(error) {
@@ -485,6 +389,69 @@ async function countUserNotes(ownerId) {
   return Number(count || 0);
 }
 
+/** Contagem de inscrições próprias excluindo clones (Fase 4 — dez_inscricoes). */
+async function countOriginalUserNotes(ownerId) {
+  const { count, error } = await supabase
+    .from(NOTES_TABLE)
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', ownerId)
+    .is('cloned_from_note_id', null);
+  if (error) throw error;
+  return Number(count || 0);
+}
+
+async function awardAchievementIds(user, achievementIds = []) {
+  const existing = Array.isArray(user.conquistas) ? [...user.conquistas] : [];
+  const fresh = [...new Set(
+    (Array.isArray(achievementIds) ? achievementIds : [])
+      .map((id) => String(id || ''))
+      .filter((id) => id && !existing.includes(id))
+  )];
+  if (fresh.length === 0) {
+    return {
+      user,
+      awarded: { xp: 0, achievements: [], achievementDetails: [] },
+      leveledUp: false,
+    };
+  }
+
+  const xpGain = fresh.reduce((sum, id) => sum + (getAchievementXp(id) || 0), 0);
+  const nextXp = Number(user.xp || 0) + xpGain;
+  const conquistas = [...existing, ...fresh];
+  const { data: updated, error } = await supabase
+    .from(USERS_TABLE)
+    .update({ xp: nextXp, conquistas })
+    .eq('id', user.id)
+    .select('*')
+    .single();
+  if (error) throw error;
+
+  return {
+    user: updated,
+    awarded: {
+      xp: xpGain,
+      achievements: fresh,
+      achievementDetails: mapAchievementDetails(fresh),
+    },
+    leveledUp: levelForXp(nextXp) > levelForXp(user.xp || 0),
+  };
+}
+
+async function evaluateAndAwardGrimoire(user, snapshot) {
+  const ids = evaluateGrimoireAchievementIds({
+    ...snapshot,
+    unlocked: Array.isArray(user.conquistas) ? user.conquistas : [],
+  });
+  if (ids.length === 0) {
+    return {
+      user,
+      awarded: { xp: 0, achievements: [], achievementDetails: [] },
+      leveledUp: false,
+    };
+  }
+  return awardAchievementIds(user, ids);
+}
+
 async function fetchSharesForNotes(noteIds = []) {
   const unique = [...new Set(noteIds.map((id) => Number(id)).filter((id) => id > 0))];
   if (unique.length === 0) return new Map();
@@ -544,6 +511,8 @@ function toClassmateCard(row, bondStatus = 'none', friendshipId = null) {
     fullName: card.fullName,
     avatarIndex: card.avatarIndex,
     turma: card.turma,
+    role: card.role,
+    xp: card.xp,
     rank: card.rank,
     level: card.level,
     bondStatus,
@@ -799,6 +768,7 @@ export default async function handler(req, res) {
       targetUserId,
       includeShared,
       turma: turmaFilterBody,
+      submittedHash,
     } = req.body || {};
     const { data: session } = await supabase
       .from('sessions')
@@ -1663,6 +1633,29 @@ export default async function handler(req, res) {
         }
 
         const count = await countUserNotes(userId);
+        const originalCount = await countOriginalUserNotes(userId);
+        let awardResult = {
+          user,
+          awarded: { xp: 0, achievements: [], achievementDetails: [] },
+          leveledUp: false,
+        };
+        try {
+          awardResult = await evaluateAndAwardGrimoire(user, {
+            event: 'create',
+            originalNoteCount: originalCount,
+            isCloneNote: false,
+            note: {
+              lessonId: created.lesson_id,
+              body: created.body,
+              tags: created.tags,
+              shareCount: 0,
+              pinned: Boolean(created.pinned),
+            },
+          });
+        } catch (awardError) {
+          console.error('[api/progress] noteCreate awards', awardError);
+        }
+
         return res.status(201).json({
           ok: true,
           count,
@@ -1671,6 +1664,9 @@ export default async function handler(req, res) {
             ? `O Grimório engrossa… (${count} inscrições).`
             : null,
           note: toNoteDetail(created, []),
+          awarded: awardResult.awarded,
+          leveledUp: awardResult.leveledUp,
+          user: sanitizeUser(awardResult.user),
         });
       } catch (error) {
         if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
@@ -1756,9 +1752,36 @@ export default async function handler(req, res) {
         }
 
         const sharesByNote = await fetchSharesForNotes([id]);
+        const sharedWith = sharesByNote.get(id) || [];
+        const originalCount = await countOriginalUserNotes(userId);
+        let awardResult = {
+          user,
+          awarded: { xp: 0, achievements: [], achievementDetails: [] },
+          leveledUp: false,
+        };
+        try {
+          awardResult = await evaluateAndAwardGrimoire(user, {
+            event: 'update',
+            originalNoteCount: originalCount,
+            isCloneNote: Boolean(updated.cloned_from_note_id),
+            note: {
+              lessonId: updated.lesson_id,
+              body: updated.body,
+              tags: updated.tags,
+              shareCount: sharedWith.length,
+              pinned: Boolean(updated.pinned),
+            },
+          });
+        } catch (awardError) {
+          console.error('[api/progress] noteUpdate awards', awardError);
+        }
+
         return res.status(200).json({
           ok: true,
-          note: toNoteDetail(updated, sharesByNote.get(id) || []),
+          note: toNoteDetail(updated, sharedWith),
+          awarded: awardResult.awarded,
+          leveledUp: awardResult.leveledUp,
+          user: sanitizeUser(awardResult.user),
         });
       } catch (error) {
         if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
@@ -1861,9 +1884,34 @@ export default async function handler(req, res) {
           .eq('id', id)
           .single();
 
+        const sharedWith = sharesByNote.get(id) || [];
+        let awardResult = {
+          user,
+          awarded: { xp: 0, achievements: [], achievementDetails: [] },
+          leveledUp: false,
+        };
+        try {
+          awardResult = await evaluateAndAwardGrimoire(user, {
+            event: 'share',
+            originalNoteCount: await countOriginalUserNotes(userId),
+            isCloneNote: Boolean(row?.cloned_from_note_id),
+            note: {
+              lessonId: row?.lesson_id,
+              body: row?.body,
+              tags: row?.tags,
+              shareCount: sharedWith.length,
+            },
+          });
+        } catch (awardError) {
+          console.error('[api/progress] noteShare awards', awardError);
+        }
+
         return res.status(200).json({
           ok: true,
-          note: toNoteDetail(row, sharesByNote.get(id) || []),
+          note: toNoteDetail(row, sharedWith),
+          awarded: awardResult.awarded,
+          leveledUp: awardResult.leveledUp,
+          user: sanitizeUser(awardResult.user),
         });
       } catch (error) {
         if (isMissingNotesTable(error) || isMissingFriendshipsTable(error)) {
@@ -2018,9 +2066,33 @@ export default async function handler(req, res) {
         }
 
         const clonedFrom = await resolveClonedFrom(created.cloned_from_note_id);
+        let awardResult = {
+          user,
+          awarded: { xp: 0, achievements: [], achievementDetails: [] },
+          leveledUp: false,
+        };
+        try {
+          awardResult = await evaluateAndAwardGrimoire(user, {
+            event: 'clone',
+            originalNoteCount: await countOriginalUserNotes(userId),
+            isCloneNote: true,
+            note: {
+              lessonId: created.lesson_id,
+              body: created.body,
+              tags: created.tags,
+              shareCount: 0,
+            },
+          });
+        } catch (awardError) {
+          console.error('[api/progress] noteClone awards', awardError);
+        }
+
         return res.status(201).json({
           ok: true,
           note: toNoteDetail(created, [], { clonedFrom }),
+          awarded: awardResult.awarded,
+          leveledUp: awardResult.leveledUp,
+          user: sanitizeUser(awardResult.user),
         });
       } catch (error) {
         if (isMissingNotesTable(error)) return notesUnavailableResponse(res);
@@ -2195,6 +2267,65 @@ export default async function handler(req, res) {
         console.error('[api/progress] notes admin', error);
         return res.status(500).json({ ok: false, error: 'Falha na vigília do Grimório.' });
       }
+    }
+
+    if (action === 'underworldJudgment') {
+      return res.status(200).json({
+        ok: true,
+        status: 'denied',
+        message: 'Acesso Negado pelos Juízes',
+        oracle_token: UNDERWORLD_ORACLE_TOKEN,
+        encoding: 'Base64',
+        hint: 'Use atob() no Console ou CyberChef para revelar o segredo.',
+      });
+    }
+
+    if (action === 'underworldRedeem') {
+      if (underworldRateLimited(userId)) {
+        return res.status(429).json({ ok: false, error: 'Demasiadas oferendas. Aguarde um momento.' });
+      }
+      const hash = String(submittedHash || '').trim().toLowerCase();
+      if (!hash) {
+        return res.status(400).json({ ok: false, error: 'Óbolo ausente.' });
+      }
+      if (hash !== UNDERWORLD_ESTIGE_HASH) {
+        return res.status(400).json({ ok: false, error: 'Óbolo rejeitado. Hash incorreto.' });
+      }
+
+      const existing = Array.isArray(user.conquistas) ? [...user.conquistas] : [];
+      if (existing.includes(UNDERWORLD_SOBERANO_ID)) {
+        return res.status(200).json({
+          ok: true,
+          alreadyOwned: true,
+          awarded: { xp: 0, achievements: [], achievementDetails: [] },
+          user: sanitizeUser(user),
+        });
+      }
+
+      const xpGain = getAchievementXp(UNDERWORLD_SOBERANO_ID) || 1500;
+      const nextXp = Number(user.xp || 0) + xpGain;
+      const conquistas = [...existing, UNDERWORLD_SOBERANO_ID];
+      const { data: updated, error: updateError } = await supabase
+        .from(USERS_TABLE)
+        .update({ xp: nextXp, conquistas })
+        .eq('id', userId)
+        .select('*')
+        .single();
+      if (updateError) {
+        return res.status(500).json({ ok: false, error: 'Falha ao registrar a travessia.' });
+      }
+
+      return res.status(200).json({
+        ok: true,
+        alreadyOwned: false,
+        awarded: {
+          xp: xpGain,
+          achievements: [UNDERWORLD_SOBERANO_ID],
+          achievementDetails: mapAchievementDetails([UNDERWORLD_SOBERANO_ID]),
+        },
+        user: sanitizeUser(updated),
+        leveledUp: levelForXp(nextXp) > levelForXp(user.xp || 0),
+      });
     }
 
     if (action === 'redeem') {
@@ -2475,7 +2606,8 @@ export default async function handler(req, res) {
 
       if (activity && !activityAlreadyAwarded) {
         awardedAchievementIds.push(activity.achievementId);
-        awardedXp += Number(activity.xp || 0);
+        const catalogXp = getAchievementXp(activity.achievementId);
+        awardedXp += catalogXp > 0 ? catalogXp : Number(activity.xp || 0);
       }
 
       const secretAwards = evaluateSecretAchievements(normalizedLessonId, text, existingAchievements);

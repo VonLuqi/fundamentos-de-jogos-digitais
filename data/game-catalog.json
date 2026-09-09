@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "achievements": [
+    {
+      "id": "aula1_concluida",
+      "name": "Primeira Travessia",
+      "desc": "Aporta o Rito da Trilha, Aliança e Recompensa. Oferenda inicial.",
+      "icon": "🏁",
+      "art": "aula1_concluida.webp",
+      "hidden": false,
+      "difficulty": "trivial",
+      "rarity": "stone",
+      "xp": 0,
+      "trailhead": {
+        "nameIndexes": [9],
+        "descIndexes": [0, 9, 17, 25, 35, 47]
+      }
+    },
+    {
+      "id": "gdd_integracao_documental",
+      "name": "O Escriba do Submundo",
+      "desc": "Compêndio da União Lúdica: Texto e Obra.",
+      "icon": "📜",
+      "art": "gdd_integracao_documental.webp",
+      "hidden": false,
+      "difficulty": "easy",
+      "rarity": "copper",
+      "xp": 20,
+      "trailhead": {
+        "nameIndexes": [0],
+        "descIndexes": [0, 13, 19, 27, 35]
+      }
+    },
+    {
+      "id": "segredo_cartografo_do_inspector",
+      "name": "Cartógrafo do Inspector",
+      "desc": "Mapeou experimentos distintos na Oficina — a observação vira cartografia.",
+      "icon": "🧭",
+      "art": "segredo_cartografo_do_inspector.webp",
+      "hidden": true,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 15,
+      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_alquimista_da_fisica",
+      "name": "Alquimista da Física",
+      "desc": "Relacionou conceitos de física do mundo da bola em linguagem própria.",
+      "icon": "⚗️",
+      "art": "segredo_alquimista_da_fisica.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 15,
+      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_juramento_do_circulo",
+      "name": "Juramento do Círculo",
+      "desc": "Fechou uma síntese ampla das forças que regem a cena — sem uma frase ritual única.",
+      "icon": "🔮",
+      "art": "segredo_juramento_do_circulo.webp",
+      "hidden": true,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 25,
+      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "soberano_do_submundo",
+      "name": "Soberano do Submundo",
+      "desc": "Superou as sombras do Tártaro, decifrou os ecos de Asfódelos, interceptou o julgamento dos Elísios e pagou o tributo sagrado no Rio Estige. Mestre absoluto da inspeção web, esteganografia e criptografia.",
+      "icon": "👑",
+      "art": "soberano_do_submundo.webp",
+      "hidden": true,
+      "difficulty": "legendary",
+      "rarity": "unique",
+      "xp": 1500
+    },
+    {
+      "id": "grimorio_primeira_inscricao",
+      "name": "Primeira Inscrição",
+      "desc": "Abriu o pergaminho e gravou a primeira página do Grimório Pessoal.",
+      "icon": "🪶",
+      "art": "grimorio_primeira_inscricao.webp",
+      "hidden": false,
+      "difficulty": "trivial",
+      "rarity": "stone",
+      "xp": 5,
+      "meta": { "family": "grimorio", "kind": "event" }
+    },
+    {
+      "id": "grimorio_elo_da_trilha",
+      "name": "Elo da Trilha",
+      "desc": "Amarrou uma inscrição à jornada de uma aula — o Grimório conversa com a Trilha.",
+      "icon": "🔗",
+      "art": "grimorio_elo_da_trilha.webp",
+      "hidden": false,
+      "difficulty": "easy",
+      "rarity": "copper",
+      "xp": 10,
+      "meta": { "family": "grimorio", "kind": "event" }
+    },
+    {
+      "id": "grimorio_dez_inscricoes",
+      "name": "Arquivo do Submundo",
+      "desc": "Dez páginas próprias no Grimório (ecos clonados não contam nesta contagem).",
+      "icon": "📚",
+      "art": "grimorio_dez_inscricoes.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 25,
+      "meta": { "family": "grimorio", "kind": "event" }
+    },
+    {
+      "id": "grimorio_revelacao",
+      "name": "Véu Erguido",
+      "desc": "Revelou uma inscrição a um companheiro ao seu lado.",
+      "icon": "🕯️",
+      "art": "grimorio_revelacao.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 20,
+      "meta": { "family": "grimorio", "kind": "event" }
+    },
+    {
+      "id": "grimorio_vinculo_oculto",
+      "name": "Vínculo Oculto",
+      "desc": "Há laços que só o Grimório registra: trilha e revelação entrelaçadas.",
+      "icon": "🕸️",
+      "art": "grimorio_vinculo_oculto.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": { "family": "grimorio", "kind": "event", "combo": "lesson+share" }
+    },
+    {
+      "id": "grimorio_eco_invertido",
+      "name": "Eco Invertido",
+      "desc": "O que veio do outro lado do véu agora ecoa nas suas páginas.",
+      "icon": "🪞",
+      "art": "grimorio_eco_invertido.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": { "family": "grimorio", "kind": "event", "combo": "receive+clone" }
+    },
+    {
+      "id": "grimorio_escriba_ritual",
+      "name": "Escriba Ritual",
+      "desc": "Uma inscrição densa o bastante para acordar os conceitos do Domínio.",
+      "icon": "✍️",
+      "art": "grimorio_escriba_ritual.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": { "family": "grimorio", "kind": "content", "axis": "body" }
+    },
+    {
+      "id": "grimorio_cartografo_pessoal",
+      "name": "Cartógrafo Pessoal",
+      "desc": "Marcou o mapa íntimo com diversidade de sinais — o Grimório aprende a navegar.",
+      "icon": "🗺️",
+      "art": "grimorio_cartografo_pessoal.webp",
+      "hidden": true,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 25,
+      "meta": { "family": "grimorio", "kind": "content", "axis": "tags" }
+    },
+    {
+      "id": "grimorio_fixador",
+      "name": "Fixador do Véu",
+      "desc": "Cravou uma inscrição no topo do Grimório — a página que não se perde na névoa.",
+      "icon": "📌",
+      "art": "grimorio_fixador.webp",
+      "hidden": false,
+      "difficulty": "easy",
+      "rarity": "copper",
+      "xp": 10,
+      "meta": { "family": "grimorio", "kind": "event" }
+    },
+    {
+      "id": "grimorio_eco_clonado",
+      "name": "Eco Clonado",
+      "desc": "Trocou o véu pela pena: a inscrição revelada passou a ser sua.",
+      "icon": "📄",
+      "art": "grimorio_eco_clonado.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 20,
+      "meta": { "family": "grimorio", "kind": "event" }
+    }
+  ],
+  "levels": {
+    "maxLevel": 99,
+    "bands": [
+      { "fromLevel": 1, "toLevel": 10, "xpPerLevel": 100 },
+      { "fromLevel": 11, "toLevel": 30, "xpPerLevel": 130 },
+      { "fromLevel": 31, "toLevel": 60, "xpPerLevel": 180 },
+      { "fromLevel": 61, "toLevel": 90, "xpPerLevel": 240 },
+      { "fromLevel": 91, "toLevel": 99, "xpPerLevel": 300 }
+    ],
+    "ranks": [
+      { "minLevel": 1, "title": "Alma Novata" },
+      { "minLevel": 3, "title": "Iniciado do Tártaro" },
+      { "minLevel": 6, "title": "Operador do Tártaro" },
+      { "minLevel": 10, "title": "Veterano do Submundo" },
+      { "minLevel": 15, "title": "Campeão Érebo" },
+      { "minLevel": 25, "title": "Guardião do Estige" },
+      { "minLevel": 40, "title": "Arauto de Asfódelos" },
+      { "minLevel": 50, "title": "Vigia dos Campos" },
+      { "minLevel": 55, "title": "Juiz dos Elísios" },
+      { "minLevel": 70, "title": "Barqueiro do Véu" },
+      { "minLevel": 85, "title": "Herdeiro do Tártaro" },
+      { "minLevel": 92, "title": "Sombra Ascendente" },
+      { "minLevel": 99, "title": "Sombra do Olimpo" }
+    ]
+  }
+}

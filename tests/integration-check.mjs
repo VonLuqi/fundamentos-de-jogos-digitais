@@ -2,6 +2,7 @@ import 'dotenv/config';
 import assert from 'node:assert/strict';
 import authHandler from '../api/auth.js';
 import progressHandler from '../api/progress.js';
+import { levelForXp } from '../js/game-catalog.js';
 
 /* ============================================================
    HELPERS — simula o contrato (req, res) das rotas serverless
@@ -22,11 +23,6 @@ const makeRes = () => ({
     return payload;
   },
 });
-
-function levelForXp(xp) {
-  const LEVEL_XP_BASE = 100;
-  return Math.max(1, Math.floor(xp / LEVEL_XP_BASE) + 1);
-}
 
 let passed = 0;
 let failed = 0;
@@ -69,8 +65,7 @@ async function testInvalidSessionOnProgress() {
 /* ============================================================
    2. CÁLCULO DE XP E SUBIDA DE NÍVEL
    ============================================================
-   Regra espelhada de api/progress.js: levelForXp = floor(xp/100)+1.
-   Validamos a fronteira exata em que o nível sobe.
+   Regra de data/game-catalog.json (banda 1–10: 100 XP/nível).
    ============================================================ */
 async function testXpLevelUpCalculation() {
   assert.equal(levelForXp(0), 1, 'XP 0 deve ser nível 1.');

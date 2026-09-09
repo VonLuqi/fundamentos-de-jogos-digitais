@@ -19,6 +19,7 @@ import {
 } from './api.js';
 import { bindTagChipEditor } from './grimorio-tags.js';
 import { isLessonPublished } from './lessons-ui.js';
+import { presentGrimoireAwards } from './grimorio-awards.js';
 
 const TITLE_MAX = 120;
 const BODY_MAX = 8000;
@@ -210,11 +211,13 @@ async function init() {
     try {
       if (isNew || !currentNote?.id) {
         const result = await createNote(token, fields);
+        presentGrimoireAwards(result.awarded, { persistAcrossRedirect: true });
         window.location.replace(ROUTES.grimorioNota(result.note.id));
         return;
       }
 
       const result = await updateNote(token, currentNote.id, fields);
+      presentGrimoireAwards(result.awarded, { persistAcrossRedirect: true });
       window.location.replace(ROUTES.grimorioNota(result.note.id));
     } catch (error) {
       setFeedback(

@@ -7,11 +7,23 @@
       "maxDuration": 10
     }
   },
+  "rewrites": [
+    { "source": "/submundo/tartaro-oculto", "destination": "/pages/submundo/tartaro-oculto.html" },
+    { "source": "/submundo/asfodelos-sussurros", "destination": "/pages/submundo/asfodelos-sussurros.html" },
+    { "source": "/submundo/elisios-julgamento", "destination": "/pages/submundo/elisios-julgamento.html" },
+    { "source": "/submundo/estige-obolo", "destination": "/pages/submundo/estige-obolo.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/submundo/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
       ]
     }
   ]

@@ -218,52 +218,210 @@ body {
 }
 
 /* ============================================================
-   5. BARRA DE XP ("JUICY")
-   A barra enche de 0 → valor salvo assim que a página carrega,
-   via JS que simplesmente altera a propriedade `width` — a transição
-   CSS cuida da animação. A "ponta" (xp-bar__tip) é um orbe que
-   acompanha o preenchimento, emitindo brilho pulsante.
+   5. BARRA DE XP — "Rio de Óbolo" (fluxo em transform, loop perfeito)
    ============================================================ */
 .xp-bar {
+  --xp-pct: 0;
   position: relative;
-  height: 22px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 1px solid var(--hades-gold-dark);
-  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.7);
+  height: 1.55rem;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--hades-gold-dark) 80%, #3a1818);
+  background: linear-gradient(180deg, rgba(8, 5, 10, 0.95), rgba(18, 10, 14, 0.88));
+  box-shadow:
+    inset 0 2px 10px rgba(0, 0, 0, 0.75),
+    inset 0 -1px 0 rgba(242, 213, 154, 0.08),
+    0 0 10px rgba(207, 167, 89, 0.18);
 }
+
+.xp-bar__aura {
+  position: absolute;
+  top: -12px;
+  bottom: -12px;
+  left: calc(var(--xp-pct) * 1% - 28px);
+  width: 56px;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(207, 167, 89, 0.35), transparent 70%);
+  filter: blur(10px);
+  opacity: 0.75;
+  transition: left 1.6s cubic-bezier(0.17, 0.9, 0.32, 1);
+}
+
 .xp-bar__fill {
   position: absolute;
+  z-index: 1;
   inset: 0 auto 0 0;
-  width: 0%; /* JS define o alvo; CSS anima */
-  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold) 45%, var(--hades-gold-dark));
-  box-shadow: 0 0 12px rgba(207, 167, 89, 0.7);
-  /* JUICE: cubic-bezier com leve "anticipation" — a barra acelera e desacelera suavemente */
+  width: 0%;
+  overflow: hidden;
+  background: var(--hades-gold-dark);
+  box-shadow:
+    0 0 12px rgba(207, 167, 89, 0.5),
+    inset 0 1px 0 rgba(255, 240, 200, 0.4),
+    inset 0 -2px 6px rgba(90, 40, 20, 0.3);
   transition: width 1.6s cubic-bezier(0.17, 0.9, 0.32, 1);
 }
-/* O orbe na ponta — acompanha o fill graças ao posicionamento à direita */
+
+.xp-bar__fill::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 200%;
+  height: 100%;
+  background-image: linear-gradient(
+    90deg,
+    #5c3a14,
+    var(--hades-gold-dark),
+    var(--hades-gold),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-gold-dark),
+    #5c3a14,
+    var(--hades-gold-dark),
+    var(--hades-gold),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-gold-dark),
+    #5c3a14
+  );
+  animation: xpIchorFlow 3s linear infinite;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.xp-bar__sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.xp-bar__sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 42%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 248, 220, 0.2),
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 248, 220, 0.2),
+    transparent
+  );
+  animation: xpSheenSweep 2.6s linear infinite;
+  will-change: transform;
+}
+
+.xp-bar__embers {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: calc(var(--xp-pct) * 1% - 1.4rem);
+  width: 1.5rem;
+  height: 100%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  transition: left 1.6s cubic-bezier(0.17, 0.9, 0.32, 1);
+}
+
+.xp-bar__embers::before,
+.xp-bar__embers::after {
+  content: '';
+  position: absolute;
+  bottom: 30%;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: var(--hades-gold-bright);
+  opacity: 0;
+  animation: xpEmberRise 2s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+.xp-bar__embers::before { right: 0.55rem; }
+.xp-bar__embers::after {
+  right: 0.15rem;
+  animation-delay: 1s;
+  background: #ffd27a;
+}
+
 .xp-bar__tip {
   position: absolute;
+  z-index: 3;
   top: 50%;
-  right: -6px;
-  width: 12px;
-  height: 12px;
-  transform: translateY(-50%) rotate(45deg);
-  background: var(--hades-gold-bright);
-  box-shadow: 0 0 10px rgba(242, 213, 154, 0.9), 0 0 22px rgba(207, 167, 89, 0.6);
-  animation: xpTipPulse 1.2s ease-in-out infinite;
+  left: calc(var(--xp-pct) * 1%);
+  width: 10px;
+  height: 10px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: radial-gradient(circle at 35% 35%, #fff6d8, var(--hades-gold-bright) 45%, var(--hades-gold) 80%);
+  box-shadow: 0 0 10px rgba(242, 213, 154, 0.85), 0 0 18px rgba(207, 167, 89, 0.55);
+  animation: xpTipPulse 1.6s ease-in-out infinite;
+  will-change: transform, opacity;
+  transition: left 1.6s cubic-bezier(0.17, 0.9, 0.32, 1);
 }
+
 .xp-bar__text {
   position: absolute;
+  z-index: 4;
   inset: 0;
   display: grid;
   place-items: center;
   font-family: var(--font-title);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 700;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #fff;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 6px rgba(0, 0, 0, 0.6);
+  color: #fff8e8;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.xp-bar[data-max='true'] {
+  border-color: color-mix(in srgb, var(--hades-blood-bright) 45%, var(--hades-gold));
+  box-shadow:
+    inset 0 2px 10px rgba(0, 0, 0, 0.75),
+    0 0 14px rgba(194, 53, 72, 0.28),
+    0 0 18px rgba(207, 167, 89, 0.25);
+}
+
+.xp-bar[data-max='true'] .xp-bar__fill::before {
+  background-image: linear-gradient(
+    90deg,
+    #5c121c,
+    var(--hades-blood),
+    var(--hades-gold-dark),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-blood-bright),
+    #5c121c,
+    var(--hades-blood),
+    var(--hades-gold-dark),
+    var(--hades-gold-bright),
+    var(--hades-gold),
+    var(--hades-blood-bright),
+    #5c121c
+  );
+}
+
+.xp-bar[data-max='true'] .xp-bar__tip {
+  box-shadow: 0 0 10px rgba(242, 213, 154, 0.95), 0 0 16px rgba(194, 53, 72, 0.5);
+}
+
+.xp-bar.is-surging .xp-bar__aura {
+  opacity: 1;
+  width: 72px;
+  left: calc(var(--xp-pct) * 1% - 36px);
+  background: radial-gradient(circle, rgba(242, 213, 154, 0.55), rgba(194, 53, 72, 0.2) 55%, transparent 72%);
+  animation: xpSurgeFlash 1s ease-out 1;
+}
+
+.xp-bar.is-surging .xp-bar__tip {
+  animation: xpTipPulse 0.4s ease-in-out 3;
 }
 
 .profile-panel__quickstats {
@@ -389,6 +547,37 @@ body {
 }
 .achievements-grid.is-preview .achievement-card__desc {
   display: none;
+}
+
+/* Soberano — hero na prévia do hub quando liberado */
+.achievement-card.is-soberano-featured {
+  grid-column: 1 / -1;
+  justify-self: center;
+  width: min(100%, 20.5rem);
+  min-height: 18.5rem;
+  margin: 0.1rem auto 0.85rem;
+  z-index: 3;
+  contain: none;
+  padding: 0.85rem 0 0.7rem;
+}
+.achievement-card.is-soberano-featured .achievement-card__name {
+  font-size: clamp(0.95rem, 2.2vw, 1.2rem);
+  letter-spacing: 0.14em;
+}
+.achievement-card.is-soberano-featured .achievement-card__art-stage {
+  top: 2.85rem;
+  bottom: 2.35rem;
+}
+.achievement-card.is-soberano-featured .achievement-card__art {
+  font-size: clamp(3.6rem, 12vw, 5.2rem);
+}
+.achievement-card.is-soberano-featured .achievement-card__art.has-art {
+  max-width: min(70%, 10.5rem);
+}
+.achievement-card.is-soberano-featured .achievement-card__rarity {
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  padding: 0.28rem 0.75rem;
 }
 .lessons-list.is-preview {
   margin-bottom: 0;
@@ -575,12 +764,37 @@ img.achievement-card__art.has-art {
   --frame-aura: rgba(255, 140, 200, 0.28);
 }
 
+.achievement-card[data-rarity='unique'] {
+  --rarity-accent: #f2d59a;
+  --rarity-glow:
+    0 0 16px rgba(194, 53, 72, 0.55),
+    0 0 28px rgba(207, 167, 89, 0.5),
+    0 0 42px rgba(92, 16, 24, 0.45);
+  --frame-a: #8a1f2e;
+  --frame-b: #cfa759;
+  --frame-c: #f2d59a;
+  --frame-d: #5c1018;
+  --frame-fill-top: rgba(42, 12, 16, 0.97);
+  --frame-fill-bot: rgba(10, 6, 8, 0.98);
+  --frame-inset-hi: rgba(242, 213, 154, 0.4);
+  --frame-inset-lo: rgba(0, 0, 0, 0.65);
+  --frame-aura: rgba(194, 53, 72, 0.42);
+}
+
+.trailhead-rune {
+  font-style: italic;
+  font-weight: 600;
+  color: inherit;
+  opacity: 0.92;
+}
+
 /* Moldura material (Fase 2) — borda grossa + bevel + aura full-card */
 .achievement-card.is-unlocked[data-rarity='stone'],
 .achievement-card.is-unlocked[data-rarity='copper'],
 .achievement-card.is-unlocked[data-rarity='silver'],
 .achievement-card.is-unlocked[data-rarity='gold'],
-.achievement-card.is-unlocked[data-rarity='rainbow'] {
+.achievement-card.is-unlocked[data-rarity='rainbow'],
+.achievement-card.is-unlocked[data-rarity='unique'] {
   border: 5px solid transparent;
   background:
     radial-gradient(ellipse 120% 100% at 50% 42%, var(--frame-aura), transparent 72%),
@@ -602,7 +816,8 @@ img.achievement-card__art.has-art {
 .achievement-card.is-unlocked[data-rarity='copper']::after,
 .achievement-card.is-unlocked[data-rarity='silver']::after,
 .achievement-card.is-unlocked[data-rarity='gold']::after,
-.achievement-card.is-unlocked[data-rarity='rainbow']::after {
+.achievement-card.is-unlocked[data-rarity='rainbow']::after,
+.achievement-card.is-unlocked[data-rarity='unique']::after {
   content: '';
   position: absolute;
   inset: 7px;
@@ -610,6 +825,13 @@ img.achievement-card__art.has-art {
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
   pointer-events: none;
   z-index: 3;
+}
+
+.achievement-card.is-unlocked[data-rarity='unique']::after {
+  border-color: color-mix(in srgb, #f2d59a 55%, #c23548);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.45),
+    inset 0 0 18px rgba(194, 53, 72, 0.18);
 }
 
 .achievement-card.is-unlocked[data-rarity='silver'] {
@@ -756,6 +978,187 @@ img.achievement-card__art.has-art {
   );
   background-size: 220% 100%;
   animation-duration: 3.1s;
+}
+
+/* Única — trono do Submundo: ouro + sangue + ícor (loops com @property) */
+.achievement-card.is-unlocked[data-rarity='unique'] {
+  --unique-border-angle: 0deg;
+  background:
+    radial-gradient(ellipse 130% 110% at 50% 38%, rgba(194, 53, 72, 0.38), transparent 68%),
+    radial-gradient(circle at 50% 8%, rgba(242, 213, 154, 0.22), transparent 42%),
+    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(120, 16, 28, 0.55), transparent 70%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--frame-fill-top) 72%, #c23548 28%),
+      color-mix(in srgb, var(--frame-fill-bot) 80%, #5c1018 20%)
+    ) padding-box,
+    conic-gradient(
+      from var(--unique-border-angle),
+      #5c1018,
+      #cfa759,
+      #fff0c2,
+      #c23548,
+      #8a1f2e,
+      #f2d59a,
+      #cfa759,
+      #5c1018
+    ) border-box;
+  animation: uniqueSovereignGlow 2.8s ease-in-out infinite, uniqueBorderAngle 8s linear infinite;
+}
+
+.achievement-card.is-unlocked[data-rarity='unique'] .achievement-card__rarity {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(rgba(18, 6, 8, 0.94), rgba(18, 6, 8, 0.94)) padding-box,
+    conic-gradient(
+      from var(--unique-border-angle),
+      #5c1018,
+      #f2d59a,
+      #c23548,
+      #fff0c2,
+      #8a1f2e,
+      #cfa759,
+      #5c1018
+    ) border-box;
+  color: #fff4d6;
+  text-shadow: 0 0 10px rgba(194, 53, 72, 0.65), 0 0 14px rgba(242, 213, 154, 0.45);
+}
+
+.achievement-card.is-unlocked[data-rarity='unique'] .achievement-card__name {
+  /* Padrão duplicado 0–50% / 50–100% + pos 0→100% = loop sem hitch */
+  --unique-name-pos: 0%;
+  background-image: linear-gradient(
+    90deg,
+    #c23548 0%,
+    #f2d59a 12.5%,
+    #fff8e0 25%,
+    #f2d59a 37.5%,
+    #c23548 50%,
+    #f2d59a 62.5%,
+    #fff8e0 75%,
+    #f2d59a 87.5%,
+    #c23548 100%
+  );
+  background-size: 200% 100%;
+  background-position: var(--unique-name-pos) 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: uniqueNameShimmer 3.4s linear infinite;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.85));
+}
+
+.achievement-card.is-unlocked[data-rarity='unique'] .achievement-card__art {
+  color: #fff4d6;
+  text-shadow:
+    0 0 8px rgba(242, 213, 154, 0.75),
+    0 0 18px rgba(194, 53, 72, 0.55),
+    0 0 28px rgba(207, 167, 89, 0.4);
+  animation: uniqueArtPulse 2.4s ease-in-out infinite;
+}
+
+.achievement-card.is-unlocked[data-rarity='unique']::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  --unique-halo-angle: 0deg;
+  background: conic-gradient(
+    from var(--unique-halo-angle),
+    rgba(92, 16, 24, 0.12),
+    rgba(207, 167, 89, 0.4),
+    rgba(242, 213, 154, 0.32),
+    rgba(194, 53, 72, 0.42),
+    rgba(92, 16, 24, 0.18),
+    rgba(207, 167, 89, 0.38),
+    rgba(194, 53, 72, 0.32),
+    rgba(92, 16, 24, 0.12)
+  );
+  filter: blur(16px);
+  z-index: -1;
+  animation: uniqueHaloAngle 10s linear infinite;
+  opacity: 0.9;
+}
+
+/* Sangue caindo — faixa 200% + translate -50% (loop perfeito) */
+.achievement-card.is-unlocked[data-rarity='unique'] .achievement-card__art-stage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 200%;
+  z-index: 2;
+  pointer-events: none;
+  background-image:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(194, 53, 72, 0.05) 6%,
+      rgba(194, 53, 72, 0.85) 9%,
+      rgba(90, 12, 20, 0.7) 16%,
+      transparent 28%,
+      transparent 50%,
+      rgba(194, 53, 72, 0.05) 56%,
+      rgba(194, 53, 72, 0.85) 59%,
+      rgba(90, 12, 20, 0.7) 66%,
+      transparent 78%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 12%,
+      rgba(160, 30, 48, 0.75) 15%,
+      rgba(70, 8, 16, 0.55) 24%,
+      transparent 36%,
+      transparent 62%,
+      rgba(160, 30, 48, 0.75) 65%,
+      rgba(70, 8, 16, 0.55) 74%,
+      transparent 86%,
+      transparent 100%
+    ),
+    linear-gradient(
+      180deg,
+      transparent 4%,
+      rgba(210, 60, 78, 0.55) 7%,
+      rgba(100, 14, 24, 0.4) 14%,
+      transparent 22%,
+      transparent 54%,
+      rgba(210, 60, 78, 0.55) 57%,
+      rgba(100, 14, 24, 0.4) 64%,
+      transparent 72%,
+      transparent 100%
+    ),
+    radial-gradient(ellipse 40% 18% at 50% 8%, rgba(194, 53, 72, 0.35), transparent 70%),
+    radial-gradient(ellipse 40% 18% at 50% 58%, rgba(194, 53, 72, 0.35), transparent 70%);
+  background-size: 2px 100%, 3px 100%, 2px 100%, 100% 50%, 100% 50%;
+  background-repeat: no-repeat;
+  background-position: 22% 0, 48% 0, 74% 0, 50% 0, 50% 50%;
+  filter: blur(0.4px);
+  mix-blend-mode: screen;
+  opacity: 0.72;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+  animation: uniqueBloodFall 4.8s linear infinite;
+  will-change: transform;
+}
+
+.achievement-card.is-unlocked[data-rarity='unique'] .achievement-card__art-stage::after {
+  content: '';
+  position: absolute;
+  inset: 8% 18%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 45%,
+      rgba(242, 213, 154, 0.28),
+      rgba(194, 53, 72, 0.12) 45%,
+      transparent 70%
+    ),
+    radial-gradient(ellipse 55% 30% at 50% 92%, rgba(120, 16, 28, 0.45), transparent 75%);
+  filter: blur(6px);
+  animation: uniqueCrownAura 3.2s ease-in-out infinite;
 }
 
 .achievement-card[data-rarity='rainbow'].is-rainbow-burst {
@@ -964,10 +1367,32 @@ img.achievement-card__art.has-art {
   100% { opacity: 1; }
 }
 
-/* Pulso da ponta da barra de XP — "brasa" que atrai o olho */
+/* Pulso / fluxo da barra de XP — só transform/opacity (GPU) */
 @keyframes xpTipPulse {
-  0%, 100% { box-shadow: 0 0 6px rgba(242, 213, 154, 0.7), 0 0 14px rgba(207, 167, 89, 0.4); }
-  50% { box-shadow: 0 0 12px rgba(242, 213, 154, 1), 0 0 28px rgba(207, 167, 89, 0.75); }
+  0%, 100% { opacity: 0.85; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.12); }
+}
+
+@keyframes xpIchorFlow {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes xpSheenSweep {
+  from { transform: translate3d(-120%, 0, 0); }
+  to { transform: translate3d(280%, 0, 0); }
+}
+
+@keyframes xpEmberRise {
+  0% { transform: translate3d(0, 4px, 0) scale(0.7); opacity: 0; }
+  20% { opacity: 0.9; }
+  100% { transform: translate3d(0, -12px, 0) scale(0.25); opacity: 0; }
+}
+
+@keyframes xpSurgeFlash {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  40% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 0.75; transform: scale(1); }
 }
 
 /* Flash dourado ao trocar o avatar — feedback imediato da ação */
@@ -1802,6 +2227,56 @@ img.achievement-card__art.has-art {
       0 0 38px rgba(100, 214, 255, 0.58),
       0 0 66px rgba(255, 226, 94, 0.35);
   }
+}
+
+@keyframes uniqueSovereignGlow {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(242, 213, 154, 0.4)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.65)),
+      inset 0 0 30px rgba(194, 53, 72, 0.22),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+      0 0 14px rgba(194, 53, 72, 0.4),
+      0 0 26px rgba(207, 167, 89, 0.35),
+      0 0 40px rgba(92, 16, 24, 0.3);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 var(--frame-inset-hi, rgba(242, 213, 154, 0.4)),
+      inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.65)),
+      inset 0 0 42px rgba(194, 53, 72, 0.38),
+      inset 0 0 0 1px rgba(0, 0, 0, 0.4),
+      0 0 22px rgba(242, 213, 154, 0.55),
+      0 0 40px rgba(194, 53, 72, 0.55),
+      0 0 68px rgba(207, 167, 89, 0.35);
+  }
+}
+
+@keyframes uniqueBorderAngle {
+  to { --unique-border-angle: 360deg; }
+}
+
+@keyframes uniqueHaloAngle {
+  to { --unique-halo-angle: 360deg; }
+}
+
+@keyframes uniqueNameShimmer {
+  to { --unique-name-pos: 100%; }
+}
+
+@keyframes uniqueArtPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(242, 213, 154, 0.45)) brightness(1); }
+  50% { filter: drop-shadow(0 0 16px rgba(194, 53, 72, 0.55)) brightness(1.08); }
+}
+
+@keyframes uniqueBloodFall {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, -50%, 0); }
+}
+
+@keyframes uniqueCrownAura {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50% { opacity: 0.95; transform: scale(1.06); }
 }
 
 @keyframes silverSheen {

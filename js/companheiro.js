@@ -11,6 +11,8 @@ import { initAppShell } from './app-shell.js';
 import {
   ApiError,
   ROUTES,
+  describeLevelProgress,
+  fillTrailheadField,
   getSession,
   loadAvatarImage,
   logout,
@@ -19,6 +21,7 @@ import {
 } from './api.js';
 import {
   fillAchievementArtHost,
+  fillAchievementDescription,
   getAchievementById,
   getAchievementCollectionStats,
   getAlbumSlotModel,
@@ -127,17 +130,33 @@ async function renderMirrorProfile(profile) {
   const levelEl = document.getElementById('mirror-level');
   const xpEl = document.getElementById('mirror-xp');
   const lessonsEl = document.getElementById('mirror-lessons');
+  const xpBarFill = document.getElementById('mirror-xp-fill');
+  const xpBarText = document.getElementById('mirror-xp-text');
+  const xpBarWrap = document.getElementById('mirror-xp-bar');
   const isAdmin = profile.role === 'admin';
+  const progress = describeLevelProgress(profile.xp, { isAdmin });
 
   if (nameEl) nameEl.textContent = profile.fullName || profile.username || '—';
   if (handleEl) handleEl.textContent = `@${profile.username || '—'}`;
-  if (rankEl) rankEl.textContent = profile.rank || (isAdmin ? 'Mestre do Infinito' : '—');
+  if (rankEl) rankEl.textContent = progress.rank || profile.rank || '—';
   if (turmaEl) turmaEl.textContent = isAdmin ? 'Domínio' : (profile.turma || '—');
-  if (levelEl) levelEl.textContent = isAdmin ? '∞' : String(profile.level ?? '—');
+  if (levelEl) levelEl.textContent = progress.levelLabel;
 
   if (mirrorMode === 'companion') {
     if (xpEl) xpEl.textContent = isAdmin ? '∞ XP' : `${Number(profile.xp || 0)} XP`;
     if (lessonsEl) lessonsEl.textContent = String(profile.completedLessonsCount ?? 0);
+    if (xpBarWrap) xpBarWrap.hidden = false;
+    if (xpBarFill) {
+      xpBarFill.style.width = `${progress.barPercent}%`;
+    }
+    if (xpBarWrap) {
+      xpBarWrap.style.setProperty('--xp-pct', String(Math.round(progress.barPercent)));
+      if (progress.atMax) xpBarWrap.dataset.max = 'true';
+      else delete xpBarWrap.dataset.max;
+    }
+    if (xpBarText) xpBarText.textContent = progress.barLabel;
+  } else if (xpBarWrap) {
+    xpBarWrap.hidden = true;
   }
 
   const label = profile.fullName || profile.username;
@@ -202,8 +221,8 @@ async function openRelicModal(achievement, model = null) {
       await fillAchievementArtHost(art, achievement, {
         grayscale: !slot.applySecretStyle,
       });
-      titleEl.textContent = achievement.name;
-      descEl.textContent = achievement.desc;
+      fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
+      fillAchievementDescription(descEl, achievement);
       metaEl.textContent = slot.applySecretStyle
         ? 'Segredo revelado neste Espelho'
         : 'Segredo conhecido — ainda não conquistado neste Espelho';
@@ -225,14 +244,14 @@ async function openRelicModal(achievement, model = null) {
   } else if (slot.kind === 'locked') {
     await fillAchievementArtHost(art, achievement, { grayscale: true });
     rarityEl.textContent = rarityName;
-    titleEl.textContent = achievement.name;
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
     descEl.textContent = 'Esta relíquia ainda não foi conquistada por este companheiro.';
     metaEl.textContent = 'Figurinha bloqueada no Espelho';
   } else {
     await fillAchievementArtHost(art, achievement, { grayscale: false });
     rarityEl.textContent = rarityName;
-    titleEl.textContent = achievement.name;
-    descEl.textContent = achievement.desc;
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
+    fillAchievementDescription(descEl, achievement);
     metaEl.textContent = 'Relíquia revelada no Espelho';
   }
 

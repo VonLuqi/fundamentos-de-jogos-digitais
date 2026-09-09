@@ -61,10 +61,12 @@ export function updateXpBar(user) {
   const bar = document.getElementById('xp-fill') || document.getElementById('xp-bar-fill');
   const label = document.getElementById('xp-text') || document.getElementById('xp-label');
   if (!bar || !label) return;
-  const xp = user.xp || 0;
-  const pct = Math.min(100, (xp % 100));
-  bar.style.width = pct + '%';
-  label.textContent = `${xp} XP`;
+  // Legado: barra linear antiga (xp % 100). Preferir describeLevelProgress no dashboard.
+  const xp = Number(user?.xp || 0);
+  const level = Math.min(99, Math.floor(xp / 100) + 1);
+  const within = level >= 99 ? 100 : xp % 100;
+  bar.style.width = `${level >= 99 ? 100 : within}%`;
+  label.textContent = level >= 99 ? 'Nível 99 · máximo do Domínio' : `${xp} XP`;
 }
 
 export function renderProfile(user) {

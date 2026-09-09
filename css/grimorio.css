@@ -674,6 +674,15 @@
   outline-offset: 3px;
 }
 
+.note-share-modal .note-share {
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  margin: 0;
+  text-align: left;
+}
+
 .note-canvas.note-form {
   padding: 0;
   border: 2px solid var(--hades-gold-dark, #8a6a2f);
@@ -686,7 +695,7 @@
 }
 
 .note-share {
-  margin-top: 1.25rem;
+  margin-top: 0;
 }
 
 .note-form__label {
@@ -1047,20 +1056,15 @@
 .note-view [hidden],
 .note-view__section[hidden],
 .note-events[hidden],
-.note-share[hidden],
-.note-icon-btn[hidden] {
+.note-icon-btn[hidden],
+.note-share-trigger[hidden] {
   display: none !important;
 }
 
 .note-canvas .note-events,
-.note-canvas .note-share,
 .note-canvas #note-feedback {
   margin-left: 1.25rem;
   margin-right: 1.25rem;
-}
-
-.note-canvas .note-share {
-  margin-bottom: 1.25rem;
 }
 
 /* Editor canvas */
@@ -1569,11 +1573,141 @@
   list-style: none;
 }
 
-body.is-grimorio-confirm-open {
+body.is-grimorio-confirm-open,
+body.is-note-share-open {
   overflow: hidden;
 }
 
+/* Gatilho Revelar (toolbar) */
+.note-share-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #f2d59a);
+  background: rgba(8, 6, 10, 0.55);
+  border: 1px solid rgba(207, 167, 89, 0.5);
+  cursor: pointer;
+}
+
+.note-share-trigger:hover,
+.note-share-trigger:focus-visible {
+  color: var(--hades-parchment, #f2e6c9);
+  border-color: var(--hades-gold, #cfa759);
+  outline: none;
+}
+
+.note-share-trigger__icon {
+  display: inline-flex;
+  line-height: 0;
+}
+
+.note-share-trigger__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.15rem;
+  height: 1.15rem;
+  padding: 0 0.28rem;
+  margin-left: 0.1rem;
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  color: var(--hades-void, #0d0a10);
+  background: var(--hades-gold, #cfa759);
+  border-radius: 999px;
+}
+
+.note-share-trigger__badge[hidden] {
+  display: none !important;
+}
+
+/* Modal Revelar */
+.note-share-modal[hidden] {
+  display: none !important;
+}
+
+.note-share-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 78;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(5, 3, 8, 0.72);
+  opacity: 0;
+  transition: opacity 160ms ease;
+}
+
+.note-share-modal.is-open {
+  opacity: 1;
+}
+
+.note-share-modal__panel {
+  position: relative;
+  width: min(100%, 460px);
+  max-height: min(88vh, 640px);
+  overflow: auto;
+  padding: 1.5rem 1.35rem 1.35rem;
+  background: var(--hades-panel, rgba(18, 12, 20, 0.96));
+  border: 2px solid var(--hades-gold-dark, #8a6a2f);
+  outline: 1px solid var(--hades-gold, #cfa759);
+  outline-offset: 3px;
+  transform: translateY(0.55rem) scale(0.98);
+  opacity: 0;
+  transition:
+    transform 200ms cubic-bezier(0.22, 0.8, 0.32, 1),
+    opacity 200ms ease;
+}
+
+.note-share-modal.is-open .note-share-modal__panel {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+.note-share-modal__close {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--hades-gold, #cfa759);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.note-share-modal__close:hover,
+.note-share-modal__close:focus-visible {
+  color: var(--hades-gold-bright, #f2d59a);
+  border-color: rgba(207, 167, 89, 0.45);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-share-modal,
+  .note-share-modal__panel {
+    transition: none;
+  }
+
+  .note-share-modal__panel {
+    transform: none;
+  }
+}
+
 @media (max-width: 640px) {
+  .note-share-modal__panel {
+    width: min(100%, 100%);
+    padding: 1.35rem 1rem 1.1rem;
+  }
+
   .grimorio-toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -1596,5 +1730,77 @@ body.is-grimorio-confirm-open {
   .note-form,
   .note-share {
     padding: 1.1rem 1rem;
+  }
+}
+
+/* Toast leve — conquistas do Grimório (Fase 4) */
+.grimorio-award-toast {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 80;
+  max-width: min(22rem, calc(100vw - 2rem));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(0.6rem);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.grimorio-award-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.grimorio-award-toast__card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--hades-gold) 55%, transparent);
+  background:
+    linear-gradient(165deg, color-mix(in srgb, #1a1210 92%, var(--hades-gold) 8%), #0d0a10 70%);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+}
+
+.grimorio-award-toast__icon {
+  flex: 0 0 auto;
+  font-size: 1.35rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--hades-gold) 40%, transparent));
+}
+
+.grimorio-award-toast__body {
+  min-width: 0;
+}
+
+.grimorio-award-toast__kicker {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.grimorio-award-toast__title {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: var(--hades-parchment);
+}
+
+.grimorio-award-toast__desc {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: var(--hades-text-dim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grimorio-award-toast {
+    transition: none;
+    transform: none;
   }
 }

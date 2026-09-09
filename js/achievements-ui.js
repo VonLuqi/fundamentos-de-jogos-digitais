@@ -9,6 +9,7 @@
 import {
   ACHIEVEMENTS,
   ACHIEVEMENT_RARITY_LABELS,
+  fillTrailheadField,
   normalizeAchievementRarity,
   rootPath,
 } from './api.js';
@@ -25,6 +26,9 @@ let achievementArtCatalogPromise = null;
  * Mantido exportado para smoke/compat.
  */
 export const ACHIEVEMENT_ART_IDS = new Set();
+
+/** Relíquia-suprema do Enigma: destaque só no Álbum (aba Conquistas), não no painel. */
+export const SOBERANO_ACHIEVEMENT_ID = 'soberano_do_submundo';
 
 function achievementArtCatalogUrl() {
   return `${rootPath()}/${ACHIEVEMENT_ART_CATALOG_FILE}`;
@@ -269,6 +273,25 @@ function isAchievementUnlocked(user, achievementId, { ignoreAdminPrivilege = fal
 
 export { isAchievementUnlocked };
 
+/** Soberano desbloqueado → pin no topo + layout de destaque (somente modo álbum). */
+export function shouldFeatureSoberano(user, achievement, { visitorView = false } = {}) {
+  if (!achievement || String(achievement.id) !== SOBERANO_ACHIEVEMENT_ID) return false;
+  return isAchievementUnlocked(user, achievement.id, {
+    ignoreAdminPrivilege: Boolean(visitorView),
+  });
+}
+
+function orderWithSoberanoFeatured(achievements, user, options = {}) {
+  if (!Array.isArray(achievements) || achievements.length === 0) return achievements;
+  const featured = [];
+  const rest = [];
+  for (const achievement of achievements) {
+    if (shouldFeatureSoberano(user, achievement, options)) featured.push(achievement);
+    else rest.push(achievement);
+  }
+  return featured.length > 0 ? [...featured, ...rest] : achievements;
+}
+
 export function getAchievementById(achievementId) {
   return ACHIEVEMENTS.find((achievement) => achievement.id === achievementId) || null;
 }
@@ -475,10 +498,18 @@ function appendRelicFaceContent(parent, {
   artClassName,
   rarityClassName,
   stageClassName,
+  applyTrailhead = true,
 }) {
   const name = document.createElement('p');
   name.className = nameClassName;
-  name.textContent = title;
+  const nameIndexes = applyTrailhead && !achievement?.hidden
+    ? achievement?.trailhead?.nameIndexes
+    : null;
+  if (Array.isArray(nameIndexes) && nameIndexes.length > 0) {
+    fillTrailheadField(name, title, nameIndexes);
+  } else {
+    name.textContent = title;
+  }
 
   const stage = document.createElement('div');
   stage.className = stageClassName
@@ -502,7 +533,21 @@ function appendRelicFaceContent(parent, {
   }
 }
 
+/** Aplica cipher spans na descrição (modal / textos longos). */
+export function fillAchievementDescription(el, achievement, { applyTrailhead = true } = {}) {
+  if (!el || !achievement) return;
+  const indexes = applyTrailhead && !achievement.hidden
+    ? achievement.trailhead?.descIndexes
+    : null;
+  if (Array.isArray(indexes) && indexes.length > 0) {
+    fillTrailheadField(el, achievement.desc, indexes);
+  } else {
+    el.textContent = achievement.desc || '';
+  }
+}
+
 function renderCardsMode(container, user, { highlightIds, emptyMessage, achievements }) {
+  // Painel (resumo): sem pin/destaque do Soberano — isso fica só no Álbum (aba Conquistas).
   const visibleAchievements = Array.isArray(achievements)
     ? achievements
     : visibleAchievementsForUser(user);
@@ -570,9 +615,13 @@ function renderAlbumMode(container, user, {
   container.innerHTML = '';
   container.classList.add('achievement-album');
 
-  const catalog = Array.isArray(achievements)
-    ? achievements
-    : achievementsCatalogForViewer(user, { visitorView });
+  const catalog = orderWithSoberanoFeatured(
+    Array.isArray(achievements)
+      ? achievements
+      : achievementsCatalogForViewer(user, { visitorView }),
+    user,
+    { visitorView }
+  );
 
   if (catalog.length === 0) {
     const li = document.createElement('li');
@@ -587,6 +636,7 @@ function renderAlbumMode(container, user, {
     const justUnlocked = highlightIds.includes(ach.id);
     const rarityName = rarityLabelForAchievement(ach);
     const slotState = model.kind;
+    const featured = model.kind === 'unlocked' && shouldFeatureSoberano(user, ach, { visitorView });
 
     const li = document.createElement('li');
     const isMysteryFace = model.kind === 'mystery';
@@ -605,6 +655,7 @@ function renderAlbumMode(container, user, {
       isStyledMystery ? 'is-mystery--styled' : '',
       isSecretKnownLocked ? 'is-secret-known' : '',
       justUnlocked ? 'is-just-unlocked' : '',
+      featured ? 'is-soberano-featured' : '',
     ]
       .filter(Boolean)
       .join(' ');
@@ -614,6 +665,7 @@ function renderAlbumMode(container, user, {
     li.dataset.achievementId = ach.id;
     li.dataset.rarity = model.rarity;
     li.dataset.state = slotState;
+    if (featured) li.dataset.featured = 'soberano';
     if (visitorView && model.isSecret) {
       li.dataset.revealText = String(model.revealText);
       li.dataset.secretStyle = String(model.applySecretStyle);

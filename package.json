@@ -8,14 +8,15 @@
     "node": ">=18"
   },
   "scripts": {
-    "check": "node --check js/main.js && node --check js/api.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/friends-ui.js && node --check js/companheiro.js && node --check js/lessons-ui.js && node --check js/achievements-ui.js && node --check js/aulas.js && node --check js/conquistas.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js && node tests/phase5-pages-smoke.mjs && node tests/friends-phase1-smoke.mjs && node tests/friends-phase4-smoke.mjs && node tests/mirror-secret-axes-smoke.mjs && node tests/achievement-art-smoke.mjs && node tests/menu-arcoiris-almas-smoke.mjs && node tests/grimorio-view-clone-smoke.mjs && node tests/grimorio-ui-workspace-smoke.mjs",
+    "check": "node --check js/main.js && node --check js/api.js && node --check js/game-catalog.js && node --check js/auth.js && node --check js/dashboard.js && node --check js/friends-ui.js && node --check js/companheiro.js && node --check js/lessons-ui.js && node --check js/achievements-ui.js && node --check js/aulas.js && node --check js/conquistas.js && node --check js/aula1.js && node --check api/auth.js && node --check api/progress.js && node --check api/_lib/store.js && node tests/game-catalog-smoke.mjs && node tests/phase5-pages-smoke.mjs && node tests/friends-phase1-smoke.mjs && node tests/friends-phase4-smoke.mjs && node tests/mirror-secret-axes-smoke.mjs && node tests/achievement-art-smoke.mjs && node tests/menu-arcoiris-almas-smoke.mjs && node tests/grimorio-view-clone-smoke.mjs && node tests/grimorio-ui-workspace-smoke.mjs && node tests/grimorio-revelar-modal-smoke.mjs && node tests/submundo-enigma-smoke.mjs && node tests/grimorio-achievements-smoke.mjs && node tests/aula1-secretas-volateis-smoke.mjs && node tests/levels-99-calibration-smoke.mjs",
     "dev": "node local-server.mjs",
     "start": "node local-server.mjs",
     "test": "echo \"No tests defined\"",
     "avatars:import": "node scripts/import-avatars-webp.mjs",
     "avatars:import:replace": "node scripts/import-avatars-webp.mjs --mode replace",
     "avatars:sync": "node scripts/sync-avatar-catalog.mjs",
-    "avatars:sync:clean": "node scripts/sync-avatar-catalog.mjs --clean-legacy"
+    "avatars:sync:clean": "node scripts/sync-avatar-catalog.mjs --clean-legacy",
+    "submundo:wav": "node scripts/generate-asfodelos-wav.mjs"
   },
   "optionalDependencies": {
     "@vercel/kv": "^3.0.0"

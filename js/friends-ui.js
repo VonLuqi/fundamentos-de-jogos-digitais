@@ -8,6 +8,7 @@
 import {
   ApiError,
   ROUTES,
+  describeLevelProgress,
   loadAvatarImage,
   listFriends,
   searchFriends,
@@ -173,6 +174,15 @@ function buildCompanionRow(entry, { mode, onAction }) {
   const handleEl = el('p', 'companions-list__handle', handle);
   const name = el('p', 'companions-list__name', fullName);
   meta.append(handleEl, name);
+  if (mode === 'accepted') {
+    const progress = describeLevelProgress(user.xp, { isAdmin: user.role === 'admin' });
+    const rankLine = el(
+      'p',
+      'companions-list__rank',
+      [progress.rank, `Nv. ${progress.shortLevelLabel}`].filter(Boolean).join(' · ')
+    );
+    meta.appendChild(rankLine);
+  }
 
   const actions = el('div', 'companions-list__actions');
 

@@ -8,6 +8,7 @@
 import {
   ApiError,
   ROUTES,
+  describeLevelProgress,
   loadAvatarImage,
   listClassmates,
   requestFriend,
@@ -91,10 +92,15 @@ function buildTurmaRow(classmate, { onAction, showTurma = false }) {
   const meta = el('div', 'companions-list__meta');
   const handleEl = el('p', 'companions-list__handle', handle);
   const name = el('p', 'companions-list__name', fullName);
+  const progress = describeLevelProgress(classmate.xp, {
+    isAdmin: classmate.role === 'admin',
+  });
   const rankParts = [
     showTurma && classmate.turma ? String(classmate.turma) : null,
-    classmate.rank,
-    classmate.level != null ? `Nv. ${classmate.level}` : null,
+    progress.rank || classmate.rank,
+    (classmate.level != null || progress.levelLabel)
+      ? `Nv. ${progress.shortLevelLabel || classmate.level}`
+      : null,
   ].filter(Boolean);
   const rankLine = el('p', 'turma-list__rank', rankParts.join(' · ') || '—');
   meta.append(handleEl, name, rankLine);
