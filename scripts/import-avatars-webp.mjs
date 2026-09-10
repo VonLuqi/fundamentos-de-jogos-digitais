@@ -324,17 +324,16 @@ async function convertToWebp(sourcePath, targetPath, options) {
   const pipeline = sharp(sourcePath).rotate();
 
   if (options.fit === 'contain') {
-    pipeline
+    return pipeline
       .resize({
         ...resizeBase,
         background: { r: 13, g: 10, b: 16, alpha: 1 },
       })
       .webp({ quality: options.quality })
       .toFile(targetPath);
-    return;
   }
 
-  pipeline
+  return pipeline
     .resize(resizeBase)
     .webp({ quality: options.quality })
     .toFile(targetPath);

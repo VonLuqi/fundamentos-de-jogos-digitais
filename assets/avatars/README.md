@@ -7,7 +7,7 @@ resolucao. O indice salvo no banco (avatar_index) continua sendo
 0-based e corresponde a ordem do catalogo semantico
 (`assets/avatars/catalog.stub.json`), nao a ordem alfabetica abaixo.
 
-Total de avatares ativos: 63
+Total de avatares ativos: 89
 
 Galeria atual:
 
@@ -15,12 +15,19 @@ Galeria atual:
 assets/avatars/afrodite.webp
 assets/avatars/beluga.webp
 assets/avatars/blinking-white-guy.webp
+assets/avatars/brook-rock.webp
+assets/avatars/brook.webp
 assets/avatars/capitao-picard.webp
 assets/avatars/catioro.webp
 assets/avatars/cellbitos.webp
 assets/avatars/chara.webp
 assets/avatars/chibi-gatinho.webp
 assets/avatars/chibi-thug-life.webp
+assets/avatars/chopper-assustado.webp
+assets/avatars/chopper-cow.webp
+assets/avatars/chopper-cry.webp
+assets/avatars/chopper-ninja.webp
+assets/avatars/chopper.webp
 assets/avatars/cinnamoroll.webp
 assets/avatars/cry-girl.webp
 assets/avatars/crying-jordan.webp
@@ -33,16 +40,23 @@ assets/avatars/gato-macacao.webp
 assets/avatars/gato-noite-estrelada.webp
 assets/avatars/giga-chad-transcendente.webp
 assets/avatars/giga-chad.webp
+assets/avatars/glitter-usopp.webp
+assets/avatars/god-usopp.webp
 assets/avatars/goku-sombrio.webp
 assets/avatars/grandao.webp
 assets/avatars/hades.webp
 assets/avatars/homem-aranha.webp
 assets/avatars/ishowspeed.webp
 assets/avatars/itadori.webp
+assets/avatars/jinbe-fofo.webp
+assets/avatars/jinbe-ira.webp
 assets/avatars/kratos-madruga.webp
 assets/avatars/kratos.webp
 assets/avatars/lara-croft.webp
 assets/avatars/lloyd.webp
+assets/avatars/love-sanji.webp
+assets/avatars/luffy-gear-5.webp
+assets/avatars/luffy.webp
 assets/avatars/mano-motoserra.webp
 assets/avatars/manoel-gomes.webp
 assets/avatars/menina-golden.webp
@@ -51,6 +65,8 @@ assets/avatars/menina-samoyed.webp
 assets/avatars/menininha.webp
 assets/avatars/michael-jackson.webp
 assets/avatars/mileena.webp
+assets/avatars/nami-pain.webp
+assets/avatars/nami.webp
 assets/avatars/neko-coracoes.webp
 assets/avatars/neko-gato.webp
 assets/avatars/neko-rosa.webp
@@ -58,10 +74,16 @@ assets/avatars/o-mago.webp
 assets/avatars/omni-man.webp
 assets/avatars/patolino-mago.webp
 assets/avatars/rena-hoodie.webp
+assets/avatars/robin-militar.webp
+assets/avatars/robin-owo.webp
+assets/avatars/robin.webp
 assets/avatars/roblox-man-face.webp
 assets/avatars/rusbe.webp
 assets/avatars/salsicha-instinto.webp
 assets/avatars/sami-nuvens.webp
+assets/avatars/sanji.webp
+assets/avatars/satoru-gojo-kid.webp
+assets/avatars/satoru-gojo.webp
 assets/avatars/scorpion.webp
 assets/avatars/shrek.webp
 assets/avatars/snoopy.webp
@@ -72,9 +94,13 @@ assets/avatars/sub-zero.webp
 assets/avatars/tails.webp
 assets/avatars/tangirina.webp
 assets/avatars/tio-patinhas.webp
+assets/avatars/usopp.webp
 assets/avatars/vini-jr-branco.webp
 assets/avatars/zagreus.webp
 assets/avatars/zeus.webp
+assets/avatars/zoro-aura.webp
+assets/avatars/zoro-roronoa.webp
+assets/avatars/zoro.webp
 ```
 
 ## Metadados do catalogo (`catalog.stub.json`)

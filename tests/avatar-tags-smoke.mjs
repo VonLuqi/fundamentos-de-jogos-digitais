@@ -30,7 +30,11 @@ assert(fs.existsSync(stubPath), 'catalog.stub.json deve existir');
 
 const catalog = JSON.parse(read('assets/avatars/catalog.stub.json'));
 assert(Array.isArray(catalog), 'catalog.stub.json deve ser um array');
-assert(catalog.length === 63, `catalog deve ter 63 entradas (tem ${catalog.length})`);
+const webpFiles = fs.readdirSync(path.join(root, 'assets/avatars'))
+  .filter((name) => /\.webp$/i.test(name))
+  .sort((a, b) => a.localeCompare(b, 'en'));
+assert(catalog.length >= 63, `catalog deve ter ao menos 63 entradas (tem ${catalog.length})`);
+assert(catalog.length === webpFiles.length, `catalog (${catalog.length}) deve bater com webp ativos (${webpFiles.length})`);
 
 const apiUrl = pathToFileURL(path.join(root, 'js/api.js')).href;
 const {

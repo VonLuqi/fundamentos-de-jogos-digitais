@@ -590,5 +590,335 @@
       "kawaii",
       "disney-sanrio"
     ]
+  },
+  {
+    "file": "brook-rock.webp",
+    "label": "Brook Rock",
+    "searchTerms": [
+      "brook",
+      "one piece",
+      "soul king"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "brook.webp",
+    "label": "Brook",
+    "searchTerms": [
+      "brook",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "chopper-assustado.webp",
+    "label": "Chopper Assustado",
+    "searchTerms": [
+      "chopper",
+      "tony tony",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "chopper-cow.webp",
+    "label": "Chopper Cow",
+    "searchTerms": [
+      "chopper",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "chopper-cry.webp",
+    "label": "Chopper Cry",
+    "searchTerms": [
+      "chopper",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "chopper-ninja.webp",
+    "label": "Chopper Ninja",
+    "searchTerms": [
+      "chopper",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "chopper.webp",
+    "label": "Chopper",
+    "searchTerms": [
+      "chopper",
+      "tony tony",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "glitter-usopp.webp",
+    "label": "Glitter Usopp",
+    "searchTerms": [
+      "usopp",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "god-usopp.webp",
+    "label": "God Usopp",
+    "searchTerms": [
+      "usopp",
+      "deus usopp",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "jinbe-fofo.webp",
+    "label": "Jinbe Fofo",
+    "searchTerms": [
+      "jinbe",
+      "jimbei",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "jinbe-ira.webp",
+    "label": "Jinbe Ira",
+    "searchTerms": [
+      "jinbe",
+      "jimbei",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "love-sanji.webp",
+    "label": "Love Sanji",
+    "searchTerms": [
+      "sanji",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "luffy-gear-5.webp",
+    "label": "Luffy Gear 5",
+    "searchTerms": [
+      "luffy",
+      "gear 5",
+      "nika",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "luffy.webp",
+    "label": "Luffy",
+    "searchTerms": [
+      "luffy",
+      "monkey d",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "nami-pain.webp",
+    "label": "Nami Pain",
+    "searchTerms": [
+      "nami",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "nami.webp",
+    "label": "Nami",
+    "searchTerms": [
+      "nami",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "robin-militar.webp",
+    "label": "Robin Militar",
+    "searchTerms": [
+      "robin",
+      "nico robin",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "robin-owo.webp",
+    "label": "Robin OwO",
+    "searchTerms": [
+      "robin",
+      "nico robin",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "robin.webp",
+    "label": "Robin",
+    "searchTerms": [
+      "robin",
+      "nico robin",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sanji.webp",
+    "label": "Sanji",
+    "searchTerms": [
+      "sanji",
+      "vinsmoke",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "satoru-gojo-kid.webp",
+    "label": "Satoru Gojo Kid",
+    "searchTerms": [
+      "gojo",
+      "satoru",
+      "jujutsu kaisen"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "satoru-gojo.webp",
+    "label": "Satoru Gojo",
+    "searchTerms": [
+      "gojo",
+      "satoru",
+      "jujutsu kaisen"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "usopp.webp",
+    "label": "Usopp",
+    "searchTerms": [
+      "usopp",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "zoro-aura.webp",
+    "label": "Zoro Aura",
+    "searchTerms": [
+      "zoro",
+      "roronoa",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "zoro-roronoa.webp",
+    "label": "Zoro Roronoa",
+    "searchTerms": [
+      "zoro",
+      "roronoa",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "zoro.webp",
+    "label": "Zoro",
+    "searchTerms": [
+      "zoro",
+      "roronoa",
+      "one piece"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
   }
 ]
