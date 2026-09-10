@@ -10,10 +10,17 @@ import {
   LESSONS,
   ROUTES,
   getSession,
+  listMyLessonParagraphs,
   listNotes,
   logout,
   requireSession,
 } from './api.js';
+import {
+  activityReadingPayload,
+  isActivityNoteId,
+  isLegacyActivityUserNote,
+  toActivityNotes,
+} from './grimorio-activity-notes.js';
 import { hideGrimorioReading, loadGrimorioReading } from './grimorio-reading.js';
 import { renderTagChips } from './grimorio-tags.js';
 import { flushQueuedGrimoireAwards } from './grimorio-awards.js';
@@ -72,7 +79,10 @@ function lessonShortLabel(lessonId) {
 
 function noteIdFromQuery() {
   const params = new URLSearchParams(window.location.search);
-  const id = Number(params.get('id'));
+  const raw = params.get('id');
+  if (!raw) return null;
+  if (isActivityNoteId(raw)) return raw;
+  const id = Number(raw);
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
@@ -83,9 +93,18 @@ function colecaoFromQuery() {
 
 function contextDotClass(note, shared) {
   if (shared) return 'is-revelada';
+  if (note.isActivityNote) return 'is-atividade';
   if (note.pinned) return 'is-fixada';
   if (note.lessonId) return 'is-trilha';
   return 'is-propria';
+}
+
+function sameNoteId(a, b) {
+  if (a == null || b == null) return false;
+  if (isActivityNoteId(a) || isActivityNoteId(b)) {
+    return String(a) === String(b);
+  }
+  return Number(a) === Number(b);
 }
 
 async function init() {
@@ -170,6 +189,11 @@ async function init() {
         label: 'Fixadas',
         count: ownNotes.filter((n) => n.pinned).length,
       },
+      {
+        key: 'atividades',
+        label: 'Atividades',
+        count: ownNotes.filter((n) => n.isActivityNote).length,
+      },
     ];
 
     const lessonCounts = new Map();
@@ -220,6 +244,9 @@ async function init() {
     }
     if (key === 'fixadas') {
       return ownNotes.filter((n) => n.pinned).map((note) => ({ note, shared: false }));
+    }
+    if (key === 'atividades') {
+      return ownNotes.filter((n) => n.isActivityNote).map((note) => ({ note, shared: false }));
     }
     if (key.startsWith('trilha:')) {
       const lessonId = key.slice('trilha:'.length);
@@ -292,7 +319,7 @@ async function init() {
     const btn = el('button', 'grimorio-feed__btn');
     btn.type = 'button';
     btn.dataset.noteId = String(note.id);
-    if (Number(note.id) === Number(selectedId)) {
+    if (sameNoteId(note.id, selectedId)) {
       btn.classList.add('is-selected');
       btn.setAttribute('aria-current', 'true');
     }
@@ -305,6 +332,7 @@ async function init() {
     const topRow = el('span', 'grimorio-feed__top');
     let context = 'Sua';
     if (shared) context = 'Revelada';
+    else if (note.isActivityNote) context = 'Atividade';
     else if (note.pinned) context = 'Fixada';
     else if (note.lessonId) context = lessonShortLabel(note.lessonId);
     topRow.appendChild(el('span', 'grimorio-feed__context', context));
@@ -314,7 +342,7 @@ async function init() {
     const titleRow = el('span', 'grimorio-feed__title-row');
     const title = el('span', 'grimorio-feed__title', note.title || 'Sem título');
     titleRow.appendChild(title);
-    if (!shared && note.unreadEventsCount > 0) {
+    if (!shared && !note.isActivityNote && note.unreadEventsCount > 0) {
       titleRow.appendChild(
         el(
           'span',
@@ -372,6 +400,8 @@ async function init() {
         emptyEl.textContent = 'Nada foi revelado a você… ainda.';
       } else if (activeColecao === 'fixadas') {
         emptyEl.textContent = 'Nenhuma inscrição fixada.';
+      } else if (activeColecao === 'atividades') {
+        emptyEl.textContent = 'Nenhuma atividade da Trilha registrada… ainda.';
       } else {
         emptyEl.textContent = 'Nada nesta coleção… ainda.';
       }
@@ -384,7 +414,7 @@ async function init() {
   }
 
   async function selectNote(id, { shared = false } = {}) {
-    selectedId = Number(id) || null;
+    selectedId = isActivityNoteId(id) ? String(id) : (Number(id) || null);
     if (!selectedId) {
       readingHandle?.clear?.();
       hideGrimorioReading();
@@ -394,7 +424,7 @@ async function init() {
       return;
     }
 
-    if (shared || notesForColecao('reveladas').some(({ note }) => Number(note.id) === selectedId)) {
+    if (shared || notesForColecao('reveladas').some(({ note }) => sameNoteId(note.id, selectedId))) {
       if (activeColecao === 'suas') {
         // keep current collection; selection can span collections
       }
@@ -407,9 +437,13 @@ async function init() {
     const seq = ++readingSeq;
     if (statusEl) statusEl.textContent = '';
     try {
+      const activityNote = ownNotes.find(
+        (note) => note.isActivityNote && sameNoteId(note.id, selectedId)
+      );
       readingHandle = await loadGrimorioReading({
         token,
         noteId: selectedId,
+        preloaded: activityNote ? activityReadingPayload(activityNote) : null,
         isStale: () => seq !== readingSeq,
         onDeleted: async () => {
           selectedId = null;
@@ -445,13 +479,20 @@ async function init() {
   }
 
   async function refreshNotes() {
-    const payload = await listNotes(token, { includeShared: true });
-    ownNotes = payload.notes || [];
-    sharedNotes = payload.sharedWithMe || [];
-    if (softEl && payload.softWarning) {
+    const [notesPayload, paragraphsPayload] = await Promise.all([
+      listNotes(token, { includeShared: true }),
+      listMyLessonParagraphs(token).catch(() => ({ activities: [] })),
+    ]);
+
+    const activityNotes = toActivityNotes(paragraphsPayload.activities || [], LESSONS);
+    const regularNotes = (notesPayload.notes || []).filter((note) => !isLegacyActivityUserNote(note));
+
+    ownNotes = [...activityNotes, ...regularNotes];
+    sharedNotes = notesPayload.sharedWithMe || [];
+    if (softEl && notesPayload.softWarning) {
       softEl.hidden = false;
-      softEl.textContent = payload.softWarningMessage
-        || `O Grimório engrossa… (${payload.count} inscrições).`;
+      softEl.textContent = notesPayload.softWarningMessage
+        || `O Grimório engrossa… (${notesPayload.count} inscrições).`;
     } else if (softEl) {
       softEl.hidden = true;
       softEl.textContent = '';

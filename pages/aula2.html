@@ -233,14 +233,18 @@
           <p><strong>Pistas secretas do Submundo:</strong> defina o glossário com as próprias palavras, descreva a hierarquia do Player como quem ensina a receita, e registre as ações do Input Map. O altar reconhece quem documenta com precisão.</p>
         </section>
 
-        <section class="config-notes-box" aria-label="Anotações da prática">
+        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
           <h3 class="lesson-subtitle">Anotações da oficina</h3>
-          <p>Registre glossário, hierarquia, Input Map e o que observou no movimento. Esse conteúdo será enviado junto com o registro da aula.</p>
+          <p>
+            Explique com as próprias palavras o que são <strong>Core Loop</strong>, <strong>Grokking</strong> e <strong>Assets</strong>.
+            Em seguida registre a hierarquia da cena, o Input Map e o que observou no movimento.
+            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+          </p>
           <textarea
             id="config-notes"
             class="config-notes-text"
-            rows="12"
-            placeholder="Glossário&#10;Core Loop: ...&#10;Grokking: ...&#10;Assets: ...&#10;&#10;Hierarquia da cena&#10;Raiz: CharacterBody2D&#10;Filhos: Sprite2D, CollisionShape2D&#10;&#10;Input Map&#10;ir_cima / ir_baixo / ir_esquerda / ir_direita → teclas ...&#10;&#10;Script / movimento&#10;Observações ao apertar Play: ..."
+            rows="14"
+            placeholder="Glossário (com suas palavras)&#10;Core Loop (com suas palavras): ...&#10;Grokking (com suas palavras): ...&#10;Assets (com suas palavras): ...&#10;&#10;Hierarquia da cena&#10;Raiz: CharacterBody2D&#10;Filhos: Sprite2D, CollisionShape2D&#10;&#10;Input Map&#10;ir_cima / ir_baixo / ir_esquerda / ir_direita → teclas ...&#10;&#10;Script / movimento&#10;Observações ao apertar Play: ..."
           ></textarea>
           <div class="gdd-actions">
             <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
@@ -250,7 +254,7 @@
         </section>
 
         <h3 class="lesson-subtitle">Artefato gerado</h3>
-        <p>Ao final, o aluno deve ter a cena do Player funcionando na Godot e uma síntese que amarra o glossário à estrutura montada.</p>
+        <p>Ao final, o aluno deve ter a cena do Player funcionando na Godot e uma síntese que amarra Core Loop, Grokking e Assets à estrutura montada.</p>
         <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
           <h4 class="lesson-subtitle">Exemplo pronto</h4>
           <p class="gdd-example__text">
@@ -261,7 +265,7 @@
           id="gdd-text"
           class="gdd-text"
           rows="8"
-          placeholder="Escreva a síntese final amarrando glossário e Player.&#10;Ex.: como Core Loop, Grokking e Assets aparecem na cena e no Input Map que você montou."
+          placeholder="Síntese final: amarre Core Loop, Grokking e Assets à cena do Player e ao Input Map que você montou.&#10;Ex.: como cada termo aparece quando você aperta Play."
         ></textarea>
         <div class="gdd-actions">
           <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>

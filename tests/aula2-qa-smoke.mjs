@@ -65,6 +65,38 @@ assert.ok(aula2Js.includes('enqueueDiscovery'), 'discovery no envio');
 assert.ok(aula2Js.includes('initAdminExample'), 'exemplo admin wired');
 assert.ok(!aula2Js.includes('game-canvas'), 'JS sem Tambor');
 
+// —— Atividades no grimório (via lesson_paragraphs, sem user_notes) ——
+assert.ok(!aula2Js.includes('createNote'), 'aula2 não grava nota no grimório');
+assert.ok(!aula2Js.includes('updateNote'), 'aula2 não atualiza nota no grimório');
+assert.ok(!aula2Js.includes('upsertLessonActivityNote'), 'sem dual-write');
+assert.ok(aula2Js.includes('Core Loop (com suas palavras)'), 'template pede Core Loop próprio');
+assert.ok(aula2Js.includes('Grokking (com suas palavras)'), 'template pede Grokking próprio');
+assert.ok(aula2Js.includes('Assets (com suas palavras)'), 'template pede Assets próprio');
+assert.ok(aula2Html.includes('Grimório Pessoal'), 'copy menciona grimório');
+assert.ok(/não compartilhada com colegas/i.test(aula2Html), 'copy deixa privacidade explícita');
+assert.ok(aula2Html.includes('Core Loop'), 'HTML pede Core Loop');
+assert.ok(/Grokking/i.test(aula2Html), 'HTML pede Grokking');
+assert.ok(/Assets/i.test(aula2Html), 'HTML pede Assets');
+
+const progressApi = read('api/progress.js');
+assert.ok(progressApi.includes("action === 'listMyLessonParagraphs'"), 'API lista paragraphs do aluno');
+
+const grimorioJs = read('js/grimorio.js');
+assert.ok(grimorioJs.includes('listMyLessonParagraphs'), 'grimório carrega paragraphs');
+assert.ok(grimorioJs.includes('toActivityNotes'), 'grimório mapeia notas de atividade');
+assert.ok(grimorioJs.includes("key: 'atividades'"), 'coleção Atividades');
+assert.ok(grimorioJs.includes('isLegacyActivityUserNote'), 'filtra notas legado dual-write');
+
+const activityNotes = read('js/grimorio-activity-notes.js');
+assert.ok(activityNotes.includes("ACTIVITY_NOTE_ID_PREFIX = 'activity:'"), 'ids virtuais activity:');
+assert.ok(activityNotes.includes('isActivityNote'), 'flag isActivityNote');
+
+const readingJs = read('js/grimorio-reading.js');
+assert.ok(readingJs.includes('preloaded'), 'leitura aceita nota de atividade pré-carregada');
+assert.ok(readingJs.includes('isActivityNote'), 'painel trata atividade');
+
+assert.ok(read('js/api.js').includes('listMyLessonParagraphs'), 'client API listMyLessonParagraphs');
+
 // —— README oficina ——
 const readme = read('assets/docs/aulas/aula02-player/README.md');
 assert.ok(readme.includes('CharacterBody2D'), 'README hierarquia');

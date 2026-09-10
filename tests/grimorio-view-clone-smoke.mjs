@@ -107,6 +107,17 @@ assert(css.includes('.note-view'), 'CSS visão');
 assert(css.includes('.grimorio-from-note'), 'CSS fromNote');
 assert(css.includes('.grimorio-workspace'), 'CSS workspace');
 
+const aulaCss = read('css/aula.css');
+assert(aulaCss.includes('width: fit-content'), 'fromNote compacto na aula');
+assert(aulaCss.includes('justify-content: flex-end'), 'fromNote no cantinho');
+
+const fromNoteJs = read('js/grimorio-from-note.js');
+assert(fromNoteJs.includes('focusLessonActivityArea'), 'foco na área da atividade');
+assert(fromNoteJs.includes('aula-atividade'), 'hash aula-atividade');
+assert(read('pages/aula1.html').includes('id="aula-atividade"'), 'âncora aula1');
+assert(read('pages/aula2.html').includes('id="aula-atividade"'), 'âncora aula2');
+assert(readingJs.includes('#aula-atividade'), 'link da atividade aponta para âncora');
+
 const aula1 = read('js/aula1.js');
 assert(aula1.includes('grimorio-from-note'), 'aula1 fromNote');
 assert(read('js/aula2.js').includes('grimorio-from-note'), 'aula2 fromNote');

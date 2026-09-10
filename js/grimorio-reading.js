@@ -287,7 +287,14 @@ function renderShareList(note, companions, onUnshare) {
 /**
  * @param {{
  *   token: string,
- *   noteId: number,
+ *   noteId: number|string,
+ *   preloaded?: {
+ *     note: object,
+ *     canEdit?: boolean,
+ *     canClone?: boolean,
+ *     canRefuse?: boolean,
+ *     readOnly?: boolean,
+ *   } | null,
  *   onDeleted?: () => void,
  *   onRefused?: () => void,
  *   onCloned?: (noteId: number) => void,
@@ -298,6 +305,7 @@ export async function loadGrimorioReading(options) {
   const {
     token,
     noteId,
+    preloaded = null,
     onDeleted,
     onRefused,
     onCloned,
@@ -405,7 +413,11 @@ export async function loadGrimorioReading(options) {
     }
 
     if (contextLabel) {
-      if (!canEdit && currentNote.owner?.username) {
+      if (currentNote.isActivityNote) {
+        contextLabel.textContent = currentNote.lessonId
+          ? `Atividade · ${lessonLabel(currentNote.lessonId)}`
+          : 'Nota de atividade';
+      } else if (!canEdit && currentNote.owner?.username) {
         contextLabel.textContent = `Revelada · @${currentNote.owner.username}`;
       } else if (currentNote.lessonId) {
         contextLabel.textContent = `Trilha · ${lessonLabel(currentNote.lessonId)}`;
@@ -418,7 +430,8 @@ export async function loadGrimorioReading(options) {
 
     if (contextDot) {
       contextDot.className = 'note-canvas__dot';
-      if (!canEdit) contextDot.classList.add('is-revelada');
+      if (currentNote.isActivityNote) contextDot.classList.add('is-atividade');
+      else if (!canEdit) contextDot.classList.add('is-revelada');
       else if (currentNote.pinned) contextDot.classList.add('is-fixada');
       else if (currentNote.lessonId) contextDot.classList.add('is-trilha');
       else contextDot.classList.add('is-propria');
@@ -453,9 +466,13 @@ export async function loadGrimorioReading(options) {
 
     if (lessonLink) {
       if (currentNote.lessonId) {
-        const label = `Abrir na Trilha · ${lessonLabel(currentNote.lessonId)}`;
+        const label = currentNote.isActivityNote
+          ? `Abrir atividade · ${lessonLabel(currentNote.lessonId)}`
+          : `Abrir na Trilha · ${lessonLabel(currentNote.lessonId)}`;
         lessonLink.hidden = false;
-        lessonLink.href = `${ROUTES.lesson(currentNote.lessonId)}?fromNote=${encodeURIComponent(currentNote.id)}`;
+        const qs = `?fromNote=${encodeURIComponent(String(currentNote.id))}`;
+        const hash = currentNote.isActivityNote ? '#aula-atividade' : '';
+        lessonLink.href = `${ROUTES.lesson(currentNote.lessonId)}${qs}${hash}`;
         lessonLink.title = label;
         lessonLink.setAttribute('aria-label', label);
       } else {
@@ -490,10 +507,14 @@ export async function loadGrimorioReading(options) {
   if (isStale()) return { clear: clearReading };
 
   try {
-    const payload = await getNote(token, noteId);
+    const payload = preloaded || await getNote(token, noteId);
     if (isStale()) return { clear: clearReading };
     renderNote(payload);
-    if (payload.canEdit && (payload.note?.events || []).some((event) => !event.readAt)) {
+    if (
+      !preloaded
+      && payload.canEdit
+      && (payload.note?.events || []).some((event) => !event.readAt)
+    ) {
       ackNoteEvents(token, noteId).catch(() => {});
     }
   } catch (error) {

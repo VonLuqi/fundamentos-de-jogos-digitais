@@ -2538,6 +2538,41 @@ export default async function handler(req, res) {
       });
     }
 
+    if (action === 'listMyLessonParagraphs') {
+      const { data, error } = await supabase
+        .from(LESSON_PARAGRAPHS_TABLE)
+        .select('lesson_id, paragraph, created_at, updated_at')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        if (error.code === '42P01' || /lesson_paragraphs/i.test(error.message || '')) {
+          return res.status(200).json({
+            ok: true,
+            activities: [],
+            warning: 'Tabela lesson_paragraphs ausente.',
+          });
+        }
+        return res.status(500).json({ ok: false, error: 'Falha ao carregar atividades da Trilha.' });
+      }
+
+      const activities = (data || [])
+        .map((row) => {
+          const lessonId = String(row.lesson_id || '');
+          const paragraph = String(row.paragraph || '').trim();
+          if (!lessonId || !paragraph || !LESSON_CATALOG[lessonId]) return null;
+          return {
+            lessonId,
+            paragraph,
+            createdAt: row.created_at || null,
+            updatedAt: row.updated_at || null,
+          };
+        })
+        .filter(Boolean);
+
+      return res.status(200).json({ ok: true, activities });
+    }
+
     if (action === 'saveLessonParagraph') {
       const normalizedLessonId = String(lessonId || '');
       if (!LESSON_CATALOG[normalizedLessonId]) {

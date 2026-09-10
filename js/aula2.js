@@ -28,10 +28,10 @@ const PDF_FILE = 'aula02_glossario_player_slides.pdf';
 const CONFIG_NOTES_START = '=== ANOTACOES_DE_CONFIGURACAO ===';
 const CONFIG_NOTES_END = '=== FIM_ANOTACOES_DE_CONFIGURACAO ===';
 const CONFIG_NOTES_TEMPLATE = [
-  'Glossário',
-  'Core Loop: ...',
-  'Grokking: ...',
-  'Assets: ...',
+  'Glossário (com suas palavras)',
+  'Core Loop (com suas palavras): ...',
+  'Grokking (com suas palavras): ...',
+  'Assets (com suas palavras): ...',
   '',
   'Hierarquia da cena',
   'Raiz: CharacterBody2D',
@@ -237,10 +237,10 @@ async function initParagraphPersistence() {
       textarea.value = parsed.summary;
       notesArea.value = parsed.notes;
       setSaveStatus('Registro e anotações carregados do banco.', 'success');
-      setNotesStatus(parsed.notes ? 'Anotações carregadas.' : 'Escreva as anotações da oficina.', 'info');
+      setNotesStatus(parsed.notes ? 'Anotações carregadas.' : 'Explique Core Loop, Grokking e Assets nas anotações.', 'info');
     } else {
       setSaveStatus('Escreva a síntese e finalize para enviar ao professor.', 'info');
-      setNotesStatus('Preencha glossário, hierarquia, Input Map e observações.', 'info');
+      setNotesStatus('Explique Core Loop, Grokking e Assets; depois hierarquia, Input Map e Play.', 'info');
     }
   } catch {
     setSaveStatus('Não foi possível carregar o registro do banco agora.', 'error');
@@ -279,10 +279,16 @@ async function initParagraphPersistence() {
         const conquestText = achievementNames.length > 0
           ? ` Conquistas: ${achievementNames.join(', ')}.`
           : '';
-        setSaveStatus(`Aula finalizada. Anotações enviadas. +${xp} XP.${conquestText}`, 'success');
+        setSaveStatus(
+          `Aula finalizada. Anotações enviadas. +${xp} XP.${conquestText} A atividade aparece no seu Grimório (privada).`,
+          'success'
+        );
         enqueueDiscovery(achievements);
       } else {
-        setSaveStatus('Aula finalizada e anotações enviadas com sucesso.', 'success');
+        setSaveStatus(
+          'Aula finalizada e anotações enviadas. A atividade aparece no seu Grimório (privada).',
+          'success'
+        );
       }
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Falha ao salvar o registro.';

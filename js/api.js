@@ -585,6 +585,13 @@ export function getLessonParagraph(token, lessonId) {
   });
 }
 
+export function listMyLessonParagraphs(token) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'listMyLessonParagraphs' }),
+  });
+}
+
 export function saveLessonParagraph(token, lessonId, paragraph) {
   return request('/progress', {
     method: 'POST',

@@ -26,13 +26,15 @@ Conectar o glossário operacional do desenvolvedor (**Core Loop**, **Grokking**,
 
 - Lê a teoria visual (~20 min).
 - Segue a prática guiada na Godot (~100 min).
-- Registra descobertas (glossário + estrutura da cena + Input Map) na página da aula.
-- Envia o registro; eventualmente resgata o código da aula no Altar.
+- Explica com as próprias palavras **Core Loop**, **Grokking** e **Assets** nas anotações da oficina; registra também hierarquia, Input Map e observações do Play.
+- Finaliza o envio: registro em `lesson_paragraphs` (professor/Almas/secretas). No **Grimório Pessoal**, a mesma entrega aparece como **nota de atividade** (virtual, sem gravar em `user_notes`; privada; não auto-revelada).
+- Eventualmente resgata o código da aula no Altar.
 
 ### Artefato gerado
 
 - A **primeira cena do Jogador** no projeto Godot do aluno (hierarquia + Input Map + script mínimo de movimento).
 - Registro escrito na plataforma (anotações + síntese) amarrando glossário ↔ cena.
+- Visão da atividade no grimório (derivada de `lesson_paragraphs`, `lessonId: aula2`).
 
 ---
 
@@ -41,7 +43,7 @@ Conectar o glossário operacional do desenvolvedor (**Core Loop**, **Grokking**,
 
 | Área              | Situação (antes)                                                              | Situação (agora)                                                                                             |
 | ----------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Página / JS       | “Loops e Ritmo” + Tambor                                                      | Glossário + Oficina Player + slides; discovery compartilhado                                                 |
+| Página / JS       | “Loops e Ritmo” + Tambor                                                      | Glossário + Oficina Player + slides; atividades no grimório via paragraphs                                   |
 | Catálogo Trilha   | Título antigo                                                                 | Título/subtitle curriculares; `rewardXp: 30`                                                                 |
 | Backend           | Título antigo; gate `false`                                                   | Título novo; gate `false` (admin); regra `aula2_concluida`                                                   |
 | Conquistas        | Sem família `aula2`                                                           | 1 pública + 3 secretas + stubs de arte                                                                       |
@@ -60,9 +62,10 @@ Manter o mesmo “contrato” de experiência:
 1. **Shell + abas:** `I. Fundamentos` · `II. Oficina` · `III. Slides`.
 2. **Tom Hades:** tokens, `hades-frame`, `triplet-grid`, `lesson-cta`, discovery overlay já em `css/aula.css`.
 3. **Envio server-authoritative:** anotações + síntese → API avalia secretas; XP/conclusão via redeem no Altar (não confiar no cliente).
-4. **Conquistas:** 1 pública de conclusão (`aulaN_concluida`) + N secretas `hidden` + `meta.family: "aula2"` + `volatile: true`.
-5. **Pistas sem spoiler:** bloco curto na Oficina (“o altar reconhece…”) sem listar ids/nomes das secretas.
-6. **Popup de descoberta:** reutilizar o fluxo já estabilizado na aula1 (CSS pulse; sem VFX externo).
+4. **Grimório lê atividades:** `listMyLessonParagraphs` + notas virtuais (`activity:aulaN`) no workspace; sem `createNote` no finalize.
+5. **Conquistas:** 1 pública de conclusão (`aulaN_concluida`) + N secretas `hidden` + `meta.family: "aula2"` + `volatile: true`.
+6. **Pistas sem spoiler:** bloco curto na Oficina (“o altar reconhece…”) sem listar ids/nomes das secretas.
+7. **Popup de descoberta:** reutilizar o fluxo já estabilizado na aula1 (CSS pulse; sem VFX externo).
 
 ---
 
@@ -274,8 +277,9 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 - [x] Reescrever `js/aula2.js`: remover Tambor; tabs + boot shell/sessão.
 - [x] Wire `initSlidesViewer` com `PPTX_FILE` / `PDF_FILE` da aula2.
 - [x] Wire envio de anotações/síntese + discovery via helper, `lessonId: 'aula2'`.
-- [x] Template de anotações: Glossário · Hierarquia · Input Map · Script/movimento · Observações.
-- [x] Placeholder da síntese pedindo amarração glossário ↔ Player (já no HTML; JS não sobrescreve).
+- [x] Template de anotações: Glossário (Core Loop / Grokking / Assets com as próprias palavras) · Hierarquia · Input Map · Script/movimento · Observações.
+- [x] Placeholder da síntese pedindo amarração dos três termos ↔ Player (já no HTML; JS não sobrescreve).
+- [x] Grimório mostra a entrega via `lesson_paragraphs` (nota de atividade virtual; sem upsert em `user_notes`).
 - [x] Exemplo pronto só para admin (`gdd-example` hidden), padrão aula1.
 - [x] `getLessonCode` não existe na UX da aula1 — omitido (redeem só no Altar).
 - [x] Smokes/art + `node --check` para `aula2.js` / `lesson-discovery.js`.
@@ -384,9 +388,10 @@ Próximo currículo → Aula 03 (câmera / cena de teste / polish)
 2. Consegue seguir o README e montar a cena `CharacterBody2D` + `Sprite2D` + `CollisionShape2D` + Input Map `ir_*` + `player.gd` com `move_and_slide`.
 3. Aba Slides serve o deck novo: PPTX + PDF em `assets/docs/aulas/`, visual alinhado aos slides da Aula 01, com download e viewer/fallback.
 4. Envio de anotações avalia secretas no servidor; popup de descoberta (via `lesson-discovery.js`) funciona em aula1 e aula2.
-5. Redeem do código marca aula concluída, concede XP 30 e `aula2_concluida`.
-6. Álbum lista as novas relíquias; secretas permanecem `?` até unlock.
-7. Smokes de secretas e catálogo passam.
+5. Finalize grava só em `lesson_paragraphs`; o Grimório lista aula1/aula2 como **notas de atividade** (coleção Atividades; sem Revelar/editar como inscrição livre).
+6. Redeem do código marca aula concluída, concede XP 30 e `aula2_concluida`.
+7. Álbum lista as novas relíquias; secretas permanecem `?` até unlock.
+8. Smokes de secretas e catálogo passam (contrato activity-from-paragraphs).
 
 ---
 
@@ -401,7 +406,7 @@ Próximo currículo → Aula 03 (câmera / cena de teste / polish)
 | Escopo Godot | Cena Player + Input Map + **`player.gd` mínimo com `move_and_slide`** |
 | Material baixável | **Só README + checklist** em `aula02-player/` (sem ZIP de sprite) |
 | Slides | Template aula1 → `aula02_glossario_player_slides.pptx` + `.pdf` em `assets/docs/aulas/` |
-| Entrega na página | Espelho aula1: `config-notes` + `gdd-text` + placeholders de seção |
+| Entrega na página | Espelho aula1: `config-notes` + `gdd-text`; grimório lê atividades de `lesson_paragraphs` |
 | Pacote conquistas | 1 pública + 3 secretas (tríade Léxico / Arquiteto / Cartógrafo) |
 | Ids finais | `aula2_concluida`, `segredo_lexico_do_desenvolvedor`, `segredo_arquiteto_de_cenas`, `segredo_cartografo_do_input` |
 | Trailhead | Público sem novos índices cipher (anagrama permanece só em aula1 + GDD) |

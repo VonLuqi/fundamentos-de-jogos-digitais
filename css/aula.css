@@ -1331,10 +1331,14 @@ img.discovery-card__item-art.has-art {
 
 /* ---------- 12. Voltar à inscrição (?fromNote=) ---------- */
 .grimorio-from-note {
-  margin: 0 0 1rem;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(207, 167, 89, 0.4);
-  background: rgba(207, 167, 89, 0.08);
+  margin: 0 0 0.35rem auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  justify-content: flex-end;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .grimorio-from-note__link,
@@ -1342,17 +1346,21 @@ img.discovery-card__item-art.has-art {
 .grimorio-from-note__link:link,
 .grimorio-from-note__link:visited {
   font-family: var(--font-title, Cinzel, serif);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--hades-gold-bright, #f2d59a);
   text-decoration: none;
+  opacity: 0.72;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .grimorio-from-note__link:hover,
 .grimorio-from-note__link:focus-visible {
   text-decoration: underline;
   outline: none;
+  opacity: 1;
 }
 
 /* ---------- 13. Acessibilidade & Motion ---------- */

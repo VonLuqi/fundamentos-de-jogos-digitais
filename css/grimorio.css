@@ -255,6 +255,11 @@
   box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.35);
 }
 
+.grimorio-feed__dot.is-atividade {
+  background: #a67c3a;
+  box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.45);
+}
+
 .grimorio-feed__main {
   display: flex;
   flex-direction: column;
@@ -839,6 +844,11 @@
 .note-canvas__dot.is-trilha {
   background: var(--hades-gold-dark, #8a6a2f);
   box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.35);
+}
+
+.note-canvas__dot.is-atividade {
+  background: #a67c3a;
+  box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.45);
 }
 
 .note-canvas__context-label {
@@ -1456,26 +1466,34 @@
 }
 
 .grimorio-from-note {
-  margin: 0 0 1rem;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid rgba(207, 167, 89, 0.4);
-  background: rgba(207, 167, 89, 0.08);
+  margin: 0 0 0.35rem auto;
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: flex;
+  justify-content: flex-end;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .grimorio-from-note__link,
 .grimorio-from-note__label {
   font-family: var(--font-title, Cinzel, serif);
-  font-size: 0.68rem;
-  letter-spacing: 0.1em;
+  font-size: 0.55rem;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--hades-gold-bright, #f2d59a);
   text-decoration: none;
+  opacity: 0.72;
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .grimorio-from-note__link:hover,
 .grimorio-from-note__link:focus-visible {
   text-decoration: underline;
   outline: none;
+  opacity: 1;
 }
 
 .grimorio-confirm[hidden] {
