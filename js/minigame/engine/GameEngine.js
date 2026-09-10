@@ -1,11 +1,10 @@
-import * as THREE from "https://unpkg.com/three@0.164.0/build/three.module.js";
-import { getSession, submitMinigameRun } from "../../api.js";
+import * as THREE from "../three.js";
 import { InputHandler } from "./InputHandler.js";
 import { Player } from "../entities/Player.js";
-import { Enemy } from "../entities/Enemy.js";
+import { EnemyPool, ENEMY_POOL_SIZE } from "../entities/Enemy.js";
 import { Pickup } from "../entities/Pickup.js";
-import { Projectile } from "../entities/Projectile.js";
-import { PhysicsSystem } from "../systems/PhysicsSystem.js";
+import { ProjectilePool, PROJECTILE_POOL_SIZE } from "../entities/Projectile.js";
+import { PhysicsSystem, ARENA_HALF_EXTENT } from "../systems/PhysicsSystem.js";
 import { createStatusSlots, applyStatusToPlayer, normalizeStatusId, STATUS_LIBRARY } from "../systems/StatusSystem.js";
 import {
   POWERUP_LIBRARY,
@@ -27,12 +26,21 @@ export class GameEngine {
     this.characterKey = characterKey;
     this.lastTime = 0;
     this.running = false;
+    /** @type {'playing' | 'paused-upgrade' | 'victory' | 'defeat'} */
     this.state = "playing";
+    /** Fixed physics step (60 Hz) — GDD / plano §1.2 */
+    this.timeStep = 1 / 60;
+    this.accumulator = 0;
+    this.maxFrameDelta = 0.25;
+    this.maxPhysicsSteps = 8;
     this.runTime = 0;
     this.gameDuration = 20 * 60;
     this.resultSubmitted = false;
     this.upgradeOverlay = null;
     this.upgradeChoices = [];
+    this._onFrame = this._loop.bind(this);
+    this._renderAlpha = 1;
+    this._hasInterpolationSample = false;
 
     const config = {
       soulblade: { name: "Soulblade", weapon: "Lâmina Arcana", color: 0x00e5ff, hp: 100, speed: 15, projectileDamage: 1, projectileSpeed: 28, projectileColor: 0xffd166 },
@@ -45,32 +53,86 @@ export class GameEngine {
     this.characterConfig = config;
 
     this.weaponLibrary = {
-      "lâmina arcana": { id: "lâmina arcana", name: "Lâmina Arcana", pattern: "nearest", fireRate: 0.42, damage: 1, speed: 28, color: 0xffd166, radius: 0.52 },
-      "lança de ossos": { id: "lança de ossos", name: "Shotgun de Ossos", pattern: "spread", fireRate: 0.72, damage: 2, speed: 24, color: 0xc4b5fd, radius: 0.48 },
-      "orbe de fogo": { id: "orbe de fogo", name: "Orbe de Fogo", pattern: "orbital", fireRate: 0.9, damage: 1.5, speed: 34, color: 0xf97316, radius: 0.58, explosionRadius: 1.2 },
-      "vento cortante": { id: "vento cortante", name: "Vento Cortante", pattern: "cleave", fireRate: 0.3, damage: 1.2, speed: 32, color: 0x93c5fd, radius: 0.28, life: 0.55 },
-      "relâmpago sagrado": { id: "relâmpago sagrado", name: "Relâmpago Sagrado", pattern: "lightning", fireRate: 0.55, damage: 2.2, speed: 26, color: 0xfed7aa, radius: 0.18, life: 0.45 },
+      "lâmina arcana": {
+        id: "lâmina arcana",
+        name: "Lâmina Arcana",
+        pattern: "melee",
+        fireRate: 0.58,
+        damage: 1.45,
+        color: 0xa78bfa,
+        meleeRange: 5.8,
+        meleeHalfAngle: 0.95,
+      },
+      "lança de ossos": {
+        id: "lança de ossos",
+        name: "Lança de Ossos",
+        pattern: "pierce",
+        fireRate: 0.68,
+        damage: 2,
+        speed: 34,
+        color: 0xc4b5fd,
+        radius: 0.42,
+        life: 1.6,
+        maxDistance: 48,
+        pierce: true,
+        maxPierce: 64,
+        visualType: "bone",
+      },
+      "orbe de fogo": {
+        id: "orbe de fogo",
+        name: "Orbe de Fogo",
+        pattern: "orbital",
+        fireRate: 0.9,
+        damage: 1.5,
+        speed: 34,
+        color: 0xf97316,
+        radius: 0.58,
+        explosionRadius: 1.2,
+      },
+      "vento cortante": {
+        id: "vento cortante",
+        name: "Vento Cortante",
+        pattern: "shockwave",
+        fireRate: 1.15,
+        damage: 1.1,
+        color: 0x93c5fd,
+        shockwaveRadius: 8.5,
+        knockback: 7.2,
+      },
+      "relâmpago sagrado": {
+        id: "relâmpago sagrado",
+        name: "Relâmpago Sagrado",
+        pattern: "lightning",
+        fireRate: 0.7,
+        damage: 2.4,
+        color: 0xfde68a,
+        strikeCount: 1,
+        aoeRadius: 2.8,
+        life: 0.42,
+      },
     };
 
     this.input = new InputHandler();
-    this.physics = new PhysicsSystem();
+    this.physics = new PhysicsSystem({
+      timeStep: this.timeStep,
+      arenaHalfExtent: ARENA_HALF_EXTENT,
+    });
     this.vfx = new VfxSystem(this.renderSystem.scene);
-    this.physics.world.gravity.set(0, -9.82, 0);
 
     this.weaponProfile = {
-      soulblade: { fireRate: 0.42, pattern: "nearest" },
-      graveguard: { fireRate: 0.75, pattern: "spread" },
+      soulblade: { fireRate: 0.58, pattern: "melee" },
+      graveguard: { fireRate: 0.68, pattern: "pierce" },
       warden: { fireRate: 0.9, pattern: "orbital" },
-    }[this.characterKey] || { fireRate: 0.45, pattern: "nearest" };
+    }[this.characterKey] || { fireRate: 0.4, pattern: "melee" };
 
     this.player = new Player(this.renderSystem.scene, this.physics.world, {
       color: config.color,
       speed: config.speed,
       size: 2,
+      hp: config.hp,
+      maxHp: config.hp,
+      arenaLimit: this.physics.arenaLimit,
     });
-    this.player.hp = config.hp;
-    this.player.maxHp = config.hp;
-    this.player.baseMaxHp = config.hp;
     this.player.xp = 0;
     this.player.level = 1;
     this.player.xpToNextLevel = this.getXpForLevel(1);
@@ -109,15 +171,19 @@ export class GameEngine {
     this.xpPickupRing.visible = true;
     this.renderSystem.scene.add(this.xpPickupRing);
 
-    const groundShape = new CANNON.Plane();
-    const groundBody = new CANNON.Body({ mass: 0 });
-    groundBody.addShape(groundShape);
-    groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-    groundBody.position.set(0, 0, 0);
-    this.physics.addBody(groundBody);
+    // Chão + paredes vêm do PhysicsSystem (§2.2)
+    if (typeof this.renderSystem.buildArenaBoundary === "function") {
+      this.renderSystem.buildArenaBoundary(this.physics.arenaLimit);
+    }
 
-    this.enemies = [];
-    this.projectiles = [];
+    this.enemyPool = new EnemyPool(THREE, ENEMY_POOL_SIZE);
+    /** Lista viva do pool (mesma referência — sem push/splice avulsos). */
+    this.enemies = this.enemyPool.active;
+    if (typeof this.renderSystem.setEnemyHordeEntities === "function") {
+      this.renderSystem.setEnemyHordeEntities(this.enemies);
+    }
+    this.projectilePool = new ProjectilePool(this.renderSystem.scene, PROJECTILE_POOL_SIZE);
+    this.projectiles = this.projectilePool.active;
     this.pickups = [];
     this.spawnTimer = 0;
     this.attackCooldown = 0;
@@ -134,6 +200,27 @@ export class GameEngine {
     }
 
     console.log("GameEngine: Initialized Input, Player, Combat, Pickup, Timer, and End-of-run systems.");
+  }
+
+  /** Start the game loop */
+  start() {
+    this.showHud();
+    this.state = "playing";
+    this.running = true;
+    this.accumulator = 0;
+    this._hasInterpolationSample = false;
+    this.lastTime = performance.now();
+    this.input.setActive(true);
+
+    // Spawn inicial aqui (não no construtor) — menu responde mais rápido
+    if ((this.enemies?.length ?? 0) === 0) {
+      for (let i = 0; i < 3; i += 1) {
+        this.spawnEnemy();
+      }
+      this.spawnTimer = 0;
+    }
+
+    requestAnimationFrame(this._onFrame);
   }
 
   _createHud() {
@@ -183,26 +270,34 @@ export class GameEngine {
 
     const hpRatio = Math.max(0, Math.min(1, this.player.hp / this.player.maxHp));
     const xpRatio = Math.max(0, Math.min(1, this.player.xp / this.player.xpToNextLevel));
+    const hpText = `${Math.max(0, Math.round(this.player.hp))} / ${Math.max(1, Math.round(this.player.maxHp))}`;
+    const xpText = `${Math.max(0, Math.round(this.player.xp))} / ${Math.max(1, Math.round(this.player.xpToNextLevel))}`;
+    const elapsed = Math.min(this.runTime, this.gameDuration);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = Math.floor(elapsed % 60);
+    const totalMinutes = Math.floor(this.gameDuration / 60);
+    const totalSeconds = Math.floor(this.gameDuration % 60);
+    const timeText = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} / ${String(totalMinutes).padStart(2, "0")}:${String(totalSeconds).padStart(2, "0")}`;
 
-    if (hpEl) hpEl.textContent = `${Math.max(0, Math.round(this.player.hp))} / ${Math.max(1, Math.round(this.player.maxHp))}`;
-    if (xpEl) xpEl.textContent = `${Math.max(0, Math.round(this.player.xp))} / ${Math.max(1, Math.round(this.player.xpToNextLevel))}`;
-    if (timeEl) {
-      const elapsed = Math.min(this.runTime, this.gameDuration);
-      const minutes = Math.floor(elapsed / 60);
-      const seconds = Math.floor(elapsed % 60);
-      const totalMinutes = Math.floor(this.gameDuration / 60);
-      const totalSeconds = Math.floor(this.gameDuration % 60);
-      timeEl.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")} / ${String(totalMinutes).padStart(2, "0")}:${String(totalSeconds).padStart(2, "0")}`;
-    }
+    if (hpEl && hpEl.textContent !== hpText) hpEl.textContent = hpText;
+    if (xpEl && xpEl.textContent !== xpText) xpEl.textContent = xpText;
+    if (timeEl && timeEl.textContent !== timeText) timeEl.textContent = timeText;
+
     if (statusEl) {
       const activeStatuses = this.player.statusSlots
         .filter(Boolean)
         .map((slot) => STATUS_LIBRARY[normalizeStatusId(slot.id)]?.name || slot.id)
         .slice(0, 2)
         .join(" • ");
-      statusEl.textContent = activeStatuses || "Nenhum status";
+      const statusText = activeStatuses || "Nenhum status";
+      if (statusEl.textContent !== statusText) statusEl.textContent = statusText;
     }
-    if (weaponListEl) {
+
+    const weaponsSig = (this.player.weaponSlots || [])
+      .map((w) => (w ? `${w.id}:${w.level || 1}` : ""))
+      .join("|");
+    if (weaponListEl && this._hudWeaponsSig !== weaponsSig) {
+      this._hudWeaponsSig = weaponsSig;
       const weapons = this.player.weaponSlots.filter(Boolean);
       weaponListEl.innerHTML = weapons.length
         ? weapons.map((weapon) => `
@@ -213,7 +308,12 @@ export class GameEngine {
           `).join("")
         : '<span class="minigame-chip minigame-chip--empty">Nenhuma arma</span>';
     }
-    if (statusListEl) {
+
+    const statusSig = (this.player.statusSlots || [])
+      .map((s) => (s ? `${normalizeStatusId(s.id)}:${s.level || 1}` : ""))
+      .join("|");
+    if (statusListEl && this._hudStatusSig !== statusSig) {
+      this._hudStatusSig = statusSig;
       const statuses = this.player.statusSlots.filter(Boolean);
       statusListEl.innerHTML = statuses.length
         ? statuses.map((slot) => `
@@ -224,12 +324,23 @@ export class GameEngine {
           `).join("")
         : '<span class="minigame-chip minigame-chip--empty">Nenhum status</span>';
     }
-    if (levelEl) levelEl.textContent = `Lv ${this.player.level}`;
-    if (healthFill) healthFill.style.width = `${Math.round(hpRatio * 100)}%`;
-    if (xpFill) xpFill.style.width = `${Math.round(xpRatio * 100)}%`;
-    if (dmgEl) dmgEl.textContent = `${this.player.projectileDamage?.toFixed(1) ?? "1.0"}`;
-    if (speedEl) speedEl.textContent = `${Math.round(this.player.speed ?? this.player.baseSpeed ?? 15)}`;
-    if (atkEl) atkEl.textContent = `${(this.weaponProfile.fireRate / (this.player.attackCooldownMultiplier || 1)).toFixed(2)}s`;
+
+    const levelText = `Lv ${this.player.level}`;
+    if (levelEl && levelEl.textContent !== levelText) levelEl.textContent = levelText;
+
+    const hpPct = `${Math.round(hpRatio * 100)}%`;
+    const xpPct = `${Math.round(xpRatio * 100)}%`;
+    if (healthFill && healthFill.style.width !== hpPct) healthFill.style.width = hpPct;
+    if (xpFill && xpFill.style.width !== xpPct) xpFill.style.width = xpPct;
+
+    const dmgText = `${this.player.projectileDamage?.toFixed(1) ?? "1.0"}`;
+    const speedText = `${Math.round(this.player.speed ?? this.player.baseSpeed ?? 15)}`;
+    const slotRate = this.player.weaponSlots.find(Boolean)?.fireRate;
+    const baseRate = Number.isFinite(slotRate) ? slotRate : this.weaponProfile.fireRate;
+    const atkText = `${(baseRate / (this.player.attackCooldownMultiplier || 1)).toFixed(2)}s`;
+    if (dmgEl && dmgEl.textContent !== dmgText) dmgEl.textContent = dmgText;
+    if (speedEl && speedEl.textContent !== speedText) speedEl.textContent = speedText;
+    if (atkEl && atkEl.textContent !== atkText) atkEl.textContent = atkText;
   }
 
   _createResultOverlay() {
@@ -279,6 +390,7 @@ export class GameEngine {
 
     this.state = "paused-upgrade";
     this.running = false;
+    this.input.setActive(false);
     this.vfx.spawnLevelUpAura(this.player.mesh.position, 0x8b5cf6);
     this.upgradeChoices = getRandomPowerupChoices(3, this.player);
 
@@ -332,9 +444,12 @@ export class GameEngine {
 
     this.state = "playing";
     this.running = true;
+    this.accumulator = 0;
+    this._hasInterpolationSample = false;
     this.lastTime = performance.now();
+    this.input.setActive(true);
     this.updateHud();
-    requestAnimationFrame(this._loop.bind(this));
+    requestAnimationFrame(this._onFrame);
   }
 
   showResultOverlay({ won, xp }) {
@@ -360,18 +475,22 @@ export class GameEngine {
     this.resultSubmitted = true;
     this.state = won ? "victory" : "defeat";
     this.running = false;
+    this.input.setActive(false);
+    this.enemyPool?.releaseAll();
+    this.projectilePool?.releaseAll();
 
     const finalXp = Math.max(0, Math.round(this.player.xp));
     this.showResultOverlay({ won, xp: finalXp });
     this.updateHud();
 
-    const session = getSession();
-    if (!session?.token) {
-      console.warn("GameEngine: sessão não encontrada; XP não foi enviado ao backend.");
-      return;
-    }
-
     try {
+      const { getSession, submitMinigameRun } = await import("../../api.js");
+      const session = getSession();
+      if (!session?.token) {
+        console.warn("GameEngine: sessão não encontrada; XP não foi enviado ao backend.");
+        return;
+      }
+
       const payload = await submitMinigameRun(session.token, finalXp, this.runTime);
       const summaryEl = this.resultOverlay?.querySelector("[data-role='summary']");
       const totalXp = Number(payload?.user?.xp ?? payload?.totalXp ?? finalXp);
@@ -390,55 +509,242 @@ export class GameEngine {
     }
   }
 
-  /** Start the game loop */
-  start() {
-    this.showHud();
-    this.state = "playing";
-    this.running = true;
-    this.lastTime = performance.now();
-    requestAnimationFrame(this._loop.bind(this));
-  }
-
   /** Stop the game loop */
   stop() {
     this.running = false;
+    this.input.setActive(false);
   }
 
+  /** Simulação só roda em `playing` (LEVEL_UP / VICTORY / DEFEAT pausam a física). */
+  isSimulating() {
+    return this.state === "playing";
+  }
+
+  /**
+   * Loop com fixed timestep + acumulador (60 Hz).
+   * Clamp de delta evita spiral-of-death; `alpha` interpola o render.
+   */
   _loop(timestamp) {
     if (!this.running) return;
-    const delta = (timestamp - this.lastTime) / 1000;
-    this.lastTime = timestamp;
 
-    this.update(delta);
-    this.renderSystem.render();
+    try {
+      const deltaReal = (timestamp - this.lastTime) / 1000;
+      this.lastTime = timestamp;
+
+      if (this.isSimulating()) {
+        this.accumulator += Math.min(deltaReal, this.maxFrameDelta);
+
+        let steps = 0;
+        while (this.accumulator >= this.timeStep && steps < this.maxPhysicsSteps) {
+          this._captureInterpolationState();
+          this.updatePhysics(this.timeStep);
+          this.accumulator -= this.timeStep;
+          steps += 1;
+
+          // Level-up / fim de run param a simulação no meio do catch-up
+          if (!this.isSimulating() || !this.running) {
+            this.accumulator = 0;
+            break;
+          }
+        }
+
+        if (steps >= this.maxPhysicsSteps) {
+          this.accumulator = 0;
+        }
+
+        this._renderAlpha = this.timeStep > 0 ? this.accumulator / this.timeStep : 1;
+      } else {
+        this.accumulator = 0;
+        this._renderAlpha = 1;
+      }
+
+      // HUD / VFX uma vez por frame (não por substep de física)
+      if (this.isSimulating()) {
+        this.updateHud();
+        this.vfx.update();
+      }
+
+      this._applyInterpolatedTransforms(this._renderAlpha);
+      this.renderSystem.render(this._renderAlpha);
+      this._restorePhysicsTransforms();
+    } catch (error) {
+      console.error("GameEngine._loop: erro no frame (mantendo loop ativo).", error);
+      this.accumulator = 0;
+    }
 
     if (this.running) {
-      requestAnimationFrame(this._loop.bind(this));
+      requestAnimationFrame(this._onFrame);
+    }
+  }
+
+  _ensurePrevPos(entity) {
+    if (!entity) return null;
+    if (!entity._prevPos) entity._prevPos = new THREE.Vector3();
+    if (!entity._currPos) entity._currPos = new THREE.Vector3();
+    return entity;
+  }
+
+  /** Snapshot das poses atuais antes do próximo passo físico (para lerp no render). */
+  _captureInterpolationState() {
+    const player = this._ensurePrevPos(this.player);
+    if (player) {
+      player._prevPos.copy(player.body.position);
+    }
+
+    for (const enemy of this.enemies) {
+      this._ensurePrevPos(enemy);
+      enemy._prevPos.copy(enemy.mesh.position);
+      enemy._freshSpawn = false;
+    }
+
+    for (const projectile of this.projectiles) {
+      if (!projectile?.mesh) continue;
+      this._ensurePrevPos(projectile);
+      projectile._prevPos.copy(projectile.mesh.position);
+      projectile._freshSpawn = false;
+    }
+
+    for (const pickup of this.pickups) {
+      if (!pickup?.mesh) continue;
+      this._ensurePrevPos(pickup);
+      pickup._prevPos.copy(pickup.mesh.position);
+    }
+
+    if (this.xpPickupRing) {
+      this._ensurePrevPos(this.xpPickupRing);
+      this.xpPickupRing._prevPos.copy(this.xpPickupRing.position);
+    }
+
+    this._hasInterpolationSample = true;
+  }
+
+  _storeCurrentPos(entity, source) {
+    if (!entity?._currPos || !source) return;
+    entity._currPos.set(source.x, source.y ?? entity._currPos.y, source.z);
+  }
+
+  _applyInterpolatedTransforms(alpha) {
+    this._finalizeInterpolationCurrents();
+
+    if (!this._hasInterpolationSample) {
+      this._restorePhysicsTransforms();
+      return;
+    }
+
+    const a = THREE.MathUtils.clamp(alpha, 0, 1);
+
+    const lerpEntity = (entity, target, { lockY = null } = {}) => {
+      if (!entity?._prevPos || !entity?._currPos || !target) return;
+      // Spawn no meio do frame: não interpolar de PARK_Y / vida anterior
+      if (entity._freshSpawn) {
+        target.x = entity._currPos.x;
+        target.y = lockY ?? entity._currPos.y;
+        target.z = entity._currPos.z;
+        return;
+      }
+      target.x = entity._prevPos.x + (entity._currPos.x - entity._prevPos.x) * a;
+      target.y = lockY ?? (entity._prevPos.y + (entity._currPos.y - entity._prevPos.y) * a);
+      target.z = entity._prevPos.z + (entity._currPos.z - entity._prevPos.z) * a;
+    };
+
+    if (this.player) {
+      lerpEntity(this.player, this.player.mesh.position, { lockY: this.player._currPos.y });
+    }
+
+    for (const enemy of this.enemies) {
+      lerpEntity(enemy, enemy.mesh.position);
+    }
+
+    for (const projectile of this.projectiles) {
+      if (!projectile.mesh) continue;
+      lerpEntity(projectile, projectile.mesh.position);
+    }
+
+    for (const pickup of this.pickups) {
+      if (!pickup.mesh) continue;
+      lerpEntity(pickup, pickup.mesh.position, { lockY: pickup.mesh.position.y });
+    }
+
+    if (this.xpPickupRing) {
+      lerpEntity(this.xpPickupRing, this.xpPickupRing.position, { lockY: 0.12 });
+    }
+  }
+
+  _finalizeInterpolationCurrents() {
+    if (this.player) {
+      this._ensurePrevPos(this.player);
+      this._storeCurrentPos(this.player, this.player.body.position);
+    }
+    for (const enemy of this.enemies) {
+      this._ensurePrevPos(enemy);
+      this._storeCurrentPos(enemy, enemy.mesh.position);
+    }
+    for (const projectile of this.projectiles) {
+      if (!projectile?.mesh) continue;
+      this._ensurePrevPos(projectile);
+      this._storeCurrentPos(projectile, projectile.mesh.position);
+    }
+    for (const pickup of this.pickups) {
+      if (!pickup?.mesh) continue;
+      this._ensurePrevPos(pickup);
+      this._storeCurrentPos(pickup, pickup.mesh.position);
+    }
+    if (this.xpPickupRing) {
+      this._ensurePrevPos(this.xpPickupRing);
+      this._storeCurrentPos(this.xpPickupRing, this.xpPickupRing.position);
+    }
+  }
+
+  _restorePhysicsTransforms() {
+    if (this.player?._currPos) {
+      this.player.mesh.position.copy(this.player._currPos);
+    }
+    for (const enemy of this.enemies) {
+      if (enemy?._currPos) enemy.mesh.position.copy(enemy._currPos);
+    }
+    for (const projectile of this.projectiles) {
+      if (projectile?._currPos && projectile.mesh) projectile.mesh.position.copy(projectile._currPos);
+    }
+    for (const pickup of this.pickups) {
+      if (pickup?._currPos && pickup.mesh) {
+        const y = pickup.mesh.position.y;
+        pickup.mesh.position.x = pickup._currPos.x;
+        pickup.mesh.position.z = pickup._currPos.z;
+        pickup.mesh.position.y = y;
+      }
+    }
+    if (this.xpPickupRing?._currPos) {
+      this.xpPickupRing.position.x = this.xpPickupRing._currPos.x;
+      this.xpPickupRing.position.z = this.xpPickupRing._currPos.z;
+      this.xpPickupRing.position.y = 0.12;
     }
   }
 
   /**
-   * Game state update – called each frame.
-   * @param {number} delta – elapsed time in seconds since previous frame.
+   * Passo fixo de simulação (60 Hz). Não chama render/HUD.
+   * @param {number} dt
    */
-  update(delta) {
-    if (this.state !== "playing") return;
+  updatePhysics(dt) {
+    if (!this.isSimulating()) return;
 
-    this.runTime += delta;
-    const direction = this.input.getDirection();
-    this.player.update(delta, direction);
+    this.runTime += dt;
+    const rawMove = this.input.getMoveVector();
+    const direction = typeof this.renderSystem.screenToWorldMove === "function"
+      ? this.renderSystem.screenToWorldMove(rawMove.x, rawMove.z)
+      : { x: rawMove.x, z: rawMove.z };
+    this.player.update(dt, direction);
 
     if (this.xpPickupRing) {
       const baseRange = this.player.basePickupRange ?? 2.2;
       const range = this.player.pickupRange ?? baseRange;
       const visualScale = Math.max(0.9, 1 + ((range - baseRange) / 2.2) * 2.2);
-      this.xpPickupRing.position.set(this.player.mesh.position.x, 0.12, this.player.mesh.position.z);
+      this.xpPickupRing.position.set(this.player.body.position.x, 0.12, this.player.body.position.z);
       this.xpPickupRing.scale.set(visualScale, visualScale, visualScale);
     }
 
-    const arenaLimit = 110;
-    this.player.body.position.x = THREE.MathUtils.clamp(this.player.body.position.x, -arenaLimit, arenaLimit);
-    this.player.body.position.z = THREE.MathUtils.clamp(this.player.body.position.z, -arenaLimit, arenaLimit);
+    const clamped = this.physics.clampToArena(this.player.body.position);
+    this.player.body.position.x = clamped.x;
+    this.player.body.position.z = clamped.z;
 
     if (this.player.hp <= 0) {
       this.finishRun({ won: false });
@@ -450,11 +756,8 @@ export class GameEngine {
       return;
     }
 
-    this.updateHud();
-    this.vfx.update();
-
     if (this.player.regenPerSecond > 0) {
-      this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.regenPerSecond * delta);
+      this.player.hp = Math.min(this.player.maxHp, this.player.hp + this.player.regenPerSecond * dt);
     }
 
     if (this.player.xp >= this.player.xpToNextLevel) {
@@ -465,8 +768,8 @@ export class GameEngine {
       return;
     }
 
-    this.attackCooldown = Math.max(0, this.attackCooldown - delta);
-    this.spawnTimer += delta;
+    this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    this.spawnTimer += dt;
 
     const difficulty = this.getDifficultyLevel();
     const spawnInterval = getSpawnInterval(difficulty);
@@ -480,13 +783,20 @@ export class GameEngine {
 
     if (this.attackCooldown <= 0) {
       this.fireWeaponPattern(direction);
-      this.attackCooldown = this.weaponProfile.fireRate / (this.player.attackCooldownMultiplier || 1);
+      const slotRate = this.player.weaponSlots.find(Boolean)?.fireRate;
+      const baseRate = Number.isFinite(slotRate) ? slotRate : this.weaponProfile.fireRate;
+      this.attackCooldown = baseRate / (this.player.attackCooldownMultiplier || 1);
     }
 
-    this.updateEnemies(delta);
-    this.updateProjectiles(delta);
-    this.updatePickups(delta);
-    this.physics.update(delta);
+    this.updateEnemies(dt);
+    this.updateProjectiles(dt);
+    this.updatePickups(dt);
+    this.physics.update(dt);
+  }
+
+  /** @deprecated Use updatePhysics — mantido para compatibilidade. */
+  update(delta) {
+    this.updatePhysics(delta);
   }
 
   getDifficultyLevel() {
@@ -506,29 +816,53 @@ export class GameEngine {
   }
 
   spawnEnemy() {
-    const width = 200;
+    if (this.enemyPool.isFull) return null;
+
     const playerPos = this.player.mesh.position;
     const difficulty = this.getDifficultyLevel();
     const enemyStats = getEnemyStats(difficulty, this.player.level);
-    const phaseMultiplier = 1 + difficulty * 0.7;
+    const phaseMultiplier = 1 + difficulty * 0.55;
 
-    let x = 0;
-    let z = 0;
-    let attempts = 0;
+    // Perímetro do framing (plano §3.4) — não no miolo da arena 200² (fora da câmera)
+    const frustum = this.renderSystem.frustumSize ?? 52;
+    const minR = frustum * 0.55;
+    const maxR = frustum * 0.72;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = minR + Math.random() * Math.max(0.5, maxR - minR);
+    let x = playerPos.x + Math.cos(angle) * radius;
+    let z = playerPos.z + Math.sin(angle) * radius;
 
-    do {
-      x = (Math.random() - 0.5) * width;
-      z = (Math.random() - 0.5) * width;
-      attempts += 1;
-    } while (attempts < 20 && Math.hypot(x - playerPos.x, z - playerPos.z) < 24);
+    const limit = this.physics.arenaLimit ?? 110;
+    x = Math.max(-limit + 2, Math.min(limit - 2, x));
+    z = Math.max(-limit + 2, Math.min(limit - 2, z));
 
-    const enemy = new Enemy(this.renderSystem.scene, { x, z }, {
+    return this.enemyPool.acquire({ x, z }, {
       speed: enemyStats.speed * phaseMultiplier,
       hp: enemyStats.hp,
       damage: enemyStats.damage,
+      color: 0xff6b6b,
     });
+  }
 
-    this.enemies.push(enemy);
+  /**
+   * Mata / devolve inimigo ao pool (§3.1). Captura posição antes do despawn.
+   * @param {import('../entities/Enemy.js').Enemy} enemy
+   * @param {{ dropPickup?: boolean, deathVfx?: boolean }} [options]
+   */
+  killEnemy(enemy, options = {}) {
+    if (!enemy?.active) return;
+    const dropPickup = options.dropPickup === true;
+    const deathVfx = options.deathVfx !== false;
+    const px = enemy.x;
+    const pz = enemy.z;
+
+    if (deathVfx) {
+      this.vfx.spawnEnemyDeathBurst({ x: px, y: enemy.y, z: pz }, 0x8b5cf6);
+    }
+    this.enemyPool.release(enemy);
+    if (dropPickup) {
+      this.spawnPickup({ x: px, z: pz }, this.getPickupValue());
+    }
   }
 
   createWeaponSlots(initialWeaponName) {
@@ -578,39 +912,64 @@ export class GameEngine {
     return true;
   }
 
-  getNearestEnemy() {
+  getNearestEnemy(maxRange = 48) {
     if (!this.enemies.length) return null;
-    let nearest = null;
-    let nearestDistance = Number.POSITIVE_INFINITY;
+    const playerPos = this.player.mesh.position;
+    const nearest = this.physics.queryNearestEnemy(playerPos.x, playerPos.z, maxRange);
+    if (nearest) return nearest;
 
-    for (const enemy of this.enemies) {
-      const dist = enemy.mesh.position.distanceTo(this.player.mesh.position);
-      if (dist < nearestDistance) {
-        nearest = enemy;
-        nearestDistance = dist;
-      }
-    }
+    // Fallback amplo se nada no raio de mira
+    return this.physics.queryNearestEnemy(playerPos.x, playerPos.z, Number.POSITIVE_INFINITY);
+  }
 
-    return nearest;
+  /**
+   * Mira mouse → ponto no chão → direção a partir do player (câmera isométrica).
+   * @returns {{ x: number, z: number } | null}
+   */
+  getMouseAimWorldDirection() {
+    if (!this.input?.mouse?.inside) return null;
+    if (typeof this.renderSystem.unprojectToGround !== "function") return null;
+
+    const hit = this.renderSystem.unprojectToGround(this.input.mouse.x, this.input.mouse.y);
+    if (!hit) return null;
+
+    const px = this.player.mesh.position.x;
+    const pz = this.player.mesh.position.z;
+    const dx = hit.x - px;
+    const dz = hit.z - pz;
+    const length = Math.hypot(dx, dz);
+    if (length < 0.5) return null;
+
+    return { x: dx / length, z: dz / length };
   }
 
   getAimVector(fallbackDirection = { x: 1, z: 0 }, preferMouse = false) {
     if (preferMouse) {
-      const mouseAim = this.input.getMouseAimDirection();
-      if (mouseAim && (mouseAim.x !== 0 || mouseAim.z !== 0)) {
+      const mouseAim = this.getMouseAimWorldDirection();
+      if (mouseAim && Number.isFinite(mouseAim.x) && Number.isFinite(mouseAim.z)
+        && (mouseAim.x !== 0 || mouseAim.z !== 0)) {
         return mouseAim;
       }
     }
 
     const nearestEnemy = this.getNearestEnemy();
     if (nearestEnemy) {
-      const dx = nearestEnemy.mesh.position.x - this.player.mesh.position.x;
-      const dz = nearestEnemy.mesh.position.z - this.player.mesh.position.z;
-      const length = Math.hypot(dx, dz) || 1;
-      return { x: dx / length, z: dz / length };
+      const ex = Number.isFinite(nearestEnemy.x) ? nearestEnemy.x : nearestEnemy.mesh?.position?.x;
+      const ez = Number.isFinite(nearestEnemy.z) ? nearestEnemy.z : nearestEnemy.mesh?.position?.z;
+      const dx = (ex ?? 0) - this.player.mesh.position.x;
+      const dz = (ez ?? 0) - this.player.mesh.position.z;
+      const length = Math.hypot(dx, dz);
+      if (Number.isFinite(length) && length > 1e-4) {
+        return { x: dx / length, z: dz / length };
+      }
     }
 
-    return fallbackDirection;
+    const fbLen = Math.hypot(fallbackDirection.x || 0, fallbackDirection.z || 0);
+    if (Number.isFinite(fbLen) && fbLen > 1e-6) {
+      return { x: fallbackDirection.x / fbLen, z: fallbackDirection.z / fbLen };
+    }
+    const facing = this.player.getFacingDirection?.() || { x: 0, z: -1 };
+    return { x: facing.x || 0, z: facing.z || -1 };
   }
 
   getWeaponDisplayName(weapon) {
@@ -632,163 +991,280 @@ export class GameEngine {
   }
 
   fireWeaponPattern(direction) {
-    const fallback = direction && (direction.x !== 0 || direction.z !== 0)
+    const facing = this.player.getFacingDirection?.() || this.player.facing || { x: 0, z: -1 };
+    const moveFallback = direction && (direction.x !== 0 || direction.z !== 0)
       ? direction
-      : { x: 1, z: 0 };
+      : { x: facing.x || 0, z: facing.z || -1 };
 
     const activeWeapons = this.player.weaponSlots.filter(Boolean);
     if (!activeWeapons.length) return;
 
-    activeWeapons.forEach((weapon) => {
-      const weaponPattern = weapon.pattern || "nearest";
-      const useMouseAim = weapon.id === "lança de ossos";
-      const aim = useMouseAim
-        ? this.getAimVector(fallback, true)
-        : this.getAimVector(fallback, false);
+    for (const weapon of activeWeapons) {
+      const pattern = weapon.pattern || "melee";
+      // Mira: movimento/facing para melee; aim (nearest/mouse) para pierce
+      const aim = pattern === "pierce"
+        ? this.getAimVector(moveFallback, true)
+        : moveFallback;
 
-      if (weaponPattern === "nearest") {
-        this.fireProjectile(aim, weapon);
-        this.vfx.spawnImpact({
-          x: this.player.mesh.position.x + aim.x * 1.4,
-          y: this.player.mesh.position.y,
-          z: this.player.mesh.position.z + aim.z * 1.4,
-        }, {
-          color: weapon.color ?? 0xffd166,
-          particlesMin: 7,
-          particlesMax: 11,
-          lifeMin: 0.2,
-          lifeMax: 0.7,
-          radiusMin: 0.12,
-          radiusMax: 0.6,
-          speed: 2.6,
-          scale: 0.8,
-          ttl: 600,
-        });
-        return;
+      if (pattern === "melee" || pattern === "nearest") {
+        this.fireMeleeArc(weapon, aim);
+        continue;
       }
 
-      if (weaponPattern === "spread") {
-        const baseAngle = Math.atan2(aim.z, aim.x);
-        const boneOffsets = [-0.9, -0.42, 0, 0.42, 0.9];
-        this.vfx.spawnImpact({
-          x: this.player.mesh.position.x + aim.x * 1.4,
-          y: this.player.mesh.position.y,
-          z: this.player.mesh.position.z + aim.z * 1.4,
-        }, {
-          color: weapon.color ?? 0xc4b5fd,
-          particlesMin: 8,
-          particlesMax: 14,
-          lifeMin: 0.25,
-          lifeMax: 0.75,
-          radiusMin: 0.14,
-          radiusMax: 0.7,
-          speed: 3.4,
-          scale: 0.95,
-          ttl: 650,
-        });
-
-        boneOffsets.forEach((offset, index) => {
-          const spreadAngle = baseAngle + offset;
-          const falloff = 0.7 + (index === 2 ? 1.0 : 0.55 + Math.abs(offset) * 0.25);
-          this.fireProjectile({
-            x: Math.cos(spreadAngle) * falloff,
-            z: Math.sin(spreadAngle) * falloff,
-          }, {
-            ...weapon,
-            speed: (weapon.speed ?? 24) * 1.2,
-            damage: (weapon.damage ?? 2) * 0.9,
-            color: 0xc4b5fd,
-            radius: 0.32,
-            life: 0.95,
-            maxDistance: 16,
-          });
-        });
-        return;
+      if (pattern === "pierce" || pattern === "spread") {
+        this.fireBoneLance(weapon, aim);
+        continue;
       }
 
-      if (weaponPattern === "cleave") {
-        const cleaveAngles = [-0.75, 0, 0.75];
-        this.vfx.spawnWindCleaveTrail(this.player.mesh.position, aim, weapon.color ?? 0x93c5fd);
-        cleaveAngles.forEach((offset) => {
-          const angle = Math.atan2(aim.z, aim.x) + offset;
-          this.fireProjectile({ x: Math.cos(angle), z: Math.sin(angle) }, {
-            ...weapon,
-            speed: (weapon.speed ?? 28) * 1.35,
-            damage: (weapon.damage ?? 1.2) * 1.15,
-            color: 0x8cf0ff,
-            life: 0.9,
-            radius: 0.2,
-            maxDistance: 18,
-            visualType: "wind",
-          });
-        });
-        return;
+      if (pattern === "shockwave" || pattern === "cleave") {
+        this.fireWindShockwave(weapon);
+        continue;
       }
 
-      if (weaponPattern === "lightning") {
-        this.vfx.spawnLightningImpact(this.player.mesh.position, { x: this.player.mesh.position.x + (aim.x * 2.4), y: 1.2, z: this.player.mesh.position.z + (aim.z * 2.4) }, weapon.color ?? 0xfde68a);
-        const visibleEnemies = this.enemies.filter((enemy) => this.isEnemyVisible(enemy));
-        const strike = visibleEnemies.length
-          ? visibleEnemies[Math.floor(Math.random() * visibleEnemies.length)]
-          : null;
-
-        if (!strike) return;
-
-        const targetPos = { x: strike.mesh.position.x, z: strike.mesh.position.z };
-        const hitDirection = {
-          x: strike.mesh.position.x - this.player.mesh.position.x,
-          z: strike.mesh.position.z - this.player.mesh.position.z,
-        };
-        const len = Math.hypot(hitDirection.x, hitDirection.z) || 1;
-        const vector = { x: hitDirection.x / len, z: hitDirection.z / len };
-
-        this.fireProjectile(vector, {
-          ...weapon,
-          speed: 0,
-          damage: (weapon.damage ?? 1) * 1.5,
-          color: 0xfde68a,
-          life: 0.38,
-          radius: 0.3,
-          damageRadius: 4.8,
-          visualType: "lightning",
-          staticEffect: true,
-          visualOnly: false,
-        }, targetPos);
-
-        this.fireProjectile({ x: 0, z: 0 }, {
-          ...weapon,
-          speed: 0,
-          damage: 0,
-          color: 0xfde68a,
-          life: 0.42,
-          radius: 0.25,
-          visualType: "lightning",
-          staticEffect: true,
-          visualOnly: true,
-          damageRadius: 0,
-        }, { x: this.player.mesh.position.x, z: this.player.mesh.position.z });
-
-        if (strike.takeDamage(weapon.damage ?? 1.5)) {
-          const victimIndex = this.enemies.findIndex((entry) => entry === strike);
-          if (victimIndex >= 0) {
-            this.renderSystem.scene.remove(strike.mesh);
-            this.enemies.splice(victimIndex, 1);
-            this.spawnPickup({ x: strike.mesh.position.x, z: strike.mesh.position.z }, this.getPickupValue());
-          }
-        }
-        return;
+      if (pattern === "lightning") {
+        this.fireSacredLightning(weapon);
+        continue;
       }
 
+      // orbital (padrão)
       const orbitalCount = 8;
       this.vfx.spawnFireOrbBurst(this.player.mesh.position, weapon.color ?? 0xf97316);
       for (let i = 0; i < orbitalCount; i += 1) {
         const angle = (Math.PI * 2 * i) / orbitalCount + (this.runTime * 2.6);
         this.fireProjectile({ x: Math.cos(angle), z: Math.sin(angle) }, weapon);
       }
+    }
+  }
+
+  /**
+   * Lâmina Arcana — GDD §3.1: feixes cortantes em arco roxo, curto alcance, direção do movimento.
+   * @param {object} weapon
+   * @param {{ x: number, z: number }} aim
+   */
+  fireMeleeArc(weapon, aim) {
+    const px = this.player.mesh.position.x;
+    const py = this.player.mesh.position.y;
+    const pz = this.player.mesh.position.z;
+    const range = weapon.meleeRange ?? 5.8;
+    const halfAngle = weapon.meleeHalfAngle ?? 0.95;
+    const cosThreshold = Math.cos(halfAngle);
+    const len = Math.hypot(aim.x, aim.z) || 1;
+    const ax = aim.x / len;
+    const az = aim.z / len;
+    const damage = (weapon.damage ?? 1.45) * (this.player.projectileDamage ?? 1);
+
+    this.vfx.spawnMeleeArc(
+      { x: px + ax * 2.0, y: py, z: pz + az * 2.0 },
+      { x: ax, z: az },
+      weapon.color ?? 0xa78bfa
+    );
+
+    // Feixes em leque (arco) — identidade visual do GDD; alcance curto
+    const slashOffsets = [-0.42, 0, 0.42];
+    const spawnPos = { x: px + ax * 1.5, y: 1.55, z: pz + az * 1.5 };
+    for (const offset of slashOffsets) {
+      const angle = Math.atan2(az, ax) + offset;
+      this.fireProjectile(
+        { x: Math.cos(angle), z: Math.sin(angle) },
+        {
+          ...weapon,
+          visualType: "wind",
+          speed: 22,
+          life: 0.28,
+          maxDistance: range * 0.85,
+          damage: damage * 0.4,
+          radius: 0.36,
+          color: weapon.color ?? 0xa78bfa,
+          pierce: true,
+          maxPierce: 5,
+          explosionRadius: 0,
+        },
+        spawnPos
+      );
+    }
+
+    // Dano principal: cone frontal imediato (curto alcance / inimigos frontais)
+    const nearby = this.physics.queryEnemiesNear(px, pz, range).slice();
+    for (const enemy of nearby) {
+      if (!enemy?.active) continue;
+      const dx = enemy.x - px;
+      const dz = enemy.z - pz;
+      const dist = Math.hypot(dx, dz) || 1;
+      const dot = (dx / dist) * ax + (dz / dist) * az;
+      if (dot < cosThreshold) continue;
+
+      if (enemy.takeDamage(damage)) {
+        this.killEnemy(enemy, { dropPickup: true });
+      }
+    }
+  }
+
+  /**
+   * Lança de Ossos — GDD §3.1: projétil linear perfurante até o limite da tela,
+   * visual esquelético com rastro de poeira.
+   * @param {object} weapon
+   * @param {{ x: number, z: number }} aim
+   */
+  fireBoneLance(weapon, aim) {
+    const len = Math.hypot(aim?.x || 0, aim?.z || 0);
+    if (!(len > 1e-4) || !Number.isFinite(len)) return;
+
+    const ax = aim.x / len;
+    const az = aim.z / len;
+    const bolts = Math.max(1, Math.round(weapon.boltCount ?? 1));
+    const frustum = this.renderSystem.frustumSize ?? 52;
+    const screenReach = Math.max(28, frustum * 0.85);
+
+    // Rastro de poeira leve no disparo (sem burst pesado a cada tiro)
+    this.vfx.spawnBurst({
+      x: this.player.mesh.position.x + ax * 1.2,
+      y: 1.4,
+      z: this.player.mesh.position.z + az * 1.2,
+    }, {
+      category: "combat",
+      color: 0xd6c7a1,
+      particlesMax: 5,
+      lifeMax: 0.28,
+      speed: 3.2,
+      ttl: 280,
     });
+
+    for (let i = 0; i < bolts; i += 1) {
+      const wobble = bolts > 1 ? (i - (bolts - 1) / 2) * 0.08 : 0;
+      const base = Math.atan2(az, ax) + wobble;
+      this.fireProjectile({ x: Math.cos(base), z: Math.sin(base) }, {
+        ...weapon,
+        name: weapon.name || "Lança de Ossos",
+        pierce: true,
+        maxPierce: weapon.maxPierce ?? 64,
+        speed: weapon.speed ?? 34,
+        damage: (weapon.damage ?? 2) * (this.player.projectileDamage ?? 1),
+        color: weapon.color ?? 0xc4b5fd,
+        radius: weapon.radius ?? 0.42,
+        life: weapon.life ?? 1.6,
+        maxDistance: weapon.maxDistance ?? screenReach,
+        visualType: "bone",
+        explosionRadius: 0,
+      });
+    }
+  }
+
+  /**
+   * Vento Cortante — pulso 360° com knockback (GDD §3.1).
+   * @param {object} weapon
+   */
+  fireWindShockwave(weapon) {
+    const px = this.player.mesh.position.x;
+    const pz = this.player.mesh.position.z;
+    const radius = weapon.shockwaveRadius ?? weapon.range ?? 8.5;
+    const knockback = weapon.knockback ?? 7.2;
+    const damage = weapon.damage ?? 1.1;
+
+    this.vfx.spawnWindShockwave({ x: px, y: 1.2, z: pz }, weapon.color ?? 0x93c5fd);
+
+    const nearby = this.physics.queryEnemiesNear(px, pz, radius).slice();
+    for (const enemy of nearby) {
+      if (!enemy?.active) continue;
+      const dx = enemy.x - px;
+      const dz = enemy.z - pz;
+      const dist = Math.hypot(dx, dz) || 1;
+      const falloff = Math.max(0.2, 1 - dist / radius);
+      const push = knockback * falloff;
+      enemy.x += (dx / dist) * push;
+      enemy.z += (dz / dist) * push;
+      const clamped = this.physics.clampToArena(enemy);
+      enemy.x = clamped.x;
+      enemy.z = clamped.z;
+      enemy.syncMesh?.();
+
+      if (enemy.takeDamage(damage * (0.65 + falloff * 0.5))) {
+        this.killEnemy(enemy, { dropPickup: true });
+      }
+    }
+
+    this.physics.rebuildEnemySpatialGrid(this.enemies);
+  }
+
+  /**
+   * Relâmpago Sagrado — alvos aleatórios visíveis + AoE (GDD §3.1).
+   * @param {object} weapon
+   */
+  fireSacredLightning(weapon) {
+    const visible = this.enemies.filter((enemy) => this.isEnemyVisible(enemy));
+    const level = Number(weapon.level ?? 1);
+    const strikeCount = Math.max(
+      1,
+      Math.round(weapon.strikeCount ?? 1) + (level >= 10 || weapon.isFinal ? 2 : level >= 5 ? 1 : 0)
+    );
+    const aoeRadius = weapon.aoeRadius ?? 2.8;
+    const damage = weapon.damage ?? 2.4;
+
+    if (!visible.length) {
+      // Sem alvo: descarga no solo à frente
+      const facing = this.player.getFacingDirection?.() || { x: 0, z: -1 };
+      const tx = this.player.mesh.position.x + facing.x * 4;
+      const tz = this.player.mesh.position.z + facing.z * 4;
+      this.vfx.spawnLightningImpact(this.player.mesh.position, { x: tx, y: 1.2, z: tz }, weapon.color ?? 0xfde68a);
+      this.fireProjectile({ x: 0, z: 0 }, {
+        ...weapon,
+        speed: 0,
+        damage: 0,
+        life: weapon.life ?? 0.42,
+        visualType: "lightning",
+        staticEffect: true,
+        visualOnly: true,
+      }, { x: tx, z: tz });
+      return;
+    }
+
+    const pool = visible.slice();
+    const targets = [];
+    for (let i = 0; i < strikeCount && pool.length; i += 1) {
+      const idx = Math.floor(Math.random() * pool.length);
+      targets.push(pool.splice(idx, 1)[0]);
+    }
+
+    for (const strike of targets) {
+      if (!strike?.active) continue;
+      const tx = strike.x;
+      const tz = strike.z;
+      this.vfx.spawnLightningImpact(
+        this.player.mesh.position,
+        { x: tx, y: 1.2, z: tz },
+        weapon.color ?? 0xfde68a
+      );
+
+      this.fireProjectile({ x: 0, z: 0 }, {
+        ...weapon,
+        speed: 0,
+        damage: 0,
+        color: weapon.color ?? 0xfde68a,
+        life: weapon.life ?? 0.42,
+        radius: 0.25,
+        visualType: "lightning",
+        staticEffect: true,
+        visualOnly: true,
+      }, { x: tx, z: tz });
+
+      const victims = this.physics.queryEnemiesNear(tx, tz, aoeRadius).slice();
+      for (const victim of victims) {
+        if (!victim?.active) continue;
+        const isPrimary = victim === strike;
+        const dealt = damage * (isPrimary ? 1.25 : 0.7);
+        if (victim.takeDamage(dealt)) {
+          this.killEnemy(victim, { dropPickup: true });
+        }
+      }
+    }
   }
 
   fireProjectile(direction, weaponOverride = null, positionOverride = null) {
+    if (this.projectilePool.isFull) return null;
+
+    const dir = direction || { x: 0, z: -1 };
+    const dirLen = Math.hypot(dir.x || 0, dir.z || 0);
+    if (dirLen < 1e-4) return null;
+
     const weapon = weaponOverride || {
       speed: this.player.projectileSpeed ?? 28,
       damage: this.player.projectileDamage ?? 1,
@@ -797,7 +1273,10 @@ export class GameEngine {
 
     const spawnPosition = positionOverride ?? this.player.mesh.position;
 
-    const projectile = new Projectile(this.renderSystem.scene, spawnPosition, direction, {
+    return this.projectilePool.acquire(spawnPosition, {
+      x: dir.x / dirLen,
+      z: dir.z / dirLen,
+    }, {
       speed: weapon.speed ?? 28,
       damage: weapon.damage ?? 1,
       life: weapon.life ?? 1.8,
@@ -805,15 +1284,22 @@ export class GameEngine {
       radius: weapon.radius ?? 0.5,
       explosionRadius: weapon.explosionRadius ?? 0,
       maxDistance: weapon.maxDistance ?? 18,
-      arenaLimit: 110,
+      arenaLimit: this.physics.arenaLimit,
       visualType: weapon.visualType ?? "orb",
       staticEffect: weapon.staticEffect ?? false,
       visualOnly: weapon.visualOnly ?? false,
       damageRadius: weapon.damageRadius ?? 0,
+      pierce: weapon.pierce ?? false,
+      maxPierce: weapon.maxPierce ?? 64,
     });
+  }
 
-    projectile.explosionRadius = weapon.explosionRadius ?? 0;
-    this.projectiles.push(projectile);
+  /**
+   * Devolve projétil ao pool (§4.2).
+   * @param {import('../entities/Projectile.js').Projectile} projectile
+   */
+  releaseProjectile(projectile) {
+    this.projectilePool.release(projectile);
   }
 
   spawnPickup(position, value = 10, reward = null) {
@@ -873,11 +1359,28 @@ export class GameEngine {
   updateEnemies(delta) {
     const playerPos = this.player.mesh.position;
 
+    // 1) Chase
     for (let i = this.enemies.length - 1; i >= 0; i--) {
       const enemy = this.enemies[i];
+      if (!enemy.active) {
+        this.enemyPool.releaseAt(i);
+        continue;
+      }
       enemy.update(delta, playerPos);
+    }
 
-      const dist = enemy.mesh.position.distanceTo(playerPos);
+    // 2) Soft separation (§3.3) — rebuild interno da grade
+    this.physics.applyEnemySoftSeparation(this.enemies, { dt: delta });
+
+    // 3) Rebuild pós-separação para combate (§4.1)
+    this.physics.rebuildEnemySpatialGrid(this.enemies);
+
+    // 4) Contact damage + morte
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      const enemy = this.enemies[i];
+      if (!enemy?.active) continue;
+
+      const dist = Math.hypot(enemy.x - playerPos.x, enemy.z - playerPos.z);
       if (dist < 2.3 && enemy.hitCooldown <= 0) {
         const mitigation = this.player.resistanceMultiplier || 1;
         const damageTaken = enemy.damage / mitigation;
@@ -887,9 +1390,7 @@ export class GameEngine {
       }
 
       if (enemy.hp <= 0) {
-        this.vfx.spawnEnemyDeathBurst(enemy.mesh.position, 0x8b5cf6);
-        this.renderSystem.scene.remove(enemy.mesh);
-        this.enemies.splice(i, 1);
+        this.killEnemy(enemy, { dropPickup: false });
       }
     }
   }
@@ -897,37 +1398,34 @@ export class GameEngine {
   updateProjectiles(delta) {
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
+      if (!projectile?.active) {
+        this.projectilePool.releaseAt(i);
+        continue;
+      }
+
       projectile.update(delta);
 
       if (projectile.visualOnly && projectile.staticEffect && projectile.visualType === "lightning") {
         if (projectile.isExpired || projectile.life <= 0) {
-          this.renderSystem.scene.remove(projectile.mesh);
-          this.projectiles.splice(i, 1);
+          this.releaseProjectile(projectile);
           continue;
         }
       }
 
+      const px = projectile.mesh.position.x;
+      const pz = projectile.mesh.position.z;
+
       if (projectile.staticEffect && projectile.visualType === "lightning" && !projectile.hitApplied && !projectile.visualOnly) {
-        const victims = this.enemies.filter((candidate) => {
-          const dist = candidate.mesh.position.distanceTo(projectile.mesh.position);
-          const visible = this.isEnemyVisible(candidate);
-          return visible && dist <= (projectile.damageRadius ?? 2.4);
-        });
+        const damageRadius = projectile.damageRadius ?? 2.4;
+        const nearby = this.physics.queryEnemiesNear(px, pz, damageRadius).slice();
+        const victims = nearby.filter((candidate) => this.isEnemyVisible(candidate));
 
         if (victims.length > 0) {
           projectile.hitApplied = true;
           for (const victim of victims) {
             const dead = victim.takeDamage(projectile.damage);
             if (dead) {
-              const victimIndex = this.enemies.findIndex((entry) => entry === victim);
-              if (victimIndex >= 0) {
-                this.renderSystem.scene.remove(victim.mesh);
-                this.enemies.splice(victimIndex, 1);
-                this.spawnPickup({
-                  x: victim.mesh.position.x,
-                  z: victim.mesh.position.z,
-                }, this.getPickupValue());
-              }
+              this.killEnemy(victim, { dropPickup: true });
             }
           }
         }
@@ -935,44 +1433,48 @@ export class GameEngine {
 
       let victims = [];
       if (projectile.explosionRadius > 0) {
-        victims = this.enemies.filter((candidate) => candidate.mesh.position.distanceTo(projectile.mesh.position) <= projectile.explosionRadius);
+        victims = this.physics.queryEnemiesNear(px, pz, projectile.explosionRadius).slice();
       } else if (!projectile.staticEffect || projectile.visualType !== "lightning") {
-        for (let j = this.enemies.length - 1; j >= 0; j--) {
-          const enemy = this.enemies[j];
-          const dist = projectile.mesh.position.distanceTo(enemy.mesh.position);
-          if (dist < 2.2) {
-            victims = [enemy];
-            break;
-          }
+        if (projectile.pierce) {
+          const nearby = this.physics.queryEnemiesNear(px, pz, 2.2).slice();
+          victims = nearby.filter((enemy) => enemy?.active && !projectile.hitIds.has(enemy.poolIndex));
+        } else {
+          const hit = this.physics.spatialGrid.queryFirst(px, pz, 2.2);
+          if (hit) victims = [hit];
         }
       }
 
       if (victims.length > 0 && !(projectile.staticEffect && projectile.visualType === "lightning")) {
+        let shouldRelease = !projectile.pierce;
+
         for (const victim of victims) {
+          if (!victim?.active) continue;
+
+          if (projectile.pierce) {
+            if (projectile.hitIds.has(victim.poolIndex)) continue;
+            projectile.hitIds.add(victim.poolIndex);
+            projectile.pierceCount += 1;
+          }
+
           const dead = victim.takeDamage(projectile.damage);
           if (dead) {
-            const victimIndex = this.enemies.findIndex((entry) => entry === victim);
-            if (victimIndex >= 0) {
-              this.vfx.spawnEnemyDeathBurst(victim.mesh.position, 0x8b5cf6);
-              this.vfx.spawnEnemyDeathBurst(victim.mesh.position, 0x8b5cf6);
-              this.renderSystem.scene.remove(victim.mesh);
-              this.enemies.splice(victimIndex, 1);
-              this.spawnPickup({
-                x: victim.mesh.position.x,
-                z: victim.mesh.position.z,
-              }, this.getPickupValue());
-            }
+            this.killEnemy(victim, { dropPickup: true });
+          }
+
+          if (projectile.pierce && projectile.pierceCount >= (projectile.maxPierce ?? 64)) {
+            shouldRelease = true;
+            break;
           }
         }
 
-        this.renderSystem.scene.remove(projectile.mesh);
-        this.projectiles.splice(i, 1);
-        continue;
+        if (shouldRelease) {
+          this.releaseProjectile(projectile);
+          continue;
+        }
       }
 
       if (projectile.isExpired || projectile.life <= 0) {
-        this.renderSystem.scene.remove(projectile.mesh);
-        this.projectiles.splice(i, 1);
+        this.releaseProjectile(projectile);
       }
     }
   }

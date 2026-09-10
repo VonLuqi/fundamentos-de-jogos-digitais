@@ -1,3 +1,5 @@
+import { resolveStatusSlotIndex, normalizeStatusId, applyStatusToPlayer } from './StatusSystem.js';
+
 export const RARITY_DEFINITIONS = {
   common: { id: 'common', label: 'Comum', color: 0x9ca3af, weight: 60 },
   uncommon: { id: 'uncommon', label: 'Incomum', color: 0x34d399, weight: 25 },
@@ -34,34 +36,33 @@ export const ITEM_PROGRESSION_LIBRARY = {
     id: 'lâmina arcana',
     name: 'Lâmina Arcana',
     category: 'weapon',
-    kind: 'slash',
+    kind: 'melee',
     maxProgression: 10,
     state: 'new',
     rarity: 'common',
     baseStats: {
-      damage: 1,
-      speed: 28,
-      fireRate: 0.42,
-      radius: 0.52,
-      range: 18,
-      projectileCount: 1,
+      damage: 1.45,
+      fireRate: 0.58,
+      meleeRange: 5.8,
+      meleeHalfAngle: 0.95,
     },
   },
   'lança de ossos': {
     id: 'lança de ossos',
-    name: 'Shotgun de Ossos',
+    name: 'Lança de Ossos',
     category: 'weapon',
-    kind: 'spread',
+    kind: 'pierce',
     maxProgression: 10,
     state: 'new',
     rarity: 'common',
     baseStats: {
       damage: 2,
-      speed: 24,
-      fireRate: 0.72,
-      radius: 0.48,
-      range: 16,
-      projectileCount: 5,
+      speed: 34,
+      fireRate: 0.68,
+      radius: 0.42,
+      range: 42,
+      projectileCount: 1,
+      pierce: true,
     },
   },
   'orbe de fogo': {
@@ -85,17 +86,15 @@ export const ITEM_PROGRESSION_LIBRARY = {
     id: 'vento cortante',
     name: 'Vento Cortante',
     category: 'weapon',
-    kind: 'cleave',
+    kind: 'shockwave',
     maxProgression: 10,
     state: 'new',
     rarity: 'common',
     baseStats: {
-      damage: 1.2,
-      speed: 28,
-      fireRate: 0.3,
-      radius: 0.24,
-      range: 20,
-      projectileCount: 3,
+      damage: 1.1,
+      fireRate: 1.15,
+      shockwaveRadius: 8.5,
+      knockback: 7.2,
     },
   },
   'relâmpago sagrado': {
@@ -107,12 +106,10 @@ export const ITEM_PROGRESSION_LIBRARY = {
     state: 'new',
     rarity: 'common',
     baseStats: {
-      damage: 2.2,
-      speed: 26,
-      fireRate: 0.55,
-      radius: 0.18,
-      range: 20,
-      damageRadius: 4.8,
+      damage: 2.4,
+      fireRate: 0.7,
+      strikeCount: 1,
+      aoeRadius: 2.8,
     },
   },
   speed: {
@@ -250,9 +247,9 @@ export const POWERUP_LIBRARY = {
   WA1: { id: 'WA1', name: 'Lâmina Arcana +1', category: 'weapon', weapon: 'lâmina arcana', type: 'damage', value: 0.1, description: '+10% de dano da arma base.' },
   WA2: { id: 'WA2', name: 'Lâmina Arcana +2', category: 'weapon', weapon: 'lâmina arcana', type: 'attackSpeed', value: 0.15, description: '+15% de velocidade de ataque.' },
   WA4: { id: 'WA4', name: 'Lâmina Arcana Final', category: 'weapon', weapon: 'lâmina arcana', type: 'evolution', value: 1, description: 'Converte em corte em espiral.' },
-  WB1: { id: 'WB1', name: 'Shotgun de Ossos +1', category: 'weapon', weapon: 'lança de ossos', type: 'damage', value: 0.12, description: '+12% de dano por projétil.' },
-  WB2: { id: 'WB2', name: 'Shotgun de Ossos +2', category: 'weapon', weapon: 'lança de ossos', type: 'projectileSpeed', value: 0.2, description: '+20% de velocidade do projétil.' },
-  WB4: { id: 'WB4', name: 'Shotgun de Ossos Final', category: 'weapon', weapon: 'lança de ossos', type: 'evolution', value: 1, description: 'Projéteis perfuram e causam dano em cadeia.' },
+  WB1: { id: 'WB1', name: 'Lança de Ossos +1', category: 'weapon', weapon: 'lança de ossos', type: 'damage', value: 0.12, description: '+12% de dano por projétil.' },
+  WB2: { id: 'WB2', name: 'Lança de Ossos +2', category: 'weapon', weapon: 'lança de ossos', type: 'projectileSpeed', value: 0.2, description: '+20% de velocidade do projétil.' },
+  WB4: { id: 'WB4', name: 'Lança de Ossos Final', category: 'weapon', weapon: 'lança de ossos', type: 'evolution', value: 1, description: 'Projéteis perfuram e causam dano em cadeia.' },
   WC1: { id: 'WC1', name: 'Orbe de Fogo +1', category: 'weapon', weapon: 'orbe de fogo', type: 'damage', value: 0.15, description: '+15% de dano por explosão.' },
   WC2: { id: 'WC2', name: 'Orbe de Fogo +2', category: 'weapon', weapon: 'orbe de fogo', type: 'area', value: 0.1, description: '+10% de área de explosão.' },
   WC4: { id: 'WC4', name: 'Orbe de Fogo Final', category: 'weapon', weapon: 'orbe de fogo', type: 'evolution', value: 1, description: 'Gera efeito de fogo em área contínua.' },
@@ -289,11 +286,11 @@ export const POWERUP_WEAPON_POOL = Object.keys(POWERUP_LIBRARY).filter((id) => P
 export const POWERUP_STATUS_POOL = Object.keys(POWERUP_LIBRARY).filter((id) => POWERUP_LIBRARY[id].category === 'status');
 
 const BASE_WEAPON_STATS = {
-  'lâmina arcana': { id: 'lâmina arcana', name: 'Lâmina Arcana', pattern: 'nearest', damage: 1, speed: 28, color: 0xffd166, radius: 0.52, fireRate: 0.42, life: 1.2, maxDistance: 18 },
-  'lança de ossos': { id: 'lança de ossos', name: 'Shotgun de Ossos', pattern: 'spread', damage: 2, speed: 24, color: 0xc4b5fd, radius: 0.48, fireRate: 0.72, life: 0.95, maxDistance: 16 },
+  'lâmina arcana': { id: 'lâmina arcana', name: 'Lâmina Arcana', pattern: 'melee', damage: 1.45, color: 0xa78bfa, fireRate: 0.58, meleeRange: 5.8, meleeHalfAngle: 0.95 },
+  'lança de ossos': { id: 'lança de ossos', name: 'Lança de Ossos', pattern: 'pierce', damage: 2, speed: 34, color: 0xc4b5fd, radius: 0.42, fireRate: 0.68, life: 1.6, maxDistance: 48, pierce: true, maxPierce: 64, visualType: 'bone' },
   'orbe de fogo': { id: 'orbe de fogo', name: 'Orbe de Fogo', pattern: 'orbital', damage: 1.5, speed: 34, color: 0xf97316, radius: 0.58, fireRate: 0.9, life: 1.8, maxDistance: 18, explosionRadius: 1.2 },
-  'vento cortante': { id: 'vento cortante', name: 'Vento Cortante', pattern: 'cleave', damage: 1.2, speed: 28, color: 0x93c5fd, radius: 0.24, fireRate: 0.3, life: 0.9, maxDistance: 20 },
-  'relâmpago sagrado': { id: 'relâmpago sagrado', name: 'Relâmpago Sagrado', pattern: 'lightning', damage: 2.2, speed: 26, color: 0xfde68a, radius: 0.18, fireRate: 0.55, life: 0.45, maxDistance: 20 },
+  'vento cortante': { id: 'vento cortante', name: 'Vento Cortante', pattern: 'shockwave', damage: 1.1, color: 0x93c5fd, fireRate: 1.15, shockwaveRadius: 8.5, knockback: 7.2 },
+  'relâmpago sagrado': { id: 'relâmpago sagrado', name: 'Relâmpago Sagrado', pattern: 'lightning', damage: 2.4, color: 0xfde68a, fireRate: 0.7, life: 0.42, strikeCount: 1, aoeRadius: 2.8 },
 };
 
 export function isWeaponFinalTier(weapon) {
@@ -382,8 +379,6 @@ export function getRandomPowerupChoices(count = 3, player = null) {
   return result.slice(0, count);
 }
 
-import { resolveStatusSlotIndex, normalizeStatusId, applyStatusToPlayer } from './StatusSystem.js';
-
 export function applyPowerupChoice(player, powerupId) {
   const powerup = POWERUP_LIBRARY[powerupId];
   if (!powerup || !player) {
@@ -440,19 +435,34 @@ export function applyPowerupChoice(player, powerupId) {
         activeWeapon.tag = 'Final';
 
         if (powerup.weapon === 'vento cortante') {
-          activeWeapon.pattern = 'cleave';
-          activeWeapon.color = 0xfbbf24;
-          activeWeapon.damage = (activeWeapon.damage || 1) * 2.3;
-          activeWeapon.speed = (activeWeapon.speed || 28) * 2;
-          activeWeapon.range = (activeWeapon.range || 12) + 12;
+          activeWeapon.pattern = 'shockwave';
+          activeWeapon.color = 0xa5f3fc;
+          activeWeapon.damage = (activeWeapon.damage || 1) * 1.8;
+          activeWeapon.shockwaveRadius = (activeWeapon.shockwaveRadius || 8.5) + 4;
+          activeWeapon.knockback = (activeWeapon.knockback || 7.2) * 1.35;
         }
 
         if (powerup.weapon === 'relâmpago sagrado') {
           activeWeapon.pattern = 'lightning';
           activeWeapon.color = 0xfde68a;
-          activeWeapon.damage = (activeWeapon.damage || 1) * 2.2;
-          activeWeapon.speed = (activeWeapon.speed || 26) * 1.8;
-          activeWeapon.radius = 0.18;
+          activeWeapon.damage = (activeWeapon.damage || 1) * 2.0;
+          activeWeapon.strikeCount = Math.max(2, (activeWeapon.strikeCount || 1) + 2);
+          activeWeapon.aoeRadius = (activeWeapon.aoeRadius || 2.8) * 1.25;
+        }
+
+        if (powerup.weapon === 'lâmina arcana') {
+          activeWeapon.pattern = 'melee';
+          activeWeapon.meleeRange = (activeWeapon.meleeRange || 5.8) + 2.5;
+          activeWeapon.meleeHalfAngle = Math.min(1.35, (activeWeapon.meleeHalfAngle || 0.95) + 0.25);
+          activeWeapon.damage = (activeWeapon.damage || 1) * 1.6;
+        }
+
+        if (powerup.weapon === 'lança de ossos') {
+          activeWeapon.pattern = 'pierce';
+          activeWeapon.pierce = true;
+          activeWeapon.boltCount = Math.max(2, (activeWeapon.boltCount || 1) + 1);
+          activeWeapon.maxDistance = (activeWeapon.maxDistance || 42) + 10;
+          activeWeapon.damage = (activeWeapon.damage || 1) * 1.5;
         }
       }
 

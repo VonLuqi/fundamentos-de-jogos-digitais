@@ -181,6 +181,59 @@ body.is-shell-mobile.is-shell-locked {
   transform: translateX(2px);
 }
 
+.app-shell__link.is-locked {
+  color: rgba(196, 181, 170, 0.42);
+  border-color: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.app-shell__link.is-locked::before {
+  background: rgba(122, 31, 43, 0.55);
+  box-shadow: none;
+}
+
+.app-shell__link.is-locked::after {
+  content: "⊘";
+  color: rgba(196, 181, 170, 0.35);
+  transform: none;
+}
+
+.app-shell__link.is-locked:hover,
+.app-shell__link.is-locked:focus-visible {
+  color: rgba(196, 181, 170, 0.48);
+  border-color: rgba(255, 255, 255, 0.04);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent);
+  box-shadow: none;
+  transform: none;
+}
+
+.app-shell__link.is-locked:hover::before,
+.app-shell__link.is-locked:focus-visible::before {
+  background: rgba(122, 31, 43, 0.55);
+  box-shadow: none;
+}
+
+.app-shell__link.is-locked:hover::after,
+.app-shell__link.is-locked:focus-visible::after {
+  color: rgba(196, 181, 170, 0.35);
+  transform: none;
+}
+
+body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"] {
+  cursor: pointer;
+}
+
+body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:hover,
+body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-visible {
+  color: var(--hades-gold-bright);
+  border-color: rgba(207, 167, 89, 0.32);
+  background:
+    linear-gradient(180deg, rgba(207, 167, 89, 0.07), rgba(122, 31, 43, 0.05));
+  transform: translateX(2px);
+}
+
 .app-shell__link:hover::before,
 .app-shell__link:focus-visible::before,
 .app-shell__logout:hover::before,
@@ -521,7 +574,7 @@ body.is-shell-mobile.is-shell-locked {
     text-wrap: balance;
   }
 
-  /* Densidade: 7 itens (admin) + brand + logout cabem em ~640dvh com safe-area. */
+  /* Densidade: 8 itens (admin c/ minigame) + brand + logout cabem em ~640dvh com safe-area. */
   .app-shell__link,
   .app-shell__logout {
     min-height: 2.75rem;

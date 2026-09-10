@@ -424,19 +424,31 @@
 
     .character-card {
       background: rgba(17, 17, 24, 0.9);
-      border: 1px solid rgba(219, 184, 89, 0.3);
+      border: 2px solid rgba(219, 184, 89, 0.3);
       color: var(--hades-text);
       padding: 1rem 0.8rem;
       cursor: pointer;
       text-align: left;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
 
-    .character-card:hover,
-    .character-card.is-selected {
+    .character-card:hover {
       transform: translateY(-2px);
+      border-color: rgba(219, 184, 89, 0.7);
+      box-shadow: 0 0 0 1px rgba(219, 184, 89, 0.25);
+    }
+
+    .character-card.is-selected {
+      transform: translateY(-3px);
       border-color: var(--hades-gold-bright);
-      box-shadow: 0 0 0 1px rgba(219, 184, 89, 0.35);
+      background: rgba(40, 28, 12, 0.95);
+      box-shadow:
+        0 0 0 1px rgba(250, 204, 21, 0.45),
+        0 0 18px rgba(219, 184, 89, 0.28);
+    }
+
+    .character-card.is-selected .character-card__name {
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
     }
 
     .character-card__name {
@@ -501,6 +513,111 @@
       border-color: var(--hades-gold-bright);
       color: var(--hades-gold-bright);
     }
+
+    .minigame-sealed {
+      margin: 1.25rem auto 0.75rem;
+      max-width: 34rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid rgba(207, 167, 89, 0.28);
+      background: rgba(17, 12, 20, 0.72);
+    }
+
+    .minigame-sealed__title {
+      margin: 0 0 0.45rem;
+      font-family: var(--font-title);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--hades-gold-bright);
+    }
+
+    .minigame-sealed__body {
+      margin: 0 0 1rem;
+      color: rgba(232, 220, 200, 0.78);
+    }
+
+    #menu-layer a.start-button {
+      background: var(--hades-panel);
+      border: 1px solid var(--hades-gold-dark);
+      color: var(--hades-text);
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      padding: var(--space-4) var(--space-8);
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: var(--shadow-panel);
+    }
+
+    #menu-layer button.start-button:disabled {
+      opacity: 0.55;
+      cursor: wait;
+      filter: grayscale(0.35);
+    }
+
+    .minigame-boot-status {
+      margin: 0.75rem 0 0;
+      max-width: 28rem;
+      font-size: 0.85rem;
+      line-height: 1.35;
+      color: rgba(232, 220, 200, 0.72);
+    }
+
+    .minigame-boot-status[data-tone="error"] {
+      color: #fca5a5;
+    }
+
+    .minigame-play.is-sealed .character-grid,
+    .minigame-play.is-sealed #selected-character-summary,
+    .minigame-play.is-sealed #start-btn,
+    .minigame-play.is-sealed .description {
+      display: none;
+    }
+
+    /* Virtual Joystick (touch) — canto inferior esquerdo */
+    #virtual-joystick {
+      position: fixed;
+      left: 1rem;
+      bottom: 5.75rem;
+      width: 132px;
+      height: 132px;
+      z-index: 70;
+      display: none;
+      touch-action: none;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #virtual-joystick.is-visible {
+      display: block;
+      pointer-events: auto;
+    }
+
+    .virtual-joystick__base {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      border: 2px solid rgba(212, 175, 55, 0.55);
+      background:
+        radial-gradient(circle at 50% 45%, rgba(90, 40, 70, 0.45), rgba(12, 10, 14, 0.72));
+      box-shadow:
+        inset 0 0 18px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(139, 92, 246, 0.2);
+    }
+
+    .virtual-joystick__knob {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 52px;
+      height: 52px;
+      margin: -26px 0 0 -26px;
+      border-radius: 999px;
+      border: 2px solid rgba(232, 220, 200, 0.7);
+      background: radial-gradient(circle at 35% 30%, rgba(250, 204, 21, 0.95), rgba(124, 58, 237, 0.85));
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      will-change: transform;
+    }
   </style>
 </head>
 <body class="game-screen">
@@ -520,9 +637,15 @@
   <main class="game-layout" style="display: flex; align-items: center; justify-content: center;">
     <section class="stage-select" aria-label="Minigame">
       <ul class="stage-select__list" id="menu-layer">
-        <li class="stage-select__item">
+        <li class="stage-select__item minigame-play" id="minigame-play">
           <h2 class="title">Arcane Survivors</h2>
           <p class="description">Escolha seu herói e sobreviva até 20 minutos enfrentando ondas crescentes.</p>
+
+          <div id="minigame-sealed" class="minigame-sealed" hidden>
+            <p class="minigame-sealed__title">Arena selada</p>
+            <p class="minigame-sealed__body">O Mestre ainda não destravou Arcane Survivors para a turma.</p>
+            <a class="start-button" href="./dashboard.html">Voltar ao Salão</a>
+          </div>
 
           <div class="character-grid" aria-label="Seleção de personagem">
             <button type="button" class="character-card" data-character-card="soulblade" aria-pressed="false">
@@ -545,7 +668,8 @@
           </div>
 
           <p id="selected-character-summary">Soulblade • Lâmina Arcana • HP 100</p>
-          <button class="start-button" id="start-btn">Iniciar Partida</button>
+          <button type="button" class="start-button" id="start-btn">Iniciar Partida</button>
+          <p id="minigame-boot-status" class="minigame-boot-status" hidden aria-live="polite"></p>
         </li>
       </ul>
     </section>
@@ -613,6 +737,12 @@
     </div>
   </div>
 
+  <div id="virtual-joystick" aria-hidden="true">
+    <div class="virtual-joystick__base" data-role="base">
+      <div class="virtual-joystick__knob" data-role="knob"></div>
+    </div>
+  </div>
+
   <!-- BARRA INFERIOR: CONTROLES (igual ao index.html) -->
   <footer class="controls-bar" aria-label="Controles do jogo">
     <a href="../index.html" class="controls-bar__btn" role="button" data-action="dashboard" aria-label="Ir para o Painel do Aluno (tecla P)">
@@ -625,8 +755,17 @@
     </button>
   </footer>
 
+  <!-- Importmap só para addons (EffectComposer importa bare `three`) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/js/vendor/three/build/three.module.js",
+      "three/addons/": "/js/vendor/three/examples/jsm/"
+    }
+  }
+  </script>
   <!-- Cannon.js CDN -->
-  <script src="https://unpkg.com/cannon@0.6.2/build/cannon.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/cannon@0.6.2/build/cannon.min.js"></script>
   <script type="module" src="../js/minigame/main.js"></script>
 </body>
 </html>

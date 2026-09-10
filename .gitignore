@@ -20,6 +20,8 @@ $RECYCLE.BIN/
 node_modules/
 dist/
 build/
+!js/vendor/three/build/
+!js/vendor/three/build/**
 out/
 *.log
 npm-debug.log*

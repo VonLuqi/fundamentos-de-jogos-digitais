@@ -1,41 +1,82 @@
-import * as THREE from "https://unpkg.com/three@0.164.0/build/three.module.js";
+import * as THREE from "../three.js";
 // CANNON é acessado do escopo global, carregado via CDN em minigame.html
+import { ARENA_HALF_EXTENT } from "../systems/PhysicsSystem.js";
 
+/**
+ * Entidade Player (§2.1):
+ * posição, velocidade, HP, corpo Cannon e facing (rotationY) a partir do vetor de movimento.
+ * Visual: threejs-geometry + threejs-materials (low-poly PBR).
+ */
 export class Player {
   /**
-   * @param {THREE.Scene} scene – cena onde o mesh será adicionado
-   * @param {CANNON.World} physicsWorld – mundo físico do Cannon.js
+   * @param {THREE.Scene} scene
+   * @param {CANNON.World} physicsWorld
    * @param {object} [options]
    */
   constructor(scene, physicsWorld, options = {}) {
-    const size = options.size ?? 2; // Tamanho do player
-    const color = options.color ?? 0x00e5ff; // Ciano vibrante para o player
-    
-    // Mesh visual (Three.js)
+    const size = options.size ?? 2;
+    const color = options.color ?? 0x00e5ff;
+    const groundOffset = size / 2 + 0.7;
+
+    this.size = size;
+    this.speed = options.speed ?? 15;
+    this.baseSpeed = this.speed;
+    this.arenaLimit = options.arenaLimit ?? ARENA_HALF_EXTENT;
+
+    this.hp = options.hp ?? 100;
+    this.maxHp = options.maxHp ?? this.hp;
+    this.baseMaxHp = this.maxHp;
+
+    /** Direção de facing no plano XZ (normalizada). Default: “norte” (-Z). */
+    this.facing = { x: 0, z: -1 };
+    this.rotationY = 0;
+
+    // Corpo — BoxGeometry + PBR emissive (skills geometry/materials)
     const geometry = new THREE.BoxGeometry(size, size, size);
     const material = new THREE.MeshStandardMaterial({
-      color: color,
+      color,
       emissive: color,
-      emissiveIntensity: 0.3, // Brilho sutil
-      metalness: 0.1,
-      roughness: 0.4,
+      emissiveIntensity: 0.35,
+      metalness: 0.15,
+      roughness: 0.45,
+      flatShading: true,
+      fog: true,
     });
 
     this.mesh = new THREE.Mesh(geometry, material);
-    this.mesh.position.set(0, size / 2 + 0.7, 0); // Elevar ligeiramente do chão para evitar o efeito de "presas no piso"
-    this.mesh.castShadow = true;   // Player projeta sombra
-    this.mesh.receiveShadow = true; // Player recebe sombra
-    this.mesh.name = "PlayerMesh"; // Para facilitar a busca no RenderSystem
+    this.mesh.position.set(0, groundOffset, 0);
+    this.mesh.castShadow = true;
+    this.mesh.receiveShadow = true;
+    this.mesh.name = "PlayerMesh";
+    this.mesh.frustumCulled = true;
+
+    // Indicador de frente (cone) — deixa o rotationY legível no top-down
+    const nose = new THREE.Mesh(
+      new THREE.ConeGeometry(size * 0.22, size * 0.55, 4),
+      new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 0.55,
+        metalness: 0.2,
+        roughness: 0.4,
+        flatShading: true,
+        fog: true,
+      })
+    );
+    nose.name = "PlayerFacing";
+    nose.rotation.x = Math.PI / 2; // eixo do cone → +Z local
+    nose.position.set(0, 0, size * 0.55);
+    nose.castShadow = true;
+    this.mesh.add(nose);
+
+    this.mesh.rotation.y = this.rotationY;
     scene.add(this.mesh);
 
-    this.speed = options.speed ?? 15; // Velocidade ajustada para o novo cenário
-    this.arenaLimit = options.arenaLimit ?? 110;
-
-    // Corpo físico (Cannon.js)
-    const playerShape = new CANNON.Box(new CANNON.Vec3(size / 2, size / 2, size / 2)); // Meia largura, altura, profundidade
+    const half = size / 2;
+    const playerShape = new CANNON.Box(new CANNON.Vec3(half, half, half));
     this.body = new CANNON.Body({
       mass: 1,
-      position: new CANNON.Vec3(0, size / 2 + 0.7, 0),
+      position: new CANNON.Vec3(0, groundOffset, 0),
       shape: playerShape,
       linearDamping: 0,
       angularDamping: 0,
@@ -47,40 +88,52 @@ export class Player {
     this.body.updateMassProperties();
     physicsWorld.addBody(this.body);
 
-    console.log("Player: Mesh and Cannon Body created.", this.mesh, this.body);
+    this._groundY = groundOffset;
+  }
+
+  /** Posição lógica no mundo (proxy do corpo físico). */
+  get position() {
+    return this.body.position;
   }
 
   /**
-   * Atualiza a posição do player no mundo físico.
-   * @param {number} delta – tempo em segundos desde o último frame
-   * @param {{x:number, z:number}} dir – vetor de direção (x, z) já normalizado
+   * Movimento + clamp de arena + facing pelo vetor de input.
+   * @param {number} delta
+   * @param {{x?:number, z?:number, y?:number}|null} dir Vetor normalizado (getMoveVector)
    */
   update(delta, dir) {
     if (!dir) return;
 
-    const currentX = this.body.position.x;
-    const currentZ = this.body.position.z;
-    const moveSpeed = this.speed;
+    const inputX = Number(dir.x) || 0;
+    const inputZ = Number(dir.z) || 0;
+    const moving = Math.hypot(inputX, inputZ) > 0.001;
 
-    const moveX = dir.x * moveSpeed;
-    const moveZ = dir.z * moveSpeed;
+    if (moving) {
+      const moveSpeed = this.speed;
+      const nextX = this.body.position.x + inputX * moveSpeed * delta;
+      const nextZ = this.body.position.z + inputZ * moveSpeed * delta;
 
-    const nextX = currentX + moveX * delta;
-    const nextZ = currentZ + moveZ * delta;
+      this.body.position.x = THREE.MathUtils.clamp(nextX, -this.arenaLimit, this.arenaLimit);
+      this.body.position.z = THREE.MathUtils.clamp(nextZ, -this.arenaLimit, this.arenaLimit);
 
-    const clampedX = THREE.MathUtils.clamp(nextX, -this.arenaLimit, this.arenaLimit);
-    const clampedZ = THREE.MathUtils.clamp(nextZ, -this.arenaLimit, this.arenaLimit);
+      // Facing: atan2(x, z) → rotationY no Object3D (threejs-fundamentals)
+      this.facing.x = inputX;
+      this.facing.z = inputZ;
+      this.rotationY = Math.atan2(inputX, inputZ);
+    }
 
-    this.body.position.x = clampedX;
-    this.body.position.z = clampedZ;
-    this.body.position.y = 1.7;
-
+    this.body.position.y = this._groundY;
     this.body.velocity.set(0, 0, 0);
     this.body.angularVelocity.set(0, 0, 0);
 
     this.mesh.position.copy(this.body.position);
     this.mesh.rotation.x = 0;
     this.mesh.rotation.z = 0;
-    this.mesh.rotation.y = 0;
+    this.mesh.rotation.y = this.rotationY;
+  }
+
+  /** Vetor unitário na direção que o campeão está olhando. */
+  getFacingDirection() {
+    return { x: this.facing.x, z: this.facing.z };
   }
 }

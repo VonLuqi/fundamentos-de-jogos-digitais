@@ -600,26 +600,27 @@ test('projectiles expire when leaving the arena or exceeding their max distance'
   assert.equal(projectile2.isExpired, true);
 });
 
-test('difficulty scales faster and increases spawn pressure over time without making the early game instantly unfair', () => {
+test('difficulty scales spawn pressure over the run while keeping the opening readable', () => {
   const earlyDifficulty = getDifficultyLevel(120, 1);
   const midDifficulty = getDifficultyLevel(420, 3);
   const lateDifficulty = getDifficultyLevel(900, 5);
 
-  assert.ok(earlyDifficulty > 0.1 && earlyDifficulty < 1.0, `early difficulty should stay very low, got ${earlyDifficulty}`);
-  assert.ok(midDifficulty > 1.0 && midDifficulty < 3.2, `mid difficulty should rise gradually, got ${midDifficulty}`);
-  assert.ok(lateDifficulty > 2.0 && lateDifficulty <= 10, `late difficulty should be much higher, got ${lateDifficulty}`);
+  assert.ok(earlyDifficulty > 0.8 && earlyDifficulty < 2.5, `early difficulty should open the arena without exploding, got ${earlyDifficulty}`);
+  assert.ok(midDifficulty > 1.5 && midDifficulty < 5.5, `mid difficulty should rise gradually, got ${midDifficulty}`);
+  assert.ok(lateDifficulty > 3.0 && lateDifficulty <= 10, `late difficulty should be much higher, got ${lateDifficulty}`);
 
-  assert.ok(getSpawnInterval(earlyDifficulty) > 1.3, `spawn interval should stay generous early, got ${getSpawnInterval(earlyDifficulty)}`);
-  assert.ok(getEnemySpawnCount(midDifficulty) >= 1 && getEnemySpawnCount(midDifficulty) <= 3, `spawn count should stay controlled, got ${getEnemySpawnCount(midDifficulty)}`);
+  assert.ok(getSpawnInterval(earlyDifficulty) >= 0.55 && getSpawnInterval(earlyDifficulty) < 2.6, `spawn interval early got ${getSpawnInterval(earlyDifficulty)}`);
+  assert.ok(getEnemySpawnCount(earlyDifficulty) >= 2, `early spawn count should start the horde, got ${getEnemySpawnCount(earlyDifficulty)}`);
+  assert.ok(getEnemySpawnCount(midDifficulty) >= 3 && getEnemySpawnCount(midDifficulty) <= 7, `spawn count should stay controlled, got ${getEnemySpawnCount(midDifficulty)}`);
 
   const earlyStats = getEnemyStats(earlyDifficulty, 1);
   const enemyStats = getEnemyStats(midDifficulty, 3);
-  assert.ok(earlyStats.hp <= 6, `expected early enemy hp to be paper-like, got ${earlyStats.hp}`);
-  assert.ok(earlyStats.damage <= 5, `expected early enemy damage to be nearly harmless, got ${earlyStats.damage}`);
-  assert.ok(earlyStats.speed <= 8, `expected early enemy speed to be slow, got ${earlyStats.speed}`);
-  assert.ok(enemyStats.speed > 8, `mid-game enemy speed should rise, got ${enemyStats.speed}`);
-  assert.ok(enemyStats.hp > 8, `mid-game enemy hp should rise, got ${enemyStats.hp}`);
-  assert.ok(enemyStats.damage > 8, `mid-game enemy damage should rise, got ${enemyStats.damage}`);
+  assert.ok(earlyStats.hp <= 12, `expected early enemy hp to stay manageable, got ${earlyStats.hp}`);
+  assert.ok(earlyStats.damage <= 10, `expected early enemy damage to stay manageable, got ${earlyStats.damage}`);
+  assert.ok(earlyStats.speed <= 12, `expected early enemy speed to stay readable, got ${earlyStats.speed}`);
+  assert.ok(enemyStats.speed > earlyStats.speed, `mid-game enemy speed should rise, got ${enemyStats.speed}`);
+  assert.ok(enemyStats.hp > earlyStats.hp, `mid-game enemy hp should rise, got ${enemyStats.hp}`);
+  assert.ok(enemyStats.damage > earlyStats.damage, `mid-game enemy damage should rise, got ${enemyStats.damage}`);
 });
 
 test('projectile bounds follow the arena size instead of a hard-coded 38-unit cutoff', () => {
