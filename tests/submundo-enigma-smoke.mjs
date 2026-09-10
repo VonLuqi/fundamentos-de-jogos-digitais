@@ -13,6 +13,7 @@ import {
   getAchievementById,
   getAchievementXp,
 } from '../js/game-catalog.js';
+import { isArgLocation, isDevtoolsShortcut } from '../js/devtools-guard.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -91,6 +92,22 @@ assert(hash === '18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083
 const apiJs = read('js/api.js');
 assert(apiJs.includes('underworldJudgment') && apiJs.includes('underworldRedeem'), 'helpers API front');
 assert(apiJs.includes('submundo'), 'rootPath conhece /submundo');
+assert(apiJs.includes("from './devtools-guard.js'"), 'api.js instala o véu de F12');
+assert(apiJs.includes('installDevtoolsGuard()'), 'véu de F12 arma no load do cliente');
+
+const guard = read('js/devtools-guard.js');
+assert(guard.includes('F12'), 'guard cobre F12');
+assert(guard.includes('isArgLocation'), 'guard reconhece o ARG');
+assert(guard.includes('submundo'), 'ARG = salas /submundo');
+assert(isArgLocation('/submundo/tartaro-oculto'), 'URL limpa do ARG fica livre');
+assert(isArgLocation('/pages/submundo/estige-obolo.html'), 'arquivo direto do ARG fica livre');
+assert(!isArgLocation('/pages/conquistas.html'), 'álbum não é sala ARG');
+assert(!isArgLocation('/pages/dashboard.html'), 'painel não é sala ARG');
+assert(isDevtoolsShortcut({ key: 'F12' }), 'F12 é atalho de DevTools');
+assert(isDevtoolsShortcut({ key: 'I', ctrlKey: true, shiftKey: true }), 'Ctrl+Shift+I é atalho');
+assert(!isDevtoolsShortcut({ key: 'F5' }), 'F5 não é DevTools');
+assert(!read('js/submundo/tartaro.js').includes('devtools-guard'), 'Tártaro não importa o véu');
+assert(!read('js/submundo/asfodelos.js').includes('devtools-guard'), 'Asfódelos não importa o véu');
 
 const ui = read('js/achievements-ui.js');
 assert(ui.includes('fillAchievementDescription') && ui.includes('fillTrailheadField'), 'cipher UI');
@@ -108,6 +125,7 @@ const local = read('local-server.mjs');
 assert(local.includes('/submundo/tartaro-oculto'), 'rewrite local-server');
 
 [
+  'js/devtools-guard.js',
   'js/submundo/tartaro.js',
   'js/submundo/asfodelos.js',
   'js/submundo/elisios.js',

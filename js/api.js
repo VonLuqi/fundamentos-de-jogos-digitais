@@ -15,6 +15,8 @@
 
 'use strict';
 
+import { installDevtoolsGuard } from './devtools-guard.js';
+
 /* ---------- Única chave permitida no localStorage ---------- */
 const SESSION_KEY = 'activeSession';
 
@@ -1027,3 +1029,5 @@ export const LESSONS = MODULES.flatMap((module) => module.lessons.map((lesson) =
   moduleTitle: module.title,
   moduleSubtitle: module.subtitle,
 })));
+
+installDevtoolsGuard();
