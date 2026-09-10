@@ -170,9 +170,14 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Não foi possível criar a sessão agora. Tente novamente.' });
       }
 
-      await dispatchEmailVerification({ supabase, user: data, ip });
+      const dispatched = await dispatchEmailVerification({ supabase, user: data, ip });
 
-      return res.status(201).json({ ok: true, token, user: sanitizeUser(data) });
+      return res.status(201).json({
+        ok: true,
+        token,
+        user: sanitizeUser(data),
+        mailSent: Boolean(dispatched?.sent),
+      });
     }
 
     if (action === 'login') {
@@ -224,10 +229,12 @@ export default async function handler(req, res) {
     if (action === 'requestEmailVerification') {
       const user = await loadUserBySessionToken(req.body?.token);
       if (!user) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
+      let mailSent = false;
       if (user.role === 'student') {
-        await dispatchEmailVerification({ supabase, user, ip });
+        const dispatched = await dispatchEmailVerification({ supabase, user, ip });
+        mailSent = Boolean(dispatched?.sent);
       }
-      return res.status(200).json({ ok: true });
+      return res.status(200).json({ ok: true, mailSent });
     }
 
     if (action === 'bindEmail') {
@@ -266,8 +273,14 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Não foi possível vincular o e-mail agora.' });
       }
 
-      await dispatchEmailVerification({ supabase, user: updated, ip });
-      return res.status(200).json({ ok: true, email, emailVerifiedAt: null, user: sanitizeUser(updated) });
+      const dispatched = await dispatchEmailVerification({ supabase, user: updated, ip });
+      return res.status(200).json({
+        ok: true,
+        email,
+        emailVerifiedAt: null,
+        mailSent: Boolean(dispatched?.sent),
+        user: sanitizeUser(updated),
+      });
     }
 
     if (action === 'confirmEmail') {

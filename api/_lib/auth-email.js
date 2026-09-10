@@ -26,9 +26,17 @@ export function createPlainToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
+const PRODUCTION_APP_URL = 'https://fundamentos-de-jogos-digitais.vercel.app';
+
 export function appBaseUrl() {
   const raw = String(process.env.APP_BASE_URL || '').trim().replace(/\/+$/, '');
-  return raw || null;
+  if (raw) return raw;
+
+  // Preview Vercel não deve inventar link: APP_BASE_URL continua obrigatório lá.
+  if (process.env.VERCEL_ENV === 'production') return PRODUCTION_APP_URL;
+  if (!process.env.VERCEL && !process.env.VERCEL_ENV) return 'http://localhost:3000';
+
+  return null;
 }
 
 export function requestIp(req) {
@@ -239,12 +247,19 @@ export async function dispatchEmailVerification({ supabase, user, ip }) {
     name: user.full_name || user.username || 'alma',
     url,
   });
-  await sendMail({
+  const mailed = await sendMail({
     to: email,
     subject: copy.subject,
     text: copy.text,
     html: copy.html,
   });
+  if (!mailed.ok) {
+    console.error('[auth-email] selo não entregue', {
+      userId: user.id,
+      reason: mailed.reason || (mailed.skipped ? 'skipped' : 'provider'),
+    });
+    return { sent: false, reason: mailed.reason || 'provider' };
+  }
   return { sent: true };
 }
 
@@ -294,12 +309,19 @@ export async function dispatchPasswordReset({ supabase, user, ip }) {
     name: user.full_name || user.username || 'alma',
     url,
   });
-  await sendMail({
+  const mailed = await sendMail({
     to: email,
     subject: copy.subject,
     text: copy.text,
     html: copy.html,
   });
+  if (!mailed.ok) {
+    console.error('[auth-email] reset não entregue', {
+      userId: user.id,
+      reason: mailed.reason || (mailed.skipped ? 'skipped' : 'provider'),
+    });
+    return { sent: false, reason: mailed.reason || 'provider' };
+  }
   return { sent: true };
 }
 

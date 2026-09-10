@@ -115,8 +115,12 @@ if (friendCard) {
   assert(!/email_verified/.test(friendCard[0]), 'toFriendCard não deve devolver email_verified');
 }
 assert(
-  progress.includes('email: _email') || progress.includes('email: _email,'),
-  'progress.sanitizeUser deve omitir email do spread'
+  /email:\s*safe\.email/.test(progress),
+  'progress.sanitizeUser do próprio usuário deve expor email'
+);
+assert(
+  /emailVerifiedAt:\s*safe\.email_verified_at/.test(progress),
+  'progress.sanitizeUser do próprio usuário deve expor emailVerifiedAt'
 );
 assert(
   !progress.includes('.select(\'id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, email'),

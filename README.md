@@ -156,9 +156,20 @@ fundamentos-de-jogos-digitais/
    RESEND_API_KEY=re_sua_chave
    MAIL_FROM=Fundamentos de Jogos Digitais <beth.t@example.com>
    APP_BASE_URL=http://localhost:3000
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=seu.email@gmail.com
+   SMTP_PASS=senha-de-app
    ```
 
-   Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app`. O remetente `beth.t@example.com` **só entrega para o e-mail da conta Resend**; para a turma, verifique um domínio em [resend.com/domains](https://resend.com/domains) e troque `MAIL_FROM`. Não versionar a API key.
+   Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app` (o servidor também usa esse host se a var faltar só em Production).
+
+   **Por que o e-mail não chega:** o remetente `beth.t@example.com` **só entrega para o e-mail da conta Resend**. Pedido de reset / selo responde 200 mesmo assim — a UI diz que o Mensageiro partiu, mas o Resend recusa destinatários da turma. Caminhos que realmente entregam:
+
+   1. Verificar um domínio em [resend.com/domains](https://resend.com/domains) e trocar `MAIL_FROM` para `Fundamentos de Jogos Digitais <noreply@SEU_DOMINIO>`; ou
+   2. SMTP (Gmail: senha de app em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) com `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS`. Se o Resend falhar no modo teste, o servidor tenta o SMTP.
+
+   Coloque as vars na Vercel (Production + Preview) e em `.env.local`. Não versionar a API key nem a senha SMTP.
 
 3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`, `friendships`) e semear o usuário administrador.
 
@@ -262,9 +273,9 @@ node tests/password-reset-smoke.mjs
 - [tests/friends-phase1-smoke.mjs](tests/friends-phase1-smoke.mjs): actions de amigos rejeitam sessão inválida.
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
-- [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO sem e-mail, helpers de token — **não** chama o Resend.
+- [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO de amigos sem e-mail, helpers de token — **não** chama Resend/SMTP.
 
-Checklist manual (e-mail real, com `RESEND_API_KEY`): cadastro + selo; pedido certo envia e derruba sessões; username certo + e-mail errado ou conta admin não enviam; token expirado/usado recusa; aluno antigo vincula no painel; e-mail duplicado → 409; viewport estreito nos três painéis do pacto.
+Checklist manual (e-mail real, com `RESEND_API_KEY` **ou** SMTP): cadastro + selo; pedido certo envia e derruba sessões; username certo + e-mail errado ou conta admin não enviam; token expirado/usado recusa; aluno antigo vincula no painel; e-mail duplicado → 409; viewport estreito nos três painéis do pacto.
 
 ## Contribuindo
 

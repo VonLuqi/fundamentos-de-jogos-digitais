@@ -182,7 +182,14 @@ function initMessengerSeal() {
       messengerShowForm = false;
       if (result.user) mergeSelfUser(result.user);
       else mergeSelfUser({ email: result.email, emailVerifiedAt: result.emailVerifiedAt ?? null });
-      setMessengerStatus('O Mensageiro partiu. Confirme o selo na caixa de entrada.');
+      if (result.mailSent === false) {
+        setMessengerStatus(
+          'O endereço foi gravado, mas o Mensageiro não partiu. Olhe o spam ou avise o Mestre — o envio de e-mail pode não estar configurado.',
+          true,
+        );
+      } else {
+        setMessengerStatus('O Mensageiro partiu. Confirme o selo na caixa de entrada — e o reino das promoções.');
+      }
       renderMessengerSeal(currentUser);
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Falha ao vincular o e-mail.';
@@ -197,8 +204,15 @@ function initMessengerSeal() {
     resendBtn.disabled = true;
     setMessengerStatus('Chamando o Mensageiro...');
     try {
-      await requestEmailVerification(currentToken);
-      setMessengerStatus(MESSENGER_RESEND_COPY);
+      const result = await requestEmailVerification(currentToken);
+      if (result?.mailSent === false) {
+        setMessengerStatus(
+          'O Mensageiro não partiu. Olhe o spam ou avise o Mestre — o envio de e-mail pode não estar configurado.',
+          true,
+        );
+      } else {
+        setMessengerStatus(MESSENGER_RESEND_COPY);
+      }
     } catch {
       setMessengerStatus(MESSENGER_RESEND_COPY);
     } finally {
