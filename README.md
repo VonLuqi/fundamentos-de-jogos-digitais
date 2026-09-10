@@ -17,6 +17,7 @@ A interface segue uma estética **cinematográfica (Hades-like)**: dark mode pro
 O projeto está em fase **funcional**, com os seguintes fluxos já implementados e validados:
 
 - ✅ Autenticação (login/cadastro) com sessão via token opaco
+- ✅ Cadastro com e-mail obrigatório e recuperação **A Palavra se perdeu** (selo no e-mail)
 - ✅ Cadastro com nome completo real (`full_name`) + username de login
 - ✅ Proteção de rotas (páginas protegidas redirecionam sem sessão válida)
 - ✅ Dashboard do aluno ("Salão dos Heróis") como hub: altar, perfil, prévias e CTAs
@@ -152,13 +153,19 @@ fundamentos-de-jogos-digitais/
    ```bash
    SUPABASE_URL=https://SEU_PROJETO.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+   RESEND_API_KEY=re_sua_chave
+   MAIL_FROM=Fundamentos de Jogos Digitais <beth.t@example.com>
+   APP_BASE_URL=http://localhost:3000
    ```
+
+   Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app`. O remetente `beth.t@example.com` **só entrega para o e-mail da conta Resend**; para a turma, verifique um domínio em [resend.com/domains](https://resend.com/domains) e troque `MAIL_FROM`. Não versionar a API key.
 
 3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`, `friendships`) e semear o usuário administrador.
 
 4. Se seu banco já existia antes dessas mudanças, execute também:
    - [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para `full_name` e `lesson_views`;
-   - [db/migrate-2026-09-08-friendships.sql](db/migrate-2026-09-08-friendships.sql) para **Companheiros de Jornada**.
+   - [db/migrate-2026-09-08-friendships.sql](db/migrate-2026-09-08-friendships.sql) para **Companheiros de Jornada**;
+   - [db/migrate-2026-09-10-password-reset-email.sql](db/migrate-2026-09-10-password-reset-email.sql) para e-mail do aluno e tokens de reset / verificação.
 
    > ⚠️ A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md) para o troubleshooting completo desse ponto).
 
@@ -190,8 +197,8 @@ Executa `node --check` em todos os módulos de front-end e das rotas de API.
 
 | Método | Rota                     | Ação                                  |
 | ------ | ------------------------ | -------------------------------------- |
-| POST   | `/api/auth`              | `login`, `register`, `logout`          |
-| GET    | `/api/auth?token=...`    | Valida sessão ativa                    |
+| POST   | `/api/auth`              | `login`, `register`, `logout`, `requestEmailVerification`, `confirmEmail`, `bindEmail`, `requestPasswordReset`, `confirmPasswordReset` |
+| GET    | `/api/auth?token=...`    | Valida sessão ativa (token de **sessão**, não o selo de e-mail) |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
 | POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile` |
 
@@ -222,12 +229,22 @@ Plano geral: [docs/plano-sistema-amigos.md](docs/plano-sistema-amigos.md). Corre
 {
    "action": "register",
    "fullName": "Nome Completo do Aluno",
+   "turma": "TCG01",
    "username": "username_login",
+   "email": "aluno@exemplo.com",
    "password": "senha"
 }
 ```
 
-O login continua por `username`, mas as respostas da API priorizam o nome real do aluno.
+O login continua por `username` (nunca por e-mail). As respostas da API priorizam o nome real do aluno. O e-mail entra **pendente** até o aluno clicar **Confirmar o selo**; o reset só envia mensagem se o selo estiver confirmado.
+
+### A Palavra se perdeu (recuperação por e-mail)
+
+No Pacto de Sangue, o link **A Palavra se perdeu?** pede username + e-mail e chama o Mensageiro. A API **sempre** responde 200 com a mesma copy — não revela se a conta existe.
+
+**Alunos já cadastrados sem e-mail** precisam, enquanto ainda estão logados, vincular e-mail no **Painel do Herói** (bloco **Selo do Mensageiro**) e confirmar o selo. Sem e-mail confirmado, o “esqueci” não tem para quem mandar. Quem perdeu a senha **e** nunca vinculou e-mail trata a recuperação na sala (fora do self-service).
+
+O e-mail do aluno **não** aparece no DTO de companheiros, turma ou Almas. No próprio perfil ele fica mascarado.
 
 ## Testes
 
@@ -237,6 +254,7 @@ node tests/integration-check.mjs
 node tests/friends-phase1-smoke.mjs
 node tests/friends-phase4-smoke.mjs
 node tests/mirror-secret-axes-smoke.mjs
+node tests/password-reset-smoke.mjs
 ```
 
 - [tests/login-check.mjs](tests/login-check.mjs): valida login com credenciais corretas e incorretas.
@@ -244,6 +262,9 @@ node tests/mirror-secret-axes-smoke.mjs
 - [tests/friends-phase1-smoke.mjs](tests/friends-phase1-smoke.mjs): actions de amigos rejeitam sessão inválida.
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
+- [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO sem e-mail, helpers de token — **não** chama o Resend.
+
+Checklist manual (e-mail real, com `RESEND_API_KEY`): cadastro + selo; pedido certo envia e derruba sessões; username certo + e-mail errado ou conta admin não enviam; token expirado/usado recusa; aluno antigo vincula no painel; e-mail duplicado → 409; viewport estreito nos três painéis do pacto.
 
 ## Contribuindo
 

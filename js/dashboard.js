@@ -43,6 +43,8 @@ import {
   redeemCode,
   generateCode,
   setAvatar,
+  bindEmail,
+  requestEmailVerification,
   listCodes,
   logout,
   getSession,
@@ -59,6 +61,166 @@ let currentUser = null;
 let currentToken = null;
 let publishMap = {};
 let shellApi = null;
+let messengerShowForm = false;
+let messengerBound = false;
+
+const MESSENGER_RESEND_COPY = 'Se o selo ainda estiver pendente, o Mensageiro já partiu. Olhe a caixa — e o reino das promoções.';
+
+function mergeSelfUser(next) {
+  const prev = currentUser || {};
+  currentUser = {
+    ...prev,
+    ...next,
+    email: next?.email ?? prev.email ?? null,
+    emailVerifiedAt: next?.emailVerifiedAt ?? next?.email_verified_at ?? prev.emailVerifiedAt ?? null,
+  };
+  return currentUser;
+}
+
+function maskEmail(email) {
+  const value = String(email || '').trim().toLowerCase();
+  const at = value.lastIndexOf('@');
+  if (at < 1 || at === value.length - 1) return '•••';
+  const local = value.slice(0, at);
+  const domain = value.slice(at + 1);
+  const keep = local.length >= 2 ? 2 : 1;
+  return `${local.slice(0, keep)}***@${domain}`;
+}
+
+function messengerSealKind(user) {
+  const email = String(user?.email || '').trim();
+  if (!email) return 'empty';
+  if (user.emailVerifiedAt) return 'confirmed';
+  return 'pending';
+}
+
+function setMessengerStatus(message, isError = false) {
+  const statusEl = document.getElementById('messenger-status');
+  if (!statusEl) return;
+  statusEl.textContent = message || '';
+  statusEl.classList.toggle('is-error', Boolean(isError && message));
+}
+
+function renderMessengerSeal(user) {
+  const root = document.getElementById('messenger-seal');
+  if (!root) return;
+
+  if (!user || user.role === 'admin') {
+    root.hidden = true;
+    return;
+  }
+
+  root.hidden = false;
+  const kind = messengerSealKind(user);
+  const stateEl = document.getElementById('messenger-state');
+  const emailEl = document.getElementById('messenger-email');
+  const form = document.getElementById('messenger-form');
+  const actions = document.getElementById('messenger-actions');
+  const resendBtn = document.getElementById('messenger-resend');
+  const changeBtn = document.getElementById('messenger-change');
+  const bindBtn = document.getElementById('messenger-bind');
+  const cancelBtn = document.getElementById('messenger-cancel');
+  const input = document.getElementById('messenger-input');
+
+  if (stateEl) {
+    stateEl.textContent = kind === 'empty'
+      ? 'Sem selo de mensageiro — vincule um e-mail para recuperar a Palavra.'
+      : kind === 'pending'
+        ? 'O selo ainda não foi reconhecido.'
+        : 'Selo reconhecido. A Palavra pode ser recuperada por este endereço.';
+  }
+
+  if (emailEl) {
+    if (kind === 'empty') {
+      emailEl.hidden = true;
+      emailEl.textContent = '';
+    } else {
+      emailEl.hidden = false;
+      emailEl.textContent = maskEmail(user.email);
+    }
+  }
+
+  const showForm = kind === 'empty' || messengerShowForm;
+  if (form) form.hidden = !showForm;
+  if (cancelBtn) cancelBtn.hidden = kind === 'empty' || !showForm;
+  if (bindBtn) {
+    bindBtn.textContent = kind === 'empty' ? 'Vincular e-mail' : 'Selar novo endereço';
+  }
+  if (input && !showForm) input.value = '';
+
+  if (actions) actions.hidden = kind === 'empty' || showForm;
+  if (resendBtn) resendBtn.hidden = kind !== 'pending';
+  if (changeBtn) {
+    changeBtn.hidden = kind === 'empty';
+    changeBtn.textContent = kind === 'confirmed' ? 'Trocou de e-mail?' : 'Trocar endereço';
+  }
+}
+
+function initMessengerSeal() {
+  if (messengerBound) return;
+  messengerBound = true;
+
+  const form = document.getElementById('messenger-form');
+  const resendBtn = document.getElementById('messenger-resend');
+  const changeBtn = document.getElementById('messenger-change');
+  const cancelBtn = document.getElementById('messenger-cancel');
+  const bindBtn = document.getElementById('messenger-bind');
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const email = String(form.elements.email.value || '').trim();
+    if (!email) {
+      setMessengerStatus('Informe um e-mail.', true);
+      return;
+    }
+    if (!currentToken) return;
+
+    bindBtn.disabled = true;
+    setMessengerStatus('Chamando o Mensageiro...');
+    try {
+      const result = await bindEmail(currentToken, email);
+      messengerShowForm = false;
+      if (result.user) mergeSelfUser(result.user);
+      else mergeSelfUser({ email: result.email, emailVerifiedAt: result.emailVerifiedAt ?? null });
+      setMessengerStatus('O Mensageiro partiu. Confirme o selo na caixa de entrada.');
+      renderMessengerSeal(currentUser);
+    } catch (error) {
+      const message = error instanceof ApiError ? error.message : 'Falha ao vincular o e-mail.';
+      setMessengerStatus(message, true);
+    } finally {
+      bindBtn.disabled = false;
+    }
+  });
+
+  resendBtn?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    resendBtn.disabled = true;
+    setMessengerStatus('Chamando o Mensageiro...');
+    try {
+      await requestEmailVerification(currentToken);
+      setMessengerStatus(MESSENGER_RESEND_COPY);
+    } catch {
+      setMessengerStatus(MESSENGER_RESEND_COPY);
+    } finally {
+      resendBtn.disabled = false;
+    }
+  });
+
+  changeBtn?.addEventListener('click', () => {
+    messengerShowForm = true;
+    setMessengerStatus('');
+    renderMessengerSeal(currentUser);
+    document.getElementById('messenger-input')?.focus();
+  });
+
+  cancelBtn?.addEventListener('click', () => {
+    messengerShowForm = false;
+    const input = document.getElementById('messenger-input');
+    if (input) input.value = '';
+    setMessengerStatus('');
+    renderMessengerSeal(currentUser);
+  });
+}
 
 function normalizeSearchText(value) {
   return String(value ?? '')
@@ -91,6 +253,7 @@ function renderProfile(user) {
     `${collection.unlocked} / ${collection.total}`;
 
   applyAdminSkin(user);
+  renderMessengerSeal(user);
 }
 
 /**
@@ -465,7 +628,7 @@ function initAltar() {
 
     try {
       const result = await redeemCode(currentToken, code);
-      currentUser = result.user;
+      currentUser = mergeSelfUser(result.user);
 
       // === JUICE EM CADEIA: flash → overlay → barra de XP enchendo ===
       flashScreen();
@@ -936,7 +1099,7 @@ function initAvatarSwap() {
 
       try {
         const { user } = await setAvatar(currentToken, pendingIndex);
-        currentUser = user;
+        currentUser = mergeSelfUser(user);
         renderProfile(currentUser);
         closeScrollModal();
       } catch (error) {
@@ -1249,6 +1412,7 @@ async function init() {
   initAltar();
   initAvatarSwap();
   initAdminTools();
+  initMessengerSeal();
   renderRailPreviews(currentToken).catch((error) => {
     console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
   });

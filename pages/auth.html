@@ -45,6 +45,7 @@
         <p class="pact-frame__subtitle" id="pact-subtitle">
           Assine seu nome no tomo dos iniciados para adentrar o Domínio.
         </p>
+        <p class="pact-form__notice" id="verify-result" role="status" aria-live="polite" hidden></p>
 
         <!-- SELETOR DE MODO: Entrar vs. Criar Conta -->
         <div class="pact-mode-toggle" role="tablist" aria-label="Selecione entre entrar com uma conta existente ou criar uma nova">
@@ -101,8 +102,87 @@
           <!-- Mensagem de erro (aparece com shake quando as credenciais falham) -->
           <p class="pact-form__error" id="login-error" role="alert" aria-live="polite"></p>
 
+          <p class="pact-form__lost">
+            <button class="pact-form__lost-btn" type="button" id="open-forgot">A Palavra se perdeu?</button>
+          </p>
+
           <button class="btn-pact" type="submit">
             <span class="btn-pact__label">Entrar no Domínio</span>
+          </button>
+        </form>
+
+        <!-- PEDIDO DE RENOVAÇÃO (A Palavra se perdeu) -->
+        <form class="pact-form" id="form-forgot" aria-label="A Palavra se perdeu" novalidate>
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="forgot-username">Nome da Alma</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="forgot-username"
+              name="username"
+              placeholder="Ex.: Orfeu"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="forgot-email">E-mail</label>
+            <input
+              class="pact-form__input"
+              type="email"
+              id="forgot-email"
+              name="email"
+              placeholder="Ex.: maria.silva@email.com"
+              autocomplete="email"
+              inputmode="email"
+              required
+            />
+          </div>
+
+          <p class="pact-form__status" id="forgot-status" role="status" aria-live="polite"></p>
+
+          <button class="btn-pact" type="submit">
+            <span class="btn-pact__label">Chamar o Mensageiro</span>
+          </button>
+
+          <p class="pact-form__back">
+            <button class="pact-form__back-btn" type="button" id="forgot-back">← Voltar a Entrar</button>
+          </p>
+        </form>
+
+        <!-- NOVA PALAVRA (deep link ?reset=) -->
+        <form class="pact-form" id="form-reset" aria-label="Nova Palavra de Passagem" novalidate>
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="reset-password">Nova Palavra de Passagem</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="reset-password"
+              name="password"
+              placeholder="Mínimo de 4 símbolos"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="reset-password-confirm">Confirme a Palavra</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="reset-password-confirm"
+              name="password_confirm"
+              placeholder="Repita a nova palavra"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <p class="pact-form__error" id="reset-error" role="alert" aria-live="polite"></p>
+
+          <button class="btn-pact btn-pact--blood" type="submit">
+            <span class="btn-pact__label">Selar nova Palavra</span>
           </button>
         </form>
 
@@ -139,6 +219,20 @@
               name="username"
               placeholder="Ex.: maria.silva"
               autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="register-email">E-mail</label>
+            <input
+              class="pact-form__input"
+              type="email"
+              id="register-email"
+              name="email"
+              placeholder="Ex.: maria.silva@email.com"
+              autocomplete="email"
+              inputmode="email"
               required
             />
           </div>

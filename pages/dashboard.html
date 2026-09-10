@@ -147,6 +147,42 @@
 
               <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
 
+              <section class="messenger-seal" id="messenger-seal" hidden>
+                <h3 class="messenger-seal__title">Selo do Mensageiro</h3>
+                <p class="messenger-seal__state" id="messenger-state"></p>
+                <p class="messenger-seal__email" id="messenger-email" hidden></p>
+                <p class="messenger-seal__status" id="messenger-status" role="status" aria-live="polite"></p>
+
+                <form class="messenger-seal__form" id="messenger-form" hidden>
+                  <label class="messenger-seal__label" for="messenger-input">E-mail</label>
+                  <input
+                    class="messenger-seal__input"
+                    type="email"
+                    id="messenger-input"
+                    name="email"
+                    placeholder="Ex.: maria.silva@email.com"
+                    autocomplete="email"
+                    inputmode="email"
+                    required
+                  />
+                  <button class="btn-gold" type="submit" id="messenger-bind">
+                    Vincular e-mail
+                  </button>
+                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-cancel" hidden>
+                    Cancelar
+                  </button>
+                </form>
+
+                <div class="messenger-seal__actions" id="messenger-actions">
+                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-resend">
+                    Confirmar o selo
+                  </button>
+                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-change">
+                    Trocar endereço
+                  </button>
+                </div>
+              </section>
+
               <div class="profile-panel__stats">
                 <div class="level-badge" aria-label="Nível atual">
                   <span class="level-badge__label">Nível</span>

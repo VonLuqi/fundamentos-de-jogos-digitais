@@ -419,6 +419,8 @@ function normalizeUser(raw) {
     completedLessons: raw.completedLessons ?? raw.completed_lessons ?? [],
     avatarIndex: raw.avatarIndex ?? raw.avatar_index ?? 0,
     achievements: raw.achievements ?? raw.conquistas ?? [],
+    email: raw.email ?? null,
+    emailVerifiedAt: raw.emailVerifiedAt ?? raw.email_verified_at ?? null,
   };
 }
 
@@ -442,10 +444,45 @@ export function login(name, password) {
   });
 }
 
-export function register(fullName, turma, username, password) {
+export function register(fullName, turma, username, password, email) {
   return request('/auth', {
     method: 'POST',
-    body: JSON.stringify({ action: 'register', fullName, turma, username, password }),
+    body: JSON.stringify({ action: 'register', fullName, turma, username, password, email }),
+  });
+}
+
+export function requestEmailVerification(token) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'requestEmailVerification', token }),
+  });
+}
+
+export function bindEmail(token, email) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'bindEmail', token, email }),
+  });
+}
+
+export function confirmEmail(token) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'confirmEmail', token }),
+  });
+}
+
+export function requestPasswordReset(username, email) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'requestPasswordReset', username, email }),
+  });
+}
+
+export function confirmPasswordReset(token, password) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'confirmPasswordReset', token, password }),
   });
 }
 

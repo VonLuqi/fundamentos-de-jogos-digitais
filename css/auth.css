@@ -196,6 +196,50 @@ body {
   /* JUICE: micro-glow constante indica qual aba está ativa, quase como "carvão vivo" */
   box-shadow: inset 0 0 16px rgba(194, 53, 72, 0.4);
 }
+.pact-mode-toggle[hidden] {
+  display: none !important;
+}
+
+.pact-form__lost {
+  margin: -0.35rem 0 1rem;
+  text-align: right;
+}
+
+.pact-form__lost-btn,
+.pact-form__back-btn {
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--hades-gold);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.pact-form__lost-btn:hover,
+.pact-form__back-btn:hover {
+  color: var(--hades-gold-bright);
+}
+
+.pact-form__back {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.pact-form__status {
+  min-height: 1.4em;
+  margin-bottom: 0.85rem;
+  font-size: 0.9rem;
+  color: var(--hades-gold-bright);
+}
+
+.pact-form__status.is-error {
+  color: var(--hades-blood-bright);
+  text-shadow: 0 0 8px rgba(194, 53, 72, 0.6);
+}
 
 /* ============================================================
    6. FORMULÁRIO — Campos "contrato" (fundo escuro translúcido,
@@ -260,6 +304,19 @@ body {
   margin-bottom: 0.85rem;
 }
 
+.pact-form__notice {
+  min-height: 1.4em;
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  color: var(--hades-gold-bright);
+  text-align: center;
+}
+
+.pact-form__notice.is-error {
+  color: var(--hades-blood-bright);
+  text-shadow: 0 0 8px rgba(194, 53, 72, 0.6);
+}
+
 /* ============================================================
    7. BOTÃO DE PACTO (Entrar / Firmar Pacto)
    Grande, serifado, com glow pulsante que INTENSIFICA no hover
@@ -295,6 +352,15 @@ body {
 /* Variante "sangue puro" para o cadastro */
 .btn-pact--blood {
   background: linear-gradient(180deg, rgba(194, 53, 72, 0.5), rgba(74, 0, 0, 0.85));
+}
+.btn-pact:disabled,
+.btn-pact.is-busy,
+.btn-pact:disabled:hover,
+.btn-pact.is-busy:hover {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+  animation: none;
 }
 
 /* ============================================================

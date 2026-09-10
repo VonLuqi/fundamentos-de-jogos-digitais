@@ -139,7 +139,7 @@ function defaultGatesForLesson(lessonId) {
 
 function sanitizeUser(u) {
   if (!u) return null;
-  const { password_hash, conquistas, ...safe } = u;
+  const { password_hash, password, conquistas, email: _email, email_verified_at: _emailVerifiedAt, ...safe } = u;
   const displayName = safe.full_name ?? safe.name ?? safe.username;
   return {
     ...safe,
@@ -491,6 +491,7 @@ async function assertAcceptedBond(userA, userB) {
   return Boolean(bond && bond.status === 'accepted');
 }
 
+/** Cartão público: nunca incluir e-mail, senha ou tokens. */
 function toFriendCard(row) {
   const xp = Number(row?.xp || 0);
   const isAdmin = row?.role === 'admin';
@@ -2798,7 +2799,7 @@ export default async function handler(req, res) {
         viewsByUser.set(row.user_id, userViews);
       });
 
-      const normalized = (users || []).map(({ conquistas, ...rest }) => ({
+      const normalized = (users || []).map(({ conquistas, email, email_verified_at, password, password_hash, ...rest }) => ({
         ...rest,
         fullName: rest.full_name || rest.username,
         achievements: conquistas || [],
