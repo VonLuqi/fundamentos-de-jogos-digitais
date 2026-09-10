@@ -58,6 +58,7 @@
         <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
         <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
         <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="minigame" data-feature-gate="arcane_survivors" href="./minigame.html" aria-disabled="true">Arcane Survivors</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
       </nav>
 
@@ -104,10 +105,16 @@
           <p id="api-warning-text"></p>
         </div>
 
+        <!--
+          ARG / trailhead: as runas itálicas soletram o portão (anagrama).
+          A pasta do abismo não está na raiz — desça um nível no Domínio (/submundo).
+          Outras pistas: data-path-prefix nas runas, robots.txt, comentários CSS.
+        -->
         <section class="album-intro" aria-label="Introdução do álbum">
           <p class="album-intro__lead">
             Cada conquista ocupa um slot fixo. Segredos ainda não revelados aparecem como
             <strong>?</strong>. Examine uma figurinha para ver o detalhe completo.
+            Algumas letras guardam um caminho — e o caminho nem sempre começa na raiz.
           </p>
           <p class="album-intro__counter" id="album-counter" role="status">Carregando coleção…</p>
         </section>

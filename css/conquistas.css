@@ -80,7 +80,7 @@ body.is-relic-modal-open {
   box-shadow: 0 0 0 2px var(--hades-gold-bright), var(--rarity-glow);
 }
 
-/* Soberano do Submundo — destaque acima do álbum quando liberado */
+/* Soberano do Submundo — destaque hero no álbum/Espelho (mesmo velado) */
 .achievement-slot.is-soberano-featured {
   grid-column: 1 / -1;
   justify-self: center;
@@ -89,6 +89,7 @@ body.is-relic-modal-open {
   margin: 0.15rem auto 1.1rem;
   z-index: 3;
   contain: none;
+  overflow: visible;
 }
 .achievement-slot.is-soberano-featured .achievement-slot__face {
   min-height: 20.5rem;
@@ -119,6 +120,37 @@ body.is-relic-modal-open {
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   padding: 0.3rem 0.85rem;
+}
+
+/* Única — full art: a imagem cobre o card inteiro; nome + badge sobrepostos */
+.achievement-slot[data-rarity='unique'] .achievement-slot__art-stage,
+.achievement-slot.is-soberano-featured[data-rarity='unique'] .achievement-slot__art-stage {
+  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.achievement-slot[data-rarity='unique'] img.achievement-slot__art.has-art,
+.achievement-slot.is-soberano-featured[data-rarity='unique'] img.achievement-slot__art.has-art {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+.achievement-slot[data-rarity='unique'] .achievement-slot__name,
+.achievement-slot[data-rarity='unique'] .achievement-slot__rarity {
+  z-index: 3;
+}
+
+/* Teaser: chrome Única + arte P&B enquanto não desbloqueada */
+.achievement-slot.is-soberano-teaser.is-locked .achievement-slot__face {
+  opacity: 1;
+  filter: none;
+  border-style: solid;
 }
 
 .achievement-slot[data-rarity='stone'] {
@@ -208,7 +240,12 @@ body.is-relic-modal-open {
   --frame-aura: rgba(194, 53, 72, 0.42);
 }
 
-/* Cipher do trailhead — sutil, caçável no Elements */
+/*
+ * Cipher do trailhead — sutil, caçável no Elements.
+ * As runas soletram o portão; a pasta do abismo é outra pista:
+ * data-path-prefix="/submundo", /robots.txt, comentários no HTML.
+ * Não é /tartaro na raiz.
+ */
 .trailhead-rune {
   font-style: italic;
   font-weight: 600;
@@ -864,6 +901,8 @@ img.achievement-slot__art.has-art {
 
 .relic-modal__panel[data-rarity='unique'] {
   --unique-border-angle: 0deg;
+  min-height: min(72vh, 560px);
+  justify-content: space-between;
   border: 5px solid transparent;
   background:
     radial-gradient(ellipse 120% 100% at 50% 38%, rgba(194, 53, 72, 0.32), transparent 72%),
@@ -891,6 +930,42 @@ img.achievement-slot__art.has-art {
     0 0 28px rgba(207, 167, 89, 0.4),
     0 0 48px rgba(194, 53, 72, 0.3),
     0 24px 60px rgba(0, 0, 0, 0.65);
+}
+
+/* Modal Única — full art sob o chrome (título / badge / texto por cima) */
+.relic-modal__panel[data-rarity='unique'] .relic-modal__art {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  aspect-ratio: auto;
+}
+.relic-modal__panel[data-rarity='unique'] .relic-modal__art.has-art .relic-modal__art-media {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+  animation: none;
+  filter: none;
+}
+.relic-modal__panel[data-rarity='unique'] .relic-modal__close,
+.relic-modal__panel[data-rarity='unique'] .relic-modal__title,
+.relic-modal__panel[data-rarity='unique'] .relic-modal__rarity,
+.relic-modal__panel[data-rarity='unique'] .relic-modal__desc,
+.relic-modal__panel[data-rarity='unique'] .relic-modal__meta {
+  position: relative;
+  z-index: 2;
+}
+.relic-modal__panel[data-rarity='unique'] .relic-modal__desc,
+.relic-modal__panel[data-rarity='unique'] .relic-modal__meta {
+  margin-inline: 1rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(8, 4, 6, 0.72);
 }
 
 .relic-modal__panel[data-rarity='unique'] .relic-modal__rarity {
@@ -1136,6 +1211,32 @@ img.achievement-slot__art.has-art {
   font-size: 1.02rem;
   line-height: 1.55;
   color: var(--hades-text-dim);
+}
+
+.relic-modal__desc.is-veiled-scramble {
+  color: #e8d7b8;
+  text-shadow: 0 0 12px rgba(194, 53, 72, 0.35), 0 0 18px rgba(207, 167, 89, 0.22);
+  letter-spacing: 0.01em;
+}
+
+.relic-modal__desc.is-veiled-readable {
+  color: #f2e6c9;
+  text-shadow: 0 0 10px rgba(207, 167, 89, 0.28);
+}
+
+.relic-modal__desc.is-veiled-scrambling {
+  color: #f2d59a;
+  text-shadow:
+    0 0 10px rgba(194, 53, 72, 0.55),
+    0 0 22px rgba(120, 40, 160, 0.35),
+    0 0 8px rgba(242, 213, 154, 0.4);
+  animation: veiledScrambleFlicker 160ms steps(2, end) infinite;
+}
+
+@keyframes veiledScrambleFlicker {
+  0% { opacity: 0.82; filter: hue-rotate(-8deg); }
+  50% { opacity: 1; filter: hue-rotate(10deg); }
+  100% { opacity: 0.9; filter: none; }
 }
 .relic-modal__meta {
   position: relative;
@@ -1631,5 +1732,10 @@ img.achievement-slot__art.has-art {
   .achievement-slot.is-mystery--styled[data-rarity='stone'] .achievement-slot__face::before {
     opacity: 0.92 !important;
     animation: none !important;
+  }
+
+  .relic-modal__desc.is-veiled-scrambling {
+    animation: none !important;
+    filter: none !important;
   }
 }

@@ -27,7 +27,7 @@ let achievementArtCatalogPromise = null;
  */
 export const ACHIEVEMENT_ART_IDS = new Set();
 
-/** Relíquia-suprema do Enigma: destaque só no Álbum (aba Conquistas), não no painel. */
+/** Relíquia-suprema do Enigma: sempre em destaque no Álbum/Espelho (mesmo velada). */
 export const SOBERANO_ACHIEVEMENT_ID = 'soberano_do_submundo';
 
 function achievementArtCatalogUrl() {
@@ -273,12 +273,9 @@ function isAchievementUnlocked(user, achievementId, { ignoreAdminPrivilege = fal
 
 export { isAchievementUnlocked };
 
-/** Soberano desbloqueado → pin no topo + layout de destaque (somente modo álbum). */
-export function shouldFeatureSoberano(user, achievement, { visitorView = false } = {}) {
-  if (!achievement || String(achievement.id) !== SOBERANO_ACHIEVEMENT_ID) return false;
-  return isAchievementUnlocked(user, achievement.id, {
-    ignoreAdminPrivilege: Boolean(visitorView),
-  });
+/** Soberano → sempre pin no topo + layout de destaque no Álbum/Espelho (mesmo velado). */
+export function shouldFeatureSoberano(_user, achievement, _options = {}) {
+  return Boolean(achievement && String(achievement.id) === SOBERANO_ACHIEVEMENT_ID);
 }
 
 function orderWithSoberanoFeatured(achievements, user, options = {}) {
@@ -294,6 +291,153 @@ function orderWithSoberanoFeatured(achievements, user, options = {}) {
 
 export function getAchievementById(achievementId) {
   return ACHIEVEMENTS.find((achievement) => achievement.id === achievementId) || null;
+}
+
+/**
+ * Descrição do modal enquanto a relíquia ainda não foi desbloqueada.
+ * Usa `veiledDesc` do catálogo quando existir; senão o fallback genérico.
+ */
+export function resolveLockedAchievementDescription(achievement, fallback) {
+  const veiled = String(achievement?.veiledDesc || '').trim();
+  if (veiled) return veiled;
+  return String(fallback || '').trim();
+}
+
+const VEILED_SCRAMBLE_GLYPHS = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρστυφχψω✦✧◈◇◆☽☾';
+const veiledScrambleTimers = new WeakMap();
+
+const DEFAULT_VEILED_SCRAMBLE = Object.freeze({
+  scrambleMs: 180_000,
+  readableMs: 45_000,
+  tickMs: 150,
+  startWith: 'readable',
+});
+
+function prefersReducedMotion() {
+  return typeof window !== 'undefined'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function randomGlyph() {
+  return VEILED_SCRAMBLE_GLYPHS[Math.floor(Math.random() * VEILED_SCRAMBLE_GLYPHS.length)];
+}
+
+function scrambleSample(text, intensity = 0.22) {
+  const chars = Array.from(String(text || ''));
+  return chars.map((ch) => {
+    if (/\s|[.,;:—\-–!]/.test(ch)) return ch;
+    return Math.random() < intensity ? randomGlyph() : ch;
+  }).join('');
+}
+
+function resolveVeiledScrambleTiming(timing = null) {
+  const raw = timing && typeof timing === 'object' ? timing : {};
+  return {
+    scrambleMs: Math.max(60_000, Number(raw.scrambleMs) || DEFAULT_VEILED_SCRAMBLE.scrambleMs),
+    readableMs: Math.max(15_000, Number(raw.readableMs) || DEFAULT_VEILED_SCRAMBLE.readableMs),
+    tickMs: Math.max(80, Math.min(400, Number(raw.tickMs) || DEFAULT_VEILED_SCRAMBLE.tickMs)),
+    startWith: raw.startWith === 'scramble' ? 'scramble' : 'readable',
+  };
+}
+
+/** Encerra o efeito de letras do véu neste elemento. */
+export function stopVeiledDescScramble(el) {
+  if (!el) return;
+  const state = veiledScrambleTimers.get(el);
+  if (state) {
+    if (state.burstId) window.clearInterval(state.burstId);
+    if (state.phaseId) window.clearTimeout(state.phaseId);
+    veiledScrambleTimers.delete(el);
+  }
+  el.classList.remove('is-veiled-scramble', 'is-veiled-scrambling', 'is-veiled-readable');
+}
+
+/**
+ * Ciclo longo: janela legível (print/leitura) ↔ embaralhamento por minutos.
+ * Em prefers-reduced-motion, só aplica o texto estático.
+ * @param {HTMLElement} el
+ * @param {string} text
+ * @param {{ scramble?: boolean, timing?: object|null }} [options]
+ */
+export function playVeiledDescScramble(el, text, { scramble = true, timing = null } = {}) {
+  if (!el) return;
+  stopVeiledDescScramble(el);
+  const finalText = String(text || '');
+  el.textContent = finalText;
+  el.classList.add('is-veiled-scramble');
+
+  if (!scramble || !finalText || prefersReducedMotion()) {
+    el.classList.add('is-veiled-readable');
+    return;
+  }
+
+  const config = resolveVeiledScrambleTiming(timing);
+  const state = { burstId: 0, phaseId: 0, phase: config.startWith };
+  veiledScrambleTimers.set(el, state);
+
+  const clearBurst = () => {
+    if (state.burstId) {
+      window.clearInterval(state.burstId);
+      state.burstId = 0;
+    }
+  };
+
+  const showReadable = () => {
+    if (!el.isConnected) {
+      stopVeiledDescScramble(el);
+      return;
+    }
+    clearBurst();
+    state.phase = 'readable';
+    el.classList.remove('is-veiled-scrambling');
+    el.classList.add('is-veiled-readable');
+    el.textContent = finalText;
+    state.phaseId = window.setTimeout(() => {
+      startScramble();
+    }, config.readableMs);
+  };
+
+  const startScramble = () => {
+    if (!el.isConnected) {
+      stopVeiledDescScramble(el);
+      return;
+    }
+    clearBurst();
+    state.phase = 'scramble';
+    el.classList.remove('is-veiled-readable');
+    el.classList.add('is-veiled-scrambling');
+    const startedAt = Date.now();
+
+    state.burstId = window.setInterval(() => {
+      if (!el.isConnected) {
+        stopVeiledDescScramble(el);
+        return;
+      }
+      const elapsed = Date.now() - startedAt;
+      // Intensidade oscila — o véu “respira”, sem congelar o olhar.
+      const pulse = 0.5 + 0.5 * Math.sin(elapsed / 900);
+      const intensity = 0.16 + pulse * 0.28;
+      el.textContent = scrambleSample(finalText, intensity);
+
+      if (elapsed >= config.scrambleMs) {
+        showReadable();
+      }
+    }, config.tickMs);
+  };
+
+  if (config.startWith === 'scramble') startScramble();
+  else showReadable();
+}
+
+/** Aplica descrição travada; se houver veiledDesc, liga o scramble longo. */
+export function fillLockedAchievementDescription(el, achievement, fallback) {
+  if (!el) return;
+  const text = resolveLockedAchievementDescription(achievement, fallback);
+  const hasVeil = Boolean(String(achievement?.veiledDesc || '').trim());
+  playVeiledDescScramble(el, text, {
+    scramble: hasVeil,
+    timing: achievement?.veiledScramble || null,
+  });
 }
 
 /**
@@ -636,17 +780,23 @@ function renderAlbumMode(container, user, {
     const justUnlocked = highlightIds.includes(ach.id);
     const rarityName = rarityLabelForAchievement(ach);
     const slotState = model.kind;
-    const featured = model.kind === 'unlocked' && shouldFeatureSoberano(user, ach, { visitorView });
+    const isSoberano = shouldFeatureSoberano(user, ach, { visitorView });
+    const featured = isSoberano;
 
     const li = document.createElement('li');
     const isMysteryFace = model.kind === 'mystery';
     const isStyledMystery = Boolean(
-      visitorView && model.isSecret && model.applySecretStyle && !model.revealText
+      (visitorView && model.isSecret && model.applySecretStyle && !model.revealText)
+      || (isSoberano && model.kind === 'mystery')
     );
     const isSecretKnownLocked = Boolean(
       visitorView && model.isSecret && model.revealText && !model.applySecretStyle
     );
     const useGrayscale = model.kind !== 'unlocked';
+    const displayRarity = isSoberano
+      ? normalizeAchievementRarity(ach.rarity, ach.difficulty)
+      : model.rarity;
+    const showBadge = Boolean(model.showRarityBadge || isSoberano);
 
     li.className = [
       'achievement-slot',
@@ -656,6 +806,7 @@ function renderAlbumMode(container, user, {
       isSecretKnownLocked ? 'is-secret-known' : '',
       justUnlocked ? 'is-just-unlocked' : '',
       featured ? 'is-soberano-featured' : '',
+      isSoberano && model.kind !== 'unlocked' ? 'is-soberano-teaser' : '',
     ]
       .filter(Boolean)
       .join(' ');
@@ -663,7 +814,7 @@ function renderAlbumMode(container, user, {
     li.id = `relic-${ach.id}`;
     li.style.setProperty('--ach-index', String(index));
     li.dataset.achievementId = ach.id;
-    li.dataset.rarity = model.rarity;
+    li.dataset.rarity = displayRarity;
     li.dataset.state = slotState;
     if (featured) li.dataset.featured = 'soberano';
     if (visitorView && model.isSecret) {
@@ -689,7 +840,7 @@ function renderAlbumMode(container, user, {
         title: '???',
         achievement: ach,
         rarityLabel: rarityName,
-        showRarityBadge: model.showRarityBadge,
+        showRarityBadge: showBadge,
         grayscale: true,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',
@@ -707,7 +858,7 @@ function renderAlbumMode(container, user, {
         title: ach.name,
         achievement: ach,
         rarityLabel: rarityName,
-        showRarityBadge: model.showRarityBadge,
+        showRarityBadge: showBadge,
         grayscale: true,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',
@@ -725,7 +876,7 @@ function renderAlbumMode(container, user, {
         title: ach.name,
         achievement: ach,
         rarityLabel: rarityName,
-        showRarityBadge: model.showRarityBadge,
+        showRarityBadge: showBadge,
         grayscale: useGrayscale,
         nameClassName: 'achievement-slot__name',
         artClassName: 'achievement-slot__art',

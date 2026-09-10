@@ -16,11 +16,14 @@ import {
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
+  fillLockedAchievementDescription,
   getAchievementById,
   getAchievementCollectionStats,
   getAlbumSlotState,
   rarityLabelForAchievement,
   renderAchievementsList,
+  SOBERANO_ACHIEVEMENT_ID,
+  stopVeiledDescScramble,
 } from './achievements-ui.js';
 
 const FOCUSABLE_SELECTOR = [
@@ -68,22 +71,34 @@ async function openRelicModal(achievement, state) {
   const closeBtn = document.getElementById('relic-modal-close');
   if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl) return;
 
+  stopVeiledDescScramble(descEl);
+
   const rarity = normalizeAchievementRarity(achievement.rarity, achievement.difficulty);
   panel.dataset.rarity = state === 'mystery' ? 'unknown' : rarity;
   panel.dataset.state = state;
   art.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
 
   if (state === 'mystery') {
+    const isSoberano = String(achievement.id) === SOBERANO_ACHIEVEMENT_ID;
     await fillAchievementArtHost(art, achievement, { grayscale: true });
-    rarityEl.textContent = 'Desconhecida';
-    titleEl.textContent = 'Relíquia Misteriosa';
-    descEl.textContent = 'Um segredo ainda não revelado. Explore as aulas e as oferendas para descobri-lo.';
-    metaEl.textContent = 'Slot oculto do álbum';
+    panel.dataset.rarity = isSoberano ? rarity : 'unknown';
+    rarityEl.textContent = isSoberano ? rarityLabelForAchievement(achievement) : 'Desconhecida';
+    titleEl.textContent = isSoberano ? '???' : 'Relíquia Misteriosa';
+    fillLockedAchievementDescription(
+      descEl,
+      achievement,
+      'Um segredo ainda não revelado. Explore as aulas e as oferendas para descobri-lo.',
+    );
+    metaEl.textContent = isSoberano ? 'Coroa velada do Domínio' : 'Slot oculto do álbum';
   } else if (state === 'locked') {
     await fillAchievementArtHost(art, achievement, { grayscale: true });
     rarityEl.textContent = rarityLabelForAchievement(achievement);
     fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
-    descEl.textContent = 'Esta relíquia ainda não foi conquistada. O caminho continua no Salão e na Trilha.';
+    fillLockedAchievementDescription(
+      descEl,
+      achievement,
+      'Esta relíquia ainda não foi conquistada. O caminho continua no Salão e na Trilha.',
+    );
     metaEl.textContent = 'Figurinha bloqueada';
   } else {
     await fillAchievementArtHost(art, achievement, { grayscale: false });
@@ -105,6 +120,7 @@ async function openRelicModal(achievement, state) {
 function closeRelicModal({ restoreHash = true } = {}) {
   const modal = document.getElementById('relic-modal');
   if (!modal || modal.hidden) return;
+  stopVeiledDescScramble(document.getElementById('relic-modal-desc'));
   modal.classList.remove('is-open');
   modal.hidden = true;
   document.body.classList.remove('is-relic-modal-open');

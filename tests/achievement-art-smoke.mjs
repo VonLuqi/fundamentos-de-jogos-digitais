@@ -185,14 +185,35 @@ assert(
 assert(uiSrc.includes('createAchievementArtNode'), 'álbum/cards usam helper de arte');
 assert(read('js/conquistas.js').includes('fillAchievementArtHost'), 'modal conquistas usa arte');
 assert(read('js/companheiro.js').includes('fillAchievementArtHost'), 'modal Espelho usa arte');
-assert(read('js/aula1.js').includes("className: 'discovery-card__item-art'"), 'discovery usa __item-art');
-assert(read('js/aula1.js').includes('ensureAchievementArtCatalogLoaded'), 'discovery aguarda catálogo');
+assert(read('js/lesson-discovery.js').includes("className: 'discovery-card__item-art'"), 'discovery usa __item-art');
+assert(read('js/lesson-discovery.js').includes('ensureAchievementArtCatalogLoaded'), 'discovery aguarda catálogo');
 assert(read('css/aula.css').includes('.discovery-card__item-art'), 'CSS discovery tem caixa de arte');
 assert(read('css/aula.css').includes('object-fit: contain'), 'discovery art usa contain');
+assert(
+  read('js/lesson-discovery.js').includes('discovery-card__item-rarity'),
+  'discovery toast mostra badge de raridade (Fase 4)'
+);
+assert(
+  read('js/aula1.js').includes("from './lesson-discovery.js'")
+    || read('js/aula1.js').includes('from "./lesson-discovery.js"'),
+  'aula1 consome lesson-discovery'
+);
+assert(
+  read('js/aula2.js').includes("from './lesson-discovery.js'")
+    || read('js/aula2.js').includes('from "./lesson-discovery.js"'),
+  'aula2 consome lesson-discovery'
+);
+assert(read('js/aula2.js').includes("lessonId: 'aula2'") || read('js/aula2.js').includes("LESSON_ID = 'aula2'"), 'aula2 usa lessonId aula2');
+assert(read('js/aula2.js').includes('aula02_glossario_player_slides.pptx'), 'aula2 aponta PPTX novo');
+assert(!read('js/aula2.js').includes('game-canvas'), 'aula2.js sem Tambor/canvas');
 
 const modalCss = read('css/conquistas.css');
 assert(/\.relic-modal__art\s*\{[\s\S]*?aspect-ratio:\s*1\s*\/\s*1/.test(modalCss), 'modal arte quadrada grande');
 assert(modalCss.includes('object-fit: contain'), 'modal art usa contain');
+assert(
+  /relic-modal__panel\[data-rarity='unique'\][\s\S]{0,900}object-fit:\s*cover/.test(modalCss),
+  'Única full art no modal usa cover'
+);
 
 const conquistasHtml = read('pages/conquistas.html');
 const companheiroHtml = read('pages/companheiro.html');
@@ -213,6 +234,10 @@ const albumCss = read('css/conquistas.css');
 assert(albumCss.includes('.achievement-slot__art'), 'CSS álbum tem __art');
 assert(albumCss.includes('.achievement-slot__art-stage'), 'CSS álbum tem art-stage');
 assert(albumCss.includes('object-fit: contain'), 'arte álbum usa contain');
+assert(
+  /\[data-rarity='unique'\][\s\S]{0,280}object-fit:\s*cover/.test(albumCss),
+  'Única full art no álbum usa cover'
+);
 assert(albumCss.includes('clamp('), 'título álbum usa clamp (Fase 1)');
 assert(!albumCss.includes('.achievement-slot__icon'), 'CSS álbum sem __icon legado');
 assert(!albumCss.includes('.achievement-slot__mystery'), 'CSS álbum sem __mystery tipográfico');
@@ -220,6 +245,10 @@ assert(!albumCss.includes('.achievement-slot__mystery'), 'CSS álbum sem __myste
 const cardCss = read('css/dashboard.css');
 assert(cardCss.includes('.achievement-card__art'), 'CSS hub tem __art');
 assert(cardCss.includes('.achievement-card__art-stage'), 'CSS hub tem art-stage');
+assert(
+  /\[data-rarity='unique'\][\s\S]{0,280}object-fit:\s*cover/.test(cardCss),
+  'Única full art no hub usa cover'
+);
 assert(cardCss.includes('overflow: visible'), 'grade hub permite hover sem cortar');
 assert(
   /achievement-card__desc,\s*\n\.achievement-card__icon/.test(cardCss)
@@ -258,10 +287,6 @@ assert(
 assert(
   read('css/companheiros.css').includes('content: none'),
   'Espelho desliga halo/sparks rainbow (Fase 3)'
-);
-assert(
-  read('js/aula1.js').includes('discovery-card__item-rarity'),
-  'discovery toast mostra badge de raridade (Fase 4)'
 );
 assert(
   read('css/aula.css').includes('discovery-card__item-rarity'),
