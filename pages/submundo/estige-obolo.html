@@ -28,14 +28,43 @@
       </form>
     </div>
   </main>
-  <div class="submundo__celebrate" id="estige-celebrate" hidden>
-    <div class="submundo__celebrate-card">
+
+  <div
+    class="submundo__celebrate"
+    id="estige-celebrate"
+    hidden
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="estige-celebrate-title"
+    aria-describedby="estige-celebrate-desc"
+  >
+    <div class="submundo__celebrate-flash" aria-hidden="true"></div>
+    <div class="submundo__celebrate-veil" aria-hidden="true"></div>
+    <div class="submundo__celebrate-rays" aria-hidden="true"></div>
+    <div class="submundo__celebrate-embers" id="estige-embers" aria-hidden="true"></div>
+    <div class="submundo__celebrate-shock" aria-hidden="true"></div>
+
+    <div class="submundo__celebrate-card" id="estige-celebrate-card">
+      <div class="submundo__celebrate-halo" aria-hidden="true"></div>
+      <p class="submundo__celebrate-kicker">Relíquia Única</p>
       <p class="submundo__eyebrow">Travessia concluída</p>
-      <h2 class="submundo__title" id="estige-celebrate-title">Soberano do Submundo</h2>
+      <p class="submundo__celebrate-crown" aria-hidden="true">👑</p>
+      <h2 class="submundo__title submundo__celebrate-title" id="estige-celebrate-title">Soberano do Submundo</h2>
+      <p class="submundo__celebrate-xp" id="estige-celebrate-xp" hidden></p>
       <p class="submundo__riddle" id="estige-celebrate-desc"></p>
-      <button class="submundo__btn" type="button" id="estige-celebrate-close">Retornar ao Domínio</button>
+      <button class="submundo__btn submundo__celebrate-btn" type="button" id="estige-celebrate-close">
+        Retornar ao Domínio
+      </button>
     </div>
   </div>
+
+  <audio
+    id="estige-aura"
+    preload="auto"
+    src="../../assets/submundo/soberano_aura.mp3"
+    hidden
+  ></audio>
+
   <script type="module" src="../../js/submundo/estige.js"></script>
 </body>
 </html>

@@ -47,6 +47,17 @@ const sorted = [...letters].sort().join('');
 const expected = [...'TARTAROOCULTO'].sort().join('');
 assert(sorted === expected, `trailhead letters ${letters.join('')} → anagrama TARTARO OCULTO`);
 
+const catalogJs = read('js/game-catalog.js');
+assert(catalogJs.includes("dataset.pathPrefix = '/submundo'"), 'pista Elements data-path-prefix');
+
+const robots = read('robots.txt');
+assert(robots.includes('Disallow: /submundo/'), 'robots.txt aponta o abismo');
+
+assert(read('pages/conquistas.html').includes('/submundo'), 'comentário/pista no álbum HTML');
+assert(read('pages/dashboard.html').includes('/submundo'), 'comentário/pista no dashboard HTML');
+assert(read('css/conquistas.css').includes('/submundo'), 'comentário CSS conquistas');
+assert(read('pages/conquistas.html').includes('nem sempre começa na raiz'), 'copy sutil da pasta');
+
 [
   'pages/submundo/tartaro-oculto.html',
   'pages/submundo/asfodelos-sussurros.html',
@@ -58,6 +69,7 @@ assert(sorted === expected, `trailhead letters ${letters.join('')} → anagrama 
   'js/submundo/elisios.js',
   'js/submundo/estige.js',
   'assets/submundo/asfodelos_echo.wav',
+  'assets/submundo/soberano_aura.mp3',
 ].forEach((rel) => assert(fs.existsSync(path.join(root, rel)), `arquivo ${rel}`));
 
 const tartaro = read('pages/submundo/tartaro-oculto.html');
@@ -78,9 +90,15 @@ assert(hash === '18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083
 
 const apiJs = read('js/api.js');
 assert(apiJs.includes('underworldJudgment') && apiJs.includes('underworldRedeem'), 'helpers API front');
+assert(apiJs.includes('submundo'), 'rootPath conhece /submundo');
 
 const ui = read('js/achievements-ui.js');
 assert(ui.includes('fillAchievementDescription') && ui.includes('fillTrailheadField'), 'cipher UI');
+assert(ui.includes('is-soberano-featured') && ui.includes('shouldFeatureSoberano'), 'destaque Soberano');
+assert(
+  !/featured = model\.kind === 'unlocked' && shouldFeatureSoberano/.test(ui),
+  'Soberano destaca mesmo velado'
+);
 
 assert(read('css/conquistas.css').includes("data-rarity='unique'"), 'CSS unique álbum');
 assert(read('css/dashboard.css').includes("data-rarity='unique'"), 'CSS unique cards');

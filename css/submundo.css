@@ -175,10 +175,6 @@ body.submundo {
   margin: 0.5rem 0 0.75rem;
 }
 
-.submundo__hint a {
-  color: var(--sub-gold);
-}
-
 /* Elísios */
 .submundo--elisios {
   background:
@@ -226,6 +222,7 @@ body.submundo {
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.55));
 }
 
+/* --- Celebração Soberano (Única): VFX + tremedeira --- */
 .submundo__celebrate {
   position: fixed;
   inset: 0;
@@ -233,10 +230,10 @@ body.submundo {
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgba(5, 3, 8, 0.78);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 220ms ease;
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .submundo__celebrate.is-open {
@@ -244,23 +241,387 @@ body.submundo {
   pointer-events: auto;
 }
 
+.submundo__celebrate-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(194, 53, 72, 0.28), transparent 42%),
+    radial-gradient(circle at 50% 80%, rgba(30, 80, 120, 0.22), transparent 50%),
+    rgba(4, 2, 8, 0.88);
+}
+
+.submundo__celebrate-flash {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(255, 240, 194, 0.55), rgba(194, 53, 72, 0.25) 34%, transparent 62%),
+    rgba(255, 236, 180, 0.18);
+  pointer-events: none;
+}
+
+.submundo__celebrate.is-epic .submundo__celebrate-flash {
+  animation: soberanoFlash 900ms ease-out both;
+}
+
+.submundo__celebrate-rays {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 140vmax;
+  height: 140vmax;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    rgba(242, 213, 154, 0.14) 8deg,
+    transparent 16deg,
+    rgba(194, 53, 72, 0.12) 24deg,
+    transparent 32deg,
+    rgba(242, 213, 154, 0.1) 40deg,
+    transparent 48deg
+  );
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.submundo__celebrate.is-epic .submundo__celebrate-rays {
+  animation: soberanoRays 4.8s linear infinite, soberanoRaysIn 700ms ease-out both;
+}
+
+.submundo__celebrate-shock {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 12rem;
+  height: 12rem;
+  border: 2px solid rgba(242, 213, 154, 0.55);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  pointer-events: none;
+  box-shadow:
+    0 0 24px rgba(194, 53, 72, 0.45),
+    inset 0 0 18px rgba(242, 213, 154, 0.25);
+}
+
+.submundo__celebrate.is-epic .submundo__celebrate-shock {
+  animation: soberanoShock 1100ms cubic-bezier(0.15, 0.85, 0.25, 1) both;
+}
+
+.submundo__celebrate-embers {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.submundo__ember {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: #f2d59a;
+  box-shadow: 0 0 10px rgba(242, 213, 154, 0.85);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(var(--scale, 1));
+  animation: soberanoEmber var(--dur, 1200ms) cubic-bezier(0.15, 0.7, 0.2, 1) var(--delay, 0ms) both;
+}
+
+.submundo__ember[data-tone='blood'] {
+  background: #c23548;
+  box-shadow: 0 0 12px rgba(194, 53, 72, 0.9);
+}
+
 .submundo__celebrate-card {
-  width: min(100%, 26rem);
-  padding: 1.5rem;
+  position: relative;
+  z-index: 2;
+  width: min(100%, 28rem);
+  padding: 1.75rem 1.5rem 1.5rem;
   text-align: center;
-  border: 2px solid var(--sub-gold);
-  background: rgba(18, 12, 20, 0.96);
-  animation: subPop 420ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+  border: 2px solid transparent;
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 0%, rgba(194, 53, 72, 0.32), transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(30, 70, 110, 0.28), transparent 55%),
+    linear-gradient(180deg, rgba(28, 12, 18, 0.98), rgba(10, 8, 14, 0.98)) padding-box,
+    conic-gradient(
+      from 0deg,
+      #5c1018,
+      #cfa759,
+      #fff0c2,
+      #c23548,
+      #8a1f2e,
+      #f2d59a,
+      #cfa759,
+      #5c1018
+    ) border-box;
+  box-shadow:
+    0 0 0 1px rgba(242, 213, 154, 0.25),
+    0 0 40px rgba(194, 53, 72, 0.35),
+    0 24px 64px rgba(0, 0, 0, 0.65);
+  animation: subPop 520ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+.submundo__celebrate.is-epic .submundo__celebrate-card {
+  animation:
+    subPop 520ms cubic-bezier(0.22, 0.8, 0.32, 1) both,
+    soberanoCardGlow 2.4s ease-in-out 520ms infinite;
+}
+
+.submundo__celebrate-card.is-shaking {
+  animation-name: soberanoCardShake, soberanoCardGlow;
+  animation-duration: 620ms, 2.4s;
+  animation-timing-function: cubic-bezier(0.36, 0.07, 0.19, 0.97), ease-in-out;
+  animation-iteration-count: 1, infinite;
+  animation-fill-mode: both, none;
+}
+
+.submundo__celebrate-halo {
+  position: absolute;
+  left: 50%;
+  top: -18%;
+  width: 14rem;
+  height: 14rem;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(242, 213, 154, 0.35), transparent 62%),
+    conic-gradient(from 90deg, transparent, rgba(194, 53, 72, 0.45), transparent 40%, rgba(242, 213, 154, 0.4), transparent 70%);
+  filter: blur(2px);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: soberanoHaloSpin 8s linear infinite;
+}
+
+.submundo__celebrate-kicker {
+  position: relative;
+  margin: 0 0 0.35rem;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #c23548;
+  text-shadow: 0 0 12px rgba(194, 53, 72, 0.65);
+}
+
+.submundo__celebrate-crown {
+  position: relative;
+  margin: 0.35rem 0 0.15rem;
+  font-size: 2.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 16px rgba(242, 213, 154, 0.65)) drop-shadow(0 8px 18px rgba(194, 53, 72, 0.45));
+  animation: soberanoCrownPulse 1.8s ease-in-out infinite;
+}
+
+.submundo__celebrate-title {
+  position: relative;
+  margin: 0.25rem 0 0.65rem;
+  background: linear-gradient(90deg, #8a1f2e, #f2d59a 28%, #fff8df 50%, #cfa759 72%, #c23548);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: soberanoTitleShimmer 2.8s linear infinite;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.55));
+}
+
+.submundo__celebrate-xp {
+  position: relative;
+  display: inline-block;
+  margin: 0 0 0.85rem;
+  padding: 0.35rem 0.85rem;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #12080c;
+  background: linear-gradient(180deg, #fff0c2, #cfa759 55%, #8a5a22);
+  border: 1px solid #fff0c2;
+  box-shadow:
+    0 0 18px rgba(242, 213, 154, 0.55),
+    0 0 28px rgba(194, 53, 72, 0.35);
+  animation: soberanoXpPop 700ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+.submundo__celebrate-xp[hidden] {
+  display: none !important;
+}
+
+.submundo__celebrate-btn {
+  position: relative;
+  margin-top: 0.35rem;
+  box-shadow: 0 0 18px rgba(194, 53, 72, 0.25);
+}
+
+.submundo__celebrate-btn:hover,
+.submundo__celebrate-btn:focus-visible {
+  box-shadow: 0 0 26px rgba(242, 213, 154, 0.45), 0 0 32px rgba(194, 53, 72, 0.35);
+}
+
+/* Tremor de tela (html) */
+html.is-soberano-quake--hard {
+  animation: soberanoQuakeHard 700ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+html.is-soberano-quake--soft {
+  animation: soberanoQuakeSoft 480ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+body.is-soberano-celebrate .submundo__shell {
+  filter: blur(1.5px) brightness(0.55);
+  transition: filter 280ms ease;
+}
+
+@keyframes soberanoFlash {
+  0% { opacity: 0.95; }
+  35% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+@keyframes soberanoRays {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes soberanoRaysIn {
+  from { opacity: 0; }
+  to { opacity: 0.55; }
+}
+
+@keyframes soberanoShock {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(0.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(3.4);
+  }
+}
+
+@keyframes soberanoEmber {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0);
+  }
+}
+
+@keyframes soberanoHaloSpin {
+  to { transform: translateX(-50%) rotate(360deg); }
+}
+
+@keyframes soberanoCrownPulse {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.08); }
+}
+
+@keyframes soberanoTitleShimmer {
+  to { background-position: 220% 50%; }
+}
+
+@keyframes soberanoXpPop {
+  0% { opacity: 0; transform: translateY(10px) scale(0.7); }
+  55% { opacity: 1; transform: translateY(-4px) scale(1.08); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes soberanoCardGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 1px rgba(242, 213, 154, 0.25),
+      0 0 36px rgba(194, 53, 72, 0.32),
+      0 24px 64px rgba(0, 0, 0, 0.65);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 240, 194, 0.45),
+      0 0 56px rgba(194, 53, 72, 0.55),
+      0 0 40px rgba(242, 213, 154, 0.28),
+      0 24px 64px rgba(0, 0, 0, 0.65);
+  }
+}
+
+@keyframes soberanoCardShake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-10px, 3px) rotate(-0.8deg); }
+  20% { transform: translate(12px, -4px) rotate(0.9deg); }
+  30% { transform: translate(-14px, 2px) rotate(-1deg); }
+  40% { transform: translate(11px, 4px) rotate(0.7deg); }
+  50% { transform: translate(-8px, -3px) rotate(-0.5deg); }
+  60% { transform: translate(7px, 2px) rotate(0.4deg); }
+  70% { transform: translate(-5px, 1px) rotate(-0.25deg); }
+  80% { transform: translate(4px, -1px) rotate(0.15deg); }
+  90% { transform: translate(-2px, 0) rotate(0deg); }
+}
+
+@keyframes soberanoQuakeHard {
+  0%, 100% { transform: translate(0, 0); }
+  8% { transform: translate(-14px, 6px); }
+  16% { transform: translate(16px, -8px); }
+  24% { transform: translate(-18px, 4px); }
+  32% { transform: translate(14px, 8px); }
+  40% { transform: translate(-12px, -5px); }
+  48% { transform: translate(10px, 4px); }
+  56% { transform: translate(-8px, -3px); }
+  64% { transform: translate(6px, 2px); }
+  72% { transform: translate(-4px, 1px); }
+  80% { transform: translate(3px, -1px); }
+  90% { transform: translate(-2px, 0); }
+}
+
+@keyframes soberanoQuakeSoft {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-6px, 2px); }
+  40% { transform: translate(7px, -3px); }
+  60% { transform: translate(-4px, 2px); }
+  80% { transform: translate(3px, -1px); }
 }
 
 @keyframes subPop {
-  from { transform: scale(0.92); opacity: 0; }
+  from { transform: scale(0.86); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .submundo__fog,
-  .submundo__celebrate-card {
-    animation: none;
+  .submundo__celebrate-card,
+  .submundo__celebrate.is-epic .submundo__celebrate-card,
+  .submundo__celebrate-card.is-shaking,
+  .submundo__celebrate.is-epic .submundo__celebrate-flash,
+  .submundo__celebrate.is-epic .submundo__celebrate-rays,
+  .submundo__celebrate.is-epic .submundo__celebrate-shock,
+  .submundo__ember,
+  .submundo__celebrate-halo,
+  .submundo__celebrate-crown,
+  .submundo__celebrate-title,
+  .submundo__celebrate-xp,
+  html.is-soberano-quake--hard,
+  html.is-soberano-quake--soft {
+    animation: none !important;
+  }
+
+  .submundo__celebrate.is-open {
+    opacity: 1;
+  }
+
+  .submundo__celebrate-rays,
+  .submundo__celebrate-flash,
+  .submundo__celebrate-shock {
+    opacity: 0;
+  }
+
+  body.is-soberano-celebrate .submundo__shell {
+    filter: none;
   }
 }

@@ -1,0 +1,4 @@
+# User-agent: *
+# O indexador não desce aos portões. Mortais curiosos, às vezes sim.
+User-agent: *
+Disallow: /submundo/

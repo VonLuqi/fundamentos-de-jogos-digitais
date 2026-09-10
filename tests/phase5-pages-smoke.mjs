@@ -90,10 +90,62 @@ assert(apiJs.includes('aulas:'), 'ROUTES.aulas deve existir em api.js');
 assert(apiJs.includes('conquistas:'), 'ROUTES.conquistas deve existir em api.js');
 assert(apiJs.includes("id: 'aula2'"), 'MODULES deve incluir aula2');
 assert(apiJs.includes("id: 'aula3'"), 'MODULES deve incluir aula3');
+assert(
+  apiJs.includes('O Glossário do Desenvolvedor e o Player na Tela'),
+  'MODULES.aula2 deve usar o título curricular novo'
+);
+assert(
+  !apiJs.includes('Loops e Ritmo'),
+  'MODULES não deve mais usar o título legado Loops e Ritmo'
+);
+assert(
+  apiJs.includes('Core Loop, Grokking, Assets'),
+  'MODULES.aula2 deve usar o subtitle do glossário/Player'
+);
 
 const progressJs = read('api/progress.js');
 assert(progressJs.includes('published'), 'progress.js deve definir gate published');
 assert(progressJs.includes('aula2:'), 'LESSON_CATALOG deve ter stub aula2');
+assert(
+  progressJs.includes('O Glossário do Desenvolvedor e o Player na Tela'),
+  'LESSON_CATALOG.aula2 deve usar o título curricular novo'
+);
+assert(
+  !progressJs.includes('Aula 02 — Loops e Ritmo'),
+  'LESSON_CATALOG não deve mais usar o título legado Loops e Ritmo'
+);
+assert(
+  progressJs.includes("id: 'aula2_concluida'"),
+  'ACHIEVEMENT_RULES deve incluir aula2_concluida'
+);
+assert(
+  /aula2:\s*\{\s*published:\s*false/.test(progressJs.replace(/\s+/g, ' ')),
+  'LESSON_GATES.aula2 deve permanecer published: false por default'
+);
+
+const aula2Html = read('pages/aula2.html');
+assert(
+  aula2Html.includes('O Glossário do Desenvolvedor') || aula2Html.includes('GLOSSÁRIO DO DESENVOLVEDOR'),
+  'aula2.html deve usar o título curricular novo'
+);
+assert(!aula2Html.includes('game-canvas'), 'aula2.html não deve mais incluir o canvas do Tambor');
+assert(!aula2Html.includes('Tambor do Estige'), 'aula2.html não deve mais mencionar Tambor do Estige');
+assert(aula2Html.includes('discovery-overlay'), 'aula2.html precisa do discovery overlay');
+assert(aula2Html.includes('id="config-notes"'), 'aula2.html precisa do campo de anotações');
+assert(aula2Html.includes('id="gdd-text"'), 'aula2.html precisa do campo de síntese');
+assert(aula2Html.includes('tab-slides'), 'aula2.html precisa da aba Slides');
+assert(
+  fs.existsSync(path.join(root, 'assets/docs/aulas/aula02_glossario_player_slides.pptx')),
+  'PPTX da aula2 deve existir em assets/docs/aulas/'
+);
+assert(
+  fs.existsSync(path.join(root, 'assets/docs/aulas/aula02_glossario_player_slides.pdf')),
+  'PDF da aula2 deve existir em assets/docs/aulas/'
+);
+assert(
+  read('js/aula2.js').includes("aula02_glossario_player_slides.pptx"),
+  'aula2.js deve apontar PPTX_FILE para o deck novo'
+);
 
 const appShell = read('js/app-shell.js');
 assert(

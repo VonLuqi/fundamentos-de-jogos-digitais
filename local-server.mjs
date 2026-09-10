@@ -50,6 +50,7 @@ const mimeTypes = {
   '.jfif': 'image/jpeg',
   '.gif': 'image/gif',
   '.wav': 'audio/wav',
+  '.mp3': 'audio/mpeg',
   '.webp': 'image/webp',
 };
 

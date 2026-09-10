@@ -58,7 +58,38 @@ shellPages.forEach((rel) => {
     assert(soulsLink[0].includes('data-admin-only'), `${rel}: Almas precisa de data-admin-only`);
     assert(/\shidden([\s>])/.test(soulsLink[0]), `${rel}: Almas precisa do atributo hidden no HTML`);
   }
+
+  const minigameLink = html.match(/<a[^>]*data-nav-item="minigame"[^>]*>[\s\S]*?<\/a>/);
+  assert(Boolean(minigameLink), `${rel}: precisa do link data-nav-item=minigame`);
+  if (minigameLink) {
+    assert(minigameLink[0].includes('data-feature-gate="arcane_survivors"'), `${rel}: minigame precisa de data-feature-gate`);
+    assert(minigameLink[0].includes('is-locked'), `${rel}: minigame começa com is-locked no HTML`);
+    assert(/aria-disabled="true"/.test(minigameLink[0]), `${rel}: minigame começa aria-disabled=true`);
+  }
 });
+
+assert(
+  appShellCss.includes('.app-shell__link.is-locked'),
+  'app-shell.css deve estilizar links de feature selados (.is-locked)'
+);
+assert(
+  appShellJs.includes('applyNavFeatureGates')
+    && appShellJs.includes('data-feature-gate')
+    && appShellJs.includes('ARCANE_SURVIVORS_FEATURE_ID'),
+  'app-shell.js deve aplicar selo de feature no nav'
+);
+assert(
+  apiJs.includes('featureGates')
+    && apiJs.includes('setFeatureGate')
+    && apiJs.includes('ARCANE_SURVIVORS_FEATURE_ID'),
+  'api.js deve expor fetch/set do gate Arcane Survivors'
+);
+assert(
+  dashboardJs.includes('btn-toggle-minigame')
+    && dashboardJs.includes('setFeatureGate'),
+  'dashboard.js deve permitir admin destravar/travar o minigame'
+);
+notes.push('Arcane Survivors: nav selado + toggle admin ok (smoke estático)');
 
 assert(
   appShellCss.includes('display: none !important')
