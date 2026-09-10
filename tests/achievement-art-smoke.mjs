@@ -151,8 +151,16 @@ assert(
   'JS respeita prefers-reduced-motion'
 );
 assert(
-  read('js/companheiro.js').includes('applyRainbowVfx: false'),
-  'Espelho sem WebGL rainbow (Fase 3)'
+  read('js/companheiro.js').includes('applyRainbowVfx: true'),
+  'Espelho aplica glitch WebGL no arco-íris desbloqueado'
+);
+assert(
+  read('js/companheiro.js').includes("setRainbowVfxSuspended(true, 'relic-modal')"),
+  'Espelho suspende o glitch com o modal de relíquia aberto'
+);
+assert(
+  !read('css/companheiros.css').includes("rarity='rainbow'].is-unlocked .achievement-slot__face"),
+  'Espelho não apaga o juice CSS do arco-íris'
 );
 const dashCss = read('css/dashboard.css');
 assert(dashCss.includes('overflow: hidden'), 'dashboard usa overflow hidden');
@@ -285,8 +293,8 @@ assert(
   'álbum desliga sparks em reduced-motion (Fase 3)'
 );
 assert(
-  read('css/companheiros.css').includes('content: none'),
-  'Espelho desliga halo/sparks rainbow (Fase 3)'
+  !read('css/companheiros.css').includes('content: none'),
+  'Espelho não desliga halo/sparks rainbow'
 );
 assert(
   read('css/aula.css').includes('discovery-card__item-rarity'),

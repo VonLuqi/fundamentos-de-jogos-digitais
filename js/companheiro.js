@@ -28,6 +28,7 @@ import {
   getAlbumSlotModel,
   rarityLabelForAchievement,
   renderAchievementsList,
+  setRainbowVfxSuspended,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
 } from './achievements-ui.js';
@@ -274,6 +275,7 @@ async function openRelicModal(achievement, model = null) {
   modal.hidden = false;
   modal.classList.add('is-open');
   document.body.classList.add('is-relic-modal-open');
+  setRainbowVfxSuspended(true, 'relic-modal');
   setShellInert(true);
   closeBtn?.focus();
 }
@@ -285,6 +287,7 @@ function closeRelicModal({ restoreHash = true } = {}) {
   modal.classList.remove('is-open');
   modal.hidden = true;
   document.body.classList.remove('is-relic-modal-open');
+  setRainbowVfxSuspended(false, 'relic-modal');
   setShellInert(false);
 
   if (restoreHash && window.location.hash) {
@@ -334,8 +337,7 @@ function renderAlbum() {
     mode: 'album',
     visitorView: true,
     viewerUser,
-    // VFX WebGL estoura o grid do álbum no Espelho; usa só o fallback CSS.
-    applyRainbowVfx: false,
+    applyRainbowVfx: true,
     emptyMessage: 'Nenhuma relíquia neste Espelho ainda.',
     onSlotClick: (achievement, _state, slotEl) => {
       lastFocusedSlot = slotEl;

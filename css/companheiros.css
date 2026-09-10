@@ -574,26 +574,6 @@ body[data-mirror-mode='turma'] .relic-modal {
   box-sizing: border-box;
 }
 
-.mirror-shell__content .achievement-slot[data-rarity='rainbow'].is-unlocked .achievement-slot__face,
-.mirror-shell__content .achievement-slot[data-rarity='rainbow'].is-mystery--styled .achievement-slot__face {
-  /* Brilho CSS no lugar do VFX — preserva bevel da moldura (Fase 2) */
-  box-shadow:
-    inset 0 1px 0 var(--frame-inset-hi, rgba(255, 255, 255, 0.28)),
-    inset 0 -3px 6px var(--frame-inset-lo, rgba(0, 0, 0, 0.55)),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.35),
-    0 0 12px rgba(255, 102, 163, 0.35),
-    0 0 22px rgba(124, 222, 255, 0.28),
-    0 0 28px rgba(255, 210, 102, 0.22);
-  /* Sem halo rotativo / sparks no Espelho — evita presença “viva” + risco de overflow no grid */
-  animation: none;
-}
-
-.mirror-shell__content .achievement-slot.is-unlocked[data-rarity='rainbow'] .achievement-slot__face::before,
-.mirror-shell__content .achievement-slot.is-unlocked[data-rarity='rainbow'] .achievement-slot__art-stage::before {
-  content: none;
-  animation: none;
-}
-
 /* Segredo conhecido + bloqueado: evita overflow do nome longo no grid do Espelho */
 .mirror-shell__content .achievement-slot.is-secret-known .achievement-slot__name {
   max-width: 100%;
