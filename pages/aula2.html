@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 2 — Loops e Ritmo: sistemas cíclicos, feedback e o miniprojeto Tambor do Estige." />
+  <meta name="description" content="Aula 02 — O Glossário do Desenvolvedor e o Player na Tela: Core Loop, Grokking, Assets, cenas, nós e Input Map na Godot 4." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 2 — Loops e Ritmo | Fundamentos de Jogos Digitais</title>
+  <title>Aula 02 — O Glossário do Desenvolvedor e o Player na Tela | Fundamentos de Jogos Digitais</title>
 
-  <!-- Fonts: Cinzel (títulos, romana/serifada clássica) + Crimson Text (leitura confortável) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -20,9 +19,18 @@
   <link rel="stylesheet" href="../css/aula.css" />
 </head>
 <body class="app-shell-page" data-route="aula2" data-role-scope="protected">
-
-  <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
   <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
 
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
@@ -40,7 +48,8 @@
         <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
         <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
         <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
-        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+                <a class="app-shell__link is-locked" data-nav-item="minigame" data-feature-gate="arcane_survivors" href="./minigame.html" aria-disabled="true">Arcane Survivors</a>
+<a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
       </nav>
 
       <div class="app-shell__footer">
@@ -65,8 +74,8 @@
           </button>
 
           <div class="app-shell__titles">
-            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="lesson-page-title">AULA 02: LOOPS E RITMO <span class="accent">(SISTEMAS CÍCLICOS)</span></h1>
+            <p class="app-shell__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 02: O GLOSSÁRIO DO DESENVOLVEDOR E O <span class="accent">PLAYER NA TELA</span></h1>
           </div>
         </div>
 
@@ -83,142 +92,215 @@
 
       <div class="app-shell__content lesson-shell__content">
         <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
-          <button
-            class="tab is-active"
-            type="button"
-            id="tab-theory"
-            data-tab="theory"
-            role="tab"
-            aria-selected="true"
-            aria-controls="theory"
-          >
-            I. Teoria e Manuais
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
           </button>
-          <button
-            class="tab"
-            type="button"
-            id="tab-simulation"
-            data-tab="simulation"
-            role="tab"
-            aria-selected="false"
-            aria-controls="simulation"
-          >
-            II. Simulação Interativa
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina do Player
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
           </button>
         </nav>
 
         <main class="lesson-main" aria-labelledby="lesson-page-title">
-
-    <!-- ========== ABA I: TEORIA E MANUAIS ========== -->
-    <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-theory">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
       <article class="hades-frame lesson-content">
-
-        <h2 class="lesson-title">O Jogo Como um Ciclo Vivo</h2>
+        <p class="lesson-chip">Módulo 1 · Aulas 1 a 5 · 10h</p>
+        <h2 class="lesson-title">Termos específicos da área de jogos</h2>
         <p>
-          Nenhum jogo é uma linha reta: ele é uma sucessão de <strong>loops</strong> — o
-          <em>core loop</em> (a ação repetida a cada poucos segundos), o <em>loop de sessão</em>
-          (o que o jogador faz do início ao fim de uma partida) e o <em>loop de progressão</em>
-          (o que muda entre uma sessão e a próxima). Entender em qual camada um problema de design
-          vive é o primeiro passo para resolvê-lo sem quebrar as outras duas.
+          Depois de ler a engine como laboratório de regras, o próximo passo é falar a língua do ofício.
+          Nesta aula, três termos ganham definição operacional — e depois viram estrutura na cena do Jogador.
         </p>
 
-        <h2 class="lesson-title">Ritmo: a Respiração da Experiência</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Core Loop</h3>
+            <p>O ciclo básico que o jogador repete: <strong>andar → coletar → avançar</strong> (ou o equivalente do seu jogo).</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Grokking</h3>
+            <p>O momento em que os controles saem da cabeça e entram na <strong>memória muscular</strong> — o jogador para de “pensar as teclas”.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Assets</h3>
+            <p>As <strong>imagens, sons e demais recursos</strong> do jogo. Na Godot, vivem no FileSystem e são referenciados por nós.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Por que o glossário importa?</h2>
         <p>
-          Ritmo é a alternância deliberada entre tensão e alívio dentro de um loop. Um jogo que
-          mantém o jogador no pico de intensidade o tempo todo cansa; um jogo que nunca sobe além
-          do neutro entedia. O designer manipula ritmo controlando a <strong>cadência dos eventos</strong>
-          — quando a ameaça aparece, quanto tempo dura o respiro, e o quão previsível é o próximo
-          batimento do sistema.
+          Sem nomes compartilhados, o time discute “a parte que o personagem anda” em vez de “o Core Loop”.
+          Glossário bom encurta conversa e deixa a prática na engine mais consciente: cada nó e cada tecla
+          passa a responder a um conceito, não só a um clique no menu.
         </p>
 
-        <h3 class="lesson-subtitle">Feedback — O Eco de Cada Ação</h3>
+        <div class="quote-block">
+          <p>Glossário nomeia o ofício; a cena do Player é o primeiro lugar onde esses termos viram estrutura.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
         <p>
-          Todo loop de qualidade devolve ao jogador uma resposta sensorial imediata: som, cor,
-          vibração, número subindo na tela. O feedback confirma que a ação foi recebida pelo
-          sistema — e é o que transforma "eu apertei um botão" em "eu senti o botão responder".
+          Montar do zero a primeira cena do Jogador na Godot 4: hierarquia de nós, Input Map e um script mínimo
+          para sentir o Grokking no Play — sem câmera follow nem polish avançado.
         </p>
+
         <ul class="lesson-list">
-          <li>Feedback imediato (ex.: flash de acerto, vibração do controle)</li>
-          <li>Feedback de progresso (ex.: barra de XP enchendo, contador subindo)</li>
-          <li>Feedback de falha (ex.: screen shake, tela vermelha, som dissonante)</li>
+          <li>Definir Core Loop, Grokking e Assets de forma operacional.</li>
+          <li>Entender cenas e nós como “receita de bolo” reutilizável.</li>
+          <li>Estruturar o Player e mapear as ações <code>ir_*</code> até o movimento na tela.</li>
         </ul>
-
-        <h3 class="lesson-subtitle">Janela de Ritmo (Timing Window)</h3>
-        <p>
-          Muitos sistemas de ritmo não exigem precisão absoluta — eles aceitam uma
-          <strong>janela de tolerância</strong> ao redor do instante ideal. Quanto mais estreita a
-          janela, maior a tensão e a sensação de maestria ao acertar; quanto mais larga, mais
-          acessível e recompensador o loop se torna para iniciantes.
-        </p>
-
-        <!-- Placeholder de Imagem -->
-        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Anatomia de um Core Loop com fases de tensão e alívio">
-          🖼️ [ Inserir Imagem Aqui: Anatomia de um Core Loop (Tensão → Ação → Alívio → Repetição) ]
-        </div>
-
-        <h2 class="lesson-title">O Desafio: Tambor do Estige</h2>
-        <p>
-          Para sentir o loop na pele, propomos um exercício de precisão rítmica: um
-          <strong>marcador percorre uma trilha circular</strong> em looping constante, e o jogador
-          deve <strong>confirmar o ritmo</strong> exatamente quando o marcador cruza a zona-alvo.
-          Cada acerto reduz a janela de tolerância da rodada seguinte — o loop fica mais difícil a
-          cada volta, exigindo leitura de padrão em vez de reação pura.
-        </p>
-
-        <!-- Placeholder de Imagem -->
-        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Trilha circular do Tambor do Estige com zona-alvo destacada">
-          🖼️ [ Inserir Imagem Aqui: Trilha Circular e Zona-Alvo do Tambor do Estige ]
-        </div>
-
       </article>
     </section>
 
-    <!-- ========== ABA II: SIMULAÇÃO INTERATIVA ========== -->
-    <section id="simulation" class="tab-panel" role="tabpanel" aria-labelledby="tab-simulation">
-      <div class="hades-frame simulation-panel">
-
-        <p class="simulation-instructions">
-          <strong>Clique na tela</strong> ou pressione <strong>Espaço</strong> exatamente quando o
-          marcador cruzar a <strong>zona-alvo dourada</strong> na trilha circular. Acerte
-          <strong>5 batidas seguidas</strong> para completar o desafio — cada acerto encolhe a
-          janela de tolerância da próxima volta. Errar reinicia a sequência de acertos, mas não o
-          desafio inteiro.
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · Player na Godot 4</p>
+        <h2 class="lesson-title">Prática na Godot Engine</h2>
+        <p>
+          Na Godot, <strong>tudo é um nó</strong>. Uma <strong>cena</strong> é a receita que agrupa esses nós —
+          como uma receita de bolo que você pode reutilizar em outros lugares do projeto.
         </p>
 
-        <!-- Moldura dourada do canvas -->
-        <div class="canvas-frame">
-          <canvas id="game-canvas" width="600" height="400" aria-label="Simulação: Tambor do Estige, marcador circular cruzando a zona-alvo no ritmo correto"></canvas>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Cenas</h3>
+            <p>Arquivos <code>.tscn</code> que descrevem uma hierarquia pronta para instanciar.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Nós</h3>
+            <p>Peças com função: corpo, imagem, colisão, script. Filhos herdam a transform da raiz.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Input Map</h3>
+            <p>Nomes internos de ações (<code>ir_cima</code>…) ligados a teclas no Project Settings.</p>
+          </article>
         </div>
 
-        <p class="simulation-legend">
-          <span class="legend-dot legend-dot--goal" aria-hidden="true"></span> Zona-Alvo (confirme o ritmo aqui)
-          &nbsp;&nbsp;&nbsp;
-          <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Marcador (percorre a trilha em loop)
-        </p>
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>Baixe o guia em Word com o passo a passo, o checklist do artefato e o snippet sugerido de <code>player.gd</code>.</p>
+          <a class="lesson-cta" href="../assets/docs/aulas/aula02-player/Material-Player-Aula02.docx" download>
+            Baixar material do Player (Word)
+          </a>
+        </div>
 
-        <!-- Revelado apenas quando o desafio é concluído com sucesso -->
-        <div class="reward-codes" id="reward-codes" hidden>
-          <h3 class="lesson-subtitle">Código da Oferenda Desbloqueado</h3>
-          <p>
-            Leve este código ao Altar do Salão dos Heróis para receber XP e conquista:
+        <h3 class="lesson-subtitle">1. Cenas e nós</h3>
+        <ol class="lesson-list">
+          <li>Abra (ou crie) o projeto Godot 4 da turma.</li>
+          <li>Lembre: Scene Tree = hierarquia; FileSystem = assets; Inspector = propriedades do nó selecionado.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">2. Cena do Jogador do zero</h3>
+        <ol class="lesson-list">
+          <li>Crie uma nova cena com raiz <strong>CharacterBody2D</strong> (renomeie para <code>Player</code>).</li>
+          <li>Adicione um filho <strong>Sprite2D</strong> e atribua uma textura (ícone/placeholder da Godot serve).</li>
+          <li>Adicione um filho <strong>CollisionShape2D</strong> e escolha um shape (ex.: <code>RectangleShape2D</code> ou <code>CapsuleShape2D</code>) alinhado ao sprite.</li>
+          <li>Salve a cena como <code>player.tscn</code> (ou nome equivalente combinado com a turma).</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">3. Input Map</h3>
+        <ol class="lesson-list">
+          <li>Vá em <strong>Project → Project Settings → Input Map</strong>.</li>
+          <li>Crie as ações: <code>ir_cima</code>, <code>ir_baixo</code>, <code>ir_esquerda</code>, <code>ir_direita</code>.</li>
+          <li>Associe <strong>W A S D</strong> ou as <strong>setas</strong> do teclado a cada ação.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">4. Script mínimo</h3>
+        <ol class="lesson-list">
+          <li>Anexe um script <code>player.gd</code> ao <strong>CharacterBody2D</strong>.</li>
+          <li>Leia as ações <code>ir_*</code> e chame <code>move_and_slide()</code> (sem câmera follow nesta aula).</li>
+          <li>Pressione <strong>Play</strong> e confirme que o personagem se move — o início do Grokking.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">Checklist do artefato</h3>
+        <ul class="lesson-list">
+          <li>Cena do Player salva com hierarquia <code>CharacterBody2D</code> → <code>Sprite2D</code> + <code>CollisionShape2D</code>.</li>
+          <li>Input Map com as quatro ações <code>ir_*</code> mapeadas.</li>
+          <li>Script mínimo rodando no Play com movimento nas quatro direções.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Andar na tela é o primeiro passo do Core Loop; o Input Map e o script são o caminho até o Grokking.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 2">
+          <p><strong>Pistas secretas do Submundo:</strong> defina o glossário com as próprias palavras, descreva a hierarquia do Player como quem ensina a receita, e registre as ações do Input Map. O altar reconhece quem documenta com precisão.</p>
+        </section>
+
+        <section class="config-notes-box" aria-label="Anotações da prática">
+          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+          <p>Registre glossário, hierarquia, Input Map e o que observou no movimento. Esse conteúdo será enviado junto com o registro da aula.</p>
+          <textarea
+            id="config-notes"
+            class="config-notes-text"
+            rows="12"
+            placeholder="Glossário&#10;Core Loop: ...&#10;Grokking: ...&#10;Assets: ...&#10;&#10;Hierarquia da cena&#10;Raiz: CharacterBody2D&#10;Filhos: Sprite2D, CollisionShape2D&#10;&#10;Input Map&#10;ir_cima / ir_baixo / ir_esquerda / ir_direita → teclas ...&#10;&#10;Script / movimento&#10;Observações ao apertar Play: ..."
+          ></textarea>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
+            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
+            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <h3 class="lesson-subtitle">Artefato gerado</h3>
+        <p>Ao final, o aluno deve ter a cena do Player funcionando na Godot e uma síntese que amarra o glossário à estrutura montada.</p>
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            Nesta aula, o Core Loop começa no andar do Player; o Grokking aparece quando as ações ir_* saem da cabeça e entram nas mãos; os Assets alimentam o Sprite2D enquanto a cena CharacterBody2D com colisão funciona como receita reutilizável do herói.
           </p>
-          <p><strong id="reward-code-value">Carregando...</strong></p>
-          <p id="reward-code-meta"></p>
+        </section>
+        <textarea
+          id="gdd-text"
+          class="gdd-text"
+          rows="8"
+          placeholder="Escreva a síntese final amarrando glossário e Player.&#10;Ex.: como Core Loop, Grokking e Assets aparecem na cena e no Input Map que você montou."
+        ></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
         </div>
-
-      </div>
+      </article>
     </section>
 
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 02</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre o glossário do desenvolvedor e o Player na Godot 4.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 02" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 02" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
         </main>
 
         <footer class="lesson-footer">
-          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 2 de N</p>
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 02</p>
         </footer>
       </div>
     </div>
   </div>
 
-  <!-- Script da página: tabs + minigame de ritmo em Canvas API nativo (sem dependências externas) -->
   <script type="module" src="../js/aula2.js"></script>
 </body>
 </html>

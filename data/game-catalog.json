@@ -68,9 +68,63 @@
       "meta": { "family": "aula1", "kind": "content", "volatile": true }
     },
     {
+      "id": "aula2_concluida",
+      "name": "Primeiro Passo do Herói",
+      "desc": "Estruturou o Jogador na engine e aportou o rito da segunda trilha.",
+      "icon": "🥾",
+      "art": "aula2_concluida.webp",
+      "hidden": false,
+      "difficulty": "trivial",
+      "rarity": "stone",
+      "xp": 0
+    },
+    {
+      "id": "segredo_lexico_do_desenvolvedor",
+      "name": "Léxico do Desenvolvedor",
+      "desc": "Nomeou o ofício: ciclo, domínio do controle e matéria do jogo.",
+      "icon": "📖",
+      "art": "segredo_lexico_do_desenvolvedor.webp",
+      "hidden": true,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 15,
+      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_arquiteto_de_cenas",
+      "name": "Arquiteto de Cenas",
+      "desc": "Descreveu a receita do Player — corpo, imagem e colisão.",
+      "icon": "🏛️",
+      "art": "segredo_arquiteto_de_cenas.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 15,
+      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_cartografo_do_input",
+      "name": "Cartógrafo do Input",
+      "desc": "Cartografou o mapa de ações ir_* até as teclas.",
+      "icon": "⌨️",
+      "art": "segredo_cartografo_do_input.webp",
+      "hidden": true,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 25,
+      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+    },
+    {
       "id": "soberano_do_submundo",
       "name": "Soberano do Submundo",
       "desc": "Superou as sombras do Tártaro, decifrou os ecos de Asfódelos, interceptou o julgamento dos Elísios e pagou o tributo sagrado no Rio Estige. Mestre absoluto da inspeção web, esteganografia e criptografia.",
+      "veiledDesc": "A coroa do Submundo não se pede ao altar. Desce quem observa o que se curva nas relíquias à vista de todos — e ousa deixar a raiz do mapa. No abismo, a sombra esconde a luz, o eco fala sem voz, o tribunal nega o que carrega, e o barqueiro só aceita o juramento que a alma calcula sozinha.",
+      "veiledScramble": {
+        "scrambleMs": 180000,
+        "readableMs": 45000,
+        "tickMs": 150,
+        "startWith": "readable"
+      },
       "icon": "👑",
       "art": "soberano_do_submundo.webp",
       "hidden": true,

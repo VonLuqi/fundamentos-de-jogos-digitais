@@ -909,6 +909,7 @@ img.discovery-card__item-art.has-art {
 
 .gdd-text {
   width: 100%;
+  max-width: 100%;
   margin-top: 0.7rem;
   padding: 0.85rem;
   border: 1px solid var(--hades-gold-dark);
@@ -916,6 +917,8 @@ img.discovery-card__item-art.has-art {
   color: var(--hades-text);
   font-family: var(--font-body);
   font-size: 1.02rem;
+  line-height: 1.5;
+  resize: vertical;
 }
 
 .config-notes-box {
@@ -931,6 +934,7 @@ img.discovery-card__item-art.has-art {
 
 .config-notes-text {
   width: 100%;
+  max-width: 100%;
   margin-top: 0.45rem;
   padding: 0.85rem;
   border: 1px solid var(--hades-gold-dark);
@@ -939,6 +943,7 @@ img.discovery-card__item-art.has-art {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.5;
+  resize: vertical;
 }
 
 .gdd-example {
@@ -1162,12 +1167,32 @@ img.discovery-card__item-art.has-art {
   .tab {
     width: 100%;
     min-width: 0;
+    min-height: 2.75rem;
     font-size: 0.68rem;
     letter-spacing: 0.04em;
     line-height: 1.2;
     padding: 0.65rem 0.5rem;
     white-space: normal;
     text-wrap: balance;
+  }
+
+  .gdd-text,
+  .config-notes-text {
+    /* 16px evita zoom automático do iOS ao focar o campo */
+    font-size: 16px;
+    min-height: 8.5rem;
+  }
+
+  .config-notes-text {
+    min-height: 12rem;
+  }
+
+  .config-notes-box {
+    padding: 0.85rem;
+  }
+
+  .lesson-download-box {
+    padding: 0.9rem;
   }
 
   .lesson-main {
@@ -1272,6 +1297,16 @@ img.discovery-card__item-art.has-art {
   .tab {
     font-size: 0.62rem;
     padding: 0.6rem 0.4rem;
+    min-height: 2.85rem;
+  }
+
+  .gdd-text,
+  .config-notes-text {
+    padding: 0.75rem;
+  }
+
+  .gdd-actions {
+    gap: 0.55rem;
   }
 
   .lesson-header__title {
@@ -1350,6 +1385,41 @@ img.discovery-card__item-art.has-art {
     opacity: 0 !important;
     transform: translateY(0) scale(1) !important;
   }
+}
+
+/* Espelha o media query quando JS aplica a classe (lesson-discovery.js). */
+body.is-reduced-motion .discovery-flash,
+body.is-reduced-motion .discovery-flash.is-active,
+body.is-reduced-motion.is-discovery-pulse .discovery-flash.is-active {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+body.is-reduced-motion .discovery-secret-burst.is-active {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1) !important;
+}
+
+body.is-reduced-motion .discovery-overlay.is-active .discovery-card,
+body.is-reduced-motion .discovery-overlay.is-leaving .discovery-card {
+  animation: none !important;
+}
+
+body.is-reduced-motion .discovery-overlay.is-active .discovery-card {
+  opacity: 1 !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+body.is-reduced-motion .discovery-overlay.is-leaving .discovery-card {
+  opacity: 0 !important;
+  transform: translateY(0) scale(1) !important;
+}
+
+body.is-reduced-motion.is-discovery-pulse .discovery-card__item,
+body.is-reduced-motion.is-discovery-pulse .discovery-secret-burst {
+  animation: none !important;
+  filter: none !important;
 }
 
 :focus-visible {

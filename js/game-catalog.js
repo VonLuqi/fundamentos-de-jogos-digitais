@@ -67,8 +67,18 @@ export function normalizeAchievementRarity(rarity, difficulty = null) {
   return rarityFromDifficulty(difficulty);
 }
 
+function normalizeVeiledScramble(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const scrambleMs = Math.max(60_000, Number(raw.scrambleMs) || 180_000);
+  const readableMs = Math.max(15_000, Number(raw.readableMs) || 45_000);
+  const tickMs = Math.max(80, Math.min(400, Number(raw.tickMs) || 150));
+  const startWith = raw.startWith === 'scramble' ? 'scramble' : 'readable';
+  return { scrambleMs, readableMs, tickMs, startWith };
+}
+
 function normalizeAchievement(raw) {
   const difficulty = raw.difficulty || ACHIEVEMENT_DIFFICULTY.TRIVIAL;
+  const veiledDesc = typeof raw.veiledDesc === 'string' ? raw.veiledDesc.trim() : '';
   return {
     ...raw,
     xp: Number(raw.xp) || 0,
@@ -76,6 +86,8 @@ function normalizeAchievement(raw) {
     difficulty,
     rarity: normalizeAchievementRarity(raw.rarity, difficulty),
     trailhead: raw.trailhead && typeof raw.trailhead === 'object' ? raw.trailhead : null,
+    veiledDesc: veiledDesc || null,
+    veiledScramble: normalizeVeiledScramble(raw.veiledScramble),
   };
 }
 
@@ -87,6 +99,15 @@ const achievementById = new Map(ACHIEVEMENTS.map((entry) => [entry.id, entry]));
 
 export function getAchievementById(id) {
   return achievementById.get(String(id || '')) || null;
+}
+
+/** Copy velada no modal enquanto a conquista ainda não foi desbloqueada. */
+export function getAchievementVeiledDescription(achievementOrId) {
+  const entry = typeof achievementOrId === 'string' || typeof achievementOrId === 'number'
+    ? getAchievementById(achievementOrId)
+    : achievementOrId;
+  const veiled = String(entry?.veiledDesc || '').trim();
+  return veiled || null;
 }
 
 export function getAchievementXp(id) {
@@ -260,6 +281,8 @@ export function buildTrailheadTextNode(text, indexes = []) {
       const rune = document.createElement('span');
       rune.className = 'trailhead-rune';
       rune.dataset.rune = ch;
+      // Pista ARG (Fase 0): pasta do abismo — não soletra o anagrama; caçável no Elements.
+      rune.dataset.pathPrefix = '/submundo';
       rune.textContent = ch;
       frag.appendChild(rune);
     } else {

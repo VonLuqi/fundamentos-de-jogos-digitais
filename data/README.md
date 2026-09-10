@@ -19,6 +19,8 @@ Fonte única e editável de **conquistas** e **níveis**. Front (`js/game-catalo
 | `art` | não | Arquivo em `assets/achievements/` |
 | `icon` | não | Fallback emoji |
 | `trailhead` | não | `{ "nameIndexes": [...], "descIndexes": [...] }` — letras do anagrama `TARTARO OCULTO` (só públicas do trailhead) |
+| `veiledDesc` | não | Copy do modal enquanto **não** desbloqueada (dica ARG velada; não spoilar a chave) |
+| `veiledScramble` | não | Timing do véu: `{ scrambleMs, readableMs, tickMs, startWith }` — padrão Soberano: 3 min embaralhado + 45 s legível (print) |
 | `meta` | não | Metadados leves (ex. Grimório: `family`, `kind` event/content) — **thresholds de secretas ficam no servidor** |
 
 ## Níveis (`levels`)
@@ -40,7 +42,9 @@ Curva fechada (Fase 6): faixas 100 → 130 → 180 → 240 → 300; ranks Domín
 
 ### Trailhead (ARG)
 
-Ao mudar `name`/`desc` de conquistas **públicas** com `trailhead`, mantenha as letras listadas visíveis no texto (spans cipher virão na Fase 3). Soletram: **TARTARO OCULTO**.
+Ao mudar `name`/`desc` de conquistas **públicas** com `trailhead`, mantenha as letras listadas visíveis no texto. Soletram só o portão: **TARTARO OCULTO** → `tartaro-oculto`.
+
+A pasta **`/submundo`** **não** entra no cipher: fica em pistas espalhadas (`data-path-prefix` nas runas, `/robots.txt`, comentários HTML/CSS, copy “nem sempre começa na raiz”). Ver [`guia-enigma-soberano-submundo.md`](../docs/guia-enigma-soberano-submundo.md).
 
 ## O que não colocar neste JSON
 

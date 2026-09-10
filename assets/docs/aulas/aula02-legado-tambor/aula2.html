@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 2 ÔÇö Loops e Ritmo: sistemas c├¡clicos, feedback e o miniprojeto Tambor do Estige." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 2 ÔÇö Loops e Ritmo | Fundamentos de Jogos Digitais</title>
+
+  <!-- Fonts: Cinzel (t├¡tulos, romana/serifada cl├íssica) + Crimson Text (leitura confort├ível) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+</head>
+<body class="app-shell-page" data-route="aula2" data-role-scope="protected">
+
+  <!-- Vinheta escura nas bordas (profundidade, comum em telas de menu do Hades) -->
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navega├º├úo" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navega├º├úo principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Dom├¡nio do Her├│i</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Se├º├Áes principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Sal├úo Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grim├│rio Pessoal</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navega├º├úo"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 02: LOOPS E RITMO <span class="accent">(SISTEMAS C├ìCLICOS)</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 02</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">Ôùå</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navega├º├úo por abas da aula">
+          <button
+            class="tab is-active"
+            type="button"
+            id="tab-theory"
+            data-tab="theory"
+            role="tab"
+            aria-selected="true"
+            aria-controls="theory"
+          >
+            I. Teoria e Manuais
+          </button>
+          <button
+            class="tab"
+            type="button"
+            id="tab-simulation"
+            data-tab="simulation"
+            role="tab"
+            aria-selected="false"
+            aria-controls="simulation"
+          >
+            II. Simula├º├úo Interativa
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+
+    <!-- ========== ABA I: TEORIA E MANUAIS ========== -->
+    <section id="theory" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-theory">
+      <article class="hades-frame lesson-content">
+
+        <h2 class="lesson-title">O Jogo Como um Ciclo Vivo</h2>
+        <p>
+          Nenhum jogo ├® uma linha reta: ele ├® uma sucess├úo de <strong>loops</strong> ÔÇö o
+          <em>core loop</em> (a a├º├úo repetida a cada poucos segundos), o <em>loop de sess├úo</em>
+          (o que o jogador faz do in├¡cio ao fim de uma partida) e o <em>loop de progress├úo</em>
+          (o que muda entre uma sess├úo e a pr├│xima). Entender em qual camada um problema de design
+          vive ├® o primeiro passo para resolv├¬-lo sem quebrar as outras duas.
+        </p>
+
+        <h2 class="lesson-title">Ritmo: a Respira├º├úo da Experi├¬ncia</h2>
+        <p>
+          Ritmo ├® a altern├óncia deliberada entre tens├úo e al├¡vio dentro de um loop. Um jogo que
+          mant├®m o jogador no pico de intensidade o tempo todo cansa; um jogo que nunca sobe al├®m
+          do neutro entedia. O designer manipula ritmo controlando a <strong>cad├¬ncia dos eventos</strong>
+          ÔÇö quando a amea├ºa aparece, quanto tempo dura o respiro, e o qu├úo previs├¡vel ├® o pr├│ximo
+          batimento do sistema.
+        </p>
+
+        <h3 class="lesson-subtitle">Feedback ÔÇö O Eco de Cada A├º├úo</h3>
+        <p>
+          Todo loop de qualidade devolve ao jogador uma resposta sensorial imediata: som, cor,
+          vibra├º├úo, n├║mero subindo na tela. O feedback confirma que a a├º├úo foi recebida pelo
+          sistema ÔÇö e ├® o que transforma "eu apertei um bot├úo" em "eu senti o bot├úo responder".
+        </p>
+        <ul class="lesson-list">
+          <li>Feedback imediato (ex.: flash de acerto, vibra├º├úo do controle)</li>
+          <li>Feedback de progresso (ex.: barra de XP enchendo, contador subindo)</li>
+          <li>Feedback de falha (ex.: screen shake, tela vermelha, som dissonante)</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">Janela de Ritmo (Timing Window)</h3>
+        <p>
+          Muitos sistemas de ritmo n├úo exigem precis├úo absoluta ÔÇö eles aceitam uma
+          <strong>janela de toler├óncia</strong> ao redor do instante ideal. Quanto mais estreita a
+          janela, maior a tens├úo e a sensa├º├úo de maestria ao acertar; quanto mais larga, mais
+          acess├¡vel e recompensador o loop se torna para iniciantes.
+        </p>
+
+        <!-- Placeholder de Imagem -->
+        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Anatomia de um Core Loop com fases de tens├úo e al├¡vio">
+          ­ƒû╝´©Å [ Inserir Imagem Aqui: Anatomia de um Core Loop (Tens├úo ÔåÆ A├º├úo ÔåÆ Al├¡vio ÔåÆ Repeti├º├úo) ]
+        </div>
+
+        <h2 class="lesson-title">O Desafio: Tambor do Estige</h2>
+        <p>
+          Para sentir o loop na pele, propomos um exerc├¡cio de precis├úo r├¡tmica: um
+          <strong>marcador percorre uma trilha circular</strong> em looping constante, e o jogador
+          deve <strong>confirmar o ritmo</strong> exatamente quando o marcador cruza a zona-alvo.
+          Cada acerto reduz a janela de toler├óncia da rodada seguinte ÔÇö o loop fica mais dif├¡cil a
+          cada volta, exigindo leitura de padr├úo em vez de rea├º├úo pura.
+        </p>
+
+        <!-- Placeholder de Imagem -->
+        <div class="img-placeholder" role="img" aria-label="Placeholder para imagem: Trilha circular do Tambor do Estige com zona-alvo destacada">
+          ­ƒû╝´©Å [ Inserir Imagem Aqui: Trilha Circular e Zona-Alvo do Tambor do Estige ]
+        </div>
+
+      </article>
+    </section>
+
+    <!-- ========== ABA II: SIMULA├ç├âO INTERATIVA ========== -->
+    <section id="simulation" class="tab-panel" role="tabpanel" aria-labelledby="tab-simulation">
+      <div class="hades-frame simulation-panel">
+
+        <p class="simulation-instructions">
+          <strong>Clique na tela</strong> ou pressione <strong>Espa├ºo</strong> exatamente quando o
+          marcador cruzar a <strong>zona-alvo dourada</strong> na trilha circular. Acerte
+          <strong>5 batidas seguidas</strong> para completar o desafio ÔÇö cada acerto encolhe a
+          janela de toler├óncia da pr├│xima volta. Errar reinicia a sequ├¬ncia de acertos, mas n├úo o
+          desafio inteiro.
+        </p>
+
+        <!-- Moldura dourada do canvas -->
+        <div class="canvas-frame">
+          <canvas id="game-canvas" width="600" height="400" aria-label="Simula├º├úo: Tambor do Estige, marcador circular cruzando a zona-alvo no ritmo correto"></canvas>
+        </div>
+
+        <p class="simulation-legend">
+          <span class="legend-dot legend-dot--goal" aria-hidden="true"></span> Zona-Alvo (confirme o ritmo aqui)
+          &nbsp;&nbsp;&nbsp;
+          <span class="legend-dot legend-dot--player" aria-hidden="true"></span> Marcador (percorre a trilha em loop)
+        </p>
+
+        <!-- Revelado apenas quando o desafio ├® conclu├¡do com sucesso -->
+        <div class="reward-codes" id="reward-codes" hidden>
+          <h3 class="lesson-subtitle">C├│digo da Oferenda Desbloqueado</h3>
+          <p>
+            Leve este c├│digo ao Altar do Sal├úo dos Her├│is para receber XP e conquista:
+          </p>
+          <p><strong id="reward-code-value">Carregando...</strong></p>
+          <p id="reward-code-meta"></p>
+        </div>
+
+      </div>
+    </section>
+
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">┬À</span> Aula 2 de N</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script da p├ígina: tabs + minigame de ritmo em Canvas API nativo (sem depend├¬ncias externas) -->
+  <script type="module" src="../js/aula2.js"></script>
+</body>
+</html>

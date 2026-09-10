@@ -66,7 +66,7 @@ const LESSON_CATALOG = {
   },
   aula2: {
     lessonId: 'aula2',
-    lessonTitle: 'Aula 02 — Loops e Ritmo',
+    lessonTitle: 'Aula 02 — O Glossário do Desenvolvedor e o Player na Tela',
     xp: 30,
   },
   aula3: {
@@ -83,6 +83,53 @@ const LESSON_GATES = {
   aula3: { published: false },
 };
 
+/**
+ * Gates de features da plataforma (reusam `lesson_gates` com feature_id).
+ * `unlocked` controla o botão do nav (ex.: Arcane Survivors).
+ */
+const FEATURE_GATES = {
+  arcane_survivors: { unlocked: false },
+};
+
+const FEATURE_GATE_PREFIX = 'feature:';
+
+function featureGateRowId(featureId) {
+  return `${FEATURE_GATE_PREFIX}${String(featureId || '')}`;
+}
+
+function defaultGatesForFeature(featureId) {
+  const configured = FEATURE_GATES[String(featureId || '')];
+  if (configured && typeof configured === 'object') {
+    return { ...configured };
+  }
+  return null;
+}
+
+async function isFeatureUnlocked(featureId) {
+  const defaults = defaultGatesForFeature(featureId);
+  if (!defaults) return false;
+  let unlocked = Boolean(defaults.unlocked);
+
+  const { data: rows, error } = await supabase
+    .from(LESSON_GATES_TABLE)
+    .select('gate_key, released')
+    .eq('lesson_id', featureGateRowId(featureId));
+
+  if (error) {
+    if (error.code === '42P01' || /lesson_gates/i.test(error.message || '')) {
+      return unlocked;
+    }
+    throw error;
+  }
+
+  (rows || []).forEach((row) => {
+    if (String(row.gate_key || '') === 'unlocked') {
+      unlocked = Boolean(row.released);
+    }
+  });
+  return unlocked;
+}
+
 const ACTIVITY_CATALOG = {
   aula1_gdd: {
     lessonId: 'aula1',
@@ -95,6 +142,10 @@ const ACHIEVEMENT_RULES = [
   {
     id: 'aula1_concluida',
     test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula1'),
+  },
+  {
+    id: 'aula2_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula2'),
   },
 ];
 
@@ -749,6 +800,7 @@ export default async function handler(req, res) {
       code,
       avatarIndex,
       lessonId,
+      featureId,
       gateKey,
       released,
       paragraph,
@@ -2411,6 +2463,16 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'XP da run inválido.' });
       }
 
+      if (user.role !== 'admin') {
+        const minigameOpen = await isFeatureUnlocked('arcane_survivors');
+        if (!minigameOpen) {
+          return res.status(403).json({
+            ok: false,
+            error: 'Arcane Survivors ainda está selado pelo Mestre.',
+          });
+        }
+      }
+
       const nextXp = Math.max(0, Number(user.xp || 0) + xpDelta);
       const { data: updated, error: updateError } = await supabase
         .from(USERS_TABLE)
@@ -2534,6 +2596,92 @@ export default async function handler(req, res) {
       });
 
       return res.status(200).json({ ok: true, lessonId: normalizedLessonId, gates });
+    }
+
+    if (action === 'featureGates') {
+      const normalizedFeatureId = String(featureId || '');
+      const defaults = defaultGatesForFeature(normalizedFeatureId);
+      if (!defaults) {
+        return res.status(400).json({ ok: false, error: 'Feature inválida.' });
+      }
+
+      const { data: rows, error } = await supabase
+        .from(LESSON_GATES_TABLE)
+        .select('gate_key, released')
+        .eq('lesson_id', featureGateRowId(normalizedFeatureId));
+
+      if (error) {
+        if (error.code === '42P01' || /lesson_gates/i.test(error.message || '')) {
+          return res.status(200).json({
+            ok: true,
+            featureId: normalizedFeatureId,
+            gates: defaults,
+            warning: 'Tabela lesson_gates ausente.',
+          });
+        }
+        return res.status(500).json({ ok: false, error: 'Falha ao carregar selo da feature.' });
+      }
+
+      const gates = { ...defaults };
+      (rows || []).forEach((row) => {
+        const key = String(row.gate_key || '');
+        if (Object.prototype.hasOwnProperty.call(gates, key)) {
+          gates[key] = Boolean(row.released);
+        }
+      });
+
+      return res.status(200).json({ ok: true, featureId: normalizedFeatureId, gates });
+    }
+
+    if (action === 'setFeatureGate') {
+      if (rejectUnlessAdmin(user, res)) return;
+
+      const normalizedFeatureId = String(featureId || '');
+      const normalizedGateKey = String(gateKey || '');
+      const gateDefaults = defaultGatesForFeature(normalizedFeatureId);
+
+      if (!gateDefaults) {
+        return res.status(400).json({ ok: false, error: 'Feature inválida.' });
+      }
+      if (!Object.prototype.hasOwnProperty.call(gateDefaults, normalizedGateKey)) {
+        return res.status(400).json({ ok: false, error: 'Chave de selo inválida para esta feature.' });
+      }
+
+      const releaseValue = Boolean(released);
+      const nowIso = new Date().toISOString();
+      const { error } = await supabase.from(LESSON_GATES_TABLE).upsert(
+        {
+          lesson_id: featureGateRowId(normalizedFeatureId),
+          gate_key: normalizedGateKey,
+          released: releaseValue,
+          released_by: userId,
+          released_at: releaseValue ? nowIso : null,
+          updated_at: nowIso,
+        },
+        { onConflict: 'lesson_id,gate_key' }
+      );
+
+      if (error) {
+        if (error.code === '42P01' || /lesson_gates/i.test(error.message || '')) {
+          return res.status(503).json({ ok: false, error: 'Tabela lesson_gates não existe. Rode o SQL de migração.' });
+        }
+        return res.status(500).json({ ok: false, error: 'Falha ao atualizar selo da feature.' });
+      }
+
+      const { data: rows } = await supabase
+        .from(LESSON_GATES_TABLE)
+        .select('gate_key, released')
+        .eq('lesson_id', featureGateRowId(normalizedFeatureId));
+
+      const gates = { ...gateDefaults };
+      (rows || []).forEach((row) => {
+        const key = String(row.gate_key || '');
+        if (Object.prototype.hasOwnProperty.call(gates, key)) {
+          gates[key] = Boolean(row.released);
+        }
+      });
+
+      return res.status(200).json({ ok: true, featureId: normalizedFeatureId, gates });
     }
 
     if (action === 'getLessonParagraph') {

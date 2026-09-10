@@ -128,4 +128,8 @@ Isso ajuda a criar continuidade entre as aulas do módulo.
 ---
 
 ## Próximo passo sugerido
-Depois deste planejamento, o próximo passo é transformar essa proposta na estrutura final da Aula 01, já com texto pronto para o arquivo da aula e, se necessário, ajuste dos slides e do material de apoio.
+
+Aula 01 implementada. Continuidade do Módulo 1:
+
+- **Aula 02** — *O Glossário do Desenvolvedor e o Player na Tela* (Core Loop, Grokking, Assets · cena do Player na Godot). Plano e status: [`plano-aula2-glossario-player.md`](./plano-aula2-glossario-player.md).
+- Liberação da Aula 02 na turma: [`playbook-liberar-aula2.md`](./playbook-liberar-aula2.md).

@@ -48,13 +48,13 @@ export const REDEEM_CODES = {
   },
   LOOP2026: {
     lessonId: 'aula2',
-    lessonTitle: 'Aula 2 — Loops e Ritmo',
+    lessonTitle: 'Aula 2 — O Glossário do Desenvolvedor e o Player na Tela',
     xp: 25,
     achievement: 'loop_master',
   },
   RITMO2026: {
     lessonId: 'aula2',
-    lessonTitle: 'Aula 2 — Loops e Ritmo',
+    lessonTitle: 'Aula 2 — O Glossário do Desenvolvedor e o Player na Tela',
     xp: 25,
     achievement: 'ritmo_do_jogo',
   },

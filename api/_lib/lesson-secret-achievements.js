@@ -125,6 +125,133 @@ export function matchesJuramentoDoCirculo(normalizedText) {
   return false;
 }
 
+/* ============================================================
+   AULA 02 — Glossário + Player (Léxico / Arquiteto / Cartógrafo)
+   ============================================================ */
+
+const GLOSSARY_CORE = Object.freeze([
+  ['core loop', 'coreloop', 'ciclo basico', 'ciclo básico', 'andar coletar avancar', 'andar coletar avançar'],
+  [
+    'grokking',
+    'grok',
+    'memoria muscular',
+    'memória muscular',
+    'dominio do controle',
+    'domínio do controle',
+    'parar de pensar as teclas',
+  ],
+  ['assets', 'asset', 'sprites', 'imagens e sons', 'recursos do jogo', 'filesystem'],
+]);
+
+const PLAYER_NODES = Object.freeze([
+  ['characterbody2d', 'character body 2d', 'characterbody', 'corpo do jogador', 'corpo controlavel', 'corpo controlável'],
+  ['sprite2d', 'sprite 2d', 'sprite'],
+  [
+    'collisionshape2d',
+    'collision shape 2d',
+    'collisionshape',
+    'forma de colisao',
+    'forma de colisão',
+    'shape de colisao',
+    'shape de colisão',
+  ],
+]);
+
+const SCENE_RECIPE_SIGNALS = Object.freeze([
+  'cena',
+  'cenas',
+  'no',
+  'nós',
+  'nos',
+  'node',
+  'nodes',
+  'receita',
+  'receita de bolo',
+  'hierarquia',
+  'tscn',
+  'player.tscn',
+]);
+
+const INPUT_ACTIONS = Object.freeze([
+  ['ir_cima', 'ir cima'],
+  ['ir_baixo', 'ir baixo'],
+  ['ir_esquerda', 'ir esquerda'],
+  ['ir_direita', 'ir direita'],
+]);
+
+const INPUT_DIRECTIONS = Object.freeze([
+  ['cima', 'up', 'norte'],
+  ['baixo', 'down', 'sul'],
+  ['esquerda', 'left', 'oeste'],
+  ['direita', 'right', 'leste'],
+]);
+
+const INPUT_MAP_SIGNALS = Object.freeze([
+  'input map',
+  'inputmap',
+  'mapeamento de teclas',
+  'project settings',
+  'wasd',
+  'setas',
+  'seta',
+  'teclado',
+]);
+
+export const AULA2_SECRET_THRESHOLDS = Object.freeze({
+  lexicoMin: 3,
+  lexicoTotal: GLOSSARY_CORE.length,
+  arquitetoNodesMin: 3,
+  arquitetoRecipeMin: 1,
+  cartografoActionsMin: 4,
+  cartografoDirectionsMin: 4,
+  cartografoMapSignalsMin: 1,
+});
+
+export function matchesLexicoDoDesenvolvedor(normalizedText) {
+  return coverageAtLeast(
+    normalizedText,
+    GLOSSARY_CORE,
+    AULA2_SECRET_THRESHOLDS.lexicoMin
+  );
+}
+
+export function matchesArquitetoDeCenas(normalizedText) {
+  const nodesOk = coverageAtLeast(
+    normalizedText,
+    PLAYER_NODES,
+    AULA2_SECRET_THRESHOLDS.arquitetoNodesMin
+  );
+  if (!nodesOk) return false;
+  const recipeHits = SCENE_RECIPE_SIGNALS.filter((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    // Evita falso positivo de "no" isolado: exige palavra inteira curta.
+    if (needle.length <= 2) {
+      return new RegExp(`(?:^|\\s)${needle}(?:\\s|$)`).test(normalizedText);
+    }
+    return needle && normalizedText.includes(needle);
+  }).length;
+  return recipeHits >= AULA2_SECRET_THRESHOLDS.arquitetoRecipeMin;
+}
+
+/**
+ * Caminho principal: as 4 ações ir_*.
+ * Caminho soft: 4 direções + sinal de Input Map / WASD / setas.
+ */
+export function matchesCartografoDoInput(normalizedText) {
+  const actions = countConceptHits(normalizedText, INPUT_ACTIONS);
+  if (actions >= AULA2_SECRET_THRESHOLDS.cartografoActionsMin) return true;
+
+  const directions = countConceptHits(normalizedText, INPUT_DIRECTIONS);
+  const mapSignals = INPUT_MAP_SIGNALS.filter((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  }).length;
+  return (
+    directions >= AULA2_SECRET_THRESHOLDS.cartografoDirectionsMin
+    && mapSignals >= AULA2_SECRET_THRESHOLDS.cartografoMapSignalsMin
+  );
+}
+
 const LESSON_SECRET_RULES = Object.freeze({
   aula1: Object.freeze([
     {
@@ -138,6 +265,20 @@ const LESSON_SECRET_RULES = Object.freeze({
     {
       id: 'segredo_juramento_do_circulo',
       test: (ctx) => matchesJuramentoDoCirculo(ctx.normalizedText),
+    },
+  ]),
+  aula2: Object.freeze([
+    {
+      id: 'segredo_lexico_do_desenvolvedor',
+      test: (ctx) => matchesLexicoDoDesenvolvedor(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_arquiteto_de_cenas',
+      test: (ctx) => matchesArquitetoDeCenas(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_cartografo_do_input',
+      test: (ctx) => matchesCartografoDoInput(ctx.normalizedText),
     },
   ]),
 });

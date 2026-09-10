@@ -49,6 +49,14 @@ for (const entry of ACHIEVEMENTS) {
 assertOk(getAchievementXp('gdd_integracao_documental') === 20, 'xp GDD do catálogo');
 assertOk(getAchievementXp('segredo_juramento_do_circulo') === 25, 'xp Juramento do catálogo');
 
+const soberano = ACHIEVEMENTS.find((a) => a.id === 'soberano_do_submundo');
+assertOk(soberano?.veiledDesc, 'Soberano tem veiledDesc');
+assertOk(soberano?.veiledScramble?.scrambleMs >= 60_000, 'scramble dura minutos');
+assertOk(soberano?.veiledScramble?.readableMs >= 15_000, 'janela legível para print');
+assertOk(soberano?.veiledScramble?.startWith === 'readable', 'abre legível para leitura/print');
+assertOk(!/CERBERUS|PERSEPHONE|ESTIGE_OBOLO|tartaro-oculto|payload|robots|indexador/i.test(soberano.veiledDesc), 'veiledDesc sem spoiler de chave');
+assertOk(!/18fec91c/i.test(soberano.veiledDesc), 'veiledDesc sem hash');
+
 assert.equal(levelForXp(0), 1);
 assert.equal(levelForXp(99), 1);
 assert.equal(levelForXp(100), 2);
