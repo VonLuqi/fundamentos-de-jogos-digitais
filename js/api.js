@@ -334,7 +334,6 @@ export const ROUTES = {
     return `${base}?u=${encodeURIComponent(username)}`;
   },
   souls: () => `${rootPath()}/pages/souls.html`,
-  minigame: () => `${rootPath()}/pages/minigame.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -521,19 +520,6 @@ export async function setAvatar(token, avatarIndex) {
   return { ...payload, user: normalizeUser(payload.user) };
 }
 
-export async function submitMinigameRun(token, xp, durationSeconds = 0) {
-  const payload = await request('/progress', {
-    method: 'POST',
-    body: JSON.stringify({
-      token,
-      action: 'addRunXP',
-      xp: Number(xp) || 0,
-      duration: Number(durationSeconds) || 0,
-    }),
-  });
-  return { ...payload, user: normalizeUser(payload.user) };
-}
-
 export function listCodes(token) {
   return request('/progress', {
     method: 'POST',
@@ -567,42 +553,6 @@ export function setLessonGate(token, lessonId, gateKey, released) {
     method: 'POST',
     body: JSON.stringify({ token, action: 'setLessonGate', lessonId, gateKey, released }),
   });
-}
-
-export const ARCANE_SURVIVORS_FEATURE_ID = 'arcane_survivors';
-export const FEATURE_UNLOCKED_GATE_KEY = 'unlocked';
-
-export function fetchFeatureGates(token, featureId) {
-  return request('/progress', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'featureGates', featureId }),
-  });
-}
-
-export function setFeatureGate(token, featureId, gateKey, released) {
-  return request('/progress', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'setFeatureGate', featureId, gateKey, released }),
-  });
-}
-
-/** Mapa featureId → unlocked (boolean). Fallback local se a API falhar. */
-export async function fetchFeatureUnlockMap(token, featureIds = [ARCANE_SURVIVORS_FEATURE_ID]) {
-  const ids = featureIds.length > 0 ? featureIds : [ARCANE_SURVIVORS_FEATURE_ID];
-  const entries = await Promise.all(
-    ids.map(async (id) => {
-      try {
-        const result = await fetchFeatureGates(token, id);
-        if (typeof result?.gates?.unlocked === 'boolean') {
-          return [id, result.gates.unlocked];
-        }
-      } catch {
-        // fallback abaixo
-      }
-      return [id, false];
-    })
-  );
-  return Object.fromEntries(entries);
 }
 
 /** Mapa lessonId → published (boolean). Fallback local se a API falhar. */

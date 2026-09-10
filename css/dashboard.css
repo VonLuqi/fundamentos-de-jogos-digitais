@@ -51,7 +51,8 @@ body {
   padding-top: 0;
 }
 
-/* Trilho esquerdo: identidade + previews (Salão / Grimório) */
+/* Trilho esquerdo: identidade + previews (Salão / Grimório).
+   Sem max-height/overflow — o painel cresce com o conteúdo; a página rola. */
 .dashboard-rail {
   display: flex;
   flex-direction: column;
@@ -59,10 +60,8 @@ body {
   position: sticky;
   top: 1rem;
   align-self: start;
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--hades-gold-dark) transparent;
+  max-height: none;
+  overflow: visible;
 }
 
 /* ============================================================

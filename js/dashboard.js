@@ -48,10 +48,6 @@ import {
   getSession,
   describeLevelProgress,
   fetchLessonsPublishMap,
-  fetchFeatureUnlockMap,
-  setFeatureGate,
-  ARCANE_SURVIVORS_FEATURE_ID,
-  FEATURE_UNLOCKED_GATE_KEY,
   normalizeAchievementRarity,
   listFriends,
   listClassmates,
@@ -62,7 +58,6 @@ import {
 let currentUser = null;
 let currentToken = null;
 let publishMap = {};
-let featureUnlockMap = { [ARCANE_SURVIVORS_FEATURE_ID]: false };
 let shellApi = null;
 
 function normalizeSearchText(value) {
@@ -1040,15 +1035,6 @@ function initScrollModal() {
   });
 }
 
-function syncMinigameToggleButton() {
-  const btn = document.getElementById('btn-toggle-minigame');
-  if (!btn) return;
-  const unlocked = Boolean(featureUnlockMap[ARCANE_SURVIVORS_FEATURE_ID]);
-  btn.textContent = unlocked ? 'Travar Arcane Survivors' : 'Destravar Arcane Survivors';
-  btn.setAttribute('aria-pressed', String(unlocked));
-  btn.classList.toggle('btn-gold--pulse', !unlocked);
-}
-
 /* ============================================================
    9. FERRAMENTAS DO ADMIN
    ============================================================ */
@@ -1069,43 +1055,11 @@ function initAdminTools() {
 
   const btnCodes = document.getElementById('btn-generate-codes');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
-  const btnToggleMinigame = document.getElementById('btn-toggle-minigame');
   const btnSouls = document.getElementById('btn-list-souls');
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
-  syncMinigameToggleButton();
-
   btnManageLessons?.addEventListener('click', () => {
     window.location.href = ROUTES.aulas();
-  });
-
-  btnToggleMinigame?.addEventListener('click', async () => {
-    const unlocked = Boolean(featureUnlockMap[ARCANE_SURVIVORS_FEATURE_ID]);
-    const next = !unlocked;
-    btnToggleMinigame.disabled = true;
-    const original = btnToggleMinigame.textContent;
-    btnToggleMinigame.textContent = next ? 'Destravando…' : 'Travando…';
-    try {
-      const result = await setFeatureGate(
-        currentToken,
-        ARCANE_SURVIVORS_FEATURE_ID,
-        FEATURE_UNLOCKED_GATE_KEY,
-        next
-      );
-      featureUnlockMap = {
-        ...featureUnlockMap,
-        [ARCANE_SURVIVORS_FEATURE_ID]: Boolean(result?.gates?.unlocked),
-      };
-      shellApi?.applyFeatureGates?.(featureUnlockMap);
-      syncMinigameToggleButton();
-    } catch (error) {
-      const p = document.createElement('p');
-      p.textContent = error instanceof ApiError ? error.message : 'Falha ao atualizar o selo do minigame.';
-      openScrollModal('Erro', p);
-      btnToggleMinigame.textContent = original;
-    } finally {
-      btnToggleMinigame.disabled = false;
-    }
   });
 
   btnCodes?.addEventListener('click', async () => {
@@ -1278,16 +1232,6 @@ async function init() {
   } catch {
     publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
   }
-
-  try {
-    featureUnlockMap = await fetchFeatureUnlockMap(currentToken, [ARCANE_SURVIVORS_FEATURE_ID]);
-  } catch {
-    featureUnlockMap = { [ARCANE_SURVIVORS_FEATURE_ID]: false };
-  }
-  if (shellApi?.featureGatesReady) {
-    await shellApi.featureGatesReady;
-  }
-  shellApi?.applyFeatureGates?.(featureUnlockMap);
 
   // A hidratação visual (stats/cards) pode falhar por dado inesperado
   // do servidor, mas isso NUNCA pode impedir os botões de funcionar.

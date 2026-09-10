@@ -62,34 +62,35 @@ shellPages.forEach((rel) => {
   const minigameLink = html.match(/<a[^>]*data-nav-item="minigame"[^>]*>[\s\S]*?<\/a>/);
   assert(Boolean(minigameLink), `${rel}: precisa do link data-nav-item=minigame`);
   if (minigameLink) {
-    assert(minigameLink[0].includes('data-feature-gate="arcane_survivors"'), `${rel}: minigame precisa de data-feature-gate`);
+    assert(minigameLink[0].includes('Minigame em breve'), `${rel}: minigame deve dizer "Minigame em breve"`);
     assert(minigameLink[0].includes('is-locked'), `${rel}: minigame começa com is-locked no HTML`);
     assert(/aria-disabled="true"/.test(minigameLink[0]), `${rel}: minigame começa aria-disabled=true`);
+    assert(!minigameLink[0].includes('minigame.html'), `${rel}: minigame não deve apontar para página antiga`);
+    assert(!minigameLink[0].includes('arcane_survivors'), `${rel}: minigame não deve usar gate Arcane`);
   }
 });
 
 assert(
   appShellCss.includes('.app-shell__link.is-locked'),
-  'app-shell.css deve estilizar links de feature selados (.is-locked)'
+  'app-shell.css deve estilizar links bloqueados (.is-locked)'
 );
 assert(
-  appShellJs.includes('applyNavFeatureGates')
-    && appShellJs.includes('data-feature-gate')
-    && appShellJs.includes('ARCANE_SURVIVORS_FEATURE_ID'),
-  'app-shell.js deve aplicar selo de feature no nav'
+  appShellJs.includes('bindLockedNavClicks')
+    && appShellJs.includes('aria-disabled'),
+  'app-shell.js deve bloquear clique em nav aria-disabled'
 );
 assert(
-  apiJs.includes('featureGates')
-    && apiJs.includes('setFeatureGate')
-    && apiJs.includes('ARCANE_SURVIVORS_FEATURE_ID'),
-  'api.js deve expor fetch/set do gate Arcane Survivors'
+  !apiJs.includes('ARCANE_SURVIVORS_FEATURE_ID')
+    && !apiJs.includes('submitMinigameRun')
+    && !apiJs.includes('minigame.html'),
+  'api.js não deve expor Arcane Survivors / minigame antigo'
 );
 assert(
-  dashboardJs.includes('btn-toggle-minigame')
-    && dashboardJs.includes('setFeatureGate'),
-  'dashboard.js deve permitir admin destravar/travar o minigame'
+  !dashboardJs.includes('btn-toggle-minigame')
+    && !dashboardJs.includes('ARCANE_SURVIVORS'),
+  'dashboard.js não deve ter toggle do Arcane Survivors'
 );
-notes.push('Arcane Survivors: nav selado + toggle admin ok (smoke estático)');
+notes.push('Minigame: stub "em breve" no nav (smoke estático)');
 
 assert(
   appShellCss.includes('display: none !important')

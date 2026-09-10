@@ -1,11 +1,6 @@
 'use strict';
 
 import { setRainbowVfxSuspended } from './achievements-ui.js';
-import {
-  ARCANE_SURVIVORS_FEATURE_ID,
-  fetchFeatureUnlockMap,
-  getSession,
-} from './api.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
 const FOCUSABLE_SELECTOR = [
@@ -17,13 +12,11 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 
-const LOCKED_FEATURE_TITLE = 'Ainda selado pelo Mestre';
-
 let lastFocusedBeforeOpen = null;
 
 /**
  * Destinos primários do aside (aluno):
- * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · Arcane Survivors
+ * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · Minigame (em breve)
  * Condicional admin: Almas Registradas (não conta no teto do aluno).
  */
 function mapRouteToNavItem(route) {
@@ -98,71 +91,16 @@ function openDrawer(shell, sidebar, toggle, overlay) {
   firstLink?.focus();
 }
 
-/**
- * Aplica selos de feature nos links `[data-feature-gate]`.
- * Aluno: link desativado até o Mestre destravar.
- * Admin: vê o estado selado, mas ainda pode abrir (como aulas não publicadas).
- */
-export function applyNavFeatureGates(shell, unlockMap = {}, role = 'student') {
-  if (!shell) return;
-  const isAdmin = role === 'admin';
-
-  shell.querySelectorAll('[data-feature-gate]').forEach((item) => {
-    const featureId = item.dataset.featureGate || '';
-    const unlocked = Boolean(unlockMap[featureId]);
-    const lockedForUser = !unlocked && !isAdmin;
-
-    item.classList.toggle('is-locked', !unlocked);
-    item.setAttribute('aria-disabled', String(lockedForUser));
-    item.dataset.featureUnlocked = String(unlocked);
-
-    if (lockedForUser) {
-      item.setAttribute('tabindex', '-1');
-      item.setAttribute('title', LOCKED_FEATURE_TITLE);
-      item.setAttribute('aria-label', `${item.textContent?.trim() || 'Destino'} — ${LOCKED_FEATURE_TITLE}`);
-    } else {
-      if (!unlocked && isAdmin) {
-        item.setAttribute('title', 'Selado para a turma — Mestre pode abrir');
-      } else {
-        item.removeAttribute('title');
-      }
-      item.removeAttribute('aria-label');
-      if (!item.hasAttribute('data-admin-only') || isAdmin) {
-        item.removeAttribute('tabindex');
-      }
-    }
-  });
-}
-
-function bindFeatureGateClicks(shell) {
-  shell.querySelectorAll('[data-feature-gate]').forEach((item) => {
-    if (item.dataset.featureGateBound === '1') return;
-    item.dataset.featureGateBound = '1';
+/** Bloqueia clique em links de nav com aria-disabled (ex.: Minigame em breve). */
+function bindLockedNavClicks(shell) {
+  shell.querySelectorAll('.app-shell__link[aria-disabled="true"]').forEach((item) => {
+    if (item.dataset.lockedNavBound === '1') return;
+    item.dataset.lockedNavBound = '1';
     item.addEventListener('click', (event) => {
-      if (item.getAttribute('aria-disabled') === 'true') {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      event.preventDefault();
+      event.stopPropagation();
     });
   });
-}
-
-async function hydrateFeatureGates(shell, role) {
-  const token = getSession()?.token;
-  if (!token) {
-    applyNavFeatureGates(shell, { [ARCANE_SURVIVORS_FEATURE_ID]: false }, role);
-    return { [ARCANE_SURVIVORS_FEATURE_ID]: false };
-  }
-
-  try {
-    const unlockMap = await fetchFeatureUnlockMap(token, [ARCANE_SURVIVORS_FEATURE_ID]);
-    applyNavFeatureGates(shell, unlockMap, role);
-    return unlockMap;
-  } catch {
-    const fallback = { [ARCANE_SURVIVORS_FEATURE_ID]: false };
-    applyNavFeatureGates(shell, fallback, role);
-    return fallback;
-  }
 }
 
 export function initAppShell({ route, role = 'student', onLogout } = {}) {
@@ -198,18 +136,13 @@ export function initAppShell({ route, role = 'student', onLogout } = {}) {
     else item.removeAttribute('aria-current');
   });
 
-  // Estado inicial selado até a API responder (evita flash liberado).
-  applyNavFeatureGates(shell, { [ARCANE_SURVIVORS_FEATURE_ID]: false }, role);
-  bindFeatureGateClicks(shell);
-  const featureGatesReady = hydrateFeatureGates(shell, role);
+  bindLockedNavClicks(shell);
 
   if (mainRegion && !mainRegion.hasAttribute('tabindex')) {
     mainRegion.setAttribute('tabindex', '-1');
   }
 
   syncShellState(shell, sidebar, toggle, overlay);
-
-  // Aulas e Conquistas são páginas próprias — sem scroll de seção no dashboard.
 
   shell.querySelectorAll('[data-nav-item]').forEach((item) => {
     item.addEventListener('click', () => {
@@ -288,7 +221,5 @@ export function initAppShell({ route, role = 'student', onLogout } = {}) {
       syncShellState(shell, sidebar, toggle, overlay);
     },
     sidebar,
-    featureGatesReady,
-    applyFeatureGates: (unlockMap) => applyNavFeatureGates(shell, unlockMap, role),
   };
 }
