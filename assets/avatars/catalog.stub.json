@@ -2,216 +2,593 @@
   {
     "file": "hades.webp",
     "label": "Hades",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "olimpo"
+    ]
   },
   {
     "file": "afrodite.webp",
     "label": "Afrodite",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "olimpo"
+    ]
   },
   {
     "file": "zagreus.webp",
     "label": "Zagreus",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "jogos",
+      "olimpo",
+      "indie"
+    ]
   },
   {
     "file": "manoel-gomes.webp",
     "label": "Manoel Gomes",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "br-memes"
+    ]
   },
   {
     "file": "vini-jr-branco.webp",
     "label": "Vini Jr. Branco",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "br-memes"
+    ]
   },
   {
     "file": "omni-man.webp",
     "label": "Omni Man",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "jogos"
+    ]
   },
   {
     "file": "tails.webp",
     "label": "Tails",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos",
+      "animais"
+    ]
   },
   {
     "file": "chara.webp",
     "label": "Chara",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos",
+      "indie"
+    ]
   },
   {
     "file": "homem-aranha.webp",
     "label": "Homem Aranha",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "jogos"
+    ]
   },
   {
     "file": "zeus.webp",
     "label": "Zeus",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "olimpo"
+    ]
   },
   {
     "file": "lloyd.webp",
     "label": "Lloyd",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop"
+    ]
   },
   {
     "file": "roblox-man-face.webp",
     "label": "Roblox Man Face",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "jogos"
+    ]
   },
   {
     "file": "beluga.webp",
     "label": "Beluga",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "animais",
+      "gatos"
+    ]
   },
   {
     "file": "fry.webp",
     "label": "Fry",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "cultura-pop"
+    ]
   },
   {
     "file": "shrek.webp",
     "label": "Shrek",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "cartoon"
+    ]
   },
   {
     "file": "crying-jordan.webp",
     "label": "Crying Jordan",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes"
+    ]
   },
   {
     "file": "ishowspeed.webp",
     "label": "Ishowspeed",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes"
+    ]
   },
   {
     "file": "blinking-white-guy.webp",
     "label": "Blinking White Guy",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes"
+    ]
   },
   {
     "file": "capitao-picard.webp",
     "label": "Capitao Picard",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop"
+    ]
   },
   {
     "file": "catioro.webp",
     "label": "Catioro",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "caes"
+    ]
   },
   {
     "file": "mileena.webp",
     "label": "Mileena",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos",
+      "mortal-kombat"
+    ]
   },
   {
     "file": "scorpion.webp",
     "label": "Scorpion",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos",
+      "mortal-kombat"
+    ]
   },
   {
     "file": "sub-zero.webp",
     "label": "Sub Zero",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos",
+      "mortal-kombat"
+    ]
   },
   {
     "file": "giga-chad.webp",
     "label": "Giga Chad",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "chad"
+    ]
   },
   {
     "file": "giga-chad-transcendente.webp",
     "label": "Giga Chad Transcendente",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "chad"
+    ]
   },
   {
     "file": "tio-patinhas.webp",
     "label": "Tio Patinhas",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "animais",
+      "cartoon"
+    ]
   },
   {
     "file": "patolino-mago.webp",
     "label": "Patolino Mago",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "animais",
+      "cartoon"
+    ]
   },
   {
     "file": "o-mago.webp",
     "label": "O Mago",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop"
+    ]
   },
   {
     "file": "michael-jackson.webp",
     "label": "Michael Jackson",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop"
+    ]
   },
   {
     "file": "kratos.webp",
     "label": "Kratos",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "jogos",
+      "norse-god"
+    ]
   },
   {
     "file": "kratos-madruga.webp",
     "label": "Kratos Madruga",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "mitologia",
+      "jogos",
+      "memes",
+      "norse-god"
+    ]
   },
   {
     "file": "salsicha-instinto.webp",
     "label": "Salsicha Instinto",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "cultura-pop",
+      "cartoon"
+    ]
   },
   {
     "file": "lara-croft.webp",
     "label": "Lara Croft",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "jogos"
+    ]
   },
   {
     "file": "cellbitos.webp",
     "label": "Cellbitos",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "memes"
+    ]
   },
   {
     "file": "cry-girl.webp",
     "label": "Cry Girl",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "memes",
+      "kawaii"
+    ]
   },
   {
     "file": "goku-sombrio.webp",
     "label": "Goku Sombrio",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
   },
   {
     "file": "grandao.webp",
     "label": "Grandão",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "br-memes"
+    ]
   },
   {
     "file": "itadori.webp",
     "label": "Itadori",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "jogos",
+      "shonen"
+    ]
   },
   {
     "file": "mano-motoserra.webp",
     "label": "Mano Motoserra",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
   },
   {
     "file": "menininha.webp",
     "label": "Menininha",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "kawaii"
+    ]
   },
   {
     "file": "rusbe.webp",
     "label": "Rusbé",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "memes",
+      "br-memes"
+    ]
   },
   {
     "file": "snoopy.webp",
     "label": "Snoopy",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "animais",
+      "cartoon"
+    ]
   },
   {
     "file": "tangirina.webp",
     "label": "Tangirina",
-    "searchTerms": []
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "gatos"
+    ]
+  },
+  {
+    "file": "chibi-gatinho.webp",
+    "label": "Chibi Gatinho",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "kawaii",
+      "gatos"
+    ]
+  },
+  {
+    "file": "chibi-thug-life.webp",
+    "label": "Chibi Thug Life",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "memes",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "cinnamoroll.webp",
+    "label": "Cinnamoroll",
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "anime",
+      "kawaii",
+      "disney-sanrio"
+    ]
+  },
+  {
+    "file": "dino-hoodie.webp",
+    "label": "Dino Hoodie",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "filhote-bone.webp",
+    "label": "Filhote Boné",
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "caes"
+    ]
+  },
+  {
+    "file": "gatinho-flor.webp",
+    "label": "Gatinho Flor",
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "gatos"
+    ]
+  },
+  {
+    "file": "gatinho-oculos.webp",
+    "label": "Gatinho Óculos",
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "gatos"
+    ]
+  },
+  {
+    "file": "gato-macacao.webp",
+    "label": "Gato Macacão",
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "gatos"
+    ]
+  },
+  {
+    "file": "gato-noite-estrelada.webp",
+    "label": "Gato Noite Estrelada",
+    "searchTerms": [],
+    "tags": [
+      "animais",
+      "cultura-pop",
+      "gatos"
+    ]
+  },
+  {
+    "file": "menina-golden.webp",
+    "label": "Menina Golden",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "caes",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "menina-lilas.webp",
+    "label": "Menina Lilás",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "menina-samoyed.webp",
+    "label": "Menina Samoyed",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "caes",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "neko-coracoes.webp",
+    "label": "Neko Corações",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "kawaii",
+      "gatos"
+    ]
+  },
+  {
+    "file": "neko-gato.webp",
+    "label": "Neko Gato",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "kawaii",
+      "gatos"
+    ]
+  },
+  {
+    "file": "neko-rosa.webp",
+    "label": "Neko Rosa",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "animais",
+      "kawaii",
+      "gatos"
+    ]
+  },
+  {
+    "file": "rena-hoodie.webp",
+    "label": "Rena Hoodie",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "sami-nuvens.webp",
+    "label": "Sami Nuvens",
+    "searchTerms": [],
+    "tags": [
+      "anime",
+      "kawaii"
+    ]
+  },
+  {
+    "file": "snowball.webp",
+    "label": "Snowball",
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "animais",
+      "cartoon"
+    ]
+  },
+  {
+    "file": "stitch-hoodie.webp",
+    "label": "Stitch Hoodie",
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "anime",
+      "kawaii",
+      "disney-sanrio"
+    ]
+  },
+  {
+    "file": "stitch-pelucia.webp",
+    "label": "Stitch Pelúcia",
+    "searchTerms": [],
+    "tags": [
+      "cultura-pop",
+      "anime",
+      "kawaii",
+      "disney-sanrio"
+    ]
   }
 ]

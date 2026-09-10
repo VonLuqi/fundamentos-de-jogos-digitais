@@ -278,10 +278,13 @@ function toDisplayLabelFromFileName(fileName) {
 }
 
 async function upsertMetadataStub(stubPath, converted, overwriteStub) {
+  // Itens novos: tags vazias ate curadoria manual. Merge nunca sobrescreve
+  // label/searchTerms/tags de entradas ja existentes (mesmo arquivo).
   const generated = converted.map((entry) => ({
     file: entry.fileName,
     label: toDisplayLabelFromFileName(entry.fileName),
     searchTerms: [],
+    tags: [],
   }));
 
   const stat = await fs.stat(stubPath).catch(() => null);

@@ -24,6 +24,41 @@ const SESSION_KEY = 'activeSession';
 const AVATAR_CATALOG_FILE = 'assets/avatars/catalog.stub.json';
 const AVATAR_FALLBACK_FILE = 'hades.webp';
 
+/** Taxonomia: primárias na faixa; subtags sob o `+`. `todos` é só UI. */
+const AVATAR_PRIMARY_TAG_DEFINITIONS = Object.freeze([
+  Object.freeze({ id: 'mitologia', label: 'Mitologia', kind: 'primary', children: Object.freeze(['olimpo', 'norse-god']) }),
+  Object.freeze({ id: 'memes', label: 'Memes', kind: 'primary', children: Object.freeze(['br-memes', 'chad']) }),
+  Object.freeze({ id: 'jogos', label: 'Jogos', kind: 'primary', children: Object.freeze(['mortal-kombat', 'indie']) }),
+  Object.freeze({ id: 'anime', label: 'Anime', kind: 'primary', children: Object.freeze(['shonen', 'kawaii']) }),
+  Object.freeze({ id: 'animais', label: 'Animais', kind: 'primary', children: Object.freeze(['gatos', 'caes']) }),
+  Object.freeze({ id: 'cultura-pop', label: 'Cultura Pop', kind: 'primary', children: Object.freeze(['disney-sanrio', 'cartoon']) }),
+]);
+
+const AVATAR_SUB_TAG_DEFINITIONS = Object.freeze([
+  Object.freeze({ id: 'olimpo', label: 'Olimpo', kind: 'sub', parent: 'mitologia' }),
+  Object.freeze({ id: 'norse-god', label: 'God of War', kind: 'sub', parent: 'mitologia' }),
+  Object.freeze({ id: 'br-memes', label: 'Memes BR', kind: 'sub', parent: 'memes' }),
+  Object.freeze({ id: 'chad', label: 'Chad', kind: 'sub', parent: 'memes' }),
+  Object.freeze({ id: 'mortal-kombat', label: 'Mortal Kombat', kind: 'sub', parent: 'jogos' }),
+  Object.freeze({ id: 'indie', label: 'Indie', kind: 'sub', parent: 'jogos' }),
+  Object.freeze({ id: 'shonen', label: 'Shonen', kind: 'sub', parent: 'anime' }),
+  Object.freeze({ id: 'kawaii', label: 'Kawaii', kind: 'sub', parent: 'anime' }),
+  Object.freeze({ id: 'gatos', label: 'Gatos', kind: 'sub', parent: 'animais' }),
+  Object.freeze({ id: 'caes', label: 'Cães', kind: 'sub', parent: 'animais' }),
+  Object.freeze({ id: 'disney-sanrio', label: 'Disney / Sanrio', kind: 'sub', parent: 'cultura-pop' }),
+  Object.freeze({ id: 'cartoon', label: 'Cartoon', kind: 'sub', parent: 'cultura-pop' }),
+]);
+
+/** Primárias + subtags (whitelist do stub). */
+const AVATAR_TAG_DEFINITIONS = Object.freeze([
+  ...AVATAR_PRIMARY_TAG_DEFINITIONS,
+  ...AVATAR_SUB_TAG_DEFINITIONS,
+]);
+
+const AVATAR_TAG_IDS = new Set(AVATAR_TAG_DEFINITIONS.map((tag) => tag.id));
+const AVATAR_SUB_BY_ID = new Map(AVATAR_SUB_TAG_DEFINITIONS.map((tag) => [tag.id, tag]));
+const AVATAR_FILTER_ALL_ID = 'todos';
+
 let avatarCatalog = [];
 let avatarCatalogPromise = null;
 
@@ -49,6 +84,23 @@ function labelFromAvatarFile(fileName) {
     .join(' ');
 }
 
+/** Mantém só ids da taxonomia, sem duplicata, na ordem do stub. */
+function normalizeAvatarTags(rawTags) {
+  if (!Array.isArray(rawTags)) return [];
+
+  const seen = new Set();
+  const tags = [];
+
+  for (const value of rawTags) {
+    const id = String(value ?? '').trim().toLowerCase();
+    if (!id || !AVATAR_TAG_IDS.has(id) || seen.has(id)) continue;
+    seen.add(id);
+    tags.push(id);
+  }
+
+  return tags;
+}
+
 function normalizeAvatarCatalog(rawCatalog) {
   const safeRaw = Array.isArray(rawCatalog) ? rawCatalog : [];
 
@@ -60,6 +112,7 @@ function normalizeAvatarCatalog(rawCatalog) {
       const label = String(entry?.label || '').trim() || labelFromAvatarFile(file);
       const aliases = Array.isArray(entry?.searchTerms) ? entry.searchTerms : [];
       const baseName = file.replace(/\.webp$/i, '').replace(/-/g, ' ');
+      const tags = normalizeAvatarTags(entry?.tags);
 
       const searchTerms = Array.from(new Set([
         label,
@@ -74,6 +127,7 @@ function normalizeAvatarCatalog(rawCatalog) {
         file,
         label,
         searchTerms,
+        tags: Object.freeze(tags),
         legacyIndex: index,
       });
     })
@@ -89,6 +143,7 @@ function defaultAvatarCatalog() {
     file: AVATAR_FALLBACK_FILE,
     label: 'Hades',
     searchTerms: [normalizeAvatarSearchTerm('hades'), 'avatar 1', '1'],
+    tags: Object.freeze(['mitologia']),
     legacyIndex: 0,
   })];
 }
@@ -127,6 +182,40 @@ function avatarUrlByIndex(index) {
 
 export function getAvatarCatalog() {
   return currentAvatarCatalog();
+}
+
+/** Tags primárias da faixa (sem `todos`). */
+export function getAvatarTagDefinitions() {
+  return AVATAR_PRIMARY_TAG_DEFINITIONS;
+}
+
+export function getAvatarPrimaryTagDefinitions() {
+  return AVATAR_PRIMARY_TAG_DEFINITIONS;
+}
+
+/** Subtags; passe `parentId` para filtrar filhas de um grupo. */
+export function getAvatarSubTagDefinitions(parentId = null) {
+  if (!parentId) return AVATAR_SUB_TAG_DEFINITIONS;
+  const parent = String(parentId);
+  return Object.freeze(
+    AVATAR_SUB_TAG_DEFINITIONS.filter((tag) => tag.parent === parent)
+  );
+}
+
+export function getAvatarParentTagId(tagId) {
+  return AVATAR_SUB_BY_ID.get(String(tagId || ''))?.parent || null;
+}
+
+/** Chips do filtro: Todos + tags primárias. */
+export function getAvatarFilterTagDefinitions() {
+  return Object.freeze([
+    Object.freeze({ id: AVATAR_FILTER_ALL_ID, label: 'Todos', kind: 'all' }),
+    ...AVATAR_PRIMARY_TAG_DEFINITIONS,
+  ]);
+}
+
+export function isAvatarFilterAllTag(tagId) {
+  return String(tagId || '') === AVATAR_FILTER_ALL_ID;
 }
 
 export function getAvatarMetaByIndex(index) {
@@ -199,15 +288,26 @@ export async function loadAvatarImage(imgEl, index) {
 /* ============================================================
    1. RESOLUÇÃO DE CAMINHOS
    ============================================================
-   As páginas vivem em dois níveis (`/index.html` e `/pages/*.html`),
-   mas a API é sempre absoluta a partir da raiz do domínio — o que
+   As páginas vivem em vários níveis:
+   - `/index.html`
+   - `/pages/*.html`
+   - `/pages/submundo/*.html` (arquivo direto)
+   - `/submundo/*` (URL limpa do ARG via rewrite)
+
+   A API é sempre absoluta a partir da raiz do domínio — o que
    funciona igual no Vercel e no `vercel dev`.
    ============================================================ */
 const API_BASE = '/api';
 
 /** Caminho relativo até a raiz do site, a partir da página atual. */
 export function rootPath() {
-  return window.location.pathname.includes('/pages/') ? '..' : '.';
+  const pathname = String(window.location?.pathname || '/');
+  // Arquivo direto: /pages/submundo/estige-obolo.html
+  if (pathname.includes('/pages/submundo/')) return '../..';
+  // URL limpa do ARG: /submundo/estige-obolo
+  if (/(^|\/)submundo(\/|$)/.test(pathname)) return '..';
+  if (pathname.includes('/pages/')) return '..';
+  return '.';
 }
 
 export const ROUTES = {
@@ -234,6 +334,7 @@ export const ROUTES = {
     return `${base}?u=${encodeURIComponent(username)}`;
   },
   souls: () => `${rootPath()}/pages/souls.html`,
+  minigame: () => `${rootPath()}/pages/minigame.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -466,6 +567,42 @@ export function setLessonGate(token, lessonId, gateKey, released) {
     method: 'POST',
     body: JSON.stringify({ token, action: 'setLessonGate', lessonId, gateKey, released }),
   });
+}
+
+export const ARCANE_SURVIVORS_FEATURE_ID = 'arcane_survivors';
+export const FEATURE_UNLOCKED_GATE_KEY = 'unlocked';
+
+export function fetchFeatureGates(token, featureId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'featureGates', featureId }),
+  });
+}
+
+export function setFeatureGate(token, featureId, gateKey, released) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'setFeatureGate', featureId, gateKey, released }),
+  });
+}
+
+/** Mapa featureId → unlocked (boolean). Fallback local se a API falhar. */
+export async function fetchFeatureUnlockMap(token, featureIds = [ARCANE_SURVIVORS_FEATURE_ID]) {
+  const ids = featureIds.length > 0 ? featureIds : [ARCANE_SURVIVORS_FEATURE_ID];
+  const entries = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        const result = await fetchFeatureGates(token, id);
+        if (typeof result?.gates?.unlocked === 'boolean') {
+          return [id, result.gates.unlocked];
+        }
+      } catch {
+        // fallback abaixo
+      }
+      return [id, false];
+    })
+  );
+  return Object.fromEntries(entries);
 }
 
 /** Mapa lessonId → published (boolean). Fallback local se a API falhar. */
@@ -876,6 +1013,7 @@ export {
   getAchievementById,
   getAchievementDifficulty,
   getAchievementRarity,
+  getAchievementVeiledDescription,
   getAchievementXp,
   isMaxLevel,
   levelForXp,
@@ -910,8 +1048,8 @@ export const MODULES = [
       {
         id: 'aula2',
         number: '02',
-        title: 'Loops e Ritmo',
-        subtitle: 'Sistemas cíclicos, timing window e o Tambor do Estige',
+        title: 'O Glossário do Desenvolvedor e o Player na Tela',
+        subtitle: 'Core Loop, Grokking, Assets · Cenas, Nós, Input Map e movimento mínimo',
         rewardXp: 30,
       },
       {

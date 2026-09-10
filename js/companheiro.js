@@ -22,11 +22,14 @@ import {
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
+  fillLockedAchievementDescription,
   getAchievementById,
   getAchievementCollectionStats,
   getAlbumSlotModel,
   rarityLabelForAchievement,
   renderAchievementsList,
+  SOBERANO_ACHIEVEMENT_ID,
+  stopVeiledDescScramble,
 } from './achievements-ui.js';
 
 const COMPANIONS_FLASH_KEY = 'companionsFlash';
@@ -197,6 +200,8 @@ async function openRelicModal(achievement, model = null) {
   const closeBtn = document.getElementById('relic-modal-close');
   if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl || !friendUser) return;
 
+  stopVeiledDescScramble(descEl);
+
   const slot = model && typeof model === 'object' && model.kind
     ? model
     : getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
@@ -227,15 +232,22 @@ async function openRelicModal(achievement, model = null) {
         ? 'Segredo revelado neste Espelho'
         : 'Segredo conhecido — ainda não conquistado neste Espelho';
     } else {
+      const isSoberano = String(achievement.id) === SOBERANO_ACHIEVEMENT_ID;
       await fillAchievementArtHost(art, achievement, { grayscale: true });
       titleEl.textContent = '???';
-      descEl.textContent = MIRROR_SECRET_DESC;
-      metaEl.textContent = slot.applySecretStyle
-        ? 'Segredo velado no Espelho'
-        : 'Segredo velado — ainda não conquistado neste Espelho';
+      fillLockedAchievementDescription(descEl, achievement, MIRROR_SECRET_DESC);
+      metaEl.textContent = isSoberano
+        ? (slot.applySecretStyle ? 'Coroa velada neste Espelho' : 'Coroa velada — ainda não conquistada neste Espelho')
+        : (slot.applySecretStyle
+          ? 'Segredo velado no Espelho'
+          : 'Segredo velado — ainda não conquistado neste Espelho');
+      if (isSoberano) {
+        panel.dataset.rarity = 'unique';
+      }
     }
 
-    if (slot.showRarityBadge) {
+    if (slot.showRarityBadge || String(achievement.id) === SOBERANO_ACHIEVEMENT_ID) {
+      rarityEl.hidden = false;
       rarityEl.textContent = rarityName;
     } else {
       rarityEl.textContent = '';
@@ -245,7 +257,11 @@ async function openRelicModal(achievement, model = null) {
     await fillAchievementArtHost(art, achievement, { grayscale: true });
     rarityEl.textContent = rarityName;
     fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
-    descEl.textContent = 'Esta relíquia ainda não foi conquistada por este companheiro.';
+    fillLockedAchievementDescription(
+      descEl,
+      achievement,
+      'Esta relíquia ainda não foi conquistada por este companheiro.',
+    );
     metaEl.textContent = 'Figurinha bloqueada no Espelho';
   } else {
     await fillAchievementArtHost(art, achievement, { grayscale: false });
@@ -265,6 +281,7 @@ async function openRelicModal(achievement, model = null) {
 function closeRelicModal({ restoreHash = true } = {}) {
   const modal = document.getElementById('relic-modal');
   if (!modal || modal.hidden) return;
+  stopVeiledDescScramble(document.getElementById('relic-modal-desc'));
   modal.classList.remove('is-open');
   modal.hidden = true;
   document.body.classList.remove('is-relic-modal-open');

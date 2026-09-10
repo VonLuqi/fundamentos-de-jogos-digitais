@@ -27,7 +27,12 @@ import {
   detectAvatarCount,
   getAvatarCount,
   getAvatarCatalog,
+  getAvatarFilterTagDefinitions,
   getAvatarMetaByIndex,
+  getAvatarParentTagId,
+  getAvatarPrimaryTagDefinitions,
+  getAvatarSubTagDefinitions,
+  isAvatarFilterAllTag,
   avatarSafeIndex,
   loadAvatarImage,
   ACHIEVEMENTS,
@@ -43,6 +48,10 @@ import {
   getSession,
   describeLevelProgress,
   fetchLessonsPublishMap,
+  fetchFeatureUnlockMap,
+  setFeatureGate,
+  ARCANE_SURVIVORS_FEATURE_ID,
+  FEATURE_UNLOCKED_GATE_KEY,
   normalizeAchievementRarity,
   listFriends,
   listClassmates,
@@ -53,6 +62,8 @@ import {
 let currentUser = null;
 let currentToken = null;
 let publishMap = {};
+let featureUnlockMap = { [ARCANE_SURVIVORS_FEATURE_ID]: false };
+let shellApi = null;
 
 function normalizeSearchText(value) {
   return String(value ?? '')
@@ -519,15 +530,50 @@ function initAvatarSwap() {
     const head = document.createElement('div');
     head.className = 'avatar-picker__head';
 
-    const title = document.createElement('p');
-    title.className = 'avatar-picker__title';
-    title.textContent = 'Biblioteca de Avatares';
+    const tagsGroup = document.createElement('div');
+    tagsGroup.className = 'avatar-picker__tags';
+    tagsGroup.setAttribute('role', 'group');
+    tagsGroup.setAttribute('aria-label', 'Filtrar por categoria');
 
-    const subtitle = document.createElement('p');
-    subtitle.className = 'avatar-picker__subtitle';
-    subtitle.textContent = 'Selecione um avatar da galeria e confirme para aplicar.';
+    const moreBtn = document.createElement('button');
+    moreBtn.type = 'button';
+    moreBtn.className = 'avatar-picker__tag avatar-picker__tag--more';
+    moreBtn.textContent = '+';
+    moreBtn.setAttribute('aria-haspopup', 'dialog');
+    moreBtn.setAttribute('aria-expanded', 'false');
+    moreBtn.setAttribute('aria-controls', 'avatar-picker-more-modal');
+    moreBtn.setAttribute('aria-label', 'Abrir tags específicas');
 
-    head.append(title, subtitle);
+    const moreModal = document.createElement('div');
+    moreModal.id = 'avatar-picker-more-modal';
+    moreModal.className = 'avatar-picker__more-modal';
+    moreModal.hidden = true;
+    moreModal.setAttribute('role', 'dialog');
+    moreModal.setAttribute('aria-modal', 'true');
+    moreModal.setAttribute('aria-labelledby', 'avatar-picker-more-title');
+
+    const moreDialog = document.createElement('div');
+    moreDialog.className = 'avatar-picker__more-dialog';
+
+    const moreTitle = document.createElement('h3');
+    moreTitle.id = 'avatar-picker-more-title';
+    moreTitle.className = 'avatar-picker__more-title';
+    moreTitle.textContent = 'Tags específicas';
+
+    const moreHint = document.createElement('p');
+    moreHint.className = 'avatar-picker__more-hint';
+    moreHint.textContent = 'Filtros menores e mais precisos.';
+
+    const moreBody = document.createElement('div');
+    moreBody.className = 'avatar-picker__more-body';
+
+    const moreClose = document.createElement('button');
+    moreClose.type = 'button';
+    moreClose.className = 'btn-gold btn-gold--ghost avatar-picker__more-close';
+    moreClose.textContent = 'Fechar';
+
+    moreDialog.append(moreTitle, moreHint, moreBody, moreClose);
+    moreModal.appendChild(moreDialog);
 
     const searchWrap = document.createElement('div');
     searchWrap.className = 'avatar-picker__search';
@@ -582,6 +628,7 @@ function initAvatarSwap() {
     const avatars = getAvatarCatalog().map((avatar, index) => ({
       ...avatar,
       index,
+      tags: Array.isArray(avatar.tags) ? avatar.tags : [],
       searchableText: normalizeSearchText([
         avatar.label,
         ...(avatar.searchTerms || []),
@@ -590,19 +637,136 @@ function initAvatarSwap() {
       ].join(' ')),
     }));
 
+    const tagCounts = new Map();
+    avatars.forEach((avatar) => {
+      avatar.tags.forEach((tagId) => {
+        tagCounts.set(tagId, (tagCounts.get(tagId) || 0) + 1);
+      });
+    });
+
+    const filterTags = getAvatarFilterTagDefinitions().filter((tag) => (
+      isAvatarFilterAllTag(tag.id) || (tagCounts.get(tag.id) || 0) > 0
+    ));
+
+    const visibleSubTags = getAvatarSubTagDefinitions()
+      .filter((tag) => (tagCounts.get(tag.id) || 0) > 0);
+
     const selectedIndex = avatarSafeIndex(currentUser?.avatarIndex ?? 0);
     let pendingIndex = selectedIndex;
+    let activeTagId = 'todos';
     const allButtons = [];
+    const primaryTagButtons = [];
+    let subTagButtons = [];
     let loadedOk = 0;
     let loadFailed = 0;
+
+    function currentTagButtons() {
+      return [...primaryTagButtons, ...subTagButtons];
+    }
 
     function setBusy(busy) {
       allButtons.forEach((button) => {
         button.disabled = busy;
       });
+      currentTagButtons().forEach((button) => {
+        button.disabled = busy;
+      });
+      moreBtn.disabled = busy;
+      moreClose.disabled = busy;
       searchInput.disabled = busy;
       confirmBtn.disabled = busy;
       cancelBtn.disabled = busy;
+    }
+
+    function isMoreModalOpen() {
+      return !moreModal.hidden;
+    }
+
+    function closeMoreModal() {
+      if (moreModal.hidden) return;
+      moreModal.hidden = true;
+      moreBtn.setAttribute('aria-expanded', 'false');
+      moreBtn.focus();
+    }
+
+    function rebuildMoreModalBody() {
+      moreBody.innerHTML = '';
+      subTagButtons = [];
+
+      if (visibleSubTags.length === 0) {
+        const emptyMore = document.createElement('p');
+        emptyMore.className = 'avatar-picker__more-empty';
+        emptyMore.textContent = 'Nenhuma tag específica disponível.';
+        moreBody.appendChild(emptyMore);
+        return;
+      }
+
+      getAvatarPrimaryTagDefinitions().forEach((parent) => {
+        const children = visibleSubTags.filter((tag) => tag.parent === parent.id);
+        if (children.length === 0) return;
+
+        const section = document.createElement('section');
+        section.className = 'avatar-picker__more-section';
+
+        const heading = document.createElement('h4');
+        heading.className = 'avatar-picker__more-section-title';
+        heading.textContent = parent.label;
+
+        const chips = document.createElement('div');
+        chips.className = 'avatar-picker__more-chips';
+        chips.setAttribute('role', 'group');
+        chips.setAttribute('aria-label', `Tags de ${parent.label}`);
+
+        children.forEach((tag) => {
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'avatar-picker__tag avatar-picker__tag--sub';
+          chip.dataset.tagId = tag.id;
+          chip.textContent = tag.label;
+          const pressed = activeTagId === tag.id;
+          chip.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+          if (pressed) chip.classList.add('is-active');
+
+          chip.addEventListener('click', () => {
+            if (chip.disabled) return;
+            setActiveTag(tag.id);
+            closeMoreModal();
+          });
+
+          subTagButtons.push(chip);
+          chips.appendChild(chip);
+        });
+
+        section.append(heading, chips);
+        moreBody.appendChild(section);
+      });
+    }
+
+    function openMoreModal() {
+      rebuildMoreModalBody();
+      moreModal.hidden = false;
+      moreBtn.setAttribute('aria-expanded', 'true');
+      moreClose.focus();
+    }
+
+    function updateTagUi() {
+      const parentOfActive = getAvatarParentTagId(activeTagId);
+      const secondaryActive = Boolean(parentOfActive);
+
+      primaryTagButtons.forEach((button) => {
+        const pressed = button.dataset.tagId === activeTagId;
+        const context = button.dataset.tagId === parentOfActive;
+        button.classList.toggle('is-active', pressed);
+        button.classList.toggle('is-context', context);
+        button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      });
+
+      moreBtn.classList.toggle('is-active', secondaryActive || isMoreModalOpen());
+      moreBtn.setAttribute('aria-expanded', isMoreModalOpen() ? 'true' : 'false');
+
+      if (isMoreModalOpen()) {
+        rebuildMoreModalBody();
+      }
     }
 
     function updateSelectionUi() {
@@ -619,11 +783,18 @@ function initAvatarSwap() {
 
     function applyFilter() {
       const query = normalizeSearchText(searchInput.value);
+      const filterByTag = !isAvatarFilterAllTag(activeTagId);
+      const filterActive = query.length > 0 || filterByTag;
       let visibleCount = 0;
 
       allButtons.forEach((button) => {
         const searchableText = button.dataset.searchableText || '';
-        const visible = query.length === 0 || searchableText.includes(query);
+        const buttonTags = String(button.dataset.tags || '')
+          .split(/\s+/)
+          .filter(Boolean);
+        const matchesQuery = query.length === 0 || searchableText.includes(query);
+        const matchesTag = !filterByTag || buttonTags.includes(activeTagId);
+        const visible = matchesQuery && matchesTag;
         button.hidden = !visible;
         if (visible) visibleCount += 1;
       });
@@ -631,24 +802,74 @@ function initAvatarSwap() {
       empty.hidden = visibleCount > 0;
 
       // Meta/confirm usam pendingIndex — seleção sobrevive ao filtro mesmo se o card sumir.
+      // Status ocioso sem contador: só filtro ativo, erro de imagem ou vazio.
       if (count > 0 && loadFailed + loadedOk === count) {
-        if (query.length > 0) {
+        if (filterActive) {
           status.textContent = visibleCount === 0
             ? 'Nenhum avatar encontrado para esse filtro.'
             : `${visibleCount} avatar${visibleCount === 1 ? '' : 'es'} encontrado${visibleCount === 1 ? '' : 's'}.`;
         } else if (loadFailed > 0) {
-          status.textContent = `${loadedOk} avatares disponíveis. ${loadFailed} com falha de imagem.`;
-        } else if (loadedOk > 0) {
-          status.textContent = `${loadedOk} avatares disponíveis na biblioteca.`;
+          status.textContent = `${loadFailed} avatar${loadFailed === 1 ? '' : 'es'} com falha de imagem.`;
+        } else {
+          status.textContent = '';
         }
       }
     }
+
+    function setActiveTag(nextTagId) {
+      const normalized = String(nextTagId || 'todos');
+      if (normalized === activeTagId && !isAvatarFilterAllTag(normalized)) {
+        activeTagId = 'todos';
+      } else {
+        activeTagId = normalized;
+      }
+      updateTagUi();
+      applyFilter();
+    }
+
+    filterTags.forEach((tag) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'avatar-picker__tag';
+      chip.dataset.tagId = tag.id;
+      chip.textContent = tag.label;
+      chip.setAttribute('aria-pressed', isAvatarFilterAllTag(tag.id) ? 'true' : 'false');
+      if (isAvatarFilterAllTag(tag.id)) {
+        chip.classList.add('is-active');
+      }
+      chip.addEventListener('click', () => {
+        if (chip.disabled) return;
+        setActiveTag(tag.id);
+      });
+      primaryTagButtons.push(chip);
+      tagsGroup.appendChild(chip);
+    });
+
+    if (visibleSubTags.length > 0) {
+      moreBtn.addEventListener('click', () => {
+        if (moreBtn.disabled) return;
+        if (isMoreModalOpen()) closeMoreModal();
+        else openMoreModal();
+      });
+      tagsGroup.appendChild(moreBtn);
+    }
+
+    moreClose.addEventListener('click', closeMoreModal);
+    moreModal.addEventListener('click', (event) => {
+      if (event.target === moreModal) closeMoreModal();
+    });
+
+    head.appendChild(tagsGroup);
 
     const count = avatars.length;
     if (count === 0) {
       status.textContent = 'Galeria vazia. Adicione avatares para habilitar a seleção.';
       confirmBtn.disabled = true;
       searchInput.disabled = true;
+      primaryTagButtons.forEach((button) => {
+        button.disabled = true;
+      });
+      moreBtn.disabled = true;
     }
 
     avatars.forEach((avatar) => {
@@ -657,6 +878,7 @@ function initAvatarSwap() {
       option.className = 'avatar-picker__option';
       option.dataset.avatarIndex = String(avatar.index);
       option.dataset.searchableText = avatar.searchableText;
+      option.dataset.tags = avatar.tags.join(' ');
       option.setAttribute('aria-label', `Selecionar ${avatar.label}`);
 
       const image = document.createElement('img');
@@ -695,17 +917,22 @@ function initAvatarSwap() {
     });
 
     searchInput.addEventListener('input', applyFilter);
-    cancelBtn.addEventListener('click', closeScrollModal);
+    cancelBtn.addEventListener('click', () => {
+      closeMoreModal();
+      closeScrollModal();
+    });
 
     confirmBtn.addEventListener('click', async () => {
       if (confirmBtn.disabled) {
         if (pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0)) {
+          closeMoreModal();
           closeScrollModal();
         }
         return;
       }
 
       setBusy(true);
+      closeMoreModal();
       status.textContent = 'Salvando avatar...';
 
       frame.classList.remove('is-swapping');
@@ -725,6 +952,7 @@ function initAvatarSwap() {
       }
     });
 
+    updateTagUi();
     updateSelectionUi();
     applyFilter();
 
@@ -740,7 +968,7 @@ function initAvatarSwap() {
     footer.className = 'avatar-picker__footer';
     footer.append(empty, meta, status, actions);
 
-    wrapper.append(chrome, scrollRegion, footer);
+    wrapper.append(chrome, scrollRegion, footer, moreModal);
     return { wrapper, focusElement: searchInput };
   }
 
@@ -812,6 +1040,15 @@ function initScrollModal() {
   });
 }
 
+function syncMinigameToggleButton() {
+  const btn = document.getElementById('btn-toggle-minigame');
+  if (!btn) return;
+  const unlocked = Boolean(featureUnlockMap[ARCANE_SURVIVORS_FEATURE_ID]);
+  btn.textContent = unlocked ? 'Travar Arcane Survivors' : 'Destravar Arcane Survivors';
+  btn.setAttribute('aria-pressed', String(unlocked));
+  btn.classList.toggle('btn-gold--pulse', !unlocked);
+}
+
 /* ============================================================
    9. FERRAMENTAS DO ADMIN
    ============================================================ */
@@ -832,11 +1069,43 @@ function initAdminTools() {
 
   const btnCodes = document.getElementById('btn-generate-codes');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
+  const btnToggleMinigame = document.getElementById('btn-toggle-minigame');
   const btnSouls = document.getElementById('btn-list-souls');
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
+  syncMinigameToggleButton();
+
   btnManageLessons?.addEventListener('click', () => {
     window.location.href = ROUTES.aulas();
+  });
+
+  btnToggleMinigame?.addEventListener('click', async () => {
+    const unlocked = Boolean(featureUnlockMap[ARCANE_SURVIVORS_FEATURE_ID]);
+    const next = !unlocked;
+    btnToggleMinigame.disabled = true;
+    const original = btnToggleMinigame.textContent;
+    btnToggleMinigame.textContent = next ? 'Destravando…' : 'Travando…';
+    try {
+      const result = await setFeatureGate(
+        currentToken,
+        ARCANE_SURVIVORS_FEATURE_ID,
+        FEATURE_UNLOCKED_GATE_KEY,
+        next
+      );
+      featureUnlockMap = {
+        ...featureUnlockMap,
+        [ARCANE_SURVIVORS_FEATURE_ID]: Boolean(result?.gates?.unlocked),
+      };
+      shellApi?.applyFeatureGates?.(featureUnlockMap);
+      syncMinigameToggleButton();
+    } catch (error) {
+      const p = document.createElement('p');
+      p.textContent = error instanceof ApiError ? error.message : 'Falha ao atualizar o selo do minigame.';
+      openScrollModal('Erro', p);
+      btnToggleMinigame.textContent = original;
+    } finally {
+      btnToggleMinigame.disabled = false;
+    }
   });
 
   btnCodes?.addEventListener('click', async () => {
@@ -996,7 +1265,7 @@ async function init() {
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
 
-  initAppShell({
+  shellApi = initAppShell({
     route: 'dashboard',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: handleDashboardLogout,
@@ -1009,6 +1278,16 @@ async function init() {
   } catch {
     publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
   }
+
+  try {
+    featureUnlockMap = await fetchFeatureUnlockMap(currentToken, [ARCANE_SURVIVORS_FEATURE_ID]);
+  } catch {
+    featureUnlockMap = { [ARCANE_SURVIVORS_FEATURE_ID]: false };
+  }
+  if (shellApi?.featureGatesReady) {
+    await shellApi.featureGatesReady;
+  }
+  shellApi?.applyFeatureGates?.(featureUnlockMap);
 
   // A hidratação visual (stats/cards) pode falhar por dado inesperado
   // do servidor, mas isso NUNCA pode impedir os botões de funcionar.

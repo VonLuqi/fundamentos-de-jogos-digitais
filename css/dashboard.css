@@ -579,6 +579,31 @@ body {
   letter-spacing: 0.16em;
   padding: 0.28rem 0.75rem;
 }
+
+/* Única — full art: a imagem cobre o card inteiro; nome + badge sobrepostos */
+.achievement-card[data-rarity='unique'] .achievement-card__art-stage,
+.achievement-card.is-soberano-featured[data-rarity='unique'] .achievement-card__art-stage {
+  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.achievement-card[data-rarity='unique'] img.achievement-card__art.has-art,
+.achievement-card.is-soberano-featured[data-rarity='unique'] img.achievement-card__art.has-art {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  object-fit: cover;
+  object-position: center;
+}
+.achievement-card[data-rarity='unique'] .achievement-card__name,
+.achievement-card[data-rarity='unique'] .achievement-card__rarity {
+  z-index: 3;
+}
+
 .lessons-list.is-preview {
   margin-bottom: 0;
 }
@@ -781,6 +806,7 @@ img.achievement-card__art.has-art {
   --frame-aura: rgba(194, 53, 72, 0.42);
 }
 
+/* Trailhead: runas → anagrama do portão; pasta do abismo = /submundo (Elements / robots.txt). */
 .trailhead-rune {
   font-style: italic;
   font-weight: 600;
@@ -1882,7 +1908,7 @@ img.achievement-card__art.has-art {
 .scroll-modal--avatar .scroll-modal__parchment {
   display: flex;
   flex-direction: column;
-  width: min(560px, 100%);
+  width: min(740px, calc(100% - 2rem));
   max-height: min(80vh, 720px);
   overflow: hidden;
 }
@@ -1974,6 +2000,7 @@ img.achievement-card__art.has-art {
 }
 
 .avatar-picker {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
@@ -1982,23 +2009,154 @@ img.achievement-card__art.has-art {
 .avatar-picker__head {
   display: flex;
   flex-direction: column;
+  gap: 0.35rem;
+}
+
+.avatar-picker__tags {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.avatar-picker__tag {
+  appearance: none;
+  margin: 0;
+  padding: 0.32rem 0.55rem;
+  font-family: var(--font-title);
+  font-size: 0.52rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid var(--hades-gold-dark);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.avatar-picker__tag--more {
+  min-width: 1.7rem;
+  padding-left: 0.4rem;
+  padding-right: 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+}
+
+.avatar-picker__tag:hover:not(:disabled) {
+  border-color: var(--hades-gold);
+  color: var(--hades-gold-bright);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.28);
+}
+
+.avatar-picker__tag.is-active,
+.avatar-picker__tag[aria-pressed='true'] {
+  color: #1e1204;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+  border-color: var(--hades-gold-bright);
+  box-shadow: 0 0 12px rgba(242, 213, 154, 0.45);
+}
+
+.avatar-picker__tag.is-context:not(.is-active) {
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 10px rgba(207, 167, 89, 0.25);
+}
+
+.avatar-picker__tag:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.avatar-picker__tag--sub {
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  padding: 0.26rem 0.48rem;
+}
+
+.avatar-picker__more-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem;
+  background: rgba(8, 5, 3, 0.72);
+}
+
+.avatar-picker__more-modal[hidden] {
+  display: none !important;
+}
+
+.avatar-picker__more-dialog {
+  width: min(100%, 28rem);
+  max-height: min(70vh, 28rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.9rem 0.85rem;
+  background: linear-gradient(180deg, rgba(36, 22, 12, 0.98), rgba(16, 10, 6, 0.98));
+  border: 1px solid var(--hades-gold-dark);
+  box-shadow: 0 0 28px rgba(0, 0, 0, 0.55), 0 0 18px rgba(207, 167, 89, 0.2);
+}
+
+.avatar-picker__more-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--hades-gold-bright);
+}
+
+.avatar-picker__more-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--hades-text-dim);
+}
+
+.avatar-picker__more-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-right: 0.15rem;
+}
+
+.avatar-picker__more-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.avatar-picker__more-section-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.52rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.avatar-picker__more-chips {
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.3rem;
 }
 
-.avatar-picker__title {
-  font-family: var(--font-title);
-  font-size: 0.86rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--hades-gold-bright);
+.avatar-picker__more-empty {
+  margin: 0;
   text-align: center;
+  color: var(--hades-text-dim);
+  font-size: 0.86rem;
 }
 
-.avatar-picker__subtitle {
-  font-size: 0.86rem;
-  color: var(--hades-text-dim);
-  text-align: center;
-  font-style: italic;
+.avatar-picker__more-close {
+  width: 100%;
 }
 
 .avatar-picker__search {
@@ -2446,6 +2604,10 @@ img.achievement-card__art.has-art {
   .scroll-modal--avatar .scroll-modal__parchment {
     max-height: min(88vh, 720px);
     padding: 1.25rem;
+  }
+
+  .avatar-picker__tags {
+    flex-wrap: wrap;
   }
 
   .scroll-modal--avatar .avatar-picker-grid {

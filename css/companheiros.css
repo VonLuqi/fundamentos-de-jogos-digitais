@@ -549,12 +549,24 @@ body[data-mirror-mode='turma'] .relic-modal {
   width: 100%;
   box-sizing: border-box;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  overflow: hidden;
+  overflow: visible;
 }
 
 .mirror-shell__content .achievement-slot {
   min-width: 0;
   overflow: hidden;
+}
+
+.mirror-shell__content .achievement-slot.is-soberano-featured {
+  overflow: visible;
+  width: min(100%, 20.5rem);
+  min-height: 19rem;
+  margin: 0.2rem auto 1rem;
+}
+
+.mirror-shell__content .achievement-slot.is-soberano-featured .achievement-slot__face {
+  min-height: 19rem;
+  max-width: 100%;
 }
 
 .mirror-shell__content .achievement-slot__face {

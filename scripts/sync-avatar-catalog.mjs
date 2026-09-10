@@ -21,7 +21,7 @@ Opcoes:
   --avatars-dir <pasta>  Pasta de avatares (padrao: assets/avatars)
   --api-file <arquivo>   Arquivo legado com const AVATAR_FILES (opcional)
   --readme-file <arquivo> README da pasta de avatares (padrao: assets/avatars/README.md)
-  --stub-file <arquivo>  Gera/atualiza stub JSON de metadata (label/searchTerms)
+  --stub-file <arquivo>  Gera/atualiza stub JSON de metadata (label/searchTerms/tags)
   --overwrite-stub       Sobrescreve o stub inteiro com confirmacao explicita
   --clean-legacy         Remove arquivos legado de avatar (nao .webp)
   --help                 Exibe esta ajuda
@@ -137,10 +137,12 @@ function labelFromFileName(file) {
 }
 
 function buildMetadataStub(files) {
+  // Itens novos: tags vazias ate curadoria. Merge preserva metadata manual.
   return files.map((file) => ({
     file,
     label: labelFromFileName(file),
     searchTerms: [],
+    tags: [],
   }));
 }
 
@@ -162,6 +164,7 @@ async function upsertMetadataStub(stubFilePath, files, overwriteStub) {
   const raw = await fs.readFile(stubFilePath, 'utf8');
   const parsed = JSON.parse(raw);
   const existing = Array.isArray(parsed) ? parsed : [];
+  // Preserva label, searchTerms e tags ja curados; so insere arquivos novos.
   const byFile = new Map(existing.map((item) => [String(item?.file || '').toLowerCase(), item]));
 
   let inserted = 0;
@@ -185,7 +188,8 @@ Esta pasta guarda a galeria fixa de avatares do projeto. O frontend
 carrega cada imagem por caminho exato, sem testar extensoes em serie.
 A galeria foi padronizada para WebP para reduzir peso e simplificar a
 resolucao. O indice salvo no banco (avatar_index) continua sendo
-0-based e corresponde a ordem abaixo.
+0-based e corresponde a ordem do catalogo semantico
+(\`assets/avatars/catalog.stub.json\`), nao a ordem alfabetica abaixo.
 
 Total de avatares ativos: ${files.length}
 
@@ -195,6 +199,34 @@ Galeria atual:
 ${list}
 \`\`\`
 
+## Metadados do catalogo (\`catalog.stub.json\`)
+
+Cada entrada do stub usa:
+
+\`\`\`json
+{
+  "file": "hades.webp",
+  "label": "Hades",
+  "searchTerms": [],
+  "tags": ["mitologia"]
+}
+\`\`\`
+
+- \`file\`: nome do WebP em \`assets/avatars/\`.
+- \`label\`: nome exibido na UI e base da busca.
+- \`searchTerms\`: aliases opcionais para a busca.
+- \`tags\`: ids da taxonomia de filtro (sem \`todos\`). Ids **primarios**:
+  \`mitologia\`, \`memes\`, \`jogos\`, \`anime\`, \`animais\`, \`cultura-pop\`.
+  Ids **sub** (chip \`+\` no fim da faixa abre modal): \`olimpo\`, \`norse-god\`, \`br-memes\`, \`chad\`,
+  \`mortal-kombat\`, \`indie\`, \`shonen\`, \`kawaii\`, \`gatos\`, \`caes\`,
+  \`disney-sanrio\`, \`cartoon\`.
+  Um avatar pode ter varias tags. Subtag exige tambem a primaria pai.
+  Sem tags (ou \`[]\`) so aparece em Todos e na busca por texto
+  (ver \`docs/plano-tags-filtro-avatar.md\`).
+
+Os scripts de import/sync **nao** apagam \`label\`, \`searchTerms\` nem \`tags\`
+de entradas existentes no merge. So \`--overwrite-stub\` recria o stub inteiro.
+
 Recomendacoes:
 - manter nomes e ordem estaveis para nao alterar o avatar de usuarios
   que ja escolheram um indice;
@@ -202,7 +234,8 @@ Recomendacoes:
 - manter WebP como formato padrao para os avatares;
 - ao importar novos avatares, usar o script scripts/import-avatars-webp.mjs;
 - apos importar/limpar, executar scripts/sync-avatar-catalog.mjs para
-  manter catalog.stub.json e este README sincronizados.
+  manter catalog.stub.json e este README sincronizados;
+- apos importar, preencher \`tags\` no stub antes de publicar o filtro.
 `;
 }
 
