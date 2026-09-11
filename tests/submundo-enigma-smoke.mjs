@@ -112,15 +112,10 @@ assert(!isDevtoolsShortcut({ key: 'u', ctrlKey: true, shiftKey: true }), 'Ctrl+S
 assert(read('js/devtools-guard.boot.js').includes('__fjdDevtoolsGuardBound'), 'boot síncrono no head');
 assert(read('js/devtools-guard.boot.js').includes('contextmenu'), 'boot vela botão direito');
 assert(read('js/devtools-guard.js').includes('contextmenu'), 'módulo vela botão direito');
-assert(read('js/devtools-guard.boot.js').includes('location.replace'), 'boot redireciona se DevTools aberto');
-assert(read('js/devtools-guard.js').includes('location.replace'), 'módulo redireciona se DevTools aberto');
-assert(read('js/devtools-guard.boot.js').includes('new Worker'), 'boot usa Worker para detectar DevTools');
-assert(read('js/devtools-guard.js').includes('new Worker'), 'módulo usa Worker para detectar DevTools');
-assert(!read('js/devtools-guard.js').includes('fjd-devtools-veil'), 'sem overlay de véu');
-assert(
-  !/\bdebugger\s*;/.test(read('js/devtools-guard.js').split('Blob')[0]),
-  'módulo sem debugger fora do Worker/Blob'
-);
+assert(!read('js/devtools-guard.boot.js').includes('location.replace'), 'boot não redireciona por heurística');
+assert(!read('js/devtools-guard.js').includes('location.replace'), 'módulo não redireciona por heurística');
+assert(!read('js/devtools-guard.boot.js').includes('new Worker'), 'boot sem Worker/debugger');
+assert(!read('js/devtools-guard.js').includes('new Worker'), 'módulo sem Worker/debugger');
 assert(read('pages/dashboard.html').includes('devtools-guard.boot.js'), 'dashboard carrega o boot cedo');
 assert(read('index.html').includes('devtools-guard.boot.js'), 'index carrega o boot cedo');
 assert(!read('pages/submundo/tartaro-oculto.html').includes('devtools-guard.boot.js'), 'Tártaro sem boot do véu');
