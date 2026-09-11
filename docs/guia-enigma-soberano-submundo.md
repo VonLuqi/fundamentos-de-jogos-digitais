@@ -151,7 +151,7 @@ for (let i = 0; i < d.length; i += 4) {
 ctx.putImageData(imgData, 0, 0);
 ```
 
-Alternativa DevTools: `filter: invert(100%) contrast(300%)` no canvas (pode precisar reforçar alfa).
+> O espelho deve parecer **negro vazio**. CSS `filter: invert()` sozinho **não** basta (alfa 0 na runa).
 
 3. Runa: **`COCYTUS_REFLECTION_404`** → `/submundo/estige-obolo`.
 

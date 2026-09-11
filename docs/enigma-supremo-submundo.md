@@ -150,7 +150,7 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
 * **A Pista / Riddle:**
   > *"O espelho do lamentoso Cócito reflete o oposto da verdade. Inverta a matriz de cores dos pixels e ajuste a frequência alfa no Canvas para revelar a runa submersa nas profundezas."*
 * **A Mecânica:** **Manipulação de Canvas API & Pixel Data via Console JS.**
-  A página possui um elemento `<canvas id="cocito-mirror">`. A frase secreta foi desenhada no Canvas com cores invertidas e transparência mascarada. O aluno tem duas vias de resolução interativas:
+  A página possui um elemento `<canvas id="cocito-mirror">`. A runa é desenhada, depois o buffer é invertido e os pixels da inscrição ficam com **alfa 0** (água opaca negra). Só invert+forçar alfa no Console revela o texto — `filter: invert()` sozinho **não** basta (alfa zero).
   1. **Inversão de Pixels via JS no Console:**
      ```javascript
      const canvas = document.getElementById('cocito-mirror');
@@ -167,7 +167,6 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
      }
      ctx.putImageData(imgData, 0, 0);
      ```
-  2. **Injeção de CSS via DevTools:** Adicionar no elemento Canvas o estilo `filter: invert(100%) contrast(300%);`.
 * **A Solução:** O Canvas processado exibe a inscrição alfanumérica: `COCYTUS_REFLECTION_404`.
 * **Próxima URL:** `/submundo/estige-obolo`
 
