@@ -504,7 +504,9 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
     position: sticky;
     top: 0;
     z-index: 40;
+    display: flex;
     align-items: flex-start;
+    justify-content: space-between;
     gap: 0.85rem;
     padding-top: calc(0.9rem + env(safe-area-inset-top, 0px));
     background: linear-gradient(180deg, rgba(13, 10, 16, 0.94), rgba(13, 10, 16, 0.82));
@@ -517,14 +519,27 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
   }
 
   .app-shell__header-left {
+    position: relative;
     flex: 1 1 auto;
     align-items: flex-start;
     min-width: 0;
+    /* Reserva espaço simétrico ao toggle para o título centrar no viewport */
+    padding-right: 3.25rem;
   }
 
   .app-shell__titles {
     flex: 1 1 auto;
     min-width: 0;
+    text-align: center;
+  }
+
+  .app-shell__header-actions {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
   }
 
   .app-shell__menu-toggle {

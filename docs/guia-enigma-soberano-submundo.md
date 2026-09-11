@@ -32,18 +32,21 @@ Progresso entre salas = **conhecer a URL** (estilo Notpron). Não há conquista 
 ## Visão rápida da jornada
 
 ```
-Álbum (runas = portão) + pistas espalhadas (= pasta /submundo)
-        ↓
-/submundo/tartaro-oculto     → CSS --shadow-color → CERBERUS-UNBOUND
-        ↓
-/submundo/asfodelos-sussurros → espectrograma WAV → PERSEPHONE_PASS
-        ↓
-/submundo/elisios-julgamento  → Network + Base64 → key_elestial_hades
-        ↓
-/submundo/estige-obolo        → SHA-256 no Console → hash → redeem
-        ↓
-Soberano do Submundo (+1500 XP)
+Álbum (runas = portão) ──┐
+                         ├─→ anagrama TARTARO OCULTO
+Salão (eco glitch)     ──┘         ↓
+                    /submundo/tartaro-oculto  → CERBERUS-UNBOUND
+                              ↓
+                    /submundo/asfodelos-sussurros → PERSEPHONE_PASS
+                              ↓
+                    /submundo/elisios-julgamento  → key_elestial_hades
+                              ↓
+                    /submundo/estige-obolo        → SHA-256 → redeem
+                              ↓
+                    Soberano do Submundo (+1500 XP)
 ```
+
+Atalho no hub: glifo glitch discreto (canto inferior, fora do fluxo) → modal → passe `TARTARO OCULTO` (aceita hífen/acentos) → Tártaro. Trailhead das runas permanece.
 
 ---
 
@@ -51,8 +54,9 @@ Soberano do Submundo (+1500 XP)
 
 ### Objetivo
 
-1. Soletrar o **portão** com as runas cipher → anagrama `TARTARO OCULTO` → slug `tartaro-oculto`.
-2. Descobrir a **pasta** do abismo (`/submundo`) por **pistas espalhadas** — ela **não** é soletrada como o anagrama.
+1. Soletrar o **portão** com as runas cipher → anagrama `TARTARO OCULTO` → slug `tartaro-oculto`  
+   **ou** usar o eco glitch do Salão dos Heróis com a mesma palavra-passe.
+2. Descobrir a **pasta** do abismo (`/submundo`) por **pistas espalhadas** — ela **não** é soletrada como o anagrama (o portão do Salão já redireciona com a pasta correta).
 
 ### Parte A — O portão (runas)
 

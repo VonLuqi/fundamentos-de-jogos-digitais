@@ -24,6 +24,7 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
   $$\text{"T A R T A R O  --  O C U L T O"}$$
 * **A Descoberta:** Ao reunir as letras destacadas e resolver o anagrama, o aluno obtém a rota de acesso secreta no domínio da aplicação.
 * **URL Secreta Inicial:** `/submundo/tartaro-oculto`
+* **Portão do Salão (paralelo):** no hub *Salão dos Heróis*, um glifo corrupto quase invisível (`░`, canto inferior) abre o modal de palavra-passe. A resposta é o mesmo anagrama (`TARTARO OCULTO`); sucesso redireciona para `/submundo/tartaro-oculto`. O trailhead das runas permanece.
 
 ---
 

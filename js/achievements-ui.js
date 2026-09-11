@@ -175,8 +175,10 @@ export async function fillAchievementArtHost(hostEl, achievement, {
 const rainbowVfxBoundElements = new WeakSet();
 let rainbowVfxInstancePromise = null;
 let rainbowVfxDisabled = false;
-/** Canvas WebGL do @vfx-js — default da lib é z-index 9999; abaixo do header mobile (40). */
-const RAINBOW_VFX_CANVAS_Z_INDEX = 25;
+/** Canvas WebGL do @vfx-js — default da lib é z-index 9999.
+ *  Fica em 1 para ficar *abaixo* do stacking context de `.app-shell` (z-index 2).
+ *  Header sticky (40) só vence dentro do shell; canvas no body precisa ficar abaixo do shell. */
+const RAINBOW_VFX_CANVAS_Z_INDEX = 1;
 let rainbowVfxCanvas = null;
 let rainbowVfxSuspended = false;
 /** Motivos concorrentes (drawer, modal, reduced-motion) — suspende se qualquer um estiver ativo. */

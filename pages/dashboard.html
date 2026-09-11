@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
 
@@ -144,6 +145,15 @@
               <p class="profile-panel__username" id="profile-username">@—</p>
               <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
               <p class="profile-panel__rank" id="profile-rank">—</p>
+
+              <button
+                class="profile-panel__messenger-shortcut"
+                type="button"
+                id="messenger-shortcut"
+                hidden
+              >
+                Atualizar selo do Mensageiro
+              </button>
 
               <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
 
@@ -298,6 +308,62 @@
 
         </section>
       </main>
+    </div>
+  </div>
+
+  <!-- ARG: eco solto — glifo corrupto; passe = anagrama das runas do álbum -->
+  <button
+    class="underworld-gate"
+    id="underworld-gate"
+    type="button"
+    aria-label="Eco no salão"
+  >
+    <span class="underworld-gate__label" id="underworld-gate-label" data-glitch="░" aria-hidden="true">░</span>
+  </button>
+
+  <!-- Portão do Submundo — palavra-passe do anagrama -->
+  <div
+    class="underworld-gate-modal"
+    id="underworld-gate-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="underworld-gate-title"
+    hidden
+  >
+    <div class="underworld-gate-modal__panel">
+      <div class="underworld-gate-modal__fx" aria-hidden="true">
+        <span class="underworld-gate-modal__scan"></span>
+        <span class="underworld-gate-modal__noise"></span>
+        <span class="underworld-gate-modal__slice underworld-gate-modal__slice--a"></span>
+        <span class="underworld-gate-modal__slice underworld-gate-modal__slice--b"></span>
+      </div>
+      <h2
+        class="underworld-gate-modal__title"
+        id="underworld-gate-title"
+        data-glitch="Portão do submundo"
+      >
+        Portão do submundo
+      </h2>
+      <form class="underworld-gate-modal__form" id="underworld-gate-form" autocomplete="off">
+        <label class="visually-hidden" for="underworld-gate-input">Palavra-passe</label>
+        <input
+          class="underworld-gate-modal__input"
+          type="text"
+          id="underworld-gate-input"
+          name="pass"
+          spellcheck="false"
+          autocomplete="off"
+          maxlength="64"
+          placeholder="···"
+        />
+        <button class="btn-gold underworld-gate-modal__submit" type="submit" id="underworld-gate-submit">
+          Avançar
+        </button>
+        <p class="underworld-gate-modal__status" id="underworld-gate-status" role="status" aria-live="polite"></p>
+      </form>
+      <button class="btn-gold btn-gold--ghost underworld-gate-modal__close" type="button" id="underworld-gate-close">
+        Recuar
+      </button>
     </div>
   </div>
 

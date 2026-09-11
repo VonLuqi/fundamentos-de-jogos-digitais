@@ -105,9 +105,43 @@ assert(!isArgLocation('/pages/conquistas.html'), 'álbum não é sala ARG');
 assert(!isArgLocation('/pages/dashboard.html'), 'painel não é sala ARG');
 assert(isDevtoolsShortcut({ key: 'F12' }), 'F12 é atalho de DevTools');
 assert(isDevtoolsShortcut({ key: 'I', ctrlKey: true, shiftKey: true }), 'Ctrl+Shift+I é atalho');
+assert(isDevtoolsShortcut({ key: 'u', ctrlKey: true }), 'Ctrl+U (ver fonte) é atalho velado');
+assert(isDevtoolsShortcut({ key: 'U', metaKey: true }), 'Cmd+U é atalho velado');
 assert(!isDevtoolsShortcut({ key: 'F5' }), 'F5 não é DevTools');
+assert(!isDevtoolsShortcut({ key: 'u', ctrlKey: true, shiftKey: true }), 'Ctrl+Shift+U não é o véu de fonte');
+assert(read('js/devtools-guard.boot.js').includes('__fjdDevtoolsGuardBound'), 'boot síncrono no head');
+assert(read('js/devtools-guard.boot.js').includes('contextmenu'), 'boot vela botão direito');
+assert(read('js/devtools-guard.js').includes('contextmenu'), 'módulo vela botão direito');
+assert(read('js/devtools-guard.boot.js').includes('location.replace'), 'boot redireciona se DevTools aberto');
+assert(read('js/devtools-guard.js').includes('location.replace'), 'módulo redireciona se DevTools aberto');
+assert(read('js/devtools-guard.boot.js').includes('new Worker'), 'boot usa Worker para detectar DevTools');
+assert(read('js/devtools-guard.js').includes('new Worker'), 'módulo usa Worker para detectar DevTools');
+assert(!read('js/devtools-guard.js').includes('fjd-devtools-veil'), 'sem overlay de véu');
+assert(
+  !/\bdebugger\s*;/.test(read('js/devtools-guard.js').split('Blob')[0]),
+  'módulo sem debugger fora do Worker/Blob'
+);
+assert(read('pages/dashboard.html').includes('devtools-guard.boot.js'), 'dashboard carrega o boot cedo');
+assert(read('index.html').includes('devtools-guard.boot.js'), 'index carrega o boot cedo');
+assert(!read('pages/submundo/tartaro-oculto.html').includes('devtools-guard.boot.js'), 'Tártaro sem boot do véu');
 assert(!read('js/submundo/tartaro.js').includes('devtools-guard'), 'Tártaro não importa o véu');
 assert(!read('js/submundo/asfodelos.js').includes('devtools-guard'), 'Asfódelos não importa o véu');
+assert(
+  spawnSync(process.execPath, ['--check', path.join(root, 'js/devtools-guard.boot.js')], { encoding: 'utf8' }).status === 0,
+  'node --check devtools-guard.boot.js'
+);
+
+const gateJs = read('js/underworld-gate.js');
+assert(gateJs.includes('initUnderworldGate') && gateJs.includes('TARTARO'), 'portão do Salão');
+assert(gateJs.includes('/submundo/tartaro-oculto'), 'portão redireciona ao Tártaro');
+assert(read('pages/dashboard.html').includes('underworld-gate'), 'markup do portão no hub');
+assert(read('css/dashboard.css').includes('.underworld-gate'), 'CSS juicy do portão');
+assert(read('js/dashboard.js').includes('initUnderworldGate'), 'dashboard inicia o portão');
+assert(read('js/submundo/tartaro.js').includes('consumeUnderworldGateEcho'), 'eco do portão no Tártaro');
+assert(
+  spawnSync(process.execPath, ['--check', path.join(root, 'js/underworld-gate.js')], { encoding: 'utf8' }).status === 0,
+  'node --check underworld-gate.js'
+);
 
 const ui = read('js/achievements-ui.js');
 assert(ui.includes('fillAchievementDescription') && ui.includes('fillTrailheadField'), 'cipher UI');

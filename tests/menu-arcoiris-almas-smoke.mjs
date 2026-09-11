@@ -132,10 +132,12 @@ assert(
 );
 notes.push('C1/C2 Menu: densidade CSS ok (altura estimada admin+notch ~584px < 640)');
 
-/* --- C3 Rainbow não cobre header --- */
+/* --- C3 Rainbow não cobre header ---
+ * Canvas no body com z=1 fica abaixo do stacking context de `.app-shell` (z=2).
+ * Comparar só com header 40 é insuficiente (contexts distintos). */
 assert(
-  /RAINBOW_VFX_CANVAS_Z_INDEX\s*=\s*25/.test(achievementsUi),
-  'canvas VFX deve usar z-index 25 (abaixo do header 40)'
+  /RAINBOW_VFX_CANVAS_Z_INDEX\s*=\s*1/.test(achievementsUi),
+  'canvas VFX deve usar z-index 1 (abaixo do .app-shell z-index 2)'
 );
 assert(
   achievementsUi.includes('pinRainbowVfxCanvasLayer')
@@ -143,8 +145,12 @@ assert(
   'deve pininar zIndex no canvas (lib pode ignorar option)'
 );
 assert(
+  /z-index:\s*2/.test(appShellCss),
+  '.app-shell deve criar stacking context acima do canvas VFX'
+);
+assert(
   appShellCss.includes('z-index: 40'),
-  'header mobile permanece z-index 40 (> canvas 25)'
+  'header mobile permanece z-index 40 (local ao shell)'
 );
 
 assert(
@@ -165,7 +171,12 @@ assert(
     && /\.achievement-card\s*\{[^}]*contain:\s*paint/.test(dashboardCss),
   'achievement-card hub: overflow hidden + contain paint'
 );
-notes.push('C3 Rainbow/header: z-index 25 + contain ok');
+assert(
+  /achievements-grid\.is-preview[\s\S]{0,220}?overflow:\s*hidden/.test(dashboardCss)
+    && /achievements-grid\.is-preview[\s\S]{0,220}?contain:\s*paint/.test(dashboardCss),
+  'preview mobile do álbum: overflow hidden + contain paint'
+);
+notes.push('C3 Rainbow/header: z-index 1 sob .app-shell + contain ok');
 
 /* --- C4 Drawer suspende VFX --- */
 assert(
@@ -188,7 +199,7 @@ assert(
 );
 assert(
   dashboardCss.includes('.scroll-modal') && dashboardCss.includes('z-index: 80'),
-  'scroll-modal z-index 80 acima do canvas 25'
+  'scroll-modal z-index 80 acima do canvas VFX'
 );
 assert(
   conquistasCss.includes('.relic-modal') && conquistasCss.includes('z-index: 80'),

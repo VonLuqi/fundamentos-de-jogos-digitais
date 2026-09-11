@@ -1,10 +1,18 @@
 'use strict';
 
+import { consumeUnderworldGateEcho } from '../underworld-gate.js';
+
 const NEXT = '/submundo/asfodelos-sussurros';
 const EXPECTED = 'CERBERUS-UNBOUND';
 
 const form = document.getElementById('tartaro-form');
 const statusEl = document.getElementById('tartaro-status');
+
+const gateEcho = consumeUnderworldGateEcho();
+if (gateEcho && statusEl) {
+  statusEl.dataset.tone = 'ok';
+  statusEl.textContent = gateEcho;
+}
 
 form?.addEventListener('submit', (event) => {
   event.preventDefault();

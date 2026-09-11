@@ -22,6 +22,7 @@ import {
   setRainbowVfxSuspended,
 } from './achievements-ui.js';
 import { isLessonPublished, renderLessonsList } from './lessons-ui.js';
+import { initUnderworldGate } from './underworld-gate.js';
 
 import {
   detectAvatarCount,
@@ -103,15 +104,24 @@ function setMessengerStatus(message, isError = false) {
 
 function renderMessengerSeal(user) {
   const root = document.getElementById('messenger-seal');
+  const shortcut = document.getElementById('messenger-shortcut');
   if (!root) return;
 
   if (!user || user.role === 'admin') {
     root.hidden = true;
+    if (shortcut) shortcut.hidden = true;
     return;
   }
 
-  root.hidden = false;
   const kind = messengerSealKind(user);
+  const showForm = kind === 'empty' || messengerShowForm;
+  const hideConfirmedBlock = kind === 'confirmed' && !messengerShowForm;
+
+  root.hidden = hideConfirmedBlock;
+  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm;
+
+  if (hideConfirmedBlock) return;
+
   const stateEl = document.getElementById('messenger-state');
   const emailEl = document.getElementById('messenger-email');
   const form = document.getElementById('messenger-form');
@@ -140,7 +150,6 @@ function renderMessengerSeal(user) {
     }
   }
 
-  const showForm = kind === 'empty' || messengerShowForm;
   if (form) form.hidden = !showForm;
   if (cancelBtn) cancelBtn.hidden = kind === 'empty' || !showForm;
   if (bindBtn) {
@@ -148,11 +157,12 @@ function renderMessengerSeal(user) {
   }
   if (input && !showForm) input.value = '';
 
+  // Form e ações nunca juntos; resend só em pending com form fechado.
   if (actions) actions.hidden = kind === 'empty' || showForm;
-  if (resendBtn) resendBtn.hidden = kind !== 'pending';
+  if (resendBtn) resendBtn.hidden = !(kind === 'pending' && !showForm);
   if (changeBtn) {
-    changeBtn.hidden = kind === 'empty';
-    changeBtn.textContent = kind === 'confirmed' ? 'Trocou de e-mail?' : 'Trocar endereço';
+    changeBtn.hidden = kind === 'empty' || showForm || kind === 'confirmed';
+    changeBtn.textContent = 'Trocar endereço';
   }
 }
 
@@ -220,12 +230,15 @@ function initMessengerSeal() {
     }
   });
 
-  changeBtn?.addEventListener('click', () => {
+  const openChangeForm = () => {
     messengerShowForm = true;
     setMessengerStatus('');
     renderMessengerSeal(currentUser);
     document.getElementById('messenger-input')?.focus();
-  });
+  };
+
+  changeBtn?.addEventListener('click', openChangeForm);
+  document.getElementById('messenger-shortcut')?.addEventListener('click', openChangeForm);
 
   cancelBtn?.addEventListener('click', () => {
     messengerShowForm = false;
@@ -1427,6 +1440,7 @@ async function init() {
   initAvatarSwap();
   initAdminTools();
   initMessengerSeal();
+  initUnderworldGate();
   renderRailPreviews(currentToken).catch((error) => {
     console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
   });
