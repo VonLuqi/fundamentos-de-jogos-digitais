@@ -16,7 +16,8 @@
     "avatars:import:replace": "node scripts/import-avatars-webp.mjs --mode replace",
     "avatars:sync": "node scripts/sync-avatar-catalog.mjs",
     "avatars:sync:clean": "node scripts/sync-avatar-catalog.mjs --clean-legacy",
-    "submundo:wav": "node scripts/generate-asfodelos-wav.mjs"
+    "submundo:wav": "node scripts/generate-asfodelos-wav.mjs",
+    "submundo:hecate": "node scripts/generate-hecate-relic.mjs"
   },
   "optionalDependencies": {
     "@vercel/kv": "^3.0.0"

@@ -102,7 +102,11 @@ const server = http.createServer(async (req, res) => {
     const submundoPages = {
       '/submundo/tartaro-oculto': '/pages/submundo/tartaro-oculto.html',
       '/submundo/asfodelos-sussurros': '/pages/submundo/asfodelos-sussurros.html',
+      '/submundo/hecate-encruzilhada': '/pages/submundo/hecate-encruzilhada.html',
       '/submundo/elisios-julgamento': '/pages/submundo/elisios-julgamento.html',
+      '/submundo/persefone-jardim': '/pages/submundo/persefone-jardim.html',
+      '/submundo/observatorio-sombras': '/pages/submundo/observatorio-sombras.html',
+      '/submundo/cocito-espelho': '/pages/submundo/cocito-espelho.html',
       '/submundo/estige-obolo': '/pages/submundo/estige-obolo.html',
     };
     if (submundoPages[pathname]) {

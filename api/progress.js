@@ -2281,8 +2281,7 @@ export default async function handler(req, res) {
         status: 'denied',
         message: 'Acesso Negado pelos Juízes',
         oracle_token: UNDERWORLD_ORACLE_TOKEN,
-        encoding: 'Base64',
-        hint: 'Use atob() no Console ou CyberChef para revelar o segredo.',
+        echo: 'O oráculo murmura em língua que os mortais não leem à vista.',
       });
     }
 
@@ -2295,7 +2294,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Óbolo ausente.' });
       }
       if (hash !== UNDERWORLD_ESTIGE_HASH) {
-        return res.status(400).json({ ok: false, error: 'Óbolo rejeitado. Hash incorreto.' });
+        return res.status(400).json({ ok: false, error: 'Tributo insuficiente.' });
       }
 
       const existing = Array.isArray(user.conquistas) ? [...user.conquistas] : [];

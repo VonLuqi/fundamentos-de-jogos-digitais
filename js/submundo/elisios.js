@@ -2,7 +2,7 @@
 
 import { ApiError, getSession, underworldJudgment } from '../api.js';
 
-const NEXT = '/submundo/estige-obolo';
+const NEXT = '/submundo/persefone-jardim';
 const EXPECTED = 'key_elestial_hades';
 
 const judgeBtn = document.getElementById('elisios-judge');
@@ -45,13 +45,13 @@ form?.addEventListener('submit', (event) => {
   if (value !== EXPECTED) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
-      statusEl.textContent = 'A chave não satisfaz o oráculo.';
+      statusEl.textContent = 'Os juízes permanecem mudos.';
     }
     return;
   }
   if (statusEl) {
     statusEl.dataset.tone = 'ok';
-    statusEl.textContent = 'Os juízes se calam. O Estige chama…';
+    statusEl.textContent = 'Os juízes se calam. O jardim chama…';
   }
   window.location.assign(NEXT);
 });

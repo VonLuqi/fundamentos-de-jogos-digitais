@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#060810" />
+  <title>O Espelho do Rio Cócito</title>
+  <link rel="icon" href="../../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../../css/submundo.css" />
+</head>
+<body class="submundo submundo--cocito">
+  <main class="submundo__shell">
+    <p class="submundo__eyebrow">Altar das Frequências de Luz</p>
+    <h1 class="submundo__title">O Espelho do Rio Cócito</h1>
+    <p class="submundo__riddle">
+      O espelho do lamentoso Cócito reflete o oposto da verdade. Inverta a matriz de cores e ajuste a frequência alfa para revelar a runa submersa nas profundezas.
+    </p>
+    <div class="submundo__mirror-wrap">
+      <canvas id="cocito-mirror" class="submundo__mirror" width="640" height="220" aria-label="Espelho do Cócito"></canvas>
+    </div>
+    <div class="submundo__panel">
+      <form id="cocito-form">
+        <label class="submundo__label" for="cocito-pass">Runa submersa</label>
+        <input class="submundo__input" id="cocito-pass" autocomplete="off" spellcheck="false" />
+        <button class="submundo__btn" type="submit">Emergir da água</button>
+        <p class="submundo__status" id="cocito-status" role="status"></p>
+      </form>
+    </div>
+  </main>
+  <script type="module" src="../../js/submundo/cocito.js"></script>
+</body>
+</html>

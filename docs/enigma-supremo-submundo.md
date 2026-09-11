@@ -1,17 +1,22 @@
-# 🏛️ Enigma Supremo do Submundo: Planejamento Arquitetural de ARG e Web Puzzles
+# 🏛️ Enigma Supremo do Submundo: Planejamento Arquitetural de ARG e Web Puzzles (Versão Expandida - 8 Fases)
 
-Este documento apresenta o planejamento arquitetural e de engenharia para a implementação do **"Enigma Supremo do Submundo"**, um puzzle web multi-telas profundo, gamificado e educativo, projetado para testar conhecimentos práticos de desenvolvimento web, inspeção de protocolo, análise forense de mídias e criptografia [4, 15, 17].
-
-> **Integração ao produto:** engenharia, tasks, adaptação ao stack do curso (`api/progress.js`, `users.conquistas`, páginas estáticas, raridade Única) e Task 0 estão em [`plano-grimorio-conquistas-enigma.md`](./plano-grimorio-conquistas-enigma.md). Este arquivo permanece a fonte de design do ARG (salas, pistas, chaves, recompensa). Trechos Next.js Edge / RPC / `auth.users` abaixo são referência conceitual — a implementação segue a §Adaptação do plano.
+Este documento apresenta o planejamento arquitetural e de engenharia expandido para a implementação do **"Enigma Supremo do Submundo"**, um puzzle web multi-telas de 8 fases, profundas, gamificadas e educativas, projetado para testar conhecimentos práticos de desenvolvimento web, inspeção de protocolo, esteganografia avançada, geolocalização ARG, manipulação de Canvas e criptografia [4, 15, 17, 20, 25, 26, 35, 40].
 
 ---
 
 ## 1. Visão Geral da Jornada & Filosofia de Design ARG
 
-O enigma é concebido sob o conceito fundamental de Alternate Reality Games (ARG) conhecido como **TINAG** (*This Is Not A Game* - "Isto Não É Um Jogo"), no qual as mecânicas de jogo se camuflam diretamente nas ferramentas reais do navegador e nos ecossistemas web [7, 10, 40]. A experiência inspira-se esteticamente no submundo da mitologia grega (com ambientação do jogo *Hades*) e pedagogicamente nos grandes marcos dos enigmas digitais da internet, como *Notpron* [4] e a *Cicada 3301* [10, 40].
+O enigma é concebido sob o conceito fundamental de Alternate Reality Games (ARG) conhecido como **TINAG** (*This Is Not A Game* - "Isto Não É Um Jogo"), no qual as mecânicas de jogo se camuflam diretamente nas ferramentas reais do navegador, no ecossistema web e em elementos do mundo real [3, 6, 7, 10, 40]. A experiência inspira-se esteticamente no submundo da mitologia grega (com ambientação do jogo *Hades*) e pedagogicamente nos grandes marcos dos enigmas digitais da internet, como *Notpron* [4] e a *Cicada 3301* [10, 34, 40, 50, 51].
 
 ### Metodologia Educativa
-O objetivo do enigma é transformar o navegador em um ambiente interativo de apuração técnica. Cada fase exige que o aluno deixe de ser um mero consumidor de interface gráfica e passe a atuar como um investigador e engenheiro web, utilizando as ferramentas do desenvolvedor (DevTools), análise de estilos CSS, esteganografia em mídias digitais, inspeção de requisições HTTP e primitivas criptográficas nativas da linguagem JavaScript [4, 6, 15, 20].
+O objetivo do enigma é transformar o navegador em um laboratório interativo de apuração técnica. A jornada expandida possui 8 fases sequenciais onde o aluno passa de um mero consumidor de interface gráfica para um investigador de segurança e engenheiro web. A progressão exige a utilização de:
+- **Ferramentas de Desenvolvedor (DevTools):** Inspecionar HTML, modificar variáveis CSS e depurar o DOM.
+- **Esteganografia de Mídia (Áudio e Imagem):** Análise espectrográfica em Audacity e extração de metadados EXIF e bits menos significativos (LSB) [12, 14, 25, 27, 30, 35, 38].
+- **Inspeção de Protocolo & API:** Análise de pacotes na aba Network e decodificação Base64 [20, 31, 49].
+- **Gestão de Armazenamento Web:** Manipulação ativa de Cookies, `localStorage` e `sessionStorage` na aba Application.
+- **OSINT & Geotecnologia ARG:** Pesquisa de coordenadas geográficas reais ligadas à mitologia grega (Cabo Matapan/Tênaro) [6, 7, 22, 50].
+- **Processamento Gráfico em Canvas:** Manipulação de pixels (`ImageData`), inversão de matriz de cores e filtros via código JavaScript.
+- **Primitivas Criptográficas Nativas:** Execução da Web Crypto API (`crypto.subtle.digest`) para geração de hashes SHA-256 no Console [3, 29, 33, 44, 45].
 
 ---
 
@@ -24,11 +29,10 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
   $$\text{"T A R T A R O  --  O C U L T O"}$$
 * **A Descoberta:** Ao reunir as letras destacadas e resolver o anagrama, o aluno obtém a rota de acesso secreta no domínio da aplicação.
 * **URL Secreta Inicial:** `/submundo/tartaro-oculto`
-* **Portão do Salão (paralelo):** no hub *Salão dos Heróis*, um glifo corrupto quase invisível (`░`, canto inferior) abre o modal de palavra-passe. A resposta é o mesmo anagrama (`TARTARO OCULTO`); sucesso redireciona para `/submundo/tartaro-oculto`. O trailhead das runas permanece.
 
 ---
 
-## 3. Detalhamento Completo das Salas (Fases 1 a 4)
+## 3. Detalhamento Completo das Salas (Fases 1 a 8)
 
 ---
 
@@ -62,46 +66,123 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
 * **A Pista / Riddle:**
   > *"Nem todo som é feito para ser ouvido; algumas verdades só se revelam quando você decide olhar para a frequência do invisível."*
 * **A Mecânica:** **Esteganografia de Áudio e Análise Espectrográfica.**
-  O áudio fornecido (`asfodelos_echo.wav`) contém uma imagem/texto sintetizada no domínio da frequência [7, 20]. Quando reproduzido acusticamente, o ouvido ouve apenas estática não inteligível [19, 21].
-  O aluno deve baixar o arquivo WAV e abri-lo em um software de análise forense como o **Audacity** ou em um analisador espectral web [20, 28].
-  1. No Audacity, o aluno clica no menu suspenso da faixa de áudio e altera a visualização de *Waveform* (Forma de Onda) para **Spectrogram** (Espectrograma) [20, 22].
-  2. Ajusta as configurações de espectrograma (*Window size* para 1024/2048 e escala de frequência para a faixa de 2000 Hz a 4000 Hz) para aumentar a nitidez [20].
+  O áudio fornecido (`asfodelos_echo.wav`) contém uma imagem/texto sintetizada no domínio da frequência [7, 20]. Quando reproduzido acusticamente, o ouvido ouve apenas estática não inteligível [12, 18, 27, 30, 38, 42].
+  O aluno deve baixar o arquivo WAV e abri-lo em um software de análise forense como o **Audacity** ou em um analisador espectral web [12, 27, 30].
+  1. No Audacity, o aluno clica no menu suspenso da faixa de áudio e altera a visualização de *Waveform* (Forma de Onda) para **Spectrogram** (Espectrograma) [12, 27].
+  2. Ajusta as configurações de espectrograma (*Window size* para 1024/2048 e escala de frequência para a faixa de 2000 Hz a 4000 Hz) para aumentar a nitidez [12].
 * **A Solução:** O espectrograma exibe a chave em letras de bloco: `PERSEPHONE_PASS`.
+* **Próxima URL:** `/submundo/hecate-encruzilhada`
+
+---
+
+### 🔮 Fase 3: A Encruzilhada de Hécate
+* **Nome e Tema:** *A Encruzilhada de Hécate* (O Segredo da Relíquia Oculta).
+* **Aparência Visual:** Uma ilustração detalhada e misteriosa da deusa Hécate em uma encruzilhada sob névoa com um botão *"Baixar Relíquia da Deusa (hecate_relic.png)"* e uma caixa de validação de código.
+* **A Pista / Riddle (UI):**
+  > *"As aparências enganam a vista superficial. Examine as entranhas digitais da imagem: primeiro o que a criação gravou nas margens, depois as camadas que a tocha esconde no pigmento mais fraco."*
+* **A Mecânica:** **Esteganografia em Imagem PNG (metadados tEXt + LSB — Least Significant Bit) [14, 25, 26, 35].**
+  O aluno faz o download do arquivo `hecate_relic.png` (`npm run submundo:hecate` regenera o asset) e utiliza técnicas forenses de imagem:
+  1. **Inspeção de metadados:** No chunk PNG `tEXt` / campo Comment, o aviso enigmático: `A tocha acende no vermelho mais fraco.` — a UI **não** nomeia canal nem bit.
+  2. **Extração LSB:** Com StegOnline, CacheSleuth LSB ou script Pillow, extrair bit 0 do canal vermelho.
+* **A Solução:** Payload LSB = `HECATE_TORCH_KEY_777`.
 * **Próxima URL:** `/submundo/elisios-julgamento`
 
 ---
 
-### ⚖️ Fase 3: O Palácio dos Elísios
+### ⚖️ Fase 4: O Palácio dos Elísios
 * **Nome e Tema:** *O Palácio dos Elísios* (O Julgamento da Rede).
 * **Aparência Visual:** Representação de um tribunal imponente com três estátuas de pedra (os juízes Minos, Radamanto e Éaco) e um botão de ação marcado como *"Solicitar Julgamento dos Juízes"*.
 * **A Pista / Riddle:**
   > *"O oráculo não profetiza na interface dos mortais. Examine as correntes de dados que trafegam nos bastidores da rede antes que o payload se desfaça."*
 * **A Mecânica:** **Análise de Payload na Network Tab & Decodificação Base64.**
-  Ao clicar no botão de julgamento, a interface exibe apenas a mensagem genérica `"Acesso Negado pelos Juízes"`. No entanto, ao monitorar a aba **Network (Rede)** do DevTools e inspecionar a resposta da requisição `POST /api/v1/underworld/julgamento`, o aluno encontrará o payload JSON completo:
+  Requer sessão autenticada. Ao clicar em *"Solicitar Julgamento dos Juízes"*, a UI mostra só `"Acesso Negado pelos Juízes"`. Em **Network**, inspecionar `POST /api/progress` com `action: "underworldJudgment"`:
   ```json
   {
+    "ok": true,
     "status": "denied",
+    "message": "Acesso Negado pelos Juízes",
     "oracle_token": "a2V5X2VsZXN0aWFsX2hhZGVz",
-    "encoding": "Base64",
-    "hint": "Use atob() no Console ou CyberChef para revelar o segredo."
+    "echo": "O oráculo murmura em língua que os mortais não leem à vista."
   }
   ```
-  O aluno deve pegar o valor do token Base64 e decodificá-lo no Console do navegador através de `atob('a2V5X2VsZXN0aWFsX2hhZGVz')` ou utilizando utilitários como o **CyberChef** [6, 49].
-* **A Solução:** A string decodificada resulta na chave: `key_elestial_hades`.
+  Decodificar o token (Base64) no Console (`atob(...)`) ou CyberChef — a API **não** envia `encoding` nem `hint`.
+* **A Solução:** `key_elestial_hades` (grafia **elestial** intencional).
+* **Próxima URL:** `/submundo/persefone-jardim`
+
+---
+
+### 🌺 Fase 5: O Jardim de Perséfone
+* **Nome e Tema:** *O Jardim de Perséfone* (As Sementes da Romã).
+* **Aparência Visual:** Um cenário de jardim místico com romãs cristalizadas flutuando sobre uma fonte escura e um aviso: *"Para provar da fruta proibida, você deve possuir a autoridade real dos mortos e ter consumido as sementes sagradas."*
+* **A Pista / Riddle (UI):**
+  > *"Para provar da fruta proibida, você deve possuir a autoridade real dos mortos e ter consumido as sementes sagradas. Os segredos do reino não ficam à vista — habitam a memória persistente do seu próprio navegador. Reivindique a posição de soberano."*
+* **A Mecânica:** **Manipulação de Storage no Navegador (Cookies & LocalStorage).**
+  Ao carregar a página, o cliente **reinicia** o estado mortal:
+  - `Cookie: underworld_role=mortal`
+  - `localStorage.pomegranate_seeds = "0"`
+  Resolução (DevTools → Application — a UI não nomeia a aba):
+  1. Cookie `underworld_role` → `queen_consort`.
+  2. Local Storage `pomegranate_seeds` → `6` (mito das 6 sementes).
+  3. Clicar *"Consumir Romã & Reivindicar Trono"* (sem recarregar a página).
+* **A Solução:** Selo revelado `POMEGRANATE_6_SEEDS` → formulário avança.
+* **Próxima URL:** `/submundo/observatorio-sombras`
+
+---
+
+### 🧭 Fase 6: O Observatório das Sombras
+* **Nome e Tema:** *O Observatório das Sombras* (O Portão de Hélio e as Coordenadas Terrestres).
+* **Aparência Visual:** Um mapa estelar antigo e um astrolábio interativo girando lentamente sobre projeções cartográficas do Mediterrâneo Antigo.
+* **A Pista / Riddle (UI):**
+  > *"Hades aprisionou o portal de acesso físico em um ponto específico do mundo real. Descubra a localização da caverna mitológica conhecida na Antiguidade como a Entrada do Submundo no Peloponeso. Marque o ponto no mapa ou inscreva as coordenadas — ou o nome ritual do portão."*
+* **A Mecânica:** **Investigação Geográfica ARG & OSINT [6, 7, 22].**
+  Local lendário: **Cabo Matapan / Cabo Tênaro** (Peloponeso).
+  1. Coordenadas de referência: **36.4005 N, 22.4858 E** (tolerância ~`0.02°` no cliente).
+  2. Alternativa: token `CAPE_MATAPAN_GATE`.
+  3. Mapa Leaflet (clique) ou formulário — literais de lat/lng ofuscados no JS (`atob`), sem coords no HTML.
+* **A Solução:** `36.4005, 22.4858` (ou equivalente dentro da margem) / `CAPE_MATAPAN_GATE`.
+* **Próxima URL:** `/submundo/cocito-espelho`
+
+---
+
+### 🪞 Fase 7: O Espelho do Rio Cócito
+* **Nome e Tema:** *O Espelho do Rio Cócito* (O Altar das Frequências de Luz).
+* **Aparência Visual:** Uma piscina reflexiva de águas escuras estilizada em HTML5 Canvas. A superfície reflete um padrão escuro completamente opaco e ilegível ao olho humano.
+* **A Pista / Riddle:**
+  > *"O espelho do lamentoso Cócito reflete o oposto da verdade. Inverta a matriz de cores dos pixels e ajuste a frequência alfa no Canvas para revelar a runa submersa nas profundezas."*
+* **A Mecânica:** **Manipulação de Canvas API & Pixel Data via Console JS.**
+  A página possui um elemento `<canvas id="cocito-mirror">`. A frase secreta foi desenhada no Canvas com cores invertidas e transparência mascarada. O aluno tem duas vias de resolução interativas:
+  1. **Inversão de Pixels via JS no Console:**
+     ```javascript
+     const canvas = document.getElementById('cocito-mirror');
+     const ctx = canvas.getContext('2d');
+     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+     const d = imgData.data;
+     
+     // Inverter canais RGB e forçar Alpha máximo
+     for (let i = 0; i < d.length; i += 4) {
+       d[i]     = 255 - d[i];     // Red
+       d[i + 1] = 255 - d[i + 1]; // Green
+       d[i + 2] = 255 - d[i + 2]; // Blue
+       d[i + 3] = 255;           // Alpha
+     }
+     ctx.putImageData(imgData, 0, 0);
+     ```
+  2. **Injeção de CSS via DevTools:** Adicionar no elemento Canvas o estilo `filter: invert(100%) contrast(300%);`.
+* **A Solução:** O Canvas processado exibe a inscrição alfanumérica: `COCYTUS_REFLECTION_404`.
 * **Próxima URL:** `/submundo/estige-obolo`
 
 ---
 
-### 🌊 Fase 4: As Águas Cegas do Rio Estige (O Clímax)
+### 🌊 Fase 8: As Águas Cegas do Rio Estige (O Clímax Final)
 * **Nome e Tema:** *As Águas Cegas do Rio Estige* (O Juramento Sagrado).
-* **Aparência Visual:** A barca de Caronte flutuando sobre águas escuras e brilhantes. No centro da tela, um altar com um pedestal solicitando o *"Óbolo de Ouro"* (o hash criptográfico do juramento).
-* **A Pista / Riddle:**
-  > *"Para cruzar o rio sem retorno, o barqueiro não aceita moedas comuns. Pague o tributo gerando o hash SHA-256 exato da mensagem sagrada no terminal do seu navegador."*
-* **A Mecânica:** **Execução de Código JS via Console & Web Crypto API.**
-  Um script executa automaticamente ao carregar a página e imprime uma mensagem formatada com estilos CSS no **Console JS** (`console.log`):
-  > `⚡ [CHARON_SYSTEM]: Calcule o hash SHA-256 em hexadecimal da string "ESTIGE_OBOLO_2026" utilizando crypto.subtle.digest().`
+* **Aparência Visual:** A barca de Caronte flutuando sobre águas escuras e brilhantes. No centro da tela, um altar com um pedestal solicitando o *"Óbolo de Ouro"* (o hash criptográfico do juramento final).
+* **A Pista / Riddle (UI):**
+  > *"Para cruzar o rio sem retorno, o barqueiro não aceita moedas comuns. O tributo nasce no terminal — um óbolo que não se conta, se reduz."*
+* **A Mecânica:** **Console JS + Web Crypto API (SHA-256) [3, 29, 33, 44, 45].**
+  Ao carregar, o Console imprime (sem citar `crypto.subtle` na mensagem):
+  > `⚡ [CHARON_SYSTEM]: A string sagrada é "ESTIGE_OBOLO_2026". O óbolo não se conta — se reduz. Traga o selo em hex.`
 
-  Para evitar que o hash final fique visível no código-fonte cliente, a validação exige que o aluno execute a primitiva nativa da **Web Crypto API** [15, 16, 178, 183]:
+  O aluno calcula o hash (descoberta própria da API). Exemplo:
   ```javascript
   async function calcularObolo(mensagem) {
     const encoder = new TextEncoder();
@@ -113,134 +194,67 @@ O ponto de partida da experiência (a "Toca do Coelho") encontra-se camuflado na
 
   calcularObolo("ESTIGE_OBOLO_2026").then(console.log);
   ```
-* **A Solução:** O cálculo via Web Crypto API resulta no hash hexadecimal SHA-256 exato:
+  Submissão via `POST /api/progress` com `action: "underworldRedeem"` (sessão obrigatória). Soft fail: *"Tributo insuficiente."*
+* **A Solução (óbolo hex):**
   `18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c`.
 
 ---
 
-## 4. O Clímax e Recompensa
+## 4. Folha de resolução (gabarito vivo)
 
-Ao colar o hash correto no altar da Fase 4, a travessia do Rio Estige é concluída. Uma animação festiva em estilo *game-feel* é disparada na tela, acompanhada do desbloqueio da conquista secreta.
+| Elo | Sala | Mecânica | Resolução / chave | Próximo |
+| --- | --- | --- | --- | --- |
+| 0 | Trailhead | Runas + pistas `/submundo` | Anagrama `TARTARO OCULTO` | `/submundo/tartaro-oculto` |
+| 1 | Tártaro | CSS `--shadow-color` | `CERBERUS-UNBOUND` | Asfódelos |
+| 2 | Asfódelos | Espectrograma WAV | `PERSEPHONE_PASS` | Hécate |
+| 3 | Hécate | tEXt Comment + LSB R bit0 | `HECATE_TORCH_KEY_777` | Elísios |
+| 4 | Elísios | Network + Base64 | `key_elestial_hades` | Perséfone |
+| 5 | Perséfone | Cookie + localStorage | `queen_consort` + `6` → `POMEGRANATE_6_SEEDS` | Observatório |
+| 6 | Observatório | OSINT / mapa | `36.4005, 22.4858` (±0,02°) ou `CAPE_MATAPAN_GATE` | Cócito |
+| 7 | Cócito | Canvas invert + alfa | `COCYTUS_REFLECTION_404` | Estige |
+| 8 | Estige | SHA-256 de `ESTIGE_OBOLO_2026` | hash acima → redeem | Soberano |
 
-* **Nome da Conquista Secreta:** 👑 **Soberano do Submundo** (*Lord of the Underworld*)
-* **Descrição:** *"Superou as sombras do Tártaro, decifrou os ecos de Asfódelos, interceptou o julgamento dos Elísios e pagou o tributo sagrado no Rio Estige. Mestre absoluto da inspeção web, esteganografia e criptografia."*
-* **Recompensa Gamificada:**
-  * **XP:** `+1500 XP`
-  * **Badge Exclusivo:** *Cetro Criptográfico de Hades* (Ícone animado com aura dourada e roxa no perfil do aluno).
-
----
-
-## 5. Guia de Implementação Rápida (Backend Serverless & Supabase)
-
-A arquitetura de validação foi estruturada de forma leve e segura, permitindo hospedagem estática em plataformas como Vercel/Netlify integrada ao banco de dados Supabase [15].
-
-```
-┌─────────────────────────┐       1. Submete Hash       ┌──────────────────────────────┐
-│  Frontend (Navegador)   │ ─────────────────────────>  │  Serverless Edge Function    │
-└─────────────────────────┘                             └──────────────┬───────────────┘
-             ▲                                                         │
-             │                                              2. Valida  │ e Invoca RPC
-             │                                                         ▼
-┌────────────┴────────────┐                             ┌──────────────────────────────┐
-│  Atualização de Perfil  │ <─────────────────────────  │  Supabase (PostgreSQL + RLS) │
-│   (+1500 XP / Badge)    │       3. Confirmação        └──────────────────────────────┘
-└─────────────────────────┘
-```
-
-### A. Tabela do Banco de Dados no Supabase
-```sql
--- Tabela para rastreamento de progresso no desafio
-CREATE TABLE public.underworld_progress (
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
-    current_room INT DEFAULT 1,
-    is_completed BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now())
-);
-
--- Habilitar Row Level Security (RLS)
-ALTER TABLE public.underworld_progress ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "Usuários podem ver seu próprio progresso"
-ON public.underworld_progress FOR SELECT
-USING (auth.uid() = user_id);
-```
-
-### B. Função RPC de Concessão de Conquista
-A atribuição do prêmio é realizada via uma Stored Procedure de banco de dados (`SECURITY DEFINER`) para evitar que alunos alterem o próprio XP arbitrariamente no lado cliente [15]:
-
-```sql
-CREATE OR REPLACE FUNCTION unlock_underworld_achievement(p_user_id UUID)
-RETURNS VOID AS $$
-BEGIN
-    -- 1. Atualizar ou inserir progresso concluído
-    INSERT INTO public.underworld_progress (user_id, current_room, is_completed, updated_at)
-    VALUES (p_user_id, 5, TRUE, now())
-    ON CONFLICT (user_id) 
-    DO UPDATE SET is_completed = TRUE, current_room = 5, updated_at = now();
-
-    -- 2. Conceder a pontuação de XP
-    UPDATE public.profiles
-    SET xp = COALESCE(xp, 0) + 1500
-    WHERE id = p_user_id;
-
-    -- 3. Registrar o Badge exclusivo na tabela de conquistas
-    INSERT INTO public.user_achievements (user_id, achievement_slug, unlocked_at)
-    VALUES (p_user_id, 'soberano-do-submundo', now())
-    ON CONFLICT DO NOTHING;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-```
-
-### C. Rota Serverless de Validação (Next.js / Vercel Edge API)
-```typescript
-import { createClient } from '@supabase/supabase-js';
-
-const EXPECTED_HASH = "18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c";
-
-export async function POST(req: Request) {
-  const { userId, submittedHash } = await req.json();
-
-  if (submittedHash?.toLowerCase() === EXPECTED_HASH) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-
-    // Invocar a RPC atômica no banco de dados
-    const { error } = await supabase.rpc('unlock_underworld_achievement', {
-      p_user_id: userId
-    });
-
-    if (error) return Response.json({ success: false, message: "Erro ao registrar conquista." }, { status: 500 });
-
-    return Response.json({ 
-      success: true, 
-      message: "Travessia concluída com sucesso! Conquista e XP concedidos." 
-    });
-  }
-
-  return Response.json({ success: false, message: "Óbolo rejeitado. Hash incorreto." }, { status: 400 });
-}
-```
+Walkthrough passo a passo (spoiler interno): [`guia-enigma-soberano-submundo.md`](./guia-enigma-soberano-submundo.md).
 
 ---
 
-## A11y e exceções ARG (produto)
+## 5. O Clímax e Recompensa (implementação atual)
 
-Salas do Submundo priorizam **TINAG / DevTools** sobre WCAG completo. Exceções documentadas:
+Ao submeter o óbolo correto na Fase 8, dispara a celebração e o award server-side (idempotente).
 
-| Superfície | Contrato |
+* **ID:** `soberano_do_submundo`
+* **Nome:** 👑 **Soberano do Submundo** (raridade **Única**)
+* **Descrição (catálogo):** *"Superou as 8 provações lendárias do submundo: decifrou o Tártaro, escutou Asfódelos, revelou os segredos de Hécate, interceptou os Elísios, dominou o Jardim de Perséfone, localizou o portal no Observatório, inverteu o espelho de Cócito e selou o pacto no Rio Estige. Mestre absoluto da investigação web, ARG e engenharia de software."*
+* **XP:** `+1500` (uma vez; calibração níveis 1–99)
+* **Arte:** `assets/achievements/soberano_do_submundo.webp`
+
+---
+
+## 6. Arquitetura implementada (stack do Domínio)
+
+**Não** há tabela `underworld_progress` nem RPC Next.js. Progresso = estilo **Notpron** (conhecer a URL). Award só no Estige.
+
+```
+Salas 1–7 (cliente)     URL conhecida = entrada
+        │
+        ▼
+Fase 4 Elísios ──POST /api/progress──► underworldJudgment → oracle_token
+Fase 8 Estige  ──POST /api/progress──► underworldRedeem (hash) → users.xp + users.conquistas
+```
+
+| Peça | Onde |
 | --- | --- |
-| Modal **Revelar** (Grimório) | `role="dialog"`, Escape, foco inicial, **focus trap** (Tab), `aria-expanded` no gatilho |
-| Confirms do Grimório | Escape + trap + retorno de foco |
-| Salas `/submundo/*` | `noindex`; pistas em CSS/Network/áudio/console são **intencionais**; `.hidden-rune` pode ser `aria-hidden` |
-| Asfódelos (WAV) | Conteúdo no espectrograma — alternativa textual mínima na pista da sala; não duplicar a chave em HTML |
-| Estige (hash) | Validação só no servidor; console do aluno é parte do puzzle |
+| Páginas / JS | `pages/submundo/*`, `js/submundo/*` |
+| CSS | `css/submundo.css` |
+| Rewrites | `vercel.json`, `local-server.mjs` |
+| Judgment / Redeem | `api/progress.js` (`underworldJudgment`, `underworldRedeem`) |
+| Catálogo / XP | `data/game-catalog.json` |
+| WAV / PNG | `assets/submundo/asfodelos_echo.wav`, `hecate_relic.png` |
+| Geradores | `npm run submundo:wav`, `npm run submundo:hecate` |
+| Smoke | `tests/submundo-enigma-smoke.mjs` |
 
-`prefers-reduced-motion` aplica-se às animações de UI do produto (modal, toast, barras); salas ARG podem manter atmosfera visual estática.
+Auth: salas **visíveis sem login**; `underworldJudgment` e `underworldRedeem` **exigem sessão**.
 
 ---
 
-*Documentação arquitetural concluída e pronta para implantação.*
+*Documentação alinhada à implementação viva das 8 fases (resolução, recompensa +1500 XP, API `/api/progress`).*

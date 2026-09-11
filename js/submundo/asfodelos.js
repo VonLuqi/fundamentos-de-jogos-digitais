@@ -1,6 +1,6 @@
 'use strict';
 
-const NEXT = '/submundo/elisios-julgamento';
+const NEXT = '/submundo/hecate-encruzilhada';
 const EXPECTED = 'PERSEPHONE_PASS';
 
 const form = document.getElementById('asfodelos-form');
@@ -15,7 +15,7 @@ form?.addEventListener('submit', (event) => {
   if (value !== EXPECTED) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
-      statusEl.textContent = 'O nevoeiro não reconhece este eco.';
+      statusEl.textContent = 'O eco ainda é só chiado.';
     }
     return;
   }

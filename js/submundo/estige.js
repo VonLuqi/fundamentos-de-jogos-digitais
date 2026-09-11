@@ -20,7 +20,7 @@ const embersRoot = document.getElementById('estige-embers');
 const auraAudio = document.getElementById('estige-aura');
 
 console.log(
-  '%c⚡ [CHARON_SYSTEM]: Calcule o hash SHA-256 em hexadecimal da string "ESTIGE_OBOLO_2026" utilizando crypto.subtle.digest().',
+  '%c⚡ [CHARON_SYSTEM]: A string sagrada é "ESTIGE_OBOLO_2026". O óbolo não se conta — se reduz. Traga o selo em hex.',
   'color:#cfa759;font-family:Cinzel,serif;font-size:13px;'
 );
 

@@ -117,8 +117,8 @@
     {
       "id": "soberano_do_submundo",
       "name": "Soberano do Submundo",
-      "desc": "Superou as sombras do Tártaro, decifrou os ecos de Asfódelos, interceptou o julgamento dos Elísios e pagou o tributo sagrado no Rio Estige. Mestre absoluto da inspeção web, esteganografia e criptografia.",
-      "veiledDesc": "A coroa do Submundo não se pede ao altar. Desce quem observa o que se curva nas relíquias à vista de todos — e ousa deixar a raiz do mapa. No abismo, a sombra esconde a luz, o eco fala sem voz, o tribunal nega o que carrega, e o barqueiro só aceita o juramento que a alma calcula sozinha.",
+      "desc": "Superou as 8 provações lendárias do submundo: decifrou o Tártaro, escutou Asfódelos, revelou os segredos de Hécate, interceptou os Elísios, dominou o Jardim de Perséfone, localizou o portal no Observatório, inverteu o espelho de Cócito e selou o pacto no Rio Estige. Mestre absoluto da investigação web, ARG e engenharia de software.",
+      "veiledDesc": "A coroa do Submundo não se pede ao altar. Desce quem observa o que se curva nas relíquias à vista de todos — e ousa deixar a raiz do mapa. No abismo, a sombra esconde a luz, o eco fala sem voz, a tocha esconde pigmento, o tribunal nega o que carrega, o jardim prova autoridade, Hélio aponta a terra, o espelho mente e o barqueiro só aceita o juramento que a alma reduz sozinha.",
       "veiledScramble": {
         "scrambleMs": 180000,
         "readableMs": 45000,

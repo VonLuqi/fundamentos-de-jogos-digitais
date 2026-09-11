@@ -10,7 +10,11 @@
   "rewrites": [
     { "source": "/submundo/tartaro-oculto", "destination": "/pages/submundo/tartaro-oculto.html" },
     { "source": "/submundo/asfodelos-sussurros", "destination": "/pages/submundo/asfodelos-sussurros.html" },
+    { "source": "/submundo/hecate-encruzilhada", "destination": "/pages/submundo/hecate-encruzilhada.html" },
     { "source": "/submundo/elisios-julgamento", "destination": "/pages/submundo/elisios-julgamento.html" },
+    { "source": "/submundo/persefone-jardim", "destination": "/pages/submundo/persefone-jardim.html" },
+    { "source": "/submundo/observatorio-sombras", "destination": "/pages/submundo/observatorio-sombras.html" },
+    { "source": "/submundo/cocito-espelho", "destination": "/pages/submundo/cocito-espelho.html" },
     { "source": "/submundo/estige-obolo", "destination": "/pages/submundo/estige-obolo.html" }
   ],
   "headers": [

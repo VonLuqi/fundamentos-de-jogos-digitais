@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#0a1018" />
+  <title>O Observatório das Sombras</title>
+  <link rel="icon" href="../../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <link rel="stylesheet" href="../../css/submundo.css" />
+</head>
+<body class="submundo submundo--observatorio">
+  <main class="submundo__shell submundo__shell--wide">
+    <p class="submundo__eyebrow">Portão de Hélio</p>
+    <h1 class="submundo__title">O Observatório das Sombras</h1>
+    <p class="submundo__riddle">
+      Hades aprisionou o portal de acesso físico em um ponto específico do mundo real. Descubra a localização da caverna mitológica conhecida na Antiguidade como a Entrada do Submundo no Peloponeso. Marque o ponto no mapa ou inscreva as coordenadas — ou o nome ritual do portão.
+    </p>
+    <div class="submundo__map" id="observatorio-map" role="application" aria-label="Mapa do Mediterrâneo antigo"></div>
+    <div class="submundo__panel">
+      <form id="observatorio-form">
+        <label class="submundo__label" for="observatorio-coords">Coordenadas ou nome do portão</label>
+        <input
+          class="submundo__input"
+          id="observatorio-coords"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="lat, lng"
+        />
+        <button class="submundo__btn" type="submit">Fixar o portal</button>
+        <p class="submundo__status" id="observatorio-status" role="status"></p>
+      </form>
+    </div>
+  </main>
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script type="module" src="../../js/submundo/observatorio.js"></script>
+</body>
+</html>

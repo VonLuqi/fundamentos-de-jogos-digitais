@@ -94,9 +94,13 @@ ARG multi-sala: `[enigma-supremo-submundo.md](./enigma-supremo-submundo.md)`. Es
 | --- | --------- | ----------------------------------------------------------------- | ------------------------------------------------------ |
 | 0   | Trailhead | Letras cipher em conquistas **públicas** (sempre legíveis no hub) | Anagrama `TARTARO OCULTO` → `/submundo/tartaro-oculto` |
 | 1   | Tártaro   | CSS `--shadow-color` / `.hidden-rune`                             | `CERBERUS-UNBOUND` → Asfódelos                         |
-| 2   | Asfódelos | WAV + espectrograma                                               | `PERSEPHONE_PASS` → Elísios                            |
-| 3   | Elísios   | Network + Base64                                                  | `key_elestial_hades` → Estige                          |
-| 4   | Estige    | SHA-256 no console; hash **só no servidor**                       | Award Soberano +1500 XP                                |
+| 2   | Asfódelos | WAV + espectrograma                                               | `PERSEPHONE_PASS` → Hécate                             |
+| 3   | Hécate    | PNG metadados + LSB (R bit0)                                      | `HECATE_TORCH_KEY_777` → Elísios                       |
+| 4   | Elísios   | Network + Base64 (payload sem `hint`)                             | `key_elestial_hades` → Perséfone                       |
+| 5   | Perséfone | Cookie + localStorage                                             | `POMEGRANATE_6_SEEDS` → Observatório                   |
+| 6   | Observatório | OSINT / geo Cabo Matapan                                       | coords / `CAPE_MATAPAN_GATE` → Cócito                  |
+| 7   | Cócito    | Canvas invert / alfa                                              | `COCYTUS_REFLECTION_404` → Estige                      |
+| 8   | Estige    | SHA-256 no console; hash **só no servidor**                       | Award Soberano +1500 XP                                |
 
 
 ---

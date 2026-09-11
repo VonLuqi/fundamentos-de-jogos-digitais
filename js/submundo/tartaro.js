@@ -22,7 +22,7 @@ form?.addEventListener('submit', (event) => {
   if (value !== EXPECTED) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
-      statusEl.textContent = 'Os portões permanecem fechados.';
+      statusEl.textContent = 'As runas ainda dormem.';
     }
     return;
   }
