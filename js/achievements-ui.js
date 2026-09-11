@@ -176,9 +176,10 @@ const rainbowVfxBoundElements = new WeakSet();
 let rainbowVfxInstancePromise = null;
 let rainbowVfxDisabled = false;
 /** Canvas WebGL do @vfx-js — default da lib é z-index 9999.
- *  Fica em 1 para ficar *abaixo* do stacking context de `.app-shell` (z-index 2).
- *  Header sticky (40) só vence dentro do shell; canvas no body precisa ficar abaixo do shell. */
-const RAINBOW_VFX_CANVAS_Z_INDEX = 1;
+ *  Precisa ficar *acima* do conteúdo do álbum/hub (senão o card some: a lib
+ *  oculta o DOM e pinta só no canvas). Header sticky (40) e modais (80)
+ *  vencem este valor quando o `.app-shell` NÃO cria stacking context baixo. */
+const RAINBOW_VFX_CANVAS_Z_INDEX = 25;
 let rainbowVfxCanvas = null;
 let rainbowVfxSuspended = false;
 /** Motivos concorrentes (drawer, modal, reduced-motion) — suspende se qualquer um estiver ativo. */

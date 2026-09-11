@@ -77,6 +77,7 @@ function bindGuardListener() {
 
 export function installDevtoolsGuard() {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  if (typeof window.addEventListener !== 'function') return false;
   if (isArgLocation()) return false;
 
   window.__fjdDevtoolsGuardInstalled = true;

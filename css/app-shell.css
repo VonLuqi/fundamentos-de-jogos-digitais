@@ -20,7 +20,10 @@ body.is-shell-mobile.is-shell-locked {
 
 .app-shell {
   position: relative;
-  z-index: 2;
+  /* Sem z-index próprio: stacking context no shell faz o canvas WebGL do
+     arco-íris (body) ou cobrir o header inteiro, ou sumir atrás do shell
+     (cards pretos no álbum). Header sticky e drawer competem no root;
+     vignette usa pointer-events: none. */
   display: grid;
   grid-template-columns: 296px minmax(0, 1fr);
   min-height: 100vh;
