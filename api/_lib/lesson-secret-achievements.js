@@ -252,6 +252,392 @@ export function matchesCartografoDoInput(normalizedText) {
   );
 }
 
+/* ============================================================
+   AULA 03 — Homo Ludens + Pixel / Identidade (Voz / Artesão / Identidade)
+   ============================================================ */
+
+const HOMO_LUDENS_CORE = Object.freeze([
+  ['homo ludens', 'homoludens'],
+  ['huizinga', 'johan huizinga'],
+  [
+    'cultura surge como jogo',
+    'cultura se desenvolve como jogo',
+    'cultura surge e se desenvolve como jogo',
+    'jogo como elemento da cultura',
+    'cultura como jogo',
+    'no jogo e pelo jogo',
+    'matriz da cultura',
+    'cultura joga',
+  ],
+]);
+
+const IMPORT_SIGNALS = Object.freeze([
+  ['import', 'importei', 'importar', 'importacao', 'importação', 'importado'],
+  [
+    'filesystem',
+    'file system',
+    'arrastar',
+    'arrastei',
+    'drag and drop',
+    'arrastar e soltar',
+    'res://',
+    'sprites/hero',
+    'sprites',
+  ],
+]);
+
+const NEAREST_SIGNALS = Object.freeze([
+  [
+    'nearest',
+    'filtro nearest',
+    'texture filter',
+    'filtro de textura',
+    'sem blur',
+    'sem borrão',
+    'sem borrao',
+    'pixel nitido',
+    'pixel nítido',
+    'pixel duro',
+    'nao borrar',
+    'não borrar',
+    'nao borrou',
+    'não borrou',
+  ],
+]);
+
+const SPRITE_SIGNALS = Object.freeze([
+  ['sprite2d', 'sprite 2d', 'sprite', 'textura'],
+]);
+
+const CULTURE_FOLKLORE = Object.freeze([
+  [
+    'folclore',
+    'saci',
+    'curupira',
+    'iara',
+    'boitata',
+    'boitatá',
+    'cuca',
+    'mula sem cabeca',
+    'mula sem cabeça',
+    'boto',
+    'lobisomem',
+  ],
+]);
+
+const CULTURE_FAUNA = Object.freeze([
+  [
+    'fauna',
+    'onca',
+    'onça',
+    'tucano',
+    'mico',
+    'mico-leao',
+    'mico-leão',
+    'jabuti',
+    'capivara',
+    'arara',
+    'tamandua',
+    'tamanduá',
+  ],
+]);
+
+const CULTURE_URBAN = Object.freeze([
+  [
+    'urbano',
+    'regional',
+    'cidade',
+    'cordel',
+    'frevo',
+    'sertao',
+    'sertão',
+    'amazonia',
+    'amazônia',
+    'nordeste',
+    'favela',
+    'centro historico',
+    'centro histórico',
+    'brasileiro',
+    'brasilidade',
+    'cultura brasileira',
+  ],
+]);
+
+const PERSONALIZATION_SIGNALS = Object.freeze([
+  'personalizei',
+  'personalizar',
+  'personalizacao',
+  'personalização',
+  'recolor',
+  'recolorei',
+  'recolorir',
+  'recolore',
+  'editei',
+  'editar',
+  'edicao',
+  'edição',
+  'alterei',
+  'alterar',
+  'modifiquei',
+  'modificar',
+  'identidade',
+  'mascara cultural',
+  'máscara cultural',
+  'ancora cultural',
+  'âncora cultural',
+  'referencia cultural',
+  'referência cultural',
+  'inspirado',
+  'inspirada',
+  'inspiracao',
+  'inspiração',
+]);
+
+export const AULA3_SECRET_THRESHOLDS = Object.freeze({
+  homoLudensMin: 2,
+  homoLudensTotal: HOMO_LUDENS_CORE.length,
+  artesaoImportMin: 1,
+  artesaoNearestMin: 1,
+  artesaoSpriteMin: 1,
+  identidadeCultureMin: 1,
+  identidadePersonalizationMin: 1,
+});
+
+/**
+ * ≥2/3 conceitos: Homo Ludens · Huizinga · cultura-como-jogo.
+ */
+export function matchesHomoLudens(normalizedText) {
+  return coverageAtLeast(
+    normalizedText,
+    HOMO_LUDENS_CORE,
+    AULA3_SECRET_THRESHOLDS.homoLudensMin
+  );
+}
+
+/**
+ * Import/FileSystem + Nearest (ou pixel nítido) + Sprite2D/sprite.
+ */
+export function matchesArtesaoDoPixel(normalizedText) {
+  const importOk = coverageAtLeast(
+    normalizedText,
+    IMPORT_SIGNALS,
+    AULA3_SECRET_THRESHOLDS.artesaoImportMin
+  );
+  const nearestOk = coverageAtLeast(
+    normalizedText,
+    NEAREST_SIGNALS,
+    AULA3_SECRET_THRESHOLDS.artesaoNearestMin
+  );
+  const spriteOk = coverageAtLeast(
+    normalizedText,
+    SPRITE_SIGNALS,
+    AULA3_SECRET_THRESHOLDS.artesaoSpriteMin
+  );
+  return importOk && nearestOk && spriteOk;
+}
+
+/**
+ * Âncora cultural BR (folclore | fauna | urbano) + sinal de personalização.
+ */
+export function matchesIdentidadeLudica(normalizedText) {
+  const cultureGroups = [...CULTURE_FOLKLORE, ...CULTURE_FAUNA, ...CULTURE_URBAN];
+  const cultureOk = coverageAtLeast(
+    normalizedText,
+    cultureGroups,
+    AULA3_SECRET_THRESHOLDS.identidadeCultureMin
+  );
+  if (!cultureOk) return false;
+
+  const personalizationHits = PERSONALIZATION_SIGNALS.filter((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  }).length;
+  return personalizationHits >= AULA3_SECRET_THRESHOLDS.identidadePersonalizationMin;
+}
+
+/** —— Aula 04: plataformas · viewport · criatividade sob limite —— */
+
+const PLATFORM_HISTORY_CORE = Object.freeze([
+  [
+    'plataforma',
+    'plataformas',
+    'console',
+    'consoles',
+    'hardware',
+    'linha do tempo',
+    'historico',
+    'histórico',
+  ],
+  [
+    'atari',
+    'nes',
+    'famicom',
+    'snes',
+    'mega drive',
+    'genesis',
+    'game boy',
+    'gameboy',
+    'gba',
+    'game boy advance',
+    '8-bit',
+    '8 bit',
+    '16-bit',
+    '16 bit',
+    'portatil',
+    'portátil',
+  ],
+  [
+    'resolucao',
+    'resolução',
+    'paleta',
+    'sprites por scanline',
+    'scanline',
+    'restricao tecnica',
+    'restrição técnica',
+    'limitacao de hardware',
+    'limitação de hardware',
+  ],
+]);
+
+const VIEWPORT_SIZE_SIGNALS = Object.freeze([
+  [
+    'viewport width',
+    'viewport height',
+    'viewport width/height',
+    'viewport nativo',
+    'resolucao nativa',
+    'resolução nativa',
+    '320x180',
+    '320×180',
+    '480x270',
+    '480×270',
+    '160x144',
+    '160×144',
+    '256x224',
+    '256×224',
+  ],
+]);
+
+const STRETCH_VIEWPORT_SIGNALS = Object.freeze([
+  [
+    'stretch mode viewport',
+    'mode viewport',
+    'modo viewport',
+    'stretch viewport',
+    'stretch mode = viewport',
+    'stretch mode: viewport',
+  ],
+]);
+
+const STRETCH_ASPECT_KEEP_SIGNALS = Object.freeze([
+  [
+    'aspect keep',
+    'keep aspect',
+    'aspect = keep',
+    'aspect: keep',
+    'stretch aspect keep',
+    'manter proporcao',
+    'manter proporção',
+    'proporcao preservada',
+    'proporção preservada',
+  ],
+]);
+
+const RESTRICTION_CREATIVITY_RESTRICTION = Object.freeze([
+  [
+    'restricao',
+    'restrição',
+    'limitacao',
+    'limitação',
+    'limite',
+    'limites',
+    'hardware',
+    'sob restrição',
+    'sob restricao',
+    'sob limite',
+  ],
+]);
+
+const RESTRICTION_CREATIVITY_SOLUTION = Object.freeze([
+  [
+    'criatividade',
+    'criativo',
+    'criativa',
+    'solucao',
+    'solução',
+    'truque',
+    'truques',
+    'design',
+    'mecanica',
+    'mecânica',
+    'visual',
+    'forca criatividade',
+    'força criatividade',
+    'inventa',
+    'inventar',
+  ],
+]);
+
+export const AULA4_SECRET_THRESHOLDS = Object.freeze({
+  arqueologoMin: 2,
+  arqueologoTotal: PLATFORM_HISTORY_CORE.length,
+  artesaoViewportMin: 1,
+  artesaoStretchModeMin: 1,
+  artesaoAspectMin: 1,
+  criatividadeRestrictionMin: 1,
+  criatividadeSolutionMin: 1,
+});
+
+/**
+ * ≥2/3: plataforma/console · gerações nomeadas · restrição (resolução/paleta/sprites).
+ */
+export function matchesArqueologoDeHardware(normalizedText) {
+  return coverageAtLeast(
+    normalizedText,
+    PLATFORM_HISTORY_CORE,
+    AULA4_SECRET_THRESHOLDS.arqueologoMin
+  );
+}
+
+/**
+ * Viewport size + Stretch Mode viewport + Aspect keep (aliases PT/EN).
+ */
+export function matchesArtesaoDaViewport(normalizedText) {
+  const viewportOk = coverageAtLeast(
+    normalizedText,
+    VIEWPORT_SIZE_SIGNALS,
+    AULA4_SECRET_THRESHOLDS.artesaoViewportMin
+  );
+  const stretchOk = coverageAtLeast(
+    normalizedText,
+    STRETCH_VIEWPORT_SIGNALS,
+    AULA4_SECRET_THRESHOLDS.artesaoStretchModeMin
+  );
+  const aspectOk = coverageAtLeast(
+    normalizedText,
+    STRETCH_ASPECT_KEEP_SIGNALS,
+    AULA4_SECRET_THRESHOLDS.artesaoAspectMin
+  );
+  return viewportOk && stretchOk && aspectOk;
+}
+
+/**
+ * Restrição/limitação/hardware + criatividade/solução/truque/design.
+ */
+export function matchesCriatividadeSobLimite(normalizedText) {
+  const restrictionOk = coverageAtLeast(
+    normalizedText,
+    RESTRICTION_CREATIVITY_RESTRICTION,
+    AULA4_SECRET_THRESHOLDS.criatividadeRestrictionMin
+  );
+  const solutionOk = coverageAtLeast(
+    normalizedText,
+    RESTRICTION_CREATIVITY_SOLUTION,
+    AULA4_SECRET_THRESHOLDS.criatividadeSolutionMin
+  );
+  return restrictionOk && solutionOk;
+}
+
 const LESSON_SECRET_RULES = Object.freeze({
   aula1: Object.freeze([
     {
@@ -279,6 +665,34 @@ const LESSON_SECRET_RULES = Object.freeze({
     {
       id: 'segredo_cartografo_do_input',
       test: (ctx) => matchesCartografoDoInput(ctx.normalizedText),
+    },
+  ]),
+  aula3: Object.freeze([
+    {
+      id: 'segredo_homo_ludens',
+      test: (ctx) => matchesHomoLudens(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_artesao_do_pixel',
+      test: (ctx) => matchesArtesaoDoPixel(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_identidade_ludica',
+      test: (ctx) => matchesIdentidadeLudica(ctx.normalizedText),
+    },
+  ]),
+  aula4: Object.freeze([
+    {
+      id: 'segredo_arqueologo_de_hardware',
+      test: (ctx) => matchesArqueologoDeHardware(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_artesao_da_viewport',
+      test: (ctx) => matchesArtesaoDaViewport(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_criatividade_sob_limite',
+      test: (ctx) => matchesCriatividadeSobLimite(ctx.normalizedText),
     },
   ]),
 });

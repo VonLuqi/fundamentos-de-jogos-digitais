@@ -323,17 +323,17 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 
 ## Ponte — Aula 03 (próxima do Módulo 1)
 
-A Aula 02 deixa o Player **andando** com Input Map + `move_and_slide`. A sequência natural:
+A Aula 02 deixa o Player **andando** com Input Map + `move_and_slide`. A **ementa oficial** da Aula 03 (congelada na Task 0) é *Homo Ludens* + expressão cultural + oficina de pixel art — **não** câmera/polish.
 
-| Tema sugerido | Por quê |
+| Tema da Aula 03 | Por quê |
 | :--- | :--- |
-| **Câmera follow** (`Camera2D` no Player ou cena de teste) | O Viewport deixa de “perder” o herói |
-| **Cena de teste** (chão / `StaticBody2D` + instancia do `player.tscn`) | Colisão e sensação de mundo mínimo |
-| **Polish de movimento** (aceleração, freio, ou export no Inspector) | Amarra de novo Inspector ↔ feel (eco da Aula 01) |
+| ***Homo Ludens* e cultura como jogo** | Amplia o Círculo Mágico (Aula 01) para identidade cultural |
+| **Importar pixel art + filtro Nearest** | O placeholder da Aula 02 vira asset real e nítido |
+| **Personalizar o herói (folclore / fauna / urbano BR)** | Artefato: personagem culturalmente marcado na engine |
 
-Fora do MVP da Aula 03 (a menos que o currículo diga o contrário): jump completo, animações, tilemaps grandes.
+Câmera follow, cena de teste e animação dos sheets Tiny Hero ficam na **ponte da Aula 04** (ver plano da Aula 03).
 
-Quando houver ementa oficial da Aula 03, abrir `docs/plano-aula3-*.md` no mesmo formato (Task 0 → conquistas → página).
+Plano oficial: [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md) (Tasks 0–10 ✅).
 
 ---
 
@@ -342,7 +342,7 @@ Quando houver ementa oficial da Aula 03, abrir `docs/plano-aula3-*.md` no mesmo 
 ```
 Task 0–10 ✅  (implementação da Aula 02 verdadeira concluída)
 Liberação na turma → docs/playbook-liberar-aula2.md
-Próximo currículo → Aula 03 (câmera / cena de teste / polish)
+Próximo currículo → Aula 03 (Homo Ludens + pixel art cultural) · docs/plano-aula3-homo-ludens.md
 ```
 
 ---
@@ -423,6 +423,6 @@ Próximo currículo → Aula 03 (câmera / cena de teste / polish)
 
 - Estado atual: **Tasks 0–10 ✅ — Aula 02 verdadeira implementada.**
 - Liberação na turma: [`playbook-liberar-aula2.md`](./playbook-liberar-aula2.md) (gate + código).
-- Próximo currículo: **Aula 03** (câmera follow / cena de teste / polish de movimento) — ver seção *Ponte* acima.
+- Próximo currículo: **Aula 03** (*Homo Ludens* + pixel art cultural) — [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md) (Tasks 0–10 ✅ · liberar via [`playbook-liberar-aula3.md`](./playbook-liberar-aula3.md)).
 - Legado Tambor: [`nota-aula02-legado-tambor.md`](./nota-aula02-legado-tambor.md).
 

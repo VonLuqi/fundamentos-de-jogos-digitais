@@ -71,7 +71,12 @@ const LESSON_CATALOG = {
   },
   aula3: {
     lessonId: 'aula3',
-    lessonTitle: 'Aula 03 — Em preparação',
+    lessonTitle: 'Aula 03 — Homo Ludens, Identidade e Expressão Cultural',
+    xp: 30,
+  },
+  aula4: {
+    lessonId: 'aula4',
+    lessonTitle: 'Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas',
     xp: 30,
   },
 };
@@ -81,6 +86,7 @@ const LESSON_GATES = {
   aula1: { published: true },
   aula2: { published: false },
   aula3: { published: false },
+  aula4: { published: false },
 };
 
 const ACTIVITY_CATALOG = {
@@ -99,6 +105,14 @@ const ACHIEVEMENT_RULES = [
   {
     id: 'aula2_concluida',
     test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula2'),
+  },
+  {
+    id: 'aula3_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula3'),
+  },
+  {
+    id: 'aula4_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula4'),
   },
 ];
 

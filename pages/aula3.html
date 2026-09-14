@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 3 — conteúdo em preparação." />
+  <meta name="description" content="Aula 03 — Homo Ludens, Identidade e Expressão Cultural: o jogo como elemento da cultura, pixel art e herói brasileiro na Godot 4." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Aula 3 — Em Preparação | Fundamentos de Jogos Digitais</title>
+  <title>Aula 03 — Homo Ludens, Identidade e Expressão Cultural | Fundamentos de Jogos Digitais</title>
 
   <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
   <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
@@ -26,6 +26,17 @@
 </head>
 <body class="app-shell-page" data-route="aula3" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
 
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
@@ -69,8 +80,8 @@
           </button>
 
           <div class="app-shell__titles">
-            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="lesson-page-title">AULA 03: CONTEÚDO OCULTO <span class="accent">(EM BREVE)</span></h1>
+            <p class="app-shell__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 03: HOMO LUDENS, IDENTIDADE E <span class="accent">EXPRESSÃO CULTURAL</span></h1>
           </div>
         </div>
 
@@ -86,20 +97,253 @@
       </div>
 
       <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina do Pixel
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
         <main class="lesson-main" aria-labelledby="lesson-page-title">
-          <section class="tab-panel is-active" role="tabpanel">
-            <article class="hades-frame lesson-content">
-              <h2 class="lesson-title">Forja em andamento</h2>
-              <p>
-                Esta aula está em desenvolvimento e será liberada com novos desafios em breve.
-                Enquanto isso, siga evoluindo no Salão dos Heróis com as aulas já disponíveis.
-              </p>
-            </article>
-          </section>
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 1 · Aulas 1 a 5 · 10h</p>
+        <h2 class="lesson-title">O jogo como elemento da cultura</h2>
+        <p>
+          Depois do Círculo Mágico e do Player andando, a pergunta muda de tom:
+          se o jogo cria um mundo com regras próprias, <strong>de onde vêm as imagens e as histórias</strong> desse mundo?
+          Nesta aula, a tese de Huizinga encontra o sprite — e a cultura vira máscara jogável.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Homo Ludens</h3>
+            <p>Huizinga propõe que o humano é também “o que joga”: a cultura surge <strong>no jogo e pelo jogo</strong> — rito, linguagem, arte e competição carregam forma lúdica.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Jogo como cultura</h3>
+            <p>Não é “pausa do sério”: é modo de a sociedade interpretar o mundo, ensaiar regras e criar <strong>significado compartilhado</strong>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Identidade jogável</h3>
+            <p>Criadores transformam lendas, folclore, fauna e paisagens locais em <strong>elementos interativos</strong> — o sprite diz de onde falamos.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Do Círculo Mágico à máscara cultural</h2>
+        <p>
+          Em <em>Homo Ludens</em> (1938), Johan Huizinga defende que a cultura humana surge e se desenvolve como jogo.
+          O Círculo Mágico da Aula 01 descreve o recorte com regras; aqui ampliamos: dentro desse recorte, o herói também carrega
+          <strong>identidade</strong> — folclore, fauna ou urbano brasileiro traduzidos em pixel.
+        </p>
+        <p>
+          Criadores não “decoram” o jogo com cultura: eles <strong>traduzem</strong> cultura em sistemas jogáveis.
+          Indies brasileiros já fizeram isso com Saci, Curupira, Cuca, sertão, Amazônia e símbolos locais — use-os como inspiração, não como obrigação de jogar.
+        </p>
+
+        <div class="quote-block">
+          <p>A cultura joga — e o sprite é uma das máscaras com que esse jogo se mostra. Personalizar o herói é exercitar identidade dentro do Círculo Mágico.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
+        <p>
+          Importar pixel art na Godot 4, deixar o pixel nítido com filtro <strong>Nearest</strong> e personalizar o Sprite do Player
+          com um recorte cultural brasileiro — sem animação obrigatória nesta etapa.
+        </p>
+
+        <ul class="lesson-list">
+          <li>Explicar <em>Homo Ludens</em> de forma operacional (cultura no jogo e pelo jogo).</li>
+          <li>Importar imagens no FileSystem e configurar <code>Sprite2D</code> com filtro Nearest.</li>
+          <li>Vestir o Player da Aula 02 com uma máscara cultural (folclore, fauna ou urbano).</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · Pixel art na Godot 4</p>
+        <h2 class="lesson-title">Prática na Godot Engine</h2>
+        <p>
+          Continue o projeto da <strong>Aula 02</strong> (Player que já anda). Hoje o placeholder vira asset real:
+          você importa o pacote Tiny Hero, aplica <strong>Nearest</strong> e personaliza o herói com identidade brasileira.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Importar</h3>
+            <p>Arrastar PNG para o FileSystem — a Godot gera os metadados em <code>res://</code>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Nearest</h3>
+            <p>Filtro que preserva o pixel duro. Linear borra; Nearest mantém a arte nítida.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Personalizar</h3>
+            <p>Recolor, acessório ou silhueta com âncora em folclore, fauna ou urbano BR.</p>
+          </article>
+        </div>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>
+            Baixe o pacote <strong>Free Pixel Art Tiny Hero Sprites</strong> (CraftPix) — três heróis base (Pink, Owlet, Dude) —
+            e consulte o guia com checklist e passos da Godot 4.
+          </p>
+          <a class="lesson-cta" href="../assets/docs/aulas/aula03-pixel-hero/craftpix-net-622999-free-pixel-art-tiny-hero-sprites.zip" download>
+            Baixar pacote Tiny Hero (ZIP)
+          </a>
+          <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula03-pixel-hero/README.md" target="_blank" rel="noopener noreferrer">
+            Abrir guia da oficina (README)
+          </a>
+        </div>
+
+        <h3 class="lesson-subtitle">0. Setup</h3>
+        <ol class="lesson-list">
+          <li>Baixe e extraia o ZIP Tiny Hero.</li>
+          <li>Abra o projeto Godot 4 da Aula 02 (Player com Input Map e <code>player.gd</code>).</li>
+          <li>No FileSystem, crie a pasta <code>sprites/hero</code> (ou equivalente).</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">1. Conhecer o pacote</h3>
+        <ol class="lesson-list">
+          <li>Escolha um herói: <code>Pink_Monster</code>, <code>Owlet_Monster</code> ou <code>Dude_Monster</code>.</li>
+          <li>Para o MVP, use o PNG base (ex.: <code>Pink_Monster.png</code>) — um frame no <code>Sprite2D</code>.</li>
+          <li>Sheets (<code>*_Idle_*</code>, <code>*_Walk_*</code>…) ficam para exploração; animação completa é bônus / aula futura.</li>
+          <li>Respeite o <code>license.txt</code> do pacote e cite a origem nas anotações.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">2. Importar no FileSystem</h3>
+        <ol class="lesson-list">
+          <li><strong>Arraste e solte</strong> o PNG escolhido na pasta <code>sprites/hero</code>.</li>
+          <li>Confirme que o arquivo aparece sob <code>res://</code> e que a Godot gerou metadados de importação.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">3. Pixel nítido (Nearest)</h3>
+        <ol class="lesson-list">
+          <li>Selecione o <code>Sprite2D</code> → Inspector → <strong>CanvasItem → Texture → Filter</strong> → <code>Nearest</code>.</li>
+          <li>Opcional (bom hábito): <strong>Project Settings → Rendering → Textures → Default Texture Filter</strong> → <code>Nearest</code>.</li>
+          <li>Compare Linear (blur) vs Nearest (pixel duro) no Play e registre a diferença.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">4. Ligar ao Player</h3>
+        <ol class="lesson-list">
+          <li>Abra <code>player.tscn</code> → <code>Sprite2D</code> → <strong>Texture</strong> → PNG importado.</li>
+          <li>Ajuste escala e realinhe o <code>CollisionShape2D</code> à nova silhueta.</li>
+          <li>Pressione <strong>Play</strong> e confirme que o movimento da Aula 02 ainda funciona.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">5. Personalização cultural</h3>
+        <p>Escolha <strong>uma</strong> âncora e edite o PNG (LibreSprite, Piskel, Photopea, GIMP, Aseprite… — a Godot só importa o resultado):</p>
+        <ul class="lesson-list">
+          <li><strong>Folclore:</strong> Saci, Curupira, Iara, Boitatá, Cuca…</li>
+          <li><strong>Fauna BR:</strong> onça, tucano, mico-leão, jabuti, capivara — como motivo visual.</li>
+          <li><strong>Urbano / regional:</strong> símbolo da sua cidade, cordel, frevo, sertão, centro histórico…</li>
+        </ul>
+        <p>
+          <strong>Nível 1 (mínimo):</strong> recolor 1–2 cores <em>ou</em> crop + nome cultural + justificativa escrita.<br />
+          <strong>Nível 2 (esperado):</strong> acessório, silhueta ou paleta com a âncora visível.<br />
+          <strong>Nível 3 (bônus):</strong> sheet Idle/Walk com a mesma identidade — sem exigir <code>AnimatedSprite2D</code> nesta aula.
+        </p>
+
+        <h3 class="lesson-subtitle">Checklist do artefato</h3>
+        <ul class="lesson-list">
+          <li>ZIP Tiny Hero baixado e PNG no projeto.</li>
+          <li><code>Sprite2D</code> do Player usando a textura importada.</li>
+          <li>Filtro <strong>Nearest</strong> aplicado — pixel nítido no Play.</li>
+          <li>Personalização cultural visível <em>ou</em> recolor + justificativa clara (Nível 1+).</li>
+          <li><code>CollisionShape2D</code> ajustado e movimento da Aula 02 intacto.</li>
+          <li>Anotações + síntese enviadas nesta página.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Importar e deixar nítido é o ofício; escolher o que o herói representa é o gesto de Homo Ludens.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 3">
+          <p><strong>Pistas secretas do Submundo:</strong> diga com as próprias palavras por que a cultura joga; descreva como importou o sprite e deixou o pixel nítido; e registre qual máscara brasileira o seu herói passou a carregar. O altar reconhece quem documenta com precisão.</p>
+        </section>
+
+        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
+          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+          <p>
+            Explique <em>Homo Ludens</em>, registre a referência cultural do herói, os passos de importação e o ajuste Nearest.
+            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+          </p>
+          <textarea
+            id="config-notes"
+            class="config-notes-text"
+            rows="14"
+            placeholder="1) Homo Ludens (com as minhas palavras):&#10;2) Relação com o Círculo Mágico (Aula 01):&#10;3) Referência cultural do meu herói (folclore / fauna / urbano):&#10;4) O que eu alterei no sprite (e por quê):&#10;5) Importação (pasta FileSystem + arquivo):&#10;6) Nearest: onde configurei e o que mudou no Play (Linear vs Nearest):&#10;7) Observações / dúvidas:"
+          ></textarea>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
+            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
+            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <h3 class="lesson-subtitle">Artefato gerado</h3>
+        <p>
+          Personagem culturalmente personalizado na engine: Player da Aula 02 com sprite importado, nítido (Nearest)
+          e identidade brasileira explícita (visual e/ou textual nas anotações).
+        </p>
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            Em Homo Ludens, Huizinga mostra que a cultura surge no jogo e pelo jogo. Meu Player deixou o placeholder genérico:
+            importei o Owlet_Monster, configurei Filter Nearest no Sprite2D (Linear borrava o pixel) e recolorei o gorro + capa
+            inspirados no Saci — assim o asset visual vira máscara cultural dentro do Círculo Mágico.
+          </p>
+        </section>
+        <textarea
+          id="gdd-text"
+          class="gdd-text"
+          rows="8"
+          placeholder="Síntese final (5–8 linhas): amarre a tese de Huizinga → por que o asset visual é cultura jogável → o que o seu Player agora expressa.&#10;Ex.: Homo Ludens + Nearest + referência cultural escolhida."
+        ></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+        </div>
+      </article>
+    </section>
+
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 03</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre Homo Ludens, identidade e pixel art na Godot 4.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 03" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 03" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
         </main>
 
         <footer class="lesson-footer">
-          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Aula 3 de N</p>
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 03</p>
         </footer>
       </div>
     </div>

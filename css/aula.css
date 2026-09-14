@@ -705,6 +705,10 @@ img.discovery-card__item-art.has-art {
   margin-top: 0.35rem;
 }
 
+.lesson-download-box .lesson-cta + .lesson-cta {
+  margin-left: 0.55rem;
+}
+
 .censored-card {
   position: relative;
   margin: 1rem 0;
@@ -1193,6 +1197,17 @@ img.discovery-card__item-art.has-art {
 
   .lesson-download-box {
     padding: 0.9rem;
+  }
+
+  .lesson-download-box .lesson-cta {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .lesson-download-box .lesson-cta + .lesson-cta {
+    margin-left: 0;
+    margin-top: 0.55rem;
   }
 
   .lesson-main {

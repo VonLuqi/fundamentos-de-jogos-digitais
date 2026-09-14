@@ -1,5 +1,5 @@
 /**
- * Aula 03 — Homo Ludens, Identidade e Expressão Cultural
+ * Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas
  * Tabs, slides, envio de anotações/síntese e discovery compartilhado.
  */
 
@@ -22,19 +22,20 @@ import {
   enqueueDiscovery,
 } from './lesson-discovery.js';
 
-const LESSON_ID = 'aula3';
-const PPTX_FILE = 'aula03_homo_ludens_slides.pptx';
-const PDF_FILE = 'aula03_homo_ludens_slides.pdf';
+const LESSON_ID = 'aula4';
+const PPTX_FILE = 'aula04_plataformas_restricoes_slides.pptx';
+const PDF_FILE = 'aula04_plataformas_restricoes_slides.pdf';
 const CONFIG_NOTES_START = '=== ANOTACOES_DE_CONFIGURACAO ===';
 const CONFIG_NOTES_END = '=== FIM_ANOTACOES_DE_CONFIGURACAO ===';
 const CONFIG_NOTES_TEMPLATE = [
-  '1) Homo Ludens (com as minhas palavras): ...',
-  '2) Relação com o Círculo Mágico (Aula 01): ...',
-  '3) Referência cultural do meu herói (folclore / fauna / urbano): ...',
-  '4) O que eu alterei no sprite (e por quê): ...',
-  '5) Importação (pasta FileSystem + arquivo): ...',
-  '6) Nearest: onde configurei e o que mudou no Play (Linear vs Nearest): ...',
-  '7) Observações / dúvidas: ...',
+  '1) Plataforma(s) que mais me marcaram na linha do tempo: ...',
+  '2) Uma restrição técnica (resolução / paleta / sprites) e por que ela importa: ...',
+  '3) Como a restrição força criatividade (exemplo meu ou de um jogo clássico): ...',
+  '4) Resolução nativa que escolhi (ex.: 320×180) e por quê: ...',
+  '5) Onde configurei Viewport Width/Height: ...',
+  '6) Stretch Mode / Aspect / Scale Mode (valores finais): ...',
+  '7) O que mudou no Play ao redimensionar a janela: ...',
+  '8) Observações / dúvidas: ...',
 ].join('\n');
 
 let currentUser = null;
@@ -230,10 +231,15 @@ async function initParagraphPersistence() {
       textarea.value = parsed.summary;
       notesArea.value = parsed.notes;
       setSaveStatus('Registro e anotações carregados do banco.', 'success');
-      setNotesStatus(parsed.notes ? 'Anotações carregadas.' : 'Registre Homo Ludens, importação, Nearest e a máscara cultural.', 'info');
+      setNotesStatus(
+        parsed.notes
+          ? 'Anotações carregadas.'
+          : 'Registre plataformas, restrições, Viewport e Stretch.',
+        'info'
+      );
     } else {
       setSaveStatus('Escreva a síntese e finalize para enviar ao professor.', 'info');
-      setNotesStatus('Registre Homo Ludens, a referência cultural, a importação e o Nearest.', 'info');
+      setNotesStatus('Registre plataformas, restrição → criatividade, Viewport e Stretch.', 'info');
     }
   } catch {
     setSaveStatus('Não foi possível carregar o registro do banco agora.', 'error');
@@ -313,7 +319,7 @@ async function init() {
   currentToken = getSession()?.token ?? null;
 
   initAppShell({
-    route: 'aula3',
+    route: 'aula4',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: async () => {
       await logout();

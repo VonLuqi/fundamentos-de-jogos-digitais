@@ -122,6 +122,7 @@ const aula1 = read('js/aula1.js');
 assert(aula1.includes('grimorio-from-note'), 'aula1 fromNote');
 assert(read('js/aula2.js').includes('grimorio-from-note'), 'aula2 fromNote');
 assert(read('js/aula3.js').includes('grimorio-from-note'), 'aula3 fromNote');
+assert(read('js/aula4.js').includes('grimorio-from-note'), 'aula4 fromNote');
 
 [
   'js/grimorio-nota.js',

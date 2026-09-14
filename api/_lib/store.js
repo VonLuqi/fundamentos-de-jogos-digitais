@@ -58,6 +58,18 @@ export const REDEEM_CODES = {
     xp: 25,
     achievement: 'ritmo_do_jogo',
   },
+  CULTURA2026: {
+    lessonId: 'aula3',
+    lessonTitle: 'Aula 03 — Homo Ludens, Identidade e Expressão Cultural',
+    xp: 30,
+    achievement: 'aula3_concluida',
+  },
+  PLATAFORMA2026: {
+    lessonId: 'aula4',
+    lessonTitle: 'Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas',
+    xp: 30,
+    achievement: 'aula4_concluida',
+  },
 };
 
 /* ============================================================
@@ -70,6 +82,7 @@ export const REDEEM_CODES = {
 export const LESSON_PREREQUISITES = {
   aula2: 'aula1',
   aula3: 'aula2',
+  aula4: 'aula3',
 };
 
 /** Retorna true se o usuário já cumpriu o pré-requisito da aula informada. */
@@ -95,6 +108,8 @@ export const ACHIEVEMENT_RULES = [
   { id: 'campeao', test: (u) => u.xp >= 120 },
   { id: 'loop_master', test: (u) => u.completedLessons.includes('aula2') },
   { id: 'ritmo_do_jogo', test: (u) => u.completedLessons.includes('aula2') && u.xp >= 45 },
+  { id: 'aula3_concluida', test: (u) => u.completedLessons.includes('aula3') },
+  { id: 'aula4_concluida', test: (u) => u.completedLessons.includes('aula4') },
 ];
 
 /* ============================================================

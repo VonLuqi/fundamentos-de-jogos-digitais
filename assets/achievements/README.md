@@ -50,6 +50,14 @@ Fonte de verdade do *conteúdo* (nome, raridade, etc.): `data/game-catalog.json`
 | `segredo_lexico_do_desenvolvedor` | Léxico do Desenvolvedor | sim |
 | `segredo_arquiteto_de_cenas` | Arquiteto de Cenas | sim |
 | `segredo_cartografo_do_input` | Cartógrafo do Input | sim |
+| `aula3_concluida` | Máscara do Homo Ludens | não |
+| `segredo_homo_ludens` | Voz do Homo Ludens | sim |
+| `segredo_artesao_do_pixel` | Artesão do Pixel | sim |
+| `segredo_identidade_ludica` | Identidade Lúdica | sim |
+| `aula4_concluida` | Guardião da Resolução | não |
+| `segredo_arqueologo_de_hardware` | Arqueólogo de Hardware | sim |
+| `segredo_artesao_da_viewport` | Artesão da Viewport | sim |
+| `segredo_criatividade_sob_limite` | Criatividade sob Limite | sim |
 | `soberano_do_submundo` | Soberano do Submundo | sim |
 | `grimorio_primeira_inscricao` | Primeira Inscrição | não |
 | `grimorio_elo_da_trilha` | Elo da Trilha | não |
@@ -74,6 +82,14 @@ aula2_concluida.webp
 segredo_lexico_do_desenvolvedor.webp
 segredo_arquiteto_de_cenas.webp
 segredo_cartografo_do_input.webp
+aula3_concluida.webp
+segredo_homo_ludens.webp
+segredo_artesao_do_pixel.webp
+segredo_identidade_ludica.webp
+aula4_concluida.webp
+segredo_arqueologo_de_hardware.webp
+segredo_artesao_da_viewport.webp
+segredo_criatividade_sob_limite.webp
 soberano_do_submundo.webp
 grimorio_primeira_inscricao.webp
 grimorio_elo_da_trilha.webp

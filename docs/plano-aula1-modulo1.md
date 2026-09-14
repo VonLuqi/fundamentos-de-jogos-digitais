@@ -133,3 +133,9 @@ Aula 01 implementada. Continuidade do Módulo 1:
 
 - **Aula 02** — *O Glossário do Desenvolvedor e o Player na Tela* (Core Loop, Grokking, Assets · cena do Player na Godot). Plano e status: [`plano-aula2-glossario-player.md`](./plano-aula2-glossario-player.md).
 - Liberação da Aula 02 na turma: [`playbook-liberar-aula2.md`](./playbook-liberar-aula2.md).
+
+- **Aula 03** — *Homo Ludens, Identidade e Expressão Cultural* (cultura como jogo · pixel art + herói brasileiro). Plano e status: [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md).
+- Liberação da Aula 03 na turma: [`playbook-liberar-aula3.md`](./playbook-liberar-aula3.md).
+
+- **Aula 04** — *A Linha do Tempo das Plataformas e as Restrições Técnicas* (histórico de hardware · viewport retrô). Plano e status: [`plano-aula4-plataformas-restricoes.md`](./plano-aula4-plataformas-restricoes.md).
+- Liberação da Aula 04 na turma: [`playbook-liberar-aula4.md`](./playbook-liberar-aula4.md).

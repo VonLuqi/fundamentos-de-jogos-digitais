@@ -103,7 +103,11 @@ assert.deepEqual(
   [],
   'texto aula2 não dispara regras aula1'
 );
-assert.deepEqual(evaluateSecretAchievements('aula3', quaseTudo), [], 'aula sem regras → vazio');
+assert.deepEqual(
+  evaluateSecretAchievements('aula3', quaseTudo).map((e) => e.id),
+  [],
+  'texto aula2 não dispara regras aula3'
+);
 
 // Catálogo
 for (const id of AULA2_IDS) {

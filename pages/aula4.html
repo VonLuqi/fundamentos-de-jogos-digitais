@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas: histórico de hardware e estética retrô na Godot 4 (viewport + stretch)." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page" data-route="aula4" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+                <a class="app-shell__link is-locked" data-nav-item="minigame" href="#" aria-disabled="true" tabindex="-1" title="Em breve">Minigame em breve</a>
+<a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 04: A LINHA DO TEMPO DAS PLATAFORMAS E AS <span class="accent">RESTRIÇÕES TÉCNICAS</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 04</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina Retrô
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 1 · Aulas 1 a 5 · 10h</p>
+        <h2 class="lesson-title">Histórico dos jogos e suas plataformas de hardware</h2>
+        <p>
+          O herói da Aula 03 já está nítido (Nearest) e culturalmente marcado.
+          A pergunta agora é outra: <strong>em que “tela imaginária” esse herói deveria viver?</strong>
+          Um monitor 1080p moderno não era o contrato dos clássicos — e projetar dentro de um contrato de poucos pixels muda o design.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Plataforma</h3>
+            <p>O hardware (e seu “contrato” com o software) onde o jogo roda: CPU, memória, vídeo, entrada. Cada geração redefine o que é <strong>possível</strong>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Restrição técnica</h3>
+            <p>Limites reais: resolução baixa, poucas cores, poucos sprites por linha, pouca RAM. O designer <strong>projeta dentro</strong> desses limites.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Criatividade sob limite</h3>
+            <p>A restrição empurra soluções elegantes: tiles reutilizados, parallax por scanline, paletas compartilhadas, mecânicas que “escondem” o hardware.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Linha do tempo operacional</h2>
+        <p>Valores didáticos (ordem de grandeza) — o ponto é o <strong>orçamento visual</strong>, não a engenharia completa do chip.</p>
+        <ul class="lesson-list">
+          <li><strong>70s — Atari 2600:</strong> ~160×192 · pouquíssimos objetos por linha; arte e timing viram truque.</li>
+          <li><strong>8-bit mesa — NES:</strong> 256×240 (área útil ~224) · ~52 cores no sistema; 3–4 cores por tile/sprite; <strong>8 sprites por scanline</strong> (flicker).</li>
+          <li><strong>8-bit portátil — Game Boy:</strong> <strong>160×144</strong>, 4 tons · silhueta e contraste &gt; detalhe.</li>
+          <li><strong>16-bit mesa — SNES / Mega Drive:</strong> SNES comum <strong>256×224</strong> · mais cores/camadas, ainda com limites de sprites.</li>
+          <li><strong>16-bit portátil — GBA:</strong> <strong>240×160</strong> · mais cor que o GB, tela ainda “perto do rosto”.</li>
+          <li><strong>HD / multiplataforma:</strong> 720p → 4K · o limite vira orçamento de GPU e densidade de UI — a disciplina de resolução base continua útil.</li>
+          <li><strong>Estética retrô hoje:</strong> alvos comuns <strong>320×180</strong>, <strong>480×270</strong>, 640×360 (16:9) — emular o contrato clássico em monitores widescreen.</li>
+        </ul>
+
+        <h2 class="lesson-title">Quando o limite inventa a linguagem</h2>
+        <ul class="lesson-list">
+          <li><strong>Sprites por scanline (NES):</strong> flicker e chefes costurados a partir de vários sprites.</li>
+          <li><strong>Paleta curta (Game Boy):</strong> silhueta e animação carregam a leitura.</li>
+          <li><strong>Mode 7 / efeitos por scanline (SNES):</strong> perspectiva falsa e ondas sem “3D de verdade”.</li>
+          <li><strong>Tiles reutilizados:</strong> o mesmo bloco monta biomas inteiros — memória vira linguagem visual.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Toda plataforma escreve um contrato invisível com o jogador: quantos pixels, quantas cores, quanto cabe na memória. Projetar dentro desse contrato — e às vezes fingir que ele ainda existe — é o ofício do designer retrô.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
+        <p>
+          Configurar na Godot 4 a <strong>resolução nativa</strong> do projeto (Viewport Width/Height) e o stretch clássico
+          (<code>viewport</code> + <code>keep</code> + <code>integer</code>) — o Nearest da Aula 03 protege o asset; o stretch protege o quadro.
+        </p>
+
+        <ul class="lesson-list">
+          <li>Situar a evolução de consoles de mesa e portáteis em uma linha do tempo operacional.</li>
+          <li>Explicar por que limitação de hardware força criatividade visual e mecânica.</li>
+          <li>Emular um contrato de tela clássico no Project Settings (estética retrô do zero).</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · Estética Retrô do Zero</p>
+        <h2 class="lesson-title">Prática na Godot Engine</h2>
+        <p>
+          Continue o projeto das <strong>Aulas 02–03</strong> (Player + sprite Nearest).
+          Hoje você não simula um chip: configura o <strong>contrato de tela</strong> —
+          viewport baixo, pixels que crescem limpos e proporção preservada, como nos consoles de 8/16 bits.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Viewport</h3>
+            <p>Resolução de design (ex.: <code>320×180</code>). É o quadro nativo do jogo — não o tamanho do monitor.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Stretch viewport</h3>
+            <p>A cena renderiza no tamanho base e <strong>depois</strong> é escalada para a janela.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Aspect keep</h3>
+            <p>Mantém a proporção; barras pretas se a janela não for 16:9 — como o console “fixando” o aspect.</p>
+          </article>
+        </div>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>
+            Consulte o guia com passo a passo Godot 4, tabela de resoluções históricas e checklist do artefato.
+          </p>
+          <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula04-retro-viewport/README.md" target="_blank" rel="noopener noreferrer">
+            Abrir guia da oficina (README)
+          </a>
+        </div>
+
+        <h3 class="lesson-subtitle">0. Setup</h3>
+        <ol class="lesson-list">
+          <li>Abra o projeto Godot 4 das Aulas 02–03 (Player andando + sprite Nearest).</li>
+          <li>Anote a resolução atual do projeto (antes de mudar).</li>
+          <li>Menu <strong>Project → Project Settings</strong> · ative <strong>Advanced Settings</strong> se a UI estiver reduzida.</li>
+          <li>Vá em <strong>Display → Window</strong>.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">1. Escolher o contrato de tela</h3>
+        <p>Escolha <strong>uma</strong> resolução nativa (ambas 16:9):</p>
+        <ul class="lesson-list">
+          <li><code>320×180</code> — contrato bem “8/16-bit moderno”; pixels grandes e legíveis.</li>
+          <li><code>480×270</code> — mesmo aspect, um pouco mais de detalhe (ainda retrô).</li>
+        </ul>
+        <p>Opcional (menção, não exigir): <code>256×224</code> (SNES-like 4:3) ou <code>160×144</code> (Game Boy) — justifique nas anotações.</p>
+
+        <h3 class="lesson-subtitle">2. Viewport nativo (resolução de design)</h3>
+        <ol class="lesson-list">
+          <li>Em <strong>Display → Window</strong>, defina <strong>Viewport Width</strong> e <strong>Viewport Height</strong>.</li>
+          <li>Observe o retângulo azul no editor 2D: a área útil muda. O herói pode parecer “grande” demais — isso é esperado.</li>
+          <li>
+            <strong>Nomenclatura:</strong> na Godot 4 a resolução de design é Viewport Width/Height.
+            Window Width/Height Override controla só o tamanho inicial da janela na sua tela.
+          </li>
+        </ol>
+
+        <h3 class="lesson-subtitle">3. Stretch clássico</h3>
+        <ol class="lesson-list">
+          <li><strong>Stretch → Mode</strong> → <code>viewport</code>.</li>
+          <li><strong>Stretch → Aspect</strong> → <code>keep</code>.</li>
+          <li><strong>Stretch → Scale Mode</strong> → <code>integer</code> (pixels inteiros, sem “quebrar” a grade).</li>
+          <li>
+            <strong>Window Width/Height Override</strong> (sugestão): <code>1280×720</code> ou <code>960×540</code>
+            — janela confortável com viewport baixo.
+          </li>
+        </ol>
+
+        <h3 class="lesson-subtitle">4. Experimento de observação</h3>
+        <p>Pressione <strong>Play</strong>, redimensione a janela e compare (depois volte ao trio canônico):</p>
+        <ul class="lesson-list">
+          <li><code>disabled</code> — 1 unidade ≈ 1 pixel da tela; o mundo muda de tamanho.</li>
+          <li><code>viewport</code> + Aspect <code>ignore</code> — estica e deforma o quadro.</li>
+          <li><code>viewport</code> + <code>keep</code> — proporção preservada; barras pretas possíveis.</li>
+          <li>Scale Mode <code>integer</code> vs <code>fractional</code> — pixels uniformes vs “meios-pixels”.</li>
+        </ul>
+        <p>Volte a <code>viewport</code> + <code>keep</code> + <code>integer</code> antes de finalizar.</p>
+
+        <h3 class="lesson-subtitle">5. Eco da Aula 03 (Nearest)</h3>
+        <ol class="lesson-list">
+          <li>Se o sprite ainda estiver em Linear: <code>Sprite2D</code> → CanvasItem → Texture → Filter → <strong>Nearest</strong>.</li>
+          <li>Ou: Project Settings → Rendering → Textures → Default Texture Filter → <strong>Nearest</strong>.</li>
+          <li>Sem Nearest, o stretch amplifica o blur — compare 30 segundos e registre.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">Checklist do artefato</h3>
+        <ul class="lesson-list">
+          <li>Projeto das Aulas 02–03 aberto.</li>
+          <li>Viewport Width × Height = <code>320×180</code> <strong>ou</strong> <code>480×270</code> (ou resolução histórica justificada).</li>
+          <li>Stretch Mode = <code>viewport</code>.</li>
+          <li>Stretch Aspect = <code>keep</code>.</li>
+          <li>Stretch Scale Mode = <code>integer</code>.</li>
+          <li>Window Override definido (janela inicial confortável).</li>
+          <li>Play: pixels nítidos e proporção mantida ao redimensionar.</li>
+          <li>Nearest ainda ativo no herói (eco Aula 03).</li>
+          <li>Anotações + síntese enviadas nesta página.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Nearest protege o asset; stretch protege o quadro. Juntos, formam a estética retrô do zero.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 4">
+          <p><strong>Pistas secretas do Submundo:</strong> situie uma plataforma na linha do tempo; descreva Viewport + Stretch (<code>viewport</code> / <code>keep</code>) com as próprias palavras; e diga que restrição antiga ainda te ensina a inventar. O altar reconhece quem documenta o contrato de tela.</p>
+        </section>
+
+        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
+          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+          <p>
+            Registre plataformas, restrições, a resolução escolhida e os caminhos do Project Settings.
+            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+          </p>
+          <textarea
+            id="config-notes"
+            class="config-notes-text"
+            rows="14"
+            placeholder="1) Plataforma(s) que mais me marcaram na linha do tempo:&#10;2) Uma restrição técnica (resolução / paleta / sprites) e por que ela importa:&#10;3) Como a restrição força criatividade (exemplo meu ou de um jogo clássico):&#10;4) Resolução nativa que escolhi (ex.: 320×180) e por quê:&#10;5) Onde configurei Viewport Width/Height:&#10;6) Stretch Mode / Aspect / Scale Mode (valores finais):&#10;7) O que mudou no Play ao redimensionar a janela:&#10;8) Observações / dúvidas:"
+          ></textarea>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
+            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
+            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <h3 class="lesson-subtitle">Artefato gerado</h3>
+        <p>
+          Projeto Godot configurado com formato e resolução clássica retrô: viewport nativo baixo + stretch
+          <code>viewport</code> / <code>keep</code> / <code>integer</code>, documentado nas anotações.
+        </p>
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            Do Atari ao SNES, cada plataforma impôs um contrato de poucos pixels e poucas cores — e isso forçou truques
+            como flicker de sprites e tiles reutilizados. Configurei Viewport 320×180, Stretch Mode viewport, Aspect keep
+            e Scale Mode integer (janela 1280×720): no Play os pixels crescem limpos sem esticar o quadro, ecoando o
+            contrato clássico em monitor moderno.
+          </p>
+        </section>
+        <textarea
+          id="gdd-text"
+          class="gdd-text"
+          rows="8"
+          placeholder="Síntese final (5–8 linhas): amarre história das plataformas → restrição técnica → por que configurei um viewport baixo com stretch viewport/keep no seu projeto.&#10;Ex.: NES/GB + limitação → criatividade · Viewport 320×180 · Mode viewport · Aspect keep."
+        ></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+        </div>
+      </article>
+    </section>
+
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 04</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre plataformas, restrições técnicas
+          e viewport retrô na Godot 4.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 04" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 04" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 04</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/aula4.js"></script>
+</body>
+</html>

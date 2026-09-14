@@ -7,7 +7,7 @@
  *      (`activeSession` = { token, name, role, savedAt }).
  *      Nenhum dado de progresso é confiado ao navegador — XP e
  *      conquistas vêm sempre do servidor.
- *   2. Expor helpers `fetch()` tipados para /api/auth e /api/progress.
+ *   2. Expor helpers `fetch()` tipados para /api/auth, /api/progress e /api/despertar.
  *   3. Fornecer um guard de rota (`requireSession`) que redireciona
  *      para o Pacto de Sangue quando não há sessão ativa.
  * ============================================================
@@ -336,6 +336,7 @@ export const ROUTES = {
     return `${base}?u=${encodeURIComponent(username)}`;
   },
   souls: () => `${rootPath()}/pages/souls.html`,
+  despertar: () => `${rootPath()}/pages/despertar.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -935,6 +936,37 @@ export async function listNotesForUser(token, targetUserId) {
 }
 
 /* ============================================================
+   5.1 O DESPERTAR (clicker — /api/despertar)
+   ============================================================ */
+export function despertarStateGet(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'stateGet' }),
+  });
+}
+
+export function despertarStateSync(token, clientState) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'stateSync', clientState }),
+  });
+}
+
+export function despertarPrestige(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'prestige' }),
+  });
+}
+
+export function despertarTalentBuy(token, talentId) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'talentBuy', talentId }),
+  });
+}
+
+/* ============================================================
    6. GUARD DE ROTA
    ============================================================
    Chamado no boot das páginas protegidas. Se não houver sessão
@@ -1032,7 +1064,7 @@ export const MODULES = [
     id: 'modulo1',
     number: 'M1',
     title: 'Fundações, Cultura e Interface',
-    subtitle: 'Aulas 1 a 3 · trilha inicial',
+    subtitle: 'Aulas 1 a 4 · trilha inicial',
     lessons: [
       {
         id: 'aula1',
@@ -1051,8 +1083,15 @@ export const MODULES = [
       {
         id: 'aula3',
         number: '03',
-        title: 'Conteúdo em preparação',
-        subtitle: 'Em breve — aguardando liberação do Mestre',
+        title: 'Homo Ludens, Identidade e Expressão Cultural',
+        subtitle: 'Cultura como jogo · Pixel art, importação e herói brasileiro',
+        rewardXp: 30,
+      },
+      {
+        id: 'aula4',
+        number: '04',
+        title: 'A Linha do Tempo das Plataformas e as Restrições Técnicas',
+        subtitle: 'Histórico de hardware · Viewport retrô e stretch clássico',
         rewardXp: 30,
       },
     ],
