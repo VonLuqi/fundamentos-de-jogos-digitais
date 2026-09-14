@@ -945,7 +945,8 @@
 }
 
 .note-view__title,
-.note-canvas__title {
+.note-canvas__title,
+#note-view-title {
   margin: 0 0 0.55rem;
   font-family: var(--font-title, Cinzel, serif);
   font-size: clamp(1.25rem, 2.6vw, 1.75rem);
@@ -953,6 +954,9 @@
   text-transform: none;
   line-height: 1.25;
   color: var(--hades-gold-bright, #f2d59a);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .note-canvas__meta-row {
@@ -990,6 +994,9 @@
   margin: 0;
   padding: 0.35rem 1.25rem 1.5rem;
   white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
   font-family: var(--font-body, 'Crimson Text', serif);
   font-size: 1.15rem;
   line-height: 1.7;
@@ -1375,6 +1382,25 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#note-view-tags {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  min-width: 0;
+  max-width: 100%;
+}
+
+#note-view-tags .note-tag-chip {
+  min-width: 0;
+}
+
+#note-view-tags .note-tag-chip__label {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .note-tag-chip {

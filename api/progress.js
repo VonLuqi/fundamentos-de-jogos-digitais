@@ -2827,12 +2827,14 @@ export default async function handler(req, res) {
           const activityUser = usersById.get(row.user_id);
           if (!activityUser || activityUser.role === 'admin') return null;
           return {
+            userId: activityUser.id,
             lessonId: row.lesson_id,
             paragraph: row.paragraph,
             updatedAt: row.updated_at,
             fullName: activityUser.fullName,
             username: activityUser.username,
             turma: activityUser.turma,
+            avatarIndex: Number(activityUser.avatar_index ?? activityUser.avatarIndex ?? 0),
           };
         })
         .filter(Boolean);

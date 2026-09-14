@@ -10,10 +10,34 @@ import {
   listNotesAdmin,
   listNotesForUser,
   getSession,
+  getAchievementRarity,
+  LESSONS,
 } from './api.js';
+import {
+  activityLessonIds,
+  deliveredLessonCount,
+  emptyReportFilters,
+  groupActivitiesByUser,
+  hasUniqueRelic,
+  latestActivitiesByLesson,
+  lessonChipLabel,
+  lessonHeading,
+  matchesSoulFilters,
+  orderedDeliveredActivities,
+  parseActivityOffer,
+  parseReportFilters,
+  writeReportFilterParams,
+} from './souls-report.js';
 
 let currentToken = null;
 let selectedOwnerId = null;
+let allStudents = [];
+let activityOwners = [];
+let visibleActivityOwners = [];
+let selectedActivityUsername = '';
+let currentTab = 'users';
+let reportFilters = emptyReportFilters();
+let filterBarBound = false;
 
 function showApiWarning(message) {
   const box = document.getElementById('api-warning');
@@ -77,6 +101,15 @@ function metric(label, value) {
   return box;
 }
 
+function appendUniquePill(host, user) {
+  if (!host || !hasUniqueRelic(user?.achievements, getAchievementRarity)) return;
+  const pill = document.createElement('span');
+  pill.className = 'relic-pill';
+  pill.textContent = 'Única';
+  pill.title = 'Relíquia de raridade Única';
+  host.appendChild(pill);
+}
+
 function buildSoulCard(user, index) {
   const card = document.createElement('article');
   card.className = 'soul-card';
@@ -102,6 +135,7 @@ function buildSoulCard(user, index) {
   username.textContent = `@${user.username}`;
 
   identify.append(name, username);
+  appendUniquePill(identify, user);
   header.append(avatar, identify);
 
   const meta = document.createElement('div');
@@ -138,7 +172,7 @@ function buildSoulCard(user, index) {
   return card;
 }
 
-function renderUsers(users) {
+function renderUsers(users, options = {}) {
   const grid = document.getElementById('souls-grid');
   if (!grid) return;
 
@@ -147,7 +181,7 @@ function renderUsers(users) {
   if (!users.length) {
     const empty = document.createElement('p');
     empty.className = 'empty';
-    empty.textContent = 'Nenhuma alma cadastrada ainda.';
+    empty.textContent = options.emptyCopy || 'Nenhuma alma cadastrada ainda.';
     grid.appendChild(empty);
     return;
   }
@@ -164,46 +198,280 @@ function renderUsers(users) {
     });
 }
 
-function buildActivity(activity, index) {
-  const item = document.createElement('article');
-  item.className = 'activity-card';
-  item.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+function buildActivityOwnerCard(owner, index) {
+  const user = owner.user || {};
+  const sent = deliveredLessonCount(owner.activities, LESSONS);
+  const total = LESSONS.length || sent;
 
-  const title = document.createElement('p');
-  title.className = 'activity-card__title';
-  title.textContent = 'GDD - Integracao documental';
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'activity-owner';
+  card.style.animationDelay = `${Math.min(index, 10) * 45}ms`;
+  card.dataset.username = String(user.username || '');
+  if (normalizeUsername(selectedActivityUsername) === normalizeUsername(user.username)) {
+    card.classList.add('is-active');
+  }
 
-  const details = document.createElement('p');
-  details.className = 'activity-card__details';
-  details.textContent = `${activity.fullName} (@${activity.username}) | ${activity.turma || 'Turma nao informada'} | Atualizado em ${formatDate(activity.updatedAt)}`;
+  const avatar = document.createElement('img');
+  avatar.className = 'activity-owner__avatar';
+  avatar.alt = `Avatar de ${user.fullName || user.name || user.username || 'aluno'}`;
+  loadAvatarImage(avatar, user.avatarIndex ?? 0);
 
-  const paragraph = document.createElement('p');
-  paragraph.className = 'activity-card__paragraph';
-  paragraph.textContent = activity.paragraph;
+  const identify = document.createElement('div');
+  identify.className = 'activity-owner__identify';
 
-  item.append(title, details, paragraph);
-  return item;
+  const name = document.createElement('p');
+  name.className = 'activity-owner__name';
+  name.textContent = user.fullName || user.name || user.username || 'Aluno';
+
+  const handle = document.createElement('p');
+  handle.className = 'activity-owner__handle';
+  handle.textContent = `@${user.username || ''}`;
+
+  const meta = document.createElement('p');
+  meta.className = 'activity-owner__meta';
+  meta.textContent = [
+    user.turma || 'Sem turma',
+    `${sent}/${total} aulas com oferenda`,
+  ].join(' · ');
+
+  identify.append(name, handle, meta);
+  appendUniquePill(identify, user);
+  card.append(avatar, identify);
+  card.addEventListener('click', () => {
+    openOwnerActivities(owner);
+  });
+  return card;
 }
 
-function renderActivities(activities) {
-  const list = document.getElementById('activities-list');
-  if (!list) return;
+function renderActivityOwners(owners, options = {}) {
+  const host = document.getElementById('activity-owners');
+  if (!host) return;
 
-  list.innerHTML = '';
-  if (!activities.length) {
+  visibleActivityOwners = Array.isArray(owners) ? owners : [];
+  host.innerHTML = '';
+  if (!visibleActivityOwners.length) {
     const empty = document.createElement('p');
     empty.className = 'empty';
-    empty.textContent = 'Nenhuma atividade GDD enviada ainda.';
-    list.appendChild(empty);
+    const sourceCount = options.sourceCount ?? visibleActivityOwners.length;
+    empty.textContent = sourceCount === 0
+      ? 'Nenhuma oferenda na Trilha ainda.'
+      : 'Nenhuma alma neste véu.';
+    host.appendChild(empty);
+    closeActivityDetail({ skipHistory: true });
     return;
   }
 
-  activities.forEach((activity, index) => {
-    list.appendChild(buildActivity(activity, index));
+  owners.forEach((owner, index) => {
+    host.appendChild(buildActivityOwnerCard(owner, index));
   });
 }
 
+function normalizeUsername(value) {
+  return String(value || '').trim().replace(/^@/, '').toLowerCase();
+}
+
+function usernameFromLocation() {
+  try {
+    return String(new URL(window.location.href).searchParams.get('u') || '').trim();
+  } catch {
+    return '';
+  }
+}
+
+function findActivityOwner(username, pool = visibleActivityOwners) {
+  const needle = normalizeUsername(username);
+  if (!needle) return null;
+  const list = Array.isArray(pool) ? pool : [];
+  return list.find((owner) => normalizeUsername(owner.user?.username) === needle) || null;
+}
+
+function writeReportQuery(options = {}) {
+  try {
+    const url = new URL(window.location.href);
+    const tab = options.tab ?? currentTab;
+    const handle = options.u !== undefined ? options.u : selectedActivityUsername;
+    if (tab === 'users') url.searchParams.delete('tab');
+    else url.searchParams.set('tab', tab);
+    if (tab === 'activities' && handle) url.searchParams.set('u', String(handle).trim());
+    else url.searchParams.delete('u');
+    writeReportFilterParams(url, reportFilters);
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  } catch {
+    // ignore
+  }
+}
+
+function markActiveActivityOwner(username) {
+  const needle = normalizeUsername(username);
+  document.querySelectorAll('.activity-owner').forEach((node) => {
+    node.classList.toggle('is-active', normalizeUsername(node.dataset.username) === needle && Boolean(needle));
+  });
+}
+
+function closeActivityDetail(options = {}) {
+  selectedActivityUsername = '';
+  markActiveActivityOwner('');
+  const detail = document.getElementById('activity-detail');
+  if (detail) detail.hidden = true;
+  const map = document.getElementById('activity-trail-map');
+  if (map) {
+    map.innerHTML = '';
+    map.hidden = true;
+  }
+  const lessons = document.getElementById('activity-lessons');
+  if (lessons) lessons.innerHTML = '';
+  const title = document.getElementById('activity-detail-title');
+  if (title) title.textContent = 'Oferendas da Trilha';
+  if (!options.skipHistory) writeReportQuery({ tab: 'activities', u: '' });
+}
+
+function renderTrailMap(owner) {
+  const map = document.getElementById('activity-trail-map');
+  if (!map) return;
+
+  map.innerHTML = '';
+  const delivered = latestActivitiesByLesson(owner.activities);
+  LESSONS.forEach((lesson) => {
+    const sent = delivered.has(lesson.id);
+    const chip = document.createElement('span');
+    chip.className = `trail-chip ${sent ? 'is-sent' : 'is-missing'}`;
+    chip.title = lessonHeading(lesson.id, LESSONS);
+    chip.setAttribute('aria-label', `${lessonChipLabel(lesson)}: ${sent ? 'Enviou' : 'Ausente'}`);
+
+    const label = document.createElement('span');
+    label.textContent = lessonChipLabel(lesson);
+
+    const state = document.createElement('span');
+    state.className = 'trail-chip__state';
+    state.textContent = sent ? 'Enviou' : 'Ausente';
+
+    chip.append(label, state);
+    map.appendChild(chip);
+  });
+  map.hidden = LESSONS.length === 0;
+}
+
+function appendActivityBlock(host, label, text) {
+  if (!text) return;
+  const block = document.createElement('section');
+  block.className = 'activity-block';
+
+  const heading = document.createElement('h4');
+  heading.className = 'activity-block__label';
+  heading.textContent = label;
+
+  const body = document.createElement('p');
+  body.className = 'activity-block__text';
+  body.textContent = text;
+
+  block.append(heading, body);
+  host.appendChild(block);
+}
+
+function renderActivityLessons(owner) {
+  const host = document.getElementById('activity-lessons');
+  if (!host) return;
+
+  host.innerHTML = '';
+  const rows = orderedDeliveredActivities(owner.activities, LESSONS);
+  if (!rows.length) {
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'Esta alma ainda não deixou oferenda na Trilha.';
+    host.appendChild(empty);
+    return;
+  }
+
+  rows.forEach((activity) => {
+    const section = document.createElement('article');
+    section.className = 'activity-lesson';
+
+    const heading = document.createElement('h3');
+    heading.className = 'activity-lesson__title';
+    heading.textContent = lessonHeading(activity.lessonId, LESSONS);
+
+    const meta = document.createElement('p');
+    meta.className = 'activity-lesson__meta';
+    meta.textContent = `Atualizado em ${formatDate(activity.updatedAt)}`;
+
+    section.append(heading, meta);
+
+    const offer = parseActivityOffer(activity.paragraph);
+    if (offer.empty) {
+      const vacant = document.createElement('p');
+      vacant.className = 'activity-offer-empty';
+      vacant.textContent = '*Oferenda vazia.*';
+      section.appendChild(vacant);
+    } else {
+      appendActivityBlock(section, 'Síntese', offer.summary);
+      appendActivityBlock(section, 'Anotações da prática', offer.notes);
+    }
+
+    host.appendChild(section);
+  });
+}
+
+function renderMissingActivityOwner(username) {
+  selectedActivityUsername = '';
+  markActiveActivityOwner('');
+  const detail = document.getElementById('activity-detail');
+  const title = document.getElementById('activity-detail-title');
+  const map = document.getElementById('activity-trail-map');
+  const lessons = document.getElementById('activity-lessons');
+  if (detail) detail.hidden = false;
+  if (title) title.textContent = `Oferendas da Trilha · @${normalizeUsername(username) || username}`;
+  if (map) {
+    map.innerHTML = '';
+    map.hidden = true;
+  }
+  if (lessons) {
+    lessons.innerHTML = '';
+    const empty = document.createElement('p');
+    empty.className = 'empty';
+    empty.textContent = 'Esta alma ainda não deixou oferenda na Trilha.';
+    lessons.appendChild(empty);
+  }
+}
+
+function openOwnerActivities(owner, options = {}) {
+  const user = owner?.user || {};
+  const username = String(user.username || '').trim();
+  if (!username) return;
+
+  selectedActivityUsername = username;
+  const detail = document.getElementById('activity-detail');
+  const title = document.getElementById('activity-detail-title');
+  if (detail) detail.hidden = false;
+  if (title) title.textContent = `Oferendas da Trilha · @${username}`;
+  markActiveActivityOwner(username);
+  renderTrailMap(owner);
+  renderActivityLessons(owner);
+  if (!options.skipHistory) writeReportQuery({ tab: 'activities', u: username });
+}
+
+function restoreActivityDetail() {
+  const username = selectedActivityUsername || usernameFromLocation();
+  if (!username) return;
+  const visible = findActivityOwner(username, visibleActivityOwners);
+  const activitiesPanel = document.getElementById('report-activities');
+  const tabActive = Boolean(activitiesPanel && !activitiesPanel.hidden);
+  if (visible) {
+    openOwnerActivities(visible, { skipHistory: !tabActive });
+    return;
+  }
+  if (findActivityOwner(username, activityOwners)) {
+    closeActivityDetail({ skipHistory: !tabActive });
+    if (tabActive) writeReportQuery({ tab: 'activities', u: '' });
+    return;
+  }
+  if (usernameFromLocation() && tabActive) {
+    renderMissingActivityOwner(usernameFromLocation());
+  }
+}
+
 function setActiveTab(tabName) {
+  currentTab = tabName;
   const tabs = [
     { name: 'users', btn: 'tab-users', panel: 'report-users' },
     { name: 'activities', btn: 'tab-activities', panel: 'report-activities' },
@@ -219,14 +487,11 @@ function setActiveTab(tabName) {
     if (panelEl) panelEl.hidden = !active;
   });
 
-  try {
-    const url = new URL(window.location.href);
-    if (tabName === 'users') url.searchParams.delete('tab');
-    else url.searchParams.set('tab', tabName);
-    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
-  } catch {
-    // ignore
-  }
+  syncFilterBarVisibility();
+  applyReportFilters({ skipHistory: true });
+  writeReportQuery({ tab: tabName, u: tabName === 'activities' ? selectedActivityUsername : '' });
+
+  if (tabName === 'activities') restoreActivityDetail();
 }
 
 function closeVigiliaDetail() {
@@ -382,21 +647,166 @@ async function loadVigilancia() {
   }
 }
 
+function lessonIdsForUser(user) {
+  const owner = activityOwners.find((item) => String(item.user?.id) === String(user?.id));
+  return owner ? activityLessonIds(owner.activities) : [];
+}
+
+function fillLessonFilterChips(facetId, facetKey) {
+  const host = document.querySelector(`#${facetId} .filter-facet__chips`);
+  if (!host || host.dataset.ready === '1') return;
+  host.innerHTML = '';
+  LESSONS.forEach((lesson) => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'filter-chip';
+    chip.dataset.facet = facetKey;
+    chip.dataset.value = lesson.id;
+    chip.textContent = lessonChipLabel(lesson);
+    chip.title = lessonHeading(lesson.id, LESSONS);
+    host.appendChild(chip);
+  });
+  host.dataset.ready = '1';
+}
+
+function syncFilterBarVisibility() {
+  const bar = document.getElementById('report-filters');
+  if (!bar) return;
+  bar.hidden = currentTab === 'grimorios';
+  bar.querySelectorAll('[data-users-only]').forEach((node) => {
+    node.hidden = currentTab !== 'users';
+  });
+}
+
+function syncFilterBarUI() {
+  const search = document.getElementById('filter-q');
+  if (search && search.value !== reportFilters.q) search.value = reportFilters.q;
+
+  document.querySelectorAll('#report-filters .filter-chip').forEach((chip) => {
+    const facet = chip.dataset.facet;
+    const selected = Array.isArray(reportFilters[facet]) ? reportFilters[facet] : [];
+    chip.classList.toggle('is-on', selected.includes(chip.dataset.value));
+  });
+
+  const needAll = document.getElementById('filter-need-all');
+  if (needAll) needAll.checked = Boolean(reportFilters.needAll);
+  const noActivity = document.getElementById('filter-no-activity');
+  if (noActivity) noActivity.checked = Boolean(reportFilters.noActivity);
+
+  const unique = document.getElementById('filter-unique');
+  if (unique) {
+    unique.classList.toggle('is-on', Boolean(reportFilters.unique));
+    unique.setAttribute('aria-pressed', String(Boolean(reportFilters.unique)));
+  }
+}
+
+function applyReportFilters(options = {}) {
+  const rarityOf = getAchievementRarity;
+  const filteredStudents = allStudents.filter((user) => matchesSoulFilters(user, reportFilters, {
+    scope: 'users',
+    rarityOf,
+    activityLessonIds: lessonIdsForUser(user),
+  }));
+  const filteredOwners = activityOwners.filter((owner) => matchesSoulFilters(owner, reportFilters, {
+    scope: 'activities',
+    rarityOf,
+    activityLessonIds: activityLessonIds(owner.activities),
+  }));
+
+  renderUsers(filteredStudents, {
+    emptyCopy: allStudents.length ? 'Nenhuma alma neste véu.' : 'Nenhuma alma cadastrada ainda.',
+  });
+  renderActivityOwners(filteredOwners, { sourceCount: activityOwners.length });
+
+  const count = currentTab === 'activities' ? filteredOwners.length : filteredStudents.length;
+  const countEl = document.getElementById('filter-count');
+  if (countEl) countEl.textContent = `${count} almas neste véu`;
+
+  if (selectedActivityUsername && !findActivityOwner(selectedActivityUsername, filteredOwners)) {
+    closeActivityDetail({ skipHistory: true });
+  }
+
+  if (!options.skipHistory) writeReportQuery();
+}
+
+function toggleFilterChip(chip) {
+  const facet = chip?.dataset?.facet;
+  const value = chip?.dataset?.value;
+  if (!facet || !value || !Array.isArray(reportFilters[facet])) return;
+  const list = reportFilters[facet];
+  const index = list.indexOf(value);
+  if (index >= 0) list.splice(index, 1);
+  else list.push(value);
+  syncFilterBarUI();
+  applyReportFilters();
+  if (currentTab === 'activities') restoreActivityDetail();
+}
+
+function mountFilterBar() {
+  fillLessonFilterChips('filter-completed', 'completed');
+  fillLessonFilterChips('filter-viewed', 'viewed');
+  fillLessonFilterChips('filter-activity', 'activity');
+  syncFilterBarUI();
+  syncFilterBarVisibility();
+  if (filterBarBound) return;
+  filterBarBound = true;
+
+  const bar = document.getElementById('report-filters');
+  if (!bar) return;
+
+  bar.addEventListener('submit', (event) => {
+    event.preventDefault();
+  });
+  bar.addEventListener('click', (event) => {
+    const chip = event.target.closest('.filter-chip');
+    if (chip && bar.contains(chip)) toggleFilterChip(chip);
+  });
+
+  document.getElementById('filter-q')?.addEventListener('input', (event) => {
+    reportFilters.q = event.target.value;
+    applyReportFilters();
+    if (currentTab === 'activities') restoreActivityDetail();
+  });
+  document.getElementById('filter-need-all')?.addEventListener('change', (event) => {
+    reportFilters.needAll = Boolean(event.target.checked);
+    applyReportFilters();
+    if (currentTab === 'activities') restoreActivityDetail();
+  });
+  document.getElementById('filter-no-activity')?.addEventListener('change', (event) => {
+    reportFilters.noActivity = Boolean(event.target.checked);
+    applyReportFilters();
+  });
+  document.getElementById('filter-unique')?.addEventListener('click', () => {
+    reportFilters.unique = !reportFilters.unique;
+    syncFilterBarUI();
+    applyReportFilters();
+    if (currentTab === 'activities') restoreActivityDetail();
+  });
+  document.getElementById('filter-clear')?.addEventListener('click', () => {
+    reportFilters = emptyReportFilters();
+    syncFilterBarUI();
+    applyReportFilters();
+    if (currentTab === 'activities') restoreActivityDetail();
+  });
+}
+
 async function loadSouls() {
   const grid = document.getElementById('souls-grid');
-  const activitiesList = document.getElementById('activities-list');
+  const ownersHost = document.getElementById('activity-owners');
   if (grid) {
     grid.innerHTML = '<p class="loading">Consultando o submundo...</p>';
   }
-  if (activitiesList) {
-    activitiesList.innerHTML = '<p class="loading">Consultando atividades...</p>';
+  if (ownersHost) {
+    ownersHost.innerHTML = '<p class="loading">Consultando atividades...</p>';
   }
 
   const { users, activities } = await listUsers(currentToken);
   const students = (users || []).filter((user) => user.role !== 'admin');
-  setSummary(students);
-  renderUsers(students);
-  renderActivities(activities || []);
+  allStudents = students;
+  activityOwners = groupActivitiesByUser(students, activities || []);
+  setSummary(allStudents);
+  applyReportFilters({ skipHistory: true });
+  restoreActivityDetail();
   await loadVigilancia();
 }
 
@@ -432,6 +842,9 @@ async function init() {
   revealSoulsApp();
   currentToken = getSession()?.token ?? null;
   await avatarCountReady;
+  reportFilters = parseReportFilters(window.location.search);
+  currentTab = tabFromLocation();
+  mountFilterBar();
 
   try {
     await loadSouls();
@@ -461,6 +874,7 @@ async function init() {
   document.getElementById('tab-activities')?.addEventListener('click', () => setActiveTab('activities'));
   document.getElementById('tab-grimorios')?.addEventListener('click', () => setActiveTab('grimorios'));
   document.getElementById('vigilia-detail-close')?.addEventListener('click', () => closeVigiliaDetail());
+  document.getElementById('activity-detail-close')?.addEventListener('click', () => closeActivityDetail());
 }
 
 document.addEventListener('DOMContentLoaded', init);

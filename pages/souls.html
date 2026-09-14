@@ -75,6 +75,50 @@
         <button class="report-tab" id="tab-grimorios" type="button" role="tab" aria-selected="false" aria-controls="report-grimorios">Grimórios sob Vigília</button>
       </div>
 
+      <form class="report-filters" id="report-filters" hidden>
+        <label class="filter-search">
+          <span class="filter-facet__label">Buscar</span>
+          <input id="filter-q" type="search" name="q" placeholder="Buscar alma…" autocomplete="off" />
+        </label>
+
+        <div class="filter-facet" id="filter-turma">
+          <p class="filter-facet__label">Turma</p>
+          <div class="filter-facet__chips">
+            <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG01">TCG01</button>
+            <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG02">TCG02</button>
+          </div>
+        </div>
+
+        <div class="filter-facet" id="filter-completed" data-users-only="1">
+          <p class="filter-facet__label">Concluiu</p>
+          <div class="filter-facet__chips"></div>
+        </div>
+
+        <div class="filter-facet" id="filter-viewed" data-users-only="1">
+          <p class="filter-facet__label">Viu</p>
+          <div class="filter-facet__chips"></div>
+        </div>
+
+        <div class="filter-facet" id="filter-activity">
+          <p class="filter-facet__label">Enviou em</p>
+          <div class="filter-facet__chips"></div>
+        </div>
+
+        <label class="filter-check">
+          <input type="checkbox" id="filter-need-all" />
+          Exigir todas as marcadas
+        </label>
+
+        <label class="filter-check" data-users-only="1">
+          <input type="checkbox" id="filter-no-activity" />
+          Sem oferenda
+        </label>
+
+        <button type="button" class="filter-toggle" id="filter-unique" title="Relíquia de raridade Única" aria-pressed="false">Única</button>
+        <button type="button" class="filter-clear" id="filter-clear">Limpar véu</button>
+        <p class="filter-count" id="filter-count">0 almas neste véu</p>
+      </form>
+
       <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
         <div class="souls-grid" id="souls-grid" aria-live="polite">
           <p class="loading">Consultando o submundo...</p>
@@ -82,8 +126,20 @@
       </section>
 
       <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
-        <div class="activities-list" id="activities-list" aria-live="polite">
-          <p class="loading">Consultando atividades...</p>
+        <div class="activity-layout">
+          <div class="activity-owners" id="activity-owners" aria-live="polite">
+            <p class="loading">Consultando atividades...</p>
+          </div>
+          <div class="activity-detail" id="activity-detail" hidden>
+            <header class="activity-detail__head">
+              <h2 class="activity-detail__title" id="activity-detail-title">Oferendas da Trilha</h2>
+              <button class="btn-refresh activity-detail__close" type="button" id="activity-detail-close">Fechar</button>
+            </header>
+            <div class="activity-detail__body">
+              <div class="activity-trail-map" id="activity-trail-map" hidden aria-label="Mapa da Trilha"></div>
+              <div class="activity-lessons" id="activity-lessons"></div>
+            </div>
+          </div>
         </div>
       </section>
 

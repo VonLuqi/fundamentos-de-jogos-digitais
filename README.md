@@ -27,7 +27,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Espelho do Companheiro (`pages/companheiro.html?u=…`) com perfil e álbum read-only
 - ✅ Sistema de XP e resgate de código ("Oferenda ao Estige")
 - ✅ Painel administrativo (geração de códigos e visão de alunos) para `role: admin`
-- ✅ Página administrativa dedicada de alunos (`/pages/souls.html`) com avatar e métricas
+- ✅ Almas Registradas (`/pages/souls.html`): alunos, atividades por aula, Vigília e filtros (turma, oferenda, relíquia Única)
 - ✅ Troca de avatar persistida no backend via `/api/progress`
 - ✅ Tracking de visualização de aula por aluno (`lesson_views`) para relatórios
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
