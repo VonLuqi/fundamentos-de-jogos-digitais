@@ -5,6 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import handler from './api/auth.js';
 import progressHandler from './api/progress.js';
+import despertarHandler from './api/despertar.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -62,7 +63,13 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const pathname = decodeURIComponent(url.pathname);
 
-    if (pathname === '/api/auth' || pathname === '/api/progress') {
+    const apiHandlers = {
+      '/api/auth': handler,
+      '/api/progress': progressHandler,
+      '/api/despertar': despertarHandler,
+    };
+    const routeHandler = apiHandlers[pathname];
+    if (routeHandler) {
       const body = req.method === 'POST' ? await parseBody(req) : {};
       console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`, { body, query: Object.fromEntries(url.searchParams.entries()) });
       const request = {
@@ -87,7 +94,6 @@ const server = http.createServer(async (req, res) => {
           return payload;
         },
       };
-      const routeHandler = pathname === '/api/progress' ? progressHandler : handler;
       await routeHandler(request, response);
       if (!res.writableEnded) {
         const payload = response.body || { ok: true };

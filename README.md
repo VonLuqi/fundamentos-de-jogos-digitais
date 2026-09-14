@@ -177,6 +177,7 @@ fundamentos-de-jogos-digitais/
    - [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para `full_name` e `lesson_views`;
    - [db/migrate-2026-09-08-friendships.sql](db/migrate-2026-09-08-friendships.sql) para **Companheiros de Jornada**;
    - [db/migrate-2026-09-10-password-reset-email.sql](db/migrate-2026-09-10-password-reset-email.sql) para e-mail do aluno e tokens de reset / verificação.
+   - [db/migrate-2026-09-11-hades-despertar.sql](db/migrate-2026-09-11-hades-despertar.sql) para o estado de **O Despertar**.
 
    > ⚠️ A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md) para o troubleshooting completo desse ponto).
 
@@ -212,6 +213,7 @@ Executa `node --check` em todos os módulos de front-end e das rotas de API.
 | GET    | `/api/auth?token=...`    | Valida sessão ativa (token de **sessão**, não o selo de e-mail) |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
 | POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile` |
+| POST   | `/api/despertar`         | `stateGet` (cria estado zerado). `stateSync` / `prestige` / `talentBuy` na Task 9 |
 
 ### Companheiros de Jornada
 
