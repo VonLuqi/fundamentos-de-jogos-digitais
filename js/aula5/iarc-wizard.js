@@ -79,7 +79,7 @@ export function buildPatchNote({
 export function buildNotesFromWizard(data) {
   return [
     `1) Pitch escolhido: ${data.pitch.title}`,
-    `2) Por que o original seria ${data.pitch.originalRating}+: violência=${data.pitch.axes.violencia} | sexo=${data.pitch.axes.sexo} | drogas=${data.pitch.axes.drogas}`,
+    `2) Faixa original: ${data.pitch.originalRating}+`,
     `3) Reescrita — feedback visual: ${data.visual}`,
     `4) Reescrita — narrativa / temática: ${data.narrative}`,
     `5) Reescrita — mecânica de cura/recompensa: ${data.reward}`,
@@ -90,13 +90,12 @@ export function buildNotesFromWizard(data) {
 }
 
 export function buildSummaryFromWizard(data) {
-  const faixa = data.targetRating === 'L' ? 'Livre' : '10';
+  const faixa = data.targetRating === 'L' ? 'Livre (L)' : '10';
   return [
-    'No ClassInd-dle, pequenos feedbacks (sangue, cadáveres, temas sexuais) mudaram a faixa mais do que o “gênero” do jogo.',
-    `No pitch ${data.pitch.title} (${data.pitch.originalRating}+), higienizamos visual/narrativa/cura para mirar ${faixa}:`,
+    `Higienizamos o pitch ${data.pitch.title} (${data.pitch.originalRating}+) para mirar faixa-alvo ${faixa}.`,
     `${data.visual} / ${data.reward}.`,
     `A mecânica-core permanece: ${data.coreLoop || data.pitch.coreLoop}.`,
-    `Argumento ClassInd/IARC: ${data.argumentsText}`,
+    `Argumentos: ${data.argumentsText}`,
   ].join(' ');
 }
 
@@ -241,7 +240,7 @@ export function initIarcWizard(mount, { onFinalize } = {}) {
               <h4 class="iarc-step__title">Argumente a faixa-alvo</h4>
               <div class="iarc-wizard__field">
                 <label for="iarc-args">Argumentos ClassInd / IARC *</label>
-                <textarea id="iarc-args" rows="3" placeholder="Ex.: violência contra não-humanos sem sangue + cura fantástica = atenuantes para L/10">${escapeHtml(draft.argumentsText)}</textarea>
+                <textarea id="iarc-args" rows="3" placeholder="Ex.: inimigos claramente não-humanos e sem sangue; o original era gráfico demais para a faixa-alvo">${escapeHtml(draft.argumentsText)}</textarea>
               </div>
               <fieldset class="iarc-wizard__rating">
                 <legend>Faixa-alvo *</legend>

@@ -60,18 +60,33 @@ assert.ok(!aula5Js.includes('createNote'), 'aula5 não grava nota no grimório')
 assert.deepEqual(idsOf('Gostei da aula.'), [], 'sem keywords → 0 secretas');
 assert.deepEqual(
   idsOf('No ClassInd os eixos clássicos são violência, sexo e drogas.'),
+  [],
+  'ClassInd sozinho não destrava Oráculo'
+);
+assert.deepEqual(
+  idsOf('No ClassInd brasileiro o IARC devolve selos para as lojas digitais.'),
   ['segredo_oraculo_do_classind'],
-  'ClassInd → Oráculo'
+  'ClassInd + IARC → Oráculo'
 );
 assert.deepEqual(
   idsOf('Após a higienização, a faixa-alvo ficou Livre.'),
   ['segredo_selo_do_livre'],
-  'Livre → Selo do Livre'
+  'faixa-alvo Livre → Selo'
+);
+assert.deepEqual(
+  idsOf('Higienizamos para mirar faixa-alvo 10.'),
+  ['segredo_selo_do_livre'],
+  'faixa-alvo 10 → Selo'
 );
 assert.deepEqual(
   idsOf('Usamos atenuante de fantasia nos inimigos.'),
+  [],
+  'só atenuante não destrava Balança'
+);
+assert.deepEqual(
+  idsOf('Atenuante de não-humano; o original agravava com gore.'),
   ['segredo_balanca_da_faixa'],
-  'atenuante → Balança da Faixa'
+  'atenuante + agravante → Balança'
 );
 
 for (const id of [
@@ -80,6 +95,13 @@ for (const id of [
   'segredo_balanca_da_faixa',
 ]) {
   assert.ok(allLessonSecretIds().includes(id), `motor lista ${id}`);
+}
+for (const id of [
+  'segredo_juri_do_telao',
+  'segredo_oraculo_do_classind',
+  'segredo_selo_do_livre',
+  'segredo_balanca_da_faixa',
+]) {
   const entry = getAchievementById(id);
   assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
   assert.equal(entry?.meta?.family, 'aula5');
@@ -147,8 +169,9 @@ assert.ok(lessonsUi.includes('coming-soon') || lessonsUi.includes('Em breve'), '
 
 // —— Álbum: secretas no catálogo ——
 const secretsInCatalog = ACHIEVEMENTS.filter((a) => a.meta?.family === 'aula5' && a.hidden);
-assert.equal(secretsInCatalog.length, 3, '3 secretas aula5 no catálogo do álbum');
+assert.equal(secretsInCatalog.length, 4, '4 secretas aula5 no catálogo do álbum');
 assert.ok(exists('assets/achievements/aula5_concluida.webp'), 'arte pública stub');
+assert.ok(exists('assets/achievements/segredo_juri_do_telao.webp'), 'arte júri stub');
 assert.ok(exists('assets/achievements/segredo_oraculo_do_classind.webp'), 'arte oráculo stub');
 assert.ok(exists('assets/achievements/segredo_selo_do_livre.webp'), 'arte selo stub');
 assert.ok(exists('assets/achievements/segredo_balanca_da_faixa.webp'), 'arte balança stub');
@@ -209,6 +232,7 @@ assert.ok(/QA pós-liberação|pós-liberação/i.test(playbook), 'playbook tem 
 // —— Pistas sem spoiler de ids ——
 assert.ok(aula5Html.includes('Pistas secretas'), 'pistas na Oficina');
 assert.ok(!aula5Html.includes('segredo_oraculo_do_classind'), 'HTML sem id de secreta');
+assert.ok(!aula5Html.includes('segredo_juri_do_telao'), 'HTML sem id júri');
 assert.ok(!aula5Html.includes('segredo_selo_do_livre'), 'HTML sem id selo');
 assert.ok(!aula5Html.includes('segredo_balanca_da_faixa'), 'HTML sem id balança');
 

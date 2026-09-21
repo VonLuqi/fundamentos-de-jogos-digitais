@@ -24,6 +24,10 @@ import {
   ROUTES,
 } from '../api.js';
 import { createRealtimeSync } from './realtime.js';
+import {
+  bindLessonDiscoveryLifecycle,
+  enqueueDiscovery,
+} from '../lesson-discovery.js';
 import { renderGate } from './ui/RoomLobby.js';
 import { renderVoteBoard } from './ui/VoteBoard.js';
 import { renderRevealCard } from './ui/RevealCard.js';
@@ -101,6 +105,7 @@ async function resyncEndSessionState() {
   try {
     const fresh = await classindGetState(currentToken, { roomId });
     if (fresh?.realtime) realtimeConfig = fresh.realtime;
+    notifyAwarded(fresh);
     if (fresh?.state) {
       sync?.bumpLocalVersion(fresh.state.stateVersion);
       mergeState(fresh.state);
@@ -110,6 +115,12 @@ async function resyncEndSessionState() {
   } finally {
     resyncingEndSession = false;
   }
+}
+
+function notifyAwarded(result) {
+  const ids = result?.awarded?.achievements;
+  if (!Array.isArray(ids) || ids.length === 0) return;
+  enqueueDiscovery(ids);
 }
 
 function showToast(message, kind = 'info') {
@@ -349,6 +360,7 @@ function startSync() {
     getState: async () => {
       const result = await classindGetState(currentToken, { roomId });
       if (result?.realtime) realtimeConfig = result.realtime;
+      notifyAwarded(result);
       return result;
     },
     onSnapshot: (payload) => {
@@ -391,6 +403,7 @@ async function enterSession(result) {
   startSync();
   history.replaceState(null, '', `?room=${encodeURIComponent(roomCode || '')}`);
   showToast(`Entrou na sala ${roomCode}`);
+  notifyAwarded(result);
 }
 
 function showGate(initialCode = '') {
@@ -479,6 +492,7 @@ async function handleVote(choice) {
     showToast(message, 'error');
     try {
       const fresh = await classindGetState(currentToken, { roomId });
+      notifyAwarded(fresh);
       if (fresh?.state) mergeState(fresh.state);
     } catch {
       mergeState({ myVote: null });
@@ -494,6 +508,7 @@ async function runHost(fn, args, { leaveAfter = false } = {}) {
   try {
     const result = await fn(currentToken, args);
     if (result?.realtime) realtimeConfig = result.realtime;
+    notifyAwarded(result);
     if (result?.state) {
       sync?.bumpLocalVersion(result.state.stateVersion);
       try {
@@ -554,6 +569,8 @@ async function init() {
       window.location.href = ROUTES.auth();
     },
   });
+
+  bindLessonDiscoveryLifecycle();
 
   document.addEventListener('keydown', onKeyVote);
   els.back?.addEventListener('click', () => {

@@ -642,32 +642,29 @@ export function matchesCriatividadeSobLimite(normalizedText) {
    AULA 05 — ClassInd / IARC / Design Saudável
    ============================================================ */
 
-const CLASSIND_SYSTEM_SIGNALS = Object.freeze([
+/** Polo brasileiro — não basta IARC sozinho. */
+const CLASSIND_BR_SIGNALS = Object.freeze([
   'classind',
-  'iarc',
   'classificacao indicativa',
 ]);
 
-const LIVRE_WORD_SIGNALS = Object.freeze([
-  'livre',
-  'faixa livre',
-  'selo livre',
-  'classificacao livre',
-  'rating livre',
-  'faixa-alvo livre',
-  'faixa alvo livre',
+/** Polo lojas / consórcio — não basta ClassInd sozinho. */
+const IARC_STORE_SIGNALS = Object.freeze([
+  'iarc',
+  'international age rating',
+  'consorcio',
+  'lojas digitais',
 ]);
 
-/** “L” só conta com contexto de faixa/selo/alvo (evita falso positivo). */
-const LIVRE_L_PATTERNS = Object.freeze([
-  /\bfaixa(?:[\s\-]?alvo)?\s*[:=]?\s*l\b/,
-  /\balvo\s*[:=]?\s*l\b/,
-  /\bselo\s*[:=]?\s*l\b/,
-  /\brating\s*[:=]?\s*l\b/,
-  /\bclassificacao\s*[:=]?\s*l\b/,
-  /\biarc\s*[:=]?\s*l\b/,
-  /\bclassind\s*[:=]?\s*l\b/,
-  /\b(?:ate|maximo|para)\s+l\b/,
+/**
+ * Faixa-alvo Livre/L/10 com contexto. “não é Livre” ou “livre” solto não conta.
+ * 10 é entrega plena da oficina (Livre ou 10).
+ * Aceita um trecho curto entre “faixa-alvo” e o valor (“ficou Livre”, “: 10”).
+ */
+const FAIXA_ALVO_VALUE_PATTERNS = Object.freeze([
+  /\bfaixa(?:[\s\-]?alvo)?[\s\S]{0,32}?\b(livre|l|10)\b/,
+  /\balvo[^a-z0-9]{0,12}(livre|l|10)\b/,
+  /\brating[^a-z0-9]{0,12}(livre|l|10)\b/,
 ]);
 
 const ATTENUATION_SIGNALS = Object.freeze([
@@ -698,58 +695,47 @@ const REALISM_SIGNALS = Object.freeze([
 ]);
 
 export const AULA5_SECRET_THRESHOLDS = Object.freeze({
-  oraculoMin: 1,
+  oraculoPoles: 2,
   seloLivreMin: 1,
-  balancaTermMin: 1,
+  balancaTermMin: 2,
 });
 
+function hasAnySignal(normalizedText, signals) {
+  return (Array.isArray(signals) ? signals : []).some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && String(normalizedText || '').includes(needle);
+  });
+}
+
 /**
- * Keywords: ClassInd · IARC · classificação indicativa.
+ * Sistema brasileiro E consórcio das lojas (ClassInd/classificação indicativa + IARC).
  */
 export function matchesOraculoDoClassind(normalizedText) {
-  const hits = CLASSIND_SYSTEM_SIGNALS.filter((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
-  }).length;
-  return hits >= AULA5_SECRET_THRESHOLDS.oraculoMin;
+  return hasAnySignal(normalizedText, CLASSIND_BR_SIGNALS)
+    && hasAnySignal(normalizedText, IARC_STORE_SIGNALS);
 }
 
 /**
- * Faixa-alvo Livre (palavra) ou “L” contextual após higienização.
+ * Documentou faixa-alvo Livre/L ou 10 (oficina aceita as duas).
  */
 export function matchesSeloDoLivre(normalizedText) {
-  const wordHit = LIVRE_WORD_SIGNALS.some((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
+  const text = String(normalizedText || '');
+  return FAIXA_ALVO_VALUE_PATTERNS.some((pattern) => {
+    pattern.lastIndex = 0;
+    return pattern.test(text);
   });
-  if (wordHit) return true;
-  return LIVRE_L_PATTERNS.some((pattern) => pattern.test(normalizedText));
 }
 
 /**
- * Atenuante OU agravante OU par fantasia × realismo.
+ * Distinguiu os dois pratos: atenuante E agravante, ou par fantasia × realismo.
  */
 export function matchesBalancaDaFaixa(normalizedText) {
-  const attenHit = ATTENUATION_SIGNALS.some((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
-  });
-  if (attenHit) return true;
+  const attenHit = hasAnySignal(normalizedText, ATTENUATION_SIGNALS);
+  const aggravHit = hasAnySignal(normalizedText, AGGRAVATION_SIGNALS);
+  if (attenHit && aggravHit) return true;
 
-  const aggravHit = AGGRAVATION_SIGNALS.some((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
-  });
-  if (aggravHit) return true;
-
-  const fantasyHit = FANTASY_SIGNALS.some((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
-  });
-  const realismHit = REALISM_SIGNALS.some((signal) => {
-    const needle = normalizeForSecretCheck(signal);
-    return needle && normalizedText.includes(needle);
-  });
+  const fantasyHit = hasAnySignal(normalizedText, FANTASY_SIGNALS);
+  const realismHit = hasAnySignal(normalizedText, REALISM_SIGNALS);
   return fantasyHit && realismHit;
 }
 

@@ -12,6 +12,11 @@
 
 import crypto from 'node:crypto';
 import supabase from './supabaseClient.js';
+import { getAchievementXp, mapAchievementDetails } from '../js/game-catalog.js';
+import {
+  CLASSIND_DLE_SECRET_ID,
+  qualifiesForClassindDleSecret,
+} from './_lib/classind-dle-achievements.js';
 import {
   DECK_ID,
   deckLength,
@@ -308,6 +313,81 @@ function isDeckFinishedPhase(room) {
   return phase === 'lobby'
     && Number(room?.current_round_index) >= deckLength()
     && deckLength() > 0;
+}
+
+function emptyAwarded() {
+  return { xp: 0, achievements: [], achievementDetails: [] };
+}
+
+async function grantClassindDleSecret(userRow) {
+  const existing = Array.isArray(userRow?.conquistas) ? [...userRow.conquistas] : [];
+  if (existing.includes(CLASSIND_DLE_SECRET_ID)) return { awarded: emptyAwarded() };
+
+  const xpGain = getAchievementXp(CLASSIND_DLE_SECRET_ID) || 0;
+  const nextXp = Number(userRow.xp || 0) + xpGain;
+  const conquistas = [...existing, CLASSIND_DLE_SECRET_ID];
+  const { data: updated, error } = await supabase
+    .from(USERS_TABLE)
+    .update({ xp: nextXp, conquistas })
+    .eq('id', userRow.id)
+    .select('id, xp, conquistas')
+    .single();
+  if (error || !updated) {
+    console.error('[api/classind] falha ao conceder Júri do Telão', error);
+    return { awarded: emptyAwarded() };
+  }
+  return {
+    awarded: {
+      xp: xpGain,
+      achievements: [CLASSIND_DLE_SECRET_ID],
+      achievementDetails: mapAchievementDetails([CLASSIND_DLE_SECRET_ID]),
+    },
+  };
+}
+
+/**
+ * Concede a secreta no getState/join do aluno (toast) ou em lote no Encerrar.
+ */
+async function maybeAwardDleSecret(user, { deckFinished, scoreAnswered, isAdmin }) {
+  if (!qualifiesForClassindDleSecret({ isAdmin, deckFinished, scoreAnswered })) {
+    return { awarded: emptyAwarded() };
+  }
+
+  let row = user;
+  if (!Array.isArray(user?.conquistas) || user.xp == null) {
+    const { data, error } = await supabase
+      .from(USERS_TABLE)
+      .select('id, role, xp, conquistas')
+      .eq('id', user.id)
+      .maybeSingle();
+    if (error || !data) return { awarded: emptyAwarded() };
+    row = data;
+  }
+  if (row.role === 'admin') return { awarded: emptyAwarded() };
+  return grantClassindDleSecret(row);
+}
+
+async function awardDleSecretsForFinishedRoom(room) {
+  if (!isDeckFinishedPhase(room)) return;
+  const sessionScores = await buildSessionScores(room);
+  if (sessionScores.error) {
+    console.error('[api/classind] placar para Júri do Telão', sessionScores.error);
+    return;
+  }
+  for (const row of sessionScores.performances || []) {
+    if (Number(row.scoreAnswered) < 1) continue;
+    const { data: student, error } = await supabase
+      .from(USERS_TABLE)
+      .select('id, role, xp, conquistas')
+      .eq('id', row.userId)
+      .maybeSingle();
+    if (error || !student || student.role === 'admin') continue;
+    await maybeAwardDleSecret(student, {
+      isAdmin: false,
+      deckFinished: true,
+      scoreAnswered: row.scoreAnswered,
+    });
+  }
 }
 
 async function getMember(roomId, userId) {
@@ -769,12 +849,20 @@ export default async function handler(req, res) {
         return maybeTableError(res, stateError) || jsonError(res, 500, 'Falha ao montar estado.');
       }
 
+      const hostUser = user.id === active.host_user_id;
+      const { awarded } = await maybeAwardDleSecret(user, {
+        isAdmin: isAdmin || hostUser,
+        deckFinished: isDeckFinishedPhase(active),
+        scoreAnswered: Number(state?.scoreAnswered || state?.myPerformance?.scoreAnswered || 0),
+      });
+
       return res.status(200).json({
         ok: true,
         roomId: active.id,
         code: active.code,
         state,
         realtime: getRealtimeConfig(active.id),
+        awarded,
       });
     }
 
@@ -830,10 +918,17 @@ export default async function handler(req, res) {
       if (stateError) {
         return maybeTableError(res, stateError) || jsonError(res, 500, 'Falha ao montar estado.');
       }
+      const hostUser = user.id === resolved.room.host_user_id;
+      const { awarded } = await maybeAwardDleSecret(user, {
+        isAdmin: isAdmin || hostUser,
+        deckFinished: isDeckFinishedPhase(resolved.room),
+        scoreAnswered: Number(state?.scoreAnswered || state?.myPerformance?.scoreAnswered || 0),
+      });
       return res.status(200).json({
         ok: true,
         state,
         realtime: getRealtimeConfig(resolved.room.id),
+        awarded,
       });
     }
 
@@ -1116,6 +1211,7 @@ export default async function handler(req, res) {
       if (resolved.error) {
         return maybeTableError(res, resolved.error) || jsonError(res, 500, 'Falha ao ler sala.');
       }
+      await awardDleSecretsForFinishedRoom(resolved.room);
       const nextVersion = Number(resolved.room.state_version || 0) + 1;
       const { room: updated, error: roomError } = await bumpRoom(resolved.room.id, {
         phase: 'closed',

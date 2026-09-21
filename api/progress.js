@@ -2647,7 +2647,7 @@ export default async function handler(req, res) {
       const secretAwards = evaluateSecretAchievements(normalizedLessonId, text, existingAchievements);
       secretAwards.forEach((secret) => {
         awardedAchievementIds.push(secret.id);
-        awardedXp += Number(secret.xp || 0);
+        awardedXp += getAchievementXp(secret.id) || Number(secret.xp || 0);
       });
 
       if (awardedAchievementIds.length > 0 || awardedXp > 0) {

@@ -71,6 +71,7 @@ async function call(action, body = {}) {
 // --- arquivos ---
 [
   'api/classind.js',
+  'api/_lib/classind-dle-achievements.js',
   'js/classind-dle/config/rounds.js',
   'local-server.mjs',
   'js/api.js',
@@ -123,7 +124,10 @@ staticAssert(
   'schema base inclui results/ranking'
 );
 
-staticAssert(apiSrc.includes('scoreCorrect'), 'payload scoreCorrect');
+staticAssert(apiSrc.includes('maybeAwardDleSecret'), 'getState/join concede Júri do Telão');
+staticAssert(apiSrc.includes('awardDleSecretsForFinishedRoom'), 'closeRoom concede Júri em lote');
+staticAssert(apiSrc.includes('segredo_juri_do_telao') || apiSrc.includes('CLASSIND_DLE_SECRET_ID'), 'id da secreta dle');
+staticAssert(fs.existsSync(path.join(root, 'api/_lib/classind-dle-achievements.js')), 'lib qualifies dle secret');
 staticAssert(apiSrc.includes('eligibleVotersCount'), 'payload eligibleVotersCount');
 staticAssert(
   /Mestre não vota/i.test(apiSrc),

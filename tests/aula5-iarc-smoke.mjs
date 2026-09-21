@@ -71,7 +71,8 @@ assert(note.includes(pitch.title), 'patch cita pitch procedural');
 assert(!/Insight do ClassInd-dle/i.test(note), 'patch sem insight');
 assert(buildNotesFromWizard(data).includes(pitch.title), 'notes pitch');
 assert(!buildNotesFromWizard(data).includes('Insight do ClassInd-dle'), 'notes sem insight');
-assert(buildSummaryFromWizard(data).includes('ClassInd'), 'summary');
+assert(buildSummaryFromWizard(data).includes('faixa-alvo'), 'summary declara faixa-alvo');
+assert(!/ClassInd|IARC/i.test(buildSummaryFromWizard(data)), 'summary não injeta ClassInd/IARC');
 
 const html = fs.readFileSync(path.join(root, 'pages', 'aula5.html'), 'utf8');
 assert(html.includes('iarc-wizard-root'), 'mount wizard');
