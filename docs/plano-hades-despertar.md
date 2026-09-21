@@ -541,21 +541,23 @@ Cada task é fatiável em PR. Critério de pronto = checklist da task + smoke se
 
 #### Task 2 — Núcleo matemático compartilhado (sem UI)
 
+**Status:** feita (2026-09-15)
+
 **Arquivos:** `js/hades-despertar/config/constants.js`, `generators.js`, `upgrades.js`, `talents.js`, `core/formulas.js`, `core/Entity.js`, `core/EntitySet.js`.
 
 **Faz**
 
-- Portar a ideia Aldo111 (`Entity` / `EntitySet`) para ES-Modules puros: quantidade, `priceAt(n)`, `rate`, `buy(count, wallet)`.
-- Implementar **todas** as fórmulas congeladas (custo em lote, SPS, click, óbolos, essência, prestige bonus, offline).
-- Números via helper decimal (string in/out). Proibido `0.1 * 15` solto na economia.
+- [x] Portar a ideia Aldo111 (`Entity` / `EntitySet`) para ES-Modules puros: quantidade, `priceAt(n)`, `rate`, `buy(count, wallet)`.
+- [x] Implementar **todas** as fórmulas congeladas (custo em lote, SPS, click, óbolos, essência, prestige bonus, offline).
+- [x] Números via helper decimal (string in/out). Proibido `0.1 * 15` solto na economia.
 
 **Testes:** `tests/despertar-formulas-smoke.mjs`
 
-- Preço T1 n=0 → 15; n=1 → 15×1.15.
-- Lote 10 de T1 a n=0 = soma geométrica conhecida.
-- SPS: 10 sombras sem upgrade = 1.0.
-- Óbolos: `runSouls = 1e9` → 1; `9.99e8` → 0.
-- Offline 10 s a SPS 1, 80% → 8 almas.
+- [x] Preço T1 n=0 → 15; n=1 → 15×1.15.
+- [x] Lote 10 de T1 a n=0 = soma geométrica conhecida.
+- [x] SPS: 10 sombras sem upgrade = 1.0.
+- [x] Óbolos: `runSouls = 1e9` → 1; `9.99e8` → 0.
+- [x] Offline 10 s a SPS 1, 80% → 8 almas.
 
 **Pronto quando:** smoke verde; módulo importável no Node (`type: module`).
 
@@ -565,39 +567,45 @@ Cada task é fatiável em PR. Critério de pronto = checklist da task + smoke se
 
 #### Task 3 — `GameState` reativo
 
+**Status:** feita (2026-09-15)
+
 **Arquivo:** `js/hades-despertar/core/GameState.js`
 
 **Faz**
 
-- Estado da corrida: almas, geradores, juramentos, run/lifetime, óbolos, essência, talentos, logs, milestones.
-- Métodos: `tick(dtSeconds)`, `click()`, `buyGenerator(id, mode)`, `buyUpgrade(id)`, `canPrestige()`, `applyPrestige()` (local, ainda sem server), `buyTalent(id)`, `unlockLogs()`.
-- Carteira nunca negativa; compras no-op se falhar.
-- Expor snapshot serializável (DTO).
+- [x] Estado da corrida: almas, geradores, juramentos, run/lifetime, óbolos, essência, talentos, logs, milestones.
+- [x] Métodos: `tick(dtSeconds)`, `click()`, `buyGenerator(id, mode)`, `buyUpgrade(id)`, `canPrestige()`, `applyPrestige()` (local, ainda sem server), `buyTalent(id)`, `unlockLogs()`.
+- [x] Carteira nunca negativa; compras no-op se falhar.
+- [x] Expor snapshot serializável (DTO).
 
 **Pronto quando:** teste de fumaça Node instancia estado, 10 cliques + 1 sombra + 2 s de tick, saldo bate com `formulas.js`.
 
 #### Task 4 — `GameLoop` RAF (GDD §5.2)
 
+**Status:** feita (2026-09-17)
+
 **Arquivo:** `js/hades-despertar/core/GameLoop.js`
 
 **Faz** — implementar o loop do GDD (copiar a semântica, não jQuery):
 
-- `step = 1000/60`; acumulador; `update(dt)`; `render(alpha)`; `panic` aos 300 updates.
-- `start` / `stop`; `visibilitychange`: ao voltar, não spiral; deixar Task 5 aplicar catch-up se o delta for grande.
-- `prefers-reduced-motion` não para o **update** (economia continua); só suaviza o render.
+- [x] `step = 1000/60`; acumulador; `update(dt)`; `render(alpha)`; `panic` aos 300 updates.
+- [x] `start` / `stop`; `visibilitychange`: ao voltar, não spiral; deixar Task 5 aplicar catch-up se o delta for grande.
+- [x] `prefers-reduced-motion` não para o **update** (economia continua); só suaviza o render.
 
 **Pronto quando:** página de harness ou teste mínimo prova 60 updates em ~1 s de relógio (tolerância); stop cancela RAF.
 
 #### Task 5 — Persistência local + offline
 
+**Status:** feita (2026-09-17)
+
 **Arquivos:** `services/StorageService.js`, `services/OfflineEngine.js`
 
 **Faz**
 
-- IndexedDB `despertar-db` / store `states` / key = `userId`.
-- Fallback: se IndexedDB falhar, `sessionStorage` (não `localStorage` da sessão de auth — não misturar chaves).
-- No boot: ler local → `calculateOfflineProgress` → aplicar almas → gravar.
-- Debounce save 1 s após mutação; flush no `pagehide`.
+- [x] IndexedDB `despertar-db` / store `states` / key = `userId`.
+- [x] Fallback: se IndexedDB falhar, `sessionStorage` (não `localStorage` da sessão de auth — não misturar chaves).
+- [x] No boot: ler local → `calculateOfflineProgress` → aplicar almas → gravar.
+- [x] Debounce save 1 s após mutação; flush no `pagehide`.
 
 **Pronto quando:** reload após 15 s com 1 sombra mostra modal de colheita (ou harness); teto 8 h respeitado.
 
@@ -607,12 +615,14 @@ Cada task é fatiável em PR. Critério de pronto = checklist da task + smoke se
 
 #### Task 6 — Página shell, tokens, layout de três colunas
 
+**Status:** feita (2026-09-17)
+
 **Arquivos:** `pages/despertar.html`, `css/despertar.css`, bootstrap `js/hades-despertar/index.js`, `js/app-shell.js` (`route === 'despertar'`).
 
 **Faz**
 
-- Página no contrato do shell: `hades-tokens.css` + `app-shell.css` + `despertar.css`; `data-route="despertar"`; `requireSession`; logout.
-- Tokens do GDD mapeados:
+- [x] Página no contrato do shell: `hades-tokens.css` + `app-shell.css` + `despertar.css`; `data-route="despertar"`; `requireSession`; logout.
+- [x] Tokens do GDD mapeados:
 
 ```css
 --despertar-bg: #0a0a0f;
@@ -624,35 +634,41 @@ Cada task é fatiável em PR. Critério de pronto = checklist da task + smoke se
 --despertar-purple: #7209b7;
 ```
 
-- Grid 3 colunas desktop; 1 coluna mobile.
-- Esqueleto das regiões (ainda que estáticas): `#acheron-altar`, `#river-market`, `#despertar-tabs`.
-- Fonte mono (JetBrains Mono) **somente** nesta página, aplicada a `.despertar-num`.
+- [x] Grid 3 colunas desktop; 1 coluna mobile.
+- [x] Esqueleto das regiões (ainda que estáticas): `#acheron-altar`, `#river-market`, `#despertar-tabs`.
+- [x] Fonte mono (JetBrains Mono) **somente** nesta página, aplicada a `.despertar-num`.
 
 **Pronto quando:** logado vê a página no visual Hades; deslogado cai no Pacto; mobile não estoura horizontal.
 
 #### Task 7 — Mercado + altar (loop jogável local)
 
-**Arquivos:** `ui/UIRenderer.js`, `ui/NumberFormatter.js`, `ui/particles.js`
+**Status:** feita (2026-09-17)
+
+**Arquivos:** `ui/UIRenderer.js`, `ui/NumberFormatter.js`, `ui/particles.js`, bootstrap `js/hades-despertar/index.js`.
 
 **Faz**
 
-- HUD: Almas, Almas/s, almas/clique.
-- Botão **Ceifar** + partículas (CSS) + gamefeel leve (`shake` existente se couber, sem copiar o rainbow VFX).
-- Lista dos 6 geradores com qtd, produção, preço do lote, máscara de rio, botão disabled se pobre.
-- Toggle 1/10/100/Máx.
-- Updates **cirúrgicos** (textContent de nós já existentes). Proibido recriar a lista inteira a 60 Hz.
-- Render interpolado pode animar o número de almas; compras só no `update`.
+- [x] HUD: Almas, Almas/s, almas/clique.
+- [x] Botão **Ceifar** + partículas (CSS) + gamefeel leve (`shake` existente se couber, sem copiar o rainbow VFX).
+- [x] Lista dos 6 geradores com qtd, produção, preço do lote, máscara de rio, botão disabled se pobre.
+- [x] Toggle 1/10/100/Máx.
+- [x] Updates **cirúrgicos** (textContent de nós já existentes). Proibido recriar a lista inteira a 60 Hz.
+- [x] Render interpolado pode animar o número de almas; compras só no `update`.
 
 **Pronto quando:** dá para clicar, comprar T1–T2, ver SPS subir, números formatados; 60 fps sem relayout da coluna inteira (checar em DevTools Performance de forma manual).
 
 #### Task 8 — Styx, Lethe, Panteão
 
+**Status:** feita (2026-09-17)
+
+**Arquivos:** `ui/UIRenderer.js`, `ui/harness.js`, `pages/despertar.html`, `css/despertar.css`, bootstrap `js/hades-despertar/index.js`.
+
 **Faz**
 
-- Aba Juramentos: lista filtrada pelo que já pode aparecer (`requires`); compra.
-- Aba Lethe: preview de óbolos/essência; bloqueio se 0 óbolos; modal **Ritual do Lethe** (confirmar / recuar).
-- Reset local da corrida + crédito de óbolos/essência; PrestigeBonus visível na HUD.
-- Panteão: 8 talentos, compra com essência, efeitos imediatos na corrida atual quando fizer sentido (bonus SPS) ou na **próxima** (memória / segundo fôlego).
+- [x] Aba Juramentos: lista filtrada pelo que já pode aparecer (`requires`); compra.
+- [x] Aba Lethe: preview de óbolos/essência; bloqueio se 0 óbolos; modal **Ritual do Lethe** (confirmar / recuar).
+- [x] Reset local da corrida + crédito de óbolos/essência; PrestigeBonus visível na HUD.
+- [x] Panteão: 8 talentos, compra com essência, efeitos imediatos na corrida atual quando fizer sentido (bonus SPS) ou na **próxima** (memória / segundo fôlego).
 
 **Pronto quando:** uma corrida “cheat” de harness consegue prestigiar e comprar 1 talento; geradores zeram; óbolos permanecem.
 
