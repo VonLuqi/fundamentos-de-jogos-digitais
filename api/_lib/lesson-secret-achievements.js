@@ -638,6 +638,121 @@ export function matchesCriatividadeSobLimite(normalizedText) {
   return restrictionOk && solutionOk;
 }
 
+/* ============================================================
+   AULA 05 — ClassInd / IARC / Design Saudável
+   ============================================================ */
+
+const CLASSIND_SYSTEM_SIGNALS = Object.freeze([
+  'classind',
+  'iarc',
+  'classificacao indicativa',
+]);
+
+const LIVRE_WORD_SIGNALS = Object.freeze([
+  'livre',
+  'faixa livre',
+  'selo livre',
+  'classificacao livre',
+  'rating livre',
+  'faixa-alvo livre',
+  'faixa alvo livre',
+]);
+
+/** “L” só conta com contexto de faixa/selo/alvo (evita falso positivo). */
+const LIVRE_L_PATTERNS = Object.freeze([
+  /\bfaixa(?:[\s\-]?alvo)?\s*[:=]?\s*l\b/,
+  /\balvo\s*[:=]?\s*l\b/,
+  /\bselo\s*[:=]?\s*l\b/,
+  /\brating\s*[:=]?\s*l\b/,
+  /\bclassificacao\s*[:=]?\s*l\b/,
+  /\biarc\s*[:=]?\s*l\b/,
+  /\bclassind\s*[:=]?\s*l\b/,
+  /\b(?:ate|maximo|para)\s+l\b/,
+]);
+
+const ATTENUATION_SIGNALS = Object.freeze([
+  'atenuante',
+  'atenua',
+  'atenuar',
+  'atenuacao',
+]);
+
+const AGGRAVATION_SIGNALS = Object.freeze([
+  'agravante',
+  'agrava',
+  'agravar',
+  'agravacao',
+]);
+
+const FANTASY_SIGNALS = Object.freeze([
+  'fantasia',
+  'fantastico',
+  'nao-humano',
+  'nao humano',
+  'comicidade',
+]);
+
+const REALISM_SIGNALS = Object.freeze([
+  'realismo',
+  'realista',
+]);
+
+export const AULA5_SECRET_THRESHOLDS = Object.freeze({
+  oraculoMin: 1,
+  seloLivreMin: 1,
+  balancaTermMin: 1,
+});
+
+/**
+ * Keywords: ClassInd · IARC · classificação indicativa.
+ */
+export function matchesOraculoDoClassind(normalizedText) {
+  const hits = CLASSIND_SYSTEM_SIGNALS.filter((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  }).length;
+  return hits >= AULA5_SECRET_THRESHOLDS.oraculoMin;
+}
+
+/**
+ * Faixa-alvo Livre (palavra) ou “L” contextual após higienização.
+ */
+export function matchesSeloDoLivre(normalizedText) {
+  const wordHit = LIVRE_WORD_SIGNALS.some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  });
+  if (wordHit) return true;
+  return LIVRE_L_PATTERNS.some((pattern) => pattern.test(normalizedText));
+}
+
+/**
+ * Atenuante OU agravante OU par fantasia × realismo.
+ */
+export function matchesBalancaDaFaixa(normalizedText) {
+  const attenHit = ATTENUATION_SIGNALS.some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  });
+  if (attenHit) return true;
+
+  const aggravHit = AGGRAVATION_SIGNALS.some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  });
+  if (aggravHit) return true;
+
+  const fantasyHit = FANTASY_SIGNALS.some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  });
+  const realismHit = REALISM_SIGNALS.some((signal) => {
+    const needle = normalizeForSecretCheck(signal);
+    return needle && normalizedText.includes(needle);
+  });
+  return fantasyHit && realismHit;
+}
+
 const LESSON_SECRET_RULES = Object.freeze({
   aula1: Object.freeze([
     {
@@ -693,6 +808,20 @@ const LESSON_SECRET_RULES = Object.freeze({
     {
       id: 'segredo_criatividade_sob_limite',
       test: (ctx) => matchesCriatividadeSobLimite(ctx.normalizedText),
+    },
+  ]),
+  aula5: Object.freeze([
+    {
+      id: 'segredo_oraculo_do_classind',
+      test: (ctx) => matchesOraculoDoClassind(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_selo_do_livre',
+      test: (ctx) => matchesSeloDoLivre(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_balanca_da_faixa',
+      test: (ctx) => matchesBalancaDaFaixa(ctx.normalizedText),
     },
   ]),
 });

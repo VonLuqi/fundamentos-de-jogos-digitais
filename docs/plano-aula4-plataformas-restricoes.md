@@ -58,7 +58,7 @@ Conectar a **história das plataformas** (consoles de mesa e portáteis) à prá
 
 ### Correção da ponte da Aula 03
 
-Em [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md), a seção *Ponte — Aula 04* sugeria `Camera2D`, cena de teste e `AnimatedSprite2D`. A **ementa oficial** desta aula é *histórico das plataformas* + oficina de **viewport retrô**. **Ponte já corrigida na Task 0 (2026-09-13).** Câmera, cena de teste e animação ficam para **Aula 05+**.
+Em [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md), a seção *Ponte — Aula 04* sugeria `Camera2D`, cena de teste e `AnimatedSprite2D`. A **ementa oficial** desta aula é *histórico das plataformas* + oficina de **viewport retrô**. **Ponte já corrigida na Task 0 (2026-09-13).** Câmera, cena de teste e animação ficam para **Módulo 2+** (quando houver ementa).
 
 ---
 
@@ -490,7 +490,7 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 ```text
 Task 0–10 ✅  (implementação da Aula 04 concluída)
 Liberação na turma → docs/playbook-liberar-aula4.md
-Próximo currículo → Aula 05 (câmera / cena de teste / AnimatedSprite — ver Ponte)
+Próximo currículo → Aula 05 (ClassInd / IARC / Design Saudável — ver Ponte)
 ```
 
 ---
@@ -523,7 +523,7 @@ Próximo currículo → Aula 05 (câmera / cena de teste / AnimatedSprite — ve
 
 **Fora de escopo desta leva (MVP)**
 
-- `Camera2D` follow, cena de teste com chão, `AnimatedSprite2D` (ficam na ponte Aula 05).
+- `Camera2D` follow, cena de teste com chão, `AnimatedSprite2D` (ficam para **Módulo 2+**, não para a Aula 05 oficial).
 - Emulação fiel de PPU/VDP, shaders CRT, paletas NES/SNES obrigatórias.
 - Tilemaps grandes, combate, UI completa.
 - Activity bônus tipo `aula1_gdd`.
@@ -548,18 +548,18 @@ Próximo currículo → Aula 05 (câmera / cena de teste / AnimatedSprite — ve
 
 ## Ponte — Aula 05 (próxima do Módulo 1)
 
-Com o **contrato de tela** definido (viewport retrô + stretch clássico) e o herói nítido da Aula 03, a sequência natural do que sobrou das pontes anteriores:
+> **Ementa oficial (2026-09-21):** Aula 05 = *Classificação Indicativa (ClassInd), IARC e Design Saudável* + práticas **ClassInd-dle** (Higher/Lower ao vivo) e **Adequação Reversa / Patch Note** no site (**sem Godot**). Plano: [`plano-aula5-classind-iarc.md`](./plano-aula5-classind-iarc.md).  
+> A sugestão anterior (câmera / cena de teste / AnimatedSprite) fica para **Módulo 2+**.
 
-| Tema sugerido | Por quê |
+Com o **contrato de tela** definido (viewport retrô + stretch clássico), a sequência curricular oficial:
+
+| Tema | Por quê |
 | :--- | :--- |
-| **Câmera follow** (`Camera2D`) | O Viewport deixa de “perder” o herói num mundo maior |
-| **Cena de teste** (chão / `StaticBody2D` + instância do `player.tscn`) | Colisão e sensação de mundo mínimo dentro do quadro retrô |
-| **Primeira animação** (`AnimatedSprite2D` Idle/Walk com sheets Tiny Hero) | Aproveita o pacote da Aula 03 *dentro* da resolução já configurada |
+| **ClassInd + faixas** | Para quem o jogo pode ser publicado — aviso de conteúdo, não censura |
+| **IARC + design saudável** | Formulário/selos nas lojas; feedbacks que baixam a faixa sem matar o loop |
+| **Práticas no site** | ClassInd-dle (votação live) + wizard IARC / Patch Note de higienização |
 
-Fora do MVP da Aula 05 (a menos que a ementa diga o contrário): tilemaps grandes, combate, UI completa, shaders CRT.
-
-Quando houver ementa oficial da Aula 05, abrir `docs/plano-aula5-*.md` no mesmo formato (Task 0 → conquistas → página).
-
+Fora do MVP da Aula 05: Godot, `Camera2D`, cena de teste, `AnimatedSprite2D`, tilemaps, combate, UI completa.
 ---
 
 ## Decisões congeladas
@@ -588,6 +588,7 @@ Quando houver ementa oficial da Aula 05, abrir `docs/plano-aula5-*.md` no mesmo 
 | Gate no merge | **Não** — `published: false` até admin liberar |
 | Códigos | Modelo atual multi-aluno + TTL; mock local `PLATAFORMA2026` |
 | Ponte Aula 03 | Ementa oficial **sobrescreve** câmera/animação — Aula 04 = plataformas + viewport retrô |
+| Ponte Aula 05 | Ementa oficial **sobrescreve** câmera/animação — Aula 05 = ClassInd / IARC / Design Saudável (sem Godot) |
 
 
 ---
@@ -601,7 +602,7 @@ Quando houver ementa oficial da Aula 05, abrir `docs/plano-aula5-*.md` no mesmo 
 - Slides: `aula04_plataformas_restricoes_slides.{pptx,pdf}` · script `scripts/build-aula04-slides.py`.
 - Conquistas: `aula4_concluida` (**Guardião da Resolução**) + 3 secretas · motor + smokes no `npm run check`.
 - Backend: catálogo curricular · gate `published: false` · regra `aula4_concluida` · mock `PLATAFORMA2026` em `store.js`.
-- Próximo currículo: **Aula 05** (câmera follow / cena de teste / AnimatedSprite) — ver seção *Ponte* acima.
+- Próximo currículo: **Aula 05** (ClassInd / IARC / Design Saudável · ClassInd-dle + Patch Note) — [`plano-aula5-classind-iarc.md`](./plano-aula5-classind-iarc.md).
 - Predecessora: [`plano-aula3-homo-ludens.md`](./plano-aula3-homo-ludens.md).
 - Fontes técnicas usadas no plano:
   - Briefing do professor (teoria 20 min + oficina Estética Retrô).

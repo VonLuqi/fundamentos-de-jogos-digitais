@@ -209,6 +209,53 @@
       "meta": { "family": "aula4", "kind": "content", "volatile": true }
     },
     {
+      "id": "aula5_concluida",
+      "name": "Guardião da Faixa",
+      "desc": "Selou a adequação de público do Submundo e honrou a quinta trilha.",
+      "icon": "🛡️",
+      "art": "aula5_concluida.webp",
+      "hidden": false,
+      "difficulty": "trivial",
+      "rarity": "stone",
+      "xp": 0
+    },
+    {
+      "id": "segredo_oraculo_do_classind",
+      "name": "Oráculo do ClassInd",
+      "desc": "Nomeou o sistema brasileiro e o consórcio das lojas.",
+      "icon": "📜",
+      "art": "segredo_oraculo_do_classind.webp",
+      "hidden": true,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 15,
+      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_selo_do_livre",
+      "name": "Selo do Livre",
+      "desc": "Documentou a faixa-alvo Livre após a higienização.",
+      "icon": "🏷️",
+      "art": "segredo_selo_do_livre.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 15,
+      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_balanca_da_faixa",
+      "name": "Balança da Faixa",
+      "desc": "Distinguiu o que atenua e o que agrava uma classificação.",
+      "icon": "⚖️",
+      "art": "segredo_balanca_da_faixa.webp",
+      "hidden": true,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 25,
+      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+    },
+    {
       "id": "soberano_do_submundo",
       "name": "Soberano do Submundo",
       "desc": "Superou as 8 provações lendárias do submundo: decifrou o Tártaro, escutou Asfódelos, revelou os segredos de Hécate, interceptou os Elísios, dominou o Jardim de Perséfone, localizou o portal no Observatório, inverteu o espelho de Cócito e selou o pacto no Rio Estige. Mestre absoluto da investigação web, ARG e engenharia de software.",

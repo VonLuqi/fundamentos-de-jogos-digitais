@@ -52,6 +52,7 @@ const shellPages = [
   'pages/aula2.html',
   'pages/aula3.html',
   'pages/aula4.html',
+  'pages/aula5.html',
 ];
 
 shellPages.forEach((rel) => {
@@ -92,6 +93,7 @@ assert(apiJs.includes('conquistas:'), 'ROUTES.conquistas deve existir em api.js'
 assert(apiJs.includes("id: 'aula2'"), 'MODULES deve incluir aula2');
 assert(apiJs.includes("id: 'aula3'"), 'MODULES deve incluir aula3');
 assert(apiJs.includes("id: 'aula4'"), 'MODULES deve incluir aula4');
+assert(apiJs.includes("id: 'aula5'"), 'MODULES deve incluir aula5');
 assert(
   apiJs.includes('O Glossário do Desenvolvedor e o Player na Tela'),
   'MODULES.aula2 deve usar o título curricular novo'
@@ -121,6 +123,14 @@ assert(
   'MODULES.aula4 deve usar o subtitle de plataformas / viewport'
 );
 assert(
+  apiJs.includes('Classificação Indicativa (ClassInd), IARC e Design Saudável'),
+  'MODULES.aula5 deve usar o título curricular novo'
+);
+assert(
+  apiJs.includes('Faixas etárias · ClassInd-dle · Adequação de público'),
+  'MODULES.aula5 deve usar o subtitle ClassInd / dle'
+);
+assert(
   !apiJs.includes('Conteúdo em preparação'),
   'MODULES não deve mais usar o stub Conteúdo em preparação'
 );
@@ -134,6 +144,7 @@ assert(progressJs.includes('published'), 'progress.js deve definir gate publishe
 assert(progressJs.includes('aula2:'), 'LESSON_CATALOG deve ter stub aula2');
 assert(progressJs.includes('aula3:'), 'LESSON_CATALOG deve ter stub aula3');
 assert(progressJs.includes('aula4:'), 'LESSON_CATALOG deve ter stub aula4');
+assert(progressJs.includes('aula5:'), 'LESSON_CATALOG deve ter stub aula5');
 assert(
   progressJs.includes('O Glossário do Desenvolvedor e o Player na Tela'),
   'LESSON_CATALOG.aula2 deve usar o título curricular novo'
@@ -155,6 +166,10 @@ assert(
   'LESSON_CATALOG.aula4 deve usar o título curricular novo'
 );
 assert(
+  progressJs.includes('Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável'),
+  'LESSON_CATALOG.aula5 deve usar o título curricular novo'
+);
+assert(
   progressJs.includes("id: 'aula2_concluida'"),
   'ACHIEVEMENT_RULES deve incluir aula2_concluida'
 );
@@ -165,6 +180,10 @@ assert(
 assert(
   progressJs.includes("id: 'aula4_concluida'"),
   'ACHIEVEMENT_RULES deve incluir aula4_concluida'
+);
+assert(
+  progressJs.includes("id: 'aula5_concluida'"),
+  'ACHIEVEMENT_RULES deve incluir aula5_concluida'
 );
 assert(
   /aula2:\s*\{\s*published:\s*false/.test(progressJs.replace(/\s+/g, ' ')),
@@ -178,6 +197,10 @@ assert(
   /aula4:\s*\{\s*published:\s*false/.test(progressJs.replace(/\s+/g, ' ')),
   'LESSON_GATES.aula4 deve permanecer published: false por default'
 );
+assert(
+  /aula5:\s*\{\s*published:\s*false/.test(progressJs.replace(/\s+/g, ' ')),
+  'LESSON_GATES.aula5 deve permanecer published: false por default'
+);
 
 const storeJs = read('api/_lib/store.js');
 assert(
@@ -185,8 +208,20 @@ assert(
   'LESSON_PREREQUISITES deve mapear aula4 → aula3'
 );
 assert(
+  /aula5:\s*'aula4'/.test(storeJs.replace(/\s+/g, ' ')),
+  'LESSON_PREREQUISITES deve mapear aula5 → aula4'
+);
+assert(
   storeJs.includes("id: 'aula4_concluida'"),
   'store ACHIEVEMENT_RULES deve incluir aula4_concluida'
+);
+assert(
+  storeJs.includes("id: 'aula5_concluida'"),
+  'store ACHIEVEMENT_RULES deve incluir aula5_concluida'
+);
+assert(
+  storeJs.includes('CLASSIND2026'),
+  'store REDEEM_CODES deve incluir mock CLASSIND2026'
 );
 
 const aula2Html = read('pages/aula2.html');
@@ -374,6 +409,36 @@ assert(
 assert(
   read('js/aula4.js').includes('aula04_plataformas_restricoes_slides.pdf'),
   'aula4.js deve apontar PDF_FILE para o deck da aula4'
+);
+
+const aula5Html = read('pages/aula5.html');
+assert(
+  aula5Html.includes('ClassInd') || aula5Html.includes('IARC'),
+  'aula5.html deve usar o título curricular ClassInd / IARC'
+);
+assert(aula5Html.includes('discovery-overlay'), 'aula5.html precisa do discovery overlay');
+assert(!aula5Html.includes('id="config-notes"'), 'aula5.html sem textarea de anotações (wizard finaliza direto)');
+assert(!aula5Html.includes('id="gdd-text"'), 'aula5.html sem textarea de síntese');
+assert(aula5Html.includes('iarc-wizard-root'), 'aula5.html monta wizard IARC');
+assert(
+  aula5Html.includes('../css/aula.css'),
+  'aula5.html deve reusar css/aula.css'
+);
+assert(
+  read('js/aula5.js').includes("const LESSON_ID = 'aula5'"),
+  'aula5.js deve usar lessonId aula5'
+);
+assert(
+  read('js/aula5.js').includes('saveLessonParagraph') && read('js/aula5.js').includes('onFinalize'),
+  'aula5.js finaliza via wizard → saveLessonParagraph'
+);
+assert(
+  read('js/aula5.js').includes('lesson-discovery') || read('js/aula5.js').includes('enqueueDiscovery'),
+  'aula5.js deve usar lesson-discovery compartilhado'
+);
+assert(
+  !read('js/aula5.js').includes('createNote'),
+  'aula5.js não deve gravar nota no grimório'
 );
 
 const appShell = read('js/app-shell.js');

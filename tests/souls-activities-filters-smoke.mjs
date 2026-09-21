@@ -165,6 +165,7 @@ const catalog = [
   { id: 'aula2', number: '02', title: 'O Glossário do Desenvolvedor e o Player na Tela' },
   { id: 'aula3', number: '03', title: 'Homo Ludens, Identidade e Expressão Cultural' },
   { id: 'aula4', number: '04', title: 'A Linha do Tempo das Plataformas e as Restrições Técnicas' },
+  { id: 'aula5', number: '05', title: 'Classificação Indicativa (ClassInd), IARC e Design Saudável' },
 ];
 
 assert.equal(

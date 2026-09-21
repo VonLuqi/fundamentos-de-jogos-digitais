@@ -337,6 +337,7 @@ export const ROUTES = {
   },
   souls: () => `${rootPath()}/pages/souls.html`,
   despertar: () => `${rootPath()}/pages/despertar.html`,
+  classindDle: () => `${rootPath()}/pages/classind-dle.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -967,6 +968,60 @@ export function despertarTalentBuy(token, talentId) {
 }
 
 /* ============================================================
+   5.2 CLASSIND-DLE (votação live — /api/classind)
+   ============================================================ */
+export function classindRequest(token, action, payload = {}) {
+  return request('/classind', {
+    method: 'POST',
+    body: JSON.stringify({ token, action, ...payload }),
+  });
+}
+
+export function classindCreateRoom(token, options = {}) {
+  return classindRequest(token, 'createRoom', options);
+}
+
+export function classindJoinRoom(token, code) {
+  return classindRequest(token, 'joinRoom', { code });
+}
+
+export function classindGetState(token, { roomId, code } = {}) {
+  return classindRequest(token, 'getState', { roomId, code });
+}
+
+export function classindStartRound(token, { roomId, roundIndex } = {}) {
+  return classindRequest(token, 'startRound', { roomId, roundIndex });
+}
+
+export function classindCastVote(token, { roomId, choice } = {}) {
+  return classindRequest(token, 'castVote', { roomId, choice });
+}
+
+export function classindReveal(token, { roomId } = {}) {
+  return classindRequest(token, 'reveal', { roomId });
+}
+
+export function classindNextRound(token, { roomId } = {}) {
+  return classindRequest(token, 'nextRound', { roomId });
+}
+
+export function classindShowRanking(token, { roomId } = {}) {
+  return classindRequest(token, 'showRanking', { roomId });
+}
+
+export function classindCloseRoom(token, { roomId } = {}) {
+  return classindRequest(token, 'closeRoom', { roomId });
+}
+
+export function classindPing(token, { roomId } = {}) {
+  return classindRequest(token, 'ping', { roomId });
+}
+
+export function classindListRoster(token, { roomId } = {}) {
+  return classindRequest(token, 'listRoomRoster', { roomId });
+}
+
+/* ============================================================
    6. GUARD DE ROTA
    ============================================================
    Chamado no boot das páginas protegidas. Se não houver sessão
@@ -1092,6 +1147,13 @@ export const MODULES = [
         number: '04',
         title: 'A Linha do Tempo das Plataformas e as Restrições Técnicas',
         subtitle: 'Histórico de hardware · Viewport retrô e stretch clássico',
+        rewardXp: 30,
+      },
+      {
+        id: 'aula5',
+        number: '05',
+        title: 'Classificação Indicativa (ClassInd), IARC e Design Saudável',
+        subtitle: 'Faixas etárias · ClassInd-dle · Adequação de público',
         rewardXp: 30,
       },
     ],

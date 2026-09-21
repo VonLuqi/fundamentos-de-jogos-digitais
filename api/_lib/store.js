@@ -70,6 +70,12 @@ export const REDEEM_CODES = {
     xp: 30,
     achievement: 'aula4_concluida',
   },
+  CLASSIND2026: {
+    lessonId: 'aula5',
+    lessonTitle: 'Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável',
+    xp: 30,
+    achievement: 'aula5_concluida',
+  },
 };
 
 /* ============================================================
@@ -83,6 +89,7 @@ export const LESSON_PREREQUISITES = {
   aula2: 'aula1',
   aula3: 'aula2',
   aula4: 'aula3',
+  aula5: 'aula4',
 };
 
 /** Retorna true se o usuário já cumpriu o pré-requisito da aula informada. */
@@ -110,6 +117,7 @@ export const ACHIEVEMENT_RULES = [
   { id: 'ritmo_do_jogo', test: (u) => u.completedLessons.includes('aula2') && u.xp >= 45 },
   { id: 'aula3_concluida', test: (u) => u.completedLessons.includes('aula3') },
   { id: 'aula4_concluida', test: (u) => u.completedLessons.includes('aula4') },
+  { id: 'aula5_concluida', test: (u) => u.completedLessons.includes('aula5') },
 ];
 
 /* ============================================================

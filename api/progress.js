@@ -79,6 +79,11 @@ const LESSON_CATALOG = {
     lessonTitle: 'Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas',
     xp: 30,
   },
+  aula5: {
+    lessonId: 'aula5',
+    lessonTitle: 'Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável',
+    xp: 30,
+  },
 };
 
 /** Gates por aula: objeto { gateKey: defaultReleased }. `published` controla liberação global na Trilha. */
@@ -87,6 +92,7 @@ const LESSON_GATES = {
   aula2: { published: false },
   aula3: { published: false },
   aula4: { published: false },
+  aula5: { published: false },
 };
 
 const ACTIVITY_CATALOG = {
@@ -113,6 +119,10 @@ const ACHIEVEMENT_RULES = [
   {
     id: 'aula4_concluida',
     test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula4'),
+  },
+  {
+    id: 'aula5_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula5'),
   },
 ];
 

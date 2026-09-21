@@ -39,6 +39,7 @@ const shellPages = [
   'pages/aula2.html',
   'pages/aula3.html',
   'pages/aula4.html',
+  'pages/aula5.html',
 ];
 
 const appShellCss = read('css/app-shell.css');

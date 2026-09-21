@@ -169,4 +169,4 @@ Na síntese (5–8 linhas): amarre **história das plataformas → restrição �
 - `AnimatedSprite2D`  
 - Shaders CRT / paletas NES obrigatórias  
 
-Isso fica para a **próxima trilha** do módulo.
+Isso fica para **Módulo 2+** (quando houver ementa). A **Aula 05** oficial é ClassInd / IARC / Design Saudável (sem Godot) — ver `docs/plano-aula5-classind-iarc.md`.

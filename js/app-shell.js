@@ -16,8 +16,9 @@ let lastFocusedBeforeOpen = null;
 
 /**
  * Destinos primários do aside (aluno):
- * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · Minigame (em breve)
+ * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · O Despertar
  * Condicional admin: Almas Registradas (não conta no teto do aluno).
+ * Até a Task 11, as outras páginas ainda mostram o stub Minigame.
  */
 function mapRouteToNavItem(route) {
   if (route === 'dashboard') return 'dashboard';
@@ -26,7 +27,9 @@ function mapRouteToNavItem(route) {
   if (route === 'conquistas') return 'conquistas';
   if (route === 'salao') return 'salao';
   if (route === 'grimorio' || route === 'grimorio-nota' || route === 'grimorio-editar') return 'grimorio';
+  if (route === 'despertar') return 'despertar';
   if (route === 'minigame') return 'minigame';
+  if (route === 'classind-dle') return 'aulas';
   if (route === 'souls') return 'souls';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;

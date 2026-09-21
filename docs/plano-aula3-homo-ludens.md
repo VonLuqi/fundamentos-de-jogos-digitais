@@ -538,7 +538,7 @@ Próximo currículo → Aula 04 (plataformas + viewport retrô — ver Ponte / [
 ## Ponte — Aula 04 (próxima do Módulo 1)
 
 > **Ementa oficial (2026-09-13):** Aula 04 = *Linha do Tempo das Plataformas e as Restrições Técnicas* + oficina **Estética Retrô do Zero** (viewport + stretch). Plano: [`plano-aula4-plataformas-restricoes.md`](./plano-aula4-plataformas-restricoes.md).  
-> A sugestão anterior (câmera / cena de teste / AnimatedSprite) fica para **Aula 05+**.
+> A sugestão anterior (câmera / cena de teste / AnimatedSprite) fica para **Módulo 2+** (a Aula 05 oficial é ClassInd/IARC — ver [`plano-aula5-classind-iarc.md`](./plano-aula5-classind-iarc.md)).
 
 Com o herói **visível, nítido e culturalmente marcado**, a sequência curricular oficial:
 

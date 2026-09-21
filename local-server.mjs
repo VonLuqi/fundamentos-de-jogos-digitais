@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import handler from './api/auth.js';
 import progressHandler from './api/progress.js';
 import despertarHandler from './api/despertar.js';
+import classindHandler from './api/classind.js';
 
 dotenv.config({ path: '.env.local' });
 dotenv.config();
@@ -67,6 +68,7 @@ const server = http.createServer(async (req, res) => {
       '/api/auth': handler,
       '/api/progress': progressHandler,
       '/api/despertar': despertarHandler,
+      '/api/classind': classindHandler,
     };
     const routeHandler = apiHandlers[pathname];
     if (routeHandler) {

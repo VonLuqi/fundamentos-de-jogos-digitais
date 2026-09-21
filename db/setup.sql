@@ -221,6 +221,125 @@ ALTER TABLE despertar_states ENABLE ROW LEVEL SECURITY;
 -- Sem policies de INSERT/UPDATE para anon/authenticated.
 -- O backend usa SUPABASE_SERVICE_ROLE_KEY (bypass RLS), igual ao restante do Domínio.
 
+-- ClassInd-dle (Aula 05 — Task 2): salas live + snapshot Realtime
+CREATE TABLE IF NOT EXISTS classind_rooms (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  code text NOT NULL,
+  host_user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  turma text NULL CHECK (turma IS NULL OR turma IN ('TCG01', 'TCG02')),
+  phase text NOT NULL DEFAULT 'lobby'
+    CHECK (phase IN ('lobby', 'voting', 'revealed', 'results', 'ranking', 'closed')),
+  current_round_index integer NOT NULL DEFAULT 0
+    CHECK (current_round_index >= 0),
+  deck_id text NOT NULL DEFAULT 'aula5-v1',
+  state_version bigint NOT NULL DEFAULT 0
+    CHECK (state_version >= 0),
+  settings jsonb NOT NULL DEFAULT '{"requireAllVotes":false}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT classind_rooms_code_fmt_chk CHECK (code ~ '^[A-Z0-9]{4,6}$')
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS classind_rooms_code_uidx
+  ON classind_rooms (code);
+
+CREATE INDEX IF NOT EXISTS classind_rooms_host_idx
+  ON classind_rooms (host_user_id);
+
+CREATE INDEX IF NOT EXISTS classind_rooms_phase_updated_idx
+  ON classind_rooms (phase, updated_at DESC);
+
+ALTER TABLE classind_rooms ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS classind_rounds (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id uuid NOT NULL REFERENCES classind_rooms(id) ON DELETE CASCADE,
+  round_index integer NOT NULL CHECK (round_index >= 0),
+  payload_public jsonb NOT NULL DEFAULT '{}'::jsonb,
+  payload_secret jsonb NOT NULL DEFAULT '{}'::jsonb,
+  phase text NOT NULL DEFAULT 'voting'
+    CHECK (phase IN ('voting', 'revealed')),
+  revealed_at timestamptz NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT classind_rounds_room_index_uidx UNIQUE (room_id, round_index)
+);
+
+CREATE INDEX IF NOT EXISTS classind_rounds_room_idx
+  ON classind_rounds (room_id, round_index);
+
+ALTER TABLE classind_rounds ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS classind_votes (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  round_id uuid NOT NULL REFERENCES classind_rounds(id) ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  choice text NOT NULL CHECK (choice IN ('A', 'B')),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT classind_votes_round_user_uidx UNIQUE (round_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS classind_votes_round_idx
+  ON classind_votes (round_id);
+
+CREATE INDEX IF NOT EXISTS classind_votes_user_idx
+  ON classind_votes (user_id);
+
+ALTER TABLE classind_votes ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS classind_members (
+  room_id uuid NOT NULL REFERENCES classind_rooms(id) ON DELETE CASCADE,
+  user_id integer NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at timestamptz NOT NULL DEFAULT now(),
+  last_seen_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (room_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS classind_members_room_idx
+  ON classind_members (room_id);
+
+CREATE INDEX IF NOT EXISTS classind_members_user_idx
+  ON classind_members (user_id);
+
+ALTER TABLE classind_members ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE IF NOT EXISTS classind_live_snapshots (
+  room_id uuid PRIMARY KEY REFERENCES classind_rooms(id) ON DELETE CASCADE,
+  state_version bigint NOT NULL DEFAULT 0 CHECK (state_version >= 0),
+  payload jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE classind_live_snapshots REPLICA IDENTITY FULL;
+
+CREATE INDEX IF NOT EXISTS classind_live_snapshots_updated_idx
+  ON classind_live_snapshots (updated_at DESC);
+
+ALTER TABLE classind_live_snapshots ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS classind_live_snapshots_select_public ON classind_live_snapshots;
+CREATE POLICY classind_live_snapshots_select_public
+  ON classind_live_snapshots
+  FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    IF NOT EXISTS (
+      SELECT 1
+      FROM pg_publication_tables
+      WHERE pubname = 'supabase_realtime'
+        AND schemaname = 'public'
+        AND tablename = 'classind_live_snapshots'
+    ) THEN
+      ALTER PUBLICATION supabase_realtime ADD TABLE classind_live_snapshots;
+    END IF;
+  ELSE
+    RAISE NOTICE 'Publication supabase_realtime ausente — habilite Realtime no dashboard do projeto.';
+  END IF;
+END $$;
+
 -- Inserir ADMIN (use a função crypt para gerar hash com pgcrypto)
 -- Substitua a senha abaixo por uma segura ou execute o INSERT via painel SQL do Supabase
 INSERT INTO users (full_name, turma, username, password_hash, role, xp, conquistas, completed_lessons, redeemed_codes, avatar_index)

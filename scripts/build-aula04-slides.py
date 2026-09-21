@@ -490,7 +490,7 @@ def build_deck() -> Presentation:
             ("FIM DA AULA 04: GUARDIÃO DA RESOLUÇÃO", {"size": 15, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
             ("Toda plataforma escreve um contrato invisível de pixels e cores.", {"size": 14, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 10}),
             ("Envie as anotações. Leve o código ao Altar quando o Mestre liberar.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER, "space_after": 12}),
-            ("Próxima trilha: câmera follow, cena de teste e primeira animação.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+            ("Próxima trilha: ClassInd, IARC e design saudável (sem Godot).", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
         ],
     )
     add_footer(s, W, H)

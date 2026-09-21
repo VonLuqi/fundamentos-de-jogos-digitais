@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável: faixas etárias, eixos de análise e adequação de público." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 05 — ClassInd, IARC e Design Saudável | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+  <link rel="stylesheet" href="../css/aula5-iarc.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page" data-route="aula5" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link" data-nav-item="despertar" href="./despertar.html">O Despertar</a>
+        <a class="app-shell__link is-locked" data-nav-item="minigame" href="#" aria-disabled="true" tabindex="-1" title="Em breve">Minigame em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 1 · Fundações, Cultura e Interface</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 05: CLASSIND, IARC E <span class="accent">DESIGN SAUDÁVEL</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 05</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina ClassInd
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 1 · Aulas 1 a 5 · 10h</p>
+        <h2 class="lesson-title">Sistemas de classificação indicativa e adequação de público</h2>
+        <p>
+          Até aqui você configurou <strong>como o jogo se sente e se vê</strong> (círculo mágico, player, pixel, viewport).
+          Hoje a pergunta muda de eixo: <strong>para quem</strong> esse jogo pode ser publicado — e o que no design
+          empurra a faixa etária para cima ou para baixo.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>ClassInd</h3>
+            <p>Sistema brasileiro de classificação indicativa. Orienta famílias e vendedores; no digital, alimenta selos nas lojas.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>IARC</h3>
+            <p>Consórcio internacional: um formulário de conteúdo → selos de idade em várias regiões/lojas, de forma gratuita.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Design saudável</h3>
+            <p>Escolher feedbacks visuais e narrativos que preservam a mecânica-core sem “inflar” violência, sexo ou drogas sem necessidade.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">O que é o ClassInd (e para que serve)</h2>
+        <p>
+          A <strong>Classificação Indicativa</strong> não é censura de criação: é um <strong>aviso de conteúdo</strong>
+          para o público. Ajuda consumidores a decidir, lojas a filtrar catálogo e o desenvolvedor a assumir
+          responsabilidade sobre o que o jogo <em>mostra e recompensa</em>.
+        </p>
+        <ul class="lesson-list">
+          <li><strong>Consumidor / responsável:</strong> sabe se o tom do jogo combina com a idade do jogador.</li>
+          <li><strong>Lojas digitais:</strong> usam a faixa (e descritores) em páginas de produto e filtros parentais.</li>
+          <li><strong>Você, designer:</strong> cada gore, nudez, cadáver ou glamourização de droga é uma decisão de design com custo de público.</li>
+        </ul>
+
+        <h2 class="lesson-title">Faixas — leitura operacional</h2>
+        <p>Não decore a lei: opere a escala. Valores didáticos usados nesta aula:</p>
+        <ul class="lesson-list">
+          <li><strong>L (Livre):</strong> conteúdo adequado a todas as idades; violência inexistente ou muito fantasiosa/cômica.</li>
+          <li><strong>10:</strong> violência leve / fantasiosa; medo leve; linguagem ocasional sem carga sexual.</li>
+          <li><strong>12:</strong> violência mais presente (ainda sem extremo); temas sexuais insinuados; linguagem mais pesada.</li>
+          <li><strong>14:</strong> violência mais intensa; sexualidade mais explícita em tom; drogas em menção / contexto.</li>
+          <li><strong>16:</strong> violência forte; conteúdo sexual / drogas com destaque; horror mais visceral.</li>
+          <li><strong>18:</strong> violência extrema / gore; sexo explícito; drogas com glamourização ou uso detalhado.</li>
+        </ul>
+
+        <h2 class="lesson-title">Três eixos clássicos (+ atenuantes e agravantes)</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Violência</h3>
+            <p>Contra quem? Com sangue? Corpos ficam? É cartunesca ou realista? Fantasia e não-humanos costumam <strong>atenuar</strong>; gore e cadáveres humanos <strong>agravam</strong>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Sexo</h3>
+            <p>Insinuação, nudez parcial, atos explícitos, recompensa sexual. O que o jogo <em>mostra</em> e o que ele <em>oferece como escolha</em> pesam.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Drogas</h3>
+            <p>Menção, uso como mecânica, representação realista ou glamourização. Uma “poção” mágica raramente equivale a uma seringa realista que “cura”.</p>
+          </article>
+        </div>
+        <ul class="lesson-list">
+          <li><strong>Atenuantes típicos:</strong> fantasia, comicidade, não-humanos, ausência de sangue, violência sem foco em sofrimento.</li>
+          <li><strong>Agravantes típicos:</strong> realismo, gore, cadáveres, tortura, nudez, glamourização de substâncias, recompensa por conteúdo adulto.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>
+            Dois jogos podem ter o mesmo “loop” (atirar, esfaquear, curar) e faixas completamente diferentes —
+            porque o <strong>feedback</strong> (gosma verde vs. sangue arterial; bateria mágica vs. droga de rua) é o que a classificação lê.
+          </p>
+        </div>
+
+        <h2 class="lesson-title">IARC — selos globais a partir de um formulário</h2>
+        <p>
+          O <strong>International Age Rating Coalition</strong> permite que studios preencham um questionário de conteúdo
+          e obtenham classificações alinhadas a vários sistemas (incluindo o caminho que alimenta o ClassInd / lojas no Brasil
+          e outras regiões). Na prática: você declara o que o jogo contém; o consórcio devolve selos para publicação digital.
+        </p>
+        <ul class="lesson-list">
+          <li>Gratuito e pensado para lojas digitais (Google Play, Nintendo e-Shop, Microsoft, etc., conforme adesão).</li>
+          <li>As perguntas espelham eixos que você já viu: violência, medo, linguagem, sexo, drogas, temas adultos.</li>
+          <li>Mentir no formulário não é “truque de marketing” — é risco comercial e ético. O design deve bater com a declaração.</li>
+        </ul>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
+        <p>
+          Sem Godot hoje. Você vai <strong>sentir</strong> a diferença de faixa no ClassInd-dle (Higher/Lower ao vivo)
+          e depois <strong>reescrever</strong> feedbacks de um pitch adulto até Livre ou 10+ — sem matar a mecânica principal.
+        </p>
+        <ul class="lesson-list">
+          <li>Operacionalizar ClassInd (faixas + eixos + atenuantes/agravantes).</li>
+          <li>Entender o papel do IARC nas lojas digitais e a ponte com o Brasil.</li>
+          <li>Praticar design saudável: higienizar conteúdo mantendo o loop-core.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · ClassInd-dle + Adequação Reversa</p>
+        <h2 class="lesson-title">Prática gamificada (sem Godot)</h2>
+        <p>
+          Duas partes na mesma aula: votação ao vivo no ClassInd-dle e, em seguida,
+          higienização de um pitch 16+/18+ até Livre ou 10 no wizard abaixo.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Parte 1 · ClassInd-dle</h3>
+            <p>~40 min. Higher/Lower: qual opção exige a idade mais alta? Vote e descubra o <em>porque</em>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Parte 2 · Higienização</h3>
+            <p>~60 min. Desafio procedural: reescreva feedbacks até Livre ou 10, preservando o loop-core.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Artefato</h3>
+            <p>Patch Note de Higienização — gerado e enviado pelo wizard (vai ao seu Grimório).</p>
+          </article>
+        </div>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Parte 1 — ClassInd-dle</p>
+          <p>
+            Quando o Mestre abrir a sala, entre pelo botão abaixo. Vote A ou B;
+            o placar sobe ao vivo; a resposta só aparece no revelar. Acompanhe seu placar de acertos.
+          </p>
+          <ol class="lesson-list">
+            <li>Mestre cria a sala e mostra o código no telão.</li>
+            <li>Você entra e aguarda a comparação.</li>
+            <li>Vote uma vez: <strong>“Qual exige a idade mais alta?”</strong></li>
+            <li>Após o revelar: faixas + se você acertou.</li>
+          </ol>
+          <a class="lesson-cta" id="cta-classind-dle" href="./classind-dle.html">
+            Abrir ClassInd-dle
+          </a>
+        </div>
+
+        <div id="iarc-wizard-root"></div>
+
+        <ul class="lesson-list">
+          <li>Participei do ClassInd-dle com pelo menos um voto.</li>
+          <li>Patch Note gerado: original → higienizado → argumentos → L ou 10.</li>
+          <li>Mecânica-core preservada (o verbo do jogo).</li>
+          <li>Aula finalizada pelo wizard (Patch Note no Grimório).</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>O selo não é só marketing — é consequência de feedbacks de design. Higienizar é redesenhar o que o jogador <em>vê e sente</em>, não apagar o jogo.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 5">
+          <p><strong>Pistas secretas do Submundo:</strong> nomeie o sistema brasileiro e o consórcio das lojas; diga se miraram Livre após a higienização; e mostre que entende o que <em>atenua</em> ou <em>agrava</em> uma faixa. O altar reconhece quem documenta adequação de público.</p>
+        </section>
+
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto (só Mestre)</h4>
+          <p class="gdd-example__text">
+            No ClassInd-dle, The Sims 4 (12) superou Hollow Knight (10) por temas sexuais — não por “mais ação”.
+            No pitch Necrópole Viral, trocamos desmembramento e seringas por robôs de sucata, faíscas e baterias mágicas:
+            o loop permanece, mas violência contra não-humanos sem sangue e cura fantástica sustentam Livre / 10.
+          </p>
+        </section>
+      </article>
+    </section>
+
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 05</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre ClassInd, IARC, atenuantes/agravantes
+          e as duas práticas (ClassInd-dle + higienização). Arquivos finais entram na Task 8; placeholders abaixo.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 05" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 05" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 1 · Aula 05</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/aula5.js"></script>
+</body>
+</html>

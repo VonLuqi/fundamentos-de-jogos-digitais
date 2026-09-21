@@ -1,0 +1,198 @@
+/* Wizard IARC — Aula 05 (fluxo em passos) */
+
+.iarc-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.5rem 0 1.25rem;
+}
+
+.iarc-wizard__intro {
+  padding: 0 0 0.25rem;
+}
+
+.iarc-wizard__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.iarc-step {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1.15rem;
+  border: 1px solid rgba(207, 167, 89, 0.28);
+  background: rgba(16, 10, 18, 0.55);
+}
+
+.iarc-step__num {
+  width: 2.1rem;
+  height: 2.1rem;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(207, 167, 89, 0.55);
+  background: rgba(122, 31, 43, 0.45);
+  color: var(--hades-gold-bright, #f2d59a);
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.iarc-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  min-width: 0;
+}
+
+.iarc-step__title {
+  margin: 0;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 1.05rem;
+  color: var(--hades-gold-bright, #f2d59a);
+}
+
+.iarc-step__lead {
+  margin: 0;
+  color: var(--hades-text-dim, #ab9c8a);
+  font-size: 0.98rem;
+}
+
+.iarc-wizard__table {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(207, 167, 89, 0.22);
+  background: rgba(8, 6, 10, 0.45);
+  color: var(--hades-text-dim, #ab9c8a);
+}
+
+.iarc-wizard__table summary {
+  cursor: pointer;
+  font-family: var(--font-title, Cinzel, serif);
+  color: var(--hades-gold, #cfa759);
+  font-size: 0.92rem;
+}
+
+.iarc-wizard__hint {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--hades-text-muted, #6f6459);
+}
+
+.iarc-wizard__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: flex-end;
+}
+
+.iarc-wizard__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 100%;
+}
+
+.iarc-wizard__field--compact {
+  flex: 1 1 200px;
+  max-width: 280px;
+}
+
+.iarc-wizard__field label,
+.iarc-wizard__field > span {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hades-gold, #cfa759);
+}
+
+.iarc-wizard__field input,
+.iarc-wizard__field select,
+.iarc-wizard__field textarea,
+.iarc-wizard__output {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: rgba(8, 6, 10, 0.85);
+  color: var(--hades-text, #ece1d1);
+  font-family: var(--font-body, "Crimson Text", serif);
+  font-size: 1.05rem;
+  line-height: 1.45;
+}
+
+.iarc-wizard__original {
+  padding: 0.75rem 0.9rem;
+  border: 1px solid rgba(207, 167, 89, 0.2);
+  background: rgba(8, 6, 10, 0.4);
+}
+
+.iarc-wizard__rating {
+  border: 1px solid rgba(207, 167, 89, 0.25);
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem 1.25rem;
+  margin: 0;
+}
+
+.iarc-wizard__rating legend {
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--hades-gold, #cfa759);
+  padding: 0 0.35rem;
+}
+
+.iarc-wizard__rating label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--hades-text, #ece1d1);
+}
+
+.iarc-wizard__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.iarc-wizard__actions--stack {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.iarc-wizard__actions--stack > .lesson-cta {
+  align-self: flex-start;
+}
+
+.iarc-wizard__actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.iarc-wizard__output {
+  width: 100%;
+  min-height: 14rem;
+  resize: vertical;
+}
+
+@media (max-width: 640px) {
+  .iarc-step {
+    grid-template-columns: 1fr;
+  }
+
+  .iarc-step__num {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 0.85rem;
+  }
+}

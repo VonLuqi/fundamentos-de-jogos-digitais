@@ -39,6 +39,11 @@ tmp/
 temp/
 *.tmp
 *.temp
+assets/docs/aulas/_tmp_slide_covers/
+assets/classind-dle/_covers-staging/
+
+# ==================== IDEs (Cursor) ====================
+.cursor/
 
 # ==================== Testes / Cobertura ====================
 coverage/
