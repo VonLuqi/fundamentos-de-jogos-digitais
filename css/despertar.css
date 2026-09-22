@@ -1,6 +1,16 @@
 /* O Despertar — layout de três colunas + tokens dos rios.
    JetBrains Mono só em .despertar-num nesta página. */
 
+/* Header só no mobile (hambúrguer); no desktop some junto com o sidebar fixo. */
+.despertar-shell .despertar-chrome-header {
+  padding: 0.55rem 1rem 0.35rem;
+  background: transparent;
+}
+
+.despertar-shell .despertar-chrome-header::after {
+  display: none;
+}
+
 .despertar-shell {
   --despertar-bg: #0a0a0f;
   --despertar-bg-2: #12121a;
@@ -41,12 +51,9 @@
     overflow: hidden;
   }
 
-  .despertar-shell .app-shell__header {
-    flex-shrink: 0;
-  }
-
-  .despertar-shell .ornate-divider {
-    flex-shrink: 0;
+  /* Sem header de título: o canvas ocupa o viewport. */
+  .despertar-shell .despertar-chrome-header {
+    display: none;
   }
 
   .despertar-shell .app-shell__content.despertar-page {

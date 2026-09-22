@@ -52,8 +52,10 @@ assert(html.includes('requireSession') === false, 'HTML não chama requireSessio
 assert(html.includes('../js/hades-despertar/index.js'), 'bootstrap ES module');
 assert(html.includes('data-nav-item="despertar"'), 'nav O Despertar');
 assert(html.includes('O Despertar'), 'copy da nav');
-assert(html.includes('O trabalho eterno do Submundo'), 'eyebrow congelado');
-assert(html.includes('HADES: O DESPERTAR DO'), 'título longo');
+assert(html.includes('id="despertar-page-title"'), 'h1 acessível da página');
+assert(html.includes('Hades: O Despertar do Submundo'), 'título no h1 (visually-hidden)');
+assert(!html.includes('ornate-divider'), 'sem divisor ornamental acima das colunas');
+assert(!html.includes('app-shell__eyebrow'), 'sem eyebrow de página');
 assert(html.includes('Ceifar'), 'botão Ceifar');
 assert(html.includes('Juramentos do Styx'), 'faixa Juramentos do Styx');
 assert(html.includes('id="tab-lethe"') && html.includes('>Lethe<'), 'aba Lethe');
