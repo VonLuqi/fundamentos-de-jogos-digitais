@@ -79,7 +79,17 @@ const server = http.createServer(async (req, res) => {
     const routeHandler = apiHandlers[pathname];
     if (routeHandler) {
       const body = req.method === 'POST' ? await parseBody(req) : {};
-      console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`, { body, query: Object.fromEntries(url.searchParams.entries()) });
+      const safeBody = { ...body };
+      if ('password' in safeBody) safeBody.password = '[redacted]';
+      if ('newPassword' in safeBody) safeBody.newPassword = '[redacted]';
+      if ('tempPassword' in safeBody) safeBody.tempPassword = '[redacted]';
+      if ('code' in safeBody && typeof safeBody.code === 'string' && safeBody.code.length >= 6) {
+        safeBody.code = '[redacted]';
+      }
+      console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`, {
+        body: safeBody,
+        query: Object.fromEntries(url.searchParams.entries()),
+      });
       const request = {
         method: req.method,
         headers: req.headers,
