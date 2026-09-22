@@ -12,10 +12,6 @@ import {
   matchesSeloDoLivre,
   normalizeForSecretCheck,
 } from '../api/_lib/lesson-secret-achievements.js';
-import {
-  CLASSIND_DLE_SECRET_ID,
-  qualifiesForClassindDleSecret,
-} from '../api/_lib/classind-dle-achievements.js';
 import { getAchievementById } from '../js/game-catalog.js';
 import { composeLessonRecord } from '../js/lesson-paragraph.js';
 import {
@@ -37,8 +33,8 @@ assert.deepEqual(listLessonSecretIds('aula5').sort(), [...AULA5_CONTENT_IDS].sor
 for (const id of AULA5_CONTENT_IDS) {
   assert.ok(allLessonSecretIds().includes(id), `allLessonSecretIds inclui ${id}`);
 }
-assert.ok(!listLessonSecretIds('aula5').includes(CLASSIND_DLE_SECRET_ID), 'Júri do Telão não é volátil de parágrafo');
-assert.equal(CLASSIND_DLE_SECRET_ID, 'segredo_juri_do_telao');
+assert.ok(!listLessonSecretIds('aula5').includes('segredo_juri_do_telao'), 'Júri do Telão fora das voláteis');
+assert.equal(getAchievementById('segredo_juri_do_telao'), null, 'Júri do Telão removido do catálogo');
 
 // —— Oráculo (ClassInd E IARC/consórcio) ——
 const oraculoSoClassind = 'No ClassInd os eixos clássicos são violência, sexo e drogas.';
@@ -151,7 +147,7 @@ assert.ok(
   'notes não vazam eixos originais com realista'
 );
 
-// Catálogo (conteúdo volátil + evento do dle)
+// Catálogo (conteúdo volátil)
 for (const id of AULA5_CONTENT_IDS) {
   const entry = getAchievementById(id);
   assert.ok(entry, id);
@@ -159,16 +155,5 @@ for (const id of AULA5_CONTENT_IDS) {
   assert.equal(entry.meta?.volatile, true, `${id} volatile`);
   assert.equal(entry.hidden, true, `${id} hidden`);
 }
-
-const juri = getAchievementById(CLASSIND_DLE_SECRET_ID);
-assert.ok(juri, 'Júri do Telão no catálogo');
-assert.equal(juri.meta?.family, 'aula5');
-assert.equal(juri.meta?.kind, 'event');
-assert.equal(juri.hidden, true);
-assert.equal(Boolean(juri.meta?.volatile), false, 'Júri não é volátil');
-assert.ok(qualifiesForClassindDleSecret({ isAdmin: false, deckFinished: true, scoreAnswered: 1 }));
-assert.ok(!qualifiesForClassindDleSecret({ isAdmin: true, deckFinished: true, scoreAnswered: 6 }));
-assert.ok(!qualifiesForClassindDleSecret({ isAdmin: false, deckFinished: false, scoreAnswered: 4 }));
-assert.ok(!qualifiesForClassindDleSecret({ isAdmin: false, deckFinished: true, scoreAnswered: 0 }));
 
 console.log('OK — smoke secretas Aula 05 voláteis');

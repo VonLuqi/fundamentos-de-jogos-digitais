@@ -109,7 +109,6 @@ Lembre a turma: higienizar é mudar **feedback** (visual/narrativa/cura/inimigos
 - [ ] Wizard: **Novo desafio** gera pitch procedural; presets opcionais; gera Patch Note.
 - [ ] **Finalizar aula** grava markdown via `saveLessonParagraph` (secretas de conteúdo no mesmo save).
 - [ ] Envio dispara secretas de conteúdo (Oráculo do ClassInd / Selo da Faixa-Alvo / Balança da Faixa) + discovery.
-- [ ] ClassInd-dle até o desempenho (aluno votou ≥1 vez) concede **Júri do Telão**; Encerrar sala também cobre quem já saiu.
 - [ ] Admin vê `#gdd-example`; aluno não.
 - [ ] Atividade aparece no Grimório Pessoal (privada).
 

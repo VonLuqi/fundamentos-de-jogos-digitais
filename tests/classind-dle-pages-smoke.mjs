@@ -49,12 +49,12 @@ assert(html.includes('id="classind-board"'), 'container board');
 assert(html.includes('id="classind-host"'), 'container host');
 assert(html.includes('id="classind-reveal"'), 'container reveal');
 assert(html.includes('data-route="classind-dle"'), 'data-route classind-dle');
-assert(html.includes('discovery-overlay'), 'overlay de discovery para Júri do Telão');
+assert(!html.includes('discovery-overlay'), 'HTML dle sem overlay de discovery');
 
 const index = read('js/classind-dle/index.js');
-assert(index.includes('enqueueDiscovery'), 'dle dispara discovery');
-assert(index.includes('bindLessonDiscoveryLifecycle'), 'dle liga ciclo de discovery');
-assert(index.includes('notifyAwarded'), 'dle trata awarded da API');
+assert(!index.includes('enqueueDiscovery'), 'dle não dispara discovery');
+assert(!index.includes('bindLessonDiscoveryLifecycle'), 'dle sem ciclo de discovery');
+assert(!index.includes('notifyAwarded'), 'dle sem notifyAwarded');
 assert(index.includes('createRealtimeSync'), 'index usa realtime');
 assert(index.includes('classindCastVote'), 'index vota via API');
 assert(index.includes('classindCreateRoom'), 'index cria sala');

@@ -220,18 +220,6 @@
       "xp": 0
     },
     {
-      "id": "segredo_juri_do_telao",
-      "name": "Júri do Telão",
-      "desc": "Percorreu as comparações do ClassInd-dle até o desempenho da sessão.",
-      "icon": "🗳️",
-      "art": "segredo_juri_do_telao.webp",
-      "hidden": true,
-      "difficulty": "medium",
-      "rarity": "silver",
-      "xp": 15,
-      "meta": { "family": "aula5", "kind": "event", "volatile": false }
-    },
-    {
       "id": "segredo_oraculo_do_classind",
       "name": "Oráculo do ClassInd",
       "desc": "Nomeou o sistema brasileiro e o consórcio das lojas.",
