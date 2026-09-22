@@ -10,6 +10,8 @@ import {
 } from './api.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
+/** Preferência de aside recolhido no desktop (Q18 / Task S.1). */
+export const NAV_COLLAPSED_STORAGE_KEY = 'hades-shell-nav-collapsed';
 const FOCUSABLE_SELECTOR = [
   'a[href]',
   'button:not([disabled])',
@@ -102,6 +104,60 @@ async function syncDespertarNavFromToken(shell, token, role, despertarPublished)
   }
 }
 
+export function readNavCollapsedPref(storage = typeof localStorage !== 'undefined' ? localStorage : null) {
+  try {
+    return storage?.getItem(NAV_COLLAPSED_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function writeNavCollapsedPref(
+  collapsed,
+  storage = typeof localStorage !== 'undefined' ? localStorage : null,
+) {
+  try {
+    storage?.setItem(NAV_COLLAPSED_STORAGE_KEY, collapsed ? '1' : '0');
+  } catch {
+    /* private mode / quota — preferência cosmética */
+  }
+}
+
+/**
+ * Desktop: aplica (ou limpa) o colapso do aside. Mobile ignora a classe visual.
+ * @returns {boolean} collapsed efetivo no desktop
+ */
+export function applyNavCollapsed(shell, sidebar, toggle, collapsed) {
+  const wantCollapsed = Boolean(collapsed);
+  const isMobile = mobileQuery.matches;
+
+  if (isMobile) {
+    shell.classList.remove('is-nav-collapsed');
+    document.body.classList.remove('is-shell-nav-collapsed');
+    sidebar?.removeAttribute('inert');
+    return false;
+  }
+
+  shell.classList.toggle('is-nav-collapsed', wantCollapsed);
+  document.body.classList.toggle('is-shell-nav-collapsed', wantCollapsed);
+
+  if (wantCollapsed) {
+    sidebar?.setAttribute('aria-hidden', 'true');
+    sidebar?.setAttribute('tabindex', '-1');
+    sidebar?.setAttribute('inert', '');
+    toggle?.setAttribute('aria-expanded', 'false');
+    toggle?.setAttribute('aria-label', 'Abrir navegação');
+  } else {
+    sidebar?.removeAttribute('aria-hidden');
+    sidebar?.removeAttribute('tabindex');
+    sidebar?.removeAttribute('inert');
+    toggle?.setAttribute('aria-expanded', 'true');
+    toggle?.setAttribute('aria-label', 'Recolher navegação');
+  }
+
+  return wantCollapsed;
+}
+
 function syncShellState(shell, sidebar, toggle, overlay) {
   const isMobile = mobileQuery.matches;
   const isOpen = shell.classList.contains('is-open');
@@ -112,19 +168,20 @@ function syncShellState(shell, sidebar, toggle, overlay) {
   if (!isMobile) {
     document.body.classList.remove('is-shell-locked');
     shell.classList.remove('is-open');
-    toggle?.setAttribute('aria-expanded', 'false');
-    toggle?.setAttribute('aria-label', 'Abrir navegação');
     if (overlay) overlay.hidden = true;
-    sidebar?.removeAttribute('aria-hidden');
-    sidebar?.removeAttribute('tabindex');
     setRainbowVfxSuspended(false, 'shell-drawer');
+    applyNavCollapsed(shell, sidebar, toggle, readNavCollapsedPref());
     return;
   }
 
+  // Mobile: drawer; limpa colapso desktop (pref fica no localStorage).
+  applyNavCollapsed(shell, sidebar, toggle, false);
   document.body.classList.toggle('is-shell-locked', isOpen);
   toggle?.setAttribute('aria-label', isOpen ? 'Fechar navegação' : 'Abrir navegação');
   sidebar?.setAttribute('aria-hidden', String(!isOpen));
   sidebar?.setAttribute('tabindex', '-1');
+  if (isOpen) sidebar?.removeAttribute('inert');
+  else sidebar?.setAttribute('inert', '');
   if (overlay) overlay.hidden = !isOpen;
   toggle?.setAttribute('aria-expanded', String(isOpen));
   setRainbowVfxSuspended(isOpen, 'shell-drawer');
@@ -136,7 +193,9 @@ function closeDrawer(shell, toggle, overlay, { restoreFocus = true } = {}) {
   toggle?.setAttribute('aria-expanded', 'false');
   toggle?.setAttribute('aria-label', 'Abrir navegação');
   if (overlay) overlay.hidden = true;
-  shell.querySelector('[data-shell-sidebar]')?.setAttribute('aria-hidden', 'true');
+  const sidebar = shell.querySelector('[data-shell-sidebar]');
+  sidebar?.setAttribute('aria-hidden', 'true');
+  sidebar?.setAttribute('inert', '');
   if (restoreFocus) {
     if (lastFocusedBeforeOpen && lastFocusedBeforeOpen.isConnected) {
       lastFocusedBeforeOpen.focus({ preventScroll: true });
@@ -155,6 +214,7 @@ function openDrawer(shell, sidebar, toggle, overlay) {
   toggle?.setAttribute('aria-label', 'Fechar navegação');
   if (overlay) overlay.hidden = false;
   sidebar?.setAttribute('aria-hidden', 'false');
+  sidebar?.removeAttribute('inert');
 
   const firstLink = shell.querySelector('.app-shell__link:not([hidden]):not(.is-locked)');
   firstLink?.focus();
@@ -238,13 +298,21 @@ export function initAppShell({
   });
 
   toggle?.addEventListener('click', () => {
-    if (shell.classList.contains('is-open')) {
-      closeDrawer(shell, toggle, overlay);
+    if (mobileQuery.matches) {
+      if (shell.classList.contains('is-open')) {
+        closeDrawer(shell, toggle, overlay);
+        syncShellState(shell, sidebar, toggle, overlay);
+        return;
+      }
+      openDrawer(shell, sidebar, toggle, overlay);
       syncShellState(shell, sidebar, toggle, overlay);
       return;
     }
-    openDrawer(shell, sidebar, toggle, overlay);
-    syncShellState(shell, sidebar, toggle, overlay);
+
+    // Desktop: alterna colapso do aside (Task S.1).
+    const willCollapse = !shell.classList.contains('is-nav-collapsed');
+    applyNavCollapsed(shell, sidebar, toggle, willCollapse);
+    writeNavCollapsedPref(willCollapse);
   });
 
   overlay?.addEventListener('click', () => {
@@ -273,9 +341,20 @@ export function initAppShell({
       }
     }
 
-    if (event.key !== 'Escape' || !shell.classList.contains('is-open')) return;
-    closeDrawer(shell, toggle, overlay);
-    syncShellState(shell, sidebar, toggle, overlay);
+    if (event.key !== 'Escape') return;
+
+    if (mobileQuery.matches && shell.classList.contains('is-open')) {
+      closeDrawer(shell, toggle, overlay);
+      syncShellState(shell, sidebar, toggle, overlay);
+      return;
+    }
+
+    // Desktop: Esc recolhe a nav se estiver aberta.
+    if (!mobileQuery.matches && !shell.classList.contains('is-nav-collapsed')) {
+      applyNavCollapsed(shell, sidebar, toggle, true);
+      writeNavCollapsedPref(true);
+      toggle?.focus({ preventScroll: true });
+    }
   });
 
   const handleMediaChange = (event) => {
@@ -303,6 +382,16 @@ export function initAppShell({
     close: () => {
       closeDrawer(shell, toggle, overlay);
       syncShellState(shell, sidebar, toggle, overlay);
+    },
+    collapseNav: () => {
+      if (mobileQuery.matches) return;
+      applyNavCollapsed(shell, sidebar, toggle, true);
+      writeNavCollapsedPref(true);
+    },
+    expandNav: () => {
+      if (mobileQuery.matches) return;
+      applyNavCollapsed(shell, sidebar, toggle, false);
+      writeNavCollapsedPref(false);
     },
     sidebar,
     refreshDespertarNav: () => syncDespertarNavFromToken(shell, token, role),
