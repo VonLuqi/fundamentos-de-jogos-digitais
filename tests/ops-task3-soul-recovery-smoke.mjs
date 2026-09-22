@@ -78,6 +78,7 @@ assert(authApi.includes("action === 'adminIssueSoulRecoveryCode'"), 'API issue')
 assert(authApi.includes("action === 'consumeSoulRecoveryCode'"), 'API consume');
 assert(authApi.includes('SOUL_RECOVERY_GENERIC_ERROR'), 'API usa erro genérico');
 assert(authApi.includes('issueSoulRecoveryCode'), 'auth importa issue');
+assert(authApi.includes("ilike('full_name'"), 'consume aceita full_name único como fallback');
 
 assert(apiJs.includes("action: 'adminIssueSoulRecoveryCode'"), 'cliente issue');
 assert(apiJs.includes("action: 'consumeSoulRecoveryCode'"), 'cliente consume');
@@ -85,12 +86,15 @@ assert(apiJs.includes("action: 'consumeSoulRecoveryCode'"), 'cliente consume');
 assert(authHtml.includes('id="form-master-code"'), 'auth.html form master');
 assert(authHtml.includes('O Mestre me deu um código'), 'link master no Pacto');
 assert(authHtml.includes('id="open-master-code"'), 'botão open-master-code');
+assert(authHtml.includes('Username da Alma'), 'label deixa claro que é username');
+assert(authHtml.includes('não o nome completo'), 'hint anti-nome-completo');
 assert(authJs.includes('consumeSoulRecoveryCode'), 'auth.js consome');
 assert(authJs.includes("activateMode('master')"), 'modo master');
 assert(authJs.includes('Palavra renovada'), 'flash sucesso');
 
 assert(soulsJs.includes('adminIssueSoulRecoveryCode'), 'Espelho chama issue');
 assert(soulsJs.includes('Emitir Código de Recuperação'), 'botão Espelho');
+assert(soulsJs.includes('não o nome completo'), 'prompt Espelho enfatiza username');
 assert(soulsJs.includes('Palavra temporária'), 'mantém Palavra temporária');
 
 assert(pkg.includes('ops-task3-soul-recovery-smoke.mjs'), 'npm check inclui smoke');

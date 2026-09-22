@@ -866,8 +866,9 @@ function openSoulEspelho(user, options = {}) {
         ? new Date(result.expiresAt).toLocaleString('pt-BR')
         : '24h';
       window.prompt(
-        `Código de Recuperação · @${username} (expira ${expiresLabel})\n`
-        + 'Aluno usa em A Palavra se perdeu? → O Mestre me deu um código.',
+        `Código de Recuperação · username @${username} (expira ${expiresLabel})\n`
+        + 'Aluno digita o USERNAME (não o nome completo) em:\n'
+        + 'A Palavra se perdeu? → O Mestre me deu um código.',
         result.code,
       );
     }

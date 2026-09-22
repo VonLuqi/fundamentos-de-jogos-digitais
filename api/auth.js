@@ -728,12 +728,25 @@ async function handleAuth(req, res) {
         return res.status(400).json({ ok: false, error: SOUL_RECOVERY_GENERIC_ERROR });
       }
 
-      const { data: user } = await supabase
+      let { data: user } = await supabase
         .from(USERS_TABLE)
         .select('id, role, username')
         .ilike('username', username)
         .limit(1)
         .maybeSingle();
+
+      // Alunos costumam digitar o nome completo no campo "Nome da Alma".
+      if (!user && username.length >= 3) {
+        const { data: byName } = await supabase
+          .from(USERS_TABLE)
+          .select('id, role, username')
+          .ilike('full_name', username)
+          .eq('role', 'student')
+          .limit(2);
+        if (Array.isArray(byName) && byName.length === 1) {
+          user = byName[0];
+        }
+      }
 
       if (!user || user.role !== 'student') {
         return res.status(400).json({ ok: false, error: SOUL_RECOVERY_GENERIC_ERROR });
