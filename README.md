@@ -27,12 +27,21 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Espelho do Companheiro (`pages/companheiro.html?u=…`) com perfil e álbum read-only
 - ✅ Sistema de XP e resgate de código ("Oferenda ao Estige")
 - ✅ Painel administrativo (geração de códigos e visão de alunos) para `role: admin`
-- ✅ Almas Registradas (`/pages/souls.html`): alunos, atividades por aula, Vigília e filtros (turma, oferenda, relíquia Única)
+- ✅ Almas Registradas (`/pages/souls.html`): app-shell, Véu (filtros + relíquia Única + **Extrair o Véu** CSV), busca na Vigília, aula5 nos chips, **Espelho da Alma** (`?tab=users&u=`) com edições auditadas
 - ✅ Troca de avatar persistida no backend via `/api/progress`
 - ✅ Tracking de visualização de aula por aluno (`lesson_views`) para relatórios
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
 - ✅ Módulo 01 — "A Regra do Jogo" (teoria MDA + simulação interativa em canvas)
 - ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api` sem depender do Vercel CLI
+- ✅ **Hades: O Despertar do Submundo** (`pages/despertar.html`): clicker server-authoritative (`/api/despertar`), layout Cookie (Altar · Mundo · Store), WorldView/AltarOrbit, sync + prestígio + talentos, **Bancada do Juiz** (Vereditos), Códice do Loop, conquistas no Álbum (gate do Mestre + Selo do Mensageiro). Planos: [docs/plano-hades-despertar.md](docs/plano-hades-despertar.md) · [docs/plano-despertar-ui-cookieclicker.md](docs/plano-despertar-ui-cookieclicker.md).
+- ✅ **Juízo do Tartarus** (modal Higher/Lower no Despertar) + pool stub ≥200 em [data/despertar-juizo-pool.stub.json](data/despertar-juizo-pool.stub.json). Click no card / Empate (`A` \| `B` \| `tie`; aliases `higher`/`lower`). No acerto o desafiante sempre assume o trono. O Mestre completa cada entrada com `rating` (L|10|12|14|16|18), `blurb` e `cover` (filename sob `assets/classind-dle/covers/` ou `assets/despertar-juizo/covers/`); só entradas com `rating` entram no sorteio; o CTA exige ≥30 ready. GDD: [docs/gdd-juizo-v2.md](docs/gdd-juizo-v2.md).
+- ✅ **Placar do Domínio** (`pages/ranking.html`, CTA **Ver o Placar** no Painel): turma/global · XP · #relíquias · juizoBest — sem almas/SPS.
+
+### O Despertar — preview e arte
+
+![Sombra Vagante — placeholder do gerador T1](assets/despertar/sprites/generators/wandering_shade.webp)
+
+Layout jogável em `pages/despertar.html` (desktop: três colunas; mobile empilhado). Sprites atuais são **placeholders** WebP/SVG gerados no pipeline p5/silhueta — a Foice herói (`assets/despertar/sprites/Foice.png` + slash no Ceifar), prateleiras em matriz 10×4 (contain, sem stretch), chrome do Juízo e capas faltantes do pool estão abertos para o Mestre em [assets/despertar/PEDIDOS-MESTRE.md](assets/despertar/PEDIDOS-MESTRE.md) (`art-requests.json`). Substituir o arquivo no mesmo path basta; o jogo já faz fallback de silhueta.
 
 ## Roadmap
 
@@ -45,6 +54,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - [x] Persistência de progresso via Supabase (PostgreSQL)
 - [x] Painel administrativo e troca de avatar persistida
 - [x] Companheiros de Jornada + Espelho do Companheiro
+- [x] Hades: O Despertar do Submundo (clicker Cookie UI + Juízo HL + sync + Códice)
 - [ ] Módulo 02 e 03 — Próximas aulas do curso
 - [ ] Cobertura de testes automatizados ampliada (dashboard, XP, resgate)
 - [ ] Expiração de sessão e rate limiting no login
@@ -60,12 +70,18 @@ fundamentos-de-jogos-digitais/
 ├── api/
 │   ├── auth.js                   # Login, cadastro, sessão e logout
 │   ├── progress.js                # XP, conquistas, resgate de código, avatar, admin
+│   ├── despertar.js               # Estado autoritativo do clicker (sync / prestige / talentos)
 │   ├── supabaseClient.js          # Cliente Supabase singleton
 │   └── _lib/
-│       └── store.js               # Regras de usuário, conquistas e códigos de resgate
+│       ├── store.js               # Regras de usuário, conquistas e códigos de resgate
+│       ├── despertar-validate.js  # validateSync + prestige + talentBuy
+│       ├── despertar-achievements.js # Elegibilidade do Códice + grant de relíquias
+│       └── despertar-gate.js      # Gate published / selado
 ├── assets/
 │   ├── images/
 │   ├── icons/
+│   ├── achievements/              # WebP das relíquias (incl. despertar_*)
+│   ├── despertar/                 # Sprites placeholders + PEDIDOS-MESTRE.md
 │   └── docs/
 │       └── aulas/                 # PDFs das aulas
 ├── css/
@@ -77,13 +93,19 @@ fundamentos-de-jogos-digitais/
 │   ├── conquistas.css             # Álbum de Relíquias
 │   ├── companheiros.css           # Companheiros + Espelho
 │   ├── aula.css                   # Páginas de aula
+│   ├── despertar.css              # UI do clicker O Despertar
 │   └── souls.css                  # Página admin de almas/alunos
 ├── db/
 │   ├── setup.sql                  # Schema de referência completo
-│   ├── migrate-2026-09-01-fullname-lesson-views.sql
-│   └── migrate-2026-09-08-friendships.sql # Vínculos entre alunos
+│   ├── migrate-2026-09-01-fix-lesson-views.sql
+│   ├── migrate-2026-09-08-friendships.sql # Vínculos entre alunos
+│   └── migrate-2026-09-11-hades-despertar.sql # Tabela despertar_states
 ├── docs/
 │   ├── plano-sistema-amigos.md    # Plano Companheiros / Espelho
+│   ├── plano-hades-despertar.md   # Plano Fases 0–8 do Despertar
+│   ├── plano-despertar-ui-cookieclicker.md # Fase 8 — UI Cookie + Juízo dle
+│   ├── gdd-hades-despertar.md     # GDD do clicker
+│   ├── gdd-juizo-v2.md            # GDD curto do Juízo Higher/Lower
 │   └── vercel-dev-troubleshoot.md
 ├── js/
 │   ├── main.js                    # CTA de entrada da introdução (auth ou dashboard)
@@ -99,13 +121,15 @@ fundamentos-de-jogos-digitais/
 │   ├── achievements-ui.js         # Render compartilhado de conquistas
 │   ├── gamefeel.js                # Efeitos visuais (flash, shake, level up)
 │   ├── aula1.js                   # Simulação interativa da Aula 1
-│   └── souls.js                   # Listagem visual de alunos (admin)
+│   ├── souls.js                   # Listagem visual de alunos (admin)
+│   └── hades-despertar/           # Clicker: GameLoop, formulas, sync, UI, Códice
 ├── pages/
 │   ├── auth.html
 │   ├── dashboard.html
 │   ├── aulas.html
 │   ├── conquistas.html
 │   ├── companheiro.html           # Espelho do Companheiro (?u=username)
+│   ├── despertar.html             # Hades: O Despertar do Submundo
 │   ├── aula1.html
 │   ├── aula2.html
 │   ├── aula3.html
@@ -114,7 +138,8 @@ fundamentos-de-jogos-digitais/
 │   ├── login-check.mjs
 │   ├── friends-phase1-smoke.mjs
 │   ├── friends-phase4-smoke.mjs
-│   └── mirror-secret-axes-smoke.mjs
+│   ├── mirror-secret-axes-smoke.mjs
+│   └── despertar-*-smoke.mjs      # Smokes do Despertar (sync, Códice, conquistas, …)
 ├── .gitignore
 └── README.md
 ```
@@ -153,6 +178,7 @@ fundamentos-de-jogos-digitais/
    ```bash
    SUPABASE_URL=https://SEU_PROJETO.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
+   DATABASE_URL=postgresql://postgres.[REF]:[SENHA]@aws-0-[REGION].pooler.supabase.com:6543/postgres
    RESEND_API_KEY=re_sua_chave
    MAIL_FROM=Fundamentos de Jogos Digitais <beth.t@example.com>
    APP_BASE_URL=http://localhost:3000
@@ -160,7 +186,26 @@ fundamentos-de-jogos-digitais/
    SMTP_PORT=465
    SMTP_USER=seu.email@gmail.com
    SMTP_PASS=senha-de-app
+   KV_REST_API_URL=
+   KV_REST_API_TOKEN=
    ```
+
+   Há um template versionado em [`.env.example`](.env.example) (copie para `.env.local`).
+
+   `DATABASE_URL` é a **connection string** do Postgres para **migrate** (`npm run db:migrate`). Pode ser Direct ou Pooler; **nunca** versionar. A API em produção continua com service role (PostgREST), salvo path C5.
+
+   **pg pool runtime (Fase C / C5 — último recurso):** `DATABASE_URL_RUNTIME` = URI **Transaction** (porta **6543**). Flag `DESPERTAR_PG_POOL=1` (default **off**) faz o hotspot `stateSync` chamar `despertar_persist_and_award` via `pg` Pool (max 1–3 / isolate, `PG_POOL_MAX`). Falha → fallback PostgREST + log `pg_pool_fallback=1`. **Proibido** Session/Direct (5432) em serverless. Só ligar com evidência D5 (conexões approaching max / p95). Ver [`api/_lib/pg-pool.js`](api/_lib/pg-pool.js).
+
+   **Vercel KV (Fase A — performance):** `KV_REST_API_URL` + `KV_REST_API_TOKEN` (ou o par Upstash `UPSTASH_REDIS_REST_*`). Usado para rate limit de jogo (Despertar sync / Juízo / underworld) e cache de `lesson_gates`. Sem KV no `.env.local`, a API **degrada** para limite em memória do isolate (ok em dev; em Production/Preview configure o Storage KV na Vercel). Detalhes: [`docs/otimizacoes/01-tasks-fase-a-contencao.md`](docs/otimizacoes/01-tasks-fase-a-contencao.md).
+
+   **Edge Middleware (Fase C / C1 — teto por IP):** [`middleware.js`](middleware.js) na raiz (Vercel Routing Middleware) limita `/api/auth` (30/min/IP), `/api/despertar` (60/min/IP) e `/api/progress` (90/min/IP) **antes** do isolate Node, com o mesmo KV REST. Sem KV no Edge: fail-open com teto in-memory + `edge_rate_degraded=1`. `/api/cron/*` fica fora do matcher. O `local-server` (`npm run dev`) **não** roda este Middleware — só Preview/Production na Vercel. Detalhes: [`docs/otimizacoes/03-tasks-fase-c-escala-obs.md`](docs/otimizacoes/03-tasks-fase-c-escala-obs.md).
+
+   **Leaderboard KV cache (Fase C / C4 — opcional):** `LEADERBOARD_KV_CACHE=1` ativa snapshot compartilhado do Placar (`fjd:lb:…`, TTL 30–60 s via `LEADERBOARD_CACHE_TTL_SEC`, partida 45). Default **off** até k6 C4 `measured` mostrar p95 `leaderboardGet` acima do limiar. Invalidação best-effort após awards / redeem / admin XP. Ver [`api/_lib/leaderboard-cache.js`](api/_lib/leaderboard-cache.js).
+
+   **Cache de assets (Fase C / C6):** em [`vercel.json`](vercel.json), `/assets/**` recebe `Cache-Control` longo (7d + SWR) e `/data/**` TTL curto (60s) porque JSON (`game-catalog.json`, pool Juízo) muda **sem** hash no filename. `/api/**` permanece `no-store` (inclui `session-bootstrap`). **Cache bust:** ao substituir um asset no mesmo path, mude o nome do arquivo **ou** aguarde o TTL / faça hard refresh; para catálogos versionáveis, prefira novo filename com hash (ex. `game-catalog.<hash>.json`) se precisar invalidação imediata em CDN.
+   **Cron sessions-purge (Fase A / A5):** defina `CRON_SECRET` na Vercel (Production + Preview). O job diário `0 5 * * *` chama [`/api/cron/sessions-purge`](api/cron/sessions-purge.js) com `Authorization: Bearer $CRON_SECRET` e remove linhas de `sessions` com `expires_at` vencido — **fora** do login. Local: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/sessions-purge`.
+
+   **Cron warmup (Fase C / C7):** `45 11 * * 1-5` (≈ **08:45 BRT**, dias úteis) chama [`/api/cron/warmup`](api/cron/warmup.js) com o mesmo `CRON_SECRET`. Aquece isolates de auth/progress/bootstrap via GET (sem scrypt; 401 esperado). Janela recomendada: **15–30 min antes** da abertura da turma — ajuste o schedule no [`vercel.json`](vercel.json) se a aula for noutro horário. Manual: `curl -H "Authorization: Bearer $CRON_SECRET" "$APP_BASE_URL/api/cron/warmup"`. Detalhes: [`docs/load-results/WARMUP-C7.md`](docs/load-results/WARMUP-C7.md).
 
    Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app` (o servidor também usa esse host se a var faltar só em Production).
 
@@ -171,15 +216,34 @@ fundamentos-de-jogos-digitais/
 
    Coloque as vars na Vercel (Production + Preview) e em `.env.local`. Não versionar a API key nem a senha SMTP.
 
-3. Execute o script [db/setup.sql](db/setup.sql) no SQL Editor do Supabase para criar as tabelas (`users`, `sessions`, `redeem_codes`, `lesson_gates`, `lesson_paragraphs`, `lesson_views`, `friendships`) e semear o usuário administrador.
+3. **Schema do banco**
 
-4. Se seu banco já existia antes dessas mudanças, execute também:
-   - [db/migrate-2026-09-01-fullname-lesson-views.sql](db/migrate-2026-09-01-fullname-lesson-views.sql) para `full_name` e `lesson_views`;
-   - [db/migrate-2026-09-08-friendships.sql](db/migrate-2026-09-08-friendships.sql) para **Companheiros de Jornada**;
-   - [db/migrate-2026-09-10-password-reset-email.sql](db/migrate-2026-09-10-password-reset-email.sql) para e-mail do aluno e tokens de reset / verificação.
-   - [db/migrate-2026-09-11-hades-despertar.sql](db/migrate-2026-09-11-hades-despertar.sql) para o estado de **O Despertar**.
+   **Banco novo (vazio):**
 
-   > ⚠️ A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md) para o troubleshooting completo desse ponto).
+   ```bash
+   npm run db:migrate -- --bootstrap
+   ```
+
+   Aplica [db/setup.sql](db/setup.sql) e depois os `db/migrate-*.sql` pendentes (ledger `_schema_migrations`).
+
+   **Banco que já foi migrado no SQL Editor:** faça backup, depois baseline sem reexecutar o histórico (evita reaplicar deletes como o reset das Estelas):
+
+   ```bash
+   npm run db:migrate -- --mark-applied
+   ```
+
+   **Dia a dia** (só pendentes):
+
+   ```bash
+   npm run db:migrate -- --dry-run   # lista APPLY/SKIP sem escrever
+   npm run db:migrate
+   ```
+
+   Cada arquivo roda em uma transação; logs `APPLY` / `SKIP` / `FAIL`. Exit ≠ 0 se falhar. O script **não** imprime a connection string.
+
+   > ⚠️ Em produção: backup antes; não use `--bootstrap` com dados. A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md)).
+
+4. Se preferir o SQL Editor manual (legado), execute [db/setup.sql](db/setup.sql) e, em bancos antigos, os arquivos `db/migrate-*.sql` na ordem do nome — ou migre de uma vez com o script acima.
 
 ## Como Executar Localmente
 
@@ -203,7 +267,7 @@ npx vercel dev
 npm run check
 ```
 
-Executa `node --check` em todos os módulos de front-end e das rotas de API.
+Executa `node --check` nos módulos de front-end e API e roda os smokes (incl. Despertar: sync, Códice, conquistas).
 
 ## Rotas da API
 
@@ -212,8 +276,8 @@ Executa `node --check` em todos os módulos de front-end e das rotas de API.
 | POST   | `/api/auth`              | `login`, `register`, `logout`, `requestEmailVerification`, `confirmEmail`, `bindEmail`, `requestPasswordReset`, `confirmPasswordReset` |
 | GET    | `/api/auth?token=...`    | Valida sessão ativa (token de **sessão**, não o selo de e-mail) |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
-| POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile` |
-| POST   | `/api/despertar`         | `stateGet` (cria estado zerado). `stateSync` / `prestige` / `talentBuy` na Task 9 |
+| POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `lessonGatesBatch`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile`, `classmatesList`, `leaderboardGet` (Placar: turma/global · xp/achievements/juizoBest) |
+| POST   | `/api/despertar`         | `stateGet`, `stateSync`, `prestige`, `talentBuy`, `verdictBuy` (Bancada), `juizoStart` / `juizoGuess` / `juizoAbandon` (Juízo); `stateResetStudents` (admin). Gate published + Selo |
 
 ### Companheiros de Jornada
 
@@ -257,6 +321,10 @@ No Pacto de Sangue, o link **A Palavra se perdeu?** pede username + e-mail e cha
 
 **Alunos já cadastrados sem e-mail** precisam, enquanto ainda estão logados, vincular e-mail no **Painel do Herói** (bloco **Selo do Mensageiro**) e confirmar o selo. Sem e-mail confirmado, o “esqueci” não tem para quem mandar. Quem perdeu a senha **e** nunca vinculou e-mail trata a recuperação na sala (fora do self-service).
 
+**Hard-gate:** aluno sem `email_verified_at` fica preso no Painel (`?selo=1`) até confirmar o selo — Trilha, aulas, Despertar e ClassInd redirecionam; mutações em `/api/progress`, `/api/despertar` e `/api/classind` respondem `403 messenger_seal_required`. Admin isento. Em produção, só ative o hard depois do domínio Resend (SPF/DKIM) e `MAIL_FROM` reais — senão a turma fica sem Mensageiro.
+
+**Almas legadas (sem e-mail):** no Pacto, **A Palavra se perdeu?** → **Não tenho e-mail no Domínio** → username + **Senha do Caronte** (gerada no Painel do Mestre) + e-mail novo. O Mensageiro envia um link que **confirma o selo e** abre a Nova Palavra. Contas novas (já com e-mail no Firmar Pacto) **não** usam este atalho. Aplique `db/migrate-2026-09-22-caronte-recovery.sql` antes de rotacionar o código em produção.
+
 O e-mail do aluno **não** aparece no DTO de companheiros, turma ou Almas. No próprio perfil ele fica mascarado.
 
 ## Testes
@@ -276,6 +344,10 @@ node tests/password-reset-smoke.mjs
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
 - [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO de amigos sem e-mail, helpers de token — **não** chama Resend/SMTP.
+- [tests/ops-task3-messenger-seal-smoke.mjs](tests/ops-task3-messenger-seal-smoke.mjs): hard-gate do Selo (helper, redirect `?selo=1`, 403 nas APIs).
+- [tests/ops-task4-caronte-recovery-smoke.mjs](tests/ops-task4-caronte-recovery-smoke.mjs): Senha do Caronte + recuperação legada (schema, actions, UI).
+- [tests/ops-task5-db-migrate-smoke.mjs](tests/ops-task5-db-migrate-smoke.mjs): script `db:migrate` (ledger, flags, README `DATABASE_URL`).
+- [tests/ops-task7-espelho-alma-smoke.mjs](tests/ops-task7-espelho-alma-smoke.mjs): Espelho da Alma (actions admin, audit, UI `?tab=users&u=`).
 
 Checklist manual (e-mail real, com `RESEND_API_KEY` **ou** SMTP): cadastro + selo; pedido certo envia e derruba sessões; username certo + e-mail errado ou conta admin não enviam; token expirado/usado recusa; aluno antigo vincula no painel; e-mail duplicado → 409; viewport estreito nos três painéis do pacto.
 

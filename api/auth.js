@@ -1,9 +1,11 @@
 import crypto from 'node:crypto';
+import { promisify } from 'node:util';
 import bcrypt from 'bcryptjs';
 import supabase from './supabaseClient.js';
 import {
   PURPOSE,
   dispatchEmailVerification,
+  dispatchLegacyReset,
   dispatchPasswordReset,
   findValidEmailToken,
   invalidateOpenTokens,
@@ -12,20 +14,69 @@ import {
   normalizeEmail,
   requestIp,
 } from './_lib/auth-email.js';
+import {
+  AUTH_RATE_LIMIT_MESSAGE,
+  isAuthActionRateLimited,
+  recordAuthRateEvent,
+} from './_lib/auth-rate.js';
+import {
+  rotateRecoveryCodeRow,
+  verifyRecoveryCode,
+  generateRecoveryCodePlain,
+} from './_lib/recovery-code.js';
+import {
+  createSessionRow,
+  loadValidSession,
+} from './_lib/sessions.js';
+import { sanitizeUser } from './_lib/sanitize-user.js';
+import { ADMIN_AUDIT_ACTIONS, recordAdminAudit } from './_lib/admin-audit.js';
+import {
+  createRequestMetrics,
+  finishRequestMetrics,
+  metricsAddScryptMs,
+  metricsBumpDb,
+  metricsSetAction,
+  metricsSetRateLimitBackend,
+  metricsSetStatus,
+  runWithMetrics,
+} from './_lib/request-metrics.js';
 
 const USERS_TABLE = 'users';
+/** Formato on-disk: `${saltHex12}:${derivedHex}` com keylen 64 (defaults Node N/r/p). */
+const SCRYPT_KEYLEN = 64;
+const scryptAsync = promisify(crypto.scrypt);
 
-function hashPassword(password, salt = crypto.randomBytes(12).toString('hex')) {
-  const derived = crypto.scryptSync(password, salt, 64).toString('hex');
+function maybeLogScryptMs(ms, op) {
+  metricsAddScryptMs(ms);
+  if (process.env.AUTH_LOG_SCRYPT === '1') {
+    console.log(`[api/auth] scrypt_ms=${ms} op=${op}`);
+  }
+}
+
+/**
+ * @param {string} password
+ * @param {string} [salt]
+ * @returns {Promise<string>}
+ */
+export async function hashPassword(password, salt = crypto.randomBytes(12).toString('hex')) {
+  const t0 = Date.now();
+  const derived = (await scryptAsync(String(password), salt, SCRYPT_KEYLEN)).toString('hex');
+  maybeLogScryptMs(Date.now() - t0, 'hash');
   return `${salt}:${derived}`;
 }
 
-function verifyPassword(password, stored) {
+/**
+ * @param {string} password
+ * @param {string} stored
+ * @returns {Promise<boolean>}
+ */
+export async function verifyPassword(password, stored) {
   if (typeof stored !== 'string') return false;
 
   if (stored.includes(':')) {
     const [salt] = stored.split(':');
-    const candidate = hashPassword(password, salt);
+    if (!salt) return false;
+    const candidate = await hashPassword(password, salt);
     const a = Buffer.from(candidate);
     const b = Buffer.from(stored);
     return a.length === b.length && crypto.timingSafeEqual(a, b);
@@ -33,7 +84,10 @@ function verifyPassword(password, stored) {
 
   if (/^\$2[aby]\$/.test(stored)) {
     try {
-      return bcrypt.compareSync(password, stored);
+      const t0 = Date.now();
+      const ok = await bcrypt.compare(String(password), stored);
+      maybeLogScryptMs(Date.now() - t0, 'bcrypt');
+      return ok;
     } catch {
       return false;
     }
@@ -42,31 +96,8 @@ function verifyPassword(password, stored) {
   return false;
 }
 
-function sanitizeUser(u) {
-  if (!u) return null;
-  const { password_hash, password, conquistas, ...safe } = u;
-  const displayName = safe.full_name ?? safe.name ?? safe.username;
-  return {
-    ...safe,
-    name: displayName,
-    fullName: safe.full_name ?? safe.name ?? safe.username,
-    username: safe.username ?? displayName,
-    email: safe.email ?? null,
-    emailVerifiedAt: safe.email_verified_at ?? null,
-    // Contrato da API: o front-end recebe `achievements`; no banco a
-    // coluna real chama-se `conquistas` (schema de produção).
-    achievements: Array.isArray(conquistas) ? conquistas : [],
-  };
-}
-
 async function loadUserBySessionToken(token) {
-  if (!token || typeof token !== 'string') return null;
-  const { data: session } = await supabase
-    .from('sessions')
-    .select('user_id')
-    .eq('token', token)
-    .limit(1)
-    .maybeSingle();
+  const session = await loadValidSession(supabase, token);
   if (!session?.user_id) return null;
   const { data: user } = await supabase
     .from(USERS_TABLE)
@@ -85,20 +116,44 @@ async function emailTakenByOther(email, userId) {
 }
 
 export default async function handler(req, res) {
+  const metrics = createRequestMetrics({
+    route: 'auth',
+    action: req.method === 'GET' ? 'sessionGet' : String(req.body?.action || 'n/a'),
+  });
+
+  const origStatus = res.status.bind(res);
+  res.status = (code) => {
+    metricsSetStatus(code);
+    return origStatus(code);
+  };
+
+  try {
+    return await runWithMetrics(metrics, () => handleAuth(req, res));
+  } finally {
+    finishRequestMetrics(metrics, { status: metrics.status });
+  }
+}
+
+async function handleAuth(req, res) {
   try {
     if (!supabase) {
       return res.status(503).json({ ok: false, error: 'Autenticação offline: Supabase não configurado.' });
     }
 
     if (req.method === 'GET') {
+      metricsSetAction('sessionGet');
       const token = req.query?.token;
       if (!token) return res.status(400).json({ ok: false, error: 'Token ausente.' });
 
-      const { data: session, error: sessionLookup } = await supabase.from('sessions').select('token, user_id').eq('token', token).limit(1).single();
-      console.log(`[api/auth] GET /api/auth token search:`, { token: token.substring(0, 10) + '...', sessionLookup: sessionLookup?.message || null, sessionExists: !!session, session });
-      if (sessionLookup || !session) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
+      const session = await loadValidSession(supabase, token);
+      console.log(`[api/auth] GET /api/auth token search:`, {
+        token: String(token).substring(0, 10) + '...',
+        sessionExists: !!session,
+      });
+      if (!session) return res.status(401).json({ ok: false, error: 'Sessão inválida.' });
 
       const { data: user } = await supabase.from(USERS_TABLE).select('*').eq('id', session.user_id).limit(1).single();
+      metricsBumpDb(1);
       return res.status(200).json({ ok: true, user: sanitizeUser(user) });
     }
 
@@ -108,9 +163,16 @@ export default async function handler(req, res) {
     }
 
     const { action } = req.body || {};
+    metricsSetAction(action || 'n/a');
     const ip = requestIp(req);
 
     if (action === 'register') {
+      const rate = await isAuthActionRateLimited(supabase, { action: 'register', ip });
+      if (rate.limited) {
+        return res.status(429).json({ ok: false, error: AUTH_RATE_LIMIT_MESSAGE });
+      }
+      await recordAuthRateEvent(supabase, { action: 'register', ip });
+
       const { fullName, turma, username, password, email } = req.body;
       const normalizedEmail = normalizeEmail(email);
       const errors = [];
@@ -130,7 +192,7 @@ export default async function handler(req, res) {
         return res.status(409).json({ ok: false, error: 'Este e-mail já firma outro pacto.' });
       }
 
-      const password_hash = hashPassword(password);
+      const password_hash = await hashPassword(password);
       const now = new Date().toISOString();
       const payload = {
         full_name: fullName.trim(),
@@ -160,12 +222,9 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Erro ao criar usuário.' });
       }
 
-      const token = crypto.randomBytes(24).toString('hex');
-      const { error: registerSessionError } = await supabase
-        .from('sessions')
-        .insert({ token, user_id: data.id, created_at: new Date().toISOString() });
+      const { token, error: registerSessionError } = await createSessionRow(supabase, data.id);
 
-      if (registerSessionError) {
+      if (registerSessionError || !token) {
         console.error('[api/auth] falha ao criar sessão após registro:', registerSessionError);
         return res.status(500).json({ ok: false, error: 'Não foi possível criar a sessão agora. Tente novamente.' });
       }
@@ -182,19 +241,48 @@ export default async function handler(req, res) {
 
     if (action === 'login') {
       const { username, password } = req.body;
+      const normalizedUsername = typeof username === 'string' ? username.trim().toLowerCase() : '';
+
+      const rate = await isAuthActionRateLimited(supabase, {
+        action: 'login',
+        ip,
+        username: normalizedUsername,
+      });
+      if (rate.limited) {
+        metricsSetRateLimitBackend('db');
+        return res.status(429).json({ ok: false, error: AUTH_RATE_LIMIT_MESSAGE });
+      }
+      metricsSetRateLimitBackend('db');
+      await recordAuthRateEvent(supabase, {
+        action: 'login',
+        ip,
+        username: normalizedUsername,
+      });
+
       const { data: user } = await supabase.from(USERS_TABLE).select('*').ilike('username', username).limit(1).single();
+      metricsBumpDb(1);
       if (!user) return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
 
       let valid = false;
-      // primary check: hashed password
-      if (user.password_hash && verifyPassword(password, user.password_hash)) {
+      // primary check: hashed password (scrypt ou bcrypt legado)
+      if (user.password_hash && await verifyPassword(password, user.password_hash)) {
         valid = true;
+        // bcrypt → scrypt on-success (mesmo formato do Domínio)
+        if (/^\$2[aby]\$/.test(user.password_hash)) {
+          try {
+            const newHash = await hashPassword(password);
+            await supabase.from(USERS_TABLE).update({ password_hash: newHash, password: null }).eq('id', user.id);
+            console.log(`[api/auth] migrated bcrypt password for user id=${user.id}`);
+          } catch (e) {
+            console.warn('[api/auth] bcrypt→scrypt migration failed for user', user.id, e);
+          }
+        }
       }
 
       // fallback: legacy plaintext `password` column — migrate on successful match
       if (!valid && user.password && password === user.password) {
         try {
-          const newHash = hashPassword(password);
+          const newHash = await hashPassword(password);
           await supabase.from(USERS_TABLE).update({ password_hash: newHash, password: null }).eq('id', user.id);
           valid = true;
           console.log(`[api/auth] migrated plaintext password for user id=${user.id}`);
@@ -205,12 +293,9 @@ export default async function handler(req, res) {
 
       if (!valid) return res.status(401).json({ ok: false, error: 'Credenciais inválidas.' });
 
-      const token = crypto.randomBytes(24).toString('hex');
-      const { error: loginSessionError } = await supabase
-        .from('sessions')
-        .insert({ token, user_id: user.id, created_at: new Date().toISOString() });
+      const { token, error: loginSessionError } = await createSessionRow(supabase, user.id);
 
-      if (loginSessionError) {
+      if (loginSessionError || !token) {
         console.error('[api/auth] falha ao criar sessão após login:', loginSessionError);
         return res.status(500).json({ ok: false, error: 'Não foi possível iniciar a sessão agora. Tente novamente.' });
       }
@@ -352,19 +437,158 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    // Task 4 — alma legada sem e-mail: username + Senha do Caronte + e-mail novo.
+    // Sempre 200 genérico (não revela se username/código falharam).
+    if (action === 'requestLegacyEmailBind') {
+      const username = String(req.body?.username || '').trim().toLowerCase();
+      const code = req.body?.code;
+      const email = normalizeEmail(req.body?.email);
+
+      const rate = await isAuthActionRateLimited(supabase, {
+        action: 'legacy_bind',
+        ip,
+        username,
+      });
+      await recordAuthRateEvent(supabase, {
+        action: 'legacy_bind',
+        ip,
+        username: username || null,
+      });
+
+      if (
+        !rate.limited
+        && username
+        && isValidEmail(email)
+      ) {
+        const codeCheck = await verifyRecoveryCode(supabase, code);
+        if (codeCheck.ok) {
+          const { data: user } = await supabase
+            .from(USERS_TABLE)
+            .select('id, full_name, username, email, email_verified_at, role')
+            .ilike('username', username)
+            .limit(1)
+            .maybeSingle();
+
+          const usernameMatches = String(user?.username || '').toLowerCase() === username;
+          const hasNoEmail = !String(user?.email || '').trim();
+          const eligible = user
+            && usernameMatches
+            && user.role === 'student'
+            && !user.email_verified_at
+            && hasNoEmail;
+
+          if (eligible && !(await emailTakenByOther(email, user.id))) {
+            const { data: updated, error } = await supabase
+              .from(USERS_TABLE)
+              .update({ email, email_verified_at: null })
+              .eq('id', user.id)
+              .select('*')
+              .single();
+
+            if (!error && updated) {
+              await dispatchLegacyReset({ supabase, user: updated, ip });
+            } else if (error && error.code !== '23505') {
+              console.error('[api/auth] falha no vínculo legado', {
+                userId: user.id,
+                message: error.message,
+              });
+            }
+          }
+        }
+      }
+
+      return res.status(200).json({ ok: true });
+    }
+
+    if (action === 'rotateRecoveryCode') {
+      const admin = await loadUserBySessionToken(req.body?.token);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      const result = await rotateRecoveryCodeRow(supabase, admin.id);
+      if (!result.ok) {
+        return res.status(500).json({ ok: false, error: result.error || 'Falha ao rotacionar.' });
+      }
+
+      return res.status(200).json({
+        ok: true,
+        code: result.code,
+        rotatedAt: result.rotatedAt,
+      });
+    }
+
+    if (action === 'adminForceTempPassword') {
+      const admin = await loadUserBySessionToken(req.body?.token);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      const targetId = Number(req.body?.targetUserId);
+      if (!Number.isInteger(targetId) || targetId <= 0) {
+        return res.status(400).json({ ok: false, error: 'Informe targetUserId.' });
+      }
+
+      const { data: target } = await supabase
+        .from(USERS_TABLE)
+        .select('id, role, username')
+        .eq('id', targetId)
+        .limit(1)
+        .maybeSingle();
+
+      if (!target) return res.status(404).json({ ok: false, error: 'Alma não encontrada.' });
+      if (target.role === 'admin') {
+        return res.status(400).json({ ok: false, error: 'Não se edita o Mestre por este caminho.' });
+      }
+
+      const tempPassword = generateRecoveryCodePlain();
+      const { error: updateError } = await supabase
+        .from(USERS_TABLE)
+        .update({
+          password_hash: await hashPassword(tempPassword),
+          password: null,
+        })
+        .eq('id', target.id);
+
+      if (updateError) {
+        console.error('[api/auth] adminForceTempPassword', updateError.message);
+        return res.status(500).json({ ok: false, error: 'Não foi possível gerar a Palavra temporária.' });
+      }
+
+      await supabase.from('sessions').delete().eq('user_id', target.id);
+
+      await recordAdminAudit(supabase, {
+        actorId: admin.id,
+        targetUserId: target.id,
+        action: ADMIN_AUDIT_ACTIONS.forceTempPassword,
+        payload: { username: target.username },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        tempPassword,
+        username: target.username,
+      });
+    }
+
     if (action === 'confirmPasswordReset') {
       const password = req.body?.password;
       if (!password || String(password).length < 4) {
         return res.status(400).json({ ok: false, error: 'Senha muito curta.' });
       }
 
-      const row = await findValidEmailToken(supabase, req.body?.token, PURPOSE.resetPassword);
+      const row = await findValidEmailToken(supabase, req.body?.token, [
+        PURPOSE.resetPassword,
+        PURPOSE.legacyReset,
+      ]);
       if (!row) {
         return res.status(400).json({
           ok: false,
           error: 'Este selo expirou ou já foi usado. Chame o Mensageiro de novo.',
         });
       }
+
+      const isLegacy = row.purpose === PURPOSE.legacyReset;
 
       const { data: owner } = await supabase
         .from(USERS_TABLE)
@@ -373,12 +597,13 @@ export default async function handler(req, res) {
         .limit(1)
         .maybeSingle();
 
-      if (
-        !owner
-        || owner.role !== 'student'
-        || !owner.email_verified_at
-        || normalizeEmail(owner.email) !== normalizeEmail(row.email)
-      ) {
+      const emailMatches = owner && normalizeEmail(owner.email) === normalizeEmail(row.email);
+      const eligible = owner
+        && owner.role === 'student'
+        && emailMatches
+        && (isLegacy ? true : Boolean(owner.email_verified_at));
+
+      if (!eligible) {
         await markTokenUsed(supabase, row.id);
         return res.status(400).json({
           ok: false,
@@ -386,12 +611,17 @@ export default async function handler(req, res) {
         });
       }
 
+      const updates = {
+        password_hash: await hashPassword(String(password)),
+        password: null,
+      };
+      if (isLegacy) {
+        updates.email_verified_at = new Date().toISOString();
+      }
+
       const { error: updateError } = await supabase
         .from(USERS_TABLE)
-        .update({
-          password_hash: hashPassword(String(password)),
-          password: null,
-        })
+        .update(updates)
         .eq('id', owner.id);
 
       if (updateError) {
@@ -414,6 +644,10 @@ export default async function handler(req, res) {
 
       await markTokenUsed(supabase, row.id);
       await invalidateOpenTokens(supabase, owner.id, PURPOSE.resetPassword);
+      await invalidateOpenTokens(supabase, owner.id, PURPOSE.legacyReset);
+      if (isLegacy) {
+        await invalidateOpenTokens(supabase, owner.id, PURPOSE.verifyEmail);
+      }
       return res.status(200).json({ ok: true });
     }
 

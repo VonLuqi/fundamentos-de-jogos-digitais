@@ -7,6 +7,16 @@
       "maxDuration": 10
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/sessions-purge",
+      "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/warmup",
+      "schedule": "45 11 * * 1-5"
+    }
+  ],
   "rewrites": [
     { "source": "/submundo/tartaro-oculto", "destination": "/pages/submundo/tartaro-oculto.html" },
     { "source": "/submundo/asfodelos-sussurros", "destination": "/pages/submundo/asfodelos-sussurros.html" },
@@ -22,6 +32,24 @@
       "source": "/api/(.*)",
       "headers": [
         { "key": "Cache-Control", "value": "no-store, max-age=0" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=604800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/data/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=60, stale-while-revalidate=300"
+        }
       ]
     },
     {

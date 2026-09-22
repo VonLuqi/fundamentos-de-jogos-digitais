@@ -7,6 +7,7 @@ export const RATE_LIMIT_IP_PER_HOUR = 5;
 
 const PURPOSE_VERIFY = 'verify_email';
 const PURPOSE_RESET = 'reset_password';
+const PURPOSE_LEGACY = 'legacy_reset';
 
 export function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
@@ -123,6 +124,40 @@ export function resetPasswordEmailCopy({ name, url }) {
   };
 }
 
+/** Um passo: confirma o selo e abre Nova Palavra (Task 4 legado). */
+export function legacyResetEmailCopy({ name, url }) {
+  const display = name || 'alma';
+  const text = [
+    `Olá, ${display}.`,
+    '',
+    'O Mestre autorizou selar o Mensageiro desta alma e renovar a Palavra de Passagem.',
+    'Um clique confirma o selo e abre o painel da Nova Palavra. O link vale por 60 minutos:',
+    url,
+    '',
+    'Se você não pediu isso na sala, ignore esta mensagem.',
+  ].join('\n');
+
+  const safeName = escapeHtml(display);
+  const html = `
+<div style="background:#0d0a10;color:#ece1d1;font-family:Georgia,serif;padding:32px;line-height:1.5">
+  <p style="color:#cfa759;font-size:13px;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 12px">Fundamentos de Jogos Digitais</p>
+  <h1 style="color:#cfa759;font-size:22px;margin:0 0 16px">Selar Mensageiro e Nova Palavra</h1>
+  <p>Olá, ${safeName}.</p>
+  <p>O Mestre liberou a Senha do Caronte. Este link confirma o e-mail e deixa você selar uma nova Palavra de Passagem.</p>
+  <p style="margin:28px 0">
+    <a href="${url}" style="display:inline-block;background:#cfa759;color:#0d0a10;padding:12px 18px;text-decoration:none;font-weight:700">Confirmar selo e Nova Palavra</a>
+  </p>
+  <p style="color:#ab9c8a;font-size:14px">O link vale por 60 minutos. Se você não pediu isso na sala, ignore.</p>
+  <p style="color:#6f6459;font-size:13px;word-break:break-all">${url}</p>
+</div>`.trim();
+
+  return {
+    subject: 'Fundamentos de Jogos Digitais — selar Mensageiro e Nova Palavra',
+    text,
+    html,
+  };
+}
+
 export async function isRateLimited({ supabase, email, ip, purpose }) {
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
@@ -176,14 +211,21 @@ export async function findValidEmailToken(supabase, plain, purpose) {
   const token = String(plain || '').trim();
   if (token.length < 32) return null;
 
-  const { data, error } = await supabase
+  const purposes = Array.isArray(purpose) ? purpose : [purpose];
+  if (purposes.length === 0) return null;
+
+  let query = supabase
     .from('auth_email_tokens')
     .select('id, user_id, purpose, email, expires_at, used_at')
     .eq('token_hash', hashEmailToken(token))
-    .eq('purpose', purpose)
     .is('used_at', null)
-    .gt('expires_at', new Date().toISOString())
-    .maybeSingle();
+    .gt('expires_at', new Date().toISOString());
+
+  query = purposes.length === 1
+    ? query.eq('purpose', purposes[0])
+    : query.in('purpose', purposes);
+
+  const { data, error } = await query.maybeSingle();
 
   if (error || !data) return null;
   return data;
@@ -325,7 +367,78 @@ export async function dispatchPasswordReset({ supabase, user, ip }) {
   return { sent: true };
 }
 
+/**
+ * Recuperação legada: token legacy_reset → link ?reset= confirma selo + Nova Palavra.
+ * Pré-condição: caller já gravou o e-mail no user (ainda sem email_verified_at).
+ */
+export async function dispatchLegacyReset({ supabase, user, ip }) {
+  const email = normalizeEmail(user?.email);
+  if (!isValidEmail(email)) return { sent: false, reason: 'invalid' };
+  if (user.role !== 'student' || user.email_verified_at) {
+    return { sent: false, reason: 'not_eligible' };
+  }
+
+  const limited = await isRateLimited({
+    supabase,
+    email,
+    ip,
+    purpose: PURPOSE_LEGACY,
+  });
+  if (limited) {
+    console.warn('[auth-email] rate limit legacy_reset', { userId: user.id });
+    return { sent: false, reason: 'rate_limit' };
+  }
+
+  await invalidateOpenTokens(supabase, user.id, PURPOSE_LEGACY);
+  await invalidateOpenTokens(supabase, user.id, PURPOSE_RESET);
+
+  const plain = createPlainToken();
+  const { error } = await supabase.from('auth_email_tokens').insert({
+    user_id: user.id,
+    purpose: PURPOSE_LEGACY,
+    token_hash: hashEmailToken(plain),
+    email,
+    requested_ip: ip,
+    expires_at: new Date(Date.now() + TOKEN_TTL_MS).toISOString(),
+  });
+
+  if (error) {
+    console.error('[auth-email] falha ao gravar token legacy_reset', {
+      userId: user.id,
+      message: error.message,
+    });
+    return { sent: false, reason: 'persist' };
+  }
+
+  const base = appBaseUrl();
+  if (!base) {
+    console.error('[auth-email] APP_BASE_URL ausente; legacy_reset não enviado.', { userId: user.id });
+    return { sent: false, reason: 'no_base_url' };
+  }
+
+  const url = `${base}/pages/auth.html?reset=${plain}`;
+  const copy = legacyResetEmailCopy({
+    name: user.full_name || user.username || 'alma',
+    url,
+  });
+  const mailed = await sendMail({
+    to: email,
+    subject: copy.subject,
+    text: copy.text,
+    html: copy.html,
+  });
+  if (!mailed.ok) {
+    console.error('[auth-email] legacy_reset não entregue', {
+      userId: user.id,
+      reason: mailed.reason || (mailed.skipped ? 'skipped' : 'provider'),
+    });
+    return { sent: false, reason: mailed.reason || 'provider' };
+  }
+  return { sent: true };
+}
+
 export const PURPOSE = Object.freeze({
   verifyEmail: PURPOSE_VERIFY,
   resetPassword: PURPOSE_RESET,
+  legacyReset: PURPOSE_LEGACY,
 });

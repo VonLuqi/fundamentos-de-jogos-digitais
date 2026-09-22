@@ -96,7 +96,8 @@ export const LESSON_PREREQUISITES = {
 export function hasUnlockedLesson(user, lessonId) {
   const prerequisite = LESSON_PREREQUISITES[lessonId];
   if (!prerequisite) return true; // aula sem pré-requisito (ex.: aula1)
-  return Array.isArray(user.completedLessons) && user.completedLessons.includes(prerequisite);
+  const completed = user?.completedLessons || user?.completed_lessons || [];
+  return Array.isArray(completed) && completed.includes(prerequisite);
 }
 
 /* ============================================================

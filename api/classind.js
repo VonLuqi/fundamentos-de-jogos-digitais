@@ -12,6 +12,11 @@
 
 import crypto from 'node:crypto';
 import supabase from './supabaseClient.js';
+import { loadValidSession } from './_lib/sessions.js';
+import {
+  MESSENGER_SEAL_REQUIRED,
+  needsMessengerSeal,
+} from './_lib/messenger-seal.js';
 import {
   DECK_ID,
   deckLength,
@@ -148,25 +153,21 @@ export function assertNoSecrets(payload) {
 async function loadSessionUser(token) {
   if (!token || typeof token !== 'string') return { errorStatus: 401, error: 'Sessão inválida.' };
 
-  const { data: session, error: sessionError } = await supabase
-    .from('sessions')
-    .select('user_id')
-    .eq('token', token)
-    .limit(1)
-    .maybeSingle();
-
-  if (sessionError) return { errorStatus: 500, error: 'Falha ao validar sessão.' };
+  const session = await loadValidSession(supabase, token);
   if (!session?.user_id) return { errorStatus: 401, error: 'Sessão inválida.' };
 
   const { data: user, error: userError } = await supabase
     .from(USERS_TABLE)
-    .select('id, role, username, full_name, turma')
+    .select('id, role, username, full_name, turma, email_verified_at')
     .eq('id', session.user_id)
     .limit(1)
     .maybeSingle();
 
   if (userError) return { errorStatus: 500, error: 'Falha ao carregar usuário.' };
   if (!user) return { errorStatus: 404, error: 'Usuário não encontrado.' };
+  if (needsMessengerSeal(user)) {
+    return { errorStatus: 403, error: MESSENGER_SEAL_REQUIRED };
+  }
   return { user };
 }
 
