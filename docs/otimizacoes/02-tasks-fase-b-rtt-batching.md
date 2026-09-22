@@ -86,7 +86,7 @@ Alvo Fase B:
 
 - [`contratos-fase-b.md`](./contratos-fase-b.md) — `fase-b.v1`
 - [`04-tasks-k6-carga.md`](./04-tasks-k6-carga.md)
-- [`docs/load-results/BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) (status `pending_staging_run`)
+- [`docs/load-results/BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) (status `measured` · 2026-09-22)
 - `tests/load/c1-login-boot.js`, `c2-aula.js`, `c3-despertar-sync.js` + `lib/`
 - `tests/ops-perf-fase-b-contracts-smoke.mjs`
 
@@ -360,15 +360,15 @@ A Fase B está **fechada** quando:
 
 ## Apêndice — limiares (partida + medido)
 
-| Métrica | Baseline pós-A | Alvo pós-B | Medido em |
+| Métrica | Baseline pós-A (lab 2026-09-22) | Alvo pós-B | Medido em |
 | --- | --- | --- | --- |
-| p95 `stateSync` | _pending `BASELINE-POST-A`_ · partida ≤ 1,5 s | ≤ baseline e ≤ 1,5 s | k6 C3 |
-| `db_round_trips` sync (mediana) | _registrar na 1ª corrida_ | ≤ 3 | logs `[metrics]` |
-| p95 boot (bootstrap) | _pending_ · partida ≤ 800 ms | ≤ 800 ms | k6 C1 |
-| p95 `leaderboardGet` | _pending_ | ↓ vs A | k6 C4 |
+| p95 `stateSync` | **1289 ms** (≤ 1,5 s) | ≤ baseline e ≤ 1,5 s | k6 turma-30 / C3 |
+| `db_round_trips` sync (mediana) | path RPC B3 no código | ≤ 3 | logs `[metrics]` |
+| p95 boot (bootstrap) | smoke 5: **769 ms** · 30 VU: **793 ms** | ≤ 800–1200 ms lab | k6 C1 |
+| p95 `leaderboardGet` | **1106 ms** (30 VU mix) | ↓ vs A / &lt; 1,5 s | k6 C4 / turma-30 |
 
-Fonte do slot: [`docs/load-results/BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md).
+Fonte: [`BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) · [`TURMA-30.md`](../load-results/TURMA-30.md) · SHA `8b67ad6`.
 
 ---
 
-*Documento vivo: atualizar limiares após a primeira corrida k6 do doc `04` e após ligar a flag `DESPERTAR_SYNC_RPC` em staging.*
+*Limiares lab fechados em 2026-09-22. Repetir em preview Vercel para cold start.*

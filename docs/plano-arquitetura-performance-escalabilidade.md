@@ -5,7 +5,7 @@
 > **Persona:** Arquiteto de Software Sênior / Engenheiro de Performance (Vercel + Supabase).  
 > **Fora de escopo deste documento:** reescrita de mecânicas de jogo, migração para Supabase Auth, e blocos extensos de código de aplicação.  
 > **Relacionados:** [`plano-ops-nav-email-perf-admin.md`](./plano-ops-nav-email-perf-admin.md) (ciclo ops já fechado: rate limit de auth, TTL de sessões, batch de gates).  
-> **Implementação:** [`otimizacoes/00-master-plan.md`](./otimizacoes/00-master-plan.md) · Fase A [`otimizacoes/01-tasks-fase-a-contencao.md`](./otimizacoes/01-tasks-fase-a-contencao.md) · Fase B [`otimizacoes/02-tasks-fase-b-rtt-batching.md`](./otimizacoes/02-tasks-fase-b-rtt-batching.md) · k6 [`otimizacoes/04-tasks-k6-carga.md`](./otimizacoes/04-tasks-k6-carga.md).
+> **Implementação:** [`otimizacoes/00-master-plan.md`](./otimizacoes/00-master-plan.md) · A/B/C feitas · k6 lab **measured** 2026-09-22 (`8b67ad6`) · [`load-results/BASELINE-POST-A.md`](./load-results/BASELINE-POST-A.md).
 
 ---
 
@@ -38,7 +38,7 @@
 | Edge / CDN | Headers `no-store` em `/api/*`; sem middleware de cache | Toda leitura autenticada paga cold path + DB |
 | Serverless | Um isolate por invocação (warm reuso parcial); monólitos (`progress.js`, `despertar.js`) | Cold start amplificado por parse + `scryptSync` + N round-trips |
 | Dados | `@supabase/supabase-js` com **service role**; `DATABASE_URL` só em migrates | Cada `.from().select/update` = 1 RTT HTTP → PostgREST → PG |
-| Rate limit | Auth/e-mail: **DB**; Despertar sync / Juízo / underworld: **Map em memória** | Limites in-memory falham sob multi-isolate e cold start |
+| Rate limit | Auth/e-mail: **DB**; Despertar sync / Juízo / underworld: **KV + fail-open local** (Fase A); Edge IP (Fase C) | Cross-isolate no path quente; Map só degradê |
 
 **Decisão de base (congelada neste plano):** a autoridade de XP, níveis, conquistas e estado do Despertar permanece no servidor. Otimizações não movem confiança para o cliente; reduzem round-trips, amortizam CPU e protegem o banco.
 
@@ -126,11 +126,11 @@ A validação no servidor é **correta** para anti-fraude educacional (códigos,
 
 Checklist — conexões
 
-- [ ] Confirmar no dashboard Supabase: pooler habilitado, modo Transaction para serverless
-- [ ] Documentar que `DATABASE_URL` de runtime (se adotado) ≠ URI de migrate (Session mode)
-- [ ] Criar RPC `despertar_state_sync(...)` com validações server-side espelhando `validateSync` (ou validação Node + um único UPDATE via RPC de persistência)
-- [ ] Índices: `sessions(token)`, `sessions(expires_at)`, `auth_rate_events(action, key, created_at)`, `despertar_states(user_id)` PK, `lesson_gates(lesson_id, gate_key)`
-- [ ] Alertar em `pg_stat_activity` / métricas Supabase: conexões ativas, waiting, errors `too many connections`
+- [x] Confirmar no dashboard Supabase: pooler habilitado, modo Transaction para serverless _(ops; documentado em `.env.example` / Fase C D5)_
+- [x] Documentar que `DATABASE_URL` de runtime (se adotado) ≠ URI de migrate (Session mode) — `DATABASE_URL_RUNTIME`
+- [x] Criar RPC de persistência/award (`despertar_persist_and_award` + flag) — validação Node + RPC (B3)
+- [x] Índices: `sessions(token)`, `sessions(expires_at)`, `auth_rate_events(action, key, created_at)`, `despertar_states(user_id)` PK, `lesson_gates(lesson_id, gate_key)`
+- [x] Alertar / runbook: [`load-results/RUNBOOK-CAPACIDADE.md`](./load-results/RUNBOOK-CAPACIDADE.md) (conexões, waiting, 5xx)
 
 ### 3.3 Caching — o que cachear e onde
 
@@ -148,11 +148,11 @@ Checklist — conexões
 
 Checklist — cache
 
-- [ ] Extrair leitura de gate para helper com memoização (isolate) + backing store compartilhado
-- [ ] Invalidar gate cache no admin `setLessonGate`
-- [ ] Avaliar Upstash Redis (já alinhado ao ecossistema Vercel) para sessão e rate limit
-- [ ] Separar assets estáticos de API: garantir cache longo em `/assets/**` e `/data/**` públicos
-- [ ] Não remover `no-store` de `/api/*` sem política explícita por rota GET segura
+- [x] Extrair leitura de gate para helper com memoização (isolate) + backing store compartilhado (`despertar-gate.js` + KV)
+- [x] Invalidar gate cache no admin `setLessonGate`
+- [x] Upstash / `@vercel/kv` para rate limit (+ Edge); sessão continua DB
+- [x] Cache longo em `/assets/**` e `/data/**` públicos (`vercel.json` Fase C)
+- [x] Manter `no-store` em `/api/*` mutáveis; bootstrap permanece `no-store`
 
 ### 3.4 Rate limiting — comparação de estratégias
 
@@ -187,10 +187,10 @@ Limites sugeridos (ponto de partida — calibrar com carga):
 
 Checklist — rate limit
 
-- [ ] Migrar `isSyncRateLimited` / Juízo / underworld de `Map` → store compartilhado
-- [ ] Edge Middleware: teto por IP em `/api/despertar` e `/api/auth`
-- [ ] Respostas `429` com `Retry-After` estável (cliente Despertar já tem min interval)
-- [ ] Métricas: contagem de 429, taxa de bypass (só possível se Map residual)
+- [x] Migrar sync / Juízo / underworld de `Map` → KV (`rate-limit-kv.js`) + degradê local
+- [x] Edge Middleware: teto por IP em `/api/auth`, `/api/despertar`, `/api/progress` (`middleware.js`)
+- [x] Respostas `429` com `Retry-After` estável
+- [x] Métricas A6: `rate_limit_backend=kv|memory|…` nos logs `[metrics]`
 
 ### 3.5 Batching e redução de RTT na progressão
 
@@ -205,11 +205,11 @@ Checklist — rate limit
 
 Checklist — fluxo de dados
 
-- [ ] Desenhar contrato de `session-bootstrap` (campos mínimos)
-- [ ] Empurrar ordenação do ranking para SQL; paginar
-- [ ] Remover `purgeExpiredSessions` do hot path de login (job periódico)
-- [ ] Avaliar coalescing no cliente de aula (sem relaxar autoridade)
-- [ ] Telemetria: histogram de “RTT PostgREST por request”
+- [x] Contrato `GET /api/session-bootstrap` (B2 + `contratos-fase-b.md`)
+- [x] Leaderboard SQL paginado (B5) + cache KV opcional (C4)
+- [x] Purge de sessions em cron (`api/cron/sessions-purge.js`), fora do login
+- [x] Batch/coalesce de eventos de aula no cliente (B6)
+- [x] Telemetria: `db_round_trips` + `duration_ms` por request (A6)
 
 ### 3.6 Auth / scrypt sob serverless
 
@@ -223,11 +223,11 @@ Checklist — fluxo de dados
 
 Checklist — auth CPU
 
-- [ ] Trocar path de verify/hash para API assíncrona
-- [ ] Medir wall time de scrypt isolado (p50/p99) no tamanho de função 256 MB
-- [ ] Manter bcrypt legado só no migrate-on-login
-- [ ] Separar bundle de auth do monólito `progress` se cold start continuar alto
-- [ ] Considerar “warmup” de `/api/auth` antes da abertura de turma (cron ping autenticado de health)
+- [x] Path verify/hash com `crypto.scrypt` async
+- [x] Instrumentar `scrypt_ms` nos logs auth (A6); calibrar em preview se necessário
+- [x] bcrypt legado só no migrate-on-login
+- [x] Split do monólito `progress` (`api/_lib/progress/*` — C3)
+- [x] Warmup cron `/api/cron/warmup` pré-aula (C7)
 
 ### 3.7 Topologia alvo (faseada)
 
@@ -328,29 +328,29 @@ Conceitualmente (não é código de produção):
 
 Checklist — load tests
 
-- [ ] Criar pasta `tests/load/` com cenários k6 nomeados C1–C6
-- [ ] Secrets de staging via env (nunca commitados)
-- [ ] Rodar baseline e arquivar resultados em `docs/load-results/` (data + commit)
-- [ ] Definir “Definition of Done” numérico por fase (A/B/C)
-- [ ] Incluir teste de regressão no checklist de release de mudanças em `api/despertar.js` / `api/progress.js` / auth
+- [x] Pasta `tests/load/` com cenários k6 C1–C6 (+ `c-turma-30.js`)
+- [x] Secrets via env / `LOAD_TOKENS_FILE` (raw gitignored)
+- [x] Baseline lab arquivado em `docs/load-results/` (data + commit `8b67ad6`)
+- [x] DoD numérico por fase nos docs `01`–`04` + Master Plan
+- [x] Regressão: smokes ops-perf + runbook de release em mudanças `despertar` / `progress` / auth
 
 ---
 
 ## 5. Roadmap priorizado
 
-| Prioridade | Item | Gargalos | Esforço | Risco |
-| --- | --- | --- | --- | --- |
-| **P0** | Rate limit compartilhado (Redis) para Despertar/progress | G4 | M | Baixo |
-| **P0** | Cache de `lesson_gates` + invalidação admin | G1, G5 | P | Baixo |
-| **P0** | Instrumentação `db_round_trips` + baseline k6 | Todos | P | Baixo |
-| **P1** | RPC colapsando `stateSync` | G1 | G | Médio (validação) |
-| **P1** | `session-bootstrap` (auth+perfil+gates) | G8 | M | Baixo |
-| **P1** | scrypt async + purge fora do login | G3, G6 | P–M | Baixo |
-| **P2** | Leaderboard SQL + cache snapshot | G7 | M | Baixo |
-| **P2** | Edge Middleware teto IP | G4 | P | Baixo |
-| **P2** | Batch/coalesce de eventos de aula | G2 | M | Médio (UX) |
-| **P3** | Split de monólitos / cold start | G9 | G | Médio |
-| **P3** | Path `pg`+pooler só se RPC insuficiente | G1 | G | Médio |
+| Prioridade | Item | Gargalos | Esforço | Risco | Estado |
+| --- | --- | --- | --- | --- | --- |
+| **P0** | Rate limit compartilhado (Redis/KV) para Despertar/progress | G4 | M | Baixo | **Feito** |
+| **P0** | Cache de `lesson_gates` + invalidação admin | G1, G5 | P | Baixo | **Feito** |
+| **P0** | Instrumentação `db_round_trips` + baseline k6 | Todos | P | Baixo | **Feito** |
+| **P1** | RPC colapsando `stateSync` | G1 | G | Médio (validação) | **Feito** |
+| **P1** | `session-bootstrap` (auth+perfil+gates) | G8 | M | Baixo | **Feito** |
+| **P1** | scrypt async + purge fora do login | G3, G6 | P–M | Baixo | **Feito** |
+| **P2** | Leaderboard SQL + cache snapshot | G7 | M | Baixo | **Feito** (SQL + KV TTL) |
+| **P2** | Edge Middleware teto IP | G4 | P | Baixo | **Feito** |
+| **P2** | Batch/coalesce de eventos de aula | G2 | M | Médio (UX) | **Feito** |
+| **P3** | Split de monólitos / cold start | G9 | G | Médio | **Feito** (split; cold preview opcional) |
+| **P3** | Path `pg`+pooler só se RPC insuficiente | G1 | G | Médio | **Pronto** (flag `DESPERTAR_PG_POOL`, default off) |
 
 ---
 
@@ -372,16 +372,18 @@ Checklist — load tests
 
 O plano considera **Fase A concluída** quando:
 
-- [ ] Limites de sync/Juízo/underworld são **cross-isolate**
-- [ ] Gate Despertar não gera RTT em todo sync no caminho quente (hit de cache &gt; 95% em lab)
-- [ ] Baseline k6 C1–C3 arquivado com p95 documentado
-- [ ] Login não dispara purge global de sessions
+- [x] Limites de sync/Juízo/underworld são **cross-isolate**
+- [x] Gate Despertar não gera RTT em todo sync no caminho quente (hit de cache no lab)
+- [x] Baseline k6 C1–C3 arquivado com p95 documentado ([`BASELINE-POST-A.md`](./load-results/BASELINE-POST-A.md))
+- [x] Login não dispara purge global de sessions
 
 **Fase B concluída** quando:
 
-- [ ] `stateSync` típico ≤ **2–3** RTT (ideal 1 RPC)
-- [ ] Boot de página protegida ≤ **1** round-trip de API para sessão+perfil
-- [ ] Pico turma (N acordado) sem exaustão de conexões e com p95 dentro dos limiares
+- [x] `stateSync` típico ≤ **2–3** RTT (ideal 1 RPC) — RPC + validação Node
+- [x] Boot de página protegida ≤ **1** round-trip de API para sessão+perfil (`session-bootstrap`)
+- [x] Pico turma lab (~30 VU) sem exaustão de conexões e com p95 dentro dos limiares ([`TURMA-30.md`](./load-results/TURMA-30.md))
+
+**Fase C / k6:** Edge + split + runbook + scripts C1–C6 feitos; pooler só sob flag.
 
 ---
 
@@ -393,14 +395,14 @@ O plano considera **Fase A concluída** quando:
 | Despertar sync client | `js/hades-despertar/services/ApiService.js` | Heartbeat / min interval / dirty |
 | Auth | `api/auth.js` | scrypt + sessions + rate DB |
 | Auth rate | `api/_lib/auth-rate.js` | Modelo durável a reutilizar conceitualmente |
-| Sessions | `api/_lib/sessions.js` | Validação + purge oportunista |
-| Progress | `api/progress.js` | Monólito; awards; underworld RL memória |
-| Despertar API | `api/despertar.js` | Hot path multi-RTT; RL memória |
-| Gate | `api/_lib/despertar-gate.js` | Leitura repetida |
-| Leaderboard | `api/_lib/leaderboard.js` | Full scan + sort |
-| Supabase client | `api/supabaseClient.js` | Service role; sem pool app-side |
-| Deploy | `vercel.json` | 256 MB, 10 s, API `no-store` |
+| Sessions | `api/_lib/sessions.js` | Validação; purge em cron |
+| Progress | `api/progress.js` + `_lib/progress/*` | Split C3; awards; underworld RL KV |
+| Despertar API | `api/despertar.js` | Hot path RPC; RL KV |
+| Gate | `api/_lib/despertar-gate.js` | Memo + KV |
+| Leaderboard | `api/_lib/leaderboard.js` + cache | SQL page + KV TTL |
+| Supabase client | `api/supabaseClient.js` | Service role; pg pool opcional |
+| Deploy | `vercel.json` | 256 MB, 10 s, API `no-store`, assets cache, crons |
 
 ---
 
-*Documento vivo: atualizar limiares numéricos após a primeira corrida de baseline k6 e após a introdução do store compartilhado de rate limit.*
+*Documento vivo: limiares lab atualizados em 2026-09-22 (`BASELINE-POST-A` / `TURMA-30`). Repetir em preview Vercel para cold start.*

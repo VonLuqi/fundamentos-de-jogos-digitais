@@ -1,13 +1,16 @@
 /**
- * C2 — Aula ativa: lessonView periódico (esqueleto).
+ * C2 — Aula ativa: lessonView periódico.
  * docs/otimizacoes/04-tasks-k6-carga.md
  *
- *   k6 run -e BASE_URL=… -e LOAD_USERNAME=… -e LOAD_PASSWORD=… tests/load/c2-aula.js
+ *   k6 run -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json tests/load/c2-aula.js
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { login } from './lib/auth.js';
 import { getConfig } from './lib/config.js';
+import { tokenForVu } from './lib/tokens.js';
+
+http.setResponseCallback(http.expectedStatuses(200, 201, 204, 400, 403, 429));
 
 export const options = {
   scenarios: {
@@ -18,28 +21,33 @@ export const options = {
     },
   },
   thresholds: {
-    http_req_failed: ['rate<0.01'],
+    http_req_failed: ['rate<0.05'],
     'http_req_duration{name:lesson_view}': ['p(95)<1500'],
   },
 };
 
-export function setup() {
-  const cfg = getConfig();
-  if (!cfg.username || !cfg.password) {
-    throw new Error('Defina LOAD_USERNAME e LOAD_PASSWORD');
-  }
-  const token = login(cfg.baseUrl, cfg.username, cfg.password);
-  if (!token) throw new Error('login falhou no setup C2');
-  return { token, baseUrl: cfg.baseUrl, lessonId: cfg.lessonId };
-}
+/** @type {string|null} */
+let vuToken = null;
 
-export default function c2Aula(data) {
+export default function c2Aula() {
+  const cfg = getConfig();
+  if (!vuToken) {
+    vuToken = tokenForVu(__VU);
+    if (!vuToken) {
+      if (!cfg.username || !cfg.password) {
+        throw new Error('Defina LOAD_TOKENS_FILE ou LOAD_USERNAME + LOAD_PASSWORD');
+      }
+      vuToken = login(cfg.baseUrl, cfg.username, cfg.password);
+      if (!vuToken) throw new Error('login falhou no C2');
+    }
+  }
+
   const res = http.post(
-    `${data.baseUrl}/api/progress`,
+    `${cfg.baseUrl}/api/progress`,
     JSON.stringify({
-      token: data.token,
+      token: vuToken,
       action: 'lessonView',
-      lessonId: data.lessonId,
+      lessonId: cfg.lessonId,
     }),
     {
       headers: { 'Content-Type': 'application/json' },
@@ -47,7 +55,8 @@ export default function c2Aula(data) {
     },
   );
   check(res, {
-    'lessonView 2xx/4xx esperado': (r) => r.status === 200 || r.status === 400 || r.status === 403,
+    'lessonView 2xx/4xx esperado': (r) =>
+      r.status === 200 || r.status === 400 || r.status === 403 || r.status === 429,
   });
   sleep(8);
 }

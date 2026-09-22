@@ -4,21 +4,27 @@ Artefatos de corridas k6 / amostragem `[metrics]` para o gate da Fase B.
 
 | Arquivo | Significado |
 | --- | --- |
-| [`BASELINE-POST-A.md`](./BASELINE-POST-A.md) | Baseline **após Fase A**, **antes** de merge B2+ |
+| [`BASELINE-POST-A.md`](./BASELINE-POST-A.md) | Baseline lab **measured** (2026-09-22, `8b67ad6`) |
+| [`BASELINE-POST-B.md`](./BASELINE-POST-B.md) | Mix pós-B / turma-30 |
 | [`RUNBOOK-CAPACIDADE.md`](./RUNBOOK-CAPACIDADE.md) | Runbook Fase C / C2 — incidentes, alertas, como rodar C1+C3+C4 |
 | [`COLD-START-PROGRESS-C3.md`](./COLD-START-PROGRESS-C3.md) | Nota cold start pós-split `progress` (C3) |
 | [`WARMUP-C7.md`](./WARMUP-C7.md) | Cron warmup C7 — janela pré-aula |
 | [`TURMA-30.md`](./TURMA-30.md) | Stress k6 ~30 alunos (boot + ranking + sync) |
-| `BASELINE-POST-B.md` | (criar após B3/B5) comparação A/B |
 
 ## Env para k6 (nunca commitar valores)
 
 ```bash
-BASE_URL=https://seu-preview.vercel.app
+BASE_URL=http://localhost:3000   # ou preview Vercel
+# Preferido (VUs ≥ 10): tokens pré-emitidos — path relativo a tests/load/lib/
+# LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json
 LOAD_USERNAME=load_aluno_01
 LOAD_PASSWORD=
-# Alternativa: JSON array de tokens já válidos
-# LOAD_TOKENS_JSON=["token1","token2"]
+```
+
+```powershell
+npm run load:seed
+npm run load:c1    # requer k6 + server
+npm run load:turma30
 ```
 
 ## Como arquivar uma corrida

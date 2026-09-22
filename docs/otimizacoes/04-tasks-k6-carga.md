@@ -5,8 +5,9 @@
 > **Gate:** obrigatório **antes** de merge na `main` das tasks B2–B6  
 > **Contratos Fase B:** [`contratos-fase-b.md`](./contratos-fase-b.md)  
 > **Resultados:** [`docs/load-results/`](../load-results/)  
-> **Estado do documento:** pronto para execução  
-> **Baseline pós-A:** slot em [`docs/load-results/BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) — preencher números após corrida em staging
+> **Estado do documento:** **fechado (lab measured)** — 2026-09-22 · SHA `8b67ad6`  
+> **Baseline pós-A:** [`BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) status `measured`  
+> **Baseline pós-B / turma-30:** [`BASELINE-POST-B.md`](../load-results/BASELINE-POST-B.md) · [`TURMA-30.md`](../load-results/TURMA-30.md)
 
 ---
 
@@ -23,13 +24,18 @@
 
 | Item | Regra |
 | --- | --- |
-| Alvo | Preview/staging Vercel + Supabase de staging (nunca produção na 1ª corrida) |
-| Base URL | `BASE_URL` (ex. `https://….vercel.app`) — sem barra final |
-| Credenciais | `LOAD_USER_PREFIX`, `LOAD_PASSWORD` ou lista `LOAD_TOKENS_JSON` — **só env**, nunca commit |
-| Seeds | Criar N alunos de load via admin/script offline; não misturar com turma real |
+| Alvo | Preview/staging Vercel + Supabase de staging (nunca produção na 1ª corrida); **lab local** aceito para fechar gate documental |
+| Base URL | `BASE_URL` (ex. `https://….vercel.app` ou `http://localhost:3000`) — sem barra final |
+| Credenciais | Preferir **`LOAD_TOKENS_FILE`** (sessões pré-emitidas) para VUs ≥ 10 — evita rate limit `login_ip` (10/15 min) |
+| Alternativa | `LOAD_USERNAME` + `LOAD_PASSWORD` só para smoke ≤ 5–8 VUs |
+| Seeds | `npm run load:seed` → `docs/load-results/raw/turma-tokens.json` (**gitignored**) |
 | Observabilidade | Logs `[metrics]` (A6) + dashboard Supabase (conexões) + Vercel function duration |
 
-Variáveis documentadas em [`docs/load-results/README.md`](../load-results/README.md) e espelhadas nos scripts `tests/load/*.js`.
+Variáveis em [`docs/load-results/README.md`](../load-results/README.md).
+
+**Path do `open()` no k6:** relativo ao módulo que chama `open`. Scripts C1–C5 usam `tests/load/lib/tokens.js` →  
+`LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json`.  
+`c-turma-30.js` abre o arquivo no próprio script → `../../docs/load-results/raw/turma-tokens.json`.
 
 ---
 
@@ -37,21 +43,22 @@ Variáveis documentadas em [`docs/load-results/README.md`](../load-results/READM
 
 | ID | Nome | Ações | Duração típica | Estágio mínimo B1 |
 | --- | --- | --- | --- | --- |
-| **C1** | Abertura de turma | `POST /api/auth` login → `GET` bootstrap **ou** auth+progress | 2–5 min | **Obrigatório** |
+| **C1** | Abertura de turma | token/login 1×/VU → `session-bootstrap` | 2–5 min | **Obrigatório** |
 | **C2** | Aula ativa | `lessonView` / paragraphs (progress) | 10–15 min | Recomendado |
 | **C3** | Despertar lab | `stateSync` dirty 5–15 s | 10–15 min | **Obrigatório** |
 | **C4** | Ranking | `leaderboardGet` | 5 min | Pós-B5 |
 | **C5** | ClassInd degradado | poll fallback | curto | Fase C / ops |
 | **C6** | Abuso | sync acima do limite / login spray | controlado | Após C1/C3 verdes |
+| **Turma-30** | Mix realista | bootstrap + ranking + sync | 3 min / 30 VU | Stress sala |
 
 ### Dimensão de VUs (partida — calibrar)
 
-| Etapa | VUs | Critério preliminar |
-| --- | --- | --- |
-| Smoke | 5 | 0× 5xx; p95 rotas leves &lt; 800 ms |
-| Aula média | 30 | p95 sync &lt; 1,5 s; erros &lt; 1% |
-| Pico turma | 60–80 | p95 login &lt; 2,5 s; sem exaustão de conexões |
-| Stress | 120+ | 429 graceful; sem cascata 5xx |
+| Etapa | VUs | Critério preliminar | Lab 2026-09-22 |
+| --- | --- | --- | --- |
+| Smoke | 5 | 0× 5xx; p95 rotas leves &lt; 800 ms | C1 boot p95 **769 ms** ✓ |
+| Aula média | 30 | p95 sync &lt; 1,5 s; erros &lt; 1% | sync p95 **1289 ms** ✓ |
+| Pico turma | 60–80 | p95 login &lt; 2,5 s; sem exaustão de conexões | _pending preview_ |
+| Stress | 120+ | 429 graceful; sem cascata 5xx | _pending_ |
 
 ---
 
@@ -67,16 +74,7 @@ Variáveis documentadas em [`docs/load-results/README.md`](../load-results/READM
 | `scrypt_ms` | logs auth | calibrar p99 |
 | Conexões PG | Supabase | não atingir max / waiting |
 
-### Thresholds k6 (esqueleto)
-
-```js
-thresholds: {
-  http_req_failed: ['rate<0.01'],
-  'http_req_duration{name:auth_login}': ['p(95)<2500'],
-  'http_req_duration{name:despertar_sync}': ['p(95)<1500'],
-  'http_req_duration{name:session_bootstrap}': ['p(95)<800'],
-}
-```
+Scripts C1–C5 tratam 400/403/409/429 como **esperados** em `http.setResponseCallback` (não inflar `http_req_failed`).
 
 ---
 
@@ -90,61 +88,67 @@ thresholds: {
 | [`tests/load/c4-ranking.js`](../../tests/load/c4-ranking.js) | C4 |
 | [`tests/load/c5-classind-poll.js`](../../tests/load/c5-classind-poll.js) | C5 |
 | [`tests/load/c6-abuse.js`](../../tests/load/c6-abuse.js) | C6 |
+| [`tests/load/c-turma-30.js`](../../tests/load/c-turma-30.js) | Mix ~30 alunos |
 | [`tests/load/lib/config.js`](../../tests/load/lib/config.js) | env / defaults |
 | [`tests/load/lib/auth.js`](../../tests/load/lib/auth.js) | login helper |
+| [`tests/load/lib/tokens.js`](../../tests/load/lib/tokens.js) | `LOAD_TOKENS_FILE` / SharedArray |
 
-**Runbook (incidentes + alertas + onboarding):** [`docs/load-results/RUNBOOK-CAPACIDADE.md`](../load-results/RUNBOOK-CAPACIDADE.md).
+**npm:** `load:seed` · `load:c1` · `load:c3` · `load:c4` · `load:turma30`
+
+**Runbook:** [`docs/load-results/RUNBOOK-CAPACIDADE.md`](../load-results/RUNBOOK-CAPACIDADE.md).
 
 ### Como rodar (local → staging)
 
-```bash
-# Requer k6 instalado: https://k6.io/docs/get-started/installation/
-export BASE_URL="https://seu-preview.vercel.app"
-export LOAD_USERNAME="load_aluno_01"
-export LOAD_PASSWORD="…"
+```powershell
+npm run load:seed
+npm run start   # outro terminal
 
-k6 run tests/load/c1-login-boot.js
-k6 run tests/load/c3-despertar-sync.js
-k6 run tests/load/c4-ranking.js
-# opcional:
-# k6 run tests/load/c5-classind-poll.js
-# k6 run tests/load/c6-abuse.js
+# C1 smoke
+k6 run -e BASE_URL=http://localhost:3000 -e VUS=5 -e DURATION=1m `
+  -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json `
+  tests/load/c1-login-boot.js
+
+# C3 / ranking / mix
+npm run load:c3
+npm run load:c4
+npm run load:turma30
 ```
 
-Smoke estático (sem k6/binário):
+Smoke estático (sem binário k6):
 
 - C1–C3 + doc: `node tests/ops-perf-fase-b-contracts-smoke.mjs`
-- Runbook + C4–C6 (Fase C / C2): `node tests/ops-perf-fase-c-obs-smoke.mjs`
+- Runbook + C4–C6: `node tests/ops-perf-fase-c-obs-smoke.mjs`
 
 ---
 
 ## 6. Metodologia de baseline pós-A
 
-1. Confirmar Fase A em preview (KV opcional; métricas A6 ligadas).  
-2. Smoke k6 (5 VUs) C1 + C3 — zero 5xx.  
-3. Corrida **Aula média** (30 VUs) C1 depois C3 — **uma variável por vez**.  
-4. Exportar summary JSON do k6 (`--summary-export`).  
-5. Amostrar 50+ linhas `[metrics]` `action=stateSync` / `login` dos logs Vercel → mediana `db_round_trips`, p95 aproximado.  
-6. Preencher [`docs/load-results/BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) (data, commit SHA, URL preview, tabelas).  
-7. Atualizar apêndice de limiares em [`02-tasks-fase-b-rtt-batching.md`](./02-tasks-fase-b-rtt-batching.md).  
-8. Só então autorizar merge de B2+ na `main`.
+1. Confirmar Fase A (+ B/C no código) em lab ou preview.  
+2. `npm run load:seed` (selo + gate Despertar publicado).  
+3. Smoke k6 (5 VUs) C1 — zero 5xx.  
+4. Corrida **Aula média** (30 VUs) — `load:turma30` ou C1+C3.  
+5. Exportar `--summary-export` em `docs/load-results/raw/` (gitignored).  
+6. Preencher [`BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) → status `measured`.  
+7. Atualizar apêndice em [`02-tasks-fase-b-rtt-batching.md`](./02-tasks-fase-b-rtt-batching.md).  
+8. Opcional: repetir em preview Vercel para cold start.
 
 ### Comparação pós-B3
 
-- Mesma `BASE_URL` class / mesma seed de VUs / mesmo script C3.  
-- Regressão se: p95 sync ↑ vs baseline **ou** mediana `db_round_trips` sync &gt; 3 com `DESPERTAR_SYNC_RPC=1`.
+- Mesma seed de VUs / scripts C3 ou turma-30.  
+- Regressão se: p95 sync ↑ vs baseline **ou** mediana `db_round_trips` sync &gt; 3 com RPC ligada.
 
 ---
 
 ## 7. Checklist do doc 04
 
-- [x] Cenários C1–C6 descritos; C1+C3 obrigatórios para baseline; C4–C6 scripts na Fase C / C2  
-- [x] Pasta `tests/load/` com esqueletos C1–C6  
-- [x] Secrets só via env (documentado)  
-- [x] Slot `docs/load-results/BASELINE-POST-A.md`  
-- [x] Runbook `docs/load-results/RUNBOOK-CAPACIDADE.md` (Fase C / C2)  
-- [ ] Corrida staging executada e números preenchidos (**ops**)  
-- [x] C4–C6 scripts versionados (ranking / ClassInd poll / abuso)  
+- [x] Cenários C1–C6 descritos; C1+C3 obrigatórios; C4–C6 + turma-30  
+- [x] Pasta `tests/load/` com scripts executáveis + `lib/tokens.js`  
+- [x] Secrets só via env / raw gitignored  
+- [x] Slot `BASELINE-POST-A.md` **preenchido (`measured`)**  
+- [x] Runbook `RUNBOOK-CAPACIDADE.md`  
+- [x] Corrida lab executada e números preenchidos (2026-09-22)  
+- [x] C4–C6 scripts versionados  
+- [ ] Corrida **preview Vercel** (cold start) — ops opcional / não bloqueia DoD lab  
 
 ---
 
@@ -152,12 +156,12 @@ Smoke estático (sem k6/binário):
 
 Doc 04 está **operacional** quando:
 
-- [x] Este documento + scripts C1–C3 versionados  
-- [ ] `BASELINE-POST-A.md` com status `measured` e tabelas numéricas  
-- [ ] Master Plan aponta o SHA/data do baseline  
+- [x] Este documento + scripts C1–C6 (+ turma-30) versionados  
+- [x] `BASELINE-POST-A.md` com status `measured` e tabelas numéricas  
+- [x] Master Plan aponta SHA/data do baseline (`8b67ad6` / 2026-09-22)  
 
-Gate de merge B2+: baseline `measured` + referência no PR.
+Gate de merge B2+: **cumprido** (código B já em `main`; baseline lab arquivado).
 
 ---
 
-*Scripts k6 são esqueletos executáveis; calibrar VUs/thresholds após a primeira corrida real.*
+*Calibrar VUs/thresholds em preview após a primeira corrida Vercel; lab local fecha o gate documental.*

@@ -4,6 +4,8 @@
 **Documento Base:** [`plano-arquitetura-performance-escalabilidade.md`](../plano-arquitetura-performance-escalabilidade.md)  
 **Objetivo:** Transformar as diretrizes arquiteturais em tarefas técnicas, iterativas e rastreáveis para garantir que a API suporte alta concorrência sem exaustão de conexões e com baixa latência.
 
+**Baseline k6 (lab):** 2026-09-22 · SHA `8b67ad6` · [`BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) (`measured`) · [`TURMA-30.md`](../load-results/TURMA-30.md)
+
 ---
 
 ## Índice de Fases
@@ -14,17 +16,16 @@ Este guia foi fatiado em documentos menores para facilitar a atribuição de tar
 | --- | --- | --- |
 | [x] | **Fase A:** Contenção e Cache Local (proteção cross-isolate, menos CPU no auth, menos RTT de gate) | [`01-tasks-fase-a-contencao.md`](./01-tasks-fase-a-contencao.md) — Task 0 + A1–A6 feitas |
 | [x] | **Fase B:** Colapso de RTT e Batching (redução drástica de idas ao PostgREST) | [`02-tasks-fase-b-rtt-batching.md`](./02-tasks-fase-b-rtt-batching.md) — Task 0 + B1–B6 feitas |
-| [ ] | **Fase C:** Escala, Middleware e Observabilidade (proteção L7 e DB pooler para hotspots) | [`03-tasks-fase-c-escala-obs.md`](./03-tasks-fase-c-escala-obs.md) — Task 0 + C1–C7 feitas (gates ops/k6 abertos) |
-| [x] | **Testes k6:** Plano de Testes de Estresse e Carga (baseline e thresholds) | [`04-tasks-k6-carga.md`](./04-tasks-k6-carga.md) — C1–C6 scripts; runbook; baseline staging ainda `pending_staging_run` |
+| [x] | **Fase C:** Escala, Middleware e Observabilidade (proteção L7 e DB pooler para hotspots) | [`03-tasks-fase-c-escala-obs.md`](./03-tasks-fase-c-escala-obs.md) — Task 0 + C1–C7 feitas (código); preview cold-start opcional |
+| [x] | **Testes k6:** Plano de Testes de Estresse e Carga (baseline e thresholds) | [`04-tasks-k6-carga.md`](./04-tasks-k6-carga.md) — C1–C6 + turma-30; baseline lab `measured` |
 
 ```text
 [ Plano Arquitetural ]
          │
          ▼
-[ 00 Master Plan ] ──► A (feita) ──► B (feita) ──► C (doc 03)
+[ 00 Master Plan ] ──► A (feita) ──► B (feita) ──► C (feita)
          │                                    ▲
-         └──────────► 04 k6 (doc pronto) ─────┘
-                      baseline measured = gate merge B→main / evidência C4–C5
+         └──────────► 04 k6 (measured lab) ───┘
 ```
 
 ---
@@ -33,19 +34,19 @@ Este guia foi fatiado em documentos menores para facilitar a atribuição de tar
 
 A implementação deve seguir a prioridade abaixo para mitigar os gargalos mais críticos (**G1, G2, G3 e G4**) o mais rápido possível:
 
-| Prioridade | Fase | Foco principal | Gargalos resolvidos |
-| --- | --- | --- | --- |
-| **P0 / P1** | **Fase A** | Cache de `lesson_gates`, rate limit no Redis/KV, `scrypt` async, purge de sessions fora do login, instrumentação de RTT | G1 (parcial), G3, G4, G5, G6 |
-| **P1** | **Fase B** | RPC `stateSync`, `session-bootstrap` unificado | G1 (final), G8 |
-| **P2** | **Fase B / C** | Leaderboard em SQL paginado, batching na UI de aula | G2, G7 |
-| **P3** | **Fase C** | Edge Middleware (teto IP), refatoração de monólitos JS, pooler em hotspots se necessário | G9 (+ endurecimento L7) |
+| Prioridade | Fase | Foco principal | Gargalos resolvidos | Estado |
+| --- | --- | --- | --- | --- |
+| **P0 / P1** | **Fase A** | Cache de `lesson_gates`, rate limit no Redis/KV, `scrypt` async, purge de sessions fora do login, instrumentação de RTT | G1 (parcial), G3, G4, G5, G6 | **Feita** |
+| **P1** | **Fase B** | RPC `stateSync`, `session-bootstrap` unificado | G1 (final), G8 | **Feita** |
+| **P2** | **Fase B / C** | Leaderboard em SQL paginado, batching na UI de aula | G2, G7 | **Feita** |
+| **P3** | **Fase C** | Edge Middleware (teto IP), refatoração de monólitos JS, pooler em hotspots se necessário | G9 (+ endurecimento L7) | **Feita** (pooler flag off) |
 
 ### Ordem congelada de entrega
 
-1. Fechar **Fase A** (doc `01`) com smokes e DoD da fase.  
-2. Publicar **doc `04` (k6)** e arquivar **baseline** do ambiente (staging).  
-3. Só então mesclar tarefas da **Fase B** na `main`.  
-4. **Fase C** (doc [`03-tasks-fase-c-escala-obs.md`](./03-tasks-fase-c-escala-obs.md)): Edge/obs/split podem avançar em paralelo ao ops de baseline; **snapshot (C4)** e **pooler (C5)** só com evidência `measured`.
+1. ~~Fechar **Fase A**~~ ✓  
+2. ~~Publicar **doc `04` (k6)** e arquivar **baseline**~~ ✓ lab 2026-09-22  
+3. ~~Mesclar **Fase B** na `main`~~ ✓  
+4. ~~**Fase C**~~ ✓ código C1–C7; evidência pooler/snapshot só se regressão em preview  
 
 ---
 
@@ -53,7 +54,7 @@ A implementação deve seguir a prioridade abaixo para mitigar os gargalos mais 
 
 ### Testabilidade
 
-- Nenhuma tarefa da **Fase B** pode ser mesclada na `main` sem que os testes de carga do **k6** (detalhados no doc `04`) tenham estabelecido o **baseline** do ambiente.
+- Nenhuma tarefa da **Fase B** pode ser mesclada na `main` sem que os testes de carga do **k6** (detalhados no doc `04`) tenham estabelecido o **baseline** do ambiente.  
 - Smokes unitários/integrados do repo (`tests/*-smoke.mjs`) continuam obrigatórios por PR; k6 é o gate de **capacidade**, não substituto dos smokes.
 
 ### Autoridade
@@ -96,24 +97,20 @@ Logs estruturados emitidos pelos handlers (`auth`, `progress`, `despertar`):
 
 Campos (sem PII): `request_id`, `route`, `action`, `duration_ms`, `db_round_trips`, `gate_cache` (`hit|miss|bypass|n/a`), `rate_limit_backend` (`kv|memory|db|n/a`), `scrypt_ms` (auth), `cold`, `status`.
 
-**Baseline rápido (staging):**
+**Baseline (arquivado):**
 
-1. Reproduzir C1/C3 (login em massa / sync Despertar) por alguns minutos.
-2. Coletar linhas `[metrics]` dos logs Vercel (filtro `route=despertar` ou `action=login`).
-3. Calcular p50/p95/p99 de `duration_ms` e média de `db_round_trips` (ex.: script local ou planilha).
-4. Arquivar com data + commit em `docs/load-results/` quando o doc `04` existir.
-5. Gate de merge da **Fase B**: baseline k6 + estes campos como referência de regressão (RTT e p95).
-
-Helper de parse: `parseMetricsLine` em `api/_lib/request-metrics.js` (smoke A6).
+1. Lab: C1 smoke + turma-30 → [`BASELINE-POST-A.md`](../load-results/BASELINE-POST-A.md) / [`TURMA-30.md`](../load-results/TURMA-30.md).  
+2. Opcional: repetir em preview Vercel e anexar cold start.  
+3. Helper de parse: `parseMetricsLine` em `api/_lib/request-metrics.js` (smoke A6).
 
 ## Definition of Done por fase (resumo)
 
-| Fase | DoD resumido |
-| --- | --- |
-| **A** | Sync/Juízo/underworld limitados cross-isolate; gate com hit de cache no path quente; login sem purge global; `scrypt` async; logs com `db_round_trips` / `duration_ms` |
-| **B** | `stateSync` típico ≤ 2–3 RTT (ideal 1 RPC); boot página ≤ 1 round-trip sessão+perfil; baseline k6 comparado e p95 dentro do limiar |
-| **C** | Teto IP no Edge; observabilidade/alertas de conexão; monólitos fatiados ou cold start medido ↓; pooler só se RPC insuficiente |
-| **k6** | Cenários C1–C6 versionados; baseline arquivado com commit + data; thresholds como gate de release |
+| Fase | DoD resumido | Estado |
+| --- | --- | --- |
+| **A** | Sync/Juízo/underworld limitados cross-isolate; gate com hit de cache no path quente; login sem purge global; `scrypt` async; logs com `db_round_trips` / `duration_ms` | **Feito** |
+| **B** | `stateSync` típico ≤ 2–3 RTT (ideal 1 RPC); boot página ≤ 1 round-trip sessão+perfil; baseline k6 comparado e p95 dentro do limiar | **Feito** |
+| **C** | Teto IP no Edge; observabilidade/alertas de conexão; monólitos fatiados ou cold start medido ↓; pooler só se RPC insuficiente | **Feito** (código; cold-start preview opcional) |
+| **k6** | Cenários C1–C6 versionados; baseline arquivado com commit + data; thresholds como gate de release | **Feito** (lab `measured`) |
 
 ---
 
@@ -140,6 +137,6 @@ Helper de parse: `parseMetricsLine` em `api/_lib/request-metrics.js` (smoke A6).
 | Sessions / purge | `api/_lib/sessions.js` + `api/cron/sessions-purge.js` | fora do hot path (Fase A) |
 | Métricas | `api/_lib/request-metrics.js` | `[metrics]` prep k6 (Fase A) |
 | Fase B (RTT) | [`02-tasks-fase-b-rtt-batching.md`](./02-tasks-fase-b-rtt-batching.md) | Task 0+B1–B6; contratos [`contratos-fase-b.md`](./contratos-fase-b.md) |
-| Fase C (escala) | [`03-tasks-fase-c-escala-obs.md`](./03-tasks-fase-c-escala-obs.md) | Task 0+C1–C7 feitas; gates ops/k6 |
-| k6 / baseline | [`04-tasks-k6-carga.md`](./04-tasks-k6-carga.md) · [`docs/load-results/`](../load-results/) | C1–C6 + [`RUNBOOK-CAPACIDADE.md`](../load-results/RUNBOOK-CAPACIDADE.md); `BASELINE-POST-A` |
-| Deploy limits | [`vercel.json`](../../vercel.json) | 256 MB, 10 s, cron purge |
+| Fase C (escala) | [`03-tasks-fase-c-escala-obs.md`](./03-tasks-fase-c-escala-obs.md) | Task 0+C1–C7 |
+| k6 / baseline | [`04-tasks-k6-carga.md`](./04-tasks-k6-carga.md) · [`docs/load-results/`](../load-results/) | **measured** `8b67ad6` / 2026-09-22 |
+| Deploy limits | [`vercel.json`](../../vercel.json) | 256 MB, 10 s, cron purge + warmup |

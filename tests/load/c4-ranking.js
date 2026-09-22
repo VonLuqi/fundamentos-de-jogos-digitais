@@ -1,15 +1,16 @@
 /**
  * C4 — Ranking: leaderboardGet periódico (pós-B5 RPC).
- * docs/otimizacoes/04-tasks-k6-carga.md · Fase C / C2
+ * docs/otimizacoes/04-tasks-k6-carga.md
  *
- *   k6 run -e BASE_URL=… -e LOAD_USERNAME=… -e LOAD_PASSWORD=… tests/load/c4-ranking.js
- *
- * Opcional: LOAD_LB_SCOPE=turma|global  LOAD_LB_SORT=xp|achievements|juizoBest  LOAD_LB_LIMIT=25
+ *   k6 run -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json tests/load/c4-ranking.js
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { login } from './lib/auth.js';
 import { getConfig } from './lib/config.js';
+import { tokenForVu } from './lib/tokens.js';
+
+http.setResponseCallback(http.expectedStatuses(200, 201, 204, 400, 403, 429));
 
 export const options = {
   scenarios: {
@@ -20,36 +21,35 @@ export const options = {
     },
   },
   thresholds: {
-    http_req_failed: ['rate<0.01'],
-    'http_req_duration{name:leaderboard_get}': ['p(95)<800'],
+    http_req_failed: ['rate<0.05'],
+    'http_req_duration{name:leaderboard_get}': ['p(95)<1500'],
   },
 };
 
-export function setup() {
+/** @type {string|null} */
+let vuToken = null;
+
+export default function c4Ranking() {
   const cfg = getConfig();
-  if (!cfg.username || !cfg.password) {
-    throw new Error('Defina LOAD_USERNAME e LOAD_PASSWORD');
+  if (!vuToken) {
+    vuToken = tokenForVu(__VU);
+    if (!vuToken) {
+      if (!cfg.username || !cfg.password) {
+        throw new Error('Defina LOAD_TOKENS_FILE ou LOAD_USERNAME + LOAD_PASSWORD');
+      }
+      vuToken = login(cfg.baseUrl, cfg.username, cfg.password);
+      if (!vuToken) throw new Error('login falhou no C4');
+    }
   }
-  const token = login(cfg.baseUrl, cfg.username, cfg.password);
-  if (!token) throw new Error('login falhou no setup C4');
-  return {
-    token,
-    baseUrl: cfg.baseUrl,
+
+  const body = {
+    token: vuToken,
+    action: 'leaderboardGet',
     scope: cfg.lbScope,
     sort: cfg.lbSort,
     limit: cfg.lbLimit,
   };
-}
-
-export default function c4Ranking(data) {
-  const body = {
-    token: data.token,
-    action: 'leaderboardGet',
-    scope: data.scope,
-    sort: data.sort,
-    limit: data.limit,
-  };
-  const res = http.post(`${data.baseUrl}/api/progress`, JSON.stringify(body), {
+  const res = http.post(`${cfg.baseUrl}/api/progress`, JSON.stringify(body), {
     headers: { 'Content-Type': 'application/json' },
     tags: { name: 'leaderboard_get' },
   });

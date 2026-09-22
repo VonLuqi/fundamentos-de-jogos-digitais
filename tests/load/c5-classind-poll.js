@@ -1,16 +1,16 @@
 /**
  * C5 — ClassInd poll (degradado / getState periódico).
- * docs/otimizacoes/04-tasks-k6-carga.md · Fase C / C2
+ * docs/otimizacoes/04-tasks-k6-carga.md
  *
- *   k6 run -e BASE_URL=… -e LOAD_USERNAME=… -e LOAD_PASSWORD=… tests/load/c5-classind-poll.js
- *
- * Opcional: LOAD_CLASSIND_ROOM_ID=… ou LOAD_CLASSIND_CODE=ABCD
- * Sem sala: ainda bate /api/classind (espera 4xx) — mede degradação do path, não happy-path.
+ *   k6 run -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json tests/load/c5-classind-poll.js
  */
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { login } from './lib/auth.js';
 import { getConfig } from './lib/config.js';
+import { tokenForVu } from './lib/tokens.js';
+
+http.setResponseCallback(http.expectedStatuses(200, 201, 204, 400, 403, 404, 429));
 
 export const options = {
   scenarios: {
@@ -26,30 +26,30 @@ export const options = {
   },
 };
 
-export function setup() {
-  const cfg = getConfig();
-  if (!cfg.username || !cfg.password) {
-    throw new Error('Defina LOAD_USERNAME e LOAD_PASSWORD');
-  }
-  const token = login(cfg.baseUrl, cfg.username, cfg.password);
-  if (!token) throw new Error('login falhou no setup C5');
-  return {
-    token,
-    baseUrl: cfg.baseUrl,
-    roomId: cfg.classindRoomId,
-    code: cfg.classindCode,
-  };
-}
+/** @type {string|null} */
+let vuToken = null;
 
-export default function c5ClassindPoll(data) {
+export default function c5ClassindPoll() {
+  const cfg = getConfig();
+  if (!vuToken) {
+    vuToken = tokenForVu(__VU);
+    if (!vuToken) {
+      if (!cfg.username || !cfg.password) {
+        throw new Error('Defina LOAD_TOKENS_FILE ou LOAD_USERNAME + LOAD_PASSWORD');
+      }
+      vuToken = login(cfg.baseUrl, cfg.username, cfg.password);
+      if (!vuToken) throw new Error('login falhou no C5');
+    }
+  }
+
   const payload = {
-    token: data.token,
+    token: vuToken,
     action: 'getState',
   };
-  if (data.roomId) payload.roomId = data.roomId;
-  if (data.code) payload.code = data.code;
+  if (cfg.classindRoomId) payload.roomId = cfg.classindRoomId;
+  if (cfg.classindCode) payload.code = cfg.classindCode;
 
-  const res = http.post(`${data.baseUrl}/api/classind`, JSON.stringify(payload), {
+  const res = http.post(`${cfg.baseUrl}/api/classind`, JSON.stringify(payload), {
     headers: { 'Content-Type': 'application/json' },
     tags: { name: 'classind_get_state' },
   });

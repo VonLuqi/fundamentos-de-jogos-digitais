@@ -4,7 +4,7 @@
 > **Base:** [`plano-arquitetura-performance-escalabilidade.md`](../plano-arquitetura-performance-escalabilidade.md) §§ 3.2–3.4, 3.6–3.7, 4.3–4.5, 5 · DoD Fase C  
 > **Predecessor:** [`01-tasks-fase-a-contencao.md`](./01-tasks-fase-a-contencao.md) + [`02-tasks-fase-b-rtt-batching.md`](./02-tasks-fase-b-rtt-batching.md) (código B1–B6 feito; baseline k6 `measured` ainda **ops**)  
 > **Estado do documento:** pronto para execução  
-> **Estado da implementação:** Task 0 + C1–C7 feitas (Fase C código completo; gates ops/k6 ainda abertos)  
+> **Estado da implementação:** Task 0 + C1–C7 feitas; baseline k6 lab `measured` (2026-09-22)  
 > **Gargalos alvo:** G9 (cold start / monólitos), G4 (endurecimento L7), G7 (snapshot opcional), G1 (pooler só se necessário), observabilidade  
 > **Fora desta fase:** Migrar para Supabase Auth; multi-região; cache CDN de POST autenticado; relaxar `validateSync` / XP client-side
 
