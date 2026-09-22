@@ -1,5 +1,7 @@
 # Documento de Design de Jogo (GDD) & Arquitetura de Software: Hades - O Despertar do Submundo
 
+> **Implementação:** [`docs/plano-hades-despertar.md`](plano-hades-despertar.md) (Fases 0–8) · UI Cookie / Juízo dle: [`plano-despertar-ui-cookieclicker.md`](plano-despertar-ui-cookieclicker.md) · Juízo v2: [`gdd-juizo-v2.md`](gdd-juizo-v2.md) — este GDD é a referência de design; os planos rastreiam o que já está no código.
+
 ---
 
 ## 1. Visão Geral e Pitch
@@ -52,10 +54,25 @@ O jogo adota um design *Dark Mode* solene e sofisticado, utilizando variáveis C
 }
 ```
 
-### 2.3 Layout Funcional da Interface (Três Colunas)
-1. **Coluna Esquerda (Santuário de Colheita Active):** Exibe a representação gráfica do Altar do Acheron, o botão de clique principal (Foice de Hades / Portal), estatísticas dinâmicas de Almas por Segundo ($SPS$), taxa de clique e o indicador de partículas ativas.
-2. **Coluna Central (Mercado dos Rios / Geradores):** Lista vertical contendo os geradores passivos encadeados por nível, mostrando quantidade possuída, produção individual e botões de compra dinâmicos com máscaras visuais cinzas quando o saldo for insuficiente.
-3. **Coluna Direita (Upgrades, Rituais & Estatísticas):** Abas alternáveis para Upgrades de Tecnologia, Panteão de Prestígio (Rio Lethe), Painel de Salvamento e Logs da Plataforma Educacional.
+### 2.3 Layout Funcional da Interface (Três Colunas — espírito Cookie Clicker)
+
+Layout vivo em `pages/despertar.html` (reformulação Fase 8). Detalhe operacional: [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md).
+
+1. **Coluna esquerda — Santuário do Acheron (Big Foice):** HUD de almas + SPS (**saldo real**, sem interpolação enganosa), alvo enorme **Ceifar**, órbita de Sombras Vagantes (cap 40), chuva/véu, CTA **Abrir o Juízo**.
+2. **Coluna centro — Domínio:** aba padrão **Mundo** (prateleiras Canvas2D por gerador, cap 40 NPCs/tipo) + tabs **Stats · Códice · Lethe · Bancada · Estela**.
+3. **Coluna direita — Mercado / Store:** lista densa de geradores (compra 1/10/100/Máx) + faixa de **Juramentos** (Styx) acima da store.
+
+Mobile: Altar → Store → Mundo. Juice (clique, compra, motes) é teatro; a HUD permanece a verdade. `prefers-reduced-motion` desliga animações.
+
+### 2.4 Juízo do Tartarus (Higher / Lower)
+
+Minigame ClassInd no Despertar — GDD curto: [`gdd-juizo-v2.md`](./gdd-juizo-v2.md).
+
+* **Loop:** campeão com faixa ClassInd visível · desafiante com `?` · **click no card** (faixa mais alta) ou **Empate**.
+* **Sucessor:** no acerto, o desafiante **sempre** vira o próximo campeão (slide clássico HL), inclusive no empate.
+* **Superfície:** modal overlay; **GameLoop não pausa**.
+* **Economia:** **Vereditos** via milestones de melhor streak; gasta na **Bancada do Juiz** (talents permanentes).
+* **Anti-cheat:** rating do desafiante só no servidor até o reveal; API aceita `A` \| `B` \| `tie` (aliases `higher` \| `lower`).
 
 ---
 
@@ -87,6 +104,7 @@ O fluxo fundamental do jogo segue a estrutura clássica de sustentação psicol�
 * **Almas (Souls):** Recurso primário contínuo gerado por cliques e geradores passivos.
 * **Óbolos de Caronte (Obols):** Moeda de prestígio de Primeira Ordem obtida ao realizar a Ascensão no Rio Lethe.
 * **Essência de Mnemosyne:** Moeda de prestígio de Segunda Ordem para destravamento de artefatos divinos na árvore de talentos.
+* **Vereditos:** Moeda exclusiva do **Juízo do Tartarus** (milestones de melhor streak); gasta na Bancada do Juiz. Não resetam no Lethe.
 
 ### 3.3 Fórmulas Matemáticas de Escalonamento
 Seguindo o padrão consolidado da indústria e a base da engine Aldo111, os custos evoluem de forma exponencial rigorosa para evitar o estouramento precoce e impor desafios de planejamento ao jogador:
