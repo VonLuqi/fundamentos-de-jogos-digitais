@@ -920,5 +920,176 @@
       "anime",
       "shonen"
     ]
+  },
+  {
+    "file": "batman.webp",
+    "label": "Batman",
+    "searchTerms": [
+      "bruce wayne",
+      "dc",
+      "liga da justiça"
+    ],
+    "tags": [
+      "cultura-pop"
+    ]
+  },
+  {
+    "file": "flash.webp",
+    "label": "Flash",
+    "searchTerms": [
+      "barry allen",
+      "dc",
+      "liga da justiça"
+    ],
+    "tags": [
+      "cultura-pop"
+    ]
+  },
+  {
+    "file": "mulher-maravilha.webp",
+    "label": "Mulher-Maravilha",
+    "searchTerms": [
+      "wonder woman",
+      "diana",
+      "dc",
+      "liga da justiça"
+    ],
+    "tags": [
+      "cultura-pop"
+    ]
+  },
+  {
+    "file": "naruto-modo-kyuubi.webp",
+    "label": "Naruto Modo Kyuubi",
+    "searchTerms": [
+      "naruto",
+      "kurama",
+      "bijuu",
+      "uzumaki"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sakura-kawaii.webp",
+    "label": "Sakura Kawaii",
+    "searchTerms": [
+      "sakura",
+      "haruno",
+      "naruto"
+    ],
+    "tags": [
+      "anime",
+      "kawaii",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sakura.webp",
+    "label": "Sakura",
+    "searchTerms": [
+      "sakura",
+      "haruno",
+      "naruto"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sakura02.webp",
+    "label": "Sakura Flores",
+    "searchTerms": [
+      "sakura",
+      "haruno",
+      "naruto",
+      "cerejeira"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sasuke.webp",
+    "label": "Sasuke",
+    "searchTerms": [
+      "sasuke",
+      "uchiha",
+      "naruto"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "spring-trap.webp",
+    "label": "Springtrap",
+    "searchTerms": [
+      "springtrap",
+      "fnaf",
+      "five nights at freddy's",
+      "william afton"
+    ],
+    "tags": [
+      "jogos"
+    ]
+  },
+  {
+    "file": "stinger.webp",
+    "label": "Stinger",
+    "searchTerms": [
+      "transformers",
+      "robo",
+      "mech"
+    ],
+    "tags": [
+      "cultura-pop",
+      "jogos"
+    ]
+  },
+  {
+    "file": "sung-jin-woo-king.webp",
+    "label": "Sung Jin-Woo Rei",
+    "searchTerms": [
+      "sung jin woo",
+      "solo leveling",
+      "shadow monarch",
+      "rei das sombras"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "sung-jin-woo.webp",
+    "label": "Sung Jin-Woo",
+    "searchTerms": [
+      "sung jin woo",
+      "solo leveling",
+      "shadow monarch"
+    ],
+    "tags": [
+      "anime",
+      "shonen"
+    ]
+  },
+  {
+    "file": "superman.webp",
+    "label": "Superman",
+    "searchTerms": [
+      "clark kent",
+      "dc",
+      "liga da justiça",
+      "homem de aço"
+    ],
+    "tags": [
+      "cultura-pop"
+    ]
   }
 ]

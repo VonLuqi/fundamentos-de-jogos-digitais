@@ -7,12 +7,13 @@ resolucao. O indice salvo no banco (avatar_index) continua sendo
 0-based e corresponde a ordem do catalogo semantico
 (`assets/avatars/catalog.stub.json`), nao a ordem alfabetica abaixo.
 
-Total de avatares ativos: 89
+Total de avatares ativos: 102
 
 Galeria atual:
 
 ```
 assets/avatars/afrodite.webp
+assets/avatars/batman.webp
 assets/avatars/beluga.webp
 assets/avatars/blinking-white-guy.webp
 assets/avatars/brook-rock.webp
@@ -33,6 +34,7 @@ assets/avatars/cry-girl.webp
 assets/avatars/crying-jordan.webp
 assets/avatars/dino-hoodie.webp
 assets/avatars/filhote-bone.webp
+assets/avatars/flash.webp
 assets/avatars/fry.webp
 assets/avatars/gatinho-flor.webp
 assets/avatars/gatinho-oculos.webp
@@ -65,8 +67,10 @@ assets/avatars/menina-samoyed.webp
 assets/avatars/menininha.webp
 assets/avatars/michael-jackson.webp
 assets/avatars/mileena.webp
+assets/avatars/mulher-maravilha.webp
 assets/avatars/nami-pain.webp
 assets/avatars/nami.webp
+assets/avatars/naruto-modo-kyuubi.webp
 assets/avatars/neko-coracoes.webp
 assets/avatars/neko-gato.webp
 assets/avatars/neko-rosa.webp
@@ -79,18 +83,27 @@ assets/avatars/robin-owo.webp
 assets/avatars/robin.webp
 assets/avatars/roblox-man-face.webp
 assets/avatars/rusbe.webp
+assets/avatars/sakura-kawaii.webp
+assets/avatars/sakura.webp
+assets/avatars/sakura02.webp
 assets/avatars/salsicha-instinto.webp
 assets/avatars/sami-nuvens.webp
 assets/avatars/sanji.webp
+assets/avatars/sasuke.webp
 assets/avatars/satoru-gojo-kid.webp
 assets/avatars/satoru-gojo.webp
 assets/avatars/scorpion.webp
 assets/avatars/shrek.webp
 assets/avatars/snoopy.webp
 assets/avatars/snowball.webp
+assets/avatars/spring-trap.webp
+assets/avatars/stinger.webp
 assets/avatars/stitch-hoodie.webp
 assets/avatars/stitch-pelucia.webp
 assets/avatars/sub-zero.webp
+assets/avatars/sung-jin-woo-king.webp
+assets/avatars/sung-jin-woo.webp
+assets/avatars/superman.webp
 assets/avatars/tails.webp
 assets/avatars/tangirina.webp
 assets/avatars/tio-patinhas.webp
