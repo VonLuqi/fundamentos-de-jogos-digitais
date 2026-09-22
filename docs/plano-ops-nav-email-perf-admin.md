@@ -7,6 +7,8 @@
 > **Fora deste ciclo:** migrar para Supabase Auth · partial HTML compartilhado do shell · 2FA · leaderboard PvP de **SPS/Almas** do Despertar.  
 > **Placar do Domínio** (XP · conquistas · streak do Juízo) e o minigame **Juízo do Tartarus** estão no [`plano-hades-despertar.md`](./plano-hades-despertar.md) **Fase 7** — não neste ciclo de ops.
 
+> **Emenda 2026-09-22 (e-mail / recuperação):** as decisões **B1–B4 / B6** (hard-gate) e o papel central de **C** (Caronte + forçar e-mail) foram **superseded** por [`plano-email-opcional-recuperacao-admin.md`](./plano-email-opcional-recuperacao-admin.md). Contrato vigente: e-mail **opcional**, hard-gate **off**, recuperação preferida = **Código de Recuperação da Alma** no Espelho. B5 (entrega SMTP/Resend) e C legado (Caronte) permanecem como canal/atalho, não como gate. O histórico abaixo não foi reescrito.
+
 Este documento é o **mapa operacional** das frentes de lapidação. Cada Task é executável sozinha, na ordem.
 
 ---
@@ -15,8 +17,8 @@ Este documento é o **mapa operacional** das frentes de lapidação. Cada Task �
 
 1. **Nav coerente + Despertar sob chave do Mestre:** um único slot de jogo no shell; alunos veem **O Despertar · em breve** até o admin liberar; URL e API bloqueadas enquanto fechado.
 2. **Performance + segurança:** batch de gates, rate limit de auth, TTL de sessões, prerequisites no redeem.
-3. **E-mail hard-gate:** alunos sem selo confirmado não usam o Domínio (exceto auth + vínculo/confirmação).
-4. **Recuperação legada:** aluno sem e-mail recupera com **código do Mestre** + e-mail; o link de reset **também confirma o selo**. Contas novas só via Firmar Pacto.
+3. **E-mail:** ~~hard-gate~~ → **opcional** + soft-nudge (emenda 2026-09-22 — plano-email).
+4. **Recuperação:** ~~só Caronte+e-mail~~ → **Código de Recuperação da Alma** preferido; Caronte legado.
 5. **Migrates automáticos:** `npm run db:migrate` sem SQL Editor.
 6. **Relatório Almas lapidado:** filtros práticos, todas as aulas, busca na Vigília, CSV, app-shell, **espelho editável** da conta do aluno.
 
@@ -82,25 +84,29 @@ Este documento é o **mapa operacional** das frentes de lapidação. Cada Task �
 
 ### B. E-mail obrigatório
 
+> **Superseded** — ver emenda no topo e [`plano-email-opcional-recuperacao-admin.md`](./plano-email-opcional-recuperacao-admin.md) (Tasks 1–2). Hard-gate removido; e-mail opcional.
+
 | # | Tema | Decisão |
 | --- | --- | --- |
-| B1 | Dureza | **Hard-block:** qualquer página protegida redireciona ao Painel (`?selo=1`) até `email_verified_at` preenchido. |
-| B2 | Pending | **Sim** — e-mail gravado sem confirmação também bloqueia. |
+| B1 | Dureza | ~~**Hard-block**~~ → **soft-nudge** (emenda 2026-09-22). |
+| B2 | Pending | ~~bloqueia~~ → **não bloqueia** navegação (emenda). |
 | B3 | Admin | **Isento.** |
-| B4 | Após vincular | Só navega o Domínio **depois** de confirmar o selo. Pending = só Painel (vínculo + reenvio) + `auth.html?verify=`. |
-| B5 | Entrega de e-mail | **Resend com domínio verificado** como caminho primário de produção. Manter `nodemailer` SMTP como fallback já previsto em `mailer.js`. **Pré-requisito operacional:** Task 3 hard só sobe em prod depois do DNS (SPF/DKIM) e `MAIL_FROM` no domínio real — senão a turma fica presa. Documentar checklist no README / playbook. |
-| B6 | Server | Mutações em `progress` / `despertar` / `classind` (exceto auth de selo) → `403 messenger_seal_required` para student sem selo. |
+| B4 | Após vincular | Confirmar selo habilita reset por e-mail; Domínio já liberado sem selo. |
+| B5 | Entrega de e-mail | **Resend com domínio verificado** ou **SMTP**. Checklist + sonda admin no README / Task 1 do plano-email. |
+| B6 | Server | ~~`403 messenger_seal_required`~~ → `rejectUnlessMessengerSeal` **no-op** (emenda). |
 
 ### C. Recuperação legada
 
+> **Parcialmente superseded** — recuperação preferida = Código de Recuperação da Alma (Task 3 do plano-email). Caronte permanece como atalho **legado** (“Alma antiga”).
+
 | # | Tema | Décisão |
 | --- | --- | --- |
-| C1 | Fluxo | Username → se alma existe **sem** e-mail → painel “Selar o Mensageiro para recuperar” → e-mail + código do Mestre → Mensageiro → Nova Palavra. |
-| C2 | Prova de posse | **Código do Mestre** (opção C). Não basta username. |
-| C2b | Forma do código | Tabela `site_settings` (ou equivalente) com hash do código atual + `rotated_at`. Admin **gera/rota** no relatório Almas (mostra o plaintext **uma vez**). Aluno digita no fluxo legado. Rate limit por IP/username. Código mínimo 8 chars, charset sem ambiguidade. |
-| C3 | E-mails | **Um passo:** o link do Mensageiro **confirma o selo e** abre o painel Nova Palavra (`email_verified_at` no mesmo consumo do token de propósito `legacy_reset` / `reset_password` estendido). |
-| C4 | Contas novas | **Proibido** usar o atalho — só Firmar Pacto. |
-| C5 | Já tem selo | Fluxo atual intacto: username + e-mail confirmado → reset. |
+| C1 | Fluxo | Preferido: Espelho → emitir código → Pacto **O Mestre me deu um código**. Legado: Caronte + e-mail. |
+| C2 | Prova de posse | Código **por aluno** (hash em `soul_recovery_codes`) ou Caronte global (legado). |
+| C2b | Forma do código | Charset compartilhado; Caronte em `site_settings`; códigos de alma em `soul_recovery_codes` (TTL 24h). |
+| C3 | E-mails | Legado Caronte ainda confirma selo no link; código de alma **não** exige e-mail. |
+| C4 | Contas novas | Firmar Pacto (e-mail opcional). |
+| C5 | Já tem selo | Reset por e-mail intacto. |
 
 ### D. Performance / segurança
 
@@ -155,7 +161,7 @@ Este documento é o **mapa operacional** das frentes de lapidação. Cada Task �
 | E-mail | **E-mail** / **Selo do Mensageiro** | Painel + gate |
 | Confirmar e-mail | **Confirmar o selo** | Link `?verify=` / reset legado |
 | Esqueci senha | **A Palavra se perdeu** | `auth.html` |
-| Código de recuperação | **Senha do Caronte** (código do Mestre) | Fluxo legado + Almas |
+| Código de recuperação | **Código de Recuperação da Alma** (preferido) · **Senha do Caronte** (legado) | Espelho + Pacto |
 | Bind na recuperação | **Selar o Mensageiro para recuperar** | Painel reset legado |
 | Relatório | **Almas Registradas** | `souls.html` |
 | Dossier | **Espelho da Alma** | Detalhe admin |

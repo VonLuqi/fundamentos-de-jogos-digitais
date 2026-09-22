@@ -224,16 +224,39 @@ body {
   color: var(--hades-gold-bright);
 }
 
+.pact-form__lost-btn--muted {
+  font-size: 0.85rem;
+  color: var(--hades-text-dim, #ab9c8a);
+  opacity: 0.85;
+}
+
+.pact-form__lost-btn--muted:hover {
+  color: var(--hades-gold);
+  opacity: 1;
+}
+
 .pact-form__back {
   margin-top: 1rem;
   text-align: center;
 }
 
 .pact-form__hint {
-  margin: 0 0 1rem;
-  font-size: 0.92rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
   line-height: 1.45;
   color: var(--hades-text-dim, #ab9c8a);
+}
+
+.pact-form__hint--forgot {
+  margin: 0.85rem 0 0.35rem;
+  text-align: center;
+}
+
+.pact-form__optional {
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  opacity: 0.75;
 }
 
 .pact-form__status {

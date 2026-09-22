@@ -27,6 +27,7 @@ import {
   adminClearEmailSeal,
   adminInvalidateSessions,
   adminForceTempPassword,
+  adminIssueSoulRecoveryCode,
 } from './api.js';
 import {
   activityLessonIds,
@@ -838,6 +839,7 @@ function openSoulEspelho(user, options = {}) {
 
   // Segurança
   const secSec = section('Segurança');
+  secSec.appendChild(row('Aluno sem e-mail ou Mensageiro fora do ar → Emitir Código de Recuperação.'));
   const wipeSessions = document.createElement('button');
   wipeSessions.type = 'button';
   wipeSessions.className = 'btn-refresh';
@@ -849,12 +851,33 @@ function openSoulEspelho(user, options = {}) {
       showApiWarning(`Sessões de @${username} encerradas.`);
     }
   });
+  const issueCode = document.createElement('button');
+  issueCode.type = 'button';
+  issueCode.className = 'btn-refresh';
+  issueCode.textContent = 'Emitir Código de Recuperação';
+  issueCode.addEventListener('click', async () => {
+    if (!window.confirm(
+      `Emitir Código de Recuperação da Alma para @${username}?\n\n`
+      + 'Vale 24h, uso único. Mostre só na sala — não reaparece.',
+    )) return;
+    const result = await runEspelhoMutation('código', () => adminIssueSoulRecoveryCode(currentToken, user.id));
+    if (result?.code) {
+      const expiresLabel = result.expiresAt
+        ? new Date(result.expiresAt).toLocaleString('pt-BR')
+        : '24h';
+      window.prompt(
+        `Código de Recuperação · @${username} (expira ${expiresLabel})\n`
+        + 'Aluno usa em A Palavra se perdeu? → O Mestre me deu um código.',
+        result.code,
+      );
+    }
+  });
   const tempPass = document.createElement('button');
   tempPass.type = 'button';
   tempPass.className = 'btn-refresh';
   tempPass.textContent = 'Palavra temporária';
   tempPass.addEventListener('click', async () => {
-    if (!window.confirm(`Gerar Palavra temporária para @${username}? Sessões atuais caem.`)) return;
+    if (!window.confirm(`Gerar Palavra temporária (pronta) para @${username}? Sessões atuais caem.`)) return;
     const result = await runEspelhoMutation('senha', () => adminForceTempPassword(currentToken, user.id));
     if (result?.tempPassword) {
       window.prompt('Palavra temporária (copie agora — não aparece de novo):', result.tempPassword);
@@ -862,7 +885,7 @@ function openSoulEspelho(user, options = {}) {
   });
   const secActions = document.createElement('div');
   secActions.className = 'espelho-actions';
-  secActions.append(wipeSessions, tempPass);
+  secActions.append(wipeSessions, issueCode, tempPass);
   secSec.appendChild(secActions);
   body.appendChild(secSec);
 

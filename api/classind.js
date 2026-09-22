@@ -14,10 +14,6 @@ import crypto from 'node:crypto';
 import supabase from './supabaseClient.js';
 import { loadValidSession } from './_lib/sessions.js';
 import {
-  MESSENGER_SEAL_REQUIRED,
-  needsMessengerSeal,
-} from './_lib/messenger-seal.js';
-import {
   DECK_ID,
   deckLength,
   getRoundByIndex,
@@ -165,9 +161,6 @@ async function loadSessionUser(token) {
 
   if (userError) return { errorStatus: 500, error: 'Falha ao carregar usuário.' };
   if (!user) return { errorStatus: 404, error: 'Usuário não encontrado.' };
-  if (needsMessengerSeal(user)) {
-    return { errorStatus: 403, error: MESSENGER_SEAL_REQUIRED };
-  }
   return { user };
 }
 

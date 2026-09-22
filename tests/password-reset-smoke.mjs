@@ -68,7 +68,12 @@ assert(apiJs.includes('action: \'bindEmail\''), 'js/api.js precisa de bindEmail'
 assert(apiJs.includes('action: \'requestEmailVerification\''), 'js/api.js precisa de requestEmailVerification');
 assert(authJs.includes('requestPasswordReset') && authJs.includes('FORGOT_SUCCESS_COPY'), 'js/auth.js precisa chamar o Mensageiro com copy genérica');
 assert(authJs.includes("activateMode('reset')"), 'js/auth.js deve abrir o painel em ?reset=');
-assert(!/triggerScreenShake\(\)/.test(authJs.split('handleForgotSubmit')[1]?.split('handleResetSubmit')[0] || ''), 'pedido de reset não deve dar screen-shake');
+{
+  // handleMasterCodeSubmit (com shake) fica entre forgot e reset — isolar só o pedido ao Mensageiro.
+  const afterForgot = authJs.split('async function handleForgotSubmit')[1] || '';
+  const forgotOnly = afterForgot.split('async function handle')[0] || '';
+  assert(!/triggerScreenShake\(\)/.test(forgotOnly), 'pedido de reset não deve dar screen-shake');
+}
 notes.push('Cliente: helpers e modos do Pacto');
 
 /* --- API actions (sem I/O) --- */
@@ -141,8 +146,8 @@ notes.push('DTO: e-mail só no self; perfil mascara');
 assert(envExampleBits.includes('RESEND_API_KEY'), 'README precisa de RESEND_API_KEY');
 assert(envExampleBits.includes('APP_BASE_URL'), 'README precisa de APP_BASE_URL');
 assert(
-  /vincule|vincular e-mail|Painel do Herói/i.test(envExampleBits),
-  'README deve avisar alunos antigos a vincularem e-mail no painel'
+  /vincule|vincular e-mail|Painel do Herói|Código de Recuperação|Playbook de sala/i.test(envExampleBits),
+  'README deve cobrir selo no painel ou recuperação pelo Mestre'
 );
 notes.push('README: env + onboarding');
 

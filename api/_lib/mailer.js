@@ -151,6 +151,58 @@ async function sendViaSmtp({ recipient, subject, html, text }) {
   }
 }
 
+/**
+ * Status sem segredos — para o Mestre diagnosticar o canal na sala.
+ * @returns {{
+ *   ready: boolean,
+ *   hasResend: boolean,
+ *   hasSmtp: boolean,
+ *   appBaseUrlSet: boolean,
+ *   fromPreview: string,
+ *   resendFromPreview: string,
+ *   usingTestingFrom: boolean,
+ *   primary: 'resend'|'smtp'|'none',
+ *   hint: string|null,
+ * }}
+ */
+export function getMailerStatus() {
+  const hasResend = Boolean(String(process.env.RESEND_API_KEY || '').trim());
+  const hasSmtp = Boolean(smtpConfig());
+  const appBaseUrlSet = Boolean(String(process.env.APP_BASE_URL || '').trim());
+  const fromPreview = mailFrom();
+  const resendFromPreview = resendFrom();
+  const usingTestingFrom = /@resend\.dev>/i.test(resendFromPreview)
+    || /@resend\.dev$/i.test(resendFromPreview)
+    || /onboarding@resend\.dev/i.test(resendFromPreview);
+
+  let primary = 'none';
+  if (hasResend) primary = 'resend';
+  else if (hasSmtp) primary = 'smtp';
+
+  let hint = null;
+  if (!hasResend && !hasSmtp) {
+    hint = 'Nenhum provedor: defina RESEND_API_KEY ou SMTP_HOST + SMTP_USER + SMTP_PASS.';
+  } else if (hasResend && usingTestingFrom && !hasSmtp) {
+    hint = 'Remetente resend.dev só entrega na caixa da conta Resend. Verifique um domínio ou configure SMTP.';
+  } else if (hasResend && usingTestingFrom && hasSmtp) {
+    hint = 'Resend em modo teste; a turma deve cair no fallback SMTP se o Resend recusar.';
+  } else if (!appBaseUrlSet) {
+    hint = 'APP_BASE_URL ausente — links de selo/reset podem não sair (obrigatório em Preview).';
+  }
+
+  return {
+    ready: hasResend || hasSmtp,
+    hasResend,
+    hasSmtp,
+    appBaseUrlSet,
+    fromPreview,
+    resendFromPreview,
+    usingTestingFrom,
+    primary,
+    hint,
+  };
+}
+
 export async function sendMail({ to, subject, html, text }) {
   const recipient = String(to || '').trim();
   if (!recipient) {
@@ -159,14 +211,13 @@ export async function sendMail({ to, subject, html, text }) {
   }
 
   const payload = { recipient, subject, html, text };
-  const hasResend = Boolean(String(process.env.RESEND_API_KEY || '').trim());
-  const hasSmtp = Boolean(smtpConfig());
+  const status = getMailerStatus();
 
-  if (hasResend) {
+  if (status.hasResend) {
     const resendResult = await sendViaResend(payload);
     if (resendResult.ok) return resendResult;
 
-    if (hasSmtp) {
+    if (status.hasSmtp) {
       console.warn('[mailer] Resend falhou; tentando SMTP.', { reason: resendResult.reason });
       return sendViaSmtp(payload);
     }
@@ -174,7 +225,7 @@ export async function sendMail({ to, subject, html, text }) {
     return resendResult;
   }
 
-  if (hasSmtp) {
+  if (status.hasSmtp) {
     return sendViaSmtp(payload);
   }
 

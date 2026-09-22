@@ -9,13 +9,15 @@ export const AUTH_RATE_TABLE = 'auth_rate_events';
 export const AUTH_RATE_LIMIT_MESSAGE =
   'Muitas tentativas. O Submundo pede paciência — tente novamente em breve.';
 
-/** Limites congelados (plano Task 0 D2 + C2b). */
+/** Limites congelados (plano Task 0 D2 + C2b + Task 3 soul recovery). */
 export const AUTH_RATE_LIMITS = Object.freeze({
   login_ip: { action: 'login', windowMs: 15 * 60 * 1000, max: 10, by: 'ip' },
   login_user: { action: 'login', windowMs: 15 * 60 * 1000, max: 10, by: 'username' },
   register_ip: { action: 'register', windowMs: 60 * 60 * 1000, max: 5, by: 'ip' },
   legacy_bind_ip: { action: 'legacy_bind', windowMs: 15 * 60 * 1000, max: 10, by: 'ip' },
   legacy_bind_user: { action: 'legacy_bind', windowMs: 15 * 60 * 1000, max: 5, by: 'username' },
+  soul_recovery_issue_user: { action: 'soul_recovery_issue', windowMs: 60 * 60 * 1000, max: 10, by: 'username' },
+  soul_recovery_consume_ip: { action: 'soul_recovery_consume', windowMs: 15 * 60 * 1000, max: 5, by: 'ip' },
 });
 
 function sha256Hex(value) {
@@ -96,6 +98,20 @@ export async function isAuthActionRateLimited(supabase, { action, ip, username }
         usernameHash,
       });
     }
+  } else if (action === 'soul_recovery_issue') {
+    if (usernameHash) {
+      checks.push({
+        ...AUTH_RATE_LIMITS.soul_recovery_issue_user,
+        ipHash: null,
+        usernameHash,
+      });
+    }
+  } else if (action === 'soul_recovery_consume') {
+    checks.push({
+      ...AUTH_RATE_LIMITS.soul_recovery_consume_ip,
+      ipHash,
+      usernameHash: null,
+    });
   }
 
   for (const check of checks) {

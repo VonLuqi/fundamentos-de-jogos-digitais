@@ -229,7 +229,13 @@ body {
   display: none !important;
 }
 
-/* Hard-gate Task 3: Domínio bloqueado até confirmar o selo */
+/* Soft-nudge (Task 2): destaque leve — sem travar o Domínio */
+.messenger-seal--nudge {
+  border-color: rgba(207, 167, 89, 0.45);
+  box-shadow: inset 0 0 18px rgba(194, 53, 72, 0.08);
+}
+
+/* Legado hard-gate (classe não é mais aplicada; regras mantidas por segurança) */
 body.is-messenger-gate .dashboard-layout > *:not(.dashboard-rail),
 body.is-messenger-gate .dashboard-rail > *:not(.profile-panel),
 body.is-messenger-gate .profile-panel > *:not(.messenger-seal):not(.profile-panel__username):not(.profile-panel__name):not(.master-badge),
@@ -1888,6 +1894,19 @@ img.achievement-card__art.has-art {
   flex-wrap: wrap;
   gap: 0.5rem;
   justify-content: flex-end;
+}
+
+.master-tools__mailer-status {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-body, 'Crimson Text', Georgia, serif);
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: rgba(232, 220, 196, 0.72);
+  text-align: right;
+}
+
+.master-tools__mailer-status.is-warn {
+  color: #e8a090;
 }
 
 .master-tools__actions .btn-gold {

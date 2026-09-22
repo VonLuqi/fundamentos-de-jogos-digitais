@@ -91,7 +91,8 @@ assert(authJs.includes('requestLegacyEmailBind'), 'auth.js chama legado');
 assert(authJs.includes("activateMode('legacy')"), 'auth.js modo legacy');
 assert(authJs.includes('LEGACY_SUCCESS_COPY'), 'auth.js copy genérica legado');
 
-assert(dashboardHtml.includes('btn-rotate-caronte'), 'Painel tem Gerar Senha do Caronte');
+assert(dashboardHtml.includes('btn-rotate-caronte'), 'Painel tem Senha do Caronte (legado)');
+assert(authHtml.includes('Alma antiga') || authHtml.includes('open-legacy'), 'atalho legado rotulado Alma antiga');
 assert(dashboardJs.includes('rotateRecoveryCode'), 'dashboard chama rotateRecoveryCode');
 
 assert(pkg.includes('ops-task4-caronte-recovery-smoke.mjs'), 'npm check inclui este smoke');

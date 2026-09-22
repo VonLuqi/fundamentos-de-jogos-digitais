@@ -21,6 +21,7 @@ import {
   requestPasswordReset,
   requestLegacyEmailBind,
   confirmPasswordReset,
+  consumeSoulRecoveryCode,
   saveSession,
   getSession,
   clearSession,
@@ -111,7 +112,8 @@ const MODE_SUBTITLES = {
   login: 'Assine seu nome no tomo dos iniciados para adentrar o Domínio.',
   register: 'Firmar um pacto é criar uma nova alma no Domínio — começando do zero.',
   forgot: 'O Mensageiro só parte se o selo desta alma estiver confirmado.',
-  legacy: 'Alma antiga sem e-mail: Senha do Caronte + endereço novo. O Mestre fala o código na sala.',
+  master: 'O Mestre emitiu um Código de Recuperação — sele uma Nova Palavra sem e-mail.',
+  legacy: 'Atalho legado (Caronte + e-mail). Prefira o Código de Recuperação da Alma no Espelho.',
   reset: 'Sele uma nova Palavra de Passagem para reabrir o Pacto.',
 };
 
@@ -124,6 +126,7 @@ function initModeToggle() {
   const formLogin = document.getElementById('form-login');
   const formRegister = document.getElementById('form-register');
   const formForgot = document.getElementById('form-forgot');
+  const formMaster = document.getElementById('form-master-code');
   const formLegacy = document.getElementById('form-legacy');
   const formReset = document.getElementById('form-reset');
   const toggle = document.querySelector('.pact-mode-toggle');
@@ -135,6 +138,7 @@ function initModeToggle() {
     const isLogin = mode === 'login';
     const isRegister = mode === 'register';
     const isForgot = mode === 'forgot';
+    const isMaster = mode === 'master';
     const isLegacy = mode === 'legacy';
     const isReset = mode === 'reset';
 
@@ -146,10 +150,11 @@ function initModeToggle() {
     formLogin.classList.toggle('is-active', isLogin);
     formRegister.classList.toggle('is-active', isRegister);
     formForgot?.classList.toggle('is-active', isForgot);
+    formMaster?.classList.toggle('is-active', isMaster);
     formLegacy?.classList.toggle('is-active', isLegacy);
     formReset?.classList.toggle('is-active', isReset);
 
-    if (toggle) toggle.hidden = isReset || isForgot || isLegacy;
+    if (toggle) toggle.hidden = isReset || isForgot || isLegacy || isMaster;
 
     if (subtitle && MODE_SUBTITLES[mode]) {
       subtitle.textContent = MODE_SUBTITLES[mode];
@@ -165,6 +170,13 @@ function initModeToggle() {
     activateMode('forgot');
   });
   document.getElementById('forgot-back')?.addEventListener('click', () => activateMode('login'));
+  document.getElementById('open-master-code')?.addEventListener('click', () => {
+    const statusEl = document.getElementById('master-status');
+    clearError(statusEl);
+    statusEl?.classList.remove('is-error');
+    activateMode('master');
+  });
+  document.getElementById('master-back')?.addEventListener('click', () => activateMode('forgot'));
   document.getElementById('open-legacy')?.addEventListener('click', () => {
     const statusEl = document.getElementById('legacy-status');
     clearError(statusEl);
@@ -209,7 +221,7 @@ async function handleRegisterSubmit(event) {
   const fullName = form.elements.full_name.value;
   const turma = form.elements.turma.value;
   const username = form.elements.username.value;
-  const email = form.elements.email.value;
+  const email = String(form.elements.email.value || '').trim();
   const password = form.elements.password.value;
   const passwordConfirm = form.elements.password_confirm.value;
 
@@ -222,7 +234,7 @@ async function handleRegisterSubmit(event) {
 
   setBusy(form, true, 'Firmando...');
   try {
-    const { token, user } = await register(fullName, turma, username, password, email);
+    const { token, user } = await register(fullName, turma, username, password, email || undefined);
     await confirmSessionBeforeRedirect(token, user);
     redirectToDashboard();
   } catch (error) {
@@ -291,6 +303,52 @@ async function handleLegacySubmit(event) {
   }
 }
 
+async function handleMasterCodeSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const statusEl = document.getElementById('master-status');
+  clearError(statusEl);
+  statusEl?.classList.remove('is-error');
+
+  const username = String(form.elements.username.value || '').trim();
+  const code = String(form.elements.code.value || '').trim();
+  const password = form.elements.password.value;
+  const passwordConfirm = form.elements.password_confirm.value;
+
+  if (!username || !code || !password) {
+    statusEl?.classList.add('is-error');
+    showError(statusEl, 'Informe a alma, o código e a nova Palavra.');
+    triggerScreenShake();
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    statusEl?.classList.add('is-error');
+    showError(statusEl, 'As palavras de passagem não coincidem.');
+    triggerScreenShake();
+    return;
+  }
+
+  setBusy(form, true, 'Selando...');
+  try {
+    await consumeSoulRecoveryCode(username, code, password);
+    const notice = document.getElementById('verify-result');
+    if (notice) {
+      notice.hidden = false;
+      notice.classList.remove('is-error');
+      notice.textContent = 'Palavra renovada — entre no Domínio.';
+    }
+    activateMode('login');
+    setBusy(form, false);
+  } catch (error) {
+    setBusy(form, false);
+    statusEl?.classList.add('is-error');
+    const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
+    showError(statusEl, message);
+    triggerScreenShake();
+  }
+}
+
 async function handleResetSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -347,11 +405,13 @@ function bindAuthInteractions() {
   const formLogin = document.getElementById('form-login');
   const formRegister = document.getElementById('form-register');
   const formForgot = document.getElementById('form-forgot');
+  const formMaster = document.getElementById('form-master-code');
   const formLegacy = document.getElementById('form-legacy');
   const formReset = document.getElementById('form-reset');
   if (formLogin) formLogin.addEventListener('submit', handleLoginSubmit);
   if (formRegister) formRegister.addEventListener('submit', handleRegisterSubmit);
   if (formForgot) formForgot.addEventListener('submit', handleForgotSubmit);
+  if (formMaster) formMaster.addEventListener('submit', handleMasterCodeSubmit);
   if (formLegacy) formLegacy.addEventListener('submit', handleLegacySubmit);
   if (formReset) formReset.addEventListener('submit', handleResetSubmit);
 

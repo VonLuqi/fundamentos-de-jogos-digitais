@@ -44,6 +44,8 @@ import {
   redeemCode,
   generateCode,
   rotateRecoveryCode,
+  adminMailerStatus,
+  adminProbeMailer,
   setAvatar,
   bindEmail,
   requestEmailVerification,
@@ -79,6 +81,8 @@ let messengerBound = false;
 let messengerGateFocused = false;
 
 const MESSENGER_RESEND_COPY = 'Se o selo ainda estiver pendente, o Mensageiro já partiu. Olhe a caixa — e o reino das promoções.';
+const MESSENGER_FAILED_COPY = 'O Mensageiro não partiu. Olhe o spam ou avise o Mestre — canal de e-mail.';
+const MESSENGER_BIND_FAILED_COPY = 'O endereço foi gravado, mas o Mensageiro não partiu. Avise o Mestre — canal de e-mail.';
 
 function mergeSelfUser(next) {
   const prev = currentUser || {};
@@ -108,21 +112,21 @@ function messengerSealKind(user) {
   return 'pending';
 }
 
-function applyMessengerHardGate(user) {
-  const locked = needsMessengerSeal(user);
-  document.body.classList.toggle('is-messenger-gate', locked);
-  if (!locked) {
+function applyMessengerSoftNudge(user) {
+  const wantsNudge = needsMessengerSeal(user);
+  document.body.classList.remove('is-messenger-gate');
+  if (!wantsNudge) {
     messengerGateFocused = false;
     return;
   }
 
   const seal = document.getElementById('messenger-seal');
   if (!seal) return;
-  seal.hidden = false;
-  seal.classList.add('messenger-seal--gate');
 
-  // Só rola/foca uma vez por sessão de gate (evita pular após vincular/reenviar).
+  // ?selo=1 ainda foca o bloco uma vez — sem travar o Domínio.
   if (messengerGateFocused) return;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('selo') !== '1') return;
   messengerGateFocused = true;
   window.requestAnimationFrame(() => {
     seal.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -151,15 +155,16 @@ function renderMessengerSeal(user) {
   }
 
   const kind = messengerSealKind(user);
-  const gated = needsMessengerSeal(user);
+  const wantsNudge = needsMessengerSeal(user);
   const showForm = kind === 'empty' || messengerShowForm;
   const hideConfirmedBlock = kind === 'confirmed' && !messengerShowForm;
 
   root.hidden = hideConfirmedBlock;
-  root.classList.toggle('messenger-seal--gate', gated);
-  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm || gated;
+  root.classList.toggle('messenger-seal--nudge', wantsNudge && kind !== 'confirmed');
+  root.classList.remove('messenger-seal--gate');
+  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm;
 
-  applyMessengerHardGate(user);
+  applyMessengerSoftNudge(user);
 
   if (hideConfirmedBlock) return;
 
@@ -175,9 +180,9 @@ function renderMessengerSeal(user) {
 
   if (stateEl) {
     stateEl.textContent = kind === 'empty'
-      ? 'Sem selo de mensageiro — vincule e confirme um e-mail para seguir no Domínio.'
+      ? 'O Mensageiro é opcional — sem ele, peça ao Mestre se a Palavra se perder. Vincule um e-mail se quiser recuperar sozinho.'
       : kind === 'pending'
-        ? 'O selo ainda não foi reconhecido. Abra o Mensageiro na caixa de entrada — e o reino das promoções.'
+        ? 'O selo ainda não foi reconhecido. Abra o Mensageiro na caixa de entrada — e o reino das promoções. Você já pode usar o Domínio.'
         : 'Selo reconhecido. A Palavra pode ser recuperada por este endereço.';
   }
 
@@ -193,8 +198,7 @@ function renderMessengerSeal(user) {
 
   if (form) form.hidden = !showForm;
   if (cancelBtn) {
-    // No hard-gate, empty não cancela; pending pode voltar ao resend.
-    cancelBtn.hidden = kind === 'empty' || !showForm || (gated && kind === 'empty');
+    cancelBtn.hidden = kind === 'empty' || !showForm;
   }
   if (bindBtn) {
     bindBtn.textContent = kind === 'empty' ? 'Vincular e-mail' : 'Selar novo endereço';
@@ -205,7 +209,6 @@ function renderMessengerSeal(user) {
   if (actions) actions.hidden = kind === 'empty' || showForm;
   if (resendBtn) resendBtn.hidden = !(kind === 'pending' && !showForm);
   if (changeBtn) {
-    // Pending (mesmo sob hard-gate) pode trocar endereço tipado errado; confirmed usa o atalho.
     changeBtn.hidden = kind !== 'pending' || showForm;
     changeBtn.textContent = 'Trocar endereço';
   }
@@ -238,10 +241,7 @@ function initMessengerSeal() {
       if (result.user) mergeSelfUser(result.user);
       else mergeSelfUser({ email: result.email, emailVerifiedAt: result.emailVerifiedAt ?? null });
       if (result.mailSent === false) {
-        setMessengerStatus(
-          'O endereço foi gravado, mas o Mensageiro não partiu. Olhe o spam ou avise o Mestre — o envio de e-mail pode não estar configurado.',
-          true,
-        );
+        setMessengerStatus(MESSENGER_BIND_FAILED_COPY, true);
       } else {
         setMessengerStatus('O Mensageiro partiu. Confirme o selo na caixa de entrada — e o reino das promoções.');
       }
@@ -261,15 +261,15 @@ function initMessengerSeal() {
     try {
       const result = await requestEmailVerification(currentToken);
       if (result?.mailSent === false) {
-        setMessengerStatus(
-          'O Mensageiro não partiu. Olhe o spam ou avise o Mestre — o envio de e-mail pode não estar configurado.',
-          true,
-        );
+        setMessengerStatus(MESSENGER_FAILED_COPY, true);
       } else {
         setMessengerStatus(MESSENGER_RESEND_COPY);
       }
-    } catch {
-      setMessengerStatus(MESSENGER_RESEND_COPY);
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao chamar o Mensageiro. Avise o Mestre — canal de e-mail.';
+      setMessengerStatus(message, true);
     } finally {
       resendBtn.disabled = false;
     }
@@ -1359,6 +1359,42 @@ function syncAcheronToggleButton() {
   btn.classList.toggle('btn-gold--ghost', despertarPublished);
 }
 
+function renderMasterMailerStatus(status, probe = null) {
+  const el = document.getElementById('master-mailer-status');
+  if (!el) return;
+  if (!status) {
+    el.hidden = true;
+    el.textContent = '';
+    return;
+  }
+
+  const bits = [];
+  bits.push(status.ready ? `Canal: ${status.primary}` : 'Canal: nenhum provedor');
+  if (status.hasResend) bits.push('Resend');
+  if (status.hasSmtp) bits.push('SMTP');
+  if (status.usingTestingFrom) bits.push('remetente de teste');
+  if (!status.appBaseUrlSet) bits.push('APP_BASE_URL ausente');
+  if (probe) {
+    bits.push(probe.probeOk
+      ? `sonda ok${probe.provider ? ` (${probe.provider})` : ''}`
+      : `sonda falhou${probe.reason ? ` (${probe.reason})` : ''}`);
+  }
+
+  el.textContent = bits.join(' · ');
+  el.hidden = false;
+  el.classList.toggle('is-warn', !status.ready || Boolean(status.usingTestingFrom && !status.hasSmtp) || (probe && !probe.probeOk));
+}
+
+async function refreshMasterMailerStatus() {
+  if (!currentToken || currentUser?.role !== 'admin') return;
+  try {
+    const result = await adminMailerStatus(currentToken);
+    renderMasterMailerStatus(result?.status || null);
+  } catch {
+    // Status é diagnóstico; falha silenciosa não bloqueia o Painel.
+  }
+}
+
 function initAdminTools() {
   const tools = document.getElementById('master-tools');
   if (currentUser?.role !== 'admin') {
@@ -1376,6 +1412,7 @@ function initAdminTools() {
 
   const btnCodes = document.getElementById('btn-generate-codes');
   const btnRotateCaronte = document.getElementById('btn-rotate-caronte');
+  const btnProbeMailer = document.getElementById('btn-probe-mailer');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
   const btnAcheron = document.getElementById('btn-toggle-acheron');
   const btnResetDespertar = document.getElementById('btn-reset-despertar');
@@ -1383,13 +1420,14 @@ function initAdminTools() {
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
   syncAcheronToggleButton();
+  refreshMasterMailerStatus();
 
   btnRotateCaronte?.addEventListener('click', async () => {
     if (!currentToken) return;
     const confirmed = window.confirm(
-      'Rotacionar a Senha do Caronte?\n\n'
-      + 'A senha anterior deixa de valer na hora. O plaintext aparece só desta vez — '
-      + 'anote e fale na sala quando um aluno legado precisar recuperar a Palavra.',
+      'Rotacionar a Senha do Caronte (legado)?\n\n'
+      + 'Prefira Emitir Código de Recuperação no Espelho da Alma.\n'
+      + 'A senha Caronte anterior deixa de valer. O plaintext aparece só desta vez.',
     );
     if (!confirmed) return;
 
@@ -1405,7 +1443,7 @@ function initAdminTools() {
           const wrap = document.createElement('div');
           const note = document.createElement('p');
           note.className = 'scroll-modal__note';
-          note.textContent = 'Mostre só uma vez. Quem precisar recuperar sem e-mail digita este código no Pacto (“Não tenho e-mail no Domínio”).';
+          note.textContent = 'Legado. Prefira o Código de Recuperação no Espelho. Quem ainda usa “Alma antiga” digita este código no Pacto.';
           wrap.appendChild(note);
           const codeBlock = document.createElement('div');
           codeBlock.className = 'code-row';
@@ -1425,6 +1463,72 @@ function initAdminTools() {
     } finally {
       btnRotateCaronte.disabled = false;
       btnRotateCaronte.textContent = previousLabel;
+    }
+  });
+
+  btnProbeMailer?.addEventListener('click', async () => {
+    if (!currentToken) return;
+
+    const defaultTo = String(currentUser?.email || '').trim();
+    const prompted = window.prompt(
+      'Para qual e-mail enviar a sonda do Mensageiro?\n\n'
+      + 'Use um endereço que você controle. Se o canal estiver certo, a mensagem chega em poucos minutos (e no spam).',
+      defaultTo,
+    );
+    if (prompted === null) return;
+    const to = String(prompted || '').trim();
+    if (!to) {
+      showApiWarning('Informe um e-mail de destino para a sonda.');
+      return;
+    }
+
+    btnProbeMailer.disabled = true;
+    const previousLabel = btnProbeMailer.textContent;
+    btnProbeMailer.textContent = 'Sondando…';
+    try {
+      const result = await adminProbeMailer(currentToken, to);
+      renderMasterMailerStatus(result?.status || null, {
+        probeOk: Boolean(result?.mailSent),
+        provider: result?.provider || null,
+        reason: result?.reason || null,
+        to: result?.to || to,
+      });
+      if (result?.mailSent) {
+        openScrollModal(
+          'Mensageiro — sonda ok',
+          (() => {
+            const wrap = document.createElement('div');
+            const note = document.createElement('p');
+            note.className = 'scroll-modal__note';
+            note.textContent = `O Mensageiro partiu via ${result?.provider || 'provedor'} para ${result?.to || to}. Confira a caixa — e o reino das promoções.`;
+            wrap.appendChild(note);
+            return wrap;
+          })(),
+        );
+      } else {
+        const reason = result?.reason || 'desconhecido';
+        const hint = result?.status?.hint || 'Revise RESEND_API_KEY / SMTP_* / APP_BASE_URL na Vercel.';
+        showApiWarning(`Mensageiro não partiu (${reason}). ${hint}`);
+      }
+    } catch (error) {
+      const payload = error instanceof ApiError ? error.payload : null;
+      if (payload?.status) {
+        renderMasterMailerStatus(payload.status, {
+          probeOk: false,
+          provider: payload.provider || null,
+          reason: payload.reason || null,
+          to: payload.to || to,
+        });
+      } else {
+        refreshMasterMailerStatus();
+      }
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao sondar o Mensageiro.';
+      showApiWarning(message);
+    } finally {
+      btnProbeMailer.disabled = false;
+      btnProbeMailer.textContent = previousLabel;
     }
   });
 
@@ -1660,11 +1764,11 @@ async function init() {
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
 
-  // Hard-gate: ?selo=1 (ou qualquer aluno sem selo) força o formulário se ainda está empty.
+  // Soft-nudge: ?selo=1 foca o formulário se ainda está empty/pending.
   if (needsMessengerSeal(currentUser)) {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('selo') === '1' || messengerSealKind(currentUser) === 'empty') {
-      messengerShowForm = messengerSealKind(currentUser) === 'empty';
+    if (params.get('selo') === '1' && messengerSealKind(currentUser) === 'empty') {
+      messengerShowForm = true;
     }
   }
 
@@ -1714,12 +1818,10 @@ async function init() {
   initAdminTools();
   initMessengerSeal();
   initUnderworldGate();
-  // Previews do trilho batem em progress (friends/notes) — só após o selo.
-  if (!needsMessengerSeal(currentUser)) {
-    renderRailPreviews(currentToken).catch((error) => {
-      console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
-    });
-  }
+  // Previews do trilho (amigos/notas) — selo não bloqueia mais.
+  renderRailPreviews(currentToken).catch((error) => {
+    console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', init);

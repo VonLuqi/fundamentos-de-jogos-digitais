@@ -1,13 +1,15 @@
 /**
- * Hard-gate do Selo do Mensageiro (Task 3).
- * Aluno sem email_verified_at não muta o Domínio; admin isento.
+ * Selo do Mensageiro — soft-nudge apenas (Task 2 / plano-email-opcional).
+ * Hard-gate removido: aluno sem email_verified_at navega e muta o Domínio.
+ * `needsMessengerSeal` ainda indica “falta confirmar selo” para banner/UI.
  */
 
 export const MESSENGER_SEAL_REQUIRED = 'messenger_seal_required';
 export const MESSENGER_SEAL_MESSAGE =
-  'Sem selo de mensageiro — vincule e confirme um e-mail no Painel do Herói.';
+  'Sem selo de mensageiro — vincule e confirme um e-mail no Painel do Herói (opcional).';
 
 /**
+ * Soft-nudge: aluno sem e-mail confirmado. Admin isento.
  * @param {{ role?: string, email_verified_at?: string|null, emailVerifiedAt?: string|null }|null} user
  */
 export function needsMessengerSeal(user) {
@@ -17,14 +19,9 @@ export function needsMessengerSeal(user) {
 }
 
 /**
- * @returns {boolean} true se a resposta já foi enviada (bloqueou)
+ * Hard-gate desligado (Task 2). Mantido como no-op para não quebrar imports.
+ * @returns {boolean} always false — nunca bloqueia
  */
-export function rejectUnlessMessengerSeal(user, res) {
-  if (!needsMessengerSeal(user)) return false;
-  res.status(403).json({
-    ok: false,
-    error: MESSENGER_SEAL_REQUIRED,
-    message: MESSENGER_SEAL_MESSAGE,
-  });
-  return true;
+export function rejectUnlessMessengerSeal(_user, _res) {
+  return false;
 }

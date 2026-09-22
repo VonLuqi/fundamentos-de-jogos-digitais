@@ -25,11 +25,18 @@ import {
   generateRecoveryCodePlain,
 } from './_lib/recovery-code.js';
 import {
+  issueSoulRecoveryCode,
+  findActiveSoulRecovery,
+  markSoulRecoveryUsed,
+  SOUL_RECOVERY_GENERIC_ERROR,
+} from './_lib/soul-recovery-code.js';
+import {
   createSessionRow,
   loadValidSession,
 } from './_lib/sessions.js';
 import { sanitizeUser } from './_lib/sanitize-user.js';
 import { ADMIN_AUDIT_ACTIONS, recordAdminAudit } from './_lib/admin-audit.js';
+import { getMailerStatus, sendMail } from './_lib/mailer.js';
 import {
   createRequestMetrics,
   finishRequestMetrics,
@@ -175,12 +182,13 @@ async function handleAuth(req, res) {
 
       const { fullName, turma, username, password, email } = req.body;
       const normalizedEmail = normalizeEmail(email);
+      const hasEmail = Boolean(normalizedEmail);
       const errors = [];
       if (!fullName || fullName.trim().length < 5) errors.push('Nome completo muito curto.');
       if (!['TCG01', 'TCG02'].includes(turma)) errors.push('Turma inválida.');
       if (!username || username.trim().length < 3) errors.push('Username muito curto.');
       if (!password || password.length < 4) errors.push('Senha muito curta.');
-      if (!isValidEmail(normalizedEmail)) errors.push('E-mail inválido.');
+      if (hasEmail && !isValidEmail(normalizedEmail)) errors.push('E-mail inválido.');
       if (errors.length) return res.status(400).json({ ok: false, error: errors.join(' ') });
 
       const normalizedUsername = username.trim().toLowerCase();
@@ -188,7 +196,7 @@ async function handleAuth(req, res) {
       const { data: existing } = await supabase.from(USERS_TABLE).select('id').eq('username', normalizedUsername).limit(1).single();
       if (existing) return res.status(409).json({ ok: false, error: 'Usuário já existe.' });
 
-      if (await emailTakenByOther(normalizedEmail)) {
+      if (hasEmail && await emailTakenByOther(normalizedEmail)) {
         return res.status(409).json({ ok: false, error: 'Este e-mail já firma outro pacto.' });
       }
 
@@ -198,7 +206,7 @@ async function handleAuth(req, res) {
         full_name: fullName.trim(),
         turma,
         username: normalizedUsername,
-        email: normalizedEmail,
+        email: hasEmail ? normalizedEmail : null,
         email_verified_at: null,
         password_hash,
         role: 'student',
@@ -229,13 +237,17 @@ async function handleAuth(req, res) {
         return res.status(500).json({ ok: false, error: 'Não foi possível criar a sessão agora. Tente novamente.' });
       }
 
-      const dispatched = await dispatchEmailVerification({ supabase, user: data, ip });
+      let mailSent = false;
+      if (hasEmail) {
+        const dispatched = await dispatchEmailVerification({ supabase, user: data, ip });
+        mailSent = Boolean(dispatched?.sent);
+      }
 
       return res.status(201).json({
         ok: true,
         token,
         user: sanitizeUser(data),
-        mailSent: Boolean(dispatched?.sent),
+        mailSent,
       });
     }
 
@@ -518,6 +530,69 @@ async function handleAuth(req, res) {
       });
     }
 
+    if (action === 'adminMailerStatus') {
+      const admin = await loadUserBySessionToken(req.body?.token);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      return res.status(200).json({ ok: true, status: getMailerStatus() });
+    }
+
+    if (action === 'adminProbeMailer') {
+      const admin = await loadUserBySessionToken(req.body?.token);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      const status = getMailerStatus();
+      const override = normalizeEmail(req.body?.to || req.body?.email);
+      const adminEmail = normalizeEmail(admin.email);
+      const recipient = isValidEmail(override) ? override : (isValidEmail(adminEmail) ? adminEmail : '');
+
+      if (!recipient) {
+        return res.status(400).json({
+          ok: false,
+          error: 'Informe um e-mail de destino (to) ou vincule um e-mail na conta do Mestre.',
+          status,
+        });
+      }
+
+      const subject = 'Mensageiro do Domínio — sonda do Mestre';
+      const text = [
+        'Esta é uma sonda do canal de e-mail do Domínio.',
+        'Se você recebeu esta mensagem, o Mensageiro consegue partir.',
+        `Provedor preferido: ${status.primary}.`,
+        `Horário: ${new Date().toISOString()}`,
+      ].join('\n');
+      const html = `<p>Esta é uma <strong>sonda</strong> do canal de e-mail do Domínio.</p>
+<p>Se você recebeu esta mensagem, o Mensageiro consegue partir.</p>
+<p>Provedor preferido: <code>${status.primary}</code><br/>Horário: ${new Date().toISOString()}</p>`;
+
+      const mailed = await sendMail({ to: recipient, subject, html, text });
+
+      await recordAdminAudit(supabase, {
+        actorId: admin.id,
+        targetUserId: admin.id,
+        action: ADMIN_AUDIT_ACTIONS.probeMailer,
+        payload: {
+          toDomain: recipient.includes('@') ? recipient.slice(recipient.lastIndexOf('@') + 1) : null,
+          ok: Boolean(mailed?.ok),
+          provider: mailed?.provider || null,
+          reason: mailed?.reason || null,
+        },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        mailSent: Boolean(mailed?.ok),
+        provider: mailed?.provider || null,
+        reason: mailed?.reason || (mailed?.skipped ? 'skipped' : null),
+        status,
+        to: recipient,
+      });
+    }
+
     if (action === 'adminForceTempPassword') {
       const admin = await loadUserBySessionToken(req.body?.token);
       if (!admin || admin.role !== 'admin') {
@@ -569,6 +644,130 @@ async function handleAuth(req, res) {
         tempPassword,
         username: target.username,
       });
+    }
+
+    if (action === 'adminIssueSoulRecoveryCode') {
+      const admin = await loadUserBySessionToken(req.body?.token);
+      if (!admin || admin.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      const rate = await isAuthActionRateLimited(supabase, {
+        action: 'soul_recovery_issue',
+        ip,
+        username: admin.username,
+      });
+      if (rate.limited) {
+        return res.status(429).json({ ok: false, error: AUTH_RATE_LIMIT_MESSAGE });
+      }
+
+      const targetId = Number(req.body?.targetUserId);
+      if (!Number.isInteger(targetId) || targetId <= 0) {
+        return res.status(400).json({ ok: false, error: 'Informe targetUserId.' });
+      }
+
+      const { data: target } = await supabase
+        .from(USERS_TABLE)
+        .select('id, role, username')
+        .eq('id', targetId)
+        .limit(1)
+        .maybeSingle();
+
+      if (!target) return res.status(404).json({ ok: false, error: 'Alma não encontrada.' });
+      if (target.role === 'admin') {
+        return res.status(400).json({ ok: false, error: 'Não se edita o Mestre por este caminho.' });
+      }
+
+      const issued = await issueSoulRecoveryCode(supabase, {
+        userId: target.id,
+        adminId: admin.id,
+        username: target.username,
+      });
+      if (!issued.ok) {
+        return res.status(500).json({ ok: false, error: issued.error || 'Falha ao emitir código.' });
+      }
+
+      await recordAuthRateEvent(supabase, {
+        action: 'soul_recovery_issue',
+        ip,
+        username: admin.username,
+      });
+
+      await recordAdminAudit(supabase, {
+        actorId: admin.id,
+        targetUserId: target.id,
+        action: ADMIN_AUDIT_ACTIONS.issueSoulRecoveryCode,
+        payload: { username: target.username, expiresAt: issued.expiresAt },
+      });
+
+      return res.status(200).json({
+        ok: true,
+        code: issued.code,
+        expiresAt: issued.expiresAt,
+        username: issued.username,
+      });
+    }
+
+    if (action === 'consumeSoulRecoveryCode') {
+      const username = typeof req.body?.username === 'string'
+        ? req.body.username.trim().toLowerCase()
+        : '';
+      const code = req.body?.code;
+      const password = req.body?.password;
+
+      const rate = await isAuthActionRateLimited(supabase, {
+        action: 'soul_recovery_consume',
+        ip,
+      });
+      if (rate.limited) {
+        return res.status(429).json({ ok: false, error: AUTH_RATE_LIMIT_MESSAGE });
+      }
+      await recordAuthRateEvent(supabase, { action: 'soul_recovery_consume', ip });
+
+      if (!username || !code || !password || String(password).length < 4) {
+        return res.status(400).json({ ok: false, error: SOUL_RECOVERY_GENERIC_ERROR });
+      }
+
+      const { data: user } = await supabase
+        .from(USERS_TABLE)
+        .select('id, role, username')
+        .ilike('username', username)
+        .limit(1)
+        .maybeSingle();
+
+      if (!user || user.role !== 'student') {
+        return res.status(400).json({ ok: false, error: SOUL_RECOVERY_GENERIC_ERROR });
+      }
+
+      const found = await findActiveSoulRecovery(supabase, { userId: user.id, code });
+      if (!found.ok) {
+        return res.status(400).json({ ok: false, error: SOUL_RECOVERY_GENERIC_ERROR });
+      }
+
+      const { error: updateError } = await supabase
+        .from(USERS_TABLE)
+        .update({
+          password_hash: await hashPassword(String(password)),
+          password: null,
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('[api/auth] consumeSoulRecoveryCode update', updateError.message);
+        return res.status(500).json({ ok: false, error: 'Não foi possível selar a nova Palavra agora.' });
+      }
+
+      await supabase.from('sessions').delete().eq('user_id', user.id);
+      await markSoulRecoveryUsed(supabase, found.row.id);
+
+      await recordAdminAudit(supabase, {
+        actorId: user.id,
+        targetUserId: user.id,
+        action: ADMIN_AUDIT_ACTIONS.consumeSoulRecoveryCode,
+        payload: { username: user.username },
+      });
+
+      return res.status(200).json({ ok: true });
     }
 
     if (action === 'confirmPasswordReset') {

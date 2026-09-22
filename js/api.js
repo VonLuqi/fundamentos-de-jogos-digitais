@@ -498,6 +498,23 @@ export function rotateRecoveryCode(token) {
   });
 }
 
+export function adminMailerStatus(token) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'adminMailerStatus', token }),
+  });
+}
+
+export function adminProbeMailer(token, to) {
+  const body = { action: 'adminProbeMailer', token };
+  const dest = String(to || '').trim();
+  if (dest) body.to = dest;
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
 export function confirmPasswordReset(token, password) {
   return request('/auth', {
     method: 'POST',
@@ -1079,6 +1096,29 @@ export function adminForceTempPassword(token, targetUserId) {
   });
 }
 
+export function adminIssueSoulRecoveryCode(token, targetUserId) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminIssueSoulRecoveryCode',
+      targetUserId,
+    }),
+  });
+}
+
+export function consumeSoulRecoveryCode(username, code, password) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'consumeSoulRecoveryCode',
+      username,
+      code,
+      password,
+    }),
+  });
+}
+
 /* ============================================================
    5b. COMPANHEIROS DE JORNADA
    ============================================================ */
@@ -1542,11 +1582,10 @@ export function classindListRoster(token, { roomId } = {}) {
    Chamado no boot das páginas protegidas. Se não houver sessão
    (ou se o servidor a rejeitar), redireciona imediatamente para
    o Pacto de Sangue.
-   Hard-gate Task 3: aluno sem e-mail confirmado vai ao Painel (?selo=1),
-   exceto na própria superfície do Painel.
+   Selo do Mensageiro é opcional (Task 2): sem redirect ?selo=1.
    ============================================================ */
 
-/** Aluno (não-admin) sem emailVerifiedAt precisa selar o Mensageiro. */
+/** Soft-nudge: aluno (não-admin) sem emailVerifiedAt — UI do Painel, não bloqueia. */
 export function needsMessengerSeal(user) {
   if (!user || user.role === 'admin') return false;
   return !user.emailVerifiedAt;
@@ -1556,11 +1595,6 @@ export function messengerSealDashboardUrl() {
   return `${ROUTES.dashboard()}?selo=1`;
 }
 
-function isDashboardPath() {
-  const path = String(window.location?.pathname || '');
-  return /dashboard\.html$/i.test(path);
-}
-
 export async function requireSession(options = {}) {
   const session = getSession();
   if (!session) {
@@ -1568,19 +1602,10 @@ export async function requireSession(options = {}) {
     return null;
   }
 
-  const allowUnsealed = () => options.allowUnsealed === true
-    || (options.allowUnsealed !== false && isDashboardPath());
-
   const finishOk = (user, gates = null) => {
     saveSession({ token: session.token, name: user.name, role: user.role });
     if (gates) setBootstrapGates(session.token, gates);
     else setBootstrapGates(null);
-
-    if (needsMessengerSeal(user) && !allowUnsealed()) {
-      window.location.replace(messengerSealDashboardUrl());
-      return null;
-    }
-
     return { session, user, gates };
   };
 

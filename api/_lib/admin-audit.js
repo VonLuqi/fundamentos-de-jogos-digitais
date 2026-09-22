@@ -51,4 +51,7 @@ export const ADMIN_AUDIT_ACTIONS = Object.freeze({
   setLessonCompleted: 'admin_set_lesson_completed',
   clearEmailSeal: 'admin_clear_email_seal',
   invalidateSessions: 'admin_invalidate_sessions',
+  probeMailer: 'admin_probe_mailer',
+  issueSoulRecoveryCode: 'admin_issue_soul_recovery_code',
+  consumeSoulRecoveryCode: 'consume_soul_recovery_code',
 });

@@ -17,7 +17,7 @@ A interface segue uma estética **cinematográfica (Hades-like)**: dark mode pro
 O projeto está em fase **funcional**, com os seguintes fluxos já implementados e validados:
 
 - ✅ Autenticação (login/cadastro) com sessão via token opaco
-- ✅ Cadastro com e-mail obrigatório e recuperação **A Palavra se perdeu** (selo no e-mail)
+- ✅ Cadastro com e-mail **opcional** e recuperação **A Palavra se perdeu** (selo no e-mail, se houver)
 - ✅ Cadastro com nome completo real (`full_name`) + username de login
 - ✅ Proteção de rotas (páginas protegidas redirecionam sem sessão válida)
 - ✅ Dashboard do aluno ("Salão dos Heróis") como hub: altar, perfil, prévias e CTAs
@@ -33,7 +33,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
 - ✅ Módulo 01 — "A Regra do Jogo" (teoria MDA + simulação interativa em canvas)
 - ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api` sem depender do Vercel CLI
-- ✅ **Hades: O Despertar do Submundo** (`pages/despertar.html`): clicker server-authoritative (`/api/despertar`), layout Cookie (Altar · Mundo · Store), WorldView/AltarOrbit, sync + prestígio + talentos, **Bancada do Juiz** (Vereditos), Códice do Loop, conquistas no Álbum (gate do Mestre + Selo do Mensageiro). Planos: [docs/plano-hades-despertar.md](docs/plano-hades-despertar.md) · [docs/plano-despertar-ui-cookieclicker.md](docs/plano-despertar-ui-cookieclicker.md).
+- ✅ **Hades: O Despertar do Submundo** (`pages/despertar.html`): clicker server-authoritative (`/api/despertar`), layout Cookie (Altar · Mundo · Store), WorldView/AltarOrbit, sync + prestígio + talentos, **Bancada do Juiz** (Vereditos), Códice do Loop, conquistas no Álbum (gate do Mestre). Planos: [docs/plano-hades-despertar.md](docs/plano-hades-despertar.md) · [docs/plano-despertar-ui-cookieclicker.md](docs/plano-despertar-ui-cookieclicker.md).
 - ✅ **Juízo do Tartarus** (modal Higher/Lower no Despertar) + pool stub ≥200 em [data/despertar-juizo-pool.stub.json](data/despertar-juizo-pool.stub.json). Click no card / Empate (`A` \| `B` \| `tie`; aliases `higher`/`lower`). No acerto o desafiante sempre assume o trono. O Mestre completa cada entrada com `rating` (L|10|12|14|16|18), `blurb` e `cover` (filename sob `assets/classind-dle/covers/` ou `assets/despertar-juizo/covers/`); só entradas com `rating` entram no sorteio; o CTA exige ≥30 ready. GDD: [docs/gdd-juizo-v2.md](docs/gdd-juizo-v2.md).
 - ✅ **Placar do Domínio** (`pages/ranking.html`, CTA **Ver o Placar** no Painel): turma/global · XP · #relíquias · juizoBest — sem almas/SPS.
 
@@ -179,13 +179,15 @@ fundamentos-de-jogos-digitais/
    SUPABASE_URL=https://SEU_PROJETO.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=sua-service-role-key
    DATABASE_URL=postgresql://postgres.[REF]:[SENHA]@aws-0-[REGION].pooler.supabase.com:6543/postgres
-   RESEND_API_KEY=re_sua_chave
-   MAIL_FROM=Fundamentos de Jogos Digitais <beth.t@example.com>
    APP_BASE_URL=http://localhost:3000
+   # Mensageiro — escolha SMTP (rápido) OU Resend com domínio verificado:
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=465
    SMTP_USER=seu.email@gmail.com
    SMTP_PASS=senha-de-app
+   MAIL_FROM=Fundamentos de Jogos Digitais <seu.email@gmail.com>
+   # RESEND_API_KEY=re_sua_chave
+   # RESEND_MAIL_FROM=Fundamentos de Jogos Digitais <noreply@SEU_DOMINIO>
    KV_REST_API_URL=
    KV_REST_API_TOKEN=
    ```
@@ -209,10 +211,19 @@ fundamentos-de-jogos-digitais/
 
    Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app` (o servidor também usa esse host se a var faltar só em Production).
 
-   **Por que o e-mail não chega:** o remetente `beth.t@example.com` **só entrega para o e-mail da conta Resend**. Pedido de reset / selo responde 200 mesmo assim — a UI diz que o Mensageiro partiu, mas o Resend recusa destinatários da turma. Caminhos que realmente entregam:
+   ### Checklist do Mensageiro (entrega real)
 
-   1. Verificar um domínio em [resend.com/domains](https://resend.com/domains) e trocar `MAIL_FROM` para `Fundamentos de Jogos Digitais <noreply@SEU_DOMINIO>`; ou
-   2. SMTP (Gmail: senha de app em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)) com `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS`. Se o Resend falhar no modo teste, o servidor tenta o SMTP.
+   **Por que o e-mail não chega:** o remetente `beth.t@example.com` **só entrega para o e-mail da conta Resend**. Pedido de reset / selo responde 200 mesmo assim no fluxo “esqueci” (anti-enumeração). No **Painel** (vínculo/reenvio autenticado), a UI mostra **Mensageiro não partiu** quando `mailSent === false`.
+
+   Caminhos que realmente entregam à turma (escolha **um** go-live):
+
+   1. **SMTP Gmail (rápido):** senha de app em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) + `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` / `MAIL_FROM` com o mesmo Gmail. Coloque na Vercel (Production + Preview) e faça redeploy.
+   2. **Resend com domínio verificado:** [resend.com/domains](https://resend.com/domains) (SPF/DKIM) + `RESEND_API_KEY` + `MAIL_FROM` / `RESEND_MAIL_FROM` no domínio real. **Não** anunciar à turma enquanto o from for `resend.dev`.
+   3. Se Resend **e** SMTP estiverem setados: o servidor tenta Resend e cai no SMTP se o Resend recusar (modo teste).
+
+   **Sonda do Mestre:** no Painel do Herói (admin) → **Testar o Mensageiro** (`adminProbeMailer`). Informe um e-mail que você controle; o status do canal aparece sob as Ferramentas do Mestre. Logs Vercel: `[mailer]` com `reason` (`no_provider`, `resend_testing_domain`, `smtp_exception`, …).
+
+   Plano: [`docs/plano-email-opcional-recuperacao-admin.md`](docs/plano-email-opcional-recuperacao-admin.md) Task 1.
 
    Coloque as vars na Vercel (Production + Preview) e em `.env.local`. Não versionar a API key nem a senha SMTP.
 
@@ -304,26 +315,38 @@ Plano geral: [docs/plano-sistema-amigos.md](docs/plano-sistema-amigos.md). Corre
 
 ```json
 {
-   "action": "register",
-   "fullName": "Nome Completo do Aluno",
-   "turma": "TCG01",
-   "username": "username_login",
-   "email": "aluno@exemplo.com",
-   "password": "senha"
+  "action": "register",
+  "fullName": "Nome Completo do Aluno",
+  "turma": "TCG01",
+  "username": "username_login",
+  "email": "aluno@exemplo.com",
+  "password": "senha"
 }
 ```
 
-O login continua por `username` (nunca por e-mail). As respostas da API priorizam o nome real do aluno. O e-mail entra **pendente** até o aluno clicar **Confirmar o selo**; o reset só envia mensagem se o selo estiver confirmado.
+`email` é **opcional** — omita ou envie `""` para gravar `null` (sem Mensageiro).
 
-### A Palavra se perdeu (recuperação por e-mail)
+O login continua por `username` (nunca por e-mail). As respostas da API priorizam o nome real do aluno. Se o e-mail for informado, fica **pendente** até o aluno clicar **Confirmar o selo**; o reset por Mensageiro só envia se o selo estiver confirmado.
+
+### Playbook de sala (Mestre)
+
+1. **Sem e-mail ok** — o aluno firma o Pacto e usa o Domínio; o Mensageiro é opcional.
+2. **Perdeu a senha** — no Espelho da Alma → **Emitir Código de Recuperação** → aluno usa **O Mestre me deu um código** no Pacto (ou **Palavra temporária** se preferir).
+3. **Mensageiro** — só se o aluno quiser self-service; canal precisa estar configurado (SMTP ou Resend — ver checklist acima). Caronte = atalho **legado**.
+
+Plano: [`docs/plano-email-opcional-recuperacao-admin.md`](docs/plano-email-opcional-recuperacao-admin.md).
+
+### A Palavra se perdeu (recuperação)
 
 No Pacto de Sangue, o link **A Palavra se perdeu?** pede username + e-mail e chama o Mensageiro. A API **sempre** responde 200 com a mesma copy — não revela se a conta existe.
 
-**Alunos já cadastrados sem e-mail** precisam, enquanto ainda estão logados, vincular e-mail no **Painel do Herói** (bloco **Selo do Mensageiro**) e confirmar o selo. Sem e-mail confirmado, o “esqueci” não tem para quem mandar. Quem perdeu a senha **e** nunca vinculou e-mail trata a recuperação na sala (fora do self-service).
+**Sem e-mail / Mensageiro fora:** **Código de Recuperação da Alma** (caminho preferido) ou **Palavra temporária** no Espelho. No Pacto: **O Mestre me deu um código**.
 
-**Hard-gate:** aluno sem `email_verified_at` fica preso no Painel (`?selo=1`) até confirmar o selo — Trilha, aulas, Despertar e ClassInd redirecionam; mutações em `/api/progress`, `/api/despertar` e `/api/classind` respondem `403 messenger_seal_required`. Admin isento. Em produção, só ative o hard depois do domínio Resend (SPF/DKIM) e `MAIL_FROM` reais — senão a turma fica sem Mensageiro.
+**Com e-mail selado:** self-service pelo Mensageiro. Soft-nudge no Painel; **sem** hard-gate.
 
-**Almas legadas (sem e-mail):** no Pacto, **A Palavra se perdeu?** → **Não tenho e-mail no Domínio** → username + **Senha do Caronte** (gerada no Painel do Mestre) + e-mail novo. O Mensageiro envia um link que **confirma o selo e** abre a Nova Palavra. Contas novas (já com e-mail no Firmar Pacto) **não** usam este atalho. Aplique `db/migrate-2026-09-22-caronte-recovery.sql` antes de rotacionar o código em produção.
+**Alma antiga (legado):** **Alma antiga (Senha do Caronte)** — força e-mail novo + link que confirma o selo. Deprecated em favor do código por aluno; mantenha `db/migrate-2026-09-22-caronte-recovery.sql` só se ainda usar.
+
+Aplique `npm run db:migrate` (inclui `soul_recovery_codes`) antes de emitir códigos em produção.
 
 O e-mail do aluno **não** aparece no DTO de companheiros, turma ou Almas. No próprio perfil ele fica mascarado.
 
@@ -344,7 +367,9 @@ node tests/password-reset-smoke.mjs
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
 - [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO de amigos sem e-mail, helpers de token — **não** chama Resend/SMTP.
-- [tests/ops-task3-messenger-seal-smoke.mjs](tests/ops-task3-messenger-seal-smoke.mjs): hard-gate do Selo (helper, redirect `?selo=1`, 403 nas APIs).
+- [tests/ops-task1-mailer-probe-smoke.mjs](tests/ops-task1-mailer-probe-smoke.mjs): status do Mensageiro + `adminProbeMailer` / UI honesta (Task 1).
+- [tests/ops-task3-messenger-seal-smoke.mjs](tests/ops-task3-messenger-seal-smoke.mjs): Selo soft (e-mail opcional, reject no-op, sem redirect/403).
+- [tests/ops-task3-soul-recovery-smoke.mjs](tests/ops-task3-soul-recovery-smoke.mjs): Código de Recuperação da Alma (schema, issue/consume, Espelho + Pacto).
 - [tests/ops-task4-caronte-recovery-smoke.mjs](tests/ops-task4-caronte-recovery-smoke.mjs): Senha do Caronte + recuperação legada (schema, actions, UI).
 - [tests/ops-task5-db-migrate-smoke.mjs](tests/ops-task5-db-migrate-smoke.mjs): script `db:migrate` (ledger, flags, README `DATABASE_URL`).
 - [tests/ops-task7-espelho-alma-smoke.mjs](tests/ops-task7-espelho-alma-smoke.mjs): Espelho da Alma (actions admin, audit, UI `?tab=users&u=`).

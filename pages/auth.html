@@ -147,9 +147,19 @@
             <span class="btn-pact__label">Chamar o Mensageiro</span>
           </button>
 
+          <p class="pact-form__hint pact-form__hint--forgot">
+            Sem e-mail no Domínio? Peça ao Mestre um Código de Recuperação, ou use o atalho legado (Senha do Caronte).
+          </p>
+
           <p class="pact-form__back">
-            <button class="pact-form__lost-btn" type="button" id="open-legacy">
-              Não tenho e-mail no Domínio
+            <button class="pact-form__lost-btn" type="button" id="open-master-code">
+              O Mestre me deu um código
+            </button>
+          </p>
+
+          <p class="pact-form__back">
+            <button class="pact-form__lost-btn pact-form__lost-btn--muted" type="button" id="open-legacy">
+              Alma antiga (Senha do Caronte)
             </button>
           </p>
 
@@ -158,10 +168,81 @@
           </p>
         </form>
 
+        <!-- CÓDIGO DO MESTRE (por aluno) -->
+        <form class="pact-form" id="form-master-code" aria-label="O Mestre me deu um código" novalidate>
+          <p class="pact-form__hint">
+            Digite o Código de Recuperação da Alma que o Mestre mostrou na sala e sele uma Nova Palavra.
+          </p>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="master-username">Nome da Alma</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="master-username"
+              name="username"
+              placeholder="Ex.: Orfeu"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="master-code">Código de Recuperação</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="master-code"
+              name="code"
+              placeholder="Código do Mestre"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="master-password">Nova Palavra de Passagem</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="master-password"
+              name="password"
+              placeholder="Mínimo de 4 símbolos"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="master-password-confirm">Confirme a Palavra</label>
+            <input
+              class="pact-form__input"
+              type="password"
+              id="master-password-confirm"
+              name="password_confirm"
+              placeholder="Repita a Palavra"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <p class="pact-form__status" id="master-status" role="status" aria-live="polite"></p>
+
+          <button class="btn-pact" type="submit">
+            <span class="btn-pact__label">Selar nova Palavra</span>
+          </button>
+
+          <p class="pact-form__back">
+            <button class="pact-form__back-btn" type="button" id="master-back">← Voltar ao pedido com e-mail</button>
+          </p>
+        </form>
+
         <!-- RECUPERAÇÃO LEGADA (Senha do Caronte) -->
         <form class="pact-form" id="form-legacy" aria-label="Selar o Mensageiro para recuperar" novalidate>
           <p class="pact-form__hint" id="legacy-hint">
-            Alma antiga sem e-mail: peça a Senha do Caronte ao Mestre na sala, vincule um endereço e confirme o selo no Mensageiro.
+            Atalho legado: prefira o <strong>Código de Recuperação da Alma</strong> no Espelho.
+            Este caminho (Senha do Caronte + e-mail novo) permanece só para almas antigas que ainda precisam selar o Mensageiro.
           </p>
 
           <div class="pact-form__field">
@@ -289,7 +370,7 @@
           </div>
 
           <div class="pact-form__field">
-            <label class="pact-form__label" for="register-email">E-mail</label>
+            <label class="pact-form__label" for="register-email">E-mail <span class="pact-form__optional">(opcional)</span></label>
             <input
               class="pact-form__input"
               type="email"
@@ -298,8 +379,8 @@
               placeholder="Ex.: maria.silva@email.com"
               autocomplete="email"
               inputmode="email"
-              required
             />
+            <p class="pact-form__hint">Sem e-mail: o Mestre recupera sua Alma se a Palavra se perder.</p>
           </div>
 
           <div class="pact-form__field">
