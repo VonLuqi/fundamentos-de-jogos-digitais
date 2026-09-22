@@ -1,0 +1,220 @@
+{
+  "version": 1,
+  "updated": "2026-09-22",
+  "task": "B4",
+  "audience": "Mestre",
+  "defaults": {
+    "formatPrimary": "webp",
+    "formatFallback": "svg",
+    "background": "transparent",
+    "style": "silhueta flat Hades + 1–2 acentos (não pixel, não paint full)",
+    "palette": {
+      "bgRef": "#0a0a0f",
+      "gold": "#cfa759",
+      "goldBright": "#e8d4a8",
+      "styx": "#00a896",
+      "lethe": "#7209b7",
+      "letheText": "#a855f7",
+      "fire": "#d90429",
+      "body": "#0c1218"
+    },
+    "dropPath": "assets/despertar/sprites/",
+    "naming": "kebab ou snake = id do catálogo (igual generators.js / upgrades.js)",
+    "note": "Placeholders procedurais já existem; substituir o arquivo mantém o path."
+  },
+  "leva1": [
+    "art_foice",
+    "art_t1",
+    "art_t2"
+  ],
+  "requests": [
+    {
+      "id": "art_foice",
+      "listId": "B1",
+      "priority": "P0",
+      "status": "open",
+      "title": "Foice / Portal do Acheron",
+      "desc": "Alvo de clique (idle + pressed). Dominante na coluna esquerda.",
+      "sizes": [
+        "512x512"
+      ],
+      "files": [
+        "foice/foice-idle.webp",
+        "foice/foice-pressed.webp"
+      ],
+      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master."
+    },
+    {
+      "id": "art_t1",
+      "listId": "B2",
+      "priority": "P0",
+      "status": "open",
+      "title": "Sombra Vagante",
+      "desc": "Ícone de mercado + sprite de prateleira/órbita.",
+      "generatorId": "wandering_shade",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/wandering_shade.webp",
+        "generators/wandering_shade.svg"
+      ],
+      "notes": "Substituir placeholders em assets/despertar/sprites/generators/."
+    },
+    {
+      "id": "art_t2",
+      "listId": "B3",
+      "priority": "P0",
+      "status": "open",
+      "title": "Servos de Caronte",
+      "generatorId": "charon_servants",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/charon_servants.webp",
+        "generators/charon_servants.svg"
+      ],
+      "notes": "Barco / remadores; acento ouro #cfa759."
+    },
+    {
+      "id": "art_t3",
+      "listId": "B4",
+      "priority": "P1",
+      "status": "open",
+      "title": "Cão Cerberiano",
+      "generatorId": "cerberian_hound",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/cerberian_hound.webp",
+        "generators/cerberian_hound.svg"
+      ]
+    },
+    {
+      "id": "art_t4",
+      "listId": "B5",
+      "priority": "P1",
+      "status": "open",
+      "title": "Juiz do Tártaro",
+      "generatorId": "tartarus_judge",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/tartarus_judge.webp",
+        "generators/tartarus_judge.svg"
+      ]
+    },
+    {
+      "id": "art_t5",
+      "listId": "B6",
+      "priority": "P1",
+      "status": "open",
+      "title": "Forja de Phlegethon",
+      "generatorId": "phlegethon_forge",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/phlegethon_forge.webp",
+        "generators/phlegethon_forge.svg"
+      ]
+    },
+    {
+      "id": "art_t6",
+      "listId": "B7",
+      "priority": "P1",
+      "status": "open",
+      "title": "Trono de Obsidiana",
+      "generatorId": "obsidian_throne",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/obsidian_throne.webp",
+        "generators/obsidian_throne.svg"
+      ]
+    },
+    {
+      "id": "art_upgrades",
+      "listId": "B8",
+      "priority": "P1",
+      "status": "open",
+      "title": "Ícones dos Juramentos do Styx",
+      "desc": "Set completo (19) ou lote prioritário de 8–12 clickMult + T1/T2.",
+      "sizes": [
+        "48x48",
+        "128x128"
+      ],
+      "filesGlob": "upgrades/*.webp",
+      "upgradeIdsPriority": [
+        "foice_afilada",
+        "juramento_acheron",
+        "pacto_das_margens",
+        "ceifador_ctoniano",
+        "colheita_eterna",
+        "umbras_despertas",
+        "cortejo_das_sombras",
+        "moeda_no_barquinho",
+        "frota_de_caronte",
+        "trela_cerberiana",
+        "tres_cabecas",
+        "veredito_tartaro"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg opcional)."
+    },
+    {
+      "id": "art_juizo_chrome",
+      "listId": "B9",
+      "priority": "P1",
+      "status": "open",
+      "title": "Chrome do Juízo (VS / moldura)",
+      "desc": "Moldura Higher/Lower, badge VS, faixa de idade do campeão.",
+      "sizes": [
+        "svg preferido",
+        "PNG @2x opcional"
+      ],
+      "files": [
+        "juizo/vs-badge.svg",
+        "juizo/frame-card.svg",
+        "juizo/band-rating.svg"
+      ],
+      "dropPath": "assets/despertar/juizo/",
+      "notes": "Paleta Styx/ouro; não vazar rating do oponente antes do guess."
+    },
+    {
+      "id": "art_juizo_covers",
+      "listId": "B10",
+      "priority": "P2",
+      "status": "open",
+      "title": "Capas faltantes do pool Juízo",
+      "desc": "WebP no filename do stub. Ordem de busca: classind-dle/covers → despertar-juizo/covers.",
+      "sizes": [
+        "600x800 preferido (padrão ClassInd)"
+      ],
+      "format": "webp",
+      "dropPath": "assets/despertar-juizo/covers/",
+      "fileMissing": [
+        "among-us.webp",
+        "elden-ring.webp",
+        "fortnite.webp",
+        "hades.webp",
+        "minecraft.webp",
+        "portal-2.webp",
+        "roblox.webp",
+        "stardew-valley.webp",
+        "super-mario-odyssey.webp"
+      ],
+      "notes": "Há ~499 entradas com cover:null no stub — editorial. Esta lista P2 é só arquivo ausente com nome já declarado (npm run despertar:art-requests regenera).",
+      "nullCoverCount": 499
+    }
+  ]
+}

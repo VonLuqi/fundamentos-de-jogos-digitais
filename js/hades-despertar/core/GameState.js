@@ -8,6 +8,7 @@ import { EDU_LOG_IDS } from '../config/edu-logs.js';
 import { GENERATOR_BY_ID } from '../config/generators.js';
 import { isKnownTalentId, getTalent } from '../config/talents.js';
 import { isKnownUpgradeId, getUpgrade } from '../config/upgrades.js';
+import { getVerdictShopItem, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import {
   add,
   clampNonNegative,
@@ -24,6 +25,7 @@ import {
   calculateTotalSPS,
   canPrestige as canPrestigeRun,
   clickPower as formulaClickPower,
+  economyEffects,
   generatorUpgradeMult,
   meetsUpgradeRequirement,
   prestigePreview as formulaPrestigePreview,
@@ -76,6 +78,13 @@ export class GameState {
     );
     this.upgrades = uniqueKnown(snapshot.upgrades ?? snapshot.upgrades_state, isKnownUpgradeId);
     this.talents = uniqueKnown(snapshot.talents ?? snapshot.talents_state, isKnownTalentId);
+    this.verdictPurchases = uniqueKnown(
+      snapshot.verdictPurchases ?? snapshot.verdict_purchases,
+      isKnownVerdictPurchase,
+    );
+    this.verdicts = Math.max(0, Number.parseInt(snapshot.verdicts, 10) || 0);
+    this.juizoBestStreak = Math.max(0, Number.parseInt(snapshot.juizoBestStreak ?? snapshot.juizo_best_streak, 10) || 0);
+    this.juizoCurrentStreak = Math.max(0, Number.parseInt(snapshot.juizoCurrentStreak ?? snapshot.juizo_current_streak, 10) || 0);
     this.eduLogsSeen = uniqueKnown(snapshot.eduLogsSeen ?? snapshot.edu_logs_seen, (id) => EDU_LOG_IDS.includes(id));
     this.milestones = { ...(snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {}) };
     this.lastSyncAt = snapshot.lastSyncAt ?? snapshot.last_sync_at ?? null;
@@ -98,7 +107,13 @@ export class GameState {
   }
 
   costMult() {
-    return talentEffects(this.talents).generatorCostMult;
+    const effects = economyEffects(this.talents, this.verdictPurchases);
+    let mult = effects.generatorCostMult;
+    const totalOwned = Object.values(this.quantities()).reduce((sum, n) => sum + (Number(n) || 0), 0);
+    if (totalOwned === 0 && cmp(effects.firstGeneratorCostMult, '1') !== 0) {
+      mult = mul(mult, effects.firstGeneratorCostMult);
+    }
+    return mult;
   }
 
   quantities() {
@@ -111,6 +126,7 @@ export class GameState {
       upgrades: this.upgrades,
       talents: this.talents,
       obols: this.obols,
+      verdictPurchases: this.verdictPurchases,
     });
   }
 
@@ -121,6 +137,7 @@ export class GameState {
       talents: this.talents,
       obols: this.obols,
       sps: this.sps(),
+      verdictPurchases: this.verdictPurchases,
     });
   }
 
@@ -207,6 +224,19 @@ export class GameState {
     return { ok: true, cost: talent.cost };
   }
 
+  buyVerdict(id) {
+    const item = getVerdictShopItem(id);
+    if (!item) return { ok: false };
+    if (this.verdictPurchases.includes(id)) return { ok: false };
+    const cost = Math.max(0, Number.parseInt(item.cost, 10) || 0);
+    if (this.verdicts < cost) return { ok: false };
+    this.verdicts = Math.max(0, this.verdicts - cost);
+    this.verdictPurchases = [...this.verdictPurchases, id];
+    this.unlockLogs();
+    this.#bump();
+    return { ok: true, cost };
+  }
+
   applyPrestige() {
     if (!this.canPrestige()) return { ok: false };
     this.unlockLogs();
@@ -237,6 +267,7 @@ export class GameState {
       elapsedSeconds,
       sps: this.sps(),
       talents: this.talents,
+      verdictPurchases: this.verdictPurchases,
     });
     this.lastOfflineSeconds = Math.max(this.lastOfflineSeconds, result.effectiveSeconds);
     if (result.ignored || isZero(result.offlineSouls)) {
@@ -293,6 +324,69 @@ export class GameState {
     return this.eduLogsSeen;
   }
 
+  /** Rehydrate a partir do DTO autoritativo do servidor (Task 9). */
+  applyAuthoritativeState(snapshot = {}) {
+    if (!snapshot || typeof snapshot !== 'object') return this;
+    this.souls = clampNonNegative(snapshot.souls ?? this.souls);
+    this.obols = clampNonNegative(snapshot.obols ?? this.obols);
+    this.mnemosyne = clampNonNegative(snapshot.mnemosyne ?? this.mnemosyne);
+    this.lifetimeSouls = clampNonNegative(
+      snapshot.lifetimeSouls ?? snapshot.lifetime_souls ?? this.lifetimeSouls,
+    );
+    this.runSouls = clampNonNegative(snapshot.runSouls ?? snapshot.run_souls ?? this.runSouls);
+    this.prestigeCount = Math.max(
+      0,
+      Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10) || this.prestigeCount,
+    );
+    this.generators.applyQuantities(
+      asQuantities(snapshot.generators ?? snapshot.generators_state),
+    );
+    this.upgrades = uniqueKnown(
+      snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
+      isKnownUpgradeId,
+    );
+    this.talents = uniqueKnown(
+      snapshot.talents ?? snapshot.talents_state ?? this.talents,
+      isKnownTalentId,
+    );
+    this.verdictPurchases = uniqueKnown(
+      snapshot.verdictPurchases ?? snapshot.verdict_purchases ?? this.verdictPurchases,
+      isKnownVerdictPurchase,
+    );
+    if (snapshot.verdicts != null) {
+      this.verdicts = Math.max(0, Number.parseInt(snapshot.verdicts, 10) || 0);
+    }
+    if (snapshot.juizoBestStreak != null || snapshot.juizo_best_streak != null) {
+      this.juizoBestStreak = Math.max(
+        0,
+        Number.parseInt(snapshot.juizoBestStreak ?? snapshot.juizo_best_streak, 10) || 0,
+      );
+    }
+    if (snapshot.juizoCurrentStreak != null || snapshot.juizo_current_streak != null) {
+      this.juizoCurrentStreak = Math.max(
+        0,
+        Number.parseInt(snapshot.juizoCurrentStreak ?? snapshot.juizo_current_streak, 10) || 0,
+      );
+    }
+    this.eduLogsSeen = uniqueKnown(
+      snapshot.eduLogsSeen ?? snapshot.edu_logs_seen ?? this.eduLogsSeen,
+      (id) => EDU_LOG_IDS.includes(id),
+    );
+    this.milestones = {
+      ...(snapshot.milestones && typeof snapshot.milestones === 'object'
+        ? snapshot.milestones
+        : this.milestones),
+    };
+    if (snapshot.lastSyncAt || snapshot.last_sync_at) {
+      this.lastSyncAt = snapshot.lastSyncAt ?? snapshot.last_sync_at;
+    }
+    this.syncOk = true;
+    this.#refreshMilestones();
+    this.unlockLogs();
+    this.#bump();
+    return this;
+  }
+
   toSnapshot() {
     return {
       souls: money(this.souls),
@@ -304,6 +398,10 @@ export class GameState {
       generators: this.quantities(),
       upgrades: [...this.upgrades],
       talents: [...this.talents],
+      verdictPurchases: [...this.verdictPurchases],
+      verdicts: this.verdicts,
+      juizoBestStreak: this.juizoBestStreak,
+      juizoCurrentStreak: this.juizoCurrentStreak,
       eduLogsSeen: [...this.eduLogsSeen],
       milestones: { ...this.milestones },
       lastSyncAt: this.lastSyncAt,
@@ -364,6 +462,8 @@ export class GameState {
         return this.syncOk;
       case 'log_offline':
         return this.lastOfflineSeconds > 60;
+      case 'log_juizo':
+        return this.verdictPurchases.length >= 1;
       default:
         return false;
     }

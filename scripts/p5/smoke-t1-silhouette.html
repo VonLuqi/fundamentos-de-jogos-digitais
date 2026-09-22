@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Despertar p5 smoke — T1 silhueta</title>
+  <style>
+    html, body { margin: 0; background: #0a0a0f; color: #e8d4a8; font-family: Georgia, serif; }
+    main { padding: 1rem; }
+    canvas { display: block; margin: 1rem 0; border: 1px solid rgba(207, 167, 89, 0.35); }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+</head>
+<body>
+  <main>
+    <p>Smoke Task 0.3 — silhueta T1. Tecla <kbd>S</kbd> exporta PNG.</p>
+  </main>
+  <script>
+    function setup() {
+      const c = createCanvas(128, 128);
+      c.parent(document.querySelector('main'));
+      noLoop();
+      drawShade();
+    }
+
+    function drawShade() {
+      clear();
+      noStroke();
+      // Corpo
+      fill(12, 18, 22, 230);
+      ellipse(64, 78, 52, 70);
+      // Cabeça / capuz
+      fill(8, 12, 16, 240);
+      ellipse(64, 42, 38, 36);
+      // Olhos Styx
+      fill(0, 168, 150, 220);
+      ellipse(56, 44, 6, 5);
+      ellipse(72, 44, 6, 5);
+      // Véu
+      fill(0, 168, 150, 40);
+      ellipse(64, 90, 40, 18);
+    }
+
+    function keyPressed() {
+      if (key === 's' || key === 'S') {
+        saveCanvas('despertar-t1-silhouette', 'png');
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,7 +1,8 @@
 /**
  * Persistência local de O Despertar.
- * IndexedDB `despertar-db` / store `states` / chave = userId.
+ * IndexedDB `despertar-db-v2` / store `states` / chave = userId.
  * Fallback: sessionStorage (nunca a chave de auth em localStorage).
+ * Epoch v2: invalida saves locais de quem jogou antes do gate do Acheron.
  */
 
 import {

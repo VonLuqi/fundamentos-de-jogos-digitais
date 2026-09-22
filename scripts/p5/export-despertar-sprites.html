@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Despertar p5 — export sprites T1–T6 + juramentos</title>
+  <style>
+    html, body { margin: 0; background: #0a0a0f; color: #e8d4a8; font-family: Georgia, serif; }
+    main { padding: 1rem 1.25rem 2rem; }
+    .row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin: 1rem 0; }
+    canvas { border: 1px solid rgba(207, 167, 89, 0.35); background: transparent; }
+    button {
+      font-family: Cinzel, Georgia, serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid #cfa759;
+      background: linear-gradient(180deg, #e8d4a8, #cfa759);
+      color: #14080c;
+      cursor: pointer;
+    }
+    code { color: #00a896; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.11.3/lib/p5.min.js"></script>
+</head>
+<body>
+  <main>
+    <h1>Export p5 — Task B3</h1>
+    <p>
+      Preferência do repo: <code>npm run despertar:sprites</code> (SVG→WebP via sharp).
+      Este sketch regenera PNGs manuais (tecla <kbd>E</kbd> ou botão).
+    </p>
+    <button type="button" id="export-all">Exportar PNGs</button>
+    <div class="row" id="gallery"></div>
+  </main>
+  <script>
+    const TIERS = [
+      { id: 'wandering_shade', tier: 1, accent: [0, 168, 150] },
+      { id: 'charon_servants', tier: 2, accent: [207, 167, 89] },
+      { id: 'cerberian_hound', tier: 3, accent: [217, 4, 41] },
+      { id: 'tartarus_judge', tier: 4, accent: [168, 85, 247] },
+      { id: 'phlegethon_forge', tier: 5, accent: [255, 107, 107] },
+      { id: 'obsidian_throne', tier: 6, accent: [232, 212, 168] },
+    ];
+
+    const canvases = [];
+
+    function drawTier(pg, tier, accent) {
+      pg.clear();
+      pg.noStroke();
+      const [ar, ag, ab] = accent;
+      if (tier === 1) {
+        pg.fill(12, 18, 22, 235);
+        pg.ellipse(64, 78, 52, 68);
+        pg.fill(8, 12, 16, 245);
+        pg.ellipse(64, 42, 38, 36);
+        pg.fill(ar, ag, ab, 220);
+        pg.ellipse(56, 44, 6, 5);
+        pg.ellipse(72, 44, 6, 5);
+        pg.fill(ar, ag, ab, 50);
+        pg.ellipse(64, 96, 40, 16);
+      } else if (tier === 2) {
+        pg.fill(ar, ag, ab, 60);
+        pg.ellipse(64, 92, 80, 22);
+        pg.fill(12, 18, 22, 240);
+        pg.beginShape();
+        pg.vertex(22, 78); pg.quadraticVertex(64, 48, 106, 78);
+        pg.vertex(98, 86); pg.quadraticVertex(64, 62, 30, 86);
+        pg.endShape(pg.CLOSE);
+        pg.fill(ar, ag, ab);
+        pg.rect(60, 36, 8, 40, 2);
+      } else if (tier === 3) {
+        pg.fill(12, 18, 22, 240);
+        pg.ellipse(40, 58, 32, 36);
+        pg.ellipse(64, 50, 36, 40);
+        pg.ellipse(88, 58, 32, 36);
+        pg.fill(ar, ag, ab);
+        pg.ellipse(40, 56, 6, 6);
+        pg.ellipse(58, 48, 6, 6);
+        pg.ellipse(70, 48, 6, 6);
+        pg.ellipse(88, 56, 6, 6);
+      } else if (tier === 4) {
+        pg.fill(12, 18, 22, 240);
+        pg.rect(58, 28, 12, 58, 2);
+        pg.fill(ar, ag, ab, 210);
+        pg.quad(34, 40, 94, 40, 88, 56, 40, 56);
+        pg.fill(12, 18, 22, 240);
+        pg.circle(64, 92, 28);
+        pg.fill(ar, ag, ab);
+        pg.circle(64, 92, 12);
+      } else if (tier === 5) {
+        pg.fill(12, 18, 22, 240);
+        pg.rect(28, 70, 72, 28, 4);
+        pg.quad(40, 70, 48, 36, 80, 36, 88, 70);
+        pg.stroke(ar, ag, ab);
+        pg.strokeWeight(4);
+        pg.noFill();
+        pg.line(52, 50, 64, 28);
+        pg.line(64, 28, 76, 50);
+        pg.noStroke();
+        pg.fill(ar, ag, ab, 200);
+        pg.circle(64, 58, 12);
+      } else {
+        pg.fill(12, 18, 22, 240);
+        pg.rect(30, 78, 68, 18, 3);
+        pg.quad(40, 78, 48, 48, 80, 48, 88, 78);
+        pg.fill(ar, ag, ab, 190);
+        pg.rect(54, 28, 20, 24, 2);
+        pg.circle(64, 24, 16);
+      }
+    }
+
+    function setup() {
+      const gallery = document.getElementById('gallery');
+      TIERS.forEach((entry) => {
+        const pg = createGraphics(128, 128);
+        drawTier(pg, entry.tier, entry.accent);
+        const c = createCanvas(128, 128);
+        c.parent(gallery);
+        image(pg, 0, 0);
+        canvases.push({ id: entry.id, pg });
+      });
+      noLoop();
+    }
+
+    function exportAll() {
+      canvases.forEach(({ id, pg }) => {
+        pg.save(`despertar-${id}.png`);
+      });
+    }
+
+    function keyPressed() {
+      if (key === 'e' || key === 'E') exportAll();
+    }
+
+    document.getElementById('export-all')?.addEventListener('click', exportAll);
+  </script>
+</body>
+</html>

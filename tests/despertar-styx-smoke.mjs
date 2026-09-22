@@ -18,7 +18,9 @@ import {
   describeUpgradeCard,
   isLetheOpen,
   isStyxUnlocked,
+  upgradeRequirementText,
 } from '../js/hades-despertar/ui/UIRenderer.js';
+import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 import { applyHarnessGrant, harnessEnabled } from '../js/hades-despertar/ui/harness.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -43,6 +45,8 @@ staticAssert(pkg.includes('js/hades-despertar/ui/harness.js'), 'check cobre harn
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
 staticAssert(html.includes('id="despertar-bonus"'), 'HUD mostra o bônus');
 staticAssert(html.includes('id="styx-list"'), 'lista de juramentos');
+staticAssert(html.includes('id="despertar-sealed-juramentos"'), 'Stats: Juramentos selados');
+staticAssert(html.includes('id="sealed-list"'), 'lista de selados');
 staticAssert(html.includes('id="lethe-ritual"'), 'CTA Ritual do Lethe');
 staticAssert(html.includes('id="despertar-lethe-modal"'), 'modal de confirmação');
 staticAssert(html.includes('Beber do Lethe'), 'copy confirmar');
@@ -58,6 +62,18 @@ staticAssert(boot.includes('applyHarnessGrant'), 'harness local no boot');
 const harnessSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/harness.js'), 'utf8');
 staticAssert(harnessSrc.includes("get('harness') === '1'"), 'query harness=1');
 staticAssert(harnessSrc.includes("host !== 'localhost'"), 'harness morto fora de localhost');
+
+const uiSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
+staticAssert(uiSrc.includes('styx-tooltip'), 'tooltip Styx no renderer');
+staticAssert(uiSrc.includes('is-sealing'), 'strip mantém ícone durante seal');
+staticAssert(uiSrc.includes('!view.owned'), 'owned some da strip');
+staticAssert(uiSrc.includes('#renderSealed') || uiSrc.includes('renderSealed'), 'Stats selados');
+
+const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
+staticAssert(css.includes('despertar-upgrade-tooltip'), 'CSS tooltip');
+staticAssert(css.includes('is-affordable'), 'CSS affordable');
+staticAssert(css.includes('despertar-sealed-chip'), 'CSS chips selados');
+staticAssert(!css.includes('despertar-upgrade-icon__mark'), 'sem mark empilhado no ícone');
 
 if (errors.length) {
   console.error('despertar-styx-smoke (estático):');
@@ -79,6 +95,30 @@ async function run(name, fn) {
     failed += 1;
   }
 }
+
+await run('F4: owned some da strip; requisito + Stats selados', () => {
+  const shade = new GameState({ souls: '100', generators: { wandering_shade: 1 } });
+  const before = describeUpgradeCard(shade, 'foice_afilada');
+  assert.equal(before.revealed, true);
+  assert.equal(before.owned, false);
+  assert.equal(before.canBuy, true);
+  assert.ok(before.requirement);
+
+  const umbras = describeUpgradeCard(shade, 'umbras_despertas');
+  assert.equal(umbras.revealed, true);
+  assert.equal(umbras.canBuy, true);
+  assert.match(umbras.requirement, /Sombra|Umbras|Exige/i);
+
+  assert.equal(shade.buyUpgrade('foice_afilada').ok, true);
+  const after = describeUpgradeCard(shade, 'foice_afilada');
+  assert.equal(after.owned, true);
+  assert.equal(after.canBuy, false);
+  assert.equal(after.revealed, true, 'ainda elegível, mas some da strip via !owned');
+  assert.equal(shade.upgrades.includes('foice_afilada'), true);
+
+  const def = UPGRADES.find((item) => item.id === 'cortejo_das_sombras');
+  assert.match(upgradeRequirementText(def), /10/);
+});
 
 await run('Styx trancado no minuto zero; abre com 1 gerador ou 100 almas', () => {
   const fresh = new GameState();

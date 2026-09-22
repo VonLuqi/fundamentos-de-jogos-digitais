@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "size": 128,
+  "format": {
+    "primary": "webp",
+    "fallback": "svg"
+  },
+  "note": "Gerado por scripts/gen-despertar-sprites.mjs (Task B3). Placeholders até arte do Mestre.",
+  "generators": {
+    "wandering_shade": {
+      "tier": 1,
+      "name": "Sombra Vagante",
+      "webp": "generators/wandering_shade.webp",
+      "svg": "generators/wandering_shade.svg",
+      "size": 128
+    },
+    "charon_servants": {
+      "tier": 2,
+      "name": "Servos de Caronte",
+      "webp": "generators/charon_servants.webp",
+      "svg": "generators/charon_servants.svg",
+      "size": 128
+    },
+    "cerberian_hound": {
+      "tier": 3,
+      "name": "Cão Cerberiano",
+      "webp": "generators/cerberian_hound.webp",
+      "svg": "generators/cerberian_hound.svg",
+      "size": 128
+    },
+    "tartarus_judge": {
+      "tier": 4,
+      "name": "Juiz do Tártaro",
+      "webp": "generators/tartarus_judge.webp",
+      "svg": "generators/tartarus_judge.svg",
+      "size": 128
+    },
+    "phlegethon_forge": {
+      "tier": 5,
+      "name": "Forja de Phlegethon",
+      "webp": "generators/phlegethon_forge.webp",
+      "svg": "generators/phlegethon_forge.svg",
+      "size": 128
+    },
+    "obsidian_throne": {
+      "tier": 6,
+      "name": "Trono de Obsidiana",
+      "webp": "generators/obsidian_throne.webp",
+      "svg": "generators/obsidian_throne.svg",
+      "size": 128
+    }
+  },
+  "upgrades": {
+    "foice_afilada": {
+      "name": "Foice Afiada",
+      "kind": "clickMult",
+      "webp": "upgrades/foice_afilada.webp",
+      "svg": "upgrades/foice_afilada.svg",
+      "size": 128
+    },
+    "juramento_acheron": {
+      "name": "Juramento do Acheron",
+      "kind": "clickMult",
+      "webp": "upgrades/juramento_acheron.webp",
+      "svg": "upgrades/juramento_acheron.svg",
+      "size": 128
+    },
+    "pacto_das_margens": {
+      "name": "Pacto das Margens",
+      "kind": "clickMult",
+      "webp": "upgrades/pacto_das_margens.webp",
+      "svg": "upgrades/pacto_das_margens.svg",
+      "size": 128
+    },
+    "ceifador_ctoniano": {
+      "name": "Ceifador Ctoniano",
+      "kind": "clickMult",
+      "webp": "upgrades/ceifador_ctoniano.webp",
+      "svg": "upgrades/ceifador_ctoniano.svg",
+      "size": 128
+    },
+    "colheita_eterna": {
+      "name": "Colheita Eterna",
+      "kind": "clickMult",
+      "webp": "upgrades/colheita_eterna.webp",
+      "svg": "upgrades/colheita_eterna.svg",
+      "size": 128
+    },
+    "umbras_despertas": {
+      "name": "Umbras Despertas",
+      "kind": "generatorMult",
+      "webp": "upgrades/umbras_despertas.webp",
+      "svg": "upgrades/umbras_despertas.svg",
+      "size": 128
+    },
+    "cortejo_das_sombras": {
+      "name": "Cortejo das Sombras",
+      "kind": "generatorMult",
+      "webp": "upgrades/cortejo_das_sombras.webp",
+      "svg": "upgrades/cortejo_das_sombras.svg",
+      "size": 128
+    },
+    "moeda_no_barquinho": {
+      "name": "Moeda no Barquinho",
+      "kind": "generatorMult",
+      "webp": "upgrades/moeda_no_barquinho.webp",
+      "svg": "upgrades/moeda_no_barquinho.svg",
+      "size": 128
+    },
+    "frota_de_caronte": {
+      "name": "Frota de Caronte",
+      "kind": "generatorMult",
+      "webp": "upgrades/frota_de_caronte.webp",
+      "svg": "upgrades/frota_de_caronte.svg",
+      "size": 128
+    },
+    "trela_cerberiana": {
+      "name": "Trela Cerberiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/trela_cerberiana.webp",
+      "svg": "upgrades/trela_cerberiana.svg",
+      "size": 128
+    },
+    "tres_cabecas": {
+      "name": "Três Cabeças",
+      "kind": "generatorMult",
+      "webp": "upgrades/tres_cabecas.webp",
+      "svg": "upgrades/tres_cabecas.svg",
+      "size": 128
+    },
+    "veredito_tartaro": {
+      "name": "Veredito do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/veredito_tartaro.webp",
+      "svg": "upgrades/veredito_tartaro.svg",
+      "size": 128
+    },
+    "lei_inquebravel": {
+      "name": "Lei Inquebrável",
+      "kind": "generatorMult",
+      "webp": "upgrades/lei_inquebravel.webp",
+      "svg": "upgrades/lei_inquebravel.svg",
+      "size": 128
+    },
+    "brasa_phlegethon": {
+      "name": "Brasa de Phlegethon",
+      "kind": "generatorMult",
+      "webp": "upgrades/brasa_phlegethon.webp",
+      "svg": "upgrades/brasa_phlegethon.svg",
+      "size": 128
+    },
+    "fornalha_industrial": {
+      "name": "Fornalha Industrial",
+      "kind": "generatorMult",
+      "webp": "upgrades/fornalha_industrial.webp",
+      "svg": "upgrades/fornalha_industrial.svg",
+      "size": 128
+    },
+    "cetro_obsidiana": {
+      "name": "Cetro de Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/cetro_obsidiana.webp",
+      "svg": "upgrades/cetro_obsidiana.svg",
+      "size": 128
+    },
+    "soberania_absoluta": {
+      "name": "Soberania Absoluta",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberania_absoluta.webp",
+      "svg": "upgrades/soberania_absoluta.svg",
+      "size": 128
+    },
+    "coroacao_imperador": {
+      "name": "Coroação do Imperador",
+      "kind": "allGeneratorsMult",
+      "webp": "upgrades/coroacao_imperador.webp",
+      "svg": "upgrades/coroacao_imperador.svg",
+      "size": 128
+    },
+    "rios_unificados": {
+      "name": "Rios Unificados",
+      "kind": "allGeneratorsMult",
+      "webp": "upgrades/rios_unificados.webp",
+      "svg": "upgrades/rios_unificados.svg",
+      "size": 128
+    }
+  }
+}

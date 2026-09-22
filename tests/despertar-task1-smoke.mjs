@@ -70,12 +70,22 @@ staticAssert(apiJs.includes('export function despertarStateSync'), 'exporta desp
 staticAssert(apiJs.includes('export function despertarPrestige'), 'exporta despertarPrestige');
 staticAssert(apiJs.includes('export function despertarTalentBuy'), 'exporta despertarTalentBuy');
 
-staticAssert(despertarApi.includes("action !== 'stateGet'"), 'api/despertar.js trata stateGet');
-staticAssert(despertarApi.includes('loadUserIdByToken'), 'identidade vem da sessão');
+staticAssert(despertarApi.includes("action === 'stateGet'"), 'api/despertar.js trata stateGet');
+staticAssert(
+  despertarApi.includes('loadSessionUser') || despertarApi.includes('loadUserIdByToken'),
+  'identidade vem da sessão'
+);
+staticAssert(despertarApi.includes('isDespertarSealedForUser'), 'gate do Acheron no handler');
+staticAssert(despertarApi.includes("action === 'stateResetStudents'"), 'admin pode limpar Estelas de alunos');
+staticAssert(apiJs.includes('export function despertarResetStudents'), 'cliente expõe despertarResetStudents');
 staticAssert(!/req\.body\?\.userId|body\.userId/.test(despertarApi), 'não usa userId do body');
-staticAssert(despertarApi.includes('toStateDto'), 'devolve DTO camelCase');
+staticAssert(
+  despertarApi.includes('buildStateDto') || despertarApi.includes('toStateDto'),
+  'devolve DTO camelCase'
+);
 staticAssert(pkg.includes('api/despertar.js'), 'npm run check cobre api/despertar.js');
 staticAssert(pkg.includes('despertar-task1-smoke.mjs'), 'npm run check inclui este smoke');
+staticAssert(pkg.includes('api/_lib/despertar-gate.js'), 'npm run check cobre despertar-gate');
 
 if (errors.length) {
   console.error('despertar-task1-smoke (estático):');
@@ -152,7 +162,7 @@ async function testInvalidTokenOnStubActions() {
       { method: 'POST', body: { token: 'token-despertar-invalido', action } },
       res
     );
-    assert.equal(res.statusCode, 401, `${action} com token inválido deve ser 401 (antes do stub 501).`);
+    assert.equal(res.statusCode, 401, `${action} com token inválido deve ser 401.`);
   }
 }
 
@@ -160,7 +170,7 @@ await run('GET /api/despertar é 405', testGetNotAllowed);
 await run('stateGet sem token é 401', testMissingToken);
 await run('stateGet com token vazio é 401', testEmptyToken);
 await run('stateGet com token inválido é 401 e ignora userId', testInvalidToken);
-await run('actions stub com token inválido ainda são 401', testInvalidTokenOnStubActions);
+await run('actions de sync com token inválido ainda são 401', testInvalidTokenOnStubActions);
 
 async function testValidSessionStateGet() {
   if (!supabase) {
@@ -188,6 +198,17 @@ async function testValidSessionStateGet() {
   assert.notEqual(res.statusCode, 401, 'sessão válida não deve ser 401.');
   if (res.statusCode === 503) {
     throw new Error(res.body?.error || 'Tabela despertar_states ausente no Supabase.');
+  }
+  if (res.statusCode === 403 && res.body?.error === 'despertar_sealed') {
+    // Aluno com Acheron selado: gate ok. Admin / aula aberta seguem para o DTO.
+    const { data: user } = await supabase
+      .from('users')
+      .select('role')
+      .eq('id', session.user_id)
+      .maybeSingle();
+    assert.notEqual(user?.role, 'admin', 'admin não deveria receber despertar_sealed.');
+    console.log('[OK] stateGet 403 despertar_sealed para aluno com Acheron selado.');
+    return;
   }
   assert.equal(res.statusCode, 200, `stateGet deveria ser 200, veio ${res.statusCode}.`);
   assert.equal(res.body?.ok, true);
@@ -218,7 +239,15 @@ async function testValidSessionStateGet() {
     { method: 'POST', body: { action: 'stateSync', token: session.token, clientState: {} } },
     stub
   );
-  assert.equal(stub.statusCode, 501, 'stateSync na Task 1 é stub 501.');
+  if (stub.statusCode === 403 && stub.body?.error === 'despertar_sealed') {
+    console.log('[OK] stateSync também respeita Acheron selado.');
+    return;
+  }
+  assert.ok(
+    stub.statusCode === 200 || stub.statusCode === 400 || stub.statusCode === 409,
+    `stateSync autoritativo (Task 9) responde 200/400/409, não stub; veio ${stub.statusCode}`,
+  );
+  assert.notEqual(stub.statusCode, 501, 'stateSync não é mais stub 501.');
 }
 
 await run('stateGet com sessão válida devolve DTO (cria linha se preciso)', testValidSessionStateGet);

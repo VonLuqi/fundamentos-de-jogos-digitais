@@ -1,6 +1,6 @@
 /**
- * Smoke Task 7 — Mercado + altar jogável (UI cirúrgica)
- * (docs/plano-hades-despertar.md).
+ * Smoke Task 7 + E1 — Mercado/altar + layout Cookie (selectors)
+ * (docs/plano-hades-despertar.md · plano-despertar-ui-cookieclicker.md).
  *
  * Uso: node tests/despertar-ui-smoke.mjs
  */
@@ -57,7 +57,8 @@ const boot = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'ut
 staticAssert(boot.includes('GameLoop'), 'index.js liga o GameLoop');
 staticAssert(boot.includes('buyGenerator'), 'compras no estado, não no render');
 staticAssert(boot.includes('.click(') || boot.includes('state.click()'), 'Ceifar chama state.click');
-staticAssert(boot.includes('bootLocalSession'), 'boot local persiste a corrida');
+staticAssert(boot.includes('bootAuthoritativeSession') || boot.includes('bootLocalSession'), 'boot persiste a corrida');
+staticAssert(boot.includes('ApiService'), 'index liga ApiService');
 staticAssert(boot.includes('spawnReapParticles'), 'partículas no clique');
 
 const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
@@ -70,6 +71,32 @@ staticAssert(html.includes('id="despertar-reap"'), 'botão Ceifar');
 staticAssert(html.includes('data-particle-layer'), 'camada de partículas');
 staticAssert(html.includes('id="despertar-market-list"'), 'lista do mercado para mount único');
 staticAssert(html.includes('data-buy-mode="max"'), 'toggle Máx');
+
+/* --- Task E1 — layout Cookie (selectors) --- */
+staticAssert(html.includes('despertar-layout'), 'grid Cookie 3 colunas');
+staticAssert(html.includes('despertar-col--acheron'), 'coluna esquerda (altar)');
+staticAssert(html.includes('despertar-col--realm'), 'coluna centro (mundo/tabs)');
+staticAssert(html.includes('despertar-col--store'), 'coluna direita (store)');
+staticAssert(html.includes('id="tab-mundo"'), 'aba Mundo');
+staticAssert(html.includes('id="panel-mundo"'), 'painel Mundo');
+staticAssert(html.includes('id="despertar-shelves"'), 'prateleiras');
+staticAssert(html.includes('id="despertar-reap-orbit"'), 'órbita do altar');
+staticAssert(html.includes('id="despertar-souls"'), 'HUD de almas');
+staticAssert(html.includes('id="despertar-juizo-open"'), 'CTA Juízo');
+staticAssert(html.includes('data-juizo-choice="A"'), 'Juízo card campeão');
+staticAssert(html.includes('data-juizo-choice="B"'), 'Juízo card desafiante');
+staticAssert(html.includes('data-juizo-choice="tie"'), 'Juízo Empate');
+staticAssert(!html.includes('data-juizo-choice="higher"'), 'Juízo sem Maior');
+staticAssert(!html.includes('data-juizo-choice="lower"'), 'Juízo sem Menor');
+staticAssert(html.includes('id="despertar-sealed-juramentos"'), 'Stats Juramentos selados');
+staticAssert(html.includes('data-reap-foice'), 'Foice no Ceifar');
+staticAssert(html.includes('despertar-shelf') || html.includes('despertar-shelves'), 'prateleiras');
+staticAssert(css.includes('despertar-layout'), 'CSS layout Cookie');
+staticAssert(css.includes('despertar-col--store'), 'CSS coluna store');
+
+staticAssert(pkg.includes('despertar-clock-smoke.mjs'), 'E1: clock smoke no check');
+staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'E1: world smoke no check');
+staticAssert(pkg.includes('despertar-juizo-smoke.mjs'), 'E1: juizo smoke no check');
 
 if (errors.length) {
   console.error('despertar-ui-smoke (estático):');

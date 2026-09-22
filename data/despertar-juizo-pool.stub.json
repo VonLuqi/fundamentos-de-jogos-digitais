@@ -1,0 +1,4855 @@
+{
+  "poolId": "despertar-juizo-v1",
+  "note": "Stub para o Mestre preencher. rating ∈ {L,10,12,14,16,18}. Só entram no Juízo entries com rating preenchido. Capas em assets/classind-dle/covers/ ou assets/despertar-juizo/covers/.",
+  "ratingOrder": [
+    "L",
+    "10",
+    "12",
+    "14",
+    "16",
+    "18"
+  ],
+  "count": 531,
+  "games": [
+    {
+      "id": "mortal-kombat-11",
+      "title": "Mortal Kombat 11",
+      "rating": "18",
+      "blurb": "Luta com fatalidades, gore explícito e desmembramento.",
+      "cover": "mortal-kombat-11.webp",
+      "descriptors": [
+        "violência extrema",
+        "gore"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "street-fighter-6",
+      "title": "Street Fighter 6",
+      "rating": "12",
+      "blurb": "Luta competitiva com impacto, sem desmembramento pedagógico.",
+      "cover": "street-fighter-6.webp",
+      "descriptors": [
+        "violência"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "the-sims-4",
+      "title": "The Sims 4",
+      "rating": "12",
+      "blurb": "Simulação de vida com temas sexuais, nudez censurada e relacionamentos adultos.",
+      "cover": "the-sims-4.webp",
+      "descriptors": [
+        "temas sexuais",
+        "nudez"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "hollow-knight",
+      "title": "Hollow Knight",
+      "rating": "10",
+      "blurb": "Metroidvania com combate fantasioso, criaturas e clima de medo.",
+      "cover": "hollow-knight.webp",
+      "descriptors": [
+        "violência fantasiosa",
+        "medo"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "undertale",
+      "title": "Undertale",
+      "rating": "10",
+      "blurb": "RPG com combate fantasioso contra monstros e humor; violência estilizada.",
+      "cover": "undertale.webp",
+      "descriptors": [
+        "violência fantasiosa",
+        "não-humanos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "hotline-miami",
+      "title": "Hotline Miami",
+      "rating": "18",
+      "blurb": "Ação top-down com violência gráfica explícita contra humanos e sangue.",
+      "cover": "hotline-miami.webp",
+      "descriptors": [
+        "violência extrema",
+        "gore",
+        "humanos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "cuphead",
+      "title": "Cuphead",
+      "rating": "10",
+      "blurb": "Run-and-gun cartunesco com violência estilizada e humor clássico.",
+      "cover": "cuphead.webp",
+      "descriptors": [
+        "violência fantasiosa",
+        "comicidade"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "blasphemous",
+      "title": "Blasphemous",
+      "rating": "18",
+      "blurb": "Metroidvania penitent com gore religioso, execução e horror corporal.",
+      "cover": "blasphemous.webp",
+      "descriptors": [
+        "violência extrema",
+        "gore",
+        "temas adultos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "supermarket-simulator",
+      "title": "Supermarket Simulator",
+      "rating": "L",
+      "blurb": "Simulação de loja: empilhar prateleiras, caixa e rotina sem violência.",
+      "cover": "supermarket-simulator.webp",
+      "descriptors": [
+        "conteúdo livre"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "grand-theft-auto-san-andreas",
+      "title": "Grand Theft Auto: San Andreas",
+      "rating": "18",
+      "blurb": "Mundo aberto com violência, drogas, crimes e temas adultos explícitos.",
+      "cover": "gta-san-andreas.webp",
+      "descriptors": [
+        "violência",
+        "drogas",
+        "temas adultos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "vampire-survivors",
+      "title": "Vampire Survivors",
+      "rating": "10",
+      "blurb": "Horda survival com sprites e violência fantasiosa arcade.",
+      "cover": "vampire-survivors.webp",
+      "descriptors": [
+        "violência fantasiosa"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "doom-eternal",
+      "title": "Doom Eternal",
+      "rating": "16",
+      "blurb": "FPS com violência intensa e gore demoníaco.",
+      "cover": "doom-eternal.webp",
+      "descriptors": [
+        "violência intensa",
+        "gore"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "the-simpsons-hit-and-run",
+      "title": "The Simpsons: Hit & Run",
+      "rating": "10",
+      "blurb": "Ação/aventura humorística com violência cartoon.",
+      "cover": "the-simpsons-hit-and-run.webp",
+      "descriptors": [
+        "violência fantasiosa",
+        "comicidade"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "silent-hill-2-2024",
+      "title": "Silent Hill 2 (2024)",
+      "rating": "18",
+      "blurb": "Terror psicológico com violência, horror corporal e temas adultos.",
+      "cover": "silent-hill-2-2024.webp",
+      "descriptors": [
+        "medo intenso",
+        "violência",
+        "temas adultos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "five-nights-at-freddy-s",
+      "title": "Five Nights at Freddy's",
+      "rating": "12",
+      "blurb": "Terror de jumpscare com animatrônicos; medo forte, violência pouco gráfica.",
+      "cover": "five-nights-at-freddys.webp",
+      "descriptors": [
+        "medo"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "god-of-war-ragnarok",
+      "title": "God of War Ragnarök",
+      "rating": "18",
+      "blurb": "Ação mitológica com combate visceral, sangue e temas maduros.",
+      "cover": "god-of-war-ragnarok.webp",
+      "descriptors": [
+        "violência",
+        "sangue",
+        "temas adultos"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "marvel-rivals",
+      "title": "Marvel Rivals",
+      "rating": "12",
+      "blurb": "Hero shooter com combate estilizado entre heróis.",
+      "cover": "marvel-rivals.webp",
+      "descriptors": [
+        "violência"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "resident-evil-village",
+      "title": "Resident Evil Village",
+      "rating": "18",
+      "blurb": "Survival horror com violência gráfica, gore e terror.",
+      "cover": "resident-evil-village.webp",
+      "descriptors": [
+        "violência extrema",
+        "gore",
+        "medo"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "call-of-duty-black-ops",
+      "title": "Call of Duty: Black Ops",
+      "rating": "18",
+      "blurb": "FPS militar com violência realista de combate contemporâneo.",
+      "cover": "call-of-duty-black-ops.webp",
+      "descriptors": [
+        "violência",
+        "sangue"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "crimson-desert",
+      "title": "Crimson Desert",
+      "rating": "16",
+      "blurb": "Ação/aventura com combate; referência pedagógica de violência intensa em mundo aberto.",
+      "cover": "crimson-desert.webp",
+      "descriptors": [
+        "violência"
+      ],
+      "source": "aula5-v1"
+    },
+    {
+      "id": "minecraft",
+      "title": "Minecraft",
+      "rating": "10",
+      "blurb": "Sandbox com exploração e combate opcional.",
+      "cover": "minecraft.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fortnite",
+      "title": "Fortnite",
+      "rating": "12",
+      "blurb": "Battle royale com violência estilizada.",
+      "cover": "fortnite.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "roblox",
+      "title": "Roblox",
+      "rating": "L",
+      "blurb": "Plataforma UGC com experiências variadas.",
+      "cover": "roblox.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "among-us",
+      "title": "Among Us",
+      "rating": "10",
+      "blurb": "Social deduction com humor e tensão leve.",
+      "cover": "among-us.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "valorant",
+      "title": "Valorant",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "league-of-legends",
+      "title": "League of Legends",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "counter-strike-2",
+      "title": "Counter-Strike 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dota-2",
+      "title": "Dota 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "overwatch-2",
+      "title": "Overwatch 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "apex-legends",
+      "title": "Apex Legends",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "genshin-impact",
+      "title": "Genshin Impact",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "honkai-star-rail",
+      "title": "Honkai: Star Rail",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "elden-ring",
+      "title": "Elden Ring",
+      "rating": "16",
+      "blurb": "Action RPG com violência fantasiosa intensa.",
+      "cover": "elden-ring.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dark-souls-iii",
+      "title": "Dark Souls III",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bloodborne",
+      "title": "Bloodborne",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sekiro-shadows-die-twice",
+      "title": "Sekiro: Shadows Die Twice",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "lies-of-p",
+      "title": "Lies of P",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "black-myth-wukong",
+      "title": "Black Myth: Wukong",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "baldur-s-gate-3",
+      "title": "Baldur's Gate 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "divinity-original-sin-2",
+      "title": "Divinity: Original Sin 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-witcher-3-wild-hunt",
+      "title": "The Witcher 3: Wild Hunt",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cyberpunk-2077",
+      "title": "Cyberpunk 2077",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "red-dead-redemption-2",
+      "title": "Red Dead Redemption 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "grand-theft-auto-v",
+      "title": "Grand Theft Auto V",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "grand-theft-auto-vi",
+      "title": "Grand Theft Auto VI",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "assassin-s-creed-valhalla",
+      "title": "Assassin's Creed Valhalla",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "assassin-s-creed-odyssey",
+      "title": "Assassin's Creed Odyssey",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "horizon-forbidden-west",
+      "title": "Horizon Forbidden West",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "horizon-zero-dawn",
+      "title": "Horizon Zero Dawn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "marvel-s-spider-man-2",
+      "title": "Marvel's Spider-Man 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "marvel-s-spider-man-miles-morales",
+      "title": "Marvel's Spider-Man: Miles Morales",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-last-of-us-part-i",
+      "title": "The Last of Us Part I",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-last-of-us-part-ii",
+      "title": "The Last of Us Part II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "uncharted-4-a-thief-s-end",
+      "title": "Uncharted 4: A Thief's End",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "god-of-war-2018",
+      "title": "God of War (2018)",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ghost-of-tsushima",
+      "title": "Ghost of Tsushima",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "days-gone",
+      "title": "Days Gone",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "death-stranding",
+      "title": "Death Stranding",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "death-stranding-2",
+      "title": "Death Stranding 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hades",
+      "title": "Hades",
+      "rating": "16",
+      "blurb": "Roguelike mitológico com sangue e combate intenso.",
+      "cover": "hades.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hades-ii",
+      "title": "Hades II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "celeste",
+      "title": "Celeste",
+      "rating": "10",
+      "blurb": "Plataforma com temas de ansiedade e perseverança.",
+      "cover": "celeste.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-cells",
+      "title": "Dead Cells",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ori-and-the-blind-forest",
+      "title": "Ori and the Blind Forest",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ori-and-the-will-of-the-wisps",
+      "title": "Ori and the Will of the Wisps",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hollow-knight-silksong",
+      "title": "Hollow Knight: Silksong",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "stardew-valley",
+      "title": "Stardew Valley",
+      "rating": "L",
+      "blurb": "Fazenda e vida rural; relacionamento adulto opcional.",
+      "cover": "stardew-valley.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "animal-crossing-new-horizons",
+      "title": "Animal Crossing: New Horizons",
+      "rating": "L",
+      "blurb": "Simulação social leve; sem violência.",
+      "cover": "animal-crossing-new-horizons.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "terraria",
+      "title": "Terraria",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "no-man-s-sky",
+      "title": "No Man's Sky",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "subnautica",
+      "title": "Subnautica",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "subnautica-below-zero",
+      "title": "Subnautica: Below Zero",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "raft",
+      "title": "Raft",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "valheim",
+      "title": "Valheim",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "don-t-starve",
+      "title": "Don't Starve",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "don-t-starve-together",
+      "title": "Don't Starve Together",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-binding-of-isaac-rebirth",
+      "title": "The Binding of Isaac: Rebirth",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "enter-the-gungeon",
+      "title": "Enter the Gungeon",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "slay-the-spire",
+      "title": "Slay the Spire",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "balatro",
+      "title": "Balatro",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hearthstone",
+      "title": "Hearthstone",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "magic-the-gathering-arena",
+      "title": "Magic: The Gathering Arena",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pokemon-go",
+      "title": "Pokémon GO",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pokemon-scarlet",
+      "title": "Pokémon Scarlet",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pokemon-legends-arceus",
+      "title": "Pokémon Legends: Arceus",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fire-emblem-three-houses",
+      "title": "Fire Emblem: Three Houses",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "xenoblade-chronicles-3",
+      "title": "Xenoblade Chronicles 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-legend-of-zelda-breath-of-the-wild",
+      "title": "The Legend of Zelda: Breath of the Wild",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-legend-of-zelda-tears-of-the-kingdom",
+      "title": "The Legend of Zelda: Tears of the Kingdom",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mario-kart-8-deluxe",
+      "title": "Mario Kart 8 Deluxe",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "super-mario-odyssey",
+      "title": "Super Mario Odyssey",
+      "rating": "L",
+      "blurb": "Plataforma familiar sem violência realista.",
+      "cover": "super-mario-odyssey.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "super-smash-bros-ultimate",
+      "title": "Super Smash Bros. Ultimate",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "kirby-and-the-forgotten-land",
+      "title": "Kirby and the Forgotten Land",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pikmin-4",
+      "title": "Pikmin 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "splatoon-3",
+      "title": "Splatoon 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "metroid-dread",
+      "title": "Metroid Dread",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "metroid-prime-remastered",
+      "title": "Metroid Prime Remastered",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "resident-evil-4-remake",
+      "title": "Resident Evil 4 Remake",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "resident-evil-2-remake",
+      "title": "Resident Evil 2 Remake",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "resident-evil-7-biohazard",
+      "title": "Resident Evil 7: Biohazard",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "resident-evil-3-remake",
+      "title": "Resident Evil 3 Remake",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "silent-hill-f",
+      "title": "Silent Hill f",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "outlast",
+      "title": "Outlast",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "outlast-2",
+      "title": "Outlast 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "amnesia-the-bunker",
+      "title": "Amnesia: The Bunker",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "phasmophobia",
+      "title": "Phasmophobia",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-by-daylight",
+      "title": "Dead by Daylight",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "left-4-dead-2",
+      "title": "Left 4 Dead 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "back-4-blood",
+      "title": "Back 4 Blood",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "payday-2",
+      "title": "Payday 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "payday-3",
+      "title": "Payday 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tom-clancy-s-rainbow-six-siege",
+      "title": "Tom Clancy's Rainbow Six Siege",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "call-of-duty-modern-warfare-ii",
+      "title": "Call of Duty: Modern Warfare II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "call-of-duty-warzone",
+      "title": "Call of Duty: Warzone",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "battlefield-2042",
+      "title": "Battlefield 2042",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "battlefield-v",
+      "title": "Battlefield V",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "halo-infinite",
+      "title": "Halo Infinite",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "gears-5",
+      "title": "Gears 5",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "doom-2016",
+      "title": "Doom (2016)",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "doom-the-dark-ages",
+      "title": "Doom: The Dark Ages",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ultrakill",
+      "title": "Ultrakill",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "half-life-2",
+      "title": "Half-Life 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "half-life-alyx",
+      "title": "Half-Life: Alyx",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "portal",
+      "title": "Portal",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "portal-2",
+      "title": "Portal 2",
+      "rating": "10",
+      "blurb": "Puzzle com humor ácido e violência cartoon.",
+      "cover": "portal-2.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "team-fortress-2",
+      "title": "Team Fortress 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "garry-s-mod",
+      "title": "Garry's Mod",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rust",
+      "title": "Rust",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dayz",
+      "title": "DayZ",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ark-survival-evolved",
+      "title": "ARK: Survival Evolved",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "palworld",
+      "title": "Palworld",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "satisfactory",
+      "title": "Satisfactory",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "factorio",
+      "title": "Factorio",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cities-skylines-ii",
+      "title": "Cities: Skylines II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "euro-truck-simulator-2",
+      "title": "Euro Truck Simulator 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "microsoft-flight-simulator",
+      "title": "Microsoft Flight Simulator",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "forza-horizon-5",
+      "title": "Forza Horizon 5",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "gran-turismo-7",
+      "title": "Gran Turismo 7",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "need-for-speed-unbound",
+      "title": "Need for Speed Unbound",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rocket-league",
+      "title": "Rocket League",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ea-sports-fc-24",
+      "title": "EA Sports FC 24",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nba-2k24",
+      "title": "NBA 2K24",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "madden-nfl-24",
+      "title": "Madden NFL 24",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wwe-2k24",
+      "title": "WWE 2K24",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tekken-8",
+      "title": "Tekken 8",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mortal-kombat-1",
+      "title": "Mortal Kombat 1",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "guilty-gear-strive",
+      "title": "Guilty Gear -Strive-",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dragon-ball-fighterz",
+      "title": "Dragon Ball FighterZ",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "multiversus",
+      "title": "MultiVersus",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "brawlhalla",
+      "title": "Brawlhalla",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "it-takes-two",
+      "title": "It Takes Two",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "a-way-out",
+      "title": "A Way Out",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "untitled-goose-game",
+      "title": "Untitled Goose Game",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "overcooked-2",
+      "title": "Overcooked! 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "moving-out",
+      "title": "Moving Out",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fall-guys",
+      "title": "Fall Guys",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "party-animals",
+      "title": "Party Animals",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-jackbox-party-pack-9",
+      "title": "The Jackbox Party Pack 9",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "keep-talking-and-nobody-explodes",
+      "title": "Keep Talking and Nobody Explodes",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-stanley-parable-ultra-deluxe",
+      "title": "The Stanley Parable: Ultra Deluxe",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "outer-wilds",
+      "title": "Outer Wilds",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "outer-wilds-echoes-of-the-eye",
+      "title": "Outer Wilds: Echoes of the Eye",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "disco-elysium",
+      "title": "Disco Elysium",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "return-of-the-obra-dinn",
+      "title": "Return of the Obra Dinn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "papers-please",
+      "title": "Papers, Please",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "this-war-of-mine",
+      "title": "This War of Mine",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "spec-ops-the-line",
+      "title": "Spec Ops: The Line",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bioshock",
+      "title": "BioShock",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bioshock-infinite",
+      "title": "BioShock Infinite",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "system-shock-2023",
+      "title": "System Shock (2023)",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "prey-2017",
+      "title": "Prey (2017)",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "control",
+      "title": "Control",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "alan-wake-2",
+      "title": "Alan Wake 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "detroit-become-human",
+      "title": "Detroit: Become Human",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "heavy-rain",
+      "title": "Heavy Rain",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "beyond-two-souls",
+      "title": "Beyond: Two Souls",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "until-dawn",
+      "title": "Until Dawn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-quarry",
+      "title": "The Quarry",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "life-is-strange",
+      "title": "Life is Strange",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "life-is-strange-true-colors",
+      "title": "Life is Strange: True Colors",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "oxenfree",
+      "title": "Oxenfree",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "night-in-the-woods",
+      "title": "Night in the Woods",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deltarune",
+      "title": "Deltarune",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "omori",
+      "title": "OMORI",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "lisa-the-painful",
+      "title": "Lisa: The Painful",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "final-fantasy-vii-remake",
+      "title": "Final Fantasy VII Remake",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "final-fantasy-xvi",
+      "title": "Final Fantasy XVI",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "final-fantasy-xiv-online",
+      "title": "Final Fantasy XIV Online",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "persona-5-royal",
+      "title": "Persona 5 Royal",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "persona-3-reload",
+      "title": "Persona 3 Reload",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "shin-megami-tensei-v-vengeance",
+      "title": "Shin Megami Tensei V: Vengeance",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "like-a-dragon-infinite-wealth",
+      "title": "Like a Dragon: Infinite Wealth",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "yakuza-like-a-dragon",
+      "title": "Yakuza: Like a Dragon",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nier-automata",
+      "title": "NieR:Automata",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nier-replicant-ver-1-22474487139",
+      "title": "NieR Replicant ver.1.22474487139...",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bayonetta-3",
+      "title": "Bayonetta 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "devil-may-cry-5",
+      "title": "Devil May Cry 5",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "metal-gear-solid-v-the-phantom-pain",
+      "title": "Metal Gear Solid V: The Phantom Pain",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deathloop",
+      "title": "Deathloop",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dishonored-2",
+      "title": "Dishonored 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hitman-world-of-assassination",
+      "title": "HITMAN World of Assassination",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "watch-dogs-legion",
+      "title": "Watch Dogs: Legion",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "far-cry-6",
+      "title": "Far Cry 6",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "far-cry-3",
+      "title": "Far Cry 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "just-cause-4",
+      "title": "Just Cause 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "saints-row-2022",
+      "title": "Saints Row (2022)",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sleeping-dogs-definitive-edition",
+      "title": "Sleeping Dogs: Definitive Edition",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mafia-definitive-edition",
+      "title": "Mafia: Definitive Edition",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mafia-iii-definitive-edition",
+      "title": "Mafia III: Definitive Edition",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bully-scholarship-edition",
+      "title": "Bully: Scholarship Edition",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "l-a-noire",
+      "title": "L.A. Noire",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "red-dead-redemption",
+      "title": "Red Dead Redemption",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "stray",
+      "title": "Stray",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "little-nightmares-ii",
+      "title": "Little Nightmares II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "inside",
+      "title": "INSIDE",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "limbo",
+      "title": "LIMBO",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "gris",
+      "title": "GRIS",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "journey",
+      "title": "Journey",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "abzu",
+      "title": "ABZû",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sky-children-of-the-light",
+      "title": "Sky: Children of the Light",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "spiritfarer",
+      "title": "Spiritfarer",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "what-remains-of-edith-finch",
+      "title": "What Remains of Edith Finch",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "gone-home",
+      "title": "Gone Home",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "firewatch",
+      "title": "Firewatch",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-witness",
+      "title": "The Witness",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-talos-principle-2",
+      "title": "The Talos Principle 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "baba-is-you",
+      "title": "Baba Is You",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tetris-effect-connected",
+      "title": "Tetris Effect: Connected",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sonic-frontiers",
+      "title": "Sonic Frontiers",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sonic-superstars",
+      "title": "Sonic Superstars",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "crash-bandicoot-4-it-s-about-time",
+      "title": "Crash Bandicoot 4: It's About Time",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "spyro-reignited-trilogy",
+      "title": "Spyro Reignited Trilogy",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ratchet-and-clank-rift-apart",
+      "title": "Ratchet & Clank: Rift Apart",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "astro-bot",
+      "title": "Astro Bot",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sackboy-a-big-adventure",
+      "title": "Sackboy: A Big Adventure",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "no-more-heroes-3",
+      "title": "No More Heroes 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "katana-zero",
+      "title": "Katana ZERO",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hotline-miami-2-wrong-number",
+      "title": "Hotline Miami 2: Wrong Number",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "broforce",
+      "title": "Broforce",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nuclear-throne",
+      "title": "Nuclear Throne",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "risk-of-rain-2",
+      "title": "Risk of Rain 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deep-rock-galactic",
+      "title": "Deep Rock Galactic",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "helldivers-2",
+      "title": "Helldivers 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warhammer-40-000-space-marine-2",
+      "title": "Warhammer 40,000: Space Marine 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warhammer-vermintide-2",
+      "title": "Warhammer: Vermintide 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warhammer-40-000-darktide",
+      "title": "Warhammer 40,000: Darktide",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "total-war-warhammer-iii",
+      "title": "Total War: Warhammer III",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "age-of-empires-iv",
+      "title": "Age of Empires IV",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sid-meier-s-civilization-vi",
+      "title": "Sid Meier's Civilization VI",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "crusader-kings-iii",
+      "title": "Crusader Kings III",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "europa-universalis-iv",
+      "title": "Europa Universalis IV",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "stellaris",
+      "title": "Stellaris",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "xcom-2",
+      "title": "XCOM 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "into-the-breach",
+      "title": "Into the Breach",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "frostpunk",
+      "title": "Frostpunk",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "frostpunk-2",
+      "title": "Frostpunk 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "against-the-storm",
+      "title": "Against the Storm",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "manor-lords",
+      "title": "Manor Lords",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rimworld",
+      "title": "RimWorld",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dwarf-fortress",
+      "title": "Dwarf Fortress",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "oxygen-not-included",
+      "title": "Oxygen Not Included",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "kerbal-space-program",
+      "title": "Kerbal Space Program",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "kerbal-space-program-2",
+      "title": "Kerbal Space Program 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "noita",
+      "title": "Noita",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "teardown",
+      "title": "Teardown",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "people-playground",
+      "title": "People Playground",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "goat-simulator-3",
+      "title": "Goat Simulator 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "powerwash-simulator",
+      "title": "PowerWash Simulator",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "house-flipper-2",
+      "title": "House Flipper 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cooking-simulator",
+      "title": "Cooking Simulator",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "farming-simulator-22",
+      "title": "Farming Simulator 22",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "train-sim-world-4",
+      "title": "Train Sim World 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bus-simulator-21",
+      "title": "Bus Simulator 21",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "candy-crush-saga",
+      "title": "Candy Crush Saga",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "clash-of-clans",
+      "title": "Clash of Clans",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "clash-royale",
+      "title": "Clash Royale",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "brawl-stars",
+      "title": "Brawl Stars",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "zenless-zone-zero",
+      "title": "Zenless Zone Zero",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wuthering-waves",
+      "title": "Wuthering Waves",
+      "rating": "14",
+      "blurb": "Ação em mundo aberto com combate e fantasia.",
+      "cover": "wuthering-waves.webp",
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tower-of-fantasy",
+      "title": "Tower of Fantasy",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "blue-archive",
+      "title": "Blue Archive",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "diablo-iv",
+      "title": "Diablo IV",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "diablo-immortal",
+      "title": "Diablo Immortal",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "path-of-exile",
+      "title": "Path of Exile",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "path-of-exile-2",
+      "title": "Path of Exile 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "last-epoch",
+      "title": "Last Epoch",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "grim-dawn",
+      "title": "Grim Dawn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deadlock",
+      "title": "Deadlock",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "teamfight-tactics",
+      "title": "Teamfight Tactics",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "marvel-snap",
+      "title": "Marvel Snap",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "yu-gi-oh-master-duel",
+      "title": "Yu-Gi-Oh! Master Duel",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "inscryption",
+      "title": "Inscryption",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "slay-the-princess",
+      "title": "Slay the Princess",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cult-of-the-lamb",
+      "title": "Cult of the Lamb",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-coffin-of-andy-and-leyley",
+      "title": "The Coffin of Andy and Leyley",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "doki-doki-literature-club-plus",
+      "title": "Doki Doki Literature Club Plus!",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "coral-island",
+      "title": "Coral Island",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "my-time-at-sandrock",
+      "title": "My Time at Sandrock",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rune-factory-5",
+      "title": "Rune Factory 5",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dragon-quest-xi-s-echoes-of-an-elusive-age",
+      "title": "Dragon Quest XI S: Echoes of an Elusive Age",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "chrono-trigger",
+      "title": "Chrono Trigger",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sea-of-stars",
+      "title": "Sea of Stars",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "chained-echoes",
+      "title": "Chained Echoes",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "octopath-traveler-ii",
+      "title": "Octopath Traveler II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "triangle-strategy",
+      "title": "Triangle Strategy",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tactics-ogre-reborn",
+      "title": "Tactics Ogre: Reborn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fire-emblem-engage",
+      "title": "Fire Emblem Engage",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "advance-wars-1-2-re-boot-camp",
+      "title": "Advance Wars 1+2: Re-Boot Camp",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "kingdom-come-deliverance-ii",
+      "title": "Kingdom Come: Deliverance II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mount-and-blade-ii-bannerlord",
+      "title": "Mount & Blade II: Bannerlord",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "chivalry-2",
+      "title": "Chivalry 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "for-honor",
+      "title": "For Honor",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mordhau",
+      "title": "Mordhau",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hunt-showdown-1896",
+      "title": "Hunt: Showdown 1896",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "escape-from-tarkov",
+      "title": "Escape from Tarkov",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "war-thunder",
+      "title": "War Thunder",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "world-of-tanks",
+      "title": "World of Tanks",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "world-of-warships",
+      "title": "World of Warships",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ace-combat-7-skies-unknown",
+      "title": "Ace Combat 7: Skies Unknown",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "project-wingman",
+      "title": "Project Wingman",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "microsoft-flight-simulator-2024",
+      "title": "Microsoft Flight Simulator 2024",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "x-plane-12",
+      "title": "X-Plane 12",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "american-truck-simulator",
+      "title": "American Truck Simulator",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "beamng-drive",
+      "title": "BeamNG.drive",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "assetto-corsa-competizione",
+      "title": "Assetto Corsa Competizione",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "iracing",
+      "title": "iRacing",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "f1-24",
+      "title": "F1 24",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dirt-rally-2-0",
+      "title": "DiRT Rally 2.0",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wreckfest",
+      "title": "Wreckfest",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "trackmania",
+      "title": "Trackmania",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "geometry-dash",
+      "title": "Geometry Dash",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "osu",
+      "title": "osu!",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "beat-saber",
+      "title": "Beat Saber",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "synth-riders",
+      "title": "Synth Riders",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pistol-whip",
+      "title": "Pistol Whip",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "vrchat",
+      "title": "VRChat",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rec-room",
+      "title": "Rec Room",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-sims-3",
+      "title": "The Sims 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "simcity-4",
+      "title": "SimCity 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cities-skylines",
+      "title": "Cities: Skylines",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "planet-zoo",
+      "title": "Planet Zoo",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "planet-coaster",
+      "title": "Planet Coaster",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "jurassic-world-evolution-2",
+      "title": "Jurassic World Evolution 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rollercoaster-tycoon-classic",
+      "title": "RollerCoaster Tycoon Classic",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "two-point-hospital",
+      "title": "Two Point Hospital",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "two-point-campus",
+      "title": "Two Point Campus",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "game-dev-tycoon",
+      "title": "Game Dev Tycoon",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "prison-architect",
+      "title": "Prison Architect",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "halo-the-master-chief-collection",
+      "title": "Halo: The Master Chief Collection",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sea-of-thieves",
+      "title": "Sea of Thieves",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "grounded",
+      "title": "Grounded",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "core-keeper",
+      "title": "Core Keeper",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "v-rising",
+      "title": "V Rising",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "enshrouded",
+      "title": "Enshrouded",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "once-human",
+      "title": "Once Human",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "content-warning",
+      "title": "Content Warning",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "lethal-company",
+      "title": "Lethal Company",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "r-e-p-o",
+      "title": "R.E.P.O.",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "buckshot-roulette",
+      "title": "Buckshot Roulette",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mouthwashing",
+      "title": "Mouthwashing",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "signalis",
+      "title": "Signalis",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fear-and-hunger",
+      "title": "Fear & Hunger",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fear-and-hunger-2-termina",
+      "title": "Fear & Hunger 2: Termina",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "lobotomy-corporation",
+      "title": "Lobotomy Corporation",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "library-of-ruina",
+      "title": "Library of Ruina",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "limbus-company",
+      "title": "Limbus Company",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "arknights",
+      "title": "Arknights",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "honkai-impact-3rd",
+      "title": "Honkai Impact 3rd",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cookie-run-kingdom",
+      "title": "Cookie Run: Kingdom",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "lost-ark",
+      "title": "Lost Ark",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "new-world",
+      "title": "New World",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "throne-and-liberty",
+      "title": "Throne and Liberty",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "black-desert-online",
+      "title": "Black Desert Online",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "world-of-warcraft",
+      "title": "World of Warcraft",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "guild-wars-2",
+      "title": "Guild Wars 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-elder-scrolls-online",
+      "title": "The Elder Scrolls Online",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-elder-scrolls-v-skyrim",
+      "title": "The Elder Scrolls V: Skyrim",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fallout-4",
+      "title": "Fallout 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fallout-76",
+      "title": "Fallout 76",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fallout-new-vegas",
+      "title": "Fallout: New Vegas",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "starfield",
+      "title": "Starfield",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "elite-dangerous",
+      "title": "Elite Dangerous",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "eve-online",
+      "title": "EVE Online",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warframe",
+      "title": "Warframe",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "destiny-2",
+      "title": "Destiny 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-division-2",
+      "title": "The Division 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tom-clancy-s-ghost-recon-breakpoint",
+      "title": "Tom Clancy's Ghost Recon Breakpoint",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "7-days-to-die",
+      "title": "7 Days to Die",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "project-zomboid",
+      "title": "Project Zomboid",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "state-of-decay-2",
+      "title": "State of Decay 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dying-light-2-stay-human",
+      "title": "Dying Light 2 Stay Human",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dying-light",
+      "title": "Dying Light",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-island-2",
+      "title": "Dead Island 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-rising-deluxe-remaster",
+      "title": "Dead Rising Deluxe Remaster",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "telltale-s-the-walking-dead",
+      "title": "Telltale's The Walking Dead",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "code-vein",
+      "title": "Code Vein",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nioh-2",
+      "title": "Nioh 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wo-long-fallen-dynasty",
+      "title": "Wo Long: Fallen Dynasty",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rise-of-the-ronin",
+      "title": "Rise of the Ronin",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "stellar-blade",
+      "title": "Stellar Blade",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "final-fantasy-vii-rebirth",
+      "title": "Final Fantasy VII Rebirth",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "clair-obscur-expedition-33",
+      "title": "Clair Obscur: Expedition 33",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "avowed",
+      "title": "Avowed",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pillars-of-eternity-ii-deadfire",
+      "title": "Pillars of Eternity II: Deadfire",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wasteland-3",
+      "title": "Wasteland 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "s-t-a-l-k-e-r-2-heart-of-chornobyl",
+      "title": "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "metro-exodus",
+      "title": "Metro Exodus",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "metro-last-light-redux",
+      "title": "Metro: Last Light Redux",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "chernobylite",
+      "title": "Chernobylite",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hardspace-shipbreaker",
+      "title": "Hardspace: Shipbreaker",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "astroneer",
+      "title": "Astroneer",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deep-rock-galactic-survivor",
+      "title": "Deep Rock Galactic: Survivor",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "brotato",
+      "title": "Brotato",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "soulstone-survivors",
+      "title": "Soulstone Survivors",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "halls-of-torment",
+      "title": "Halls of Torment",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "20-minutes-till-dawn",
+      "title": "20 Minutes Till Dawn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "peglin",
+      "title": "Peglin",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "luck-be-a-landlord",
+      "title": "Luck be a Landlord",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dicey-dungeons",
+      "title": "Dicey Dungeons",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "monster-train",
+      "title": "Monster Train",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "monster-hunter-wilds",
+      "title": "Monster Hunter Wilds",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "monster-hunter-world",
+      "title": "Monster Hunter: World",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "monster-hunter-rise",
+      "title": "Monster Hunter Rise",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "wild-hearts",
+      "title": "Wild Hearts",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-finals",
+      "title": "The Finals",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "xdefiant",
+      "title": "XDefiant",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "splitgate-2",
+      "title": "Splitgate 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "smite",
+      "title": "Smite",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fallout-shelter",
+      "title": "Fallout Shelter",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cookie-clicker",
+      "title": "Cookie Clicker",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "adventure-capitalist",
+      "title": "Adventure Capitalist",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "universal-paperclips",
+      "title": "Universal Paperclips",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "a-dark-room",
+      "title": "A Dark Room",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "reigns",
+      "title": "Reigns",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "unpacking",
+      "title": "Unpacking",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "a-little-to-the-left",
+      "title": "A Little to the Left",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "donut-county",
+      "title": "Donut County",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "alba-a-wildlife-adventure",
+      "title": "Alba: A Wildlife Adventure",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "a-short-hike",
+      "title": "A Short Hike",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cozy-grove",
+      "title": "Cozy Grove",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "slime-rancher",
+      "title": "Slime Rancher",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "slime-rancher-2",
+      "title": "Slime Rancher 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bugsnax",
+      "title": "Bugsnax",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "webbed",
+      "title": "Webbed",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rain-world",
+      "title": "Rain World",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "owlboy",
+      "title": "Owlboy",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "shovel-knight-treasure-trove",
+      "title": "Shovel Knight: Treasure Trove",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "castle-crashers",
+      "title": "Castle Crashers",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "battleblock-theater",
+      "title": "BattleBlock Theater",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pizza-tower",
+      "title": "Pizza Tower",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "antonblast",
+      "title": "Antonblast",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warioware-move-it",
+      "title": "WarioWare: Move It!",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rhythm-heaven-megamix",
+      "title": "Rhythm Heaven Megamix",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "jet-set-radio",
+      "title": "Jet Set Radio",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "crazy-taxi",
+      "title": "Crazy Taxi",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sonic-mania",
+      "title": "Sonic Mania",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sonic-x-shadow-generations",
+      "title": "Sonic x Shadow Generations",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "puyo-puyo-tetris-2",
+      "title": "Puyo Puyo Tetris 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tetris-99",
+      "title": "Tetris 99",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "diablo-ii-resurrected",
+      "title": "Diablo II: Resurrected",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "warcraft-iii-reforged",
+      "title": "Warcraft III: Reforged",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "starcraft-remastered",
+      "title": "StarCraft: Remastered",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "starcraft-ii",
+      "title": "StarCraft II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "age-of-mythology-retold",
+      "title": "Age of Mythology: Retold",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "command-and-conquer-remastered-collection",
+      "title": "Command & Conquer Remastered Collection",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "company-of-heroes-3",
+      "title": "Company of Heroes 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hearts-of-iron-iv",
+      "title": "Hearts of Iron IV",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "victoria-3",
+      "title": "Victoria 3",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "humankind",
+      "title": "Humankind",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "civilization-vii",
+      "title": "Civilization VII",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "total-war-pharaoh",
+      "title": "Total War: Pharaoh",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "total-war-three-kingdoms",
+      "title": "Total War: Three Kingdoms",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "rome-total-war-remastered",
+      "title": "Rome: Total War Remastered",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "returnal",
+      "title": "Returnal",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hi-fi-rush",
+      "title": "Hi-Fi Rush",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "armored-core-vi-fires-of-rubicon",
+      "title": "Armored Core VI: Fires of Rubicon",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "elden-ring-nightreign",
+      "title": "Elden Ring Nightreign",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dark-souls-remastered",
+      "title": "Dark Souls Remastered",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dark-souls-ii-scholar-of-the-first-sin",
+      "title": "Dark Souls II: Scholar of the First Sin",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "demon-s-souls",
+      "title": "Demon's Souls",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ninja-gaiden-ii-black",
+      "title": "Ninja Gaiden II Black",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "tunic",
+      "title": "Tunic",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "animal-well",
+      "title": "Animal Well",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "pseudoregalia",
+      "title": "Pseudoregalia",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "nine-sols",
+      "title": "Nine Sols",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "blasphemous-ii",
+      "title": "Blasphemous II",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-messenger",
+      "title": "The Messenger",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-cells-return-to-castlevania",
+      "title": "Dead Cells: Return to Castlevania",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "castlevania-symphony-of-the-night",
+      "title": "Castlevania: Symphony of the Night",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "bloodstained-ritual-of-the-night",
+      "title": "Bloodstained: Ritual of the Night",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "axiom-verge",
+      "title": "Axiom Verge",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "axiom-verge-2",
+      "title": "Axiom Verge 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "afterimage",
+      "title": "Afterimage",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ender-lilies-quietus-of-the-knights",
+      "title": "Ender Lilies: Quietus of the Knights",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ender-magnolia-bloom-in-the-mist",
+      "title": "Ender Magnolia: Bloom in the Mist",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "salt-and-sanctuary",
+      "title": "Salt and Sanctuary",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "salt-and-sacrifice",
+      "title": "Salt and Sacrifice",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sifu",
+      "title": "Sifu",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "absolver",
+      "title": "Absolver",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "streets-of-rage-4",
+      "title": "Streets of Rage 4",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "teenage-mutant-ninja-turtles-shredder-s-revenge",
+      "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "scott-pilgrim-vs-the-world-the-game-complete-edition",
+      "title": "Scott Pilgrim vs. The World: The Game Complete Edition",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "river-city-girls-2",
+      "title": "River City Girls 2",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fight-n-rage",
+      "title": "Fight'N Rage",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "kaze-and-the-wild-masks",
+      "title": "Kaze and the Wild Masks",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "yoku-s-island-express",
+      "title": "Yoku's Island Express",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "sable",
+      "title": "Sable",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "eastward",
+      "title": "Eastward",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "crosscode",
+      "title": "CrossCode",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "hyper-light-drifter",
+      "title": "Hyper Light Drifter",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "deadlight-director-s-cut",
+      "title": "Deadlight: Director's Cut",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-swapper",
+      "title": "The Swapper",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "fez",
+      "title": "Fez",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "super-meat-boy-forever",
+      "title": "Super Meat Boy Forever",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "super-meat-boy",
+      "title": "Super Meat Boy",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-end-is-nigh",
+      "title": "The End Is Nigh",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "vvvvvv",
+      "title": "VVVVVV",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "cave-story",
+      "title": "Cave Story+",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "ikaruga",
+      "title": "Ikaruga",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "touhou-luna-nights",
+      "title": "Touhou Luna Nights",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "crimson-clover",
+      "title": "Crimson Clover",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dodonpachi-resurrection",
+      "title": "DoDonPachi Resurrection",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "mushihimesama",
+      "title": "Mushihimesama",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "blazing-beaks",
+      "title": "Blazing Beaks",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "enter-the-gungeon-house-of-the-gundead",
+      "title": "Enter the Gungeon: House of the Gundead",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "gunfire-reborn",
+      "title": "Gunfire Reborn",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "roboquest",
+      "title": "Roboquest",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "curse-of-the-dead-gods",
+      "title": "Curse of the Dead Gods",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "dead-estate",
+      "title": "Dead Estate",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "binding-of-isaac-repentance",
+      "title": "Binding of Isaac: Repentance",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    },
+    {
+      "id": "the-binding-of-isaac-afterbirth",
+      "title": "The Binding of Isaac: Afterbirth+",
+      "rating": null,
+      "blurb": null,
+      "cover": null,
+      "descriptors": [],
+      "source": "stub"
+    }
+  ],
+  "readyHint": 20
+}

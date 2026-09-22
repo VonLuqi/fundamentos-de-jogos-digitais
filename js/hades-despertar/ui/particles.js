@@ -52,15 +52,49 @@ export function spawnReapParticles(layer, options = {}) {
 }
 
 export function pulseReapButton(button, { reducedMotion } = {}) {
-  if (!button || reducedMotion) return;
+  if (!button) return false;
   button.classList.remove('is-reaping');
   void button.offsetWidth;
   button.classList.add('is-reaping');
+  if (reducedMotion) {
+    /* slash soft fica a cargo de playFoiceSlash */
+  }
+  return true;
 }
 
 export function bindReapFeel(button, { reducedMotion } = {}) {
   if (!button) return () => {};
-  const onEnd = () => button.classList.remove('is-reaping');
+  const onEnd = (event) => {
+    if (event?.animationName && !/despertar(ReapPulse|FoiceSlash|FoicePulse)/.test(event.animationName)) {
+      return;
+    }
+    button.classList.remove('is-reaping', 'is-slashing', 'is-slash-soft');
+  };
   button.addEventListener('animationend', onEnd);
   return () => button.removeEventListener('animationend', onEnd);
+}
+
+/**
+ * Fallback se Foice.png falhar — mostra glyph ⚔.
+ * @param {HTMLElement|null} button
+ */
+export function bindFoiceAsset(button) {
+  if (!button) return () => {};
+  const img = button.querySelector?.('[data-reap-foice]');
+  const glyph = button.querySelector?.('[data-reap-glyph]');
+  if (!img) return () => {};
+
+  const showFallback = () => {
+    img.hidden = true;
+    if (glyph) glyph.hidden = false;
+  };
+
+  if (img.complete && img.naturalWidth === 0) {
+    showFallback();
+    return () => {};
+  }
+
+  const onError = () => showFallback();
+  img.addEventListener('error', onError);
+  return () => img.removeEventListener('error', onError);
 }

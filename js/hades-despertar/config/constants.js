@@ -39,12 +39,23 @@ export const SYNC_ABSURD_GAIN_FLOOR = '100';
 export const SYNC_MAX_PER_MINUTE = 12;
 export const SYNC_OFFLINE_JITTER_SECONDS = 60;
 
+/** Sync rejeitado (anti-cheat) — Task F0.1: copy legível para o aluno. */
+export const JUDGES_REFUSED_MESSAGE =
+  'Os Juízes recusaram o saldo declarado — o Submundo restaurou o estado verdadeiro.';
+
+/** Rumor do ticker quando o sync é recusado. */
+export const JUDGES_REFUSED_TICKER =
+  'Rumor: o servidor julga o saldo — o browser só simula; a Estela verdadeira é a do Submundo.';
+
+/** Auto-dismiss do banner api-warning (ms). */
+export const API_WARNING_DISMISS_MS = 8_000;
+
 export const BUY_MAX_CAP = 10_000;
 export const BUY_MODES = Object.freeze(['1', '10', '100', 'max']);
 
-export const STORAGE_DB_NAME = 'despertar-db';
+export const STORAGE_DB_NAME = 'despertar-db-v2';
 export const STORAGE_STORE_NAME = 'states';
-export const STORAGE_SESSION_PREFIX = 'despertar:state:';
+export const STORAGE_SESSION_PREFIX = 'despertar:v2:state:';
 export const SAVE_DEBOUNCE_MS = 1000;
 
 export const STYX_UNLOCK_SOULS = '100';

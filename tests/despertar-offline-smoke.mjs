@@ -47,7 +47,9 @@ staticAssert(pkg.includes('js/hades-despertar/services/StorageService.js'), 'che
 staticAssert(pkg.includes('js/hades-despertar/services/OfflineEngine.js'), 'check cobre OfflineEngine');
 
 const storageSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/services/StorageService.js'), 'utf8');
-staticAssert(storageSrc.includes(STORAGE_DB_NAME), 'IndexedDB despertar-db');
+staticAssert(storageSrc.includes(STORAGE_DB_NAME), 'IndexedDB usa STORAGE_DB_NAME');
+staticAssert(STORAGE_DB_NAME === 'despertar-db-v2', 'epoch v2 invalida cache antecipado');
+staticAssert(STORAGE_SESSION_PREFIX.includes('v2'), 'sessionStorage também na epoch v2');
 staticAssert(storageSrc.includes(STORAGE_STORE_NAME), 'store states');
 staticAssert(storageSrc.includes('sessionStorage'), 'fallback sessionStorage');
 staticAssert(!/localStorage\.(get|set|remove)Item/.test(storageSrc), 'não usa API localStorage');

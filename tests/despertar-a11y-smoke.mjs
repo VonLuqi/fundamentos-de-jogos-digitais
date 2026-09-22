@@ -1,0 +1,157 @@
+/**
+ * Smoke Task 14 — Acessibilidade e mobile do Despertar
+ * (docs/plano-hades-despertar.md).
+ *
+ * Uso: node tests/despertar-a11y-smoke.mjs
+ */
+
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { interpolatedSouls } from '../js/hades-despertar/ui/UIRenderer.js';
+import { spawnReapParticles } from '../js/hades-despertar/ui/particles.js';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const errors = [];
+
+function staticAssert(condition, message) {
+  if (!condition) errors.push(message);
+}
+
+function read(rel) {
+  return fs.readFileSync(path.join(root, rel), 'utf8');
+}
+
+function lin(channel) {
+  const c = channel / 255;
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+}
+
+function relativeLuminance(hex) {
+  const n = Number.parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+/** Contraste WCAG 2.x entre duas cores hex absolutas. */
+export function contrastRatio(fg, bg) {
+  const a = relativeLuminance(fg);
+  const b = relativeLuminance(bg);
+  const [hi, lo] = a > b ? [a, b] : [b, a];
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+const html = read('pages/despertar.html');
+const css = read('css/despertar.css');
+const indexJs = read('js/hades-despertar/index.js');
+const pkg = read('package.json');
+
+staticAssert(/id="despertar-reap"[^>]*type="button"|type="button"[^>]*id="despertar-reap"/.test(html)
+  || html.includes('id="despertar-reap"'), 'altar Ceifar presente');
+staticAssert(
+  /<button[^>]*id="despertar-reap"[\s\S]*?<\/button>/.test(html),
+  'Altar é <button> (não div/span)',
+);
+staticAssert(html.includes('role="tablist"'), 'tablist presente');
+staticAssert(html.includes('role="tab"'), 'tabs com role=tab');
+staticAssert(html.includes('role="tabpanel"'), 'tabpanels presentes');
+staticAssert(
+  /id="tab-mundo"[^>]*tabindex="0"|tabindex="0"[^>]*id="tab-mundo"/.test(html)
+    || /id="tab-styx"[^>]*tabindex="0"|tabindex="0"[^>]*id="tab-styx"/.test(html),
+  'aba ativa (Mundo) inicia com tabindex=0',
+);
+staticAssert(html.includes('viewport'), 'viewport meta (mobile)');
+
+staticAssert(indexJs.includes('ArrowRight'), 'setas nas abas');
+staticAssert(indexJs.includes('Home') && indexJs.includes('End'), 'Home/End nas abas');
+staticAssert(indexJs.includes("closest('[role=\"tab\"]')") || indexJs.includes('closest(\'[role="tab"]\')'),
+  'setas só quando o foco está numa aba');
+
+staticAssert(css.includes('--despertar-styx: #00a896'), 'token atmosfera Styx preservado');
+staticAssert(css.includes('--despertar-purple: #7209b7'), 'token atmosfera Lethe preservado');
+staticAssert(css.includes('--despertar-styx-text'), 'token de texto Styx');
+staticAssert(css.includes('--despertar-purple-text'), 'token de texto Lethe (clareado)');
+staticAssert(css.includes('touch-action: manipulation'), 'touch-action evita zoom iOS');
+staticAssert(css.includes('safe-area-inset-bottom'), 'HUD/página respeita safe-area');
+staticAssert(css.includes('prefers-reduced-motion'), 'reduced-motion no CSS');
+
+const bg = '#0a0a0f';
+const styxAtmosphere = '#00a896';
+const purpleAtmosphere = '#7209b7';
+const purpleText = '#a855f7';
+
+staticAssert(
+  contrastRatio(styxAtmosphere, bg) >= 4.5,
+  `Styx texto/atmosfera vs fundo ≥ 4.5 (tem ${contrastRatio(styxAtmosphere, bg).toFixed(2)})`,
+);
+staticAssert(
+  contrastRatio(purpleAtmosphere, bg) < 4.5,
+  'atmosfera Lethe #7209b7 falha AA — por isso o texto usa token clareado',
+);
+staticAssert(
+  contrastRatio(purpleText, bg) >= 4.5,
+  `Lethe texto #a855f7 vs fundo ≥ 4.5 (tem ${contrastRatio(purpleText, bg).toFixed(2)})`,
+);
+
+staticAssert(pkg.includes('despertar-a11y-smoke.mjs'), 'npm run check inclui este smoke');
+
+if (errors.length) {
+  console.error('despertar-a11y-smoke (estático):');
+  errors.forEach((item) => console.error(` - ${item}`));
+  process.exit(1);
+}
+
+let passed = 0;
+let failed = 0;
+
+async function run(name, fn) {
+  try {
+    await fn();
+    console.log(`[PASS] ${name}`);
+    passed += 1;
+  } catch (error) {
+    console.log(`[FAIL] ${name}`);
+    console.error(error);
+    failed += 1;
+  }
+}
+
+await run('reduced-motion: interpolação de almas não adianta o saldo', () => {
+  assert.equal(interpolatedSouls('100', '10', 0.5, true), '100');
+  assert.notEqual(interpolatedSouls('100', '10', 0.5, false), '100');
+});
+
+await run('reduced-motion: partículas não spawnam', () => {
+  const created = [];
+  const host = {
+    appendChild(node) {
+      created.push(node);
+      return node;
+    },
+    ownerDocument: {
+      createElement(tag) {
+        return {
+          tagName: tag,
+          className: '',
+          style: { setProperty() {} },
+          setAttribute() {},
+          addEventListener() {},
+        };
+      },
+    },
+  };
+  assert.equal(spawnReapParticles(host, { reducedMotion: true }), 0);
+  assert.equal(created.length, 0);
+});
+
+await run('contraste WCAG dos acentos de texto', () => {
+  assert.ok(contrastRatio('#00a896', '#0a0a0f') >= 4.5);
+  assert.ok(contrastRatio('#a855f7', '#0a0a0f') >= 4.5);
+  assert.ok(contrastRatio('#7209b7', '#0a0a0f') < 4.5);
+});
+
+console.log(`\ndespertar-a11y-smoke: ${passed} passed, ${failed} failed`);
+if (failed) process.exitCode = 1;

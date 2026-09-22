@@ -1,6 +1,6 @@
 /**
  * Códice do Loop — logs educacionais (GDD §2.3).
- * Task 3 usa os gatilhos; a aba de UI entra na Task 10a.
+ * Gatilhos em GameState.unlockLogs; aba UI na Task 10a (UIRenderer).
  */
 
 function freezeAll(list) {
@@ -67,6 +67,11 @@ export const EDU_LOGS = freezeAll([
     id: 'log_offline',
     title: 'Colheita na ausência',
     body: 'Teto de horas × eficiência — design de respeito ao sono do aluno.',
+  },
+  {
+    id: 'log_juizo',
+    title: 'A Bancada do Juiz',
+    body: 'Vereditos compram poder permanente — outra moeda, outro loop.',
   },
 ]);
 

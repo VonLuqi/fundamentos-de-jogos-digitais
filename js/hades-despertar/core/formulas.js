@@ -29,6 +29,7 @@ import {
 import { GENERATOR_BY_ID, GENERATORS, getGenerator } from '../config/generators.js';
 import { UPGRADE_BY_ID, getUpgrade } from '../config/upgrades.js';
 import { TALENT_BY_ID, getTalent } from '../config/talents.js';
+import { VERDICT_SHOP_BY_ID, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import {
   add,
   cmp,
@@ -94,6 +95,47 @@ export function talentEffects(talentIds = []) {
   };
 }
 
+/** Efeitos da Bancada (Vereditos) — permanentes, fora do Panteão. */
+export function verdictEffects(verdictPurchases = []) {
+  const owned = new Set(
+    (verdictPurchases || []).filter((id) => isKnownVerdictPurchase(id)),
+  );
+  let clickMult = '1';
+  let spsMult = '1';
+  let offlineExtraHours = 0;
+  let firstGeneratorCostMult = '1';
+  for (const id of owned) {
+    const item = VERDICT_SHOP_BY_ID[id];
+    if (!item?.effects) continue;
+    if (item.effects.clickMult) clickMult = mul(clickMult, item.effects.clickMult);
+    if (item.effects.spsMult) spsMult = mul(spsMult, item.effects.spsMult);
+    if (item.effects.offlineExtraHours) {
+      offlineExtraHours += Number(item.effects.offlineExtraHours) || 0;
+    }
+    if (item.effects.firstGeneratorCostMult) {
+      firstGeneratorCostMult = mul(firstGeneratorCostMult, item.effects.firstGeneratorCostMult);
+    }
+  }
+  return {
+    clickMult,
+    spsMult,
+    offlineExtraHours,
+    firstGeneratorCostMult,
+  };
+}
+
+export function economyEffects(talents = [], verdictPurchases = []) {
+  const t = talentEffects(talents);
+  const v = verdictEffects(verdictPurchases);
+  return {
+    ...t,
+    offlineHours: Number(t.offlineHours) + Number(v.offlineExtraHours || 0),
+    clickVerdictMult: v.clickMult,
+    spsVerdictMult: v.spsMult,
+    firstGeneratorCostMult: v.firstGeneratorCostMult,
+  };
+}
+
 export function generatorUpgradeMult(generatorId, upgradeIds = []) {
   let mult = '1';
   for (const id of upgradeIds || []) {
@@ -127,6 +169,7 @@ export function calculateTotalSPS({
   upgrades = [],
   talents = [],
   obols = '0',
+  verdictPurchases = [],
 } = {}) {
   let sum = '0';
   for (const def of GENERATORS) {
@@ -136,7 +179,9 @@ export function calculateTotalSPS({
     const line = mul(mul(String(qty), def.baseRate), upgradeMult);
     sum = add(sum, line);
   }
-  return mul(sum, prestigeBonus(obols, talents));
+  const withPrestige = mul(sum, prestigeBonus(obols, talents));
+  const { spsVerdictMult } = economyEffects(talents, verdictPurchases);
+  return mul(withPrestige, spsVerdictMult);
 }
 
 export function clickPower({
@@ -145,13 +190,14 @@ export function clickPower({
   talents = [],
   obols = '0',
   sps = null,
+  verdictPurchases = [],
 } = {}) {
   const totalSps = sps == null
-    ? calculateTotalSPS({ generators, upgrades, talents, obols })
+    ? calculateTotalSPS({ generators, upgrades, talents, obols, verdictPurchases })
     : sps;
-  const { kSps } = talentEffects(talents);
-  const clickMult = clickMultiplier(upgrades);
-  const spsTerm = add('1', mul(kSps, totalSps));
+  const effects = economyEffects(talents, verdictPurchases);
+  const clickMult = mul(clickMultiplier(upgrades), effects.clickVerdictMult);
+  const spsTerm = add('1', mul(effects.kSps, totalSps));
   return mul(mul(add(CLICK_BASE, CLICK_FLAT_BASE), clickMult), spsTerm);
 }
 
@@ -186,6 +232,7 @@ export function calculateOfflineProgress({
   elapsedSeconds = 0,
   sps = '0',
   talents = [],
+  verdictPurchases = [],
 } = {}) {
   const elapsed = Number(elapsedSeconds);
   if (!Number.isFinite(elapsed) || elapsed < OFFLINE_MIN_SECONDS) {
@@ -197,7 +244,7 @@ export function calculateOfflineProgress({
     };
   }
 
-  const { offlineHours, offlineEfficiency } = talentEffects(talents);
+  const { offlineHours, offlineEfficiency } = economyEffects(talents, verdictPurchases);
   const maxAllowedSeconds = offlineHours * 3600;
   const effectiveSeconds = Math.min(elapsed, maxAllowedSeconds);
   const offlineSouls = mul(mul(String(effectiveSeconds), sps), offlineEfficiency);
