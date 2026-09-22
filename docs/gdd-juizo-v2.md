@@ -1,10 +1,11 @@
 # GDD curto — Juízo do Tartarus v2 (Higher / Lower)
 
-> **Status:** design atualizado (F3 polish, 2026-09-22)  
+> **Status:** design atualizado (F3 polish + J.2 B1 Soft, 2026-09-22)  
 > **Pai:** [`gdd-hades-despertar.md`](./gdd-hades-despertar.md) · loop Fase 7 em [`plano-hades-despertar.md`](./plano-hades-despertar.md)  
 > **UI Cookie:** [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md) §3.3 / Fase D  
 > **Polish:** [`plano-despertar-polish-foice-juizo-upgrades.md`](./plano-despertar-polish-foice-juizo-upgrades.md) F3  
-> **Escopo desta página:** só o loop dle. Economia, pool e anti-cheat de ratings do desafiante **não** reabrem.
+> **Balance:** [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md) J.2  
+> **Escopo desta página:** loop dle + tabela de Vereditos/Bancada (B1 Soft). Pool e anti-cheat de ratings do desafiante **não** reabrem.
 
 ---
 
@@ -40,16 +41,19 @@ Dois títulos ClassInd. O **campeão** mostra a faixa. O **desafiante** mostra `
 
 ---
 
-## 4. O que permanece (não mexer na economia)
+## 4. Economia de Vereditos (J.2 — pacote **B1 Soft**)
 
 | Peça | Regra |
 | --- | --- |
-| **Vereditos** | Moeda exclusiva; ganha só em milestones de **melhor streak** |
-| **Milestones** | 5→1 · 10→2 · 15→3 · 25→5 · 40→8 · 60→12 · 100→20 (1× via `juizoMilestonesClaimed`) |
-| **Bancada do Juiz** | Catálogo permanente (sobrevive ao Lethe); `verdictBuy` intacto |
+| **Vereditos** | Moeda exclusiva; ganha em milestones de **melhor streak** (1× por id; catch-up se o recorde já passou e o marco ainda não foi claimado) |
+| **Milestones** | 5→1 · 10→2 · 15→3 · **20→4** · 25→5 · 40→8 · 60→12 · 100→20 (teto **55**) |
+| **Bancada do Juiz** | Catálogo permanente (sobrevive ao Lethe); custos B1: Selo **2** · Memória **4** · Olho 8 · Pacto 12 (total **26**) |
+| **Naming (Q16)** | **Juízo** = este minigame; **Juiz do Tártaro** = gerador T4; **Veredito do Tártaro** = Juramento do Styx nesse gerador — não são a mesma coisa |
 | **Pool** | Stub/ready ≥30; capas compartilhadas com ClassInd-dle |
 | **Placar** | `juizoBest` no Placar do Domínio — sem mudança |
 | **Falha** | Cards com capas + faixas + Δ + streak + recorde; sem rationale ClassInd longo |
+
+**Adiado:** B2 (novo sink na Bancada) · B3 (Veredito repeat pós-s100).
 
 ---
 
@@ -87,8 +91,8 @@ Teclado: ←/1 campeão · →/2 desafiante · E empate · Esc abandona.
 
 ## 8. Fora de escopo (esta reforma)
 
-SFX · daily challenge · expor ratings no cliente antes do guess · mudar tabela de Vereditos · novos itens da Bancada · rationale longo na falha.
+SFX · daily challenge · expor ratings no cliente antes do guess · B2/B3 (sink / repeat) · rationale longo na falha.
 
 ---
 
-*Amenda o Juízo Fase 7 para o padrão Higher-Lower clássico (desafiante sempre sobe). Implementação: F3 polish.*
+*Amenda o Juízo Fase 7 para o padrão Higher-Lower clássico (desafiante sempre sobe). Balance J.2 = B1 Soft. Implementação: F3 polish + J.2.*
