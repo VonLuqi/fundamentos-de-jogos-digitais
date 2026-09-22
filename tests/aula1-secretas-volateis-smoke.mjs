@@ -15,6 +15,7 @@ import {
   matchesJuramentoDoCirculo,
   normalizeForSecretCheck,
 } from '../api/_lib/lesson-secret-achievements.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -101,7 +102,7 @@ for (const id of [
   assert.ok(entry.meta?.volatile === true, `${id} meta.volatile`);
 }
 
-const progress = fs.readFileSync(path.join(root, 'api/progress.js'), 'utf8');
+const progress = readProgressSurface(root);
 assert.ok(progress.includes('lesson-secret-achievements'), 'progress importa motor');
 assert.ok(progress.includes('evaluateSecretAchievements'), 'reavalia no save');
 assert.ok(progress.includes("action === 'saveLessonParagraph'"), 'hook save');

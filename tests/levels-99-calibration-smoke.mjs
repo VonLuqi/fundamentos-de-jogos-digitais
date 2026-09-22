@@ -23,6 +23,7 @@ import {
   levelForXp as levelFromApi,
   MAX_LEVEL as maxFromApi,
 } from '../js/api.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const raw = JSON.parse(fs.readFileSync(path.join(root, 'data/game-catalog.json'), 'utf8'));
@@ -94,7 +95,7 @@ const catalogXp = ACHIEVEMENTS.reduce((sum, entry) => sum + (Number(entry.xp) ||
 assert.ok(levelForXp(catalogXp) < 99, 'soma do catálogo sozinha não estoura 99');
 assert.ok(levelForXp(catalogXp) < 30, 'catálogo atual fica no early/mid (espaço p/ aulas)');
 
-const progressSrc = fs.readFileSync(path.join(root, 'api/progress.js'), 'utf8');
+const progressSrc = readProgressSurface(root);
 assert.ok(progressSrc.includes('levelForXp'), 'API usa levelForXp do catálogo');
 assert.ok(!progressSrc.includes('LEVEL_XP_BASE = 100'), 'API sem curva linear hardcode');
 

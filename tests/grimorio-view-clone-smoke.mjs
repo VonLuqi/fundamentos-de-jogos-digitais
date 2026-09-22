@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -48,7 +49,7 @@ assert(api.includes("action: 'noteClone'"), 'cloneNote deve chamar noteClone');
 assert(api.includes("action: 'noteRefuseShare'"), 'refuseNoteShare deve existir');
 assert(api.includes("action: 'noteEventsAck'"), 'ackNoteEvents deve existir');
 
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert(progress.includes("action === 'noteClone'"), 'API noteClone');
 assert(progress.includes("action === 'noteRefuseShare'"), 'API noteRefuseShare');
 assert(progress.includes('user_note_events') || progress.includes('NOTE_EVENTS_TABLE'), 'eventos de nota');

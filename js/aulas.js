@@ -127,6 +127,7 @@ async function init() {
     route: 'aulas',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: handleLogout,
+    token: currentToken,
   });
 
   try {

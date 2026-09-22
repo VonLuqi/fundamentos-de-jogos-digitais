@@ -1,11 +1,11 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Álbum de Relíquias — conquistas e figurinhas | Fundamentos de Jogos Digitais." />
+  <meta name="description" content="Placar do Domínio — turma e global | Fundamentos de Jogos Digitais." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Álbum de Relíquias | Fundamentos de Jogos Digitais</title>
+  <title>Placar do Domínio | Fundamentos de Jogos Digitais</title>
 
   <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
   <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
@@ -21,32 +21,11 @@
 
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/conquistas.css" />
+  <link rel="stylesheet" href="../css/ranking.css" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
-<body class="app-shell-page" data-route="conquistas" data-role-scope="protected">
+<body class="app-shell-page" data-route="ranking" data-role-scope="protected">
   <div class="vignette" aria-hidden="true"></div>
-
-  <div
-    class="relic-modal"
-    id="relic-modal"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="relic-modal-title"
-    aria-describedby="relic-modal-desc relic-modal-rarity relic-modal-meta"
-    hidden
-  >
-    <div class="relic-modal__panel" data-rarity="stone">
-      <button class="relic-modal__close" type="button" id="relic-modal-close" aria-label="Fechar relíquia">
-        Fechar
-      </button>
-      <h2 class="relic-modal__title" id="relic-modal-title">Relíquia</h2>
-      <div class="relic-modal__art" id="relic-modal-art" aria-hidden="true"></div>
-      <p class="relic-modal__rarity" id="relic-modal-rarity">Pedra</p>
-      <p class="relic-modal__desc" id="relic-modal-desc"></p>
-      <p class="relic-modal__meta" id="relic-modal-meta"></p>
-    </div>
-  </div>
 
   <div class="app-shell" data-shell>
     <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
@@ -91,45 +70,69 @@
 
           <div class="app-shell__titles">
             <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
-            <h1 class="app-shell__title" id="conquistas-page-title">ÁLBUM DE <span class="accent">RELÍQUIAS</span></h1>
+            <h1 class="app-shell__title" id="ranking-page-title">PLACAR DO <span class="accent">DOMÍNIO</span></h1>
           </div>
         </div>
 
         <div class="app-shell__header-actions" data-shell-actions>
-          <span class="app-shell__context-chip">Conquistas</span>
+          <span class="app-shell__context-chip">Placar</span>
         </div>
       </header>
 
-      <div class="ornate-divider" aria-hidden="true">
-        <span class="ornate-divider__line"></span>
-        <span class="ornate-divider__gem">◆</span>
-        <span class="ornate-divider__line"></span>
-      </div>
-
-      <main class="app-shell__content album-shell__content" aria-labelledby="conquistas-page-title">
+      <main class="app-shell__content ranking-page" id="main-content">
         <div class="api-warning" id="api-warning" hidden>
           <p id="api-warning-text"></p>
         </div>
 
-        <!--
-          ARG / trailhead: as runas itálicas soletram o portão (anagrama).
-          A pasta do abismo não está na raiz — desça um nível no Domínio (/submundo).
-          Outras pistas: data-path-prefix nas runas, robots.txt, comentários CSS.
-        -->
-        <section class="album-intro" aria-label="Introdução do álbum">
-          <p class="album-intro__lead">
-            Cada conquista ocupa um slot fixo. Segredos ainda não revelados aparecem como
-            <strong>?</strong>. Examine uma figurinha para ver o detalhe completo.
-            Algumas letras guardam um caminho — e o caminho nem sempre começa na raiz.
-          </p>
-          <p class="album-intro__counter" id="album-counter" role="status">Carregando coleção…</p>
-        </section>
+        <p class="ranking-intro">
+          Ordenação por <strong>XP</strong>, <strong>relíquias</strong> ou <strong>recorde do Juízo</strong>.
+          Sem almas nem SPS — o Domínio não vaza a economia do Acheron.
+        </p>
 
-        <ul class="achievement-album" id="album-grid" aria-label="Álbum de Relíquias" aria-live="polite"></ul>
+        <div class="ranking-controls" role="group" aria-label="Filtros do Placar">
+          <div class="ranking-controls__group" role="group" aria-label="Escopo">
+            <button class="ranking-chip is-active" type="button" data-ranking-scope="turma" aria-pressed="true">Turma</button>
+            <button class="ranking-chip" type="button" data-ranking-scope="global" aria-pressed="false">Global</button>
+          </div>
+          <div class="ranking-controls__group" role="group" aria-label="Ordenação">
+            <button class="ranking-chip is-active" type="button" data-ranking-sort="xp" aria-pressed="true">XP</button>
+            <button class="ranking-chip" type="button" data-ranking-sort="achievements" aria-pressed="false">Relíquias</button>
+            <button class="ranking-chip" type="button" data-ranking-sort="juizoBest" aria-pressed="false">Juízo</button>
+          </div>
+          <label class="ranking-turma" id="ranking-turma-wrap" hidden>
+            <span class="ranking-turma__label">Turma</span>
+            <select class="ranking-turma__select" id="ranking-turma" aria-label="Filtrar turma"></select>
+          </label>
+        </div>
+
+        <p class="ranking-meta" id="ranking-meta" aria-live="polite">Consultando o Domínio…</p>
+
+        <div class="ranking-table-wrap">
+          <table class="ranking-table" id="ranking-table">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">Alma</th>
+                <th scope="col">Turma</th>
+                <th scope="col">XP</th>
+                <th scope="col">Relíquias</th>
+                <th scope="col">Juízo</th>
+              </tr>
+            </thead>
+            <tbody id="ranking-body">
+              <tr><td colspan="6">Carregando…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="ranking-self" id="ranking-self" hidden aria-live="polite">
+          <h2 class="ranking-self__title">Tua posição</h2>
+          <p class="ranking-self__line" id="ranking-self-line"></p>
+        </aside>
       </main>
     </div>
   </div>
 
-  <script type="module" src="../js/conquistas.js"></script>
+  <script type="module" src="../js/ranking.js"></script>
 </body>
 </html>

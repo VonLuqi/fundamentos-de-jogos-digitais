@@ -148,7 +148,71 @@
           </button>
 
           <p class="pact-form__back">
+            <button class="pact-form__lost-btn" type="button" id="open-legacy">
+              Não tenho e-mail no Domínio
+            </button>
+          </p>
+
+          <p class="pact-form__back">
             <button class="pact-form__back-btn" type="button" id="forgot-back">← Voltar a Entrar</button>
+          </p>
+        </form>
+
+        <!-- RECUPERAÇÃO LEGADA (Senha do Caronte) -->
+        <form class="pact-form" id="form-legacy" aria-label="Selar o Mensageiro para recuperar" novalidate>
+          <p class="pact-form__hint" id="legacy-hint">
+            Alma antiga sem e-mail: peça a Senha do Caronte ao Mestre na sala, vincule um endereço e confirme o selo no Mensageiro.
+          </p>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="legacy-username">Nome da Alma</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="legacy-username"
+              name="username"
+              placeholder="Ex.: Orfeu"
+              autocomplete="username"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="legacy-code">Senha do Caronte</label>
+            <input
+              class="pact-form__input"
+              type="text"
+              id="legacy-code"
+              name="code"
+              placeholder="Código falado pelo Mestre"
+              autocomplete="off"
+              spellcheck="false"
+              required
+            />
+          </div>
+
+          <div class="pact-form__field">
+            <label class="pact-form__label" for="legacy-email">E-mail novo</label>
+            <input
+              class="pact-form__input"
+              type="email"
+              id="legacy-email"
+              name="email"
+              placeholder="Ex.: maria.silva@email.com"
+              autocomplete="email"
+              inputmode="email"
+              required
+            />
+          </div>
+
+          <p class="pact-form__status" id="legacy-status" role="status" aria-live="polite"></p>
+
+          <button class="btn-pact" type="submit">
+            <span class="btn-pact__label">Selar o Mensageiro</span>
+          </button>
+
+          <p class="pact-form__back">
+            <button class="pact-form__back-btn" type="button" id="legacy-back">← Voltar ao pedido com e-mail</button>
           </p>
         </form>
 

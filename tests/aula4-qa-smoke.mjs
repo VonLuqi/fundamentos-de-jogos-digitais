@@ -12,6 +12,7 @@ import {
   evaluateSecretAchievements,
 } from '../api/_lib/lesson-secret-achievements.js';
 import { ACHIEVEMENTS, getAchievementById } from '../js/game-catalog.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -75,7 +76,7 @@ assert.ok(
 assert.ok(aula4Html.includes('Grimório Pessoal'), 'copy menciona grimório');
 assert.ok(/não compartilhada com colegas/i.test(aula4Html), 'copy deixa privacidade explícita');
 
-const progressApi = read('api/progress.js');
+const progressApi = readProgressSurface(root);
 assert.ok(progressApi.includes("action === 'listMyLessonParagraphs'"), 'API lista paragraphs do aluno');
 
 const grimorioJs = read('js/grimorio.js');
@@ -143,7 +144,7 @@ assert.equal(publica.hidden, false);
 assert.equal(publica.rarity, 'stone');
 assert.equal(publica.xp, 0, 'XP da conclusão vem do redeem da aula, não do card');
 
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert.ok(progress.includes("id: 'aula4_concluida'"), 'regra ACHIEVEMENT_RULES');
 assert.ok(
   progress.includes('Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas'),

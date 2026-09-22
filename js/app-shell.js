@@ -1,6 +1,13 @@
 'use strict';
 
 import { setRainbowVfxSuspended } from './achievements-ui.js';
+import {
+  DESPERTAR_GATE_ID,
+  DESPERTAR_NAV_LABEL,
+  DESPERTAR_NAV_LOCKED_LABEL,
+  fetchLessonGates,
+  getBootstrapGates,
+} from './api.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
 const FOCUSABLE_SELECTOR = [
@@ -18,7 +25,6 @@ let lastFocusedBeforeOpen = null;
  * Destinos primários do aside (aluno):
  * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · O Despertar
  * Condicional admin: Almas Registradas (não conta no teto do aluno).
- * Até a Task 11, as outras páginas ainda mostram o stub Minigame.
  */
 function mapRouteToNavItem(route) {
   if (route === 'dashboard') return 'dashboard';
@@ -28,11 +34,72 @@ function mapRouteToNavItem(route) {
   if (route === 'salao') return 'salao';
   if (route === 'grimorio' || route === 'grimorio-nota' || route === 'grimorio-editar') return 'grimorio';
   if (route === 'despertar') return 'despertar';
-  if (route === 'minigame') return 'minigame';
   if (route === 'classind-dle') return 'aulas';
   if (route === 'souls') return 'souls';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;
+}
+
+/**
+ * Admin sempre vê o link vivo (pode pré-visualizar). Aluno só quando o Acheron está aberto.
+ */
+export function applyDespertarNavState(shell, { published = false, isAdmin = false } = {}) {
+  const root = shell || document.querySelector('[data-shell]');
+  if (!root) return;
+  const link = root.querySelector('[data-nav-item="despertar"]');
+  if (!link) return;
+
+  const open = Boolean(isAdmin || published);
+  link.classList.toggle('is-locked', !open);
+  link.textContent = open ? DESPERTAR_NAV_LABEL : DESPERTAR_NAV_LOCKED_LABEL;
+
+  if (open) {
+    link.removeAttribute('aria-disabled');
+    link.removeAttribute('tabindex');
+    link.removeAttribute('title');
+    if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
+      link.setAttribute('href', './despertar.html');
+    }
+  } else {
+    link.setAttribute('aria-disabled', 'true');
+    link.setAttribute('tabindex', '-1');
+    link.setAttribute('title', 'Em breve');
+  }
+
+  bindLockedNavClicks(root);
+}
+
+async function syncDespertarNavFromToken(shell, token, role, despertarPublished) {
+  const isAdmin = role === 'admin';
+  if (!token) {
+    applyDespertarNavState(shell, { published: false, isAdmin });
+    return false;
+  }
+
+  if (typeof despertarPublished === 'boolean') {
+    applyDespertarNavState(shell, { published: despertarPublished, isAdmin });
+    return despertarPublished;
+  }
+
+  const cached = getBootstrapGates();
+  if (
+    cached?.token === token
+    && typeof cached.gates?.despertar?.published === 'boolean'
+  ) {
+    const published = cached.gates.despertar.published;
+    applyDespertarNavState(shell, { published, isAdmin });
+    return published;
+  }
+
+  try {
+    const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
+    const published = Boolean(result?.gates?.published);
+    applyDespertarNavState(shell, { published, isAdmin });
+    return published;
+  } catch {
+    applyDespertarNavState(shell, { published: false, isAdmin });
+    return false;
+  }
 }
 
 function syncShellState(shell, sidebar, toggle, overlay) {
@@ -54,7 +121,6 @@ function syncShellState(shell, sidebar, toggle, overlay) {
     return;
   }
 
-  // No mobile, só trava o scroll do body com o drawer aberto.
   document.body.classList.toggle('is-shell-locked', isOpen);
   toggle?.setAttribute('aria-label', isOpen ? 'Fechar navegação' : 'Abrir navegação');
   sidebar?.setAttribute('aria-hidden', String(!isOpen));
@@ -94,7 +160,7 @@ function openDrawer(shell, sidebar, toggle, overlay) {
   firstLink?.focus();
 }
 
-/** Bloqueia clique em links de nav com aria-disabled (ex.: Minigame em breve). */
+/** Bloqueia clique em links de nav com aria-disabled (ex.: O Despertar · em breve). */
 function bindLockedNavClicks(shell) {
   shell.querySelectorAll('.app-shell__link[aria-disabled="true"]').forEach((item) => {
     if (item.dataset.lockedNavBound === '1') return;
@@ -106,7 +172,13 @@ function bindLockedNavClicks(shell) {
   });
 }
 
-export function initAppShell({ route, role = 'student', onLogout } = {}) {
+export function initAppShell({
+  route,
+  role = 'student',
+  onLogout,
+  token = null,
+  despertarPublished,
+} = {}) {
   const shell = document.querySelector('[data-shell]');
   if (!shell) return null;
 
@@ -138,6 +210,15 @@ export function initAppShell({ route, role = 'student', onLogout } = {}) {
     if (isActive) item.setAttribute('aria-current', 'page');
     else item.removeAttribute('aria-current');
   });
+
+  // Default selado até a API responder; admin já destrava na hora.
+  applyDespertarNavState(shell, { published: false, isAdmin: role === 'admin' });
+  const despertarGatePromise = syncDespertarNavFromToken(
+    shell,
+    token,
+    role,
+    despertarPublished,
+  );
 
   bindLockedNavClicks(shell);
 
@@ -224,5 +305,7 @@ export function initAppShell({ route, role = 'student', onLogout } = {}) {
       syncShellState(shell, sidebar, toggle, overlay);
     },
     sidebar,
+    refreshDespertarNav: () => syncDespertarNavFromToken(shell, token, role),
+    despertarGatePromise,
   };
 }

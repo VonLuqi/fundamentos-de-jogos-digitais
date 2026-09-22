@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -69,7 +70,7 @@ assert(apiJs.includes('listFriends'), 'api.js exporta listFriends');
 assert(apiJs.includes('fetchFriendProfile'), 'api.js exporta fetchFriendProfile');
 assert(apiJs.includes('companheiro:'), 'ROUTES.companheiro existe');
 
-const progressJs = read('api/progress.js');
+const progressJs = readProgressSurface(root);
 assert(progressJs.includes("action === 'friendsList'"), 'progress.js tem friendsList');
 assert(progressJs.includes("action === 'friendProfile'"), 'progress.js tem friendProfile');
 assert(progressJs.includes('FRIEND_LIMIT'), 'progress.js define limite de companheiros');

@@ -229,6 +229,40 @@ body {
   display: none !important;
 }
 
+/* Hard-gate Task 3: Domínio bloqueado até confirmar o selo */
+body.is-messenger-gate .dashboard-layout > *:not(.dashboard-rail),
+body.is-messenger-gate .dashboard-rail > *:not(.profile-panel),
+body.is-messenger-gate .profile-panel > *:not(.messenger-seal):not(.profile-panel__username):not(.profile-panel__name):not(.master-badge),
+body.is-messenger-gate .master-tools,
+body.is-messenger-gate .hub-preview,
+body.is-messenger-gate .altar,
+body.is-messenger-gate .achievements-block,
+body.is-messenger-gate .lessons-block {
+  opacity: 0.28;
+  pointer-events: none;
+  filter: grayscale(0.35);
+}
+
+body.is-messenger-gate .messenger-seal,
+body.is-messenger-gate .messenger-seal--gate {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  filter: none !important;
+  position: relative;
+  z-index: 2;
+  border-color: rgba(217, 4, 41, 0.55);
+  box-shadow: 0 0 0 1px rgba(207, 167, 89, 0.35), 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+body.is-messenger-gate .app-shell__nav .app-shell__link:not([data-nav-item="dashboard"]) {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+body.is-messenger-gate .app-shell__link[data-nav-item="dashboard"] {
+  pointer-events: auto;
+}
+
 .messenger-seal__title {
   margin: 0 0 0.35rem;
   font-family: var(--font-title);
@@ -1871,7 +1905,7 @@ img.achievement-card__art.has-art {
   border-top: 1px solid rgba(194, 53, 72, 0.35);
 }
 
-/* Previews do trilho (Salão / Grimório) */
+/* Previews do trilho (Salão / Grimório / Despertar) */
 .rail-preview {
   padding: 1.1rem 1.15rem;
   text-align: left;
@@ -1880,6 +1914,19 @@ img.achievement-card__art.has-art {
   outline: 1px solid var(--hades-gold);
   outline-offset: 2px;
   box-shadow: var(--shadow-panel), inset 0 0 24px rgba(207, 167, 89, 0.04);
+}
+
+#despertar-preview.is-sealed {
+  opacity: 0.85;
+}
+
+#despertar-preview-cta.is-locked {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.despertar-preview__num {
+  font-variant-numeric: tabular-nums;
 }
 
 .rail-preview .block-title {

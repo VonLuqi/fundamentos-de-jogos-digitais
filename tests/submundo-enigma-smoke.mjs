@@ -15,6 +15,7 @@ import {
   getAchievementXp,
 } from '../js/game-catalog.js';
 import { isArgLocation, isDevtoolsShortcut } from '../js/devtools-guard.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -117,9 +118,12 @@ const local = read('local-server.mjs');
 assert(local.includes('/submundo/hecate-encruzilhada'), 'rewrite local hecate');
 assert(local.includes('/submundo/cocito-espelho'), 'rewrite local cocito');
 
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert(progress.includes("action === 'underworldJudgment'"), 'underworldJudgment');
 assert(progress.includes("action === 'underworldRedeem'"), 'underworldRedeem');
+assert(progress.includes('consumeGameRateLimit'), 'underworld rate limit via KV helper (A2)');
+assert(progress.includes('applyRetryAfterHeader'), 'underworld 429 com Retry-After');
+assert(!progress.includes('underworldRedeemAttempts'), 'Map underworldRedeemAttempts removido (A2)');
 assert(progress.includes('18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c'), 'hash server-side');
 assert(!progress.includes("encoding: 'Base64'"), 'judgment sem encoding spoiler');
 assert(!/hint:\s*'Use atob/.test(progress), 'judgment sem hint atob');

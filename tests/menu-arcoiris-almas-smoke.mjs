@@ -9,6 +9,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -40,16 +41,23 @@ const shellPages = [
   'pages/aula3.html',
   'pages/aula4.html',
   'pages/aula5.html',
+  'pages/classind-dle.html',
+  'pages/despertar.html',
+  'pages/ranking.html',
 ];
 
 const appShellCss = read('css/app-shell.css');
 const achievementsUi = read('js/achievements-ui.js');
 const appShellJs = read('js/app-shell.js');
 const dashboardJs = read('js/dashboard.js');
+const dashboardHtml = read('pages/dashboard.html');
 const conquistasCss = read('css/conquistas.css');
 const dashboardCss = read('css/dashboard.css');
 const soulsJs = read('js/souls.js');
 const apiJs = read('js/api.js');
+const progressApi = readProgressSurface(root);
+const despertarApi = read('api/despertar.js');
+const despertarGate = read('api/_lib/despertar-gate.js');
 
 /* --- C1 Aluno: Almas oculto (markup + CSS + JS) --- */
 shellPages.forEach((rel) => {
@@ -61,14 +69,18 @@ shellPages.forEach((rel) => {
     assert(/\shidden([\s>])/.test(soulsLink[0]), `${rel}: Almas precisa do atributo hidden no HTML`);
   }
 
-  const minigameLink = html.match(/<a[^>]*data-nav-item="minigame"[^>]*>[\s\S]*?<\/a>/);
-  assert(Boolean(minigameLink), `${rel}: precisa do link data-nav-item=minigame`);
-  if (minigameLink) {
-    assert(minigameLink[0].includes('Minigame em breve'), `${rel}: minigame deve dizer "Minigame em breve"`);
-    assert(minigameLink[0].includes('is-locked'), `${rel}: minigame começa com is-locked no HTML`);
-    assert(/aria-disabled="true"/.test(minigameLink[0]), `${rel}: minigame começa aria-disabled=true`);
-    assert(!minigameLink[0].includes('minigame.html'), `${rel}: minigame não deve apontar para página antiga`);
-    assert(!minigameLink[0].includes('arcane_survivors'), `${rel}: minigame não deve usar gate Arcane`);
+  const despertarLinks = html.match(/<a[^>]*data-nav-item="despertar"[^>]*>[\s\S]*?<\/a>/g) || [];
+  assert(despertarLinks.length === 1, `${rel}: exatamente um link data-nav-item=despertar`);
+  assert(!html.includes('data-nav-item="minigame"'), `${rel}: não deve restar Minigame legado`);
+
+  if (rel === 'pages/despertar.html') {
+    assert(despertarLinks[0].includes('O Despertar'), `${rel}: copy O Despertar`);
+    assert(despertarLinks[0].includes('is-active'), `${rel}: Despertar ativo nesta página`);
+  } else {
+    assert(despertarLinks[0].includes('O Despertar · em breve'), `${rel}: começa selado na nav`);
+    assert(despertarLinks[0].includes('is-locked'), `${rel}: Despertar começa com is-locked`);
+    assert(/aria-disabled="true"/.test(despertarLinks[0]), `${rel}: Despertar começa aria-disabled=true`);
+    assert(despertarLinks[0].includes('despertar.html'), `${rel}: href aponta para despertar.html`);
   }
 });
 
@@ -78,8 +90,9 @@ assert(
 );
 assert(
   appShellJs.includes('bindLockedNavClicks')
-    && appShellJs.includes('aria-disabled'),
-  'app-shell.js deve bloquear clique em nav aria-disabled'
+    && appShellJs.includes('aria-disabled')
+    && appShellJs.includes('applyDespertarNavState'),
+  'app-shell.js deve bloquear clique e sincronizar gate do Despertar'
 );
 assert(
   !apiJs.includes('ARCANE_SURVIVORS_FEATURE_ID')
@@ -92,7 +105,33 @@ assert(
     && !dashboardJs.includes('ARCANE_SURVIVORS'),
   'dashboard.js não deve ter toggle do Arcane Survivors'
 );
-notes.push('Minigame: stub "em breve" no nav (smoke estático)');
+assert(
+  dashboardHtml.includes('btn-toggle-acheron')
+    && dashboardJs.includes('btn-toggle-acheron')
+    && dashboardJs.includes('DESPERTAR_GATE_ID')
+    && dashboardJs.includes('Abrir o Acheron')
+    && dashboardHtml.includes('btn-reset-despertar')
+    && dashboardJs.includes('despertarResetStudents'),
+  'dashboard deve ter toggle Abrir/Selar o Acheron e Limpar Estelas'
+);
+assert(
+  progressApi.includes("despertar: { published: false }")
+    || /despertar:\s*\{\s*published:\s*false/.test(progressApi),
+  'progress.js deve defaultar despertar.published=false'
+);
+assert(
+  progressApi.includes('FEATURE_GATE_IDS')
+    && progressApi.includes('isGateableLessonId'),
+  'progress.js deve aceitar gate de feature despertar'
+);
+assert(
+  despertarGate.includes('DESPERTAR_GATE_ID')
+    && despertarGate.includes('despertar_sealed')
+    && despertarApi.includes('isDespertarSealedForUser')
+    && despertarApi.includes('DESPERTAR_SEALED_ERROR'),
+  'api/despertar deve rejeitar alunos com Acheron selado'
+);
+notes.push('Despertar: nav selada + gate admin (smoke estático)');
 
 assert(
   appShellCss.includes('display: none !important')

@@ -553,6 +553,7 @@ async function init() {
       await logout();
       window.location.href = ROUTES.auth();
     },
+    token: currentToken,
   });
 
   document.addEventListener('keydown', onKeyVote);

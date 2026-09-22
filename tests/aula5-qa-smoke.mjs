@@ -15,6 +15,7 @@ import {
   evaluateSecretAchievements,
 } from '../api/_lib/lesson-secret-achievements.js';
 import { ACHIEVEMENTS, getAchievementById } from '../js/game-catalog.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -115,7 +116,7 @@ assert.equal(publica.rarity, 'stone');
 assert.equal(publica.xp, 0, 'XP da conclusão vem do redeem da aula, não do card');
 
 // —— Catálogo / gates / redeem ——
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert.ok(progress.includes("id: 'aula5_concluida'"), 'regra ACHIEVEMENT_RULES aula5_concluida');
 assert.ok(
   progress.includes('Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável'),

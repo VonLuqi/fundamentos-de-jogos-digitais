@@ -127,6 +127,7 @@ async function init() {
     onLogout: async () => {
       await logout();
     },
+    token: getSession()?.token ?? null,
   });
 
   flushQueuedGrimoireAwards();

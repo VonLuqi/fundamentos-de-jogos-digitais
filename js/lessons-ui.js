@@ -13,7 +13,8 @@ export function isLessonPublished(lessonId, publishMap = {}) {
   if (Object.prototype.hasOwnProperty.call(publishMap, lessonId)) {
     return Boolean(publishMap[lessonId]);
   }
-  // Sem mapa (ou entrada ausente): só aula1 começa liberada.
+  // Sem mapa (ou entrada ausente): só aula1 começa liberada; Despertar fica selado.
+  if (lessonId === 'despertar') return false;
   return lessonId === 'aula1';
 }
 

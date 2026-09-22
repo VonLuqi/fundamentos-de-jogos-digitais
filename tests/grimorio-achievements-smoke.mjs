@@ -20,6 +20,7 @@ import {
   matchesCartografoPessoal,
   matchesEscribaRitual,
 } from '../api/_lib/grimoire-achievements.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -217,7 +218,7 @@ assert.ok(
   'update com aula + shares → vínculo'
 );
 
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert.ok(progress.includes('countOriginalUserNotes'), 'countOriginalUserNotes');
 assert.ok(progress.includes('.is(\'cloned_from_note_id\', null)'), 'filtro clones');
 assert.ok(progress.includes('evaluateAndAwardGrimoire'), 'hook award');

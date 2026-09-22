@@ -229,6 +229,13 @@ body {
   text-align: center;
 }
 
+.pact-form__hint {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--hades-text-dim, #ab9c8a);
+}
+
 .pact-form__status {
   min-height: 1.4em;
   margin-bottom: 0.85rem;

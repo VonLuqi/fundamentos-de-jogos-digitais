@@ -17,6 +17,7 @@ import {
   normalizeEmail,
   PURPOSE,
 } from '../api/_lib/auth-email.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -41,7 +42,7 @@ const apiJs = read('js/api.js');
 const authApi = read('api/auth.js');
 const authEmailLib = read('api/_lib/auth-email.js');
 const mailer = read('api/_lib/mailer.js');
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 const dashboardHtml = read('pages/dashboard.html');
 const dashboardJs = read('js/dashboard.js');
 const migrate = read('db/migrate-2026-09-10-password-reset-email.sql');
@@ -122,9 +123,14 @@ assert(
   /emailVerifiedAt:\s*safe\.email_verified_at/.test(progress),
   'progress.sanitizeUser do próprio usuário deve expor emailVerifiedAt'
 );
+// Amigos/turma/espelho não selecionam e-mail; listUsers (admin + CSV do Véu) pode.
 assert(
-  !progress.includes('.select(\'id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, email'),
-  'listagens de alunos/amigos não devem selecionar email'
+  !progress.includes(".select('id, full_name, username, turma, role, xp, conquistas, completed_lessons, avatar_index, email"),
+  'listagens de amigos/turma não devem selecionar email no meio do select curto'
+);
+assert(
+  /action === 'listUsers'[\s\S]*email_verified_at/.test(progress),
+  'listUsers admin pode incluir email/selo para Extrair o Véu'
 );
 assert(dashboardJs.includes('maskEmail'), 'dashboard deve mascarar e-mail no perfil');
 assert(dashboardHtml.includes('id="messenger-seal"'), 'dashboard precisa do Selo do Mensageiro');

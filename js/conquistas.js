@@ -12,6 +12,7 @@ import {
   logout,
   normalizeAchievementRarity,
   requireSession,
+  getSession,
 } from './api.js';
 import {
   fillAchievementArtHost,
@@ -256,6 +257,7 @@ async function init() {
     route: 'conquistas',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: handleLogout,
+    token: getSession()?.token ?? null,
   });
 
   renderAlbum();

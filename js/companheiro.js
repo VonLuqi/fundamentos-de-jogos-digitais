@@ -440,6 +440,7 @@ async function init() {
     route: 'companheiro',
     role: viewerUser.role === 'admin' ? 'admin' : 'student',
     onLogout: handleLogout,
+    token: getSession()?.token ?? null,
   });
 
   if (String(viewerUser.username || '').toLowerCase() === username.toLowerCase()) {

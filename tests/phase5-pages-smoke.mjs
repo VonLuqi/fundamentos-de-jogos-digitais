@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -139,7 +140,7 @@ assert(
   'MODULES não deve usar o subtitle stub Em breve no catálogo'
 );
 
-const progressJs = read('api/progress.js');
+const progressJs = readProgressSurface(root);
 assert(progressJs.includes('published'), 'progress.js deve definir gate published');
 assert(progressJs.includes('aula2:'), 'LESSON_CATALOG deve ter stub aula2');
 assert(progressJs.includes('aula3:'), 'LESSON_CATALOG deve ter stub aula3');

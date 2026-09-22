@@ -30,7 +30,9 @@ const grimorioCss = read('css/grimorio.css');
 const soulsHtml = read('pages/souls.html');
 const pkg = read('package.json');
 
-assert(soulsHtml.includes('class="souls-page"'), 'souls.html body precisa de class=souls-page');
+assert(soulsHtml.includes('souls-page'), 'souls.html body precisa da class souls-page');
+assert(soulsHtml.includes('data-shell') || soulsHtml.includes('app-shell'), 'souls.html precisa do app-shell');
+assert(soulsHtml.includes('Extrair o Véu'), 'souls.html precisa do botão Extrair o Véu');
 
 assert(/html\s*\{[^}]*overflow-x:\s*clip/.test(soulsCss), 'html da página souls precisa de overflow-x: clip');
 assert(/body\.souls-page\s*\{[^}]*overflow-x:\s*clip/.test(soulsCss), 'body.souls-page precisa de overflow-x: clip');

@@ -15,13 +15,13 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js';
+import { applyDespertarNavState, initAppShell } from './app-shell.js';
 import {
   getAchievementCollectionStats,
   renderAchievementsList,
   setRainbowVfxSuspended,
 } from './achievements-ui.js';
-import { isLessonPublished, renderLessonsList } from './lessons-ui.js';
+import { isLessonPublished, PUBLISHED_GATE_KEY, renderLessonsList } from './lessons-ui.js';
 import { initUnderworldGate } from './underworld-gate.js';
 
 import {
@@ -43,6 +43,7 @@ import {
   requireSession,
   redeemCode,
   generateCode,
+  rotateRecoveryCode,
   setAvatar,
   bindEmail,
   requestEmailVerification,
@@ -51,19 +52,31 @@ import {
   getSession,
   describeLevelProgress,
   fetchLessonsPublishMap,
+  fetchDespertarPublished,
+  setLessonGate,
+  DESPERTAR_GATE_ID,
+  despertarResetStudents,
+  despertarStateGet,
+  needsMessengerSeal,
   normalizeAchievementRarity,
   listFriends,
   listClassmates,
   listNotes,
 } from './api.js';
+import {
+  formatRate,
+  formatSouls,
+} from './hades-despertar/ui/NumberFormatter.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
 let currentToken = null;
 let publishMap = {};
 let shellApi = null;
+let despertarPublished = false;
 let messengerShowForm = false;
 let messengerBound = false;
+let messengerGateFocused = false;
 
 const MESSENGER_RESEND_COPY = 'Se o selo ainda estiver pendente, o Mensageiro já partiu. Olhe a caixa — e o reino das promoções.';
 
@@ -95,6 +108,28 @@ function messengerSealKind(user) {
   return 'pending';
 }
 
+function applyMessengerHardGate(user) {
+  const locked = needsMessengerSeal(user);
+  document.body.classList.toggle('is-messenger-gate', locked);
+  if (!locked) {
+    messengerGateFocused = false;
+    return;
+  }
+
+  const seal = document.getElementById('messenger-seal');
+  if (!seal) return;
+  seal.hidden = false;
+  seal.classList.add('messenger-seal--gate');
+
+  // Só rola/foca uma vez por sessão de gate (evita pular após vincular/reenviar).
+  if (messengerGateFocused) return;
+  messengerGateFocused = true;
+  window.requestAnimationFrame(() => {
+    seal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('messenger-input')?.focus();
+  });
+}
+
 function setMessengerStatus(message, isError = false) {
   const statusEl = document.getElementById('messenger-status');
   if (!statusEl) return;
@@ -109,16 +144,22 @@ function renderMessengerSeal(user) {
 
   if (!user || user.role === 'admin') {
     root.hidden = true;
+    root.classList.remove('messenger-seal--gate');
     if (shortcut) shortcut.hidden = true;
+    document.body.classList.remove('is-messenger-gate');
     return;
   }
 
   const kind = messengerSealKind(user);
+  const gated = needsMessengerSeal(user);
   const showForm = kind === 'empty' || messengerShowForm;
   const hideConfirmedBlock = kind === 'confirmed' && !messengerShowForm;
 
   root.hidden = hideConfirmedBlock;
-  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm;
+  root.classList.toggle('messenger-seal--gate', gated);
+  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm || gated;
+
+  applyMessengerHardGate(user);
 
   if (hideConfirmedBlock) return;
 
@@ -134,9 +175,9 @@ function renderMessengerSeal(user) {
 
   if (stateEl) {
     stateEl.textContent = kind === 'empty'
-      ? 'Sem selo de mensageiro — vincule um e-mail para recuperar a Palavra.'
+      ? 'Sem selo de mensageiro — vincule e confirme um e-mail para seguir no Domínio.'
       : kind === 'pending'
-        ? 'O selo ainda não foi reconhecido.'
+        ? 'O selo ainda não foi reconhecido. Abra o Mensageiro na caixa de entrada — e o reino das promoções.'
         : 'Selo reconhecido. A Palavra pode ser recuperada por este endereço.';
   }
 
@@ -151,7 +192,10 @@ function renderMessengerSeal(user) {
   }
 
   if (form) form.hidden = !showForm;
-  if (cancelBtn) cancelBtn.hidden = kind === 'empty' || !showForm;
+  if (cancelBtn) {
+    // No hard-gate, empty não cancela; pending pode voltar ao resend.
+    cancelBtn.hidden = kind === 'empty' || !showForm || (gated && kind === 'empty');
+  }
   if (bindBtn) {
     bindBtn.textContent = kind === 'empty' ? 'Vincular e-mail' : 'Selar novo endereço';
   }
@@ -161,7 +205,8 @@ function renderMessengerSeal(user) {
   if (actions) actions.hidden = kind === 'empty' || showForm;
   if (resendBtn) resendBtn.hidden = !(kind === 'pending' && !showForm);
   if (changeBtn) {
-    changeBtn.hidden = kind === 'empty' || showForm || kind === 'confirmed';
+    // Pending (mesmo sob hard-gate) pode trocar endereço tipado errado; confirmed usa o atalho.
+    changeBtn.hidden = kind !== 'pending' || showForm;
     changeBtn.textContent = 'Trocar endereço';
   }
 }
@@ -318,7 +363,7 @@ function applyAdminSkin(user) {
 }
 
 /**
- * Previews do trilho esquerdo (Salão + Grimório).
+ * Previews do trilho esquerdo (Salão + Grimório + O Despertar).
  * Contagem da turma completa chega na Task 4 (`classmatesList`).
  */
 async function renderRailPreviews(token) {
@@ -338,8 +383,13 @@ async function renderRailPreviews(token) {
     grimorioSummary.textContent = 'O Grimório espera a primeira inscrição.';
   }
 
+  const despertarPreviewPromise = renderDespertarPreview(token);
+  const rankingCta = document.getElementById('ranking-preview-cta');
+  if (rankingCta) rankingCta.href = ROUTES.ranking();
+
   if (!token) {
     if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
+    await despertarPreviewPromise;
     return;
   }
 
@@ -436,6 +486,78 @@ async function renderRailPreviews(token) {
   } catch {
     if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
     if (companionsEl) companionsEl.textContent = '— / 25';
+  }
+
+  await despertarPreviewPromise;
+}
+
+/**
+ * Preview compacto de O Despertar no trilho (Task 11).
+ * Respeita o gate do Acheron: aluno só vê números/CTA quando aberto.
+ */
+async function renderDespertarPreview(token) {
+  const host = document.getElementById('despertar-preview');
+  const summary = document.getElementById('despertar-preview-summary');
+  const soulsEl = document.getElementById('despertar-preview-souls');
+  const spsEl = document.getElementById('despertar-preview-sps');
+  const cta = document.getElementById('despertar-preview-cta');
+  if (!host) return;
+
+  const isAdmin = currentUser?.role === 'admin';
+  const open = Boolean(isAdmin || despertarPublished);
+
+  if (cta) {
+    cta.href = ROUTES.despertar();
+    cta.textContent = 'Descer ao Acheron';
+    cta.classList.toggle('is-locked', !open);
+    if (open) {
+      cta.removeAttribute('aria-disabled');
+      cta.removeAttribute('tabindex');
+      cta.removeAttribute('title');
+    } else {
+      cta.setAttribute('aria-disabled', 'true');
+      cta.setAttribute('tabindex', '-1');
+      cta.setAttribute('title', 'O Acheron ainda está selado');
+    }
+  }
+
+  if (!open) {
+    if (summary) summary.textContent = 'O Acheron ainda está selado. O Mestre abrirá O Despertar em breve.';
+    if (soulsEl) soulsEl.textContent = '—';
+    if (spsEl) spsEl.textContent = '—';
+    host.classList.add('is-sealed');
+    return;
+  }
+
+  host.classList.remove('is-sealed');
+
+  if (!token) {
+    if (summary) summary.textContent = 'O Submundo não reconhece a sessão.';
+    return;
+  }
+
+  try {
+    const result = await despertarStateGet(token);
+    const state = result?.state || {};
+    if (soulsEl) soulsEl.textContent = formatSouls(state.souls ?? '0');
+    if (spsEl) spsEl.textContent = formatRate(state.sps ?? '0');
+    if (summary) {
+      const prestige = Number(state.prestigeCount) || 0;
+      summary.textContent = prestige > 0
+        ? `Catábase ×${prestige}. O trabalho eterno do Submundo continua.`
+        : 'O trabalho eterno do Submundo. Ceife almas no Acheron.';
+    }
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 403) {
+      if (summary) summary.textContent = 'O Acheron ainda está selado.';
+      if (soulsEl) soulsEl.textContent = '—';
+      if (spsEl) spsEl.textContent = '—';
+      host.classList.add('is-sealed');
+      return;
+    }
+    if (summary) summary.textContent = 'A Estela do Submundo não respondeu.';
+    if (soulsEl) soulsEl.textContent = '—';
+    if (spsEl) spsEl.textContent = '—';
   }
 }
 
@@ -1228,6 +1350,15 @@ function initScrollModal() {
 /* ============================================================
    9. FERRAMENTAS DO ADMIN
    ============================================================ */
+function syncAcheronToggleButton() {
+  const btn = document.getElementById('btn-toggle-acheron');
+  if (!btn) return;
+  btn.textContent = despertarPublished ? 'Selar o Acheron' : 'Abrir o Acheron';
+  btn.setAttribute('aria-pressed', String(despertarPublished));
+  btn.classList.toggle('btn-gold--pulse', !despertarPublished);
+  btn.classList.toggle('btn-gold--ghost', despertarPublished);
+}
+
 function initAdminTools() {
   const tools = document.getElementById('master-tools');
   if (currentUser?.role !== 'admin') {
@@ -1244,12 +1375,132 @@ function initAdminTools() {
   }
 
   const btnCodes = document.getElementById('btn-generate-codes');
+  const btnRotateCaronte = document.getElementById('btn-rotate-caronte');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
+  const btnAcheron = document.getElementById('btn-toggle-acheron');
+  const btnResetDespertar = document.getElementById('btn-reset-despertar');
   const btnSouls = document.getElementById('btn-list-souls');
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
+  syncAcheronToggleButton();
+
+  btnRotateCaronte?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    const confirmed = window.confirm(
+      'Rotacionar a Senha do Caronte?\n\n'
+      + 'A senha anterior deixa de valer na hora. O plaintext aparece só desta vez — '
+      + 'anote e fale na sala quando um aluno legado precisar recuperar a Palavra.',
+    );
+    if (!confirmed) return;
+
+    btnRotateCaronte.disabled = true;
+    const previousLabel = btnRotateCaronte.textContent;
+    btnRotateCaronte.textContent = 'Gerando…';
+    try {
+      const result = await rotateRecoveryCode(currentToken);
+      const code = String(result?.code || '').trim();
+      openScrollModal(
+        'Senha do Caronte',
+        (() => {
+          const wrap = document.createElement('div');
+          const note = document.createElement('p');
+          note.className = 'scroll-modal__note';
+          note.textContent = 'Mostre só uma vez. Quem precisar recuperar sem e-mail digita este código no Pacto (“Não tenho e-mail no Domínio”).';
+          wrap.appendChild(note);
+          const codeBlock = document.createElement('div');
+          codeBlock.className = 'code-row';
+          const codeEl = document.createElement('span');
+          codeEl.className = 'code-row__code';
+          codeEl.textContent = code || '—';
+          codeBlock.appendChild(codeEl);
+          wrap.appendChild(codeBlock);
+          return wrap;
+        })(),
+      );
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao rotacionar a Senha do Caronte.';
+      showApiWarning(message);
+    } finally {
+      btnRotateCaronte.disabled = false;
+      btnRotateCaronte.textContent = previousLabel;
+    }
+  });
+
   btnManageLessons?.addEventListener('click', () => {
     window.location.href = ROUTES.aulas();
+  });
+
+  btnAcheron?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    const next = !despertarPublished;
+    btnAcheron.disabled = true;
+    const previousLabel = btnAcheron.textContent;
+    btnAcheron.textContent = next ? 'Abrindo…' : 'Selando…';
+    try {
+      const result = await setLessonGate(
+        currentToken,
+        DESPERTAR_GATE_ID,
+        PUBLISHED_GATE_KEY,
+        next,
+      );
+      despertarPublished = Boolean(result?.gates?.published);
+      applyDespertarNavState(document.querySelector('[data-shell]'), {
+        published: despertarPublished,
+        isAdmin: true,
+      });
+      if (shellApi?.refreshDespertarNav) {
+        await shellApi.refreshDespertarNav();
+      }
+      syncAcheronToggleButton();
+      renderDespertarPreview(currentToken).catch(() => {});
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao atualizar o selo do Acheron.';
+      showApiWarning(message);
+      btnAcheron.textContent = previousLabel;
+    } finally {
+      btnAcheron.disabled = false;
+    }
+  });
+
+  btnResetDespertar?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    const confirmed = window.confirm(
+      'Apagar o progresso de O Despertar de TODOS os alunos?\n\n'
+      + 'Isso zera as Estelas no servidor (quem descobriu o jogo antes da hora volta ao zero). '
+      + 'A Estela do Mestre permanece. O cache local dos alunos também é invalidado no próximo deploy/carregamento.',
+    );
+    if (!confirmed) return;
+
+    btnResetDespertar.disabled = true;
+    const previousLabel = btnResetDespertar.textContent;
+    btnResetDespertar.textContent = 'Limpando…';
+    try {
+      const result = await despertarResetStudents(currentToken);
+      const deleted = Number(result?.deleted) || 0;
+      openScrollModal(
+        'Estelas limpas',
+        (() => {
+          const note = document.createElement('p');
+          note.className = 'scroll-modal__note';
+          note.textContent = deleted === 0
+            ? 'Nenhuma Estela de aluno estava gravada no Submundo.'
+            : `${deleted} Estela(s) de aluno foram apagadas. O Acheron segue selado até você abrir.`;
+          return note;
+        })(),
+      );
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao limpar as Estelas antecipadas.';
+      showApiWarning(message);
+    } finally {
+      btnResetDespertar.disabled = false;
+      btnResetDespertar.textContent = previousLabel;
+    }
   });
 
   btnCodes?.addEventListener('click', async () => {
@@ -1409,10 +1660,22 @@ async function init() {
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
 
+  // Hard-gate: ?selo=1 (ou qualquer aluno sem selo) força o formulário se ainda está empty.
+  if (needsMessengerSeal(currentUser)) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('selo') === '1' || messengerSealKind(currentUser) === 'empty') {
+      messengerShowForm = messengerSealKind(currentUser) === 'empty';
+    }
+  }
+
   shellApi = initAppShell({
     route: 'dashboard',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: handleDashboardLogout,
+    token: currentToken,
+    despertarPublished: typeof result.gates?.despertar?.published === 'boolean'
+      ? result.gates.despertar.published
+      : undefined,
   });
 
   await avatarCountReady; // garante getAvatarCount()/avatarSafeIndex corretos antes de renderizar
@@ -1421,6 +1684,16 @@ async function init() {
     publishMap = await fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id));
   } catch {
     publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
+  }
+
+  if (typeof result.gates?.despertar?.published === 'boolean') {
+    despertarPublished = result.gates.despertar.published;
+  } else {
+    try {
+      despertarPublished = await fetchDespertarPublished(currentToken);
+    } catch {
+      despertarPublished = false;
+    }
   }
 
   // A hidratação visual (stats/cards) pode falhar por dado inesperado
@@ -1441,9 +1714,12 @@ async function init() {
   initAdminTools();
   initMessengerSeal();
   initUnderworldGate();
-  renderRailPreviews(currentToken).catch((error) => {
-    console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
-  });
+  // Previews do trilho batem em progress (friends/notes) — só após o selo.
+  if (!needsMessengerSeal(currentUser)) {
+    renderRailPreviews(currentToken).catch((error) => {
+      console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

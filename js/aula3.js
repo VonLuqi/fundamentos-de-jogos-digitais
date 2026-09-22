@@ -285,6 +285,7 @@ async function init() {
       await logout();
       window.location.href = ROUTES.auth();
     },
+    token: currentToken,
   });
 
   const { initFromNoteBanner } = await import('./grimorio-from-note.js');

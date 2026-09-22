@@ -12,6 +12,7 @@ import {
   evaluateSecretAchievements,
 } from '../api/_lib/lesson-secret-achievements.js';
 import { ACHIEVEMENTS, getAchievementById } from '../js/game-catalog.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -78,7 +79,7 @@ assert.ok(aula2Html.includes('Core Loop'), 'HTML pede Core Loop');
 assert.ok(/Grokking/i.test(aula2Html), 'HTML pede Grokking');
 assert.ok(/Assets/i.test(aula2Html), 'HTML pede Assets');
 
-const progressApi = read('api/progress.js');
+const progressApi = readProgressSurface(root);
 assert.ok(progressApi.includes("action === 'listMyLessonParagraphs'"), 'API lista paragraphs do aluno');
 
 const grimorioJs = read('js/grimorio.js');
@@ -153,7 +154,7 @@ assert.equal(publica.hidden, false);
 assert.equal(publica.rarity, 'stone');
 assert.equal(publica.xp, 0, 'XP da conclusão vem do redeem da aula, não do card');
 
-const progress = read('api/progress.js');
+const progress = readProgressSurface(root);
 assert.ok(progress.includes("id: 'aula2_concluida'"), 'regra ACHIEVEMENT_RULES');
 assert.ok(
   /aula2:\s*\{[\s\S]*?xp:\s*30/.test(progress),

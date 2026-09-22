@@ -337,6 +337,7 @@ export const ROUTES = {
   },
   souls: () => `${rootPath()}/pages/souls.html`,
   despertar: () => `${rootPath()}/pages/despertar.html`,
+  ranking: () => `${rootPath()}/pages/ranking.html`,
   classindDle: () => `${rootPath()}/pages/classind-dle.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
@@ -368,6 +369,7 @@ export function getSession() {
 
 export function clearSession() {
   localStorage.removeItem(SESSION_KEY);
+  setBootstrapGates(null);
 }
 
 /* ============================================================
@@ -423,6 +425,7 @@ function normalizeUser(raw) {
     achievements: raw.achievements ?? raw.conquistas ?? [],
     email: raw.email ?? null,
     emailVerifiedAt: raw.emailVerifiedAt ?? raw.email_verified_at ?? null,
+    hasDespertarState: Boolean(raw.hasDespertarState),
   };
 }
 
@@ -481,6 +484,20 @@ export function requestPasswordReset(username, email) {
   });
 }
 
+export function requestLegacyEmailBind(username, code, email) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'requestLegacyEmailBind', username, code, email }),
+  });
+}
+
+export function rotateRecoveryCode(token) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({ action: 'rotateRecoveryCode', token }),
+  });
+}
+
 export function confirmPasswordReset(token, password) {
   return request('/auth', {
     method: 'POST',
@@ -489,10 +506,8 @@ export function confirmPasswordReset(token, password) {
 }
 
 export function trackLessonView(token, lessonId) {
-  return request('/progress', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'lessonView', lessonId }),
-  });
+  enqueueLessonEvent(token, { type: 'lessonView', lessonId });
+  return Promise.resolve({ ok: true, queued: true });
 }
 
 export async function logout() {
@@ -513,6 +528,51 @@ export async function logout() {
 export async function validateSession(token) {
   const payload = await request(`/auth?token=${encodeURIComponent(token)}`, { method: 'GET' });
   return { ...payload, user: normalizeUser(payload.user) };
+}
+
+/**
+ * Boot unificado (Fase B / B2): sessão + perfil + gate Despertar.
+ * @see docs/otimizacoes/contratos-fase-b.md §1
+ */
+export async function fetchSessionBootstrap(token) {
+  const payload = await request(
+    `/session-bootstrap?token=${encodeURIComponent(token)}`,
+    { method: 'GET' },
+  );
+  const gates = payload?.gates && typeof payload.gates === 'object'
+    ? payload.gates
+    : { despertar: { published: false } };
+  return {
+    ...payload,
+    user: normalizeUser(payload.user),
+    gates: {
+      despertar: {
+        published: Boolean(gates?.despertar?.published),
+      },
+    },
+  };
+}
+
+/** Cache em memória do último bootstrap (mesmo page-load → shell sem 2º GET de gate). */
+let bootstrapGatesCache = null;
+
+/**
+ * @returns {{ token: string, gates: { despertar: { published: boolean } } } | null}
+ */
+export function getBootstrapGates() {
+  return bootstrapGatesCache;
+}
+
+function setBootstrapGates(token, gates) {
+  if (!token || !gates) {
+    bootstrapGatesCache = null;
+    return;
+  }
+  bootstrapGatesCache = { token, gates };
+}
+
+function isBootstrapFallbackStatus(status) {
+  return status === 404 || status === 405 || status === 503;
 }
 
 /* ============================================================
@@ -582,6 +642,12 @@ export function getLessonCode(token, lessonId) {
   });
 }
 
+/** Gate transversal de O Despertar (lesson_gates.lesson_id). */
+export const DESPERTAR_GATE_ID = 'despertar';
+export const DESPERTAR_NAV_LABEL = 'O Despertar';
+export const DESPERTAR_NAV_LOCKED_LABEL = 'O Despertar · em breve';
+export const DESPERTAR_SEALED_ERROR = 'despertar_sealed';
+
 export function fetchLessonGates(token, lessonId) {
   return request('/progress', {
     method: 'POST',
@@ -596,11 +662,39 @@ export function setLessonGate(token, lessonId, gateKey, released) {
   });
 }
 
-/** Mapa lessonId → published (boolean). Fallback local se a API falhar. */
+/** Lê se o Acheron está aberto para a turma. Default: selado. */
+export async function fetchDespertarPublished(token) {
+  try {
+    const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
+    return Boolean(result?.gates?.published);
+  } catch {
+    return false;
+  }
+}
+
+/** Mapa lessonId → published (boolean). Uma única action batch (Task 2). */
 export async function fetchLessonsPublishMap(token, lessonIds = []) {
   const ids = lessonIds.length > 0
     ? lessonIds
     : LESSONS.map((lesson) => lesson.id);
+
+  try {
+    const result = await request('/progress', {
+      method: 'POST',
+      body: JSON.stringify({ token, action: 'lessonGatesBatch', lessonIds: ids }),
+    });
+    if (result?.gates && typeof result.gates === 'object') {
+      return Object.fromEntries(
+        ids.map((id) => {
+          const published = result.gates[id]?.published;
+          if (typeof published === 'boolean') return [id, published];
+          return [id, id === 'aula1'];
+        }),
+      );
+    }
+  } catch {
+    // fallback N+1 abaixo
+  }
 
   const entries = await Promise.all(
     ids.map(async (id) => {
@@ -613,7 +707,7 @@ export async function fetchLessonsPublishMap(token, lessonIds = []) {
         // fallback abaixo
       }
       return [id, id === 'aula1'];
-    })
+    }),
   );
 
   return Object.fromEntries(entries);
@@ -633,11 +727,242 @@ export function listMyLessonParagraphs(token) {
   });
 }
 
-export function saveLessonParagraph(token, lessonId, paragraph) {
-  return request('/progress', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'saveLessonParagraph', lessonId, paragraph }),
+/** Intervalo de flush do buffer de aula (B6 / D6): 8–15 s. */
+export const LESSON_EVENTS_FLUSH_MS = 10_000;
+const LESSON_EVENTS_BATCH_MAX = 20;
+
+/** @type {Array<{ token: string, type: string, lessonId?: string, paragraph?: string, clientTs: number, _qid: number }>} */
+let lessonEventQueue = [];
+let lessonEventFlushTimer = null;
+let lessonEventInFlight = null;
+let lessonBatchSupported = true;
+let lessonEventSeq = 0;
+let lessonLifecycleBound = false;
+
+function isLessonBatchFallbackStatus(status) {
+  return status === 404 || status === 405 || status === 501;
+}
+
+/**
+ * Enfileira evento de aula (lessonView / lessonParagraph). Retorna índice lógico na fila.
+ * @returns {number} queue id (para casar com results[].index após flush)
+ */
+export function enqueueLessonEvent(token, event = {}) {
+  if (!token) return -1;
+  const type = String(event.type || '');
+  if (type !== 'lessonView' && type !== 'lessonParagraph') return -1;
+
+  // Coalesce: um view por lessonId; parágrafo mais recente por lessonId.
+  if (type === 'lessonView') {
+    const lessonId = String(event.lessonId || '');
+    lessonEventQueue = lessonEventQueue.filter(
+      (item) => !(item.token === token && item.type === 'lessonView' && item.lessonId === lessonId),
+    );
+  }
+  if (type === 'lessonParagraph') {
+    const lessonId = String(event.lessonId || '');
+    lessonEventQueue = lessonEventQueue.filter(
+      (item) => !(item.token === token && item.type === 'lessonParagraph' && item.lessonId === lessonId),
+    );
+  }
+
+  const _qid = lessonEventSeq;
+  lessonEventSeq += 1;
+  lessonEventQueue.push({
+    token,
+    type,
+    lessonId: event.lessonId,
+    paragraph: event.paragraph,
+    clientTs: Number(event.clientTs) || Date.now(),
+    _qid,
   });
+
+  ensureLessonLifecycleHooks();
+  scheduleLessonEventsFlush();
+  return _qid;
+}
+
+function scheduleLessonEventsFlush() {
+  if (lessonEventFlushTimer != null) return;
+  lessonEventFlushTimer = window.setTimeout(() => {
+    lessonEventFlushTimer = null;
+    flushLessonEvents({ reason: 'timer' }).catch(() => {});
+  }, LESSON_EVENTS_FLUSH_MS);
+}
+
+function ensureLessonLifecycleHooks() {
+  if (lessonLifecycleBound || typeof window === 'undefined') return;
+  lessonLifecycleBound = true;
+  const flushSoon = () => {
+    flushLessonEvents({ reason: 'lifecycle' }).catch(() => {});
+  };
+  window.addEventListener('pagehide', flushSoon);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushSoon();
+  });
+}
+
+/**
+ * Envia o buffer via lessonEventsBatch; fallback item-a-item se 404/405.
+ * @param {{ reason?: string }} [options]
+ */
+export async function flushLessonEvents(options = {}) {
+  if (lessonEventInFlight) return lessonEventInFlight;
+  if (lessonEventQueue.length === 0) return { ok: true, results: [] };
+
+  if (lessonEventFlushTimer != null) {
+    window.clearTimeout(lessonEventFlushTimer);
+    lessonEventFlushTimer = null;
+  }
+
+  const batch = lessonEventQueue.splice(0, LESSON_EVENTS_BATCH_MAX);
+  const token = batch[0]?.token;
+  if (!token) return { ok: true, results: [] };
+
+  // Itens de outro token voltam para a fila.
+  const sameToken = [];
+  const deferred = [];
+  for (const item of batch) {
+    if (item.token === token) sameToken.push(item);
+    else deferred.push(item);
+  }
+  if (deferred.length) lessonEventQueue = deferred.concat(lessonEventQueue);
+
+  const events = sameToken.map(({ type, lessonId, paragraph, clientTs }) => ({
+    type,
+    lessonId,
+    paragraph,
+    clientTs,
+  }));
+
+  lessonEventInFlight = (async () => {
+    try {
+      if (lessonBatchSupported) {
+        try {
+          const payload = await request('/progress', {
+            method: 'POST',
+            body: JSON.stringify({ token, action: 'lessonEventsBatch', events }),
+          });
+          const results = Array.isArray(payload?.results)
+            ? payload.results.map((row, i) => ({
+              ...row,
+              index: sameToken[i]?._qid ?? row.index,
+            }))
+            : [];
+          return { ok: true, results, reason: options.reason || null };
+        } catch (error) {
+          if (error instanceof ApiError && isLessonBatchFallbackStatus(error.status)) {
+            lessonBatchSupported = false;
+          } else {
+            // Devolve à fila e propaga (rede / 5xx).
+            lessonEventQueue = sameToken.concat(lessonEventQueue);
+            throw error;
+          }
+        }
+      }
+
+      // Fallback legado: um POST por evento.
+      const results = [];
+      let legacyParagraph = null;
+      for (const item of sameToken) {
+        try {
+          if (item.type === 'lessonView') {
+            await request('/progress', {
+              method: 'POST',
+              body: JSON.stringify({
+                token: item.token,
+                action: 'lessonView',
+                lessonId: item.lessonId,
+              }),
+            });
+            results.push({ ok: true, index: item._qid, type: 'lessonView', lessonId: item.lessonId });
+          } else if (item.type === 'lessonParagraph') {
+            const payload = await request('/progress', {
+              method: 'POST',
+              body: JSON.stringify({
+                token: item.token,
+                action: 'saveLessonParagraph',
+                lessonId: item.lessonId,
+                paragraph: item.paragraph,
+              }),
+            });
+            legacyParagraph = payload;
+            results.push({
+              ok: true,
+              index: item._qid,
+              type: 'lessonParagraph',
+              lessonId: payload?.lessonId ?? item.lessonId,
+              paragraph: payload?.paragraph ?? item.paragraph,
+              updatedAt: payload?.updatedAt,
+              user: payload?.user,
+              awarded: payload?.awarded ?? null,
+            });
+          }
+        } catch (itemError) {
+          results.push({
+            ok: false,
+            index: item._qid,
+            type: item.type,
+            error: itemError?.message || 'Falha no evento.',
+            status: itemError?.status || 500,
+          });
+        }
+      }
+      return {
+        ok: true,
+        results,
+        legacy: legacyParagraph,
+        reason: options.reason || null,
+      };
+    } finally {
+      lessonEventInFlight = null;
+      if (lessonEventQueue.length > 0) scheduleLessonEventsFlush();
+    }
+  })();
+
+  return lessonEventInFlight;
+}
+
+/** Só para testes. */
+export function __resetLessonEventsQueueForTests() {
+  lessonEventQueue = [];
+  lessonEventFlushTimer = null;
+  lessonEventInFlight = null;
+  lessonBatchSupported = true;
+  lessonEventSeq = 0;
+}
+
+export async function saveLessonParagraph(token, lessonId, paragraph) {
+  const queuedIndex = enqueueLessonEvent(token, {
+    type: 'lessonParagraph',
+    lessonId,
+    paragraph,
+  });
+  const flush = await flushLessonEvents({ reason: 'saveLessonParagraph' });
+  const mine = Array.isArray(flush?.results)
+    ? flush.results.find((row) => row.index === queuedIndex)
+    : null;
+  if (mine && mine.ok === false) {
+    throw new ApiError(mine.error || 'Falha ao salvar o registro.', mine.status || 400, mine);
+  }
+  if (mine?.ok) {
+    return {
+      ok: true,
+      lessonId: mine.lessonId,
+      paragraph: mine.paragraph,
+      updatedAt: mine.updatedAt,
+      user: mine.user ? normalizeUser(mine.user) : undefined,
+      awarded: mine.awarded ?? null,
+      batch: true,
+    };
+  }
+  if (flush?.ok && flush?.legacy) {
+    return {
+      ...flush.legacy,
+      user: flush.legacy.user ? normalizeUser(flush.legacy.user) : undefined,
+    };
+  }
+  throw new ApiError('Falha ao salvar o registro.', 500, flush);
 }
 
 export async function listUsers(token) {
@@ -646,6 +971,112 @@ export async function listUsers(token) {
     body: JSON.stringify({ token, action: 'listUsers' }),
   });
   return { ...payload, users: (payload.users ?? []).map(normalizeUser) };
+}
+
+/* ---------- Espelho da Alma (admin) ---------- */
+
+export async function adminUpdateProfile(token, targetUserId, fields = {}) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminUpdateProfile',
+      targetUserId,
+      fullName: fields.fullName,
+      turma: fields.turma,
+      avatarIndex: fields.avatarIndex,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export async function adminAdjustXp(token, targetUserId, { mode, xp, reason }) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminAdjustXp',
+      targetUserId,
+      mode,
+      xp,
+      reason,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export async function adminSetLessonCompleted(token, targetUserId, lessonId, completed) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminSetLessonCompleted',
+      targetUserId,
+      lessonId,
+      completed,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export async function adminGrantAchievement(token, targetUserId, achievementId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminGrantAchievement',
+      targetUserId,
+      achievementId,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export async function adminRevokeAchievement(token, targetUserId, achievementId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminRevokeAchievement',
+      targetUserId,
+      achievementId,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export async function adminClearEmailSeal(token, targetUserId) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminClearEmailSeal',
+      targetUserId,
+    }),
+  });
+  return { ...payload, user: payload.user ? normalizeUser(payload.user) : null };
+}
+
+export function adminInvalidateSessions(token, targetUserId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminInvalidateSessions',
+      targetUserId,
+    }),
+  });
+}
+
+export function adminForceTempPassword(token, targetUserId) {
+  return request('/auth', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'adminForceTempPassword',
+      targetUserId,
+    }),
+  });
 }
 
 /* ============================================================
@@ -705,6 +1136,30 @@ export async function listClassmates(token, { turma } = {}) {
     turmasDisponiveis: Array.isArray(payload.turmasDisponiveis) ? payload.turmasDisponiveis : [],
     classmates: (payload.classmates ?? []).map(normalizeClassmateCard),
   };
+}
+
+/**
+ * Placar do Domínio (Task 20 + B5).
+ * @param {string} token
+ * @param {{ scope?: 'turma'|'global', sort?: 'xp'|'achievements'|'juizoBest', turma?: string, limit?: number }} [options]
+ */
+export async function leaderboardGet(token, { scope = 'turma', sort = 'xp', turma, limit } = {}) {
+  const body = {
+    token,
+    action: 'leaderboardGet',
+    scope,
+    sort,
+  };
+  if (turma != null && String(turma).trim() !== '') {
+    body.turma = String(turma).trim();
+  }
+  if (limit != null && Number.isFinite(Number(limit))) {
+    body.limit = Number(limit);
+  }
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
 }
 
 export function searchFriends(token, query) {
@@ -946,6 +1401,38 @@ export function despertarStateGet(token) {
   });
 }
 
+/** Admin: apaga despertar_states de todos os alunos (não toca no Mestre). */
+export function despertarResetStudents(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'stateResetStudents' }),
+  });
+}
+
+/** Admin: reseta conquistas do Despertar + planta sandbox na própria Estela. */
+export function despertarDebugSandbox(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'debugSandbox' }),
+  });
+}
+
+/** Admin: zera a própria Estela + remove conquistas do Despertar. */
+export function despertarDebugReset(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'debugReset' }),
+  });
+}
+
+/** Admin: concede recursos (preset) na própria Estela. */
+export function despertarDebugGrant(token, grantId) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'debugGrant', grantId }),
+  });
+}
+
 export function despertarStateSync(token, clientState) {
   return request('/despertar', {
     method: 'POST',
@@ -964,6 +1451,34 @@ export function despertarTalentBuy(token, talentId) {
   return request('/despertar', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'talentBuy', talentId }),
+  });
+}
+
+export function despertarVerdictBuy(token, purchaseId) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'verdictBuy', purchaseId }),
+  });
+}
+
+export function despertarJuizoStart(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'juizoStart' }),
+  });
+}
+
+export function despertarJuizoGuess(token, choice) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'juizoGuess', choice }),
+  });
+}
+
+export function despertarJuizoAbandon(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'juizoAbandon' }),
   });
 }
 
@@ -1027,29 +1542,83 @@ export function classindListRoster(token, { roomId } = {}) {
    Chamado no boot das páginas protegidas. Se não houver sessão
    (ou se o servidor a rejeitar), redireciona imediatamente para
    o Pacto de Sangue.
+   Hard-gate Task 3: aluno sem e-mail confirmado vai ao Painel (?selo=1),
+   exceto na própria superfície do Painel.
    ============================================================ */
-export async function requireSession() {
+
+/** Aluno (não-admin) sem emailVerifiedAt precisa selar o Mensageiro. */
+export function needsMessengerSeal(user) {
+  if (!user || user.role === 'admin') return false;
+  return !user.emailVerifiedAt;
+}
+
+export function messengerSealDashboardUrl() {
+  return `${ROUTES.dashboard()}?selo=1`;
+}
+
+function isDashboardPath() {
+  const path = String(window.location?.pathname || '');
+  return /dashboard\.html$/i.test(path);
+}
+
+export async function requireSession(options = {}) {
   const session = getSession();
   if (!session) {
     window.location.replace(ROUTES.auth());
     return null;
   }
 
-  try {
-    const { user } = await validateSession(session.token);
-    // Mantém o cache de UI (nome/role) alinhado ao servidor.
+  const allowUnsealed = () => options.allowUnsealed === true
+    || (options.allowUnsealed !== false && isDashboardPath());
+
+  const finishOk = (user, gates = null) => {
     saveSession({ token: session.token, name: user.name, role: user.role });
-    return { session, user };
+    if (gates) setBootstrapGates(session.token, gates);
+    else setBootstrapGates(null);
+
+    if (needsMessengerSeal(user) && !allowUnsealed()) {
+      window.location.replace(messengerSealDashboardUrl());
+      return null;
+    }
+
+    return { session, user, gates };
+  };
+
+  const validateLegacy = async () => {
+    const { user } = await validateSession(session.token);
+    return finishOk(user, null);
+  };
+
+  try {
+    try {
+      const boot = await fetchSessionBootstrap(session.token);
+      return finishOk(boot.user, boot.gates);
+    } catch (bootError) {
+      if (bootError instanceof ApiError && isBootstrapFallbackStatus(bootError.status)) {
+        return await validateLegacy();
+      }
+      throw bootError;
+    }
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) {
       // Segunda chance para inconsistências transitórias entre login e leitura da sessão.
       try {
         await wait(250);
-        const { user } = await validateSession(session.token);
-        saveSession({ token: session.token, name: user.name, role: user.role });
-        return { session, user };
+        try {
+          const boot = await fetchSessionBootstrap(session.token);
+          return finishOk(boot.user, boot.gates);
+        } catch (bootError) {
+          if (bootError instanceof ApiError && isBootstrapFallbackStatus(bootError.status)) {
+            return await validateLegacy();
+          }
+          if (bootError instanceof ApiError && bootError.status === 401) {
+            throw bootError;
+          }
+          throw bootError;
+        }
       } catch {
         clearSession();
+        setBootstrapGates(null);
         window.location.replace(ROUTES.auth());
         return null;
       }

@@ -248,6 +248,7 @@ function matchTurma(user, turmas) {
 /**
  * Facetas combinam com E. Opções de uma faceta de aula combinam com OU,
  * ou com ⊆ se needAll. Sem oferenda vence a faceta Enviou em.
+ * Escopo `activities` ignora Concluiu/Viu/Sem oferenda (só Enviou + busca + turma + Única).
  */
 export function matchesSoulFilters(record, filters = emptyReportFilters(), options = {}) {
   const user = record?.user || record || {};
@@ -275,4 +276,133 @@ export function matchesSoulFilters(record, filters = emptyReportFilters(), optio
   if (!matchLessonFacet(user.completedLessons, filters.completed, filters.needAll)) return false;
   if (!matchLessonFacet(viewedLessonIds(user), filters.viewed, filters.needAll)) return false;
   return true;
+}
+
+/**
+ * Vigília: busca em título / tag / @dono (+ turma).
+ * `owner.notes` = [{ title, tags }] (preview do notesListAdmin).
+ */
+export function matchesVigiliaOwner(owner, filters = {}) {
+  if (!matchTurma(owner, filters.turmas)) return false;
+
+  const raw = foldSearchText(filters.q);
+  if (!raw) return true;
+
+  const needle = raw.replace(/^@+/, '');
+  const username = foldSearchText(owner?.username);
+  const fullName = foldSearchText(owner?.fullName || owner?.name);
+  if (username.includes(needle) || fullName.includes(needle)) return true;
+
+  for (const note of Array.isArray(owner?.notes) ? owner.notes : []) {
+    if (foldSearchText(note?.title).includes(needle)) return true;
+    for (const tag of Array.isArray(note?.tags) ? note.tags : []) {
+      if (foldSearchText(tag).includes(needle)) return true;
+    }
+  }
+  return false;
+}
+
+export function escapeCsvCell(value) {
+  const text = String(value ?? '');
+  if (/[",\n\r]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+export function csvWithBom(lines) {
+  const body = (Array.isArray(lines) ? lines : [])
+    .map((row) => (Array.isArray(row) ? row : [row]).map(escapeCsvCell).join(','))
+    .join('\r\n');
+  return `\uFEFF${body}`;
+}
+
+function seloLabel(user) {
+  const email = String(user?.email || '').trim();
+  const verified = user?.emailVerifiedAt ?? user?.email_verified_at ?? null;
+  if (!email) return 'vazio';
+  if (verified) return 'confirmado';
+  return 'pendente';
+}
+
+/**
+ * Linhas CSV da aba Alunos (lista já filtrada).
+ * Colunas: nome, username, turma, XP, e-mail, selo, aulas concluídas, vistas, #atividades, #conquistas, tem Única.
+ */
+export function buildAlunosCsvRows(users, options = {}) {
+  const rarityOf = options.rarityOf;
+  const activityCountOf = typeof options.activityCountOf === 'function'
+    ? options.activityCountOf
+    : () => 0;
+
+  const header = [
+    'nome',
+    'username',
+    'turma',
+    'XP',
+    'e-mail',
+    'selo',
+    'aulas concluídas',
+    'vistas',
+    '#atividades',
+    '#conquistas',
+    'tem Única',
+  ];
+
+  const rows = [header];
+  for (const user of Array.isArray(users) ? users : []) {
+    const completed = Array.isArray(user?.completedLessons) ? user.completedLessons.length : 0;
+    const viewed = viewedLessonIds(user).length;
+    const achievements = Array.isArray(user?.achievements) ? user.achievements.length : 0;
+    rows.push([
+      user?.fullName || user?.name || '',
+      user?.username || '',
+      user?.turma || '',
+      Number(user?.xp) || 0,
+      user?.email || '',
+      seloLabel(user),
+      completed,
+      viewed,
+      activityCountOf(user),
+      achievements,
+      hasUniqueRelic(user?.achievements, rarityOf) ? 'sim' : 'não',
+    ]);
+  }
+  return rows;
+}
+
+/**
+ * CSV da aba Atividades (donos já filtrados).
+ */
+export function buildAtividadesCsvRows(owners, lessons = [], options = {}) {
+  const rarityOf = options.rarityOf;
+  const catalog = Array.isArray(lessons) ? lessons : [];
+  const header = [
+    'nome',
+    'username',
+    'turma',
+    'XP',
+    'e-mail',
+    'selo',
+    'aulas com oferenda',
+    'aulas do catálogo',
+    '#conquistas',
+    'tem Única',
+  ];
+  const rows = [header];
+  for (const owner of Array.isArray(owners) ? owners : []) {
+    const user = owner?.user || owner || {};
+    const sent = deliveredLessonCount(owner?.activities, catalog);
+    rows.push([
+      user.fullName || user.name || '',
+      user.username || '',
+      user.turma || '',
+      Number(user.xp) || 0,
+      user.email || '',
+      seloLabel(user),
+      sent,
+      catalog.length || sent,
+      Array.isArray(user.achievements) ? user.achievements.length : 0,
+      hasUniqueRelic(user.achievements, rarityOf) ? 'sim' : 'não',
+    ]);
+  }
+  return rows;
 }

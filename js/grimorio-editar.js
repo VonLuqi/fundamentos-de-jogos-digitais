@@ -122,6 +122,7 @@ async function init() {
     onLogout: async () => {
       await logout();
     },
+    token: getSession()?.token ?? null,
   });
 
   const token = session.token || getSession()?.token;

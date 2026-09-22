@@ -19,153 +19,218 @@
     rel="stylesheet"
   />
 
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
   <link rel="stylesheet" href="../css/souls.css" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
-<body class="souls-page" data-role-scope="admin">
+<body class="app-shell-page souls-page" data-route="souls" data-role-scope="admin">
   <div class="vignette" aria-hidden="true"></div>
 
   <!-- Conteúdo admin só aparece após requireAdmin (evita flash em deep link de aluno). -->
-  <div id="souls-app" hidden>
+  <div id="souls-app" class="app-shell" data-shell hidden>
 
-    <header class="souls-header">
-      <a class="btn-back" href="./dashboard.html" aria-label="Voltar para o Salão dos Heróis">
-        <span aria-hidden="true">←</span> Voltar ao Salão
-      </a>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
 
-      <div class="souls-header__titles">
-        <p class="souls-header__eyebrow">Painel Administrativo</p>
-        <h1 class="souls-header__title" id="souls-page-title">ALMAS <span class="accent">REGISTRADAS</span></h1>
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
       </div>
 
-      <button class="btn-refresh" type="button" id="btn-refresh" aria-label="Atualizar listagem">
-        Atualizar
-      </button>
-    </header>
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
 
-    <div class="ornate-divider" aria-hidden="true">
-      <span class="ornate-divider__line"></span>
-      <span class="ornate-divider__gem">◆</span>
-      <span class="ornate-divider__line"></span>
-    </div>
-
-    <main class="souls-main" aria-labelledby="souls-page-title">
-      <section class="summary" id="summary">
-        <article class="summary-card">
-          <p class="summary-card__label">Total de Almas</p>
-          <p class="summary-card__value" id="sum-users">0</p>
-        </article>
-        <article class="summary-card">
-          <p class="summary-card__label">Aulas Vistas (eventos)</p>
-          <p class="summary-card__value" id="sum-views">0</p>
-        </article>
-        <article class="summary-card">
-          <p class="summary-card__label">Aulas Concluídas</p>
-          <p class="summary-card__value" id="sum-completed">0</p>
-        </article>
-        <article class="summary-card">
-          <p class="summary-card__label">Conquistas</p>
-          <p class="summary-card__value" id="sum-achievements">0</p>
-        </article>
-      </section>
-
-      <div class="report-tabs" role="tablist" aria-label="Seções do relatório">
-        <button class="report-tab is-active" id="tab-users" type="button" role="tab" aria-selected="true" aria-controls="report-users">Alunos</button>
-        <button class="report-tab" id="tab-activities" type="button" role="tab" aria-selected="false" aria-controls="report-activities">Atividades</button>
-        <button class="report-tab" id="tab-grimorios" type="button" role="tab" aria-selected="false" aria-controls="report-grimorios">Grimórios sob Vigília</button>
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
       </div>
+    </aside>
 
-      <form class="report-filters" id="report-filters" hidden>
-        <label class="filter-search">
-          <span class="filter-facet__label">Buscar</span>
-          <input id="filter-q" type="search" name="q" placeholder="Buscar alma…" autocomplete="off" />
-        </label>
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
 
-        <div class="filter-facet" id="filter-turma">
-          <p class="filter-facet__label">Turma</p>
-          <div class="filter-facet__chips">
-            <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG01">TCG01</button>
-            <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG02">TCG02</button>
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Painel Administrativo</p>
+            <h1 class="app-shell__title" id="souls-page-title">ALMAS <span class="accent">REGISTRADAS</span></h1>
           </div>
         </div>
 
-        <div class="filter-facet" id="filter-completed" data-users-only="1">
-          <p class="filter-facet__label">Concluiu</p>
-          <div class="filter-facet__chips"></div>
+        <div class="app-shell__header-actions" data-shell-actions>
+          <button class="btn-refresh" type="button" id="btn-csv-alunos" title="Exporta a lista filtrada da aba Alunos">
+            Extrair o Véu
+          </button>
+          <button class="btn-refresh" type="button" id="btn-csv-atividades" title="Exporta a lista filtrada da aba Atividades" hidden>
+            Extrair Atividades
+          </button>
+          <button class="btn-refresh" type="button" id="btn-refresh" aria-label="Atualizar listagem">
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content souls-main" aria-labelledby="souls-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
         </div>
 
-        <div class="filter-facet" id="filter-viewed" data-users-only="1">
-          <p class="filter-facet__label">Viu</p>
-          <div class="filter-facet__chips"></div>
+        <section class="summary" id="summary">
+          <article class="summary-card">
+            <p class="summary-card__label">Total de Almas</p>
+            <p class="summary-card__value" id="sum-users">0</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-card__label">Aulas Vistas (eventos)</p>
+            <p class="summary-card__value" id="sum-views">0</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-card__label">Aulas Concluídas</p>
+            <p class="summary-card__value" id="sum-completed">0</p>
+          </article>
+          <article class="summary-card">
+            <p class="summary-card__label">Conquistas</p>
+            <p class="summary-card__value" id="sum-achievements">0</p>
+          </article>
+        </section>
+
+        <div class="report-tabs" role="tablist" aria-label="Seções do relatório">
+          <button class="report-tab is-active" id="tab-users" type="button" role="tab" aria-selected="true" aria-controls="report-users">Alunos</button>
+          <button class="report-tab" id="tab-activities" type="button" role="tab" aria-selected="false" aria-controls="report-activities">Atividades</button>
+          <button class="report-tab" id="tab-grimorios" type="button" role="tab" aria-selected="false" aria-controls="report-grimorios">Grimórios sob Vigília</button>
         </div>
 
-        <div class="filter-facet" id="filter-activity">
-          <p class="filter-facet__label">Enviou em</p>
-          <div class="filter-facet__chips"></div>
-        </div>
+        <details class="report-filters-drawer" id="report-filters-drawer">
+          <summary class="report-filters-drawer__summary">Véu do relatório</summary>
 
-        <label class="filter-check">
-          <input type="checkbox" id="filter-need-all" />
-          Exigir todas as marcadas
-        </label>
+          <form class="report-filters" id="report-filters" hidden>
+            <div class="report-filters__row report-filters__row--primary">
+              <label class="filter-search">
+                <span class="filter-facet__label" id="filter-q-label">Buscar</span>
+                <input id="filter-q" type="search" name="q" placeholder="Buscar alma…" autocomplete="off" />
+              </label>
 
-        <label class="filter-check" data-users-only="1">
-          <input type="checkbox" id="filter-no-activity" />
-          Sem oferenda
-        </label>
+              <div class="filter-facet" id="filter-turma">
+                <p class="filter-facet__label">Turma</p>
+                <div class="filter-facet__chips">
+                  <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG01">TCG01</button>
+                  <button type="button" class="filter-chip" data-facet="turmas" data-value="TCG02">TCG02</button>
+                </div>
+              </div>
 
-        <button type="button" class="filter-toggle" id="filter-unique" title="Relíquia de raridade Única" aria-pressed="false">Única</button>
-        <button type="button" class="filter-clear" id="filter-clear">Limpar véu</button>
-        <p class="filter-count" id="filter-count">0 almas neste véu</p>
-      </form>
+              <button type="button" class="filter-clear" id="filter-clear">Limpar véu</button>
+              <p class="filter-count" id="filter-count">0 almas neste véu</p>
+            </div>
 
-      <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
-        <div class="souls-grid" id="souls-grid" aria-live="polite">
-          <p class="loading">Consultando o submundo...</p>
-        </div>
-      </section>
+            <div class="report-filters__row report-filters__row--facets" data-facet-row>
+              <div class="filter-facet" id="filter-completed" data-users-only="1">
+                <p class="filter-facet__label">Concluiu</p>
+                <div class="filter-facet__chips"></div>
+              </div>
 
-      <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
-        <div class="activity-layout">
-          <div class="activity-owners" id="activity-owners" aria-live="polite">
-            <p class="loading">Consultando atividades...</p>
+              <div class="filter-facet" id="filter-viewed" data-users-only="1">
+                <p class="filter-facet__label">Viu</p>
+                <div class="filter-facet__chips"></div>
+              </div>
+
+              <div class="filter-facet" id="filter-activity" data-hide-on-vigilia="1">
+                <p class="filter-facet__label">Enviou em</p>
+                <div class="filter-facet__chips"></div>
+              </div>
+
+              <label class="filter-check" data-hide-on-vigilia="1">
+                <input type="checkbox" id="filter-need-all" />
+                Exigir todas as marcadas
+              </label>
+
+              <label class="filter-check" data-users-only="1" title="Só quem ainda não enviou o parágrafo da Trilha. Aulas concluídas (código resgatado) não contam como oferenda.">
+                <input type="checkbox" id="filter-no-activity" />
+                Sem oferenda
+              </label>
+
+              <button type="button" class="filter-toggle" id="filter-unique" data-hide-on-vigilia="1" title="Relíquia de raridade Única" aria-pressed="false">Única</button>
+            </div>
+          </form>
+        </details>
+
+        <section class="report-panel" id="report-users" role="tabpanel" aria-labelledby="tab-users">
+          <div class="espelho-layout">
+            <div class="souls-grid" id="souls-grid" aria-live="polite">
+              <p class="loading">Consultando o Submundo…</p>
+            </div>
+            <aside class="espelho-panel" id="soul-espelho" hidden aria-labelledby="espelho-title">
+              <header class="espelho-panel__head">
+                <h2 class="espelho-panel__title" id="espelho-title">Espelho da Alma</h2>
+                <button class="btn-refresh espelho-panel__close" type="button" id="espelho-close">Fechar</button>
+              </header>
+              <div class="espelho-panel__body" id="espelho-body"></div>
+            </aside>
           </div>
-          <div class="activity-detail" id="activity-detail" hidden>
-            <header class="activity-detail__head">
-              <h2 class="activity-detail__title" id="activity-detail-title">Oferendas da Trilha</h2>
-              <button class="btn-refresh activity-detail__close" type="button" id="activity-detail-close">Fechar</button>
-            </header>
-            <div class="activity-detail__body">
-              <div class="activity-trail-map" id="activity-trail-map" hidden aria-label="Mapa da Trilha"></div>
-              <div class="activity-lessons" id="activity-lessons"></div>
+        </section>
+
+        <section class="report-panel" id="report-activities" role="tabpanel" aria-labelledby="tab-activities" hidden>
+          <div class="activity-layout">
+            <div class="activity-owners" id="activity-owners" aria-live="polite">
+              <p class="loading">Consultando oferendas da Trilha…</p>
+            </div>
+            <div class="activity-detail" id="activity-detail" hidden>
+              <header class="activity-detail__head">
+                <h2 class="activity-detail__title" id="activity-detail-title">Oferendas da Trilha</h2>
+                <button class="btn-refresh activity-detail__close" type="button" id="activity-detail-close">Fechar</button>
+              </header>
+              <div class="activity-detail__body">
+                <div class="activity-trail-map" id="activity-trail-map" hidden aria-label="Mapa da Trilha"></div>
+                <div class="activity-lessons" id="activity-lessons"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <section class="report-panel" id="report-grimorios" role="tabpanel" aria-labelledby="tab-grimorios" hidden>
-        <p class="vigilia-lead">
-          Alunos com inscrições no Grimório Pessoal. O Mestre pode abrir cada página em modo somente leitura.
-        </p>
-        <div class="vigilia-layout">
-          <div class="vigilia-owners" id="vigilia-owners" aria-live="polite">
-            <p class="loading">Consultando grimórios...</p>
+        <section class="report-panel" id="report-grimorios" role="tabpanel" aria-labelledby="tab-grimorios" hidden>
+          <p class="vigilia-lead">
+            Alunos com inscrições no Grimório Pessoal. Busque por título, tag ou @dono. O Mestre abre cada página em modo somente leitura.
+          </p>
+          <div class="vigilia-layout">
+            <div class="vigilia-owners" id="vigilia-owners" aria-live="polite">
+              <p class="loading">Consultando a Vigília…</p>
+            </div>
+            <div class="vigilia-detail" id="vigilia-detail" hidden>
+              <header class="vigilia-detail__head">
+                <h2 class="vigilia-detail__title" id="vigilia-detail-title">Grimório</h2>
+                <button class="btn-refresh vigilia-detail__close" type="button" id="vigilia-detail-close">Fechar</button>
+              </header>
+              <ul class="vigilia-notes" id="vigilia-notes" aria-label="Inscrições do aluno"></ul>
+              <p class="empty" id="vigilia-notes-empty" hidden>Este grimório ainda não tem inscrição.</p>
+            </div>
           </div>
-          <div class="vigilia-detail" id="vigilia-detail" hidden>
-            <header class="vigilia-detail__head">
-              <h2 class="vigilia-detail__title" id="vigilia-detail-title">Grimório</h2>
-              <button class="btn-refresh vigilia-detail__close" type="button" id="vigilia-detail-close">Fechar</button>
-            </header>
-            <ul class="vigilia-notes" id="vigilia-notes" aria-label="Inscrições do aluno"></ul>
-            <p class="empty" id="vigilia-notes-empty" hidden>Este grimório está vazio.</p>
-          </div>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <div class="api-warning" id="api-warning" hidden>
-    <p id="api-warning-text"></p>
+        </section>
+      </main>
+    </div>
   </div>
 
   <script type="module" src="../js/souls.js"></script>

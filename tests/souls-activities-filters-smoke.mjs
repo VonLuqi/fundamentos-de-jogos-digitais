@@ -10,13 +10,17 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  buildAlunosCsvRows,
+  csvWithBom,
   deliveredLessonCount,
   emptyReportFilters,
+  escapeCsvCell,
   groupActivitiesByUser,
   hasUniqueRelic,
   lessonChipLabel,
   lessonHeading,
   matchesSoulFilters,
+  matchesVigiliaOwner,
   orderedDeliveredActivities,
   parseActivityOffer,
   parseReportFilters,
@@ -27,6 +31,7 @@ import {
   CONFIG_NOTES_END,
   CONFIG_NOTES_START,
 } from '../js/lesson-paragraph.js';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -35,13 +40,15 @@ function read(rel) {
 }
 
 function listUsersMapper(src) {
-  const start = src.indexOf("if (action === 'listUsers')");
+  const startFn = src.indexOf('export async function listUsers');
+  const startAction = src.indexOf("if (action === 'listUsers')");
+  const start = startFn >= 0 ? startFn : startAction;
   assert.ok(start >= 0, 'api/progress.js precisa da action listUsers');
   const nextAction = src.indexOf('return res.status(400)', start);
-  return src.slice(start, nextAction > start ? nextAction : start + 4000);
+  return src.slice(start, nextAction > start ? nextAction : start + 8000);
 }
 
-const progressApi = read('api/progress.js');
+const progressApi = readProgressSurface(root);
 const mapper = listUsersMapper(progressApi);
 
 assert.match(mapper, /userId:\s*activityUser\.id/, 'listUsers precisa mapear userId em cada activity');
@@ -55,6 +62,12 @@ assert.doesNotMatch(
   /completedLessons:/,
   'activities não devem ganhar completedLessons (fica em users[])'
 );
+assert.match(
+  mapper,
+  /emailVerifiedAt:\s*rest\.email_verified_at/,
+  'listUsers admin precisa de emailVerifiedAt para CSV do Véu'
+);
+assert.match(mapper, /email:\s*rest\.email/, 'listUsers admin precisa de email para CSV');
 
 const soulsJs = read('js/souls.js');
 assert.ok(
@@ -273,17 +286,26 @@ assert.ok(soulsHtml.includes('Buscar alma…'), 'placeholder congelado da busca'
 assert.ok(soulsHtml.includes('Limpar véu'), 'copy Limpar véu');
 assert.ok(soulsHtml.includes('Exigir todas as marcadas'), 'copy exigir todas');
 assert.ok(soulsHtml.includes('Sem oferenda'), 'copy Sem oferenda');
+assert.ok(soulsHtml.includes('Extrair o Véu'), 'botão Extrair o Véu');
+assert.ok(soulsHtml.includes('report-filters-drawer'), 'toolbar em details no mobile');
+assert.ok(soulsHtml.includes('data-shell'), 'Almas no app-shell');
+assert.ok(soulsJs.includes('Título, tag ou @dono'), 'placeholder da Vigília no JS');
 assert.ok(soulsCss.includes('.report-filters'), 'souls.css precisa da barra de filtros');
+assert.ok(soulsCss.includes('report-filters__row'), 'toolbar 2 linhas');
 assert.ok(soulsCss.includes('.filter-chip'), 'souls.css precisa de .filter-chip');
 assert.ok(soulsCss.includes('.relic-pill'), 'souls.css precisa da pílula Única');
 
 assert.ok(soulsJs.includes('getAchievementRarity'), 'Única usa getAchievementRarity');
 assert.ok(soulsJs.includes('matchesSoulFilters'), 'souls.js aplica matchesSoulFilters');
+assert.ok(soulsJs.includes('matchesVigiliaOwner'), 'souls.js filtra Vigília');
+assert.ok(soulsJs.includes('buildAlunosCsvRows') || soulsJs.includes('exportAlunosCsv'), 'souls.js exporta CSV');
+assert.ok(soulsJs.includes('initAppShell'), 'souls.js inicia app-shell');
 assert.ok(
   !soulsJs.includes('soberano_do_submundo'),
   'filtro Única não pode hardcodar soberano_do_submundo'
 );
 assert.ok(soulsJs.includes('Nenhuma alma neste véu.'), 'empty do filtro');
+assert.ok(progressApi.includes("select('user_id, title, tags')") || progressApi.includes('user_id, title, tags'), 'notesListAdmin devolve título/tags');
 
 const rarityOf = (id) => (id === 'relic_x' ? 'unique' : 'gold');
 assert.equal(hasUniqueRelic(['soberano_do_submundo'], rarityOf), false);
@@ -378,6 +400,56 @@ assert.deepEqual(
   [],
   'aba Atividades não lista quem não enviou, mesmo se a busca bate'
 );
+
+assert.deepEqual(
+  namesMatching({ completed: ['aula1'], viewed: ['aula1'], activity: ['aula1'] }).sort(),
+  ['ana', 'carla'],
+  'Concluiu ∩ Viu ∩ Enviou combina facetas com E'
+);
+
+assert.equal(
+  matchesVigiliaOwner(
+    { username: 'ana', fullName: 'Ana', notes: [{ title: 'Rio Estige', tags: ['mito'] }] },
+    { q: 'estige' },
+  ),
+  true,
+  'Vigília busca no título'
+);
+assert.equal(
+  matchesVigiliaOwner(
+    { username: 'ana', fullName: 'Ana', notes: [{ title: 'X', tags: ['mito'] }] },
+    { q: 'mito' },
+  ),
+  true,
+  'Vigília busca na tag'
+);
+assert.equal(
+  matchesVigiliaOwner(
+    { username: 'bruno', fullName: 'Bruno', notes: [{ title: 'X', tags: [] }] },
+    { q: '@BRUNO' },
+  ),
+  true,
+  'Vigília busca no @dono'
+);
+assert.equal(
+  matchesVigiliaOwner(
+    { username: 'ana', fullName: 'Ana', turma: 'TCG01', notes: [] },
+    { q: '', turmas: ['TCG02'] },
+  ),
+  false,
+  'Vigília respeita turma'
+);
+
+const csvRows = buildAlunosCsvRows(
+  [{ fullName: 'Ana', username: 'ana', turma: 'TCG01', xp: 10, email: 'a@b.com', emailVerifiedAt: '2026-01-01', completedLessons: ['aula1'], viewedLessons: [{ lessonId: 'aula1' }], achievements: ['relic_x'] }],
+  { rarityOf, activityCountOf: () => 2 },
+);
+assert.equal(csvRows[0][4], 'e-mail');
+assert.equal(csvRows[1][4], 'a@b.com');
+assert.equal(csvRows[1][5], 'confirmado');
+assert.equal(csvRows[1][10], 'sim');
+assert.equal(escapeCsvCell('a,b'), '"a,b"');
+assert.ok(csvWithBom([['x']]).startsWith('\uFEFF'), 'CSV com BOM UTF-8');
 
 const parsed = parseReportFilters('q=@ana&turma=TCG01,TCG02&aula=aula1,aula3&concluiu=aula2&viu=aula1&need=all&sem=1&unica=1');
 assert.deepEqual(parsed.turmas, ['TCG01', 'TCG02']);

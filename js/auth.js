@@ -14,7 +14,20 @@
 
 'use strict';
 
-import { login, register, confirmEmail, requestPasswordReset, confirmPasswordReset, saveSession, getSession, clearSession, validateSession, ROUTES, ApiError } from './api.js';
+import {
+  login,
+  register,
+  confirmEmail,
+  requestPasswordReset,
+  requestLegacyEmailBind,
+  confirmPasswordReset,
+  saveSession,
+  getSession,
+  clearSession,
+  validateSession,
+  ROUTES,
+  ApiError,
+} from './api.js';
 
 /* ============================
    1. UI HELPERS
@@ -92,11 +105,13 @@ async function confirmSessionBeforeRedirect(token, fallbackUser) {
    2. TOGGLE LOGIN / CADASTRO / MENSAGEIRO
    ============================ */
 const FORGOT_SUCCESS_COPY = 'Se houver uma alma com esse nome e um e-mail confirmado, o Mensageiro já partiu. Olhe a caixa de entrada — e o reino das promoções.';
+const LEGACY_SUCCESS_COPY = 'Se o Mensageiro puder partir, ele já partiu. Olhe a caixa de entrada — e o reino das promoções. O link confirma o selo e abre a Nova Palavra.';
 
 const MODE_SUBTITLES = {
   login: 'Assine seu nome no tomo dos iniciados para adentrar o Domínio.',
   register: 'Firmar um pacto é criar uma nova alma no Domínio — começando do zero.',
   forgot: 'O Mensageiro só parte se o selo desta alma estiver confirmado.',
+  legacy: 'Alma antiga sem e-mail: Senha do Caronte + endereço novo. O Mestre fala o código na sala.',
   reset: 'Sele uma nova Palavra de Passagem para reabrir o Pacto.',
 };
 
@@ -109,6 +124,7 @@ function initModeToggle() {
   const formLogin = document.getElementById('form-login');
   const formRegister = document.getElementById('form-register');
   const formForgot = document.getElementById('form-forgot');
+  const formLegacy = document.getElementById('form-legacy');
   const formReset = document.getElementById('form-reset');
   const toggle = document.querySelector('.pact-mode-toggle');
   const subtitle = document.getElementById('pact-subtitle');
@@ -119,6 +135,7 @@ function initModeToggle() {
     const isLogin = mode === 'login';
     const isRegister = mode === 'register';
     const isForgot = mode === 'forgot';
+    const isLegacy = mode === 'legacy';
     const isReset = mode === 'reset';
 
     btnLogin.classList.toggle('is-active', isLogin);
@@ -129,9 +146,10 @@ function initModeToggle() {
     formLogin.classList.toggle('is-active', isLogin);
     formRegister.classList.toggle('is-active', isRegister);
     formForgot?.classList.toggle('is-active', isForgot);
+    formLegacy?.classList.toggle('is-active', isLegacy);
     formReset?.classList.toggle('is-active', isReset);
 
-    if (toggle) toggle.hidden = isReset || isForgot;
+    if (toggle) toggle.hidden = isReset || isForgot || isLegacy;
 
     if (subtitle && MODE_SUBTITLES[mode]) {
       subtitle.textContent = MODE_SUBTITLES[mode];
@@ -147,6 +165,13 @@ function initModeToggle() {
     activateMode('forgot');
   });
   document.getElementById('forgot-back')?.addEventListener('click', () => activateMode('login'));
+  document.getElementById('open-legacy')?.addEventListener('click', () => {
+    const statusEl = document.getElementById('legacy-status');
+    clearError(statusEl);
+    statusEl?.classList.remove('is-error');
+    activateMode('legacy');
+  });
+  document.getElementById('legacy-back')?.addEventListener('click', () => activateMode('forgot'));
 }
 
 /* ============================
@@ -238,6 +263,34 @@ async function handleForgotSubmit(event) {
   }
 }
 
+async function handleLegacySubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const statusEl = document.getElementById('legacy-status');
+  clearError(statusEl);
+  statusEl?.classList.remove('is-error');
+
+  const username = String(form.elements.username.value || '').trim();
+  const code = String(form.elements.code.value || '').trim();
+  const email = String(form.elements.email.value || '').trim();
+
+  if (!username || !code || !email) {
+    statusEl?.classList.add('is-error');
+    showError(statusEl, 'Informe a alma, a Senha do Caronte e o e-mail novo.');
+    return;
+  }
+
+  setBusy(form, true, 'Selando...');
+  try {
+    await requestLegacyEmailBind(username, code, email);
+    showError(statusEl, LEGACY_SUCCESS_COPY);
+  } catch {
+    showError(statusEl, LEGACY_SUCCESS_COPY);
+  } finally {
+    setBusy(form, false);
+  }
+}
+
 async function handleResetSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -294,10 +347,12 @@ function bindAuthInteractions() {
   const formLogin = document.getElementById('form-login');
   const formRegister = document.getElementById('form-register');
   const formForgot = document.getElementById('form-forgot');
+  const formLegacy = document.getElementById('form-legacy');
   const formReset = document.getElementById('form-reset');
   if (formLogin) formLogin.addEventListener('submit', handleLoginSubmit);
   if (formRegister) formRegister.addEventListener('submit', handleRegisterSubmit);
   if (formForgot) formForgot.addEventListener('submit', handleForgotSubmit);
+  if (formLegacy) formLegacy.addEventListener('submit', handleLegacySubmit);
   if (formReset) formReset.addEventListener('submit', handleResetSubmit);
 
   window.addEventListener('keydown', (event) => {
