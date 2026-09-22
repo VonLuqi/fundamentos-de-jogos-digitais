@@ -1,6 +1,7 @@
 /**
- * Bancada do Juiz — itens permanentes pagos com Vereditos (Task 19).
+ * Bancada do Juiz — itens permanentes pagos com Vereditos (Task 19 / J.2 B1 Soft).
  * Não resetam no Lethe (ficam em verdictPurchases).
+ * B1: −1 Veredito nos dois itens baratos (selo, memória).
  */
 
 function freezeAll(list) {
@@ -15,14 +16,14 @@ export const VERDICT_SHOP = freezeAll([
     id: 'selo_do_juiz',
     name: 'Selo do Juiz',
     blurb: '+5% no clique. O carimbo do Tártaro na foice.',
-    cost: 3,
+    cost: 2,
     effects: { clickMult: '1.05' },
   },
   {
     id: 'memoria_classind',
     name: 'Memória ClassInd',
     blurb: 'Offline +30 min de teto. O catálogo não dorme.',
-    cost: 5,
+    cost: 4,
     effects: { offlineExtraHours: 0.5 },
   },
   {
@@ -40,6 +41,9 @@ export const VERDICT_SHOP = freezeAll([
     effects: { firstGeneratorCostMult: '0.90' },
   },
 ]);
+
+/** Soma dos custos da Bancada (B1 Soft = 26). */
+export const VERDICT_SHOP_TOTAL_COST = VERDICT_SHOP.reduce((sum, item) => sum + item.cost, 0);
 
 export const VERDICT_SHOP_IDS = Object.freeze(VERDICT_SHOP.map((item) => item.id));
 

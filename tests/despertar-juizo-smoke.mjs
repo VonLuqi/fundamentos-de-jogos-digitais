@@ -17,6 +17,8 @@ import {
   juizoGuess,
   juizoStart,
   normalizeJuizoChoice,
+  JUIZO_MILESTONE_VERDICT_CAP,
+  JUIZO_STREAK_MILESTONES,
 } from '../api/_lib/despertar-juizo.js';
 import { JUIZO_READY_POOL, isJuizoPoolReady } from '../js/hades-despertar/config/juizo-pool.js';
 
@@ -65,6 +67,8 @@ staticAssert(juizoLib.includes('normalizeJuizoChoice'), 'normalizeJuizoChoice');
 staticAssert(juizoLib.includes("higher: 'B'"), 'alias higher → B');
 staticAssert(juizoLib.includes("lower: 'A'"), 'alias lower → A');
 staticAssert(juizoLib.includes('run.challengerId'), 'sucessor sempre desafiante');
+staticAssert(juizoLib.includes("id: 's20'") || juizoLib.includes('s20'), 'J.2 B1 Soft: milestone s20');
+staticAssert(juizoLib.includes('JUIZO_MILESTONE_VERDICT_CAP'), 'cap de Vereditos exportado');
 staticAssert(pkg.includes('despertar-juizo-smoke.mjs'), 'check inclui este smoke');
 staticAssert(isJuizoPoolReady(), `pool ready ≥30 (tem ${JUIZO_READY_POOL.length})`);
 
@@ -213,6 +217,22 @@ await run('streak + milestone paga 1×', () => {
 
   const afterDeath = claimJuizoMilestones(10, 10, claimedOnce.claimed);
   assert.deepEqual(afterDeath.newly, []);
+});
+
+await run('J.2 B1 Soft: s20 + catch-up se best já passou', () => {
+  const cross = claimJuizoMilestones(15, 20, ['s5', 's10', 's15']);
+  assert.deepEqual(cross.newly, ['s20']);
+  assert.equal(cross.verdictGain, 4);
+
+  const catchUp = claimJuizoMilestones(50, 50, ['s5', 's10', 's15', 's25', 's40']);
+  assert.deepEqual(catchUp.newly, ['s20']);
+  assert.equal(catchUp.verdictGain, 4);
+
+  const full = claimJuizoMilestones(0, 100, []);
+  assert.equal(full.verdictGain, JUIZO_MILESTONE_VERDICT_CAP);
+  assert.equal(JUIZO_MILESTONE_VERDICT_CAP, 55);
+  assert.ok(JUIZO_STREAK_MILESTONES.some((m) => m.id === 's20' && m.verdicts === 4));
+  assert.ok(full.newly.includes('s20'));
 });
 
 await run('abandon zera current e não vaza ratings', () => {

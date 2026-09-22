@@ -77,6 +77,11 @@ staticAssert(css.includes('--despertar-purple-text'), 'token de texto Lethe (cla
 staticAssert(css.includes('touch-action: manipulation'), 'touch-action evita zoom iOS');
 staticAssert(css.includes('safe-area-inset-bottom'), 'HUD/página respeita safe-area');
 staticAssert(css.includes('prefers-reduced-motion'), 'reduced-motion no CSS');
+staticAssert(
+  css.includes('.despertar-tab[aria-selected="true"]')
+    && (css.includes('box-shadow') || css.includes('text-shadow')),
+  'aba selecionada com glow (G5.1)',
+);
 
 const bg = '#0a0a0f';
 const styxAtmosphere = '#00a896';

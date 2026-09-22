@@ -44,6 +44,7 @@ const apiSrc = fs.readFileSync(path.join(root, 'api/despertar.js'), 'utf8');
 staticAssert(apiSrc.includes('validateSync'), 'handler usa validateSync');
 staticAssert(apiSrc.includes("action === 'stateSync'"), 'stateSync implementado');
 staticAssert(apiSrc.includes('persistPatchAndAward') || apiSrc.includes('persistPatch'), 'persistência de estado');
+staticAssert(apiSrc.includes("'shiny_counts'") || apiSrc.includes('shiny_counts'), 'ROW_SELECT shiny_counts G4.3');
 staticAssert(apiSrc.includes('DESPERTAR_SYNC_RPC') || apiSrc.includes('isDespertarSyncRpcEnabled'), 'flag RPC B3');
 staticAssert(apiSrc.includes("action === 'prestige'"), 'prestige implementado');
 staticAssert(apiSrc.includes("action === 'talentBuy'"), 'talentBuy implementado');

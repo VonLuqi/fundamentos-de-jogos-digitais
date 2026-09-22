@@ -21,6 +21,7 @@ import {
   OFFLINE_MAX_HOURS_TALENT,
   OFFLINE_MIN_SECONDS,
   PRESTIGE_RUN_DIVISOR,
+  SHINY_MULT,
   STARTING_SOULS_MEMORY,
   SYNC_GAIN_TOLERANCE,
   TALENT_JURAMENTO_ETERNO_MULT,
@@ -170,18 +171,80 @@ export function calculateTotalSPS({
   talents = [],
   obols = '0',
   verdictPurchases = [],
+  shinyCounts = {},
 } = {}) {
   let sum = '0';
   for (const def of GENERATORS) {
     const qty = Number(generators[def.id] || 0);
     if (!Number.isFinite(qty) || qty <= 0) continue;
     const upgradeMult = generatorUpgradeMult(def.id, upgrades);
-    const line = mul(mul(String(qty), def.baseRate), upgradeMult);
+    const shiny = Number(shinyCounts?.[def.id] || 0);
+    const line = lineSPS({
+      qty,
+      shiny,
+      baseRate: def.baseRate,
+      upgradeMult,
+    });
     sum = add(sum, line);
   }
   const withPrestige = mul(sum, prestigeBonus(obols, talents));
   const { spsVerdictMult } = economyEffects(talents, verdictPurchases);
   return mul(withPrestige, spsVerdictMult);
+}
+
+/**
+ * SPS bruta da linha (antes de prestige / veredito).
+ * `(qty - shiny) * unit + shiny * unit * SHINY_MULT` (Q9 / G4.1).
+ *
+ * @param {{ qty?: number|string, shiny?: number|string, baseRate?: string|number, upgradeMult?: string|number }} opts
+ */
+export function lineSPS({
+  qty = 0,
+  shiny = 0,
+  baseRate = '0',
+  upgradeMult = '1',
+} = {}) {
+  const n = Math.max(0, Math.floor(Number(qty) || 0));
+  if (n <= 0) return '0';
+  let shinyN = Math.max(0, Math.floor(Number(shiny) || 0));
+  if (shinyN > n) shinyN = n;
+  const unit = mul(baseRate, upgradeMult);
+  const normal = n - shinyN;
+  return add(
+    mul(String(normal), unit),
+    mul(mul(String(shinyN), unit), SHINY_MULT),
+  );
+}
+
+/**
+ * SPS efetiva de **uma** unidade (Q7 / G3.1).
+ * `baseRate × genMult × prestige × spsVerdict × (shiny ? SHINY_MULT : 1)`.
+ *
+ * @param {{
+ *   generatorId: string,
+ *   upgrades?: string[],
+ *   talents?: string[],
+ *   obols?: string|number,
+ *   verdictPurchases?: string[],
+ *   shiny?: boolean,
+ * }} opts
+ */
+export function effectiveUnitSPS({
+  generatorId,
+  upgrades = [],
+  talents = [],
+  obols = '0',
+  verdictPurchases = [],
+  shiny = false,
+} = {}) {
+  const def = getGenerator(generatorId);
+  if (!def) return '0';
+  const upgradeMult = generatorUpgradeMult(generatorId, upgrades);
+  const unit = mul(def.baseRate, upgradeMult);
+  const withPrestige = mul(unit, prestigeBonus(obols, talents));
+  const { spsVerdictMult } = economyEffects(talents, verdictPurchases);
+  const effective = mul(withPrestige, spsVerdictMult);
+  return shiny ? mul(effective, SHINY_MULT) : effective;
 }
 
 export function clickPower({
@@ -191,9 +254,10 @@ export function clickPower({
   obols = '0',
   sps = null,
   verdictPurchases = [],
+  shinyCounts = {},
 } = {}) {
   const totalSps = sps == null
-    ? calculateTotalSPS({ generators, upgrades, talents, obols, verdictPurchases })
+    ? calculateTotalSPS({ generators, upgrades, talents, obols, verdictPurchases, shinyCounts })
     : sps;
   const effects = economyEffects(talents, verdictPurchases);
   const clickMult = mul(clickMultiplier(upgrades), effects.clickVerdictMult);

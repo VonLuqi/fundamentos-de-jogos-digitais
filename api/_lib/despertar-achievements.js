@@ -113,6 +113,7 @@ export function evaluateDespertarAchievementIds(state = {}, options = {}) {
     talents,
     obols: state.obols || '0',
     verdictPurchases: state.verdictPurchases || [],
+    shinyCounts: state.shinyCounts || {},
   });
 
   const earned = [];

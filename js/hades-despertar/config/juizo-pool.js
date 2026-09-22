@@ -9,7 +9,24 @@ import stub from '../../../data/despertar-juizo-pool.stub.json' with { type: 'js
 export const JUIZO_MIN_READY = 30;
 
 export const JUIZO_POOL_SHORT_COPY = 'O Juízo ainda cataloga as almas.';
-export const JUIZO_CTA_LABEL = 'Abrir o Juízo';
+/** CTA pronto — ClassInd Higher/Lower (G5.1 / §4.5). */
+export const JUIZO_CTA_LABEL = 'Juízo · ClassInd';
+/** Hint educacional (B4 / G5.1 / J.1): Vereditos = marcos do recorde. */
+export const JUIZO_CTA_READY_HINT =
+  'Vereditos vêm dos marcos do teu melhor streak — não de cada acerto.';
+
+/** Bancada (B4 / J.1): Vereditos + distinção Q16. */
+export const JUIZO_BANCADA_HINT =
+  'Vereditos: marcos do melhor streak no Juízo (não cada acerto). Bancada sobrevive ao Lethe. Juízo ≠ Juiz do Tártaro (gerador) ≠ Juramentos do Styx.';
+
+/** Modal play hint (J.1). */
+export const JUIZO_MODAL_EDU_HINT =
+  'Campeão mostra a faixa. Desafiante esconde com ?. Acerto sobe a sequência; Vereditos só nos marcos do teu recorde.';
+
+/** Códice log_juizo (J.1). */
+export const JUIZO_CODEX_TITLE = 'A Bancada do Juiz';
+export const JUIZO_CODEX_BODY =
+  'Vereditos vêm dos marcos do teu melhor streak no Juízo ClassInd — não de cada acerto. A Bancada compra buffs permanentes. O Juiz do Tártaro é gerador de almas/s; Juramentos como Veredito do Tártaro multiplicam esse gerador no Styx — outro sistema.';
 
 export const JUIZO_RATING_ORDER = Object.freeze(
   Array.isArray(stub.ratingOrder) ? stub.ratingOrder.map(String) : ['L', '10', '12', '14', '16', '18'],
@@ -129,6 +146,6 @@ export function getJuizoCtaState() {
     count: getJuizoReadyCount(),
     min: JUIZO_MIN_READY,
     label: JUIZO_CTA_LABEL,
-    hint: ready ? '' : JUIZO_POOL_SHORT_COPY,
+    hint: ready ? JUIZO_CTA_READY_HINT : JUIZO_POOL_SHORT_COPY,
   };
 }

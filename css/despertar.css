@@ -1,7 +1,8 @@
 /* O Despertar — layout de três colunas + tokens dos rios.
    JetBrains Mono só em .despertar-num nesta página. */
 
-/* Header só no mobile (hambúrguer); no desktop some junto com o sidebar fixo. */
+/* Chrome do Despertar: no desktop o título some, mas o toggle da nav
+   (Task S.1) fica flutuante — sem ele o aside não dava para recolher. */
 .despertar-shell .despertar-chrome-header {
   padding: 0.55rem 1rem 0.35rem;
   background: transparent;
@@ -10,7 +11,6 @@
 .despertar-shell .despertar-chrome-header::after {
   display: none;
 }
-
 .despertar-shell {
   --despertar-bg: #0a0a0f;
   --despertar-bg-2: #12121a;
@@ -46,14 +46,35 @@
   }
 
   .despertar-shell .app-shell__main {
+    position: relative;
     height: 100%;
     min-height: 0;
     overflow: hidden;
   }
 
-  /* Sem header de título: o canvas ocupa o viewport. */
+  /* Sem título de página: toggle flutuante para recolher/abrir o aside. */
   .despertar-shell .despertar-chrome-header {
-    display: none;
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 45;
+    width: auto;
+    padding: 0.55rem 0.65rem;
+    margin: 0;
+    pointer-events: none;
+    background: transparent;
+  }
+
+  .despertar-shell .despertar-chrome-header .app-shell__header-left {
+    gap: 0;
+    padding: 0;
+  }
+
+  .despertar-shell .despertar-chrome-header .app-shell__menu-toggle {
+    pointer-events: auto;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+    background: rgba(17, 13, 21, 0.82);
   }
 
   .despertar-shell .app-shell__content.despertar-page {
@@ -66,7 +87,6 @@
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
 }
-
 /* Rolagem vertical sem barra (meio + direita). */
 .despertar-scroll-y {
   overflow-x: hidden;
@@ -187,6 +207,18 @@
   color: var(--despertar-styx-text);
 }
 
+/* G5.1 — micro-feedback Almas / SPS */
+.despertar-big-souls.is-bump,
+.despertar-big-sps .despertar-num.is-bump {
+  animation: despertar-hud-bump 0.38s ease;
+}
+
+@keyframes despertar-hud-bump {
+  0% { transform: scale(1); filter: brightness(1); }
+  35% { transform: scale(1.06); filter: brightness(1.18); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
 .despertar-hud--secondary {
   margin-top: 0.75rem;
   opacity: 0.92;
@@ -203,6 +235,12 @@
 
 .despertar-col--realm .despertar-tab[aria-selected="true"]#tab-lethe {
   color: var(--despertar-purple-text);
+  border-color: rgba(168, 85, 247, 0.55);
+  background: rgba(168, 85, 247, 0.14);
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.28),
+    0 0 14px rgba(168, 85, 247, 0.22);
+  text-shadow: 0 0 12px rgba(168, 85, 247, 0.4);
 }
 
 .despertar-col__title {
@@ -470,6 +508,17 @@
   animation: despertarShelfPop 480ms ease-out;
 }
 
+/* G5.2 — reforço visual do buy na órbita (além do scale canvas) */
+.despertar-reap-orbit.is-buy-pulse {
+  animation: despertarOrbitBuyPulse 420ms ease-out;
+}
+
+@keyframes despertarOrbitBuyPulse {
+  0% { transform: scale(0.94); filter: brightness(1.05); }
+  45% { transform: scale(1.04); filter: brightness(1.12); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
 .despertar-upgrade-icon.is-sealing {
   animation: despertarSealUpgrade 700ms ease-out;
   opacity: 1;
@@ -496,6 +545,20 @@
   animation: despertarMote 700ms ease-out forwards;
 }
 
+/* Alminhas do Ceifar: sobem e somem; quantidade escala com almas/clique. */
+.despertar-particle--soul {
+  width: var(--soul-size, 0.5rem);
+  height: calc(var(--soul-size, 0.5rem) * 1.35);
+  border-radius: 50% 50% 45% 45%;
+  background:
+    radial-gradient(circle at 40% 30%, rgba(255, 255, 255, 0.85) 0%, transparent 42%),
+    radial-gradient(ellipse at 50% 55%, #c8fff4 0%, var(--despertar-styx) 55%, rgba(0, 80, 70, 0.2) 100%);
+  box-shadow:
+    0 0 10px rgba(0, 168, 150, 0.65),
+    0 0 18px rgba(207, 167, 89, 0.22);
+  animation: despertarSoulRise var(--soul-dur, 0.9s) ease-out forwards;
+}
+
 .despertar-particle--rain {
   left: var(--rain-x, 50%);
   top: -4%;
@@ -513,11 +576,25 @@
     opacity: 0.95;
   }
   100% {
-    transform: translate(var(--dx), var(--dy)) scale(0.35);
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -40px))) scale(0.35);
     opacity: 0;
   }
 }
 
+@keyframes despertarSoulRise {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, -80px))) scale(0.2);
+    opacity: 0;
+  }
+}
 @keyframes despertarRain {
   0% {
     transform: translate(-50%, 0) scale(1);
@@ -744,6 +821,79 @@
   flex-shrink: 0;
 }
 
+/* Letreiro digital (G2.1) — scroll contínuo; pausa hover/focus. */
+.despertar-ticker.despertar-marquee {
+  text-overflow: clip;
+  cursor: default;
+  outline: none;
+}
+
+.despertar-ticker.despertar-marquee:focus-visible {
+  border-color: rgba(0, 168, 150, 0.55);
+  box-shadow: 0 0 0 1px rgba(0, 168, 150, 0.35);
+}
+
+.despertar-marquee__track {
+  display: inline-flex;
+  width: max-content;
+  will-change: transform;
+  animation: despertarMarquee var(--marquee-dur, 16s) linear infinite;
+}
+
+.despertar-marquee:hover .despertar-marquee__track,
+.despertar-marquee:focus-within .despertar-marquee__track {
+  animation-play-state: paused;
+}
+
+.despertar-marquee__seg {
+  flex: 0 0 auto;
+  padding-right: 2.75rem;
+  white-space: nowrap;
+}
+
+.despertar-marquee.is-static {
+  text-overflow: ellipsis;
+}
+
+.despertar-marquee.is-static .despertar-marquee__track {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  animation: none;
+  transform: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.despertar-marquee.is-static .despertar-marquee__seg {
+  display: inline;
+  padding-right: 0;
+}
+
+.despertar-marquee.is-static .despertar-marquee__seg[aria-hidden="true"] {
+  display: none;
+}
+
+@keyframes despertarMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .despertar-marquee .despertar-marquee__track {
+    animation: none;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .despertar-marquee .despertar-marquee__seg[aria-hidden="true"] {
+    display: none;
+  }
+}
+
 .despertar-shelves {
   display: flex;
   flex-direction: column;
@@ -770,6 +920,13 @@
 .despertar-shelf__label {
   position: static;
   z-index: 1;
+  display: block;
+  width: 100%;
+  min-height: 1.15em;
+  line-height: 1.15;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   font-family: var(--font-title);
   font-size: 0.5rem;
   letter-spacing: 0.12em;
@@ -777,6 +934,23 @@
   color: var(--hades-gold);
   opacity: 0.85;
   pointer-events: none;
+}
+
+/* Label com overflow: letreiro; altura estável (G2.2 / Q4). */
+.despertar-shelf__label.despertar-marquee {
+  text-overflow: clip;
+}
+
+.despertar-shelf__label.despertar-marquee .despertar-marquee__seg {
+  padding-right: 1.75rem;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+}
+
+.despertar-shelf:hover .despertar-shelf__label.is-overflow .despertar-marquee__track {
+  animation-play-state: paused;
 }
 
 /*
@@ -1131,6 +1305,23 @@
   display: none;
 }
 
+.despertar-upgrade-tooltip__shiny {
+  margin: 0.3rem 0 0;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  color: var(--despertar-styx-text, #00a896);
+}
+
+.despertar-upgrade-tooltip__shiny[hidden] {
+  display: none;
+}
+
+.despertar-npc-tooltip {
+  z-index: 42;
+}
+
 .despertar-sealed {
   margin-top: 1rem;
 }
@@ -1332,8 +1523,13 @@
 
 .despertar-tab[aria-selected="true"] {
   color: var(--hades-gold-bright);
-  border-color: rgba(0, 168, 150, 0.55);
-  background: rgba(0, 168, 150, 0.12);
+  font-weight: 700;
+  border-color: rgba(0, 168, 150, 0.65);
+  background: rgba(0, 168, 150, 0.16);
+  box-shadow:
+    0 0 0 1px rgba(0, 168, 150, 0.28),
+    0 0 14px rgba(0, 168, 150, 0.22);
+  text-shadow: 0 0 12px rgba(0, 168, 150, 0.35);
 }
 
 .despertar-tabpanel {
@@ -1719,12 +1915,16 @@
   .despertar-shockwave,
   .despertar-card--store.is-bought-flash,
   .despertar-shelf.is-spawn-pop .despertar-shelf__field,
+  .despertar-reap-orbit.is-buy-pulse,
   .despertar-shelf__mote,
   .despertar-upgrade-icon.is-sealing,
   .despertar-particle,
   .despertar-particle--rain,
+  .despertar-particle--soul,
   .despertar-styx-flash.is-active,
-  .despertar-lethe-overlay.is-active .despertar-lethe-overlay__card {
+  .despertar-lethe-overlay.is-active .despertar-lethe-overlay__card,
+  .despertar-big-souls.is-bump,
+  .despertar-big-sps .despertar-num.is-bump {
     animation: none;
   }
 

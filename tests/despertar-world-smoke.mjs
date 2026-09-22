@@ -21,6 +21,7 @@ import {
   allocateShelfMoteRates,
   cappedNpcCount,
   drawContainedInCell,
+  drawNpcSilhouette,
   isShelfGenerator,
   prefersReducedMotion,
   shelfCanvasSize,
@@ -61,6 +62,7 @@ staticAssert(!css.includes('aspect-ratio: 210 / 90') && !css.includes('aspect-ra
 staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'check inclui world smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/world/WorldView.js'), 'check cobre WorldView.js');
 staticAssert(worldSrc.includes('SHELF_ORBIT_ONLY') || worldSrc.includes('isShelfGenerator'), 'T1 só na órbita');
+staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('pulseBuy'), 'G5.2 highlight + pulseBuy');
 staticAssert(html.includes('orbitam a Foice') || html.includes('mundo-hint'), 'hint Mundo menciona órbita');
 
 if (errors.length) {
@@ -86,13 +88,37 @@ function createFakeDocument() {
         textContent: '',
         classList: {
           _on: new Set(),
+          add(name) { this._on.add(name); },
+          remove(name) { this._on.delete(name); },
           toggle(name, force) {
+            if (force === undefined) {
+              if (this._on.has(name)) this._on.delete(name);
+              else this._on.add(name);
+              return;
+            }
             if (force) this._on.add(name);
             else this._on.delete(name);
           },
+          contains(name) { return this._on.has(name); },
         },
         setAttribute() {},
+        hasAttribute() { return false; },
         addEventListener() {},
+        querySelector(sel) {
+          if (sel === '.despertar-marquee__track') {
+            return this.childNodes.find((c) => String(c.className).includes('despertar-marquee__track')) || null;
+          }
+          if (sel === '.despertar-marquee__seg') {
+            return this.childNodes.find((c) => String(c.className).includes('despertar-marquee__seg')) || null;
+          }
+          return null;
+        },
+        querySelectorAll(sel) {
+          if (sel === '.despertar-marquee__seg') {
+            return this.childNodes.filter((c) => String(c.className).includes('despertar-marquee__seg'));
+          }
+          return [];
+        },
         getContext(type) {
           if (type !== '2d') return null;
           return {
@@ -194,6 +220,8 @@ run('F1: campo full-width; canvas pode crescer (overflow)', () => {
 run('F1: drawContainedInCell nunca estica (object-fit contain)', () => {
   const calls = [];
   const ctx = {
+    save() {},
+    restore() {},
     drawImage(...args) {
       calls.push(args);
     },
@@ -206,6 +234,61 @@ run('F1: drawContainedInCell nunca estica (object-fit contain)', () => {
   assert.equal(dh, 9);
   assert.equal(dx, 10);
   assert.equal(dy, 20 + (18 - 9) / 2);
+});
+
+run('G4.2: shelf shiny — primeiros N com glow/invert; reduced = borda', () => {
+  let shadowBlurCalls = 0;
+  let strokeRectCalls = 0;
+  const glowCtx = {
+    save() {},
+    restore() {},
+    drawImage() {},
+    set shadowBlur(v) { if (v > 0) shadowBlurCalls += 1; },
+    get shadowBlur() { return 0; },
+    shadowColor: '',
+    filter: '',
+  };
+  drawContainedInCell(glowCtx, { width: 36, height: 36 }, 0, 0, 36, 0, {
+    shiny: true,
+    reducedMotion: false,
+  });
+  assert.ok(shadowBlurCalls > 0, 'shiny sprite aplica glow');
+
+  const reducedCtx = {
+    save() {},
+    restore() {},
+    drawImage() {},
+    strokeRect() { strokeRectCalls += 1; },
+    strokeStyle: '',
+    lineWidth: 1,
+  };
+  drawContainedInCell(reducedCtx, { width: 36, height: 36 }, 0, 0, 36, 0, {
+    shiny: true,
+    reducedMotion: true,
+  });
+  assert.equal(strokeRectCalls, 1, 'reduced-motion usa borda dourada');
+
+  let silhouetteGlow = 0;
+  const silCtx = {
+    save() {},
+    restore() {},
+    translate() {},
+    scale() {},
+    beginPath() {},
+    ellipse() {},
+    fill() {},
+    stroke() {},
+    arc() {},
+    set shadowBlur(v) { if (v > 0) silhouetteGlow += 1; },
+    get shadowBlur() { return 0; },
+    shadowColor: '',
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 1,
+    globalAlpha: 1,
+  };
+  drawNpcSilhouette(silCtx, 0, 0, 2, 0, 36, { shiny: true, reducedMotion: false });
+  assert.ok(silhouetteGlow > 0, 'shiny silhueta aplica glow');
 });
 
 run('prefersReducedMotion lê matchMedia', () => {

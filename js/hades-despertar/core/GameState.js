@@ -3,7 +3,7 @@
  * Simulação local; o servidor só julga na Task 9.
  */
 
-import { BUY_MAX_CAP, LETHE_PREVIEW_RUN_SOULS } from '../config/constants.js';
+import { BUY_MAX_CAP, LETHE_PREVIEW_RUN_SOULS, SHINY_CHANCE } from '../config/constants.js';
 import { EDU_LOG_IDS } from '../config/edu-logs.js';
 import { GENERATOR_BY_ID } from '../config/generators.js';
 import { isKnownTalentId, getTalent } from '../config/talents.js';
@@ -55,6 +55,25 @@ function asQuantities(raw) {
   return out;
 }
 
+/**
+ * Normaliza shinyCounts: só ids conhecidos; 0 ≤ shiny ≤ qty.
+ * @param {unknown} raw
+ * @param {Record<string, number>} quantities
+ */
+function asShinyCounts(raw, quantities = {}) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+  const out = {};
+  for (const [id, val] of Object.entries(raw)) {
+    if (!GENERATOR_BY_ID[id]) continue;
+    const qty = Math.max(0, Math.floor(Number(quantities[id]) || 0));
+    let n = Math.floor(Number(val) || 0);
+    if (!Number.isFinite(n) || n <= 0 || qty <= 0) continue;
+    if (n > qty) n = qty;
+    out[id] = n;
+  }
+  return out;
+}
+
 function resolveBuyCount(mode, entity, wallet, costMult) {
   const raw = String(mode ?? '1').trim().toLowerCase();
   if (raw === 'max' || raw === 'máx' || raw === 'maximo' || raw === 'máximo') {
@@ -66,7 +85,7 @@ function resolveBuyCount(mode, entity, wallet, costMult) {
 }
 
 export class GameState {
-  constructor(snapshot = {}) {
+  constructor(snapshot = {}, options = {}) {
     this.souls = clampNonNegative(snapshot.souls ?? '0');
     this.obols = clampNonNegative(snapshot.obols ?? '0');
     this.mnemosyne = clampNonNegative(snapshot.mnemosyne ?? '0');
@@ -75,6 +94,10 @@ export class GameState {
     this.prestigeCount = Math.max(0, Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10) || 0);
     this.generators = EntitySet.fromCatalog(
       asQuantities(snapshot.generators ?? snapshot.generators_state),
+    );
+    this._shinyCounts = asShinyCounts(
+      snapshot.shinyCounts ?? snapshot.shiny_counts,
+      this.generators.quantities(),
     );
     this.upgrades = uniqueKnown(snapshot.upgrades ?? snapshot.upgrades_state, isKnownUpgradeId);
     this.talents = uniqueKnown(snapshot.talents ?? snapshot.talents_state, isKnownTalentId);
@@ -96,6 +119,7 @@ export class GameState {
     this.lastOfflineSeconds = Number(snapshot.lastOfflineSeconds) || 0;
     this.revision = 0;
     this._listeners = new Set();
+    this._random = typeof options.random === 'function' ? options.random : Math.random.bind(Math);
     this.#refreshMilestones();
     this.unlockLogs();
   }
@@ -120,6 +144,11 @@ export class GameState {
     return this.generators.quantities();
   }
 
+  /** Contagem shiny por gerador (0 ≤ shiny ≤ qty). */
+  shinyCounts() {
+    return { ...this._shinyCounts };
+  }
+
   sps() {
     return calculateTotalSPS({
       generators: this.quantities(),
@@ -127,6 +156,7 @@ export class GameState {
       talents: this.talents,
       obols: this.obols,
       verdictPurchases: this.verdictPurchases,
+      shinyCounts: this._shinyCounts,
     });
   }
 
@@ -183,19 +213,33 @@ export class GameState {
     return { ok: true, gained: money(amount), souls: this.souls, runSouls: this.runSouls };
   }
 
-  buyGenerator(id, mode = '1') {
+  buyGenerator(id, mode = '1', opts = {}) {
     const entity = this.generators.get(id);
-    if (!entity) return { ok: false, bought: 0, cost: money('0') };
+    if (!entity) return { ok: false, bought: 0, cost: money('0'), shinyGained: 0 };
     const costMult = this.costMult();
     const count = resolveBuyCount(mode, entity, this.souls, costMult);
-    if (count <= 0) return { ok: false, bought: 0, cost: money('0') };
+    if (count <= 0) return { ok: false, bought: 0, cost: money('0'), shinyGained: 0 };
     const result = entity.buy(count, this.souls, costMult);
-    if (!result.ok) return { ok: false, bought: 0, cost: result.cost };
+    if (!result.ok) return { ok: false, bought: 0, cost: result.cost, shinyGained: 0 };
     this.souls = clampNonNegative(result.wallet);
+
+    const random = typeof opts.random === 'function' ? opts.random : this._random;
+    const chance = Number.isFinite(Number(opts.chance)) ? Number(opts.chance) : SHINY_CHANCE;
+    let shinyGained = 0;
+    for (let i = 0; i < result.bought; i += 1) {
+      if (random() < chance) shinyGained += 1;
+    }
+    if (shinyGained > 0) {
+      const prev = Number(this._shinyCounts[id] || 0);
+      const qty = Math.max(0, Math.floor(Number(entity.quantity) || 0));
+      this._shinyCounts[id] = Math.min(qty, prev + shinyGained);
+    }
+    this.#clampShinyCounts();
+
     this.#refreshMilestones();
     this.unlockLogs();
     this.#bump();
-    return { ok: true, bought: result.bought, cost: result.cost };
+    return { ok: true, bought: result.bought, cost: result.cost, shinyGained };
   }
 
   buyUpgrade(id) {
@@ -246,6 +290,7 @@ export class GameState {
     this.prestigeCount += 1;
     this.upgrades = [];
     this.generators.applyQuantities({});
+    this._shinyCounts = {};
     this.souls = '0';
     this.runSouls = '0';
     this.clickCount = 0;
@@ -256,6 +301,8 @@ export class GameState {
     if (effects.startingGenerators && Object.keys(effects.startingGenerators).length) {
       this.generators.applyQuantities(effects.startingGenerators);
     }
+    // Starting gens do Lethe começam sem shiny (Q12 / Q8).
+    this._shinyCounts = {};
 
     this.unlockLogs();
     this.#bump();
@@ -341,6 +388,14 @@ export class GameState {
     this.generators.applyQuantities(
       asQuantities(snapshot.generators ?? snapshot.generators_state),
     );
+    if (snapshot.shinyCounts != null || snapshot.shiny_counts != null) {
+      this._shinyCounts = asShinyCounts(
+        snapshot.shinyCounts ?? snapshot.shiny_counts,
+        this.generators.quantities(),
+      );
+    } else {
+      this.#clampShinyCounts();
+    }
     this.upgrades = uniqueKnown(
       snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
       isKnownUpgradeId,
@@ -396,6 +451,7 @@ export class GameState {
       runSouls: money(this.runSouls),
       prestigeCount: this.prestigeCount,
       generators: this.quantities(),
+      shinyCounts: this.shinyCounts(),
       upgrades: [...this.upgrades],
       talents: [...this.talents],
       verdictPurchases: [...this.verdictPurchases],
@@ -431,6 +487,19 @@ export class GameState {
     const qty = this.quantities();
     if (qty.phlegethon_forge >= 1) this.milestones.forge = true;
     if (qty.obsidian_throne >= 1) this.milestones.throne = true;
+  }
+
+  /** Garante 0 ≤ shiny ≤ qty após mudanças de quantidade. */
+  #clampShinyCounts() {
+    const qty = this.quantities();
+    const next = {};
+    for (const [id, raw] of Object.entries(this._shinyCounts || {})) {
+      if (!GENERATOR_BY_ID[id]) continue;
+      const cap = Math.max(0, Math.floor(Number(qty[id]) || 0));
+      const n = Math.min(cap, Math.max(0, Math.floor(Number(raw) || 0)));
+      if (n > 0) next[id] = n;
+    }
+    this._shinyCounts = next;
   }
 
   #logTriggered(id) {

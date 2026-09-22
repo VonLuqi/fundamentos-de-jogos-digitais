@@ -22,7 +22,8 @@ import { UIRenderer } from './ui/UIRenderer.js';
 import { applyHarnessGrant, harnessEnabled } from './ui/harness.js';
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
-import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion } from './ui/juice.js';
+import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass } from './ui/juice.js';
+import { setMarqueeText } from './ui/Marquee.js';
 import { getJuizoCtaState } from './config/juizo-pool.js';
 import {
   API_WARNING_DISMISS_MS,
@@ -32,6 +33,8 @@ import {
 import { presentGrimoireAwards } from '../grimorio-awards.js';
 
 let apiWarningTimer = null;
+/** Preenchido após montar o UIRenderer — interrupts do ticker. */
+const uiRef = { renderer: null };
 
 function showApiWarning(message, { dismissMs = API_WARNING_DISMISS_MS } = {}) {
   const box = document.getElementById('api-warning');
@@ -52,8 +55,9 @@ function showApiWarning(message, { dismissMs = API_WARNING_DISMISS_MS } = {}) {
 }
 
 function pushJudgesTickerHint() {
+  if (uiRef.renderer?.interruptTicker?.(JUDGES_REFUSED_TICKER)) return;
   const ticker = document.getElementById('despertar-ticker');
-  if (ticker) ticker.textContent = JUDGES_REFUSED_TICKER;
+  if (ticker) setMarqueeText(ticker, JUDGES_REFUSED_TICKER);
 }
 
 function showSealedState() {
@@ -250,10 +254,11 @@ function bindJuizoCta(api, { onError } = {}) {
   const cta = getJuizoCtaState();
   button.disabled = !cta.ready;
   button.setAttribute('aria-disabled', String(!cta.ready));
-  button.title = cta.ready ? cta.label : cta.hint;
+  button.textContent = cta.label;
+  button.title = cta.hint || cta.label;
   if (hint) {
     hint.textContent = cta.hint;
-    hint.hidden = cta.ready;
+    hint.hidden = !cta.hint;
   }
 
   const modal = new JuizoModal(document, {
@@ -441,10 +446,12 @@ async function init() {
       try {
         await api.flush();
         await api.prestige();
+        uiRef.renderer?.resetShinyRumor?.();
         return true;
       } catch (error) {
         const local = state.applyPrestige();
         if (local.ok) {
+          uiRef.renderer?.resetShinyRumor?.();
           showApiWarning(
             error instanceof ApiError
               ? error.message
@@ -466,6 +473,13 @@ async function init() {
         const reducedMotion = juicePrefersReducedMotion();
         flashBuyRow(document, id, { reducedMotion });
         tweenShelfSpawn(document, id, { reducedMotion });
+        uiRef.renderer?.pulseGeneratorBuy?.(id, {
+          bought: result.bought,
+          reducedMotion,
+        });
+        if (result.shinyGained > 0) {
+          uiRef.renderer?.announceShinyFirst?.({ reducedMotion });
+        }
       }
       api.requestSync();
     },
@@ -519,6 +533,7 @@ async function init() {
       state.markAmortSeen();
     },
   });
+  uiRef.renderer = renderer;
   renderer.mount(state);
 
   const reap = document.getElementById('despertar-reap');
@@ -548,7 +563,7 @@ async function init() {
     const reducedMotion = loop.prefersReducedMotion();
     pulseReapButton(reap, { reducedMotion });
     playFoiceSlash(reap, { reducedMotion });
-    spawnReapParticles(particles, { reducedMotion });
+    spawnReapParticles(particles, { reducedMotion, clickPower: gained, gained });
     playReapJuice({
       root: document,
       stage: reapStage,
@@ -556,6 +571,9 @@ async function init() {
       amount: gained,
       reducedMotion,
     });
+    if (!reducedMotion) {
+      juiceBumpClass(document.getElementById('despertar-souls'), 'is-bump', 380);
+    }
   });
 
   document.getElementById('lethe-ritual')?.addEventListener('click', () => {

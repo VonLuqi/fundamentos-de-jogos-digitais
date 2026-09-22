@@ -14,6 +14,7 @@ import { evaluateDespertarAchievementIds } from '../api/_lib/despertar-achieveme
 import {
   VERDICT_SHOP,
   VERDICT_SHOP_IDS,
+  VERDICT_SHOP_TOTAL_COST,
 } from '../js/hades-despertar/config/verdict-shop.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
 import {
@@ -22,6 +23,7 @@ import {
   economyEffects,
 } from '../js/hades-despertar/core/formulas.js';
 import { cmp, mul } from '../js/hades-despertar/core/decimal.js';
+import { spsOrderOfMagnitude } from '../js/hades-despertar/ui/UIRenderer.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -47,16 +49,29 @@ staticAssert(VERDICT_SHOP_IDS.includes('selo_do_juiz'), 'selo_do_juiz');
 staticAssert(VERDICT_SHOP_IDS.includes('memoria_classind'), 'memoria_classind');
 staticAssert(VERDICT_SHOP_IDS.includes('olho_do_tartarus'), 'olho_do_tartarus');
 staticAssert(VERDICT_SHOP_IDS.includes('pacto_duplo'), 'pacto_duplo');
+staticAssert(VERDICT_SHOP.find((i) => i.id === 'selo_do_juiz')?.cost === 2, 'B1 Soft: selo custa 2');
+staticAssert(VERDICT_SHOP.find((i) => i.id === 'memoria_classind')?.cost === 4, 'B1 Soft: memória custa 4');
+staticAssert(VERDICT_SHOP_TOTAL_COST === 26, 'B1 Soft: Bancada total 26');
 
 staticAssert(html.includes('id="tab-bancada"'), 'aba Bancada no HTML');
 staticAssert(html.includes('id="panel-bancada"'), 'painel Bancada no HTML');
 staticAssert(html.includes('id="bancada-list"'), 'lista Bancada');
+staticAssert(html.includes('marcos do melhor streak') || html.includes('não cada acerto'), 'Bancada hint B4/J.1');
 staticAssert(indexJs.includes('onBuyVerdict'), 'index wire onBuyVerdict');
 staticAssert(indexJs.includes('verdictBuy'), 'index chama verdictBuy');
 staticAssert(apiJs.includes('despertarVerdictBuy'), 'cliente despertarVerdictBuy');
 staticAssert(despertarApi.includes("action === 'verdictBuy'"), 'API verdictBuy');
 staticAssert(validateSrc.includes('applyVerdictBuy'), 'applyVerdictBuy no validate');
 staticAssert(pkg.includes('despertar-verdict-smoke.mjs'), 'check inclui este smoke');
+
+const uiSrc = read('js/hades-despertar/ui/UIRenderer.js');
+staticAssert(uiSrc.includes('bancada-tooltip'), 'tooltip Bancada (G5.1)');
+staticAssert(uiSrc.includes('despertar-upgrade-tooltip'), 'tooltip compartilha classe Styx/NPC');
+staticAssert(uiSrc.includes('spsOrderOfMagnitude'), 'OoM SPS para bump HUD');
+
+const css = read('css/despertar.css');
+staticAssert(css.includes('despertar-hud-bump') || css.includes('despertar-big-souls.is-bump'), 'CSS bump Almas/SPS');
+staticAssert(css.includes('font-weight: 700') && css.includes('aria-selected'), 'tabs selected com peso');
 
 if (errors.length) {
   console.error('despertar-verdict-smoke (estático):');
@@ -84,7 +99,7 @@ run('compra debita Vereditos e libera log_juizo', () => {
   const before = state.clickPower();
   const result = state.buyVerdict('selo_do_juiz');
   assert.equal(result.ok, true);
-  assert.equal(state.verdicts, 0);
+  assert.equal(state.verdicts, 1); // B1 Soft: selo custa 2
   assert.deepEqual(state.verdictPurchases, ['selo_do_juiz']);
   assert.ok(state.eduLogsSeen.includes('log_juizo'));
   assert.ok(cmp(state.clickPower(), before) > 0);
@@ -149,9 +164,9 @@ run('applyVerdictBuy server-authoritative', () => {
   };
   const ok = applyVerdictBuy(row, 'selo_do_juiz');
   assert.equal(ok.ok, true);
-  assert.equal(ok.next.verdicts, 0);
+  assert.equal(ok.next.verdicts, 1); // B1 Soft: selo custa 2
   assert.deepEqual(ok.next.verdictPurchases, ['selo_do_juiz']);
-  assert.equal(ok.patch.verdicts, 0);
+  assert.equal(ok.patch.verdicts, 1);
 
   const again = applyVerdictBuy({ ...row, ...ok.patch, verdict_purchases: ok.next.verdictPurchases }, 'selo_do_juiz');
   assert.equal(again.ok, false);
@@ -187,6 +202,14 @@ run('conquistas juizo + veredito', () => {
     { unlocked: [] },
   );
   assert.ok(bought.includes('despertar_veredito'));
+});
+
+run('spsOrderOfMagnitude sobe em marcos (G5.1)', () => {
+  assert.equal(spsOrderOfMagnitude('0'), -1);
+  assert.equal(spsOrderOfMagnitude('9.9'), 0);
+  assert.equal(spsOrderOfMagnitude('10'), 1);
+  assert.equal(spsOrderOfMagnitude('99'), 1);
+  assert.equal(spsOrderOfMagnitude('100'), 2);
 });
 
 console.log(`\ndespertar-verdict-smoke: ${passed} passed, ${failed} failed`);

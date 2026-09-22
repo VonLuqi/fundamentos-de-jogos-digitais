@@ -34,6 +34,7 @@ function assert(condition, message) {
 }
 
 const migrate = read('db/migrate-2026-09-22-despertar-persist-award-rpc.sql');
+const migrateShiny = read('db/migrate-2026-09-22-despertar-shiny-counts.sql');
 const setup = read('db/setup.sql');
 const rpcLib = read('api/_lib/despertar-persist-rpc.js');
 const despertarSrc = read('api/despertar.js');
@@ -48,6 +49,11 @@ assert(migrate.includes('p_user_id integer'), 'RPC p_user_id integer');
 assert(migrate.includes('GRANT EXECUTE') && migrate.includes('service_role'), 'GRANT EXECUTE service_role');
 assert(migrate.includes('SECURITY DEFINER'), 'SECURITY DEFINER');
 assert(setup.includes('despertar_persist_and_award'), 'setup.sql espelha RPC');
+assert(migrateShiny.includes('shiny_counts'), 'G4.3 migration shiny_counts');
+assert(migrateShiny.includes("v_patch ? 'shiny_counts'"), 'G4.3 RPC CASE shiny_counts');
+assert(setup.includes('shiny_counts jsonb'), 'setup.sql coluna shiny_counts');
+assert(despertarSrc.includes("'shiny_counts'"), 'ROW_SELECT shiny_counts');
+assert(validateSrc.includes('shiny_counts:'), 'patch inclui shiny_counts');
 
 assert(rpcLib.includes('DESPERTAR_SYNC_RPC'), 'helper lê flag');
 assert(rpcLib.includes("rpc('despertar_persist_and_award'") || rpcLib.includes('DESPERTAR_PERSIST_RPC'), 'helper chama rpc');

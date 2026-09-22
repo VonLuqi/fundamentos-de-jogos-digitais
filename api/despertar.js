@@ -81,6 +81,7 @@ const ROW_SELECT = [
   'run_souls',
   'prestige_count',
   'generators_state',
+  'shiny_counts',
   'upgrades_state',
   'talents_state',
   'edu_logs_seen',

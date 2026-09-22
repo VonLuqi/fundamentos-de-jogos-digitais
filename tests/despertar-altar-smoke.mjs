@@ -142,11 +142,12 @@ function run(name, fn) {
   }
 }
 
-run('órbita: 0 → limpo; 100 T1 → cap 40', () => {
-  assert.equal(ORBIT_CURSOR_CAP, 40);
+run('órbita: 0 → limpo; 100 T1 → 100 (cap 200)', () => {
+  assert.equal(ORBIT_CURSOR_CAP, 200);
   assert.equal(orbitCursorCount(0), 0);
-  assert.equal(orbitCursorCount(100), 40);
+  assert.equal(orbitCursorCount(100), 100);
   assert.equal(orbitCursorCount(12), 12);
+  assert.equal(orbitCursorCount(300), 200);
 });
 
 run('chuva: SPS 0 → 0; SPS alto ≤ teto', () => {
@@ -182,7 +183,7 @@ run('AltarOrbit sync: cursors T1 + véu; reduced-motion sem chuva', () => {
     prestigeCount: 1,
   });
   // dá SPS > 0
-  assert.equal(altar.sync(rich).cursorCount, 40);
+  assert.equal(altar.sync(rich).cursorCount, 100);
 
   altar.sync(rich, { reducedMotion: true });
   altar._lastFrame = 0;

@@ -54,12 +54,17 @@ staticAssert(css.includes('prefers-reduced-motion'), 'juice respeita reduced-mot
 staticAssert(indexJs.includes('flashStyx'), 'juramento dispara flashStyx');
 staticAssert(indexJs.includes('playLetheRitualFeel'), 'ritual dispara overlay Lethe');
 staticAssert(indexJs.includes('playReapJuice'), 'ceifar dispara playReapJuice');
+staticAssert(indexJs.includes('juiceBumpClass'), 'ceifar dispara bump Almas (G5.1)');
 staticAssert(indexJs.includes('flashBuyRow'), 'compra dispara flashBuyRow');
+staticAssert(indexJs.includes('pulseGeneratorBuy'), 'compra dispara pulseGeneratorBuy (G5.2)');
 staticAssert(indexJs.includes('sealUpgradeIcon'), 'upgrade dispara sealUpgradeIcon');
+staticAssert(css.includes('despertar-hud-bump') || css.includes('despertar-big-souls.is-bump'), 'CSS bump HUD');
+staticAssert(css.includes('is-buy-pulse') || css.includes('despertarOrbitBuyPulse'), 'CSS orbit buy pulse G5.2');
 staticAssert(juiceSrc.includes('sem alterar saldo') || juiceSrc.includes('reduced-motion'), 'juice documenta sem saldo');
 staticAssert(juiceSrc.includes('spawnFloatText') || juiceSrc.includes('playReapJuice'), 'C1 float/shockwave');
 const worldSrc = read('js/hades-despertar/ui/world/WorldView.js');
 staticAssert(worldSrc.includes('SHELF_MOTE_MAX_PER_SEC'), 'C2 budget de motes');
+staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('buyPulseScale'), 'G5.2 highlight + scale');
 staticAssert(css.includes('despertar-shelf__mote') || css.includes('despertarShelfMote'), 'CSS mote prateleira');
 staticAssert(pkg.includes('despertar-juice-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/juice.js') || pkg.includes('ui/juice.js'), 'check cobre juice.js');

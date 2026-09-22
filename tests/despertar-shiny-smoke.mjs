@@ -1,0 +1,336 @@
+/**
+ * Smoke Task G4.1 + G4.2 + G4.3 — shinyCounts / lineSPS / render / persistência.
+ * Uso: node tests/despertar-shiny-smoke.mjs
+ */
+
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { SHINY_CHANCE, SHINY_MULT } from '../js/hades-despertar/config/constants.js';
+import { cmp, mul } from '../js/hades-despertar/core/decimal.js';
+import {
+  calculateTotalSPS,
+  lineSPS,
+} from '../js/hades-despertar/core/formulas.js';
+import { GameState } from '../js/hades-despertar/core/GameState.js';
+import {
+  applyPrestige,
+  buildStateDto,
+  canonicalToRowPatch,
+  normalizeShinyCounts,
+  rowToCanonical,
+  validateSync,
+} from '../api/_lib/despertar-validate.js';
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const errors = [];
+
+function staticAssert(condition, message) {
+  if (!condition) errors.push(message);
+}
+
+const formulasSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/core/formulas.js'), 'utf8');
+const stateSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameState.js'), 'utf8');
+const validateSrc = fs.readFileSync(path.join(root, 'api/_lib/despertar-validate.js'), 'utf8');
+const worldSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/world/WorldView.js'), 'utf8');
+const altarSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/world/AltarOrbit.js'), 'utf8');
+const indexSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8');
+const apiSrc = fs.readFileSync(path.join(root, 'api/despertar.js'), 'utf8');
+const setupSql = fs.readFileSync(path.join(root, 'db/setup.sql'), 'utf8');
+const migrateShiny = path.join(root, 'db/migrate-2026-09-22-despertar-shiny-counts.sql');
+const migrateSrc = fs.existsSync(migrateShiny) ? fs.readFileSync(migrateShiny, 'utf8') : '';
+const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
+
+staticAssert(formulasSrc.includes('lineSPS'), 'lineSPS export');
+staticAssert(formulasSrc.includes('shinyCounts'), 'calculateTotalSPS usa shinyCounts');
+staticAssert(stateSrc.includes('SHINY_CHANCE'), 'GameState rola shiny no buy');
+staticAssert(stateSrc.includes('_shinyCounts'), 'GameState guarda shinyCounts');
+staticAssert(validateSrc.includes('normalizeShinyCounts'), 'validate normaliza shiny');
+staticAssert(validateSrc.includes('shiny_counts:'), 'canonicalToRowPatch escreve shiny_counts');
+staticAssert(worldSrc.includes('shinyOpts') || worldSrc.includes('opts.shiny'), 'shelf pinta shiny');
+staticAssert(altarSrc.includes('markShinyPlacements'), 'órbita marca shiny');
+staticAssert(indexSrc.includes('announceShinyFirst'), 'ticker one-shot no buy');
+staticAssert(indexSrc.includes('shinyGained'), 'buy → shinyGained');
+staticAssert(apiSrc.includes("'shiny_counts'"), 'ROW_SELECT inclui shiny_counts');
+staticAssert(fs.existsSync(migrateShiny), 'migration shiny_counts existe');
+staticAssert(migrateSrc.includes('ADD COLUMN IF NOT EXISTS shiny_counts'), 'migration ADD COLUMN');
+staticAssert(migrateSrc.includes("v_patch ? 'shiny_counts'"), 'RPC CASE shiny_counts');
+staticAssert(setupSql.includes('shiny_counts jsonb'), 'setup.sql coluna shiny_counts');
+staticAssert(setupSql.includes("v_patch ? 'shiny_counts'"), 'setup.sql RPC shiny_counts');
+staticAssert(pkg.includes('despertar-shiny-smoke.mjs'), 'check inclui shiny smoke');
+staticAssert(SHINY_MULT === '2' && SHINY_CHANCE === 0.01, 'constantes Q9');
+
+if (errors.length) {
+  console.error('despertar-shiny-smoke (estático):');
+  errors.forEach((item) => console.error(` - ${item}`));
+  process.exit(1);
+}
+
+let passed = 0;
+let failed = 0;
+
+function run(name, fn) {
+  try {
+    fn();
+    console.log(`[PASS] ${name}`);
+    passed += 1;
+  } catch (error) {
+    console.error(`[FAIL] ${name}`);
+    console.error(`  ${error.message}`);
+    failed += 1;
+  }
+}
+
+function eqMoney(actual, expected, message) {
+  assert.equal(cmp(actual, expected), 0, message || `${actual} ≠ ${expected}`);
+}
+
+run('lineSPS sem shiny = qty × base × upgrade', () => {
+  eqMoney(lineSPS({ qty: 10, shiny: 0, baseRate: '0.1', upgradeMult: '1' }), '1');
+  eqMoney(lineSPS({ qty: 5, shiny: 0, baseRate: '0.8', upgradeMult: '2' }), '8');
+});
+
+run('lineSPS: (qty-shiny)*u + shiny*u*2', () => {
+  // 8 normal + 2 shiny ×2 = 8*0.1 + 2*0.1*2 = 0.8 + 0.4 = 1.2
+  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1', upgradeMult: '1' }), '1.2');
+  // shiny capped to qty
+  eqMoney(lineSPS({ qty: 3, shiny: 9, baseRate: '0.1', upgradeMult: '1' }), '0.6');
+});
+
+run('calculateTotalSPS com shinyCounts', () => {
+  const base = calculateTotalSPS({ generators: { wandering_shade: 10 } });
+  eqMoney(base, '1');
+  const boosted = calculateTotalSPS({
+    generators: { wandering_shade: 10 },
+    shinyCounts: { wandering_shade: 2 },
+  });
+  eqMoney(boosted, '1.2');
+});
+
+run('buyGenerator rola shiny (RNG injetável)', () => {
+  const always = new GameState(
+    { souls: '10000', generators: {} },
+    { random: () => 0 }, // sempre < 0.01
+  );
+  const lot = always.buyGenerator('wandering_shade', '10');
+  assert.equal(lot.ok, true);
+  assert.equal(lot.bought, 10);
+  assert.equal(lot.shinyGained, 10);
+  assert.equal(always.shinyCounts().wandering_shade, 10);
+
+  const never = new GameState(
+    { souls: '10000', generators: {} },
+    { random: () => 0.99 },
+  );
+  const lot2 = never.buyGenerator('wandering_shade', '10');
+  assert.equal(lot2.shinyGained, 0);
+  assert.equal(never.shinyCounts().wandering_shade, undefined);
+});
+
+run('Lethe zera shiny com geradores (Q12)', () => {
+  const state = new GameState({
+    souls: '0',
+    runSouls: '1000000000',
+    lifetimeSouls: '1000000000',
+    generators: { wandering_shade: 5 },
+    shinyCounts: { wandering_shade: 2 },
+  });
+  assert.equal(state.shinyCounts().wandering_shade, 2);
+  assert.equal(state.applyPrestige().ok, true);
+  assert.deepEqual(state.shinyCounts(), {});
+  assert.equal(Object.keys(state.quantities()).length, 0);
+});
+
+run('snapshot round-trip preserva shinyCounts', () => {
+  const state = new GameState({
+    souls: '100',
+    generators: { charon_servants: 4 },
+    shinyCounts: { charon_servants: 1 },
+  });
+  const snap = state.toSnapshot();
+  assert.equal(snap.shinyCounts.charon_servants, 1);
+  const restored = GameState.fromSnapshot(snap);
+  assert.equal(restored.shinyCounts().charon_servants, 1);
+  eqMoney(restored.sps(), state.sps());
+});
+
+run('normalizeShinyCounts rejeita OOB', () => {
+  const ok = normalizeShinyCounts({ wandering_shade: 2 }, { wandering_shade: 5 });
+  assert.equal(ok.ok, true);
+  assert.equal(ok.shinyCounts.wandering_shade, 2);
+
+  const bad = normalizeShinyCounts({ wandering_shade: 9 }, { wandering_shade: 5 });
+  assert.equal(bad.ok, false);
+  assert.equal(bad.error, 'shiny_bounds');
+
+  const neg = normalizeShinyCounts({ wandering_shade: -1 }, { wandering_shade: 5 });
+  assert.equal(neg.ok, false);
+});
+
+run('validateSync aceita shiny in-bounds e rejeita OOB', () => {
+  const db = {
+    souls: '100.00',
+    obols: '0.00',
+    mnemosyne: '0.00',
+    lifetime_souls: '100.00',
+    run_souls: '100.00',
+    prestige_count: 0,
+    generators_state: { wandering_shade: 5 },
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  };
+
+  const good = validateSync(db, {
+    souls: '100.00',
+    lifetimeSouls: '100.00',
+    runSouls: '100.00',
+    generators: { wandering_shade: 5 },
+    shinyCounts: { wandering_shade: 2 },
+    upgrades: [],
+    lastSyncAt: db.last_sync_at,
+  }, new Date('2026-09-22T12:00:05.000Z'));
+  assert.equal(good.ok, true, good.detail || good.error);
+  assert.equal(good.next.shinyCounts.wandering_shade, 2);
+  assert.equal(good.state.shinyCounts.wandering_shade, 2);
+  // SPS DTO recalculado com shiny
+  const expected = calculateTotalSPS({
+    generators: { wandering_shade: 5 },
+    shinyCounts: { wandering_shade: 2 },
+  });
+  assert.equal(cmp(good.state.sps, expected), 0);
+
+  const bad = validateSync(db, {
+    souls: '100.00',
+    lifetimeSouls: '100.00',
+    runSouls: '100.00',
+    generators: { wandering_shade: 5 },
+    shinyCounts: { wandering_shade: 99 },
+    upgrades: [],
+    lastSyncAt: db.last_sync_at,
+  }, new Date('2026-09-22T12:00:05.000Z'));
+  assert.equal(bad.ok, false);
+  assert.equal(bad.status, 400);
+  assert.equal(bad.detail, 'shiny_bounds');
+});
+
+run('applyPrestige (server) zera shinyCounts', () => {
+  const db = {
+    souls: '1000.00',
+    obols: '0.00',
+    mnemosyne: '0.00',
+    lifetime_souls: '1000000000.00',
+    run_souls: '1000000000.00',
+    prestige_count: 0,
+    generators_state: { wandering_shade: 5 },
+    shiny_counts: { wandering_shade: 3 },
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  };
+  const result = applyPrestige(db, new Date('2026-09-22T12:00:00.000Z'));
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.next.shinyCounts, {});
+  assert.deepEqual(buildStateDto(result.next).shinyCounts, {});
+});
+
+run('chance defaults Q9', () => {
+  assert.equal(SHINY_CHANCE, 0.01);
+  assert.equal(SHINY_MULT, '2');
+  assert.equal(mul('0.1', SHINY_MULT), '0.2');
+});
+
+run('G4.2: sync shelf marca shinyCount e repinta', () => {
+  // WorldView sync path — shinyCountFromState já coberto; assert paint flags via código.
+  assert.ok(worldSrc.includes('shinyChanged') || worldSrc.includes('nextShiny'));
+  assert.ok(worldSrc.includes('reducedMotion'));
+});
+
+run('G4.3: canonicalToRowPatch inclui shiny_counts', () => {
+  const patch = canonicalToRowPatch({
+    souls: '10',
+    obols: '0',
+    mnemosyne: '0',
+    lifetimeSouls: '10',
+    runSouls: '10',
+    prestigeCount: 0,
+    generators: { wandering_shade: 5 },
+    shinyCounts: { wandering_shade: 2 },
+    upgrades: [],
+    talents: [],
+    eduLogsSeen: [],
+    milestones: {},
+  }, '2026-09-22T12:00:00.000Z');
+  assert.deepEqual(patch.shiny_counts, { wandering_shade: 2 });
+  assert.equal(patch.generators_state.wandering_shade, 5);
+});
+
+run('G4.3: rowToCanonical lê shiny_counts (migration tolerante)', () => {
+  const withCol = rowToCanonical({
+    souls: '10.00',
+    generators_state: { wandering_shade: 4 },
+    shiny_counts: { wandering_shade: 1 },
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+  });
+  assert.equal(withCol.shinyCounts.wandering_shade, 1);
+
+  const legacy = rowToCanonical({
+    souls: '10.00',
+    generators_state: { wandering_shade: 4 },
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+  });
+  assert.deepEqual(legacy.shinyCounts, {});
+});
+
+run('G4.3: validateSync → patch.shiny_counts round-trip', () => {
+  const db = {
+    souls: '100.00',
+    obols: '0.00',
+    mnemosyne: '0.00',
+    lifetime_souls: '100.00',
+    run_souls: '100.00',
+    prestige_count: 0,
+    generators_state: { wandering_shade: 3 },
+    shiny_counts: {},
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  };
+  const result = validateSync(db, {
+    souls: '100.00',
+    lifetimeSouls: '100.00',
+    runSouls: '100.00',
+    generators: { wandering_shade: 3 },
+    shinyCounts: { wandering_shade: 1 },
+    upgrades: [],
+    lastSyncAt: db.last_sync_at,
+  }, new Date('2026-09-22T12:00:05.000Z'));
+  assert.equal(result.ok, true, result.detail || result.error);
+  assert.equal(result.patch.shiny_counts.wandering_shade, 1);
+  const fromPatch = rowToCanonical({
+    ...db,
+    ...result.patch,
+    generators_state: result.patch.generators_state,
+    shiny_counts: result.patch.shiny_counts,
+  });
+  assert.equal(fromPatch.shinyCounts.wandering_shade, 1);
+});
+
+if (failed) {
+  console.error(`\n${failed} failed, ${passed} passed`);
+  process.exit(1);
+}
+console.log(`\nAll ${passed} checks passed.`);

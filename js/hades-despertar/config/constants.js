@@ -53,6 +53,10 @@ export const API_WARNING_DISMISS_MS = 8_000;
 export const BUY_MAX_CAP = 10_000;
 export const BUY_MODES = Object.freeze(['1', '10', '100', 'max']);
 
+/** Shiny (G4): mult SPS da unidade; G3.1 já usa no tooltip quando `shiny`. */
+export const SHINY_MULT = '2';
+export const SHINY_CHANCE = 0.01;
+
 export const STORAGE_DB_NAME = 'despertar-db-v2';
 export const STORAGE_STORE_NAME = 'states';
 export const STORAGE_SESSION_PREFIX = 'despertar:v2:state:';

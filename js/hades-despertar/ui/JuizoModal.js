@@ -7,6 +7,7 @@
 'use strict';
 
 import { juiceBumpClass, juicePrefersReducedMotion } from './juice.js';
+import { JUIZO_MODAL_EDU_HINT } from '../config/juizo-pool.js';
 
 function setText(el, value) {
   if (el) el.textContent = value == null ? '' : String(value);
@@ -89,6 +90,9 @@ export class JuizoModal {
     this.btnBack = this.root.querySelector('[data-juizo-action="back"]');
     this.btnRestart = this.root.querySelector('[data-juizo-action="restart"]');
     this.btnFailBack = this.root.querySelector('[data-juizo-action="fail-back"]');
+
+    const eduHint = this.root.querySelector('[data-juizo-hint]');
+    if (eduHint) eduHint.textContent = JUIZO_MODAL_EDU_HINT;
 
     this.cardA?.root?.addEventListener('click', () => this.#guess('A'));
     this.cardB?.root?.addEventListener('click', () => this.#guess('B'));

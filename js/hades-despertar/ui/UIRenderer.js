@@ -12,14 +12,26 @@ import {
   STYX_UNLOCK_SOULS,
   TICK_FPS,
 } from '../config/constants.js';
-import { EDU_LOGS, EDU_LOG_BY_ID } from '../config/edu-logs.js';
+import { EDU_LOGS } from '../config/edu-logs.js';
 import { GENERATORS, getGenerator } from '../config/generators.js';
+import {
+  RUMOR_INTERRUPT_MS,
+  RUMOR_ROTATE_MS,
+  SHINY_FIRST_TICKER,
+  buildRumorPool,
+  pickRumor,
+  rumorPoolSignature,
+} from '../config/rumors.js';
 import { TALENTS } from '../config/talents.js';
 import { UPGRADES } from '../config/upgrades.js';
 import { VERDICT_SHOP } from '../config/verdict-shop.js';
+import { JUIZO_BANCADA_HINT } from '../config/juizo-pool.js';
 import { add, cmp, div, mul } from '../core/decimal.js';
 import {
   amortizationSeconds,
+  economyEffects,
+  effectiveUnitSPS,
+  lineSPS,
   meetsUpgradeRequirement,
   prestigeBonus,
 } from '../core/formulas.js';
@@ -27,6 +39,8 @@ import { formatAmortSeconds, formatOwned, formatRate, formatSouls } from './Numb
 import { AltarOrbit, veilPercent } from './world/AltarOrbit.js';
 import { createSpriteNode, generatorSprite, upgradeSprite } from './world/SpriteAtlas.js';
 import { WorldView } from './world/WorldView.js';
+import { bindMarquee, setMarqueeText } from './Marquee.js';
+import { juiceBumpClass } from './juice.js';
 
 const RIVER_VEIL = 'Este rio ainda não aceita teu nome.';
 const STYX_EMPTY = 'Os juramentos do Styx exigem servos — ou um punhado de almas.';
@@ -35,6 +49,9 @@ const PANTHEON_EMPTY = 'Mnemosyne ainda não bebeu tua memória.';
 const CODEX_EMPTY = 'O Códice espera o primeiro clique.';
 const CODEX_LOCKED_TITLE = 'Página selada';
 const CODEX_LOCKED_BODY = 'O Submundo só revela o que a corrida já encontrou.';
+
+/** Copy do tip de NPC (G3.2) — shelf/órbita = uma unidade. */
+export const NPC_UNIT_PRODUCTION_BLURB = 'produção desta unidade';
 
 const TALENT_BLURB = Object.freeze({
   memoria_das_sombras: 'A próxima corrida começa com 100 almas.',
@@ -129,8 +146,26 @@ export function describeGeneratorCard(state, id, buyMode = '1') {
   const costMult = state.costMult();
   const upgradeMult = state.generatorUpgradeMult(id);
   const bonus = prestigeBonus(state.obols, state.talents);
-  const lineRate = mul(entity.rate(upgradeMult), bonus);
-  const unitRate = mul(entity.unitRate(upgradeMult), bonus);
+  const { spsVerdictMult } = economyEffects(state.talents, state.verdictPurchases);
+  const shinyMap = typeof state.shinyCounts === 'function'
+    ? state.shinyCounts()
+    : (state.shinyCounts || {});
+  const shiny = Number(shinyMap?.[id] || 0);
+  const baseLine = lineSPS({
+    qty: entity.quantity,
+    shiny,
+    baseRate: def.baseRate,
+    upgradeMult,
+  });
+  const lineRate = mul(mul(baseLine, bonus), spsVerdictMult);
+  const unitRate = effectiveUnitSPS({
+    generatorId: id,
+    upgrades: state.upgrades || [],
+    talents: state.talents || [],
+    obols: state.obols ?? '0',
+    verdictPurchases: state.verdictPurchases || [],
+    shiny: false,
+  });
   const count = revealed ? resolveLotCount(buyMode, entity, state.souls, costMult) : 0;
   const cost = count > 0
     ? entity.batchCost(count, costMult)
@@ -146,11 +181,43 @@ export function describeGeneratorCard(state, id, buyMode = '1') {
     river: def.tier >= 5 ? 'phlegethon' : 'cocytus',
     revealed,
     quantity: entity.quantity,
+    /** SPS da linha (todas as unidades, incl. shiny) — mercado. */
     rate: lineRate,
+    /** SPS de uma unidade não-shiny (amortização / tip base). */
+    unitRate,
     cost,
     lot: count,
     canBuy,
     amort,
+  };
+}
+
+/**
+ * Tooltip de NPC (órbita / prateleira) — SPS efetiva da **unidade** (G3.1–G3.2 / Q7).
+ * Distinto do card do mercado, que mostra a linha total.
+ *
+ * @param {object} state
+ * @param {string} generatorId
+ * @param {{ shiny?: boolean }} [opts]
+ */
+export function describeNpcUnit(state, generatorId, opts = {}) {
+  const def = getGenerator(generatorId);
+  if (!def || !state) return null;
+  const shiny = Boolean(opts.shiny);
+  const rate = effectiveUnitSPS({
+    generatorId,
+    upgrades: state.upgrades || [],
+    talents: state.talents || [],
+    obols: state.obols ?? '0',
+    verdictPurchases: state.verdictPurchases || [],
+    shiny,
+  });
+  return {
+    id: generatorId,
+    name: def.name,
+    rate,
+    shiny,
+    blurb: NPC_UNIT_PRODUCTION_BLURB,
   };
 }
 
@@ -202,6 +269,10 @@ export function isLetheOpen(state) {
 }
 
 function upgradeBlurb(upgrade) {
+  // Q16 / J.1 — Juramentos T4 ≠ Vereditos do minigame Juízo.
+  if (upgrade.id === 'veredito_tartaro' || upgrade.id === 'lei_inquebravel') {
+    return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.`;
+  }
   if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.`;
   if (upgrade.kind === 'generatorMult') {
     const gen = getGenerator(upgrade.generatorId);
@@ -279,6 +350,13 @@ export function describeVerdictCard(state, id) {
   };
 }
 
+/** Ordem de grandeza do SPS (G5.1) — -1 se ≤ 0. */
+export function spsOrderOfMagnitude(sps) {
+  const n = Number(sps);
+  if (!Number.isFinite(n) || n <= 0) return -1;
+  return Math.floor(Math.log10(n));
+}
+
 export function describeLethe(state) {
   const preview = state.prestigePreview();
   const open = isLetheOpen(state);
@@ -327,14 +405,26 @@ export class UIRenderer {
     this._codex = new Map();
     this._styx = null;
     this._styxTip = null;
+    this._npcTip = null;
     this._sealed = null;
     this._lethe = null;
     this._bancada = null;
+    this._bancadaTip = null;
     this._codexPanel = null;
     this._world = null;
     this._altar = null;
     this._modeButtons = [];
     this._mounted = false;
+    /** @type {number|null} última OoM do SPS (G5.1 bump) */
+    this._lastSpsMag = null;
+    /** @type {{ id: string, text: string }[]} */
+    this._rumorPool = [];
+    this._rumorIndex = 0;
+    this._rumorSig = '';
+    this._rumorNextAt = 0;
+    this._rumorHoldUntil = 0;
+    this._rumorCurrent = '';
+    this._shinyRumorUsed = false;
   }
 
   mount(state = this.state) {
@@ -350,12 +440,14 @@ export class UIRenderer {
     this.#mountMarket();
     this.#bindBuyModes();
     this.#mountStyx();
+    this.#mountNpcTip();
     this.#mountShelves();
     this.#mountAltar();
     this.#mountLethe();
     this.#mountBancada();
     this.#mountCodex();
     this._ticker = this.root.getElementById('despertar-ticker');
+    if (this._ticker) bindMarquee(this._ticker);
     this._stats = this.root.getElementById('despertar-stats');
     this._sealed = {
       empty: this.root.getElementById('sealed-empty'),
@@ -392,11 +484,21 @@ export class UIRenderer {
     // Interpolação agressiva dava a sensação de tempo acelerado.
     void alpha;
     setText(this._hud?.souls, formatSouls(state.souls));
-    setText(this._hud?.sps, formatRate(state.sps()));
+    const sps = state.sps();
+    setText(this._hud?.sps, formatRate(sps));
+    if (!reducedMotion && this._hud?.sps) {
+      const mag = spsOrderOfMagnitude(sps);
+      if (this._lastSpsMag != null && mag > this._lastSpsMag) {
+        juiceBumpClass(this._hud.sps, 'is-bump', 380);
+      }
+      this._lastSpsMag = mag;
+    } else if (this._hud?.sps) {
+      this._lastSpsMag = spsOrderOfMagnitude(sps);
+    }
     setText(this._hud?.click, formatSouls(state.clickPower()));
     setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents)));
     this.#renderHint(state);
-    this.#renderTicker(state);
+    this.#renderTicker(state, { reducedMotion });
     this.#renderVeil(state);
     this.#renderMarket(state);
     this.#renderStyx(state);
@@ -516,7 +618,8 @@ export class UIRenderer {
         if (nameNode) nameNode.textContent = '???';
       }
       if (view.revealed && view.amort != null) {
-        nodes.item.title = `Amortização ~ ${formatAmortSeconds(view.amort)}`;
+        // Mercado = linha total; amortização na unidade (como hoje).
+        nodes.item.title = `Linha total · Amortização ~ ${formatAmortSeconds(view.amort)}`;
         this.onAmortSeen?.();
       }
 
@@ -525,6 +628,12 @@ export class UIRenderer {
       setHidden(nodes.meta, !view.revealed);
       setText(nodes.qty, formatOwned(view.quantity));
       setText(nodes.rate, formatRate(view.rate));
+      if (nodes.rate) {
+        nodes.rate.setAttribute?.(
+          'aria-label',
+          `Almas por segundo da linha: ${formatRate(view.rate)}`,
+        );
+      }
       setText(nodes.price, formatSouls(view.cost));
       setDisabled(nodes.buy, !view.canBuy);
     }
@@ -704,6 +813,108 @@ export class UIRenderer {
     }
   }
 
+  #mountNpcTip() {
+    let tip = this.root.getElementById('despertar-npc-tooltip');
+    if (!tip) {
+      tip = this.root.createElement('div');
+      tip.id = 'despertar-npc-tooltip';
+      tip.className = 'despertar-upgrade-tooltip despertar-npc-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      tip.hidden = true;
+      const nameEl = this.root.createElement('p');
+      nameEl.className = 'despertar-upgrade-tooltip__name';
+      nameEl.dataset.tip = 'name';
+      const blurbEl = this.root.createElement('p');
+      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
+      blurbEl.dataset.tip = 'blurb';
+      const rateEl = this.root.createElement('p');
+      rateEl.className = 'despertar-upgrade-tooltip__cost';
+      rateEl.dataset.tip = 'rate';
+      const shinyEl = this.root.createElement('p');
+      shinyEl.className = 'despertar-upgrade-tooltip__shiny';
+      shinyEl.dataset.tip = 'shiny';
+      tip.append(nameEl, blurbEl, rateEl, shinyEl);
+      const mountParent = this.root.body || this.root.documentElement || this.root;
+      mountParent?.append?.(tip);
+    } else if (!tip.querySelector('[data-tip="blurb"]')) {
+      const blurbEl = this.root.createElement('p');
+      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
+      blurbEl.dataset.tip = 'blurb';
+      const nameNode = tip.querySelector('[data-tip="name"]');
+      if (nameNode?.nextSibling) tip.insertBefore(blurbEl, nameNode.nextSibling);
+      else tip.append(blurbEl);
+    }
+    this._npcTip = tip
+      ? {
+        root: tip,
+        name: tip.querySelector('[data-tip="name"]'),
+        blurb: tip.querySelector('[data-tip="blurb"]'),
+        rate: tip.querySelector('[data-tip="rate"]'),
+        shiny: tip.querySelector('[data-tip="shiny"]'),
+        activeKey: null,
+      }
+      : null;
+  }
+
+  #showNpcTip(hit, event = null) {
+    const tip = this._npcTip;
+    if (!tip?.root || !hit || !this.state) return;
+    const view = describeNpcUnit(this.state, hit.generatorId, { shiny: hit.shiny });
+    if (!view) {
+      this.#hideNpcTip();
+      return;
+    }
+    setText(tip.name, view.name);
+    setText(tip.blurb, view.blurb || NPC_UNIT_PRODUCTION_BLURB);
+    setHidden(tip.blurb, false);
+    setText(tip.rate, `Almas / s: ${formatRate(view.rate)}`);
+    setText(tip.shiny, view.shiny ? 'shiny ×2' : '');
+    setHidden(tip.shiny, !view.shiny);
+    tip.activeKey = `${hit.source}:${hit.generatorId}:${hit.index}`;
+    tip.root.hidden = false;
+    tip.root.classList.remove('is-below');
+    tip.root.classList.add('is-fixed');
+
+    const tipWidth = tip.root.offsetWidth || 180;
+    const tipHeight = tip.root.offsetHeight || 72;
+    const gap = 12;
+    const clientX = Number(event?.clientX);
+    const clientY = Number(event?.clientY);
+    const vw = typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : tipWidth + 16;
+    const vh = typeof globalThis.innerHeight === 'number' ? globalThis.innerHeight : tipHeight + 16;
+
+    let left;
+    let top;
+    if (Number.isFinite(clientX) && Number.isFinite(clientY)) {
+      left = clientX + gap;
+      top = clientY + gap;
+      if (left + tipWidth > vw - 8) left = clientX - tipWidth - gap;
+      if (top + tipHeight > vh - 8) top = clientY - tipHeight - gap;
+    } else {
+      left = 8;
+      top = 8;
+    }
+    left = Math.max(8, Math.min(left, vw - tipWidth - 8));
+    top = Math.max(8, Math.min(top, vh - tipHeight - 8));
+    tip.root.style.left = `${Math.round(left)}px`;
+    tip.root.style.top = `${Math.round(top)}px`;
+  }
+
+  #hideNpcTip() {
+    const tip = this._npcTip;
+    if (!tip?.root) return;
+    tip.root.hidden = true;
+    tip.activeKey = null;
+  }
+
+  #onNpcHover(hit, event = null) {
+    if (!hit) {
+      this.#hideNpcTip();
+      return;
+    }
+    this.#showNpcTip(hit, event);
+  }
+
   #mountShelves() {
     const host = this.root.getElementById('despertar-shelves');
     if (!host) return;
@@ -711,11 +922,15 @@ export class UIRenderer {
     this._world = new WorldView({
       document: this.root,
       isGeneratorRevealed,
+      onNpcHover: (hit, event) => this.#onNpcHover(hit, event),
     }).mount(host, this._mundoHint);
   }
 
   #mountAltar() {
-    this._altar = new AltarOrbit({ document: this.root }).mount({
+    this._altar = new AltarOrbit({
+      document: this.root,
+      onNpcHover: (hit, event) => this.#onNpcHover(hit, event),
+    }).mount({
       orbitHost: this.root.getElementById('despertar-reap-orbit'),
       particleLayer: this.root.querySelector('[data-particle-layer]'),
       veil: this.root.getElementById('despertar-veil'),
@@ -737,26 +952,97 @@ export class UIRenderer {
     this._altar.frame();
   }
 
-  #renderTicker(state) {
+  /**
+   * Juice G5.2 — scale nas células/cursors recém-comprados (shelf + órbita T1).
+   * @param {string} generatorId
+   * @param {{ bought?: number, reducedMotion?: boolean }} [opts]
+   */
+  pulseGeneratorBuy(generatorId, opts = {}) {
+    if (!generatorId || opts.reducedMotion) return false;
+    const bought = Math.max(0, Math.floor(Number(opts.bought) || 0));
+    if (bought <= 0) return false;
+    const qty = Number(this.state?.quantities?.()?.[generatorId] || 0);
+    const fromIndex = Math.max(0, qty - bought);
+    let ok = false;
+    if (this._world?.pulseBuy?.(generatorId, { fromIndex, count: bought })) ok = true;
+    if (generatorId === 'wandering_shade') {
+      if (this._altar?.pulseBuy?.({ fromIndex, count: bought })) ok = true;
+    }
+    return ok;
+  }
+
+  /**
+   * Interrupt de prioridade máxima (sync/Juízes) — segura a faixa por RUMOR_INTERRUPT_MS.
+   * @param {string} text
+   * @param {{ holdMs?: number, reducedMotion?: boolean }} [options]
+   */
+  interruptTicker(text, options = {}) {
+    if (!this._ticker) return false;
+    const next = String(text ?? '').trim();
+    if (!next) return false;
+    const holdMs = Number(options.holdMs) > 0 ? Number(options.holdMs) : RUMOR_INTERRUPT_MS;
+    const now = typeof performance !== 'undefined' && performance.now
+      ? performance.now()
+      : Date.now();
+    this._rumorHoldUntil = now + holdMs;
+    this._rumorCurrent = next;
+    setMarqueeText(this._ticker, next, {
+      reducedMotion: Boolean(options.reducedMotion),
+    });
+    return true;
+  }
+
+  /**
+   * Primeira shiny da corrida — fura a fila uma vez (gancho G4).
+   * @param {{ reducedMotion?: boolean }} [options]
+   */
+  announceShinyFirst(options = {}) {
+    if (this._shinyRumorUsed) return false;
+    this._shinyRumorUsed = true;
+    return this.interruptTicker(SHINY_FIRST_TICKER, options);
+  }
+
+  /** Reset do gancho shiny (ex.: após Lethe / nova corrida). */
+  resetShinyRumor() {
+    this._shinyRumorUsed = false;
+  }
+
+  #renderTicker(state, meta = {}) {
     if (!this._ticker) return;
-    const seen = state.eduLogsSeen || [];
-    if (seen.length) {
-      const lastId = seen[seen.length - 1];
-      const last = EDU_LOG_BY_ID[lastId] || EDU_LOGS.find((entry) => entry.id === lastId);
-      if (last) {
-        setText(this._ticker, `Rumor: ${last.title} — ${last.body}`);
-        return;
+    const reducedMotion = Boolean(meta.reducedMotion);
+    const now = typeof performance !== 'undefined' && performance.now
+      ? performance.now()
+      : Date.now();
+
+    if (this._rumorHoldUntil > now && this._rumorCurrent) {
+      setMarqueeText(this._ticker, this._rumorCurrent, { reducedMotion });
+      return;
+    }
+
+    const sig = rumorPoolSignature(state);
+    if (sig !== this._rumorSig || !this._rumorPool.length) {
+      const prevId = this._rumorPool[this._rumorIndex]?.id;
+      this._rumorPool = buildRumorPool(state);
+      this._rumorSig = sig;
+      const kept = prevId
+        ? this._rumorPool.findIndex((item) => item.id === prevId)
+        : -1;
+      this._rumorIndex = kept >= 0 ? kept : 0;
+      const refreshed = pickRumor(this._rumorPool, this._rumorIndex);
+      this._rumorIndex = refreshed.index;
+      this._rumorCurrent = refreshed.text;
+      if (!this._rumorNextAt || this._rumorNextAt <= now) {
+        this._rumorNextAt = now + RUMOR_ROTATE_MS;
       }
+    } else if (now >= this._rumorNextAt) {
+      this._rumorIndex = (this._rumorIndex + 1) % this._rumorPool.length;
+      const picked = pickRumor(this._rumorPool, this._rumorIndex);
+      this._rumorIndex = picked.index;
+      this._rumorCurrent = picked.text;
+      this._rumorNextAt = now + RUMOR_ROTATE_MS;
     }
-    if (state.clickCount < 1) {
-      setText(this._ticker, 'Rumor do Submundo: a Foice ainda não cortou.');
-      return;
-    }
-    if (cmp(state.sps(), '0') > 0) {
-      setText(this._ticker, 'Rumor: o Cocytus lamuria — as Almas / s já fluem sozinhas.');
-      return;
-    }
-    setText(this._ticker, 'Rumor: as Sombras orbitam a Foice; os demais servos povoam as prateleiras do Mundo.');
+
+    setMarqueeText(this._ticker, this._rumorCurrent, { reducedMotion });
   }
 
   #renderVeil(state) {
@@ -916,6 +1202,42 @@ export class UIRenderer {
       hint: this.root.getElementById('bancada-hint'),
       list: this.root.getElementById('bancada-list'),
     };
+    setText(this._bancada.hint, JUIZO_BANCADA_HINT);
+
+    let tip = this.root.getElementById('bancada-tooltip');
+    if (!tip) {
+      tip = this.root.createElement('div');
+      tip.id = 'bancada-tooltip';
+      tip.className = 'despertar-upgrade-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      tip.hidden = true;
+      const nameEl = this.root.createElement('p');
+      nameEl.className = 'despertar-upgrade-tooltip__name';
+      nameEl.dataset.tip = 'name';
+      const blurbEl = this.root.createElement('p');
+      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
+      blurbEl.dataset.tip = 'blurb';
+      const costEl = this.root.createElement('p');
+      costEl.className = 'despertar-upgrade-tooltip__cost';
+      costEl.dataset.tip = 'cost';
+      tip.append(nameEl, blurbEl, costEl);
+      const mountParent = this.root.body || this.root.documentElement || panel;
+      mountParent?.append?.(tip);
+    }
+    this._bancadaTip = tip
+      ? {
+        root: tip,
+        name: tip.querySelector('[data-tip="name"]'),
+        blurb: tip.querySelector('[data-tip="blurb"]'),
+        cost: tip.querySelector('[data-tip="cost"]'),
+        activeId: null,
+      }
+      : null;
+    this._bancadaKeyHandler = (event) => {
+      if (event.key === 'Escape') this.#hideBancadaTip();
+    };
+    this.root.addEventListener?.('keydown', this._bancadaKeyHandler);
+
     const list = this._bancada.list;
     if (!list) return;
     list.replaceChildren();
@@ -950,10 +1272,65 @@ export class UIRenderer {
         if (buy.disabled) return;
         this.onBuyVerdict?.(def.id);
       });
+      buy.addEventListener('pointerenter', () => this.#showBancadaTip(def.id, buy));
+      buy.addEventListener('pointerleave', () => this.#hideBancadaTip(def.id));
+      buy.addEventListener('focus', () => this.#showBancadaTip(def.id, buy));
+      buy.addEventListener('blur', () => this.#hideBancadaTip(def.id));
 
       item.append(name, blurb, meta, buy);
       list.append(item);
       this._verdicts.set(def.id, { item, price, buy });
+    }
+  }
+
+  #showBancadaTip(id, anchor) {
+    const tip = this._bancadaTip;
+    if (!tip?.root || !anchor || !this.state) return;
+    const view = describeVerdictCard(this.state, id);
+    if (!view) return;
+    setText(tip.name, view.name);
+    setText(tip.blurb, view.blurb);
+    setText(
+      tip.cost,
+      view.owned ? 'Na Bancada' : `Custo: ${view.cost} Vereditos`,
+    );
+    tip.activeId = id;
+    tip.root.hidden = false;
+    tip.root.classList.remove('is-below');
+    tip.root.classList.add('is-fixed');
+    anchor.setAttribute('aria-describedby', 'bancada-tooltip');
+
+    const btnBox = anchor.getBoundingClientRect?.();
+    if (!btnBox) return;
+
+    const tipWidth = tip.root.offsetWidth || 220;
+    const tipHeight = tip.root.offsetHeight || 110;
+    const gap = 8;
+    const vw = typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : btnBox.right + tipWidth;
+    const vh = typeof globalThis.innerHeight === 'number' ? globalThis.innerHeight : btnBox.bottom + tipHeight;
+
+    let left = btnBox.left + (btnBox.width / 2) - (tipWidth / 2);
+    left = Math.max(8, Math.min(left, vw - tipWidth - 8));
+
+    const spaceAbove = btnBox.top - gap;
+    const placeBelow = spaceAbove < tipHeight && (vh - btnBox.bottom) > spaceAbove;
+    tip.root.classList.toggle('is-below', placeBelow);
+    const top = placeBelow
+      ? btnBox.bottom + gap
+      : btnBox.top - tipHeight - gap;
+
+    tip.root.style.left = `${Math.round(left)}px`;
+    tip.root.style.top = `${Math.round(Math.max(8, top))}px`;
+  }
+
+  #hideBancadaTip(id = null) {
+    const tip = this._bancadaTip;
+    if (!tip?.root) return;
+    if (id != null && tip.activeId && tip.activeId !== id) return;
+    tip.root.hidden = true;
+    tip.activeId = null;
+    for (const nodes of this._verdicts.values()) {
+      nodes.buy?.removeAttribute('aria-describedby');
     }
   }
 
@@ -968,6 +1345,10 @@ export class UIRenderer {
       setText(nodes.price, String(card.cost));
       setText(nodes.buy, card.owned ? 'Na Bancada' : 'Comprar');
       setDisabled(nodes.buy, !card.canBuy);
+    }
+    if (this._bancadaTip?.activeId) {
+      const active = this._verdicts.get(this._bancadaTip.activeId);
+      if (!active) this.#hideBancadaTip();
     }
   }
 

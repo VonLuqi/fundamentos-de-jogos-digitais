@@ -50,10 +50,13 @@ const particlesSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/part
 staticAssert(pkg.includes('despertar-perf-smoke.mjs'), 'check inclui perf smoke');
 staticAssert(plan.includes('Caps finais') || plan.includes('SHELF_NPC_CAP'), 'caps documentados no plano');
 staticAssert(worldSrc.includes('SHELF_NPC_CAP = 400') || worldSrc.includes('SHELF_NPC_CAP=400') || /SHELF_NPC_CAP\s*=\s*400/.test(worldSrc), 'SHELF_NPC_CAP=400');
-staticAssert(/ORBIT_CURSOR_CAP\s*=\s*40/.test(altarSrc), 'ORBIT_CURSOR_CAP=40');
+staticAssert(/ORBIT_CURSOR_CAP\s*=\s*200/.test(altarSrc), 'ORBIT_CURSOR_CAP=200');
 staticAssert(/SHELF_MOTE_MAX_PER_SEC\s*=\s*8/.test(worldSrc), 'motes ≤8/s');
 staticAssert(/SOUL_RAIN_MAX_PER_SEC\s*=\s*6/.test(altarSrc), 'chuva ≤6/s');
-staticAssert(particlesSrc.includes('MAX_MOTES = 24') || /MAX_MOTES\s*=\s*24/.test(particlesSrc), 'reap motes ≤24');
+staticAssert(
+  /REAP_PARTICLE_LAYER_CAP\s*=\s*40/.test(particlesSrc) || /REAP_PARTICLE_BURST_MAX\s*=\s*28/.test(particlesSrc),
+  'reap soul burst limitado (layer 40 / burst 28)',
+);
 
 if (errors.length) {
   console.error('despertar-perf-smoke (estático):');
@@ -86,9 +89,27 @@ function createFakeDocument() {
           },
         },
         setAttribute() {},
+        hasAttribute() { return false; },
+        removeAttribute() {},
         addEventListener() {},
+        removeEventListener() {},
+        querySelector(sel) {
+          if (sel === '.despertar-marquee__track') {
+            return this.childNodes.find((c) => String(c.className).includes('despertar-marquee__track')) || null;
+          }
+          if (sel === '.despertar-marquee__seg') {
+            return this.childNodes.find((c) => String(c.className).includes('despertar-marquee__seg')) || null;
+          }
+          return null;
+        },
+        querySelectorAll(sel) {
+          if (sel === '.despertar-marquee__seg') {
+            return this.childNodes.filter((c) => String(c.className).includes('despertar-marquee__seg'));
+          }
+          return [];
+        },
         getBoundingClientRect() {
-          return { width: 220, height: 220 };
+          return { width: 220, height: 220, left: 0, top: 0 };
         },
         getContext(type) {
           if (type !== '2d') return null;
@@ -182,9 +203,9 @@ function run(name, fn) {
   }
 }
 
-run('caps finais: prateleira cresce; órbita capped 40', () => {
+run('caps finais: prateleira cresce; órbita capped 200', () => {
   assert.equal(SHELF_NPC_CAP, 400);
-  assert.equal(ORBIT_CURSOR_CAP, 40);
+  assert.equal(ORBIT_CURSOR_CAP, 200);
   assert.equal(SHELF_MOTE_MAX_PER_SEC, 8);
   assert.equal(SHELF_MOTE_MAX_ON_SCREEN, 20);
   assert.equal(SOUL_RAIN_MAX_PER_SEC, 6);
@@ -193,7 +214,8 @@ run('caps finais: prateleira cresce; órbita capped 40', () => {
   assert.equal(LOOP_PANIC_UPDATES, 300);
   assert.equal(cappedNpcCount(100), 100);
   assert.equal(cappedNpcCount(999), 400);
-  assert.equal(orbitCursorCount(100), 40);
+  assert.equal(orbitCursorCount(100), 100);
+  assert.equal(orbitCursorCount(300), 200);
 });
 
 run('100 T1: sem prateleira; órbita capped; T2 povoa Mundo', () => {
@@ -240,7 +262,7 @@ run('100 T1: sem prateleira; órbita capped; T2 povoa Mundo', () => {
     cancelFrame: () => {},
     now: () => 0,
   }).mount({ orbitHost, particleLayer: particles, veil });
-  assert.equal(altar.sync(onlyT1).cursorCount, 40);
+  assert.equal(altar.sync(onlyT1).cursorCount, 100);
 });
 
 run('perfil Node: 100 T1 + Juízo + 30 s idle (sem panic, wall < 5 s)', () => {

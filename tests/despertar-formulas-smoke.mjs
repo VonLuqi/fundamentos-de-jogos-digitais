@@ -23,6 +23,7 @@ import {
   clickPower,
   generatorBatchCost,
   generatorPriceAt,
+  lineSPS,
   maxAffordableCount,
   mnemosyneFromObolsGain,
   obolsFromRunSouls,
@@ -107,6 +108,15 @@ await run('SPS: 10 sombras sem upgrade = 1.0', () => {
   eqMoney(sps, '1');
   const set = EntitySet.fromCatalog({ wandering_shade: 10 });
   eqMoney(set.get('wandering_shade').rate(), '1');
+});
+
+await run('G4.1 lineSPS / shiny no total SPS', () => {
+  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1' }), '1.2');
+  const sps = calculateTotalSPS({
+    generators: { wandering_shade: 10 },
+    shinyCounts: { wandering_shade: 2 },
+  });
+  eqMoney(sps, '1.2');
 });
 
 await run('Óbolos: runSouls 1e9 → 1; 9.99e8 → 0', () => {

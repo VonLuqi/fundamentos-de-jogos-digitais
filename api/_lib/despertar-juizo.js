@@ -38,16 +38,23 @@ export function normalizeJuizoChoice(choice) {
   return null;
 }
 
-/** Milestones de melhor streak → Vereditos (1×). */
+/** Milestones de melhor streak → Vereditos (1×). J.2 / B1 Soft: +s20. */
 export const JUIZO_STREAK_MILESTONES = Object.freeze([
   { id: 's5', streak: 5, verdicts: 1 },
   { id: 's10', streak: 10, verdicts: 2 },
   { id: 's15', streak: 15, verdicts: 3 },
+  { id: 's20', streak: 20, verdicts: 4 },
   { id: 's25', streak: 25, verdicts: 5 },
   { id: 's40', streak: 40, verdicts: 8 },
   { id: 's60', streak: 60, verdicts: 12 },
   { id: 's100', streak: 100, verdicts: 20 },
 ]);
+
+/** Teto teórico de Vereditos via milestones (soma dos payouts). */
+export const JUIZO_MILESTONE_VERDICT_CAP = JUIZO_STREAK_MILESTONES.reduce(
+  (sum, m) => sum + m.verdicts,
+  0,
+);
 
 const RECENT_EXCLUDE = 8;
 
@@ -72,13 +79,23 @@ export function juizoDeltaLabel(ratingA, ratingB) {
   return `${ratingA} → ${ratingB}`;
 }
 
+/**
+ * Concede milestones ainda não claimados cujo limiar o melhor streak já alcançou.
+ * Catch-up (J.2): marcos novos (ex. s20) pagam na próxima avaliação se best ≥ limiar.
+ *
+ * @param {number} bestBefore
+ * @param {number} bestAfter
+ * @param {string[]} [claimed]
+ */
 export function claimJuizoMilestones(bestBefore, bestAfter, claimed = []) {
+  void bestBefore; // mantido na assinatura (call sites / histórico de cruzamento)
   const have = new Set(asStringArray(claimed));
   const newly = [];
   let verdictGain = 0;
+  const after = Math.max(0, Number(bestAfter) || 0);
   for (const m of JUIZO_STREAK_MILESTONES) {
     if (have.has(m.id)) continue;
-    if (bestAfter >= m.streak && bestBefore < m.streak) {
+    if (after >= m.streak) {
       newly.push(m.id);
       verdictGain += m.verdicts;
       have.add(m.id);

@@ -40,7 +40,7 @@ export const GENERATORS = freezeAll([
     id: 'tartarus_judge',
     tier: 4,
     name: 'Juiz do Tártaro',
-    blurb: 'Sentença que rende almas.',
+    blurb: 'Gerador T4 de almas/s — distinto do minigame Juízo e da Bancada.',
     baseCost: '12000',
     baseRate: '47',
     multiplier: COST_MULTIPLIER,

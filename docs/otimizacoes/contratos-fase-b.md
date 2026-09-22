@@ -116,7 +116,7 @@ Fallback: erro/ausência de RPC → path legado + log `sync_rpc_fallback=1`.
 ### Chaves esperadas em `p_patch` (subset)
 
 Alinhadas ao `persistPatch` atual / colunas de `despertar_states` (snake_case):  
-`souls`, `obols`, `mnemosyne`, `lifetime_souls`, `run_souls`, `prestige_count`, `generators_state`, `upgrades_state`, `talents_state`, `edu_logs_seen`, `milestones`, `verdicts`, `juizo_*`, `verdict_purchases`, `juizo_run`, `last_sync_at`, `updated_at`, …
+`souls`, `obols`, `mnemosyne`, `lifetime_souls`, `run_souls`, `prestige_count`, `generators_state`, `shiny_counts`, `upgrades_state`, `talents_state`, `edu_logs_seen`, `milestones`, `verdicts`, `juizo_*`, `verdict_purchases`, `juizo_run`, `last_sync_at`, `updated_at`, …
 
 A RPC **não** valida economia de jogo — só persiste o patch já autenticado pelo Node.
 

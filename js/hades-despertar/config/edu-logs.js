@@ -3,6 +3,8 @@
  * Gatilhos em GameState.unlockLogs; aba UI na Task 10a (UIRenderer).
  */
 
+import { JUIZO_CODEX_BODY, JUIZO_CODEX_TITLE } from './juizo-pool.js';
+
 function freezeAll(list) {
   return Object.freeze(list.map((item) => Object.freeze({ ...item })));
 }
@@ -70,8 +72,8 @@ export const EDU_LOGS = freezeAll([
   },
   {
     id: 'log_juizo',
-    title: 'A Bancada do Juiz',
-    body: 'Vereditos compram poder permanente — outra moeda, outro loop.',
+    title: JUIZO_CODEX_TITLE,
+    body: JUIZO_CODEX_BODY,
   },
 ]);
 
