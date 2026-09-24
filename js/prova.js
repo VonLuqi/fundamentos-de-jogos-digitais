@@ -874,6 +874,8 @@ async function startExam() {
   }
   try {
     const payload = await provaStartAttempt(currentToken, asStudentOpts());
+    // Liberar busy antes de pintar — senão as alternativas nascem disabled
+    busy = false;
     await enterExamFromPayload(payload);
   } catch (error) {
     console.error('[prova] start', error);
