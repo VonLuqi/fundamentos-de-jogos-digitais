@@ -58,7 +58,8 @@ CREATE TABLE IF NOT EXISTS prova_attempts (
   graded_at timestamptz NULL,
   graded_by integer NULL REFERENCES users(id) ON DELETE SET NULL,
   admin_notes text NULL
-    CHECK (admin_notes IS NULL OR char_length(admin_notes) <= 4000),
+    CONSTRAINT prova_attempts_admin_notes_len_chk
+    CHECK (admin_notes IS NULL OR char_length(admin_notes) <= 24000),
   integrity_summary jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),

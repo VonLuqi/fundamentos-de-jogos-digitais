@@ -9,12 +9,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  ADMIN_NOTES_MAX,
   buildAdminAttemptDetail,
   normalizeAttemptId,
   normalizeDiscursiveQuestionId,
   parseAttemptAdminNotes,
   serializeAttemptAdminNotes,
   sumDiscursivePoints,
+  validateSerializedAdminNotes,
 } from '../api/_lib/prova/admin-grade.js';
 import { normalizeDiscursivePoints } from '../api/_lib/prova/answer-key-modulo1.js';
 
@@ -79,6 +81,18 @@ const notes = parseAttemptAdminNotes(JSON.stringify({
 assert(notes.discursiveComments.q13 === 'bom', 'parse comments');
 const ser = serializeAttemptAdminNotes(notes);
 assert(ser.includes('q13') && ser.includes('bom'), 'serialize');
+assert(validateSerializedAdminNotes(ser) == null, 'ser ok size');
+assert(ADMIN_NOTES_MAX >= 24000, 'admin_notes teto cobre 8×2000');
+const fatComments = {};
+for (let i = 13; i <= 20; i += 1) {
+  fatComments[`q${i}`] = 'x'.repeat(2000);
+}
+const fatSer = serializeAttemptAdminNotes({ discursiveComments: fatComments, general: 'y'.repeat(4000) });
+assert(fatSer.length <= ADMIN_NOTES_MAX, `8 comentários grandes cabem (${fatSer.length})`);
+assert(validateSerializedAdminNotes(fatSer) == null, 'fat ser ok');
+const migrateNotes = read('db/migrate-2026-09-24-prova-admin-notes-limit.sql');
+assert(migrateNotes.includes('24000'), 'migration amplia admin_notes');
+assert(handler.includes('validateSerializedAdminNotes'), 'API valida tamanho das anotações');
 
 assert(sumDiscursivePoints([
   { question_id: 'q13', points_awarded: 1 },

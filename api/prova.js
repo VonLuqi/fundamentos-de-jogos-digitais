@@ -65,6 +65,7 @@ import {
   normalizeDiscursiveQuestionId,
   parseAttemptAdminNotes,
   serializeAttemptAdminNotes,
+  validateSerializedAdminNotes,
   sumDiscursivePoints,
 } from './_lib/prova/admin-grade.js';
 import { normalizeDiscursivePoints } from './_lib/prova/answer-key-modulo1.js';
@@ -1086,9 +1087,15 @@ export default async function handler(req, res) {
       }
       const discursiveScore = sumDiscursivePoints(answers);
 
+      const adminNotesSerialized = serializeAttemptAdminNotes(notes);
+      const notesTooLong = validateSerializedAdminNotes(adminNotesSerialized);
+      if (notesTooLong) {
+        return jsonError(res, 400, notesTooLong);
+      }
+
       const touched = await touchAttempt(attemptId, {
         discursive_score: discursiveScore,
-        admin_notes: serializeAttemptAdminNotes(notes),
+        admin_notes: adminNotesSerialized,
       });
       if (touched.error) {
         return maybeTableError(res, touched.error) || jsonError(res, 500, 'Falha ao atualizar a tentativa.');

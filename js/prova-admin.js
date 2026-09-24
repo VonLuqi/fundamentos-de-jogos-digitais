@@ -324,8 +324,8 @@ function paintDetail(attempt) {
               ${locked ? 'disabled' : ''} />
           </label>
           <label class="prova-admin-q__comment">
-            <span>Comentário (opcional)</span>
-            <textarea rows="2" data-comment-input="${escapeHtml(q.questionId)}"
+            <span>Comentário (opcional, até 2000)</span>
+            <textarea rows="2" maxlength="2000" data-comment-input="${escapeHtml(q.questionId)}"
               ${locked ? 'disabled' : ''}>${escapeHtml(q.comment || '')}</textarea>
           </label>
         `;

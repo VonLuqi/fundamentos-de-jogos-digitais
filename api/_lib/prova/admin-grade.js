@@ -13,6 +13,13 @@ import {
 } from './answer-key-modulo1.js';
 import { attemptAdminListItem } from './admin-list.js';
 
+/** Teto do JSON em prova_attempts.admin_notes (alinha com CHECK no banco). */
+export const ADMIN_NOTES_MAX = 24000;
+/** Comentário por discursiva. */
+export const ADMIN_COMMENT_MAX = 2000;
+/** Nota geral do Mestre. */
+export const ADMIN_GENERAL_NOTE_MAX = 4000;
+
 function remainingMs(endsAt, nowMs = Date.now()) {
   const end = new Date(endsAt).getTime();
   if (Number.isNaN(end)) return 0;
@@ -32,11 +39,11 @@ export function parseAttemptAdminNotes(raw) {
       : {};
     const out = {};
     for (const [k, v] of Object.entries(comments)) {
-      out[String(k)] = String(v ?? '').slice(0, 2000);
+      out[String(k)] = String(v ?? '').slice(0, ADMIN_COMMENT_MAX);
     }
     return {
       discursiveComments: out,
-      general: String(raw.general ?? raw.note ?? '').slice(0, 4000),
+      general: String(raw.general ?? raw.note ?? '').slice(0, ADMIN_GENERAL_NOTE_MAX),
     };
   }
   const text = String(raw);
@@ -47,20 +54,34 @@ export function parseAttemptAdminNotes(raw) {
       /* fallthrough */
     }
   }
-  return { discursiveComments: {}, general: text.slice(0, 4000) };
+  return { discursiveComments: {}, general: text.slice(0, ADMIN_GENERAL_NOTE_MAX) };
 }
 
 /**
  * @param {{ discursiveComments?: Record<string, string>, general?: string }} notes
+ * @returns {string}
  */
 export function serializeAttemptAdminNotes(notes) {
   const discursiveComments = {};
   for (const [k, v] of Object.entries(notes?.discursiveComments || {})) {
     const t = String(v ?? '').trim();
-    if (t) discursiveComments[k] = t.slice(0, 2000);
+    if (t) discursiveComments[k] = t.slice(0, ADMIN_COMMENT_MAX);
   }
-  const general = String(notes?.general ?? '').trim().slice(0, 4000);
+  const general = String(notes?.general ?? '').trim().slice(0, ADMIN_GENERAL_NOTE_MAX);
   return JSON.stringify({ discursiveComments, general });
+}
+
+/**
+ * @param {string} serialized
+ * @returns {string|null} mensagem de erro amigável, ou null se ok
+ */
+export function validateSerializedAdminNotes(serialized) {
+  const len = String(serialized || '').length;
+  if (len <= ADMIN_NOTES_MAX) return null;
+  return (
+    `Anotações da correção muito longas (${len}/${ADMIN_NOTES_MAX} caracteres). `
+    + `Encurte os comentários das discursivas (máx. ${ADMIN_COMMENT_MAX} cada).`
+  );
 }
 
 /**

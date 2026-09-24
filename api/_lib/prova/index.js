@@ -62,12 +62,16 @@ export {
 } from './admin-list.js';
 
 export {
+  ADMIN_COMMENT_MAX,
+  ADMIN_GENERAL_NOTE_MAX,
+  ADMIN_NOTES_MAX,
   buildAdminAttemptDetail,
   normalizeAttemptId,
   normalizeDiscursiveQuestionId,
   parseAttemptAdminNotes,
   serializeAttemptAdminNotes,
   sumDiscursivePoints,
+  validateSerializedAdminNotes,
 } from './admin-grade.js';
 
 export {
