@@ -73,7 +73,7 @@ Fechar o gap entre o Despertar atual e a presença “Cookie Clicker no Submundo
 | **Q6** | Pool de rumores | Uma linha vs fila? | *Fila rotativa (Códice visto + progresso + curiosidades + dicas leves + sync)* | Só linha atual |
 | **Q7** | SPS no hover | Bruto vs efetivo? | *Efetivo (+ shiny)* | Só baseRate |
 | **Q8** | Shiny — quando | Buy vs retrofit? | *No buy, por unidade do lote* | Retrofit save |
-| **Q9** | Shiny — chance/mult | … | *1% · ×2 SPS · sem custo* | 0.5%×3 / 2%×1.5 |
+| **Q9** | Shiny — chance/mult | … | *Negativo 0,5% · ×15 + glitch (mais raro); Gold 2% · ×2 ouro* | 0.5%×3 / 2%×1.5 |
 | **Q10** | Shiny — sync | … | *`shinyCounts[id]`; bounds; cliente rola / server valida qty* | Lista por unidade |
 | **Q11** | Shiny — visual | Invert vs arte? | *Invert + glow; reduced = borda* | WebP dedicado |
 | **Q12** | Shiny — Lethe | Morrem no ritual? | *Sim (qty+shiny); Bancada fica* | Memória Mnemosyne |
@@ -123,7 +123,7 @@ Tooltip sticky perto do cursor/célula:
 ```
 Sombra Vagante
 Almas / s: 0,12
-(shiny ×2)          ← só se shiny
+(negativo ×15 / gold ×2)          ← raridades
 ```
 
 Store card continua mostrando **SPS da linha** (todas as unidades daquele gerador).
@@ -411,7 +411,7 @@ Não confundir:
 - [x] `lineSPS` considera `(qty - shiny) * rate + shiny * rate * SHINY_MULT`.
 - [x] Lethe zera shiny com geradores (Q12).
 
-**Anti-cheat (congelado Q10):** cliente rola shiny no buy; server **só valida** `0 ≤ shinyCounts[id] ≤ qty` e recalcula SPS. Exploit máximo documentado = linha inteira ×`SHINY_MULT` (×2). Sem server-RNG nesta leva.
+**Anti-cheat (congelado Q10):** cliente rola shiny no buy; server **só valida** `0 ≤ shinyCounts[id] ≤ qty` e recalcula SPS. Exploit máximo documentado = linha inteira ×`SHINY_MULT` (×15). Sem server-RNG nesta leva.
 
 **Arquivos:** `formulas.js` (`lineSPS`), `GameState.js`, `despertar-validate.js` (`normalizeShinyCounts`), `UIRenderer.js` (linha da store), `tests/despertar-shiny-smoke.mjs`.  
 **Nota:** coluna SQL / RPC de persistência = **G4.3**; sync já valida + ecoa `shinyCounts` no DTO; IDB local via `toSnapshot`.
@@ -439,7 +439,7 @@ Não confundir:
 **Arquivos:** `db/migrate-2026-09-22-despertar-shiny-counts.sql`, `db/setup.sql`, `api/despertar.js` (`ROW_SELECT`), `despertar-validate.js` (`canonicalToRowPatch`), `tests/despertar-shiny-smoke.mjs`.  
 **Nota:** IDB já guardava `toSnapshot().shinyCounts` desde G4.1; G4.3 fecha o caminho Postgres/RPC.
 
-**Aceite:** comprar ~100 unidades eventualmente produz shiny; hover mostra ×2; Lethe limpa; sync não rejeita save legítimo.
+**Aceite:** comprar ~100 unidades eventualmente produz shiny; hover mostra ×15; Lethe limpa; sync não rejeita save legítimo.
 
 ---
 
@@ -541,7 +541,7 @@ Estimativa grossa (após G0): **S 0,25–0,5 d** · G1 0,5–1 d · G2 0,5 d · 
 
 | # | Decisão |
 | --- | --- |
-| **Q1** | Slots densos por anel **12 → 18 → 24 → … → 48**; cap visual **200** (qty econômica pode passar; ex. 63 sombras = 63 no anel). |
+| **Q1** | Slots densos por anel **28 → 36 → 44 → 52 → 60**; gap curto; opacidade cai com o raio; cap visual **200**. |
 | **Q2** | **Manter o cursor procedural atual**; só mudar packing para auréolas Cookie. |
 | **Q3** | **Só Sombras Vagantes** orbitam a Foice; T2+ ficam nas prateleiras. |
 | **Q4** | Ticker = marquee sempre; labels de shelf = marquee **só se overflow**. Pool inclui o que já existe **+ curiosidades do Submundo/Hades + dicas leves de enigmas** (sem spoiler). |
@@ -549,7 +549,7 @@ Estimativa grossa (após G0): **S 0,25–0,5 d** · G1 0,5–1 d · G2 0,5 d · 
 | **Q6** | **Fila rotativa** (prioridades na §4.2); não uma linha única. |
 | **Q7** | Hover mostra SPS **efetivo** da unidade (`baseRate × genMult × prestige × spsVerdict` × shiny se houver). |
 | **Q8** | Shiny rola **no buy** (cada unidade do lote 1/10/100/Máx); saves antigos começam com 0 shiny. |
-| **Q9** | Chance **1%**; mult **×2** SPS da unidade; **não** afeta custo. |
+| **Q9** | Chance **0,5% negativo ×15** (mais raro) + **2% gold ×2**; mutuamente exclusivos; **não** afeta custo. |
 | **Q10** | Persistência `shinyCounts[id]` com `0 ≤ shiny ≤ qty`; server rejeita fora dos bounds e recalcula SPS. **RNG no cliente**; server não atribui shiny. |
 | **Q11** | Visual **invert + glow Styx** no canvas; reduced-motion = borda dourada (sem invert animado). |
 | **Q12** | Lethe **zera** qty + shiny dos geradores; Bancada / Vereditos / compras de Vereditos **permanecem**. |
@@ -570,7 +570,7 @@ Estimativa grossa (após G0): **S 0,25–0,5 d** · G1 0,5–1 d · G2 0,5 d · 
 - [x] Sombras formam auréolas Cookie (lado a lado → anel seguinte) com cursor atual.
 - [x] Ticker (e labels se overflow) = letreiro; fila com curiosidades/dicas; reduced-motion ok.
 - [x] Hover em NPC/órbita mostra Almas/s **efetivas** da unidade (e shiny).
-- [x] Shiny 1% ×2: existe, persiste, rende mais, morre no Lethe.
+- [x] Negativo 0,5% ×15 (glitch, mais raro) + Gold 2% ×2: existem, persistem, rendem mais, morrem no Lethe.
 - [x] HUD mais clara e com juice contido.
 - [x] Copy Juízo B0+B4; balance **B1 Soft** feita; B2/B3 explicitamente adiados.
 

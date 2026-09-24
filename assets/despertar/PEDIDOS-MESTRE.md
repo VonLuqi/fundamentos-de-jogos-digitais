@@ -52,6 +52,18 @@ Dropar em `assets/despertar-juizo/covers/` (ou ClassInd compartilhado), **mesmo 
 
 Tamanho sugerido: **600×800** WebP (padrão ClassInd).
 
+## P3 — Cosméticos de upgrade (Fase E)
+
+P0 do jogo usa **procedural/CSS** (`hat_charon` no canvas; `blade_glow` na Foice).  
+Quando houver arte, dropar WebP transparente aqui (o código passa a preferir asset se existir):
+
+| Accessory | Peça | Tamanho | Path sugerido |
+| --- | --- | --- | --- |
+| `hat_charon` | Chapéu / aba nos Servos (~50% coverage) | 64² | `cosmetics/hat_charon.webp` (+ `.svg`) |
+| `blade_glow` | Glow / runas na Foice (ou manter CSS) | 512² overlay | `cosmetics/blade_glow.webp` |
+
+Pasta: `assets/despertar/cosmetics/` (criar ao entregar). Naming = id do accessory em `upgrade-cosmetics.js`.
+
 ## Como marcar entrega
 
 1. Substituir o arquivo no path indicado.  

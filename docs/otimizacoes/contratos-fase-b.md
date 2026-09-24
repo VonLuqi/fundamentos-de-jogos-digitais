@@ -152,9 +152,48 @@ Cliente opcional: `limit`. Implementação: `ORDER BY …` + window rank no SQL;
 
 ---
 
+## 5. Extensão opcional — `clientEpoch` (Despertar sync · Fase A)
+
+> **Origem:** [`docs/despertar-sync/01-tasks-fase-a-sync.md`](../despertar-sync/01-tasks-fase-a-sync.md) Task 0 / A3  
+> **Status:** contrato documentado; eco no wire **implementado** (Task A3, 2026-09-22)
+
+Campo **opcional** no payload de `action: 'stateSync'` e no DTO de resposta. Clientes legados omitem; server **ignora** para validação de economia (é hint de rebase no client).
+
+### Request (subset)
+
+```json
+{
+  "token": "…",
+  "action": "stateSync",
+  "clientEpoch": 12
+}
+```
+
+| Campo | Tipo | Regra |
+| --- | --- | --- |
+| `clientEpoch` | number ≥ 0 (inteiro) | Opcional. Monotônico no client a cada mutação suja (`buy*`, prestige local, grants). Ausente = legado. |
+
+### Response (eco)
+
+Em `ok` e em reject com `state`, o DTO pode incluir:
+
+| Campo | Tipo | Regra |
+| --- | --- | --- |
+| `echoEpoch` | number \| omitido | Eco do `clientEpoch` recebido nesta request. Se o client omitiu, omitir no eco. |
+
+Alias aceitável no state embutido: `clientEpoch` (mesmo valor). Preferir **`echoEpoch`** no envelope / state DTO para não confundir com o epoch local pós-merge.
+
+### Semântica no client (Fase A)
+
+- Se `echoEpoch < syncEpoch` local após o RTT → **não** replace cego de souls/gens/upgrades; merge reconcile + remarcar dirty.
+- Reject (`JUDGES_REFUSED` / 400/409) → replace total **independente** do epoch.
+
+---
+
 ## Checklist de revisão de contrato
 
 - [x] D4 bootstrap shape congelado
 - [x] D2 RPC nome + tipos (`integer` user id) congelados
 - [x] D3 flag `DESPERTAR_SYNC_RPC` documentada
 - [x] Smoke estático `ops-perf-fase-b-contracts-smoke.mjs` amarra strings-chave
+- [x] Extensão opcional `clientEpoch` / `echoEpoch` documentada (Despertar Fase A)
