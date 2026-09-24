@@ -247,8 +247,10 @@ async function touchAttempt(attemptId, patch) {
 
 /**
  * Se in_progress e passou ends_at → timed_out + grade MC.
+ * @param {object} attempt
+ * @param {{ turma?: string|null }} [opts]
  */
-async function finalizeIfExpired(attempt) {
+async function finalizeIfExpired(attempt, { turma = null } = {}) {
   if (!attempt || attempt.status !== 'in_progress') {
     return { attempt, timedOut: false };
   }
@@ -256,10 +258,11 @@ async function finalizeIfExpired(attempt) {
     return { attempt, timedOut: false };
   }
 
+  const resolvedTurma = turma || attempt?.users?.turma || null;
   const { answers, error: ansError } = await loadAnswers(attempt.id);
   if (ansError) return { error: ansError };
 
-  const { mcScore, updates } = buildMcGradeUpdates(answers);
+  const { mcScore, updates } = buildMcGradeUpdates(answers, { turma: resolvedTurma });
   const submittedAt = serverNowIso();
 
   for (const u of updates) {
@@ -286,11 +289,12 @@ async function finalizeIfExpired(attempt) {
   return { attempt: updated || { ...attempt, status: 'timed_out', submitted_at: submittedAt, mc_score: mcScore }, timedOut: true };
 }
 
-async function gradeAndCloseAttempt(attempt, { status }) {
+async function gradeAndCloseAttempt(attempt, { status, turma = null }) {
   const { answers, error: ansError } = await loadAnswers(attempt.id);
   if (ansError) return { error: ansError };
 
-  const { mcScore, updates } = buildMcGradeUpdates(answers);
+  const resolvedTurma = turma || attempt?.users?.turma || null;
+  const { mcScore, updates } = buildMcGradeUpdates(answers, { turma: resolvedTurma });
   const submittedAt = serverNowIso();
   const byId = new Map((answers || []).map((a) => [a.question_id, a]));
 
@@ -373,7 +377,7 @@ export default async function handler(req, res) {
 
       let attempt = rawAttempt;
       if (attempt?.status === 'in_progress') {
-        const fin = await finalizeIfExpired(attempt);
+        const fin = await finalizeIfExpired(attempt, { turma: user.turma });
         if (fin.error) {
           return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
         }
@@ -430,7 +434,7 @@ export default async function handler(req, res) {
       }
       if (existing) {
         if (existing.status === 'in_progress') {
-          const fin = await finalizeIfExpired(existing);
+          const fin = await finalizeIfExpired(existing, { turma: user.turma });
           if (fin.error) {
             return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
           }
@@ -439,7 +443,7 @@ export default async function handler(req, res) {
             const payload = {
               ok: true,
               resumed: true,
-              ...studentAttemptPayload(fin.attempt, answers || [], { nowMs }),
+              ...studentAttemptPayload(fin.attempt, answers || [], { nowMs, turma: user.turma }),
             };
             payload.exam = {
               ...payload.exam,
@@ -483,7 +487,7 @@ export default async function handler(req, res) {
       const payload = {
         ok: true,
         resumed: false,
-        ...studentAttemptPayload(created, [], { nowMs }),
+        ...studentAttemptPayload(created, [], { nowMs, turma: user.turma }),
       };
       payload.exam = {
         ...payload.exam,
@@ -512,7 +516,7 @@ export default async function handler(req, res) {
 
       let attempt = raw;
       if (attempt.status === 'in_progress') {
-        const fin = await finalizeIfExpired(attempt);
+        const fin = await finalizeIfExpired(attempt, { turma: user.turma });
         if (fin.error) {
           return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
         }
@@ -526,7 +530,7 @@ export default async function handler(req, res) {
 
       const payload = {
         ok: true,
-        ...studentAttemptPayload(attempt, answers, { nowMs }),
+        ...studentAttemptPayload(attempt, answers, { nowMs, turma: user.turma }),
       };
       payload.exam = {
         ...payload.exam,
@@ -559,7 +563,7 @@ export default async function handler(req, res) {
       }
       if (!raw) return jsonError(res, 404, 'Nenhuma tentativa encontrada.');
 
-      const fin = await finalizeIfExpired(raw);
+      const fin = await finalizeIfExpired(raw, { turma: user.turma });
       if (fin.error) {
         return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
       }
@@ -627,7 +631,7 @@ export default async function handler(req, res) {
       }
       if (!raw) return jsonError(res, 404, 'Nenhuma tentativa encontrada.');
 
-      const fin = await finalizeIfExpired(raw);
+      const fin = await finalizeIfExpired(raw, { turma: user.turma });
       if (fin.error) {
         return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
       }
@@ -673,7 +677,7 @@ export default async function handler(req, res) {
       if (!raw) return jsonError(res, 404, 'Nenhuma tentativa encontrada.');
 
       // Aceita só enquanto a prova está em andamento (ou já estourou sem submit — finaliza)
-      const fin = await finalizeIfExpired(raw);
+      const fin = await finalizeIfExpired(raw, { turma: user.turma });
       if (fin.error) {
         return maybeTableError(res, fin.error) || jsonError(res, 500, 'Falha ao encerrar por tempo.');
       }
@@ -753,7 +757,7 @@ export default async function handler(req, res) {
         }
       }
 
-      const closed = await gradeAndCloseAttempt(raw, { status });
+      const closed = await gradeAndCloseAttempt(raw, { status, turma: user.turma });
       if (closed.error) {
         return maybeTableError(res, closed.error) || jsonError(res, 500, 'Falha ao enviar a prova.');
       }
@@ -1161,7 +1165,7 @@ export default async function handler(req, res) {
 
       let mcScore = raw.mc_score != null ? Number(raw.mc_score) : null;
       if (mcScore == null) {
-        const graded = buildMcGradeUpdates(answers);
+        const graded = buildMcGradeUpdates(answers, { turma: raw.users?.turma });
         mcScore = graded.mcScore;
         for (const u of graded.updates) {
           const existing = answers.find((a) => a.question_id === u.questionId);

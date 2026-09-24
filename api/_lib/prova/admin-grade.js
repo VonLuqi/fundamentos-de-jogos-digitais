@@ -12,6 +12,11 @@ import {
   questionsForAdmin,
 } from './answer-key-modulo1.js';
 import { attemptAdminListItem } from './admin-list.js';
+import {
+  getMcAnswerKeyForTurma,
+  getQuestionsForTurma,
+  resolveQuestionBankTurma,
+} from './questions-by-turma.js';
 
 /** Teto do JSON em prova_attempts.admin_notes (alinha com CHECK no banco). */
 export const ADMIN_NOTES_MAX = 24000;
@@ -102,13 +107,16 @@ export function sumDiscursivePoints(answerRows) {
 /**
  * @param {Array<object>} answerRows
  * @param {{ discursiveComments?: Record<string, string> }} notes
+ * @param {{ turma?: string|null }} [opts]
  */
-export function buildAdminAnswerDetails(answerRows, notes = {}) {
+export function buildAdminAnswerDetails(answerRows, notes = {}, { turma = null } = {}) {
   const byId = new Map();
   for (const row of answerRows || []) {
     if (row?.question_id) byId.set(row.question_id, row);
   }
-  const questions = questionsForAdmin();
+  const questions = questionsForAdmin(getQuestionsForTurma(turma), {
+    answerKey: getMcAnswerKeyForTurma(turma),
+  });
   const comments = notes.discursiveComments || {};
 
   return questions.map((q) => {
@@ -146,12 +154,13 @@ export function buildAdminAnswerDetails(answerRows, notes = {}) {
  * @param {object|null} userRow
  * @param {Array<object>} answerRows
  * @param {Array<object>} integrityEvents
- * @param {{ nowMs?: number }} [opts]
+ * @param {{ nowMs?: number, turma?: string|null }} [opts]
  */
-export function buildAdminAttemptDetail(attempt, userRow, answerRows, integrityEvents, { nowMs = Date.now() } = {}) {
+export function buildAdminAttemptDetail(attempt, userRow, answerRows, integrityEvents, { nowMs = Date.now(), turma = null } = {}) {
   const notes = parseAttemptAdminNotes(attempt.admin_notes);
   const listItem = attemptAdminListItem(attempt, userRow, { nowMs });
-  const answers = buildAdminAnswerDetails(answerRows, notes);
+  const resolvedTurma = turma || userRow?.turma || null;
+  const answers = buildAdminAnswerDetails(answerRows, notes, { turma: resolvedTurma });
   const discursiveIds = listDiscursiveQuestionIds();
   const scoredDiscursive = discursiveIds.filter((id) => {
     const row = (answerRows || []).find((a) => a.question_id === id);
@@ -167,6 +176,7 @@ export function buildAdminAttemptDetail(attempt, userRow, answerRows, integrityE
       ? remainingMs(attempt.ends_at, nowMs)
       : 0,
     adminNotesGeneral: notes.general,
+    questionBank: resolveQuestionBankTurma(resolvedTurma),
     answers,
     contest: {
       status: attempt.contest_status || null,

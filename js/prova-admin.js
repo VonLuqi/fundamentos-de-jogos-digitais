@@ -188,10 +188,10 @@ function paintTable(attempts) {
       <td>${escapeHtml(mc)}</td>
       <td>${escapeHtml(final)}</td>
       <td class="prova-admin-row-actions">
-        <a class="prova-admin-row-link" href="${escapeHtml(detailUrl(row.id))}">Abrir</a>
-        <button type="button" class="prova-admin-row-reset" data-reset-attempt="${escapeHtml(row.id)}" data-reset-name="${escapeHtml(name)}">
-          Resetar
-        </button>
+        <span class="prova-admin-row-actions__inner">
+          <a class="prova-admin-row-link" href="${escapeHtml(detailUrl(row.id))}">Abrir</a>
+          <button type="button" class="prova-admin-row-reset" data-reset-attempt="${escapeHtml(row.id)}" data-reset-name="${escapeHtml(name)}">Resetar</button>
+        </span>
       </td>
     `;
     tbody.appendChild(tr);
@@ -233,6 +233,7 @@ function paintDetail(attempt) {
   if (meta) {
     meta.textContent = [
       student.turma || '—',
+      attempt.questionBank ? `banco ${attempt.questionBank}` : null,
       student.username ? `@${student.username}` : null,
       attempt.hasAlerts ? 'com alertas' : null,
     ].filter(Boolean).join(' · ');

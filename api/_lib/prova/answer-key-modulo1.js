@@ -155,14 +155,16 @@ export function sanitizeQuestionsForClient(questions = QUESTIONS) {
 /**
  * Payload admin: questões + gabarito MC + rubricas discursivas.
  * @param {ReadonlyArray<object>} [questions]
+ * @param {{ answerKey?: Readonly<Record<string, string>> }} [opts]
  */
-export function questionsForAdmin(questions = QUESTIONS) {
+export function questionsForAdmin(questions = QUESTIONS, opts = {}) {
+  const answerKey = opts.answerKey || MC_ANSWER_KEY;
   return questions.map((q) => {
     const client = sanitizeQuestionsForClient([q])[0];
     if (q.type === 'mc') {
       return {
         ...client,
-        correctChoice: MC_ANSWER_KEY[q.id] || null,
+        correctChoice: answerKey[q.id] || null,
         justification: MC_JUSTIFICATIONS[q.id] || null,
       };
     }
@@ -187,9 +189,10 @@ export function normalizeMcChoice(choice) {
 /**
  * @param {string} questionId
  * @param {unknown} choice
+ * @param {Readonly<Record<string, string>>} [answerKey]
  */
-export function isMcChoiceCorrect(questionId, choice) {
-  const expected = MC_ANSWER_KEY[String(questionId)];
+export function isMcChoiceCorrect(questionId, choice, answerKey = MC_ANSWER_KEY) {
+  const expected = answerKey[String(questionId)];
   if (!expected) return false;
   const normalized = normalizeMcChoice(choice);
   return normalized != null && normalized === expected;
@@ -201,6 +204,7 @@ export function isMcChoiceCorrect(questionId, choice) {
  * - Record/map questionId → choice
  *
  * @param {Array<{questionId?: string, question_id?: string, choice?: unknown}>|Record<string, unknown>} answers
+ * @param {{ answerKey?: Readonly<Record<string, string>> }} [opts]
  * @returns {{
  *   mcScore: number,
  *   maxMcScore: number,
@@ -215,7 +219,8 @@ export function isMcChoiceCorrect(questionId, choice) {
  *   }>
  * }}
  */
-export function gradeMultipleChoice(answers) {
+export function gradeMultipleChoice(answers, opts = {}) {
+  const answerKey = opts.answerKey || MC_ANSWER_KEY;
   const byId = new Map();
 
   if (Array.isArray(answers)) {
@@ -239,7 +244,7 @@ export function gradeMultipleChoice(answers) {
   const results = [];
 
   for (const questionId of mcIds) {
-    const correctChoice = MC_ANSWER_KEY[questionId];
+    const correctChoice = answerKey[questionId];
     const choice = normalizeMcChoice(byId.get(questionId));
     const isCorrect = choice != null && choice === correctChoice;
     const pointsAwarded = isCorrect ? MC_POINTS_EACH : 0;
@@ -277,8 +282,12 @@ export function normalizeDiscursivePoints(value) {
   return Math.round(n * 100) / 100;
 }
 
-export function getMcCorrectChoice(questionId) {
-  return MC_ANSWER_KEY[String(questionId)] || null;
+/**
+ * @param {string} questionId
+ * @param {Readonly<Record<string, string>>} [answerKey]
+ */
+export function getMcCorrectChoice(questionId, answerKey = MC_ANSWER_KEY) {
+  return answerKey[String(questionId)] || null;
 }
 
 export function getDiscursiveRubric(questionId) {

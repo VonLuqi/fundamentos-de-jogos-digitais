@@ -23,8 +23,12 @@ import {
 } from './answer-key-modulo1.js';
 import {
   DISCURSIVE_POINTS_EACH,
-  QUESTIONS,
 } from './questions-modulo1.js';
+import {
+  getMcAnswerKeyForTurma,
+  getQuestionsForTurma,
+  resolveQuestionBankTurma,
+} from './questions-by-turma.js';
 
 export const DEFAULT_EXAM_ID = EXAM_ID;
 
@@ -127,9 +131,10 @@ export function attemptStudentDto(attempt, { nowMs = Date.now() } = {}) {
  *
  * @param {object} attempt
  * @param {Array<object>} answerRows
- * @returns {null|{ generalNote: string, items: Array<object> }}
+ * @param {{ turma?: string|null }} [opts]
+ * @returns {null|{ generalNote: string, items: Array<object>, questionBank?: string }}
  */
-export function buildStudentReview(attempt, answerRows) {
+export function buildStudentReview(attempt, answerRows, { turma = null } = {}) {
   if (!attempt || attempt.status !== 'graded') return null;
 
   const byId = new Map();
@@ -138,8 +143,10 @@ export function buildStudentReview(attempt, answerRows) {
   }
   const notes = parseAttemptAdminNotes(attempt.admin_notes);
   const comments = notes.discursiveComments || {};
+  const questions = getQuestionsForTurma(turma);
+  const answerKey = getMcAnswerKeyForTurma(turma);
 
-  const items = QUESTIONS.map((q) => {
+  const items = questions.map((q) => {
     const row = byId.get(q.id) || null;
     const base = {
       questionId: q.id,
@@ -151,7 +158,7 @@ export function buildStudentReview(attempt, answerRows) {
 
     if (q.type === 'mc') {
       const studentChoice = row?.choice || null;
-      const correctChoice = getMcCorrectChoice(q.id);
+      const correctChoice = getMcCorrectChoice(q.id, answerKey);
       let isCorrect = row?.is_correct == null ? null : Boolean(row.is_correct);
       if (isCorrect == null && correctChoice) {
         isCorrect = studentChoice === correctChoice;
@@ -185,6 +192,7 @@ export function buildStudentReview(attempt, answerRows) {
 
   return {
     generalNote: notes.general || '',
+    questionBank: resolveQuestionBankTurma(turma),
     items,
   };
 }
@@ -243,13 +251,14 @@ export function parseSaveAnswerPayload(body) {
 /**
  * Aplica correção MC nas linhas e retorna updates + mcScore.
  * @param {Array<{ question_id: string, choice?: string|null }>} answerRows
+ * @param {{ turma?: string|null }} [opts]
  */
-export function buildMcGradeUpdates(answerRows) {
+export function buildMcGradeUpdates(answerRows, { turma = null } = {}) {
   const map = {};
   for (const row of answerRows || []) {
     map[row.question_id] = row.choice;
   }
-  const graded = gradeMultipleChoice(map);
+  const graded = gradeMultipleChoice(map, { answerKey: getMcAnswerKeyForTurma(turma) });
   const updates = graded.results.map((r) => ({
     questionId: r.questionId,
     isCorrect: r.isCorrect,
@@ -259,7 +268,8 @@ export function buildMcGradeUpdates(answerRows) {
   return { mcScore: graded.mcScore, updates, graded };
 }
 
-export function studentAttemptPayload(attempt, answerRows, { nowMs = Date.now() } = {}) {
+export function studentAttemptPayload(attempt, answerRows, { nowMs = Date.now(), turma = null } = {}) {
+  const questions = getQuestionsForTurma(turma);
   const payload = {
     serverNow: new Date(nowMs).toISOString(),
     exam: {
@@ -267,13 +277,14 @@ export function studentAttemptPayload(attempt, answerRows, { nowMs = Date.now() 
       title: EXAM_TITLE,
       durationMinutes: null,
       totalPoints: TOTAL_POINTS,
+      questionBank: resolveQuestionBankTurma(turma),
     },
     attempt: attemptStudentDto(attempt, { nowMs }),
-    questions: sanitizeQuestionsForClient(),
+    questions: sanitizeQuestionsForClient(questions),
     answers: answersToClientMap(answerRows),
   };
   if (attempt.status === 'graded') {
-    payload.review = buildStudentReview(attempt, answerRows);
+    payload.review = buildStudentReview(attempt, answerRows, { turma });
   }
   return payload;
 }
