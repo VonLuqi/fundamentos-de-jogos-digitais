@@ -53,9 +53,21 @@ export const API_WARNING_DISMISS_MS = 8_000;
 export const BUY_MAX_CAP = 10_000;
 export const BUY_MODES = Object.freeze(['1', '10', '100', 'max']);
 
-/** Shiny (G4): mult SPS da unidade; G3.1 já usa no tooltip quando `shiny`. */
-export const SHINY_MULT = '2';
-export const SHINY_CHANCE = 0.01;
+/**
+ * Raridades de unidade no buy (G4):
+ * - Negativo (persistido como shiny_counts): 0,5% · ×15 · invert+glitch (mais raro)
+ * - Gold (gold_counts): 2% · ×2 · ouro (segundo)
+ * Rolls mutuamente exclusivos por unidade (negativo primeiro).
+ */
+export const NEGATIVO_MULT = '15';
+export const NEGATIVO_CHANCE = 0.005;
+export const GOLD_MULT = '2';
+export const GOLD_CHANCE = 0.02;
+
+/** @deprecated use NEGATIVO_MULT — alias p/ código legado */
+export const SHINY_MULT = NEGATIVO_MULT;
+/** @deprecated use NEGATIVO_CHANCE */
+export const SHINY_CHANCE = NEGATIVO_CHANCE;
 
 export const STORAGE_DB_NAME = 'despertar-db-v2';
 export const STORAGE_STORE_NAME = 'states';

@@ -2,6 +2,7 @@
  * Sync autoritativo com /api/despertar (Task 9 + Fase B / B6).
  * Heartbeat 30 s só envia se `_dirty` (D7); compras forçam sync.
  * Mínimo 5 s entre syncs.
+ * Diag opcional (Fase A / A1): `logDiag` — só injetar em localhost harness/syncDiag.
  */
 
 import {
@@ -14,6 +15,7 @@ import {
   despertarTalentBuy,
   despertarVerdictBuy,
   despertarDebugGrant,
+  despertarDebugSet,
   despertarDebugReset,
   despertarDebugSandbox,
 } from '../../api.js';
@@ -27,9 +29,11 @@ export class ApiService {
    * @param {object} options
    * @param {() => string|null} options.getToken
    * @param {() => object} options.getSnapshot — GameState.toSnapshot()
-   * @param {(state: object) => void} options.applyServerState
+   * @param {(state: object, meta?: { mode?: 'replace'|'reconcile', ok?: boolean, epochAtSend?: number, echoEpoch?: number, elapsedMs?: number }) => void} options.applyServerState
    * @param {(info: { status?: number, error?: string, state?: object }) => void} [options.onRejected]
    * @param {(info: { ok: true, state: object, awarded?: unknown[] }) => void} [options.onSynced]
+   * @param {(phase: string, data: Record<string, unknown>) => void} [options.logDiag]
+   * @param {(token: string, snapshot: object) => Promise<object>} [options.syncFn] — default despertarStateSync
    */
   constructor(options = {}) {
     this.getToken = typeof options.getToken === 'function' ? options.getToken : () => null;
@@ -39,6 +43,8 @@ export class ApiService {
       : () => {};
     this.onRejected = typeof options.onRejected === 'function' ? options.onRejected : null;
     this.onSynced = typeof options.onSynced === 'function' ? options.onSynced : null;
+    this.logDiag = typeof options.logDiag === 'function' ? options.logDiag : null;
+    this.syncFn = typeof options.syncFn === 'function' ? options.syncFn : despertarStateSync;
     this.heartbeatMs = Number.isFinite(options.heartbeatMs) ? options.heartbeatMs : SYNC_HEARTBEAT_MS;
     this.minIntervalMs = Number.isFinite(options.minIntervalMs)
       ? options.minIntervalMs
@@ -49,6 +55,20 @@ export class ApiService {
     this._inFlight = null;
     this._lastSyncAt = 0;
     this._dirty = false;
+  }
+
+  /** @param {string} phase @param {Record<string, unknown>} [extra] */
+  _diag(phase, extra = {}) {
+    if (!this.logDiag) return;
+    this.logDiag(phase, {
+      dirty: this._dirty,
+      inFlight: !!this._inFlight,
+      ...extra,
+    });
+  }
+
+  get isInFlight() {
+    return !!this._inFlight;
   }
 
   start() {
@@ -87,6 +107,7 @@ export class ApiService {
    */
   scheduleFlush({ force = false } = {}) {
     this._dirty = true;
+    this._diag('dirty', { force: !!force });
     this._armFlushTimer({ force });
   }
 
@@ -115,7 +136,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarStateGet(token);
     if (result?.state && apply) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
       this._lastSyncAt = this.now();
       this._dirty = false;
@@ -124,7 +145,10 @@ export class ApiService {
   }
 
   async flush() {
-    if (this._inFlight) return this._inFlight;
+    if (this._inFlight) {
+      this._diag('flush:reuse-in-flight');
+      return this._inFlight;
+    }
     // Idle / heartbeat: sem dirty e já sincronizou ao menos uma vez → no-op.
     if (!this._dirty && this._lastSyncAt > 0) return null;
 
@@ -132,21 +156,77 @@ export class ApiService {
     if (!token) return null;
 
     const snapshot = this.getSnapshot();
+    const epochAtSend = Number(snapshot?.clientEpoch ?? snapshot?.syncEpoch) || 0;
+    const soulsAtSend = snapshot?.souls != null ? String(snapshot.souls) : null;
+    const sentAt = this.now();
+    this._diag('flush:start', { syncEpoch: epochAtSend, souls: soulsAtSend });
     this._inFlight = (async () => {
       try {
-        const result = await despertarStateSync(token, snapshot);
+        const result = await this.syncFn(token, snapshot);
+        const elapsedMs = Math.max(0, this.now() - sentAt);
+        const echoRaw = result?.echoEpoch ?? result?.state?.echoEpoch;
+        const echoEpoch = Number.isFinite(Number(echoRaw)) ? Math.floor(Number(echoRaw)) : null;
+        const afterSnap = this.getSnapshot();
+        const localEpoch = Number(afterSnap?.clientEpoch ?? afterSnap?.syncEpoch) || 0;
+        const epochAdvanced = localEpoch > epochAtSend
+          || (echoEpoch != null && echoEpoch < localEpoch);
+
         this._lastSyncAt = this.now();
-        this._dirty = false;
+        this._diag('flush:ok-before-apply', {
+          syncEpoch: epochAtSend,
+          localEpoch,
+          echoEpoch,
+          epochAdvanced,
+          soulsSent: soulsAtSend,
+          soulsServer: result?.state?.souls != null ? String(result.state.souls) : null,
+          elapsedMs,
+        });
+
         if (result?.state) {
-          this.applyServerState(result.state);
+          this.applyServerState(result.state, {
+            mode: 'reconcile',
+            ok: true,
+            epochAtSend,
+            echoEpoch: echoEpoch ?? epochAtSend,
+            elapsedMs,
+          });
           this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
         }
+
+        // A4: não ack cego — mutações durante o RTT remarcem dirty + reflush
+        if (epochAdvanced) {
+          this._dirty = true;
+          this._armFlushTimer({ force: true });
+        } else {
+          this._dirty = false;
+        }
+
+        this._diag('flush:ok-after-apply', {
+          syncEpoch: epochAtSend,
+          localEpoch,
+          dirty: this._dirty,
+          epochAdvanced,
+        });
         return result;
       } catch (error) {
         const status = Number(error?.status) || 0;
         const payload = error?.payload || {};
+        const elapsedMs = Math.max(0, this.now() - sentAt);
+        this._diag('flush:reject-before-apply', {
+          status,
+          error: payload.error || error?.message || 'sync_failed',
+          syncEpoch: epochAtSend,
+          soulsSent: soulsAtSend,
+          soulsServer: payload.state?.souls != null ? String(payload.state.souls) : null,
+          elapsedMs,
+        });
         if (payload.state) {
-          this.applyServerState(payload.state);
+          this.applyServerState(payload.state, {
+            mode: 'replace',
+            ok: false,
+            epochAtSend,
+            elapsedMs,
+          });
         }
         this.onRejected?.({
           status,
@@ -157,9 +237,11 @@ export class ApiService {
           this._dirty = false;
           this._lastSyncAt = this.now();
         }
+        this._diag('flush:reject-after-apply', { status, dirty: this._dirty });
         throw error;
       } finally {
         this._inFlight = null;
+        this._diag('flush:finally', { dirty: this._dirty });
       }
     })();
 
@@ -171,7 +253,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarPrestige(token);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
       this._lastSyncAt = this.now();
       this._dirty = false;
@@ -184,7 +266,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarTalentBuy(token, talentId);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
       this._lastSyncAt = this.now();
       this._dirty = false;
@@ -197,7 +279,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarVerdictBuy(token, purchaseId);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
       this._lastSyncAt = this.now();
       this._dirty = false;
@@ -210,7 +292,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarDebugSandbox(token);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this._lastSyncAt = this.now();
       this._dirty = false;
     }
@@ -222,7 +304,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarDebugReset(token);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this._lastSyncAt = this.now();
       this._dirty = false;
     }
@@ -234,7 +316,20 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarDebugGrant(token, grantId);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
+      this._lastSyncAt = this.now();
+      this._dirty = false;
+    }
+    return result;
+  }
+
+  /** Admin: set absoluto de recursos (B2). */
+  async debugSet(set) {
+    const token = this.getToken();
+    if (!token) return null;
+    const result = await despertarDebugSet(token, set);
+    if (result?.state) {
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this._lastSyncAt = this.now();
       this._dirty = false;
     }
@@ -246,7 +341,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarJuizoStart(token);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this._lastSyncAt = this.now();
     }
     return result;
@@ -257,7 +352,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarJuizoGuess(token, choice);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
       this._lastSyncAt = this.now();
     }
@@ -269,7 +364,7 @@ export class ApiService {
     if (!token) return null;
     const result = await despertarJuizoAbandon(token);
     if (result?.state) {
-      this.applyServerState(result.state);
+      this.applyServerState(result.state, { mode: 'replace', ok: true });
       this._lastSyncAt = this.now();
     }
     return result;

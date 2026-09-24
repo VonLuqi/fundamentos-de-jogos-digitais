@@ -19,7 +19,7 @@ import { ApiService } from './services/ApiService.js';
 import { bootAuthoritativeSession, resumeFromHidden } from './services/OfflineEngine.js';
 import { StorageService } from './services/StorageService.js';
 import { UIRenderer } from './ui/UIRenderer.js';
-import { applyHarnessGrant, harnessEnabled } from './ui/harness.js';
+import { applyHarnessGrant, harnessEnabled, logSyncDiag, syncDiagEnabled } from './ui/harness.js';
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass } from './ui/juice.js';
@@ -123,13 +123,22 @@ function bindTabs(root) {
   });
 }
 
-function bindDebugSandbox({ api, storage, userId, isAdmin }) {
+function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
   const panel = document.getElementById('despertar-debug');
   const resetBtn = document.getElementById('despertar-debug-reset');
   const sandboxBtn = document.getElementById('despertar-debug-sandbox');
   const status = document.getElementById('despertar-debug-status');
+  const exitTestBtn = document.getElementById('despertar-debug-exit-test');
+  const shinyHalfBtn = document.getElementById('despertar-debug-shiny-half');
+  const goldHalfBtn = document.getElementById('despertar-debug-gold-half');
   const grantButtons = panel
     ? [...panel.querySelectorAll('[data-debug-grant]')]
+    : [];
+  const applyButtons = panel
+    ? [...panel.querySelectorAll('[data-debug-apply]')]
+    : [];
+  const flagInputs = panel
+    ? [...panel.querySelectorAll('[data-debug-flag]')]
     : [];
   if (!panel) return;
   if (!isAdmin) {
@@ -141,8 +150,17 @@ function bindDebugSandbox({ api, storage, userId, isAdmin }) {
   const setBusy = (busy) => {
     if (resetBtn) resetBtn.disabled = busy;
     if (sandboxBtn) sandboxBtn.disabled = busy;
+    if (exitTestBtn) exitTestBtn.disabled = busy;
+    if (shinyHalfBtn) shinyHalfBtn.disabled = busy;
+    if (goldHalfBtn) goldHalfBtn.disabled = busy;
     grantButtons.forEach((button) => {
       button.disabled = busy;
+    });
+    applyButtons.forEach((button) => {
+      button.disabled = busy;
+    });
+    flagInputs.forEach((input) => {
+      input.disabled = busy;
     });
   };
 
@@ -244,6 +262,117 @@ function bindDebugSandbox({ api, storage, userId, isAdmin }) {
         setBusy(false);
       }
     });
+  });
+
+  applyButtons.forEach((button) => {
+    button.addEventListener('click', async () => {
+      const field = button.getAttribute('data-debug-apply');
+      if (!field) return;
+      const input = panel.querySelector(`[data-debug-set="${field}"]`);
+      const raw = input?.value?.trim?.() ?? '';
+      if (!raw) {
+        if (status) status.textContent = 'Informe um valor para aplicar.';
+        return;
+      }
+      setBusy(true);
+      if (status) status.textContent = 'Definindo…';
+      try {
+        await api.flush();
+        const result = await api.debugSet({ [field]: raw });
+        await applyResult(result);
+        if (status) {
+          status.textContent = result?.label
+            ? `${result.label}.`
+            : 'Valor definido.';
+        }
+      } catch (error) {
+        const message = failMessage(error, 'Não foi possível definir o valor.');
+        showApiWarning(message);
+        if (status) status.textContent = message;
+      } finally {
+        setBusy(false);
+      }
+    });
+  });
+
+  flagInputs.forEach((input) => {
+    const flag = input.getAttribute('data-debug-flag');
+    if (!flag) return;
+    input.addEventListener('change', () => {
+      const state = typeof getState === 'function' ? getState() : null;
+      if (!state?.setDebugFlag) return;
+      state.setDebugFlag(flag, input.checked);
+      if (status) {
+        if (flag === 'freeShopping') {
+          status.textContent = input.checked
+            ? 'Compras gratuitas ON — sync com o Submundo pausado.'
+            : 'Compras gratuitas OFF.';
+        } else if (flag === 'forceShiny') {
+          status.textContent = input.checked
+            ? 'Forçar negativos ON — chance 100% na compra (sem gold).'
+            : 'Forçar negativos OFF — volta ao 0,5%.';
+        } else if (flag === 'forceGold') {
+          status.textContent = input.checked
+            ? 'Forçar gold ON — chance 100% na compra.'
+            : 'Forçar gold OFF — volta ao 2%.';
+        }
+      }
+    });
+  });
+
+  exitTestBtn?.addEventListener('click', () => {
+    const state = typeof getState === 'function' ? getState() : null;
+    state?.clearDebugFlags?.();
+    flagInputs.forEach((input) => {
+      input.checked = false;
+    });
+    if (status) status.textContent = 'Modo teste encerrado (flags locais limpas).';
+  });
+
+  shinyHalfBtn?.addEventListener('click', () => {
+    const state = typeof getState === 'function' ? getState() : null;
+    if (!state?.setShinyCount) return;
+    const select = panel.querySelector('[data-debug-shiny-line]');
+    const id = select?.value;
+    if (!id) return;
+    const qty = Math.max(0, Math.floor(Number(state.quantities?.()?.[id]) || 0));
+    const half = Math.floor(qty / 2);
+    const result = state.setShinyCount(id, half);
+    if (!result?.ok) {
+      if (status) status.textContent = 'Não foi possível marcar negativo nessa linha.';
+      return;
+    }
+    if (status) {
+      status.textContent = qty
+        ? `Negativo na linha: ${result.shiny}/${qty}.`
+        : 'Linha vazia — compre unidades antes.';
+    }
+    if (!state.isFreeShopping?.()) {
+      api.requestSync();
+    }
+  });
+
+  goldHalfBtn?.addEventListener('click', () => {
+    const state = typeof getState === 'function' ? getState() : null;
+    if (!state?.setGoldCount) return;
+    const select = panel.querySelector('[data-debug-shiny-line]');
+    const id = select?.value;
+    if (!id) return;
+    const qty = Math.max(0, Math.floor(Number(state.quantities?.()?.[id]) || 0));
+    const half = Math.floor(qty / 2);
+    const result = state.setGoldCount(id, half);
+    if (!result?.ok) {
+      if (status) status.textContent = 'Não foi possível marcar gold nessa linha.';
+      return;
+    }
+    if (status) {
+      status.textContent = qty
+        ? `Gold na linha: ${result.gold}/${qty}.`
+        : 'Linha vazia — compre unidades antes.';
+    }
+    if (!state.isFreeShopping?.()) {
+      api.requestSync();
+    }
   });
 }
 
@@ -394,12 +523,39 @@ async function init() {
   const storage = new StorageService();
   /** Preenchido após o boot; ApiService usa getters estáveis. */
   const stateRef = { current: null };
+  const diagOn = syncDiagEnabled();
   const api = new ApiService({
     getToken: () => getSession()?.token ?? null,
     getSnapshot: () => stateRef.current?.toSnapshot?.() ?? {},
-    applyServerState: (serverState) => {
+    applyServerState: (serverState, meta = {}) => {
       if (!stateRef.current) return;
-      stateRef.current.applyAuthoritativeState(serverState);
+      const mode = meta.mode === 'reconcile' ? 'reconcile' : 'replace';
+      if (diagOn) {
+        logSyncDiag('apply:before', {
+          mode,
+          syncEpoch: stateRef.current.syncEpoch ?? 0,
+          souls: String(stateRef.current.souls ?? ''),
+          dirty: api.isDirty,
+          inFlight: api.isInFlight,
+          serverSouls: serverState?.souls != null ? String(serverState.souls) : null,
+          echoEpoch: meta.echoEpoch,
+          elapsedMs: meta.elapsedMs,
+        });
+      }
+      stateRef.current.applyAuthoritativeState(serverState, {
+        mode,
+        sps: stateRef.current.sps(),
+        elapsedMs: meta.elapsedMs,
+      });
+      if (diagOn) {
+        logSyncDiag('apply:after', {
+          mode,
+          syncEpoch: stateRef.current.syncEpoch ?? 0,
+          souls: String(stateRef.current.souls ?? ''),
+          dirty: api.isDirty,
+          inFlight: api.isInFlight,
+        });
+      }
       storage.scheduleSave(user.id, stateRef.current);
     },
     onRejected: ({ error }) => {
@@ -411,6 +567,7 @@ async function init() {
         presentGrimoireAwards(awarded);
       }
     },
+    logDiag: diagOn ? logSyncDiag : null,
   });
 
   bindJuizoCta(api, { onError: showApiWarning });
@@ -432,7 +589,7 @@ async function init() {
   stateRef.current = state;
   applyHarnessGrant(state);
   if (harnessEnabled()) {
-    window.__despertar = { state, decision };
+    window.__despertar = { state, decision, api };
   }
 
   if (decision.source === 'server') {
@@ -477,11 +634,15 @@ async function init() {
           bought: result.bought,
           reducedMotion,
         });
-        if (result.shinyGained > 0) {
+        if (result.goldGained > 0) {
+          uiRef.renderer?.announceGoldFirst?.({ reducedMotion });
+        } else if (result.shinyGained > 0) {
           uiRef.renderer?.announceShinyFirst?.({ reducedMotion });
         }
       }
-      api.requestSync();
+      if (!state.isFreeShopping?.()) {
+        api.requestSync();
+      }
     },
     onBuyUpgrade: (id) => {
       const result = state.buyUpgrade(id);
@@ -490,7 +651,9 @@ async function init() {
         flashStyx({ reducedMotion });
         sealUpgradeIcon(document, id, { reducedMotion });
       }
-      api.requestSync();
+      if (!state.isFreeShopping?.()) {
+        api.requestSync();
+      }
     },
     onBuyTalent: async (id) => {
       try {
@@ -531,6 +694,9 @@ async function init() {
     },
     onAmortSeen: () => {
       state.markAmortSeen();
+    },
+    onLetheFirstUnlock: () => {
+      api.requestSync();
     },
   });
   uiRef.renderer = renderer;
@@ -585,6 +751,7 @@ async function init() {
     storage,
     userId: user.id,
     isAdmin: user.role === 'admin',
+    getState: () => stateRef.current,
   });
 
   harvestUi.show(catchUp.harvest);

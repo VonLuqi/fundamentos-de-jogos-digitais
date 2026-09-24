@@ -403,6 +403,61 @@
   transition: filter 160ms ease;
 }
 
+/* Fase E / E3 — cosmético foice_afilada (glow Styx) */
+.despertar-reap.has-cosmetic-blade_glow .despertar-reap__foice {
+  filter:
+    drop-shadow(0 0 8px rgba(0, 168, 150, 0.85))
+    drop-shadow(0 0 20px rgba(94, 234, 212, 0.55))
+    brightness(1.08);
+}
+
+.despertar-reap.has-cosmetic-blade_glow:hover .despertar-reap__foice {
+  filter:
+    drop-shadow(0 0 12px rgba(0, 168, 150, 0.95))
+    drop-shadow(0 0 26px rgba(94, 234, 212, 0.65))
+    brightness(1.12);
+}
+
+.despertar-reap.has-cosmetic-blade_glow:active .despertar-reap__foice {
+  filter:
+    drop-shadow(0 0 10px rgba(0, 168, 150, 0.8))
+    drop-shadow(0 0 16px rgba(94, 234, 212, 0.45))
+    brightness(1.05);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .despertar-reap.has-cosmetic-blade_glow .despertar-reap__foice {
+    animation: despertarBladeGlow 2.6s ease-in-out infinite;
+  }
+}
+
+@keyframes despertarBladeGlow {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 0 8px rgba(0, 168, 150, 0.75))
+      drop-shadow(0 0 18px rgba(94, 234, 212, 0.4))
+      brightness(1.06);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 14px rgba(0, 168, 150, 0.95))
+      drop-shadow(0 0 28px rgba(94, 234, 212, 0.7))
+      brightness(1.14);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .despertar-reap.has-cosmetic-blade_glow .despertar-reap__foice {
+    animation: none;
+    /* Glow estático — sem pulse */
+    filter:
+      drop-shadow(0 0 10px rgba(0, 168, 150, 0.8))
+      drop-shadow(0 0 18px rgba(94, 234, 212, 0.45))
+      brightness(1.08);
+  }
+}
+
 .despertar-reap__foice[hidden] {
   display: none;
 }
@@ -1305,6 +1360,17 @@
   display: none;
 }
 
+.despertar-upgrade-tooltip__mark {
+  margin: 0.45rem 0 0;
+  padding-top: 0.35rem;
+  border-top: 1px solid color-mix(in srgb, var(--despertar-styx) 35%, transparent);
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--despertar-styx-text, #00a896);
+}
+
 .despertar-upgrade-tooltip__shiny {
   margin: 0.3rem 0 0;
   font-family: var(--font-title);
@@ -1330,37 +1396,36 @@
   margin: 0 0 0.55rem;
 }
 
-.despertar-sealed-list {
+/* Fase F — grade densa Cookie (ícones ~32×32, gap 2px; tip #sealed-tooltip). */
+.despertar-sealed-icons {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.despertar-sealed-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  gap: 2px;
+  justify-content: start;
   max-width: 100%;
-  padding: 0.25rem 0.55rem 0.25rem 0.25rem;
-  border: 1px solid rgba(0, 168, 150, 0.35);
-  background: rgba(0, 168, 150, 0.08);
 }
 
-.despertar-sealed-chip__sprite {
-  width: 1.5rem;
-  height: 1.5rem;
-  flex: 0 0 auto;
+.despertar-sealed-icon {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.despertar-sealed-chip__name {
-  font-size: 0.82rem;
-  color: var(--hades-parchment);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.despertar-sealed-icons .despertar-upgrade-icon {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.1rem;
+  cursor: default;
+}
+
+.despertar-sealed-icons .despertar-upgrade-icon:hover,
+.despertar-sealed-icons .despertar-upgrade-icon:focus-visible {
+  border-color: var(--despertar-styx);
+  outline: 2px solid color-mix(in srgb, var(--despertar-styx) 50%, transparent);
+  outline-offset: 1px;
 }
 
 .despertar-col--store .despertar-col__river,
@@ -1617,6 +1682,64 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+.despertar-debug__setters,
+.despertar-debug__flags,
+.despertar-debug__shiny-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+
+.despertar-debug__setter-row,
+.despertar-debug__shiny-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.despertar-debug__setter-label {
+  flex: 0 0 5.5rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--hades-text-dim);
+}
+
+.despertar-debug__setter-input {
+  flex: 1 1 8rem;
+  min-height: 2.35rem;
+  padding: 0.35rem 0.55rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--hades-text);
+  background: rgba(10, 10, 15, 0.55);
+  border: 1px solid rgba(207, 167, 89, 0.35);
+}
+
+.despertar-debug__flag {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--hades-text);
+  cursor: pointer;
+}
+
+.despertar-debug__flag input {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--hades-gold);
+}
+
+.despertar-debug__hint {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--hades-text-dim);
 }
 
 .despertar-debug__grant {
@@ -1954,10 +2077,130 @@
   animation: despertarStyxFlash 760ms ease-out both;
 }
 
+.despertar-styx-flash.is-lethe {
+  background:
+    radial-gradient(ellipse at 65% 35%, rgba(168, 85, 247, 0.48), transparent 55%),
+    radial-gradient(ellipse at center, rgba(114, 9, 183, 0.22), transparent 70%);
+}
+
+.despertar-styx-flash.is-lethe.is-active {
+  animation: despertarLetheFlash 920ms ease-out both;
+}
+
 @keyframes despertarStyxFlash {
   0% { opacity: 0; }
   18% { opacity: 1; }
   100% { opacity: 0; }
+}
+
+@keyframes despertarLetheFlash {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Fase C / C1 — aba Lethe no first unlock */
+#tab-lethe.is-just-unlocked {
+  animation: despertarLetheTabUnlock 1.4s ease-out both;
+  color: var(--despertar-purple-text);
+  border-color: rgba(168, 85, 247, 0.7);
+  box-shadow:
+    0 0 0 1px rgba(168, 85, 247, 0.4),
+    0 0 18px rgba(168, 85, 247, 0.35);
+}
+
+@keyframes despertarLetheTabUnlock {
+  0% { filter: brightness(1.35); transform: scale(1.04); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tab-lethe.is-just-unlocked,
+  .despertar-styx-flash.is-lethe.is-active {
+    animation: none;
+  }
+
+  #tab-lethe.is-just-unlocked {
+    /* Destaque estático sem scale/brightness */
+    filter: none;
+    transform: none;
+  }
+}
+
+/* Fase C / C3 — toast tutorial não-bloqueante */
+.despertar-tutorial-toast {
+  position: fixed;
+  z-index: 48;
+  left: 50%;
+  bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(0.6rem);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  max-width: min(28rem, calc(100vw - 1.5rem));
+  padding: 0.7rem 0.85rem 0.7rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--despertar-purple-text) 55%, transparent);
+  background:
+    linear-gradient(165deg, rgba(28, 12, 36, 0.96), rgba(12, 10, 20, 0.96));
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+}
+
+.despertar-tutorial-toast.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.despertar-tutorial-toast[hidden] {
+  display: none !important;
+}
+
+.despertar-tutorial-toast__text {
+  margin: 0;
+  flex: 1 1 auto;
+  font-family: var(--font-body, 'Crimson Text', Georgia, serif);
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--despertar-purple-text) 88%, #f5f0ff);
+}
+
+.despertar-tutorial-toast__dismiss {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  border-radius: 2px;
+  background: rgba(168, 85, 247, 0.16);
+  color: var(--despertar-purple-text);
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.despertar-tutorial-toast__dismiss:hover,
+.despertar-tutorial-toast__dismiss:focus-visible {
+  background: rgba(168, 85, 247, 0.28);
+  outline: 2px solid rgba(168, 85, 247, 0.55);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .despertar-tutorial-toast {
+    transition: none;
+    transform: translateX(-50%);
+  }
+
+  .despertar-tutorial-toast.is-visible {
+    transform: translateX(-50%);
+  }
 }
 
 .despertar-lethe-overlay {

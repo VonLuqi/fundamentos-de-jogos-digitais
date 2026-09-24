@@ -18,10 +18,11 @@ import {
   describeUpgradeCard,
   isLetheOpen,
   isStyxUnlocked,
+  sortStyxVisible,
   upgradeRequirementText,
 } from '../js/hades-despertar/ui/UIRenderer.js';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
-import { applyHarnessGrant, harnessEnabled } from '../js/hades-despertar/ui/harness.js';
+import { applyHarnessGrant, harnessEnabled, syncDiagEnabled } from '../js/hades-despertar/ui/harness.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -61,19 +62,25 @@ staticAssert(boot.includes('applyHarnessGrant'), 'harness local no boot');
 
 const harnessSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/harness.js'), 'utf8');
 staticAssert(harnessSrc.includes("get('harness') === '1'"), 'query harness=1');
-staticAssert(harnessSrc.includes("host !== 'localhost'"), 'harness morto fora de localhost');
+staticAssert(harnessSrc.includes("host !== 'localhost'") || harnessSrc.includes("host === 'localhost'"), 'harness morto fora de localhost');
 
 const uiSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
 staticAssert(uiSrc.includes('styx-tooltip'), 'tooltip Styx no renderer');
 staticAssert(uiSrc.includes('is-sealing'), 'strip mantém ícone durante seal');
 staticAssert(uiSrc.includes('!view.owned'), 'owned some da strip');
 staticAssert(uiSrc.includes('#renderSealed') || uiSrc.includes('renderSealed'), 'Stats selados');
+staticAssert(uiSrc.includes('sortStyxVisible'), 'D3 sortStyxVisible');
+staticAssert(uiSrc.includes('catalogIndex'), 'D3 reordena por índice/custo');
+staticAssert(uiSrc.includes('_styxOrderSig') || uiSrc.includes('orderSig'), 'strip só reordena quando a ordem muda');
+staticAssert(uiSrc.includes("strip?.addEventListener?.('pointerleave'") || uiSrc.includes("addEventListener('pointerleave'"), 'strip pointerleave fecha tip');
 
 const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
 staticAssert(css.includes('despertar-upgrade-tooltip'), 'CSS tooltip');
 staticAssert(css.includes('is-affordable'), 'CSS affordable');
-staticAssert(css.includes('despertar-sealed-chip'), 'CSS chips selados');
+staticAssert(css.includes('despertar-sealed-icons'), 'CSS grade selados');
+staticAssert(!css.includes('despertar-sealed-chip'), 'sem chips largos selados');
 staticAssert(!css.includes('despertar-upgrade-icon__mark'), 'sem mark empilhado no ícone');
+staticAssert(html.includes('id="sealed-tooltip"'), 'F3: #sealed-tooltip');
 
 if (errors.length) {
   console.error('despertar-styx-smoke (estático):');
@@ -118,6 +125,129 @@ await run('F4: owned some da strip; requisito + Stats selados', () => {
 
   const def = UPGRADES.find((item) => item.id === 'cortejo_das_sombras');
   assert.match(upgradeRequirementText(def), /10/);
+});
+
+await run('D2: cadeia Foice — um elo revelado por vez', () => {
+  const FOICE = [
+    'foice_afilada',
+    'juramento_acheron',
+    'pacto_das_margens',
+    'ceifador_ctoniano',
+    'colheita_eterna',
+  ];
+  const state = new GameState({ souls: '100000', generators: { wandering_shade: 1 } });
+
+  const countRevealedUnowned = () => FOICE.filter((id) => {
+    const view = describeUpgradeCard(state, id);
+    return view.revealed && !view.owned;
+  });
+
+  assert.deepEqual(countRevealedUnowned(), ['foice_afilada']);
+  assert.equal(describeUpgradeCard(state, 'juramento_acheron').revealed, false);
+  assert.equal(state.buyUpgrade('juramento_acheron').ok, false, 'não compra N+1 sem N');
+
+  assert.equal(state.buyUpgrade('foice_afilada').ok, true);
+  assert.deepEqual(countRevealedUnowned(), ['juramento_acheron']);
+  assert.match(
+    describeUpgradeCard(state, 'juramento_acheron').requirement,
+    /Foice Afiada/,
+  );
+
+  assert.equal(state.buyUpgrade('juramento_acheron').ok, true);
+  assert.deepEqual(countRevealedUnowned(), ['pacto_das_margens']);
+
+  assert.equal(state.buyUpgrade('pacto_das_margens').ok, true);
+  assert.deepEqual(countRevealedUnowned(), ['ceifador_ctoniano']);
+
+  assert.equal(state.buyUpgrade('ceifador_ctoniano').ok, true);
+  assert.deepEqual(countRevealedUnowned(), ['colheita_eterna']);
+
+  assert.equal(state.buyUpgrade('colheita_eterna').ok, true);
+  assert.deepEqual(countRevealedUnowned(), []);
+});
+
+await run('D2: save mid-cadeia sem soft-lock (owned N+1 sem N)', () => {
+  const mid = new GameState({
+    souls: '1000',
+    generators: { wandering_shade: 1 },
+    upgrades: ['juramento_acheron'],
+  });
+  assert.ok(mid.upgrades.includes('juramento_acheron'));
+  assert.equal(cmp(mid.clickPower(), '2'), 0, 'efeito do owned permanece');
+  assert.equal(describeUpgradeCard(mid, 'juramento_acheron').owned, true);
+  assert.equal(describeUpgradeCard(mid, 'juramento_acheron').revealed, true, 'owned permanece');
+  assert.equal(describeUpgradeCard(mid, 'juramento_acheron').canBuy, false);
+  assert.equal(describeUpgradeCard(mid, 'foice_afilada').revealed, true, 'elo anterior ainda comprável');
+  assert.equal(describeUpgradeCard(mid, 'foice_afilada').canBuy, true);
+  // Próximo elo exige acheron — que já está owned — então revela (sem soft-lock).
+  assert.equal(describeUpgradeCard(mid, 'pacto_das_margens').revealed, true);
+  assert.equal(mid.buyUpgrade('foice_afilada').ok, true);
+  assert.ok(mid.upgrades.includes('foice_afilada'));
+  assert.ok(mid.upgrades.includes('juramento_acheron'));
+});
+
+await run('D3: sortStyxVisible — 2 affordáveis + 1 caro → baratos primeiro', () => {
+  assert.deepEqual(
+    sortStyxVisible([
+      { id: 'expensive', canBuy: true, cost: '1000', catalogIndex: 0 },
+      { id: 'locked', canBuy: false, cost: '50', catalogIndex: 1 },
+      { id: 'cheap', canBuy: true, cost: '100', catalogIndex: 2 },
+    ]),
+    ['cheap', 'expensive', 'locked'],
+  );
+
+  // Integração com cards reais: foice+umbras affordáveis; cortejo revelado mas caro.
+  const state = new GameState({
+    souls: '150',
+    generators: { wandering_shade: 10 },
+  });
+  const visible = [];
+  UPGRADES.forEach((def, catalogIndex) => {
+    const view = describeUpgradeCard(state, def.id);
+    if (!view?.revealed || view.owned) return;
+    visible.push({
+      id: def.id,
+      canBuy: view.canBuy,
+      cost: view.cost,
+      catalogIndex,
+    });
+  });
+  assert.ok(visible.some((c) => c.id === 'foice_afilada' && c.canBuy));
+  assert.ok(visible.some((c) => c.id === 'umbras_despertas' && c.canBuy));
+  assert.ok(visible.some((c) => c.id === 'cortejo_das_sombras' && !c.canBuy));
+  const order = sortStyxVisible(visible);
+  const iFoice = order.indexOf('foice_afilada');
+  const iUmbras = order.indexOf('umbras_despertas');
+  const iCortejo = order.indexOf('cortejo_das_sombras');
+  assert.ok(iFoice >= 0 && iUmbras >= 0 && iCortejo >= 0);
+  assert.ok(iFoice < iCortejo && iUmbras < iCortejo, 'affordáveis antes do caro');
+  // Ambos a 100: empate por custo → ordem de catálogo (foice antes de umbras).
+  assert.ok(iFoice < iUmbras, 'empate de custo preserva catálogo');
+});
+
+await run('D3: após foice_afilada, juramento_acheron entra na strip', () => {
+  const state = new GameState({ souls: '600', generators: { wandering_shade: 1 } });
+  assert.equal(describeUpgradeCard(state, 'juramento_acheron').revealed, false);
+  assert.equal(state.buyUpgrade('foice_afilada').ok, true);
+  const next = describeUpgradeCard(state, 'juramento_acheron');
+  assert.equal(next.revealed, true);
+  assert.equal(next.canBuy, true);
+  const order = sortStyxVisible([
+    {
+      id: 'juramento_acheron',
+      canBuy: next.canBuy,
+      cost: next.cost,
+      catalogIndex: UPGRADES.findIndex((u) => u.id === 'juramento_acheron'),
+    },
+    {
+      id: 'umbras_despertas',
+      canBuy: true,
+      cost: '100',
+      catalogIndex: UPGRADES.findIndex((u) => u.id === 'umbras_despertas'),
+    },
+  ]);
+  // umbras 100 barato antes de acheron 500
+  assert.deepEqual(order, ['umbras_despertas', 'juramento_acheron']);
 });
 
 await run('Styx trancado no minuto zero; abre com 1 gerador ou 100 almas', () => {
@@ -217,6 +347,14 @@ await run('harness só em localhost com ?harness=1; concede 1e9', () => {
   assert.equal(cmp(state.runSouls, '1000000000'), 0);
   assert.equal(state.canPrestige(), true);
   assert.equal(applyHarnessGrant(state, { hostname: 'localhost', search: '?harness=1' }), false);
+});
+
+await run('syncDiag: harness=1 ou syncDiag=1 só em localhost (Fase A A1)', () => {
+  assert.equal(syncDiagEnabled({ hostname: 'example.com', search: '?syncDiag=1' }), false);
+  assert.equal(syncDiagEnabled({ hostname: 'localhost', search: '' }), false);
+  assert.equal(syncDiagEnabled({ hostname: 'localhost', search: '?syncDiag=1' }), true);
+  assert.equal(syncDiagEnabled({ hostname: 'localhost', search: '?harness=1' }), true);
+  assert.equal(syncDiagEnabled({ hostname: '127.0.0.1', search: '?syncDiag=1' }), true);
 });
 
 console.log(`\ndespertar-styx-smoke: ${passed} passed, ${failed} failed`);

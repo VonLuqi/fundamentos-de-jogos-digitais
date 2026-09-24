@@ -104,7 +104,7 @@ run('effectiveUnitSPS shiny aplica SHINY_MULT', () => {
   const base = effectiveUnitSPS({ generatorId: 'wandering_shade', shiny: false });
   const shiny = effectiveUnitSPS({ generatorId: 'wandering_shade', shiny: true });
   assert.equal(shiny, mul(base, SHINY_MULT));
-  assert.equal(SHINY_MULT, '2');
+  assert.equal(SHINY_MULT, '15');
 });
 
 run('effectiveUnitSPS alinhado a calculateTotalSPS / qty', () => {

@@ -253,6 +253,7 @@ CREATE TABLE IF NOT EXISTS despertar_states (
   prestige_count integer NOT NULL DEFAULT 0,
   generators_state jsonb NOT NULL DEFAULT '{}'::jsonb,
   shiny_counts jsonb NOT NULL DEFAULT '{}'::jsonb,
+  gold_counts jsonb NOT NULL DEFAULT '{}'::jsonb,
   upgrades_state jsonb NOT NULL DEFAULT '[]'::jsonb,
   talents_state jsonb NOT NULL DEFAULT '[]'::jsonb,
   edu_logs_seen jsonb NOT NULL DEFAULT '[]'::jsonb,
@@ -278,8 +279,9 @@ ALTER TABLE despertar_states ENABLE ROW LEVEL SECURITY;
 -- Sem policies de INSERT/UPDATE para anon/authenticated.
 -- O backend usa SUPABASE_SERVICE_ROLE_KEY (bypass RLS), igual ao restante do Domínio.
 
--- Fase B / B3 + G4.3: RPC híbrida (persist + award). Espelho de
--- db/migrate-2026-09-22-despertar-shiny-counts.sql (coluna shiny_counts + CASE no patch).
+-- Fase B / B3 + G4.3 + gold: RPC híbrida (persist + award). Espelho de
+-- db/migrate-2026-09-22-despertar-shiny-counts.sql e
+-- db/migrate-2026-09-22-despertar-gold-counts.sql (shiny_counts / gold_counts + CASE no patch).
 CREATE OR REPLACE FUNCTION public.despertar_persist_and_award(
   p_user_id integer,
   p_patch jsonb,
@@ -316,6 +318,7 @@ BEGIN
     prestige_count = CASE WHEN v_patch ? 'prestige_count' THEN (v_patch->>'prestige_count')::integer ELSE ds.prestige_count END,
     generators_state = CASE WHEN v_patch ? 'generators_state' THEN COALESCE(v_patch->'generators_state', '{}'::jsonb) ELSE ds.generators_state END,
     shiny_counts = CASE WHEN v_patch ? 'shiny_counts' THEN COALESCE(v_patch->'shiny_counts', '{}'::jsonb) ELSE ds.shiny_counts END,
+    gold_counts = CASE WHEN v_patch ? 'gold_counts' THEN COALESCE(v_patch->'gold_counts', '{}'::jsonb) ELSE ds.gold_counts END,
     upgrades_state = CASE WHEN v_patch ? 'upgrades_state' THEN COALESCE(v_patch->'upgrades_state', '[]'::jsonb) ELSE ds.upgrades_state END,
     talents_state = CASE WHEN v_patch ? 'talents_state' THEN COALESCE(v_patch->'talents_state', '[]'::jsonb) ELSE ds.talents_state END,
     edu_logs_seen = CASE WHEN v_patch ? 'edu_logs_seen' THEN COALESCE(v_patch->'edu_logs_seen', '[]'::jsonb) ELSE ds.edu_logs_seen END,

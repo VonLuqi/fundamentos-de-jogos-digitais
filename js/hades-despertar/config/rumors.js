@@ -17,7 +17,10 @@ export const RUMOR_ROTATE_MS = 14_000;
 export const RUMOR_INTERRUPT_MS = 18_000;
 
 export const SHINY_FIRST_TICKER =
-  'Rumor: uma sombra nasceu invertida sob a Foice — o Submundo piscou o olho.';
+  'Rumor: uma sombra nasceu em negativo sob a Foice — o Submundo piscou o olho.';
+
+export const GOLD_FIRST_TICKER =
+  'Rumor: uma sombra veio dourada do Cocytus — até Caronte contou as moedas duas vezes.';
 
 /** Sync / Juízes — prioridade máxima (também em constants.js). */
 export { JUDGES_REFUSED_TICKER };

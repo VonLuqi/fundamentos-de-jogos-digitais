@@ -44,6 +44,24 @@
     </div>
   </div>
 
+  <!-- Fase C / C3: toast tutorial leve (não bloqueia) -->
+  <div
+    class="despertar-tutorial-toast"
+    id="despertar-tutorial-toast"
+    role="status"
+    aria-live="polite"
+    hidden
+  >
+    <p class="despertar-tutorial-toast__text" id="despertar-tutorial-toast-text"></p>
+    <button
+      type="button"
+      class="despertar-tutorial-toast__dismiss"
+      id="despertar-tutorial-toast-dismiss"
+    >
+      Entendi
+    </button>
+  </div>
+
   <div
     class="despertar-modal"
     id="despertar-harvest-modal"
@@ -329,7 +347,7 @@
               <section class="despertar-sealed" id="despertar-sealed-juramentos" aria-labelledby="sealed-heading">
                 <h3 class="despertar-subsection" id="sealed-heading">Juramentos selados</h3>
                 <p class="despertar-empty" id="sealed-empty">Nenhum juramento selado nesta corrida.</p>
-                <ul class="despertar-sealed-list" id="sealed-list" hidden></ul>
+                <ul class="despertar-sealed-icons" id="sealed-list" hidden></ul>
               </section>
             </div>
 
@@ -405,6 +423,71 @@
                   <button class="despertar-debug__grant" type="button" data-debug-grant="verdicts_40">+40 vereditos</button>
                 </div>
 
+                <h4 class="despertar-debug__label">Definir valor absoluto</h4>
+                <div class="despertar-debug__setters" role="group" aria-label="Definir recursos absolutos">
+                  <div class="despertar-debug__setter-row">
+                    <label class="despertar-debug__setter-label" for="despertar-debug-set-souls">Almas</label>
+                    <input class="despertar-debug__setter-input" id="despertar-debug-set-souls" type="text" inputmode="decimal" data-debug-set="souls" placeholder="ex.: 1e12" autocomplete="off" />
+                    <button class="despertar-debug__grant" type="button" data-debug-apply="souls">Aplicar</button>
+                  </div>
+                  <div class="despertar-debug__setter-row">
+                    <label class="despertar-debug__setter-label" for="despertar-debug-set-obols">Óbolos</label>
+                    <input class="despertar-debug__setter-input" id="despertar-debug-set-obols" type="text" inputmode="decimal" data-debug-set="obols" placeholder="0" autocomplete="off" />
+                    <button class="despertar-debug__grant" type="button" data-debug-apply="obols">Aplicar</button>
+                  </div>
+                  <div class="despertar-debug__setter-row">
+                    <label class="despertar-debug__setter-label" for="despertar-debug-set-mnemosyne">Essência</label>
+                    <input class="despertar-debug__setter-input" id="despertar-debug-set-mnemosyne" type="text" inputmode="decimal" data-debug-set="mnemosyne" placeholder="0" autocomplete="off" />
+                    <button class="despertar-debug__grant" type="button" data-debug-apply="mnemosyne">Aplicar</button>
+                  </div>
+                  <div class="despertar-debug__setter-row">
+                    <label class="despertar-debug__setter-label" for="despertar-debug-set-verdicts">Vereditos</label>
+                    <input class="despertar-debug__setter-input" id="despertar-debug-set-verdicts" type="text" inputmode="numeric" data-debug-set="verdicts" placeholder="0" autocomplete="off" />
+                    <button class="despertar-debug__grant" type="button" data-debug-apply="verdicts">Aplicar</button>
+                  </div>
+                </div>
+
+                <h4 class="despertar-debug__label">Modo de teste</h4>
+                <div class="despertar-debug__flags" role="group" aria-label="Flags de teste locais">
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-debug-flag="freeShopping" id="despertar-debug-flag-freeShopping" />
+                    Compras gratuitas
+                  </label>
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-debug-flag="forceShiny" id="despertar-debug-flag-forceShiny" />
+                    Forçar negativos
+                  </label>
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-debug-flag="forceGold" id="despertar-debug-flag-forceGold" />
+                    Forçar gold
+                  </label>
+                  <button class="despertar-ghost" type="button" id="despertar-debug-exit-test" data-debug-action="exitTestMode">
+                    Sair do modo teste
+                  </button>
+                </div>
+                <p class="despertar-debug__hint">
+                  Negativo natural = 0,5% (×15); gold = 2% (×2) por unidade (mutuamente exclusivos; negativo tem prioridade). Compras gratuitas não sincronizam com o Submundo.
+                </p>
+
+                <h4 class="despertar-debug__label">Raridade na linha</h4>
+                <div class="despertar-debug__shiny-line" role="group" aria-label="Marcar raridade na linha">
+                  <label class="despertar-debug__setter-label" for="despertar-debug-shiny-line">Gerador</label>
+                  <select class="despertar-debug__setter-input" id="despertar-debug-shiny-line" data-debug-shiny-line>
+                    <option value="wandering_shade">Sombra Vagante</option>
+                    <option value="charon_servants">Servos de Caronte</option>
+                    <option value="cerberian_hound">Cão Cerberiano</option>
+                    <option value="tartarus_judge">Juiz do Tártaro</option>
+                    <option value="phlegethon_forge">Forja de Phlegethon</option>
+                    <option value="obsidian_throne">Trono de Obsidiana</option>
+                  </select>
+                  <button class="despertar-debug__grant" type="button" id="despertar-debug-shiny-half" data-debug-action="shinyHalf">
+                    Marcar 50% negativo
+                  </button>
+                  <button class="despertar-debug__grant" type="button" id="despertar-debug-gold-half" data-debug-action="goldHalf">
+                    Marcar 50% gold
+                  </button>
+                </div>
+
                 <p class="despertar-debug__status" id="despertar-debug-status" role="status" aria-live="polite"></p>
               </div>
             </div>
@@ -431,6 +514,17 @@
         </div>
       </main>
     </div>
+  </div>
+
+  <div
+    id="sealed-tooltip"
+    class="despertar-upgrade-tooltip"
+    role="tooltip"
+    hidden
+  >
+    <p class="despertar-upgrade-tooltip__name" data-tip="name"></p>
+    <p class="despertar-upgrade-tooltip__blurb" data-tip="blurb"></p>
+    <p class="despertar-upgrade-tooltip__mark" data-tip="mark">Selado</p>
   </div>
 
   <script type="module" src="../js/hades-despertar/index.js"></script>

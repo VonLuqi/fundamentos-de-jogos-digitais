@@ -6,8 +6,43 @@
  */
 
 import { GENERATORS } from '../../config/generators.js';
+import {
+  activeCosmetics,
+  cosmeticsForGenerator,
+  indexMatchesCoverage,
+} from '../../config/upgrade-cosmetics.js';
 import { setMarqueeTextIfOverflow } from '../Marquee.js';
+import {
+  shinyChromaticPx,
+  shinyGlitchNow,
+  shinyTearBands,
+} from './shinyGlitch.js';
+import {
+  GOLD_ACCENT,
+  GOLD_BODY,
+  GOLD_BORDER,
+  GOLD_SHADOW,
+  drawImageAsGold,
+  goldPulse,
+  paintGoldAura,
+  paintGoldSparkles,
+} from './goldJuice.js';
 import { loadGeneratorImage } from './SpriteAtlas.js';
+import { unitRarityAt } from './unitRarity.js';
+
+/**
+ * Resolve raridade a partir de opts `{ rarity }` ou `{ shiny, gold }`.
+ * @param {{ rarity?: string, shiny?: boolean, gold?: boolean }} [opts]
+ * @returns {'normal'|'gold'|'negativo'}
+ */
+function rarityFromOpts(opts = {}) {
+  if (opts.rarity === 'gold' || opts.rarity === 'negativo' || opts.rarity === 'normal') {
+    return opts.rarity;
+  }
+  if (opts.gold) return 'gold';
+  if (opts.shiny) return 'negativo';
+  return 'normal';
+}
 
 /**
  * Teto de segurança de sprites por prateleira (não o “máx. Cookie” antigo de 40).
@@ -190,8 +225,8 @@ export function drawShelfCellHighlight(ctx, cellX, cellY, cell = SHELF_CELL) {
 }
 
 /**
- * Lê shinyCount de um gerador no state (gancho G4; default 0).
- * Convenção: primeiros `shinyCount` índices são shiny.
+ * Lê shinyCount (negativo) de um gerador no state (gancho G4; default 0).
+ * Convenção de índice: 0..shiny-1 = negativo; shiny..shiny+gold-1 = gold.
  *
  * @param {object|null|undefined} state
  * @param {string} generatorId
@@ -212,8 +247,31 @@ export function shinyCountFromState(state, generatorId, visualCap = Infinity) {
 }
 
 /**
+ * Lê goldCount de um gerador no state (default 0).
+ * Convenção: índices 0..shinyCount-1 = negativo; seguintes = gold.
+ *
+ * @param {object|null|undefined} state
+ * @param {string} generatorId
+ * @param {number} [visualCap]
+ */
+export function goldCountFromState(state, generatorId, visualCap = Infinity) {
+  if (!state || !generatorId) return 0;
+  let raw = 0;
+  if (typeof state.goldCounts === 'function') {
+    const map = state.goldCounts();
+    raw = Number(map?.[generatorId] || 0);
+  } else if (state.goldCounts && typeof state.goldCounts === 'object') {
+    raw = Number(state.goldCounts[generatorId] || 0);
+  }
+  const cap = Number.isFinite(visualCap) ? Math.max(0, Math.floor(visualCap)) : Infinity;
+  const n = Math.max(0, Math.floor(raw) || 0);
+  return Number.isFinite(cap) ? Math.min(cap, n) : n;
+}
+
+/**
  * drawImage com object-fit: contain dentro da célula (nunca stretch assimétrico).
- * Shiny (G4.2 / Q11): invert + glow Styx; reduced-motion = borda dourada.
+ * Gold: glow dourado quente (sem invert/glitch); reduced = borda dourada.
+ * Negativo (legacy shiny): invert + glow + glitch; reduced = borda dourada.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {CanvasImageSource} img
@@ -221,11 +279,13 @@ export function shinyCountFromState(state, generatorId, visualCap = Infinity) {
  * @param {number} cellY
  * @param {number} [cell]
  * @param {number} [bobY]
- * @param {{ shiny?: boolean, reducedMotion?: boolean }} [opts]
+ * @param {{ rarity?: 'gold'|'negativo'|false, shiny?: boolean, gold?: boolean, reducedMotion?: boolean }} [opts]
  */
 export function drawContainedInCell(ctx, img, cellX, cellY, cell = SHELF_CELL, bobY = 0, opts = {}) {
   if (!ctx || !img) return;
-  const shiny = Boolean(opts.shiny);
+  const rarity = rarityFromOpts(opts);
+  const isGold = rarity === 'gold';
+  const isNegativo = rarity === 'negativo';
   const reduced = Boolean(opts.reducedMotion);
   const iw = Number(img.naturalWidth || img.width) || 1;
   const ih = Number(img.naturalHeight || img.height) || 1;
@@ -240,21 +300,69 @@ export function drawContainedInCell(ctx, img, cellX, cellY, cell = SHELF_CELL, b
   ctx.imageSmoothingEnabled = true;
   if (prevQuality != null) ctx.imageSmoothingQuality = 'high';
 
-  if (shiny) {
+  const drawInvertSprite = (ox = 0) => {
+    if (typeof ctx.filter === 'string' || 'filter' in ctx) {
+      ctx.filter = 'invert(1) hue-rotate(180deg)';
+    }
+    ctx.drawImage(img, dx + ox, dy, dw, dh);
+    if (typeof ctx.filter === 'string' || 'filter' in ctx) {
+      ctx.filter = 'none';
+    }
+  };
+
+  if (isGold) {
+    const midX = cellX + cell / 2;
+    const midY = cellY + cell / 2 + bobY;
     if (reduced) {
-      ctx.strokeStyle = 'rgba(207, 167, 89, 0.95)';
+      ctx.strokeStyle = GOLD_BORDER;
+      ctx.lineWidth = 1.75;
+      ctx.strokeRect(cellX + 0.75, cellY + 0.75 + bobY, cell - 1.5, cell - 1.5);
+      drawImageAsGold(ctx, img, dx, dy, dw, dh, { reducedMotion: true, pulse: 0.7 });
+    } else {
+      const t = shinyGlitchNow();
+      const pulse = goldPulse(t);
+      paintGoldAura(ctx, midX, midY, cell * 0.58, pulse);
+      drawImageAsGold(ctx, img, dx, dy, dw, dh, {
+        pulse,
+        reducedMotion: false,
+        shadowBlur: 12 + pulse * 14,
+      });
+      paintGoldSparkles(ctx, midX, midY, cell * 0.48, t);
+    }
+  } else if (isNegativo) {
+    if (reduced) {
+      ctx.strokeStyle = GOLD_BORDER;
       ctx.lineWidth = 1.5;
       ctx.strokeRect(cellX + 0.75, cellY + 0.75 + bobY, cell - 1.5, cell - 1.5);
+      ctx.drawImage(img, dx, dy, dw, dh);
     } else {
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.85)';
-      ctx.shadowBlur = 10;
-      if (typeof ctx.filter === 'string' || 'filter' in ctx) {
-        ctx.filter = 'invert(1) hue-rotate(180deg)';
+      const t = shinyGlitchNow();
+      const chroma = shinyChromaticPx(t);
+      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowBlur = 12;
+      drawInvertSprite(0);
+      ctx.shadowBlur = 0;
+
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      ctx.globalCompositeOperation = 'screen';
+      drawInvertSprite(-chroma);
+      drawInvertSprite(chroma);
+      ctx.restore();
+
+      for (const band of shinyTearBands(cellY + bobY, cell, t)) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(cellX - 4, band.y, cell + 8, band.h);
+        ctx.clip();
+        drawInvertSprite(band.dx);
+        ctx.restore();
       }
     }
+  } else {
+    ctx.drawImage(img, dx, dy, dw, dh);
   }
 
-  ctx.drawImage(img, dx, dy, dw, dh);
   ctx.restore();
   ctx.imageSmoothingEnabled = prev;
   if (prevQuality != null) ctx.imageSmoothingQuality = prevQuality;
@@ -304,7 +412,8 @@ export function prefersReducedMotion(matchMediaFn) {
 
 /**
  * Silhueta flat centrada na célula (escala para caber sem distorcer).
- * Shiny (G4.2): invert de cores + glow; reduced = borda dourada.
+ * Gold: corpo/glow quentes (sem invert/glitch); reduced = borda dourada.
+ * Negativo (legacy shiny): invert de cores + glow + glitch; reduced = borda dourada.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} cellX
@@ -312,56 +421,177 @@ export function prefersReducedMotion(matchMediaFn) {
  * @param {number} tier
  * @param {number} [bobY]
  * @param {number} [cell]
- * @param {{ shiny?: boolean, reducedMotion?: boolean }} [opts]
+ * @param {{ rarity?: 'gold'|'negativo'|false, shiny?: boolean, gold?: boolean, reducedMotion?: boolean }} [opts]
  */
 export function drawNpcSilhouette(ctx, cellX, cellY, tier, bobY = 0, cell = SHELF_CELL, opts = {}) {
-  const shiny = Boolean(opts.shiny);
+  const rarity = rarityFromOpts(opts);
+  const isGold = rarity === 'gold';
+  const isNegativo = rarity === 'negativo';
   const reduced = Boolean(opts.reducedMotion);
   const palette = TIER_PALETTE[tier] || TIER_PALETTE[1];
-  const body = shiny && !reduced ? 'rgba(242, 232, 220, 0.95)' : palette.body;
-  const accent = shiny && !reduced ? 'rgba(217, 4, 41, 0.9)' : palette.accent;
+  let body = palette.body;
+  let accent = palette.accent;
+  if (isGold) {
+    // Sempre ouro no corpo (reduced também) — não só a sombra.
+    body = GOLD_BODY;
+    accent = GOLD_ACCENT;
+  } else if (isNegativo && !reduced) {
+    body = 'rgba(242, 232, 220, 0.95)';
+    accent = 'rgba(217, 4, 41, 0.9)';
+  }
   const s = cell / 24;
   const cx = cellX + cell / 2;
   const cy = cellY + cell / 2 + bobY + 1 * s;
+
+  const paintFigure = (bodyColor, accentColor) => {
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.ellipse(0, -1, 5.5, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(0, -11, 4.2, 4.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 0.35;
+    ctx.fillStyle = accentColor;
+    ctx.beginPath();
+    ctx.ellipse(0, 6, 6, 2.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = accentColor;
+    ctx.beginPath();
+    ctx.ellipse(-1.6, -11, 0.9, 0.75, 0, 0, Math.PI * 2);
+    ctx.ellipse(1.6, -11, 0.9, 0.75, 0, 0, Math.PI * 2);
+    ctx.fill();
+  };
 
   ctx.save();
   ctx.translate(cx, cy);
   ctx.scale(s, s);
 
-  if (shiny) {
+  if (isGold) {
     if (reduced) {
-      ctx.strokeStyle = 'rgba(207, 167, 89, 0.95)';
+      ctx.strokeStyle = GOLD_BORDER;
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.arc(0, -2, 12, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowColor = GOLD_SHADOW;
+      ctx.shadowBlur = 8;
+      paintFigure(body, accent);
+      ctx.shadowBlur = 0;
+    } else {
+      const t = shinyGlitchNow();
+      const pulse = goldPulse(t);
+      // aura em coords locais (já translate+scale)
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      paintGoldAura(ctx, cx, cy, cell * 0.55, pulse);
+      ctx.restore();
+      ctx.shadowColor = GOLD_SHADOW;
+      ctx.shadowBlur = 14 + pulse * 12;
+      paintFigure(body, accent);
+      // highlight warm ghost
+      ctx.save();
+      ctx.globalAlpha = 0.35 + pulse * 0.2;
+      ctx.globalCompositeOperation = 'screen';
+      paintFigure('rgba(255, 236, 180, 0.9)', 'rgba(255, 248, 220, 0.95)');
+      ctx.restore();
+      ctx.shadowBlur = 0;
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      paintGoldSparkles(ctx, cx, cy, cell * 0.45, t);
+      ctx.restore();
+    }
+  } else if (isNegativo) {
+    if (reduced) {
+      ctx.strokeStyle = GOLD_BORDER;
       ctx.lineWidth = 1.4;
       ctx.beginPath();
       ctx.arc(0, -2, 12, 0, Math.PI * 2);
       ctx.stroke();
+      paintFigure(body, accent);
     } else {
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.85)';
-      ctx.shadowBlur = 10;
+      const t = shinyGlitchNow();
+      const chroma = shinyChromaticPx(t) / Math.max(s, 0.01);
+      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowBlur = 12;
+      paintFigure(body, accent);
+      ctx.shadowBlur = 0;
+
+      ctx.save();
+      ctx.globalAlpha = 0.45;
+      ctx.globalCompositeOperation = 'screen';
+      ctx.translate(-chroma, 0);
+      paintFigure('rgba(0, 255, 220, 0.85)', 'rgba(255, 40, 80, 0.9)');
+      ctx.translate(chroma * 2, 0);
+      paintFigure('rgba(255, 40, 120, 0.85)', 'rgba(0, 255, 200, 0.9)');
+      ctx.restore();
+
+      for (const band of shinyTearBands(cellY + bobY, cell, t)) {
+        const localY = (band.y - (cellY + bobY) - cell / 2) / s;
+        const localH = band.h / s;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(-14, localY, 28, Math.max(0.4, localH));
+        ctx.clip();
+        ctx.translate(band.dx / s, 0);
+        paintFigure(body, accent);
+        ctx.restore();
+      }
     }
+  } else {
+    paintFigure(body, accent);
   }
 
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.ellipse(0, -1, 5.5, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
-  ctx.ellipse(0, -11, 4.2, 4.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = accent;
-  ctx.beginPath();
-  ctx.ellipse(0, 6, 6, 2.2, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = accent;
-  ctx.beginPath();
-  ctx.ellipse(-1.6, -11, 0.9, 0.75, 0, 0, Math.PI * 2);
-  ctx.ellipse(1.6, -11, 0.9, 0.75, 0, 0, Math.PI * 2);
-  ctx.fill();
-
   ctx.restore();
+}
+
+/**
+ * Overlay procedural de accessory (Fase E / E2).
+ * P0: `hat_charon` = triângulo + aba na cor do tier.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} accessory
+ * @param {number} cellX
+ * @param {number} cellY
+ * @param {number} [cell]
+ * @param {number} [bobY]
+ * @param {{ tier?: number }} [opts]
+ */
+export function drawAccessory(ctx, accessory, cellX, cellY, cell = SHELF_CELL, bobY = 0, opts = {}) {
+  if (!ctx || !accessory) return false;
+  const id = String(accessory);
+  const tier = Number(opts.tier) || 2;
+  const palette = TIER_PALETTE[tier] || TIER_PALETTE[2];
+  const x = Number(cellX) || 0;
+  const y = (Number(cellY) || 0) + (Number(bobY) || 0);
+  const s = Number(cell) > 0 ? Number(cell) : SHELF_CELL;
+
+  if (id === 'hat_charon') {
+    const cx = x + s * 0.5;
+    const peak = y + s * 0.06;
+    const brimY = y + s * 0.3;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cx, peak);
+    ctx.lineTo(x + s * 0.2, brimY);
+    ctx.lineTo(x + s * 0.8, brimY);
+    ctx.closePath();
+    ctx.fillStyle = palette.accent;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(242, 232, 220, 0.5)';
+    ctx.lineWidth = Math.max(1, s * 0.03);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + s * 0.12, brimY);
+    ctx.lineTo(x + s * 0.88, brimY);
+    ctx.strokeStyle = palette.accent;
+    ctx.lineWidth = Math.max(1.2, s * 0.04);
+    ctx.stroke();
+    ctx.restore();
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -407,7 +637,7 @@ export class WorldView {
     this._dpr = shelfDevicePixelRatio();
     this._resizeObserver = null;
     this._onVisibility = () => this.#onVisibility();
-    /** @type {((hit: { generatorId: string, index: number, shiny: boolean }|null, event?: PointerEvent) => void)|null} */
+    /** @type {((hit: { generatorId: string, index: number, rarity?: string, shiny: boolean, gold?: boolean }|null, event?: PointerEvent) => void)|null} */
     this.onNpcHover = typeof options.onNpcHover === 'function' ? options.onNpcHover : null;
     this._hoverKey = null;
     /** @type {{ generatorId: string, index: number }|null} */
@@ -475,6 +705,9 @@ export class WorldView {
         sprite: null,
         spriteTried: false,
         shinyCount: 0,
+        goldCount: 0,
+        cosmetics: [],
+        cosmeticSig: '',
       };
       this.#layoutShelf(nodes);
       this.#bindShelfPointer(nodes);
@@ -506,6 +739,7 @@ export class WorldView {
       ? state.quantities()
       : (state.generators || {});
     const souls = state.souls ?? '0';
+    const cosmeticsActive = activeCosmetics(state);
     let any = false;
     let sprites = 0;
     const weights = {};
@@ -522,6 +756,8 @@ export class WorldView {
       if (!show) {
         if (nodes.count !== 0) {
           nodes.count = 0;
+          nodes.cosmetics = [];
+          nodes.cosmeticSig = '';
           this.#paintShelf(nodes, true);
         }
         nodes.motes?.replaceChildren?.();
@@ -535,8 +771,18 @@ export class WorldView {
       nodes.shelf.removeAttribute?.('title');
       nodes.shelf.title = '';
       const nextShiny = shinyCountFromState(state, def.id, visual);
-      const shinyChanged = nextShiny !== (nodes.shinyCount || 0);
+      const nextGold = goldCountFromState(state, def.id, visual);
+      const rarityChanged = nextShiny !== (nodes.shinyCount || 0)
+        || nextGold !== (nodes.goldCount || 0);
       nodes.shinyCount = nextShiny;
+      nodes.goldCount = nextGold;
+      const shelfCosmetics = cosmeticsForGenerator(cosmeticsActive, def.id);
+      const cosSig = shelfCosmetics
+        .map((c) => `${c.upgradeId}:${c.accessory}:${c.coverage}`)
+        .join('|');
+      const cosChanged = cosSig !== (nodes.cosmeticSig || '');
+      nodes.cosmetics = shelfCosmetics;
+      nodes.cosmeticSig = cosSig;
       this.#refreshShelfLabel(nodes);
       weights[def.id] = shelfLineMoteWeight(qty, def.baseRate);
 
@@ -553,7 +799,7 @@ export class WorldView {
         this._pendingBuyPulse = null;
         nodes._needsPaint = true;
       }
-      if (countChanged || shinyChanged || nodes._needsPaint) {
+      if (countChanged || rarityChanged || cosChanged || nodes._needsPaint) {
         nodes._needsPaint = false;
         this.#paintShelf(nodes, true);
       }
@@ -742,6 +988,8 @@ export class WorldView {
     const n = Math.min(count, this.cap);
     const bobAmp = Math.max(1.2, SHELF_CELL * 0.06);
     const shinyCount = Math.max(0, Math.floor(Number(nodes.shinyCount) || 0));
+    const goldCount = Math.max(0, Math.floor(Number(nodes.goldCount) || 0));
+    const cosmetics = Array.isArray(nodes.cosmetics) ? nodes.cosmetics : [];
     const pulse = nodes._buyPulse;
     const nowMs = this.now();
     let pulseScaleFor = null;
@@ -763,27 +1011,38 @@ export class WorldView {
       if (!staticPose && !this._reducedMotion) {
         bob = Math.sin(timeSec * 2.2 + phase + i * 0.37) * bobAmp;
       }
-      const shinyOpts = {
-        shiny: i < shinyCount,
+      const rarity = unitRarityAt(i, { gold: goldCount, shiny: shinyCount });
+      const rarityOpts = {
+        rarity: rarity === 'normal' ? false : rarity,
+        shiny: rarity === 'negativo',
+        gold: rarity === 'gold',
         reducedMotion: this._reducedMotion,
       };
       const cellScale = pulseScaleFor ? pulseScaleFor(i) : 1;
+
+      const paintCell = (ox, oy) => {
+        if (sprite) {
+          drawContainedInCell(ctx, sprite, ox, oy, SHELF_CELL, bob, rarityOpts);
+        } else {
+          drawNpcSilhouette(ctx, ox, oy, def.tier, bob, SHELF_CELL, rarityOpts);
+        }
+        for (const cos of cosmetics) {
+          const salt = cos.upgradeId || cos.accessory || 0;
+          if (!indexMatchesCoverage(i, cos.coverage, salt)) continue;
+          drawAccessory(ctx, cos.accessory, ox, oy, SHELF_CELL, bob, { tier: def.tier });
+        }
+      };
+
       if (cellScale !== 1) {
         const cx = x + SHELF_CELL / 2;
         const cy = y + SHELF_CELL / 2;
         ctx.save();
         ctx.translate(cx, cy);
         ctx.scale(cellScale, cellScale);
-        if (sprite) {
-          drawContainedInCell(ctx, sprite, -SHELF_CELL / 2, -SHELF_CELL / 2, SHELF_CELL, bob, shinyOpts);
-        } else {
-          drawNpcSilhouette(ctx, -SHELF_CELL / 2, -SHELF_CELL / 2, def.tier, bob, SHELF_CELL, shinyOpts);
-        }
+        paintCell(-SHELF_CELL / 2, -SHELF_CELL / 2);
         ctx.restore();
-      } else if (sprite) {
-        drawContainedInCell(ctx, sprite, x, y, SHELF_CELL, bob, shinyOpts);
       } else {
-        drawNpcSilhouette(ctx, x, y, def.tier, bob, SHELF_CELL, shinyOpts);
+        paintCell(x, y);
       }
     }
 
@@ -850,11 +1109,16 @@ export class WorldView {
       this.#emitNpcHover(null, event);
       return;
     }
-    const shiny = index < (nodes.shinyCount || 0);
+    const rarity = unitRarityAt(index, {
+      gold: nodes.goldCount || 0,
+      shiny: nodes.shinyCount || 0,
+    });
     this.#emitNpcHover({
       generatorId: nodes.def.id,
       index,
-      shiny,
+      rarity,
+      shiny: rarity === 'negativo',
+      gold: rarity === 'gold',
       source: 'shelf',
     }, event);
   }
@@ -870,7 +1134,7 @@ export class WorldView {
 
   #emitNpcHover(hit, event = null) {
     const key = hit
-      ? `${hit.source || 'shelf'}:${hit.generatorId}:${hit.index}:${hit.shiny ? 1 : 0}`
+      ? `${hit.source || 'shelf'}:${hit.generatorId}:${hit.index}:${hit.rarity || 'normal'}`
       : null;
     if (!hit) {
       if (this._hoverKey == null) return;

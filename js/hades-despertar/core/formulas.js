@@ -21,7 +21,8 @@ import {
   OFFLINE_MAX_HOURS_TALENT,
   OFFLINE_MIN_SECONDS,
   PRESTIGE_RUN_DIVISOR,
-  SHINY_MULT,
+  GOLD_MULT,
+  NEGATIVO_MULT,
   STARTING_SOULS_MEMORY,
   SYNC_GAIN_TOLERANCE,
   TALENT_JURAMENTO_ETERNO_MULT,
@@ -172,6 +173,7 @@ export function calculateTotalSPS({
   obols = '0',
   verdictPurchases = [],
   shinyCounts = {},
+  goldCounts = {},
 } = {}) {
   let sum = '0';
   for (const def of GENERATORS) {
@@ -179,9 +181,11 @@ export function calculateTotalSPS({
     if (!Number.isFinite(qty) || qty <= 0) continue;
     const upgradeMult = generatorUpgradeMult(def.id, upgrades);
     const shiny = Number(shinyCounts?.[def.id] || 0);
+    const gold = Number(goldCounts?.[def.id] || 0);
     const line = lineSPS({
       qty,
       shiny,
+      gold,
       baseRate: def.baseRate,
       upgradeMult,
     });
@@ -194,31 +198,36 @@ export function calculateTotalSPS({
 
 /**
  * SPS bruta da linha (antes de prestige / veredito).
- * `(qty - shiny) * unit + shiny * unit * SHINY_MULT` (Q9 / G4.1).
+ * `(qty - neg - gold) * u + neg * u * NEGATIVO_MULT + gold * u * GOLD_MULT`
  *
- * @param {{ qty?: number|string, shiny?: number|string, baseRate?: string|number, upgradeMult?: string|number }} opts
+ * @param {{ qty?: number|string, shiny?: number|string, gold?: number|string, baseRate?: string|number, upgradeMult?: string|number }} opts
  */
 export function lineSPS({
   qty = 0,
   shiny = 0,
+  gold = 0,
   baseRate = '0',
   upgradeMult = '1',
 } = {}) {
   const n = Math.max(0, Math.floor(Number(qty) || 0));
   if (n <= 0) return '0';
+  let goldN = Math.max(0, Math.floor(Number(gold) || 0));
   let shinyN = Math.max(0, Math.floor(Number(shiny) || 0));
-  if (shinyN > n) shinyN = n;
+  if (goldN > n) goldN = n;
+  if (shinyN > n - goldN) shinyN = n - goldN;
   const unit = mul(baseRate, upgradeMult);
-  const normal = n - shinyN;
+  const normal = n - shinyN - goldN;
   return add(
-    mul(String(normal), unit),
-    mul(mul(String(shinyN), unit), SHINY_MULT),
+    add(
+      mul(String(normal), unit),
+      mul(mul(String(shinyN), unit), NEGATIVO_MULT),
+    ),
+    mul(mul(String(goldN), unit), GOLD_MULT),
   );
 }
 
 /**
  * SPS efetiva de **uma** unidade (Q7 / G3.1).
- * `baseRate × genMult × prestige × spsVerdict × (shiny ? SHINY_MULT : 1)`.
  *
  * @param {{
  *   generatorId: string,
@@ -227,6 +236,8 @@ export function lineSPS({
  *   obols?: string|number,
  *   verdictPurchases?: string[],
  *   shiny?: boolean,
+ *   gold?: boolean,
+ *   rarity?: 'normal'|'negativo'|'gold',
  * }} opts
  */
 export function effectiveUnitSPS({
@@ -236,6 +247,8 @@ export function effectiveUnitSPS({
   obols = '0',
   verdictPurchases = [],
   shiny = false,
+  gold = false,
+  rarity = null,
 } = {}) {
   const def = getGenerator(generatorId);
   if (!def) return '0';
@@ -244,7 +257,11 @@ export function effectiveUnitSPS({
   const withPrestige = mul(unit, prestigeBonus(obols, talents));
   const { spsVerdictMult } = economyEffects(talents, verdictPurchases);
   const effective = mul(withPrestige, spsVerdictMult);
-  return shiny ? mul(effective, SHINY_MULT) : effective;
+  const kind = rarity
+    || (gold ? 'gold' : (shiny ? 'negativo' : 'normal'));
+  if (kind === 'gold') return mul(effective, GOLD_MULT);
+  if (kind === 'negativo' || kind === 'shiny') return mul(effective, NEGATIVO_MULT);
+  return effective;
 }
 
 export function clickPower({
@@ -255,9 +272,18 @@ export function clickPower({
   sps = null,
   verdictPurchases = [],
   shinyCounts = {},
+  goldCounts = {},
 } = {}) {
   const totalSps = sps == null
-    ? calculateTotalSPS({ generators, upgrades, talents, obols, verdictPurchases, shinyCounts })
+    ? calculateTotalSPS({
+      generators,
+      upgrades,
+      talents,
+      obols,
+      verdictPurchases,
+      shinyCounts,
+      goldCounts,
+    })
     : sps;
   const effects = economyEffects(talents, verdictPurchases);
   const clickMult = mul(clickMultiplier(upgrades), effects.clickVerdictMult);
@@ -349,14 +375,36 @@ export function unknownCatalogIds({ generators = {}, upgrades = [], talents = []
   return unknown;
 }
 
-export function meetsUpgradeRequirement(upgradeOrId, { souls = '0', generators = {} } = {}) {
+export function meetsUpgradeRequirement(upgradeOrId, {
+  souls = '0',
+  generators = {},
+  upgrades = [],
+} = {}) {
   const upgrade = typeof upgradeOrId === 'string' ? getUpgrade(upgradeOrId) : upgradeOrId;
   if (!upgrade) return false;
   const req = upgrade.requires || {};
-  if (req.generatorId) {
-    return Number(generators[req.generatorId] || 0) >= Number(req.quantity || 0);
+  const owned = new Set(
+    (Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)),
+  );
+
+  // Fase D / D1 — pré-requisitos de juramento (AND).
+  if (req.upgradeId != null && req.upgradeId !== '') {
+    if (!owned.has(String(req.upgradeId))) return false;
   }
-  if (req.minSouls != null) return cmp(souls, req.minSouls) >= 0;
+  if (Array.isArray(req.allUpgradeIds) && req.allUpgradeIds.length > 0) {
+    for (const id of req.allUpgradeIds) {
+      if (!owned.has(String(id))) return false;
+    }
+  }
+
+  if (req.generatorId) {
+    if (Number(generators[req.generatorId] || 0) < Number(req.quantity || 0)) {
+      return false;
+    }
+  }
+  if (req.minSouls != null) {
+    if (cmp(souls, req.minSouls) < 0) return false;
+  }
   return true;
 }
 

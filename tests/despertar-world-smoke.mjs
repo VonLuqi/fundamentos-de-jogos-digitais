@@ -20,6 +20,7 @@ import {
   WorldView,
   allocateShelfMoteRates,
   cappedNpcCount,
+  drawAccessory,
   drawContainedInCell,
   drawNpcSilhouette,
   isShelfGenerator,
@@ -30,6 +31,7 @@ import {
   shelfColumnsForWidth,
   shelfLineMoteWeight,
 } from '../js/hades-despertar/ui/world/WorldView.js';
+import { cosmeticCoverageIndices } from '../js/hades-despertar/config/upgrade-cosmetics.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -63,6 +65,12 @@ staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'check inclui world smok
 staticAssert(pkg.includes('js/hades-despertar/ui/world/WorldView.js'), 'check cobre WorldView.js');
 staticAssert(worldSrc.includes('SHELF_ORBIT_ONLY') || worldSrc.includes('isShelfGenerator'), 'T1 só na órbita');
 staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('pulseBuy'), 'G5.2 highlight + pulseBuy');
+staticAssert(worldSrc.includes('drawAccessory'), 'E2 drawAccessory');
+staticAssert(worldSrc.includes('activeCosmetics') || worldSrc.includes('cosmeticsForGenerator'), 'E2 cosméticos no sync');
+staticAssert(
+  fs.readFileSync(path.join(root, 'assets/despertar/PEDIDOS-MESTRE.md'), 'utf8').includes('cosmetics'),
+  'E4 pedido de arte cosméticos',
+);
 staticAssert(html.includes('orbitam a Foice') || html.includes('mundo-hint'), 'hint Mundo menciona órbita');
 
 if (errors.length) {
@@ -128,11 +136,17 @@ function createFakeDocument() {
             translate() {},
             scale() {},
             beginPath() {},
+            moveTo() {},
+            lineTo() {},
+            closePath() {},
             ellipse() {},
             fill() {},
+            stroke() {},
             drawImage() {},
             globalAlpha: 1,
             fillStyle: '',
+            strokeStyle: '',
+            lineWidth: 1,
           };
         },
         append(...kids) {
@@ -236,24 +250,31 @@ run('F1: drawContainedInCell nunca estica (object-fit contain)', () => {
   assert.equal(dy, 20 + (18 - 9) / 2);
 });
 
-run('G4.2: shelf shiny — primeiros N com glow/invert; reduced = borda', () => {
+run('G4.2: shelf shiny — glow + glitch; reduced = borda', () => {
   let shadowBlurCalls = 0;
-  let strokeRectCalls = 0;
+  let clipCalls = 0;
   const glowCtx = {
     save() {},
     restore() {},
     drawImage() {},
+    beginPath() {},
+    rect() {},
+    clip() { clipCalls += 1; },
     set shadowBlur(v) { if (v > 0) shadowBlurCalls += 1; },
     get shadowBlur() { return 0; },
     shadowColor: '',
     filter: '',
+    globalAlpha: 1,
+    globalCompositeOperation: 'source-over',
   };
   drawContainedInCell(glowCtx, { width: 36, height: 36 }, 0, 0, 36, 0, {
     shiny: true,
     reducedMotion: false,
   });
   assert.ok(shadowBlurCalls > 0, 'shiny sprite aplica glow');
+  assert.ok(clipCalls >= 0, 'glitch pode clipar tears');
 
+  let strokeRectCalls = 0;
   const reducedCtx = {
     save() {},
     restore() {},
@@ -279,13 +300,16 @@ run('G4.2: shelf shiny — primeiros N com glow/invert; reduced = borda', () => 
     fill() {},
     stroke() {},
     arc() {},
+    rect() {},
+    clip() {},
     set shadowBlur(v) { if (v > 0) silhouetteGlow += 1; },
     get shadowBlur() { return 0; },
     shadowColor: '',
+    globalAlpha: 1,
+    globalCompositeOperation: 'source-over',
     fillStyle: '',
     strokeStyle: '',
     lineWidth: 1,
-    globalAlpha: 1,
   };
   drawNpcSilhouette(silCtx, 0, 0, 2, 0, 36, { shiny: true, reducedMotion: false });
   assert.ok(silhouetteGlow > 0, 'shiny silhueta aplica glow');
@@ -432,6 +456,110 @@ run('C2: motes com budget; peso log ≠ linear no saldo', () => {
   const shelf = world._shelves.get('charon_servants');
   assert.ok(shelf.motes.childNodes.length > 0);
   assert.ok(shelf.motes.childNodes.length <= 40);
+});
+
+run('E2: hat_charon na prateleira após moeda_no_barquinho; cap respeitado', () => {
+  const ops = [];
+  const hatCtx = {
+    save() { ops.push('save'); },
+    restore() { ops.push('restore'); },
+    beginPath() { ops.push('begin'); },
+    moveTo() { ops.push('move'); },
+    lineTo() { ops.push('line'); },
+    closePath() { ops.push('close'); },
+    fill() { ops.push('fill'); },
+    stroke() { ops.push('stroke'); },
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 1,
+  };
+  assert.equal(drawAccessory(hatCtx, 'hat_charon', 0, 0, 36, 0, { tier: 2 }), true);
+  assert.ok(ops.includes('fill') && ops.includes('stroke'));
+  assert.equal(drawAccessory(hatCtx, 'unknown_hat', 0, 0), false);
+
+  const { doc } = createFakeDocument();
+  const host = doc.createElement('div');
+  const world = new WorldView({
+    document: doc,
+    isGeneratorRevealed,
+    matchMedia: () => ({ matches: true }),
+    requestFrame: () => 1,
+    cancelFrame: () => {},
+    now: () => 0,
+  }).mount(host);
+
+  const before = new GameState({
+    souls: '5000',
+    generators: { wandering_shade: 1, charon_servants: 10 },
+  });
+  world.sync(before, { reducedMotion: true });
+  const shelf = world._shelves.get('charon_servants');
+  assert.equal(shelf.count, 10);
+  assert.deepEqual(shelf.cosmetics, []);
+
+  assert.equal(before.buyUpgrade('moeda_no_barquinho').ok, true);
+  world.sync(before, { reducedMotion: true });
+  assert.equal(shelf.cosmetics.length, 1);
+  assert.equal(shelf.cosmetics[0].accessory, 'hat_charon');
+  const hatSalt = shelf.cosmetics[0].upgradeId || shelf.cosmetics[0].accessory;
+  const hatIdx = cosmeticCoverageIndices(shelf.count, shelf.cosmetics[0].coverage, hatSalt);
+  assert.ok(hatIdx.length >= 3 && hatIdx.length <= 7, `~5 got ${hatIdx.length}`);
+  assert.notDeepEqual(hatIdx, [1, 3, 5, 7, 9]);
+
+  // Cap: qty acima do visual ainda só pinta até cap; cosmético não cria partículas.
+  const capped = new GameState({
+    souls: '5000',
+    generators: { wandering_shade: 1, charon_servants: 500 },
+    upgrades: ['moeda_no_barquinho'],
+  });
+  world.sync(capped, { reducedMotion: true });
+  assert.equal(shelf.count, SHELF_NPC_CAP);
+  assert.equal(shelf.cosmetics[0].accessory, 'hat_charon');
+});
+
+run('E4: qty 10 + coverage 0.5 → ~5 células com accessory (±1)', () => {
+  const { doc } = createFakeDocument();
+  const host = doc.createElement('div');
+  const world = new WorldView({
+    document: doc,
+    isGeneratorRevealed,
+    matchMedia: () => ({ matches: true }),
+    requestFrame: () => 1,
+    cancelFrame: () => {},
+    now: () => 0,
+  }).mount(host);
+
+  const state = new GameState({
+    souls: '5000',
+    generators: { wandering_shade: 1, charon_servants: 10 },
+    upgrades: ['moeda_no_barquinho'],
+  });
+  world.sync(state, { reducedMotion: true });
+  const shelf = world._shelves.get('charon_servants');
+  assert.equal(shelf.count, 10);
+  assert.equal(shelf.cosmetics[0]?.accessory, 'hat_charon');
+
+  const coverage = shelf.cosmetics[0].coverage;
+  const hatSalt = shelf.cosmetics[0].upgradeId || shelf.cosmetics[0].accessory;
+  const cellsWithHat = cosmeticCoverageIndices(shelf.count, coverage, hatSalt);
+  assert.ok(
+    cellsWithHat.length >= 3 && cellsWithHat.length <= 7,
+    `esperava ~5 células, tem ${cellsWithHat.length}`,
+  );
+  assert.notDeepEqual(cellsWithHat, [1, 3, 5, 7, 9]);
+  // Espalhamento na grade coluna-major (4 rows): não só linhas ímpares.
+  const oddRowsOnly = cellsWithHat.every((i) => i % 4 === 1 || i % 4 === 3);
+  assert.equal(oddRowsOnly, false);
+
+  // Sem upgrade → zero accessories
+  world.sync(
+    new GameState({
+      souls: '5000',
+      generators: { wandering_shade: 1, charon_servants: 10 },
+    }),
+    { reducedMotion: true },
+  );
+  assert.deepEqual(shelf.cosmetics, []);
 });
 
 console.log(`\ndespertar-world-smoke: ${passed} passed, ${failed} failed`);

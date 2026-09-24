@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
+  GOLD_FIRST_TICKER,
   JUDGES_REFUSED_TICKER,
   RUMOR_CURIOSITIES,
   RUMOR_ENIGMA_HINTS,
@@ -43,9 +44,11 @@ staticAssert(rendererSrc.includes('interruptTicker'), 'interruptTicker');
 staticAssert(rendererSrc.includes('announceShinyFirst'), 'announceShinyFirst');
 staticAssert(rendererSrc.includes('RUMOR_ROTATE_MS'), 'rotação');
 staticAssert(indexSrc.includes('interruptTicker'), 'index Juízes → interrupt');
-staticAssert(indexSrc.includes('announceShinyFirst'), 'buy shiny → announceShinyFirst');
-staticAssert(indexSrc.includes('resetShinyRumor'), 'Lethe reseta shiny rumor');
+staticAssert(indexSrc.includes('announceShinyFirst'), 'buy negativo → announceShinyFirst');
+staticAssert(indexSrc.includes('announceGoldFirst'), 'buy gold → announceGoldFirst');
+staticAssert(indexSrc.includes('resetShinyRumor'), 'Lethe reseta rarity rumor');
 staticAssert(indexSrc.includes('shinyGained'), 'buy checa shinyGained');
+staticAssert(indexSrc.includes('goldGained'), 'buy checa goldGained');
 staticAssert(pkg.includes('despertar-rumor-smoke.mjs'), 'check inclui smoke');
 staticAssert(pkg.includes('config/rumors.js'), 'check inclui rumors.js');
 
@@ -121,9 +124,10 @@ run('pickRumor rotaciona; assinatura muda com códice', () => {
   assert.notEqual(rumorPoolSignature(state), sig0);
 });
 
-run('prioridade sync / shiny copy congelada', () => {
+run('prioridade sync / raridade copy congelada', () => {
   assert.ok(JUDGES_REFUSED_TICKER.includes('servidor julga') || JUDGES_REFUSED_TICKER.includes('Juízes') || JUDGES_REFUSED_TICKER.includes('Estela'));
-  assert.ok(SHINY_FIRST_TICKER.toLowerCase().includes('invertida'));
+  assert.ok(SHINY_FIRST_TICKER.toLowerCase().includes('negativo'));
+  assert.ok(GOLD_FIRST_TICKER.toLowerCase().includes('dourada'));
 });
 
 console.log(`\nRumor smoke: ${passed} pass, ${failed} fail`);

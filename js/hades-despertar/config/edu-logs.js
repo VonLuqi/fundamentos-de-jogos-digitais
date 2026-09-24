@@ -56,6 +56,21 @@ export const EDU_LOGS = freezeAll([
     body: 'Curva exponencial cria barreira; o gênero responde com prestígio.',
   },
   {
+    id: 'log_lethe_unlock',
+    title: 'O Lethe se abre',
+    body: 'A parede da corrida revela o rio da memória — o prestígio deixa de ser lenda.',
+  },
+  {
+    id: 'log_lethe_ritual',
+    title: 'O Ritual do Lethe',
+    body: 'Há óbolos a colher: beber do Lethe reseta a corrida e guarda memória permanente.',
+  },
+  {
+    id: 'log_styx_open',
+    title: 'O Styx aceita teu nome',
+    body: 'Juramentos do Styx multiplicam a máquina — upgrades não somam almas soltas.',
+  },
+  {
     id: 'log_prestige',
     title: 'Catábase',
     body: 'Reset da corrida em troca de óbolos; bônus permanente no SPS.',
@@ -82,3 +97,24 @@ export const EDU_LOG_IDS = Object.freeze(EDU_LOGS.map((item) => item.id));
 export const EDU_LOG_BY_ID = Object.freeze(
   Object.fromEntries(EDU_LOGS.map((item) => [item.id, item])),
 );
+
+/** Logs com interrupt de ticker na primeira revelação (Fase C / C2). */
+export const EDU_LOG_TICKER_IDS = Object.freeze([
+  'log_lethe_unlock',
+  'log_lethe_ritual',
+  'log_styx_open',
+]);
+
+/**
+ * Primeira frase do body (ou title) para o letreiro.
+ * @param {{ body?: string, title?: string }|null|undefined} log
+ */
+export function eduLogTickerPhrase(log) {
+  if (!log) return '';
+  const body = String(log.body ?? '').trim();
+  if (body) {
+    const match = body.match(/^(.+?[.!?])(?:\s|$)/u);
+    return (match ? match[1] : body).trim();
+  }
+  return String(log.title ?? '').trim();
+}

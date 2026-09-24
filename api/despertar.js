@@ -21,6 +21,7 @@ import {
   applyTalentBuy,
   applyVerdictBuy,
   buildStateDto,
+  parseClientEpoch,
   rowToCanonical,
   validateSync,
 } from './_lib/despertar-validate.js';
@@ -39,6 +40,7 @@ import {
   DEBUG_SANDBOX_PATCH,
   DEBUG_ZERO_PATCH,
   buildDebugGrantPatch,
+  buildDebugSetPatch,
   cloneDebugPatch,
   stripDespertarAchievements,
 } from './_lib/despertar-debug.js';
@@ -82,6 +84,7 @@ const ROW_SELECT = [
   'prestige_count',
   'generators_state',
   'shiny_counts',
+  'gold_counts',
   'upgrades_state',
   'talents_state',
   'edu_logs_seen',
@@ -296,7 +299,8 @@ function applySanitizedEduLogs(result) {
   if (result.patch) {
     result.patch = { ...result.patch, edu_logs_seen: sanitized };
   }
-  result.state = buildStateDto(result.next);
+  const echoOpts = result.echoEpoch != null ? { echoEpoch: result.echoEpoch } : {};
+  result.state = buildStateDto(result.next, echoOpts);
   return result;
 }
 
@@ -338,7 +342,7 @@ async function handleDespertar(req, res) {
       return res.status(503).json({ ok: false, error: 'O Despertar está offline: Supabase não configurado.' });
     }
 
-    const { action, token, clientState, talentId, purchaseId, choice, grantId } = req.body || {};
+    const { action, token, clientState, talentId, purchaseId, choice, grantId, set } = req.body || {};
     metricsSetAction(action || 'n/a');
     const user = await loadSessionUser(token);
     if (!user) {
@@ -415,7 +419,10 @@ async function handleDespertar(req, res) {
         const { row, error } = await getOrCreateState(user.id);
         if (error) return tableErrorResponse(res, error, 'Não foi possível ler a Estela de Memória.');
 
-        const grant = buildDebugGrantPatch(row, grantId);
+        // B2: set absoluto (DEBUG_SET_PATCH) ou preset aditivo (grantId)
+        const grant = set && typeof set === 'object' && !Array.isArray(set)
+          ? buildDebugSetPatch(row, set)
+          : buildDebugGrantPatch(row, grantId);
         if (!grant.ok) {
           return res.status(400).json({ ok: false, error: grant.error || 'Concessão inválida.' });
         }
@@ -437,10 +444,11 @@ async function handleDespertar(req, res) {
         return res.status(200).json({
           ok: true,
           state: buildStateDto(saved || { ...row, ...patch }),
-          grantId: grant.grantId,
+          grantId: grant.grantId || null,
           label: grant.label,
           awarded: emptyAwarded(),
           grant: true,
+          set: Boolean(set && typeof set === 'object'),
         });
       }
 
@@ -533,6 +541,7 @@ async function handleDespertar(req, res) {
           ok: false,
           error: result.error || JUDGES_REFUSED,
           state: result.state,
+          ...(result.echoEpoch != null ? { echoEpoch: result.echoEpoch } : {}),
           awarded: emptyAwarded(),
         });
       }
@@ -546,9 +555,12 @@ async function handleDespertar(req, res) {
       } = await persistPatchAndAward(user, result.patch, canonical, { award: true });
       if (saveError) return tableErrorResponse(res, saveError, 'Não foi possível gravar a Estela.');
 
+      const echoEpoch = result.echoEpoch ?? parseClientEpoch(clientState);
+      const echoOpts = echoEpoch != null ? { echoEpoch } : {};
       return res.status(200).json({
         ok: true,
-        state: buildStateDto(saved || result.next),
+        state: buildStateDto(saved || result.next, echoOpts),
+        ...(echoEpoch != null ? { echoEpoch } : {}),
         awarded,
       });
     }

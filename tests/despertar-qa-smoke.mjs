@@ -82,7 +82,7 @@ staticAssert(validateSrc.includes('validateSync'), 'validateSync autoritativo');
 staticAssert(apiSrc.includes('JUDGES_REFUSED') || apiSrc.includes('recus') || validateSrc.includes('teto') || validateSrc.includes('1.05'), 'anti-cheat no validate');
 staticAssert(html.includes('despertar-layout'), 'três colunas no markup');
 staticAssert(html.includes('tab-codex') || html.includes('panel-codex'), 'Códice na UI');
-staticAssert(EDU_LOG_IDS.length === 13, '13 logs do Códice');
+staticAssert(EDU_LOG_IDS.length === 16, '16 logs do Códice');
 staticAssert(!rendererSrc.includes('innerHTML'), 'UIRenderer sem innerHTML');
 
 // —— Ecossistema ——
@@ -211,7 +211,7 @@ await run('Arquiteto hidden só com Códice legítimo', () => {
     eduLogsSeen: [...EDU_LOG_IDS],
   };
   const sanitized = sanitizeEduLogsSeen(poor.eduLogsSeen, poor, { syncOk: true });
-  assert.ok(sanitized.length < 13);
+  assert.ok(sanitized.length < 16);
   assert.ok(
     !evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
       .includes('despertar_arquiteto_do_loop'),

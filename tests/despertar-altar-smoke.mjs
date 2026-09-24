@@ -39,6 +39,9 @@ staticAssert(rendererSrc.includes('AltarOrbit'), 'UIRenderer integra AltarOrbit'
 staticAssert(css.includes('despertar-particle--rain'), 'CSS chuva');
 staticAssert(css.includes('is-milk'), 'CSS véu milk');
 staticAssert(altarSrc.includes('wandering_shade'), 'órbita = T1');
+staticAssert(altarSrc.includes('applyReapCosmeticClasses') || altarSrc.includes('blade_glow'), 'E3 cosmético Foice');
+staticAssert(css.includes('has-cosmetic-blade_glow'), 'CSS blade_glow');
+staticAssert(css.includes('despertarBladeGlow') || css.includes('prefers-reduced-motion'), 'glow + reduced-motion');
 staticAssert(pkg.includes('despertar-altar-smoke.mjs'), 'check inclui altar smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/world/AltarOrbit.js'), 'check cobre AltarOrbit.js');
 
@@ -85,6 +88,17 @@ function fakeHosts() {
       setProperty(k, v) { this.props[k] = v; },
     },
   };
+  const reap = {
+    id: 'despertar-reap',
+    classList: {
+      _on: new Set(),
+      add(name) { this._on.add(name); },
+      remove(name) { this._on.delete(name); },
+      contains(name) { return this._on.has(name); },
+      values() { return this._on.values(); },
+      [Symbol.iterator]() { return this._on[Symbol.iterator](); },
+    },
+  };
   const orbitHost = {
     childNodes: [],
     replaceChildren(...kids) { this.childNodes = [...kids]; },
@@ -123,8 +137,12 @@ function fakeHosts() {
       }
       return { className: '', setAttribute() {}, append() {}, replaceChildren() {} };
     },
+    getElementById(id) {
+      if (id === 'despertar-reap') return reap;
+      return null;
+    },
   };
-  return { doc, orbitHost, particles, veil, rains };
+  return { doc, orbitHost, particles, veil, rains, reap };
 }
 
 let passed = 0;
@@ -200,6 +218,26 @@ run('AltarOrbit sync: cursors T1 + véu; reduced-motion sem chuva', () => {
   }
   assert.ok(rains.length > 0);
   assert.ok(rains.length <= SOUL_RAIN_MAX_MOTES);
+});
+
+run('E3: foice_afilada → has-cosmetic-blade_glow na Foice', () => {
+  const { doc, orbitHost, particles, veil, reap } = fakeHosts();
+  const altar = new AltarOrbit({
+    document: doc,
+    matchMedia: () => ({ matches: true }),
+    now: () => 0,
+  }).mount({ orbitHost, particleLayer: particles, veil, reapButton: reap });
+
+  const state = new GameState({ souls: '100' });
+  altar.sync(state, { reducedMotion: true });
+  assert.equal(reap.classList.contains('has-cosmetic-blade_glow'), false);
+
+  assert.equal(state.buyUpgrade('foice_afilada').ok, true);
+  altar.sync(state, { reducedMotion: true });
+  assert.equal(reap.classList.contains('has-cosmetic-blade_glow'), true);
+
+  altar.sync(new GameState({ souls: '100' }), { reducedMotion: true });
+  assert.equal(reap.classList.contains('has-cosmetic-blade_glow'), false);
 });
 
 console.log(`\ndespertar-altar-smoke: ${passed} passed, ${failed} failed`);

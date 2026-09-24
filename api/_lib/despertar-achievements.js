@@ -3,11 +3,11 @@
  * Regras puras — sem I/O. O grant grava em users via api/despertar.js.
  */
 
-import { LETHE_PREVIEW_RUN_SOULS } from '../../js/hades-despertar/config/constants.js';
+import { LETHE_PREVIEW_RUN_SOULS, STYX_UNLOCK_SOULS } from '../../js/hades-despertar/config/constants.js';
 import { EDU_LOG_IDS } from '../../js/hades-despertar/config/edu-logs.js';
 import { GENERATORS } from '../../js/hades-despertar/config/generators.js';
 import { cmp } from '../../js/hades-despertar/core/decimal.js';
-import { calculateTotalSPS } from '../../js/hades-despertar/core/formulas.js';
+import { calculateTotalSPS, canPrestige } from '../../js/hades-despertar/core/formulas.js';
 
 export const DESPERTAR_PUBLIC_IDS = Object.freeze([
   'despertar_primeira_alma',
@@ -68,6 +68,19 @@ export function computeEligibleEduLogs(state = {}, { syncOk = false } = {}) {
   if (cmp(runSouls, LETHE_PREVIEW_RUN_SOULS) >= 0 || prestigeCount >= 1) {
     eligible.push('log_wall');
   }
+  const obols = state.obols ?? '0';
+  const mnemosyne = state.mnemosyne ?? '0';
+  const ritualReady = canPrestige(runSouls);
+  const letheOpen =
+    prestigeCount >= 1
+    || cmp(obols, '0') > 0
+    || cmp(mnemosyne, '0') > 0
+    || ritualReady
+    || cmp(runSouls, LETHE_PREVIEW_RUN_SOULS) >= 0;
+  if (letheOpen) eligible.push('log_lethe_unlock');
+  // Ritual: pronto agora, ou já prestigiou (já passou pelo CTA).
+  if (ritualReady || prestigeCount >= 1) eligible.push('log_lethe_ritual');
+  if (ownedAny || cmp(souls, STYX_UNLOCK_SOULS) >= 0) eligible.push('log_styx_open');
   if (prestigeCount >= 1) eligible.push('log_prestige');
   if (syncOk) eligible.push('log_authority');
   // Offline longo: marco ou progresso substancial (não DevTools com 1 clique).
@@ -114,6 +127,7 @@ export function evaluateDespertarAchievementIds(state = {}, options = {}) {
     obols: state.obols || '0',
     verdictPurchases: state.verdictPurchases || [],
     shinyCounts: state.shinyCounts || {},
+    goldCounts: state.goldCounts || {},
   });
 
   const earned = [];

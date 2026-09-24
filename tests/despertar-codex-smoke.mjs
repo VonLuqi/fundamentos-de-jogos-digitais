@@ -77,9 +77,12 @@ function check(label, fn) {
   }
 }
 
-check('catálogo tem 13 logs', () => {
-  assert.equal(EDU_LOGS.length, 13);
-  assert.equal(EDU_LOG_IDS.length, 13);
+check('catálogo tem 16 logs', () => {
+  assert.equal(EDU_LOGS.length, 16);
+  assert.equal(EDU_LOG_IDS.length, 16);
+  assert.ok(EDU_LOG_IDS.includes('log_lethe_unlock'));
+  assert.ok(EDU_LOG_IDS.includes('log_lethe_ritual'));
+  assert.ok(EDU_LOG_IDS.includes('log_styx_open'));
 });
 
 check('Códice vazio antes do primeiro clique', () => {

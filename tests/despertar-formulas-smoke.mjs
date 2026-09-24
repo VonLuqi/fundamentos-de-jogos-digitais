@@ -25,6 +25,7 @@ import {
   generatorPriceAt,
   lineSPS,
   maxAffordableCount,
+  meetsUpgradeRequirement,
   mnemosyneFromObolsGain,
   obolsFromRunSouls,
   prestigeBonus,
@@ -111,12 +112,12 @@ await run('SPS: 10 sombras sem upgrade = 1.0', () => {
 });
 
 await run('G4.1 lineSPS / shiny no total SPS', () => {
-  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1' }), '1.2');
+  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1' }), '3.8');
   const sps = calculateTotalSPS({
     generators: { wandering_shade: 10 },
     shinyCounts: { wandering_shade: 2 },
   });
-  eqMoney(sps, '1.2');
+  eqMoney(sps, '3.8');
 });
 
 await run('Óbolos: runSouls 1e9 → 1; 9.99e8 → 0', () => {
@@ -156,6 +157,69 @@ await run('Entity.buy e clique base / amortização T1', () => {
   eqMoney(amortizationSeconds('15', '0.1'), '150');
   assert.equal(maxAffordableCount('15', 0, '32.25'), 2);
   assert.equal(maxAffordableCount('15', 0, '14.99'), 0);
+});
+
+await run('D1: meetsUpgradeRequirement upgradeId / allUpgradeIds', () => {
+  const next = {
+    id: 'juramento_acheron',
+    requires: { upgradeId: 'foice_afilada', minSouls: '0' },
+  };
+  assert.equal(
+    meetsUpgradeRequirement(next, { souls: '1000', upgrades: [] }),
+    false,
+    'sem foice_afilada falha',
+  );
+  assert.equal(
+    meetsUpgradeRequirement(next, { souls: '1000', upgrades: ['foice_afilada'] }),
+    true,
+    'com foice_afilada passa',
+  );
+
+  const andReq = {
+    id: 'demo_and',
+    requires: { allUpgradeIds: ['foice_afilada', 'juramento_acheron'] },
+  };
+  assert.equal(
+    meetsUpgradeRequirement(andReq, { upgrades: ['foice_afilada'] }),
+    false,
+  );
+  assert.equal(
+    meetsUpgradeRequirement(andReq, {
+      upgrades: ['foice_afilada', 'juramento_acheron'],
+    }),
+    true,
+  );
+
+  // Legado: gerador / minSouls sem prereq de upgrade.
+  assert.equal(
+    meetsUpgradeRequirement('umbras_despertas', {
+      generators: { wandering_shade: 1 },
+    }),
+    true,
+  );
+  assert.equal(
+    meetsUpgradeRequirement('umbras_despertas', { generators: {} }),
+    false,
+  );
+  assert.equal(meetsUpgradeRequirement('foice_afilada', { souls: '0' }), true);
+  assert.equal(
+    meetsUpgradeRequirement('foice_afilada', { souls: '0', upgrades: [] }),
+    true,
+    'ausência de prereq = comportamento legado',
+  );
+
+  // Catálogo real (D2): juramento_acheron exige foice_afilada.
+  assert.equal(
+    meetsUpgradeRequirement('juramento_acheron', { souls: '0', upgrades: [] }),
+    false,
+  );
+  assert.equal(
+    meetsUpgradeRequirement('juramento_acheron', {
+      souls: '0',
+      upgrades: ['foice_afilada'],
+    }),
+    true,
+  );
 });
 
 console.log(`\ndespertar-formulas-smoke: ${passed} passed, ${failed} failed`);

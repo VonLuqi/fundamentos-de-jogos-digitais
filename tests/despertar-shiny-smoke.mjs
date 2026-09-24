@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SHINY_CHANCE, SHINY_MULT } from '../js/hades-despertar/config/constants.js';
+import { GOLD_CHANCE, GOLD_MULT, NEGATIVO_CHANCE, NEGATIVO_MULT, SHINY_CHANCE, SHINY_MULT } from '../js/hades-despertar/config/constants.js';
 import { cmp, mul } from '../js/hades-despertar/core/decimal.js';
 import {
   calculateTotalSPS,
@@ -53,13 +53,26 @@ staticAssert(altarSrc.includes('markShinyPlacements'), 'órbita marca shiny');
 staticAssert(indexSrc.includes('announceShinyFirst'), 'ticker one-shot no buy');
 staticAssert(indexSrc.includes('shinyGained'), 'buy → shinyGained');
 staticAssert(apiSrc.includes("'shiny_counts'"), 'ROW_SELECT inclui shiny_counts');
+staticAssert(apiSrc.includes("'gold_counts'"), 'ROW_SELECT inclui gold_counts');
 staticAssert(fs.existsSync(migrateShiny), 'migration shiny_counts existe');
+const migrateGold = path.join(root, 'db/migrate-2026-09-22-despertar-gold-counts.sql');
+staticAssert(fs.existsSync(migrateGold), 'migration gold_counts existe');
 staticAssert(migrateSrc.includes('ADD COLUMN IF NOT EXISTS shiny_counts'), 'migration ADD COLUMN');
 staticAssert(migrateSrc.includes("v_patch ? 'shiny_counts'"), 'RPC CASE shiny_counts');
 staticAssert(setupSql.includes('shiny_counts jsonb'), 'setup.sql coluna shiny_counts');
+staticAssert(setupSql.includes('gold_counts jsonb'), 'setup.sql coluna gold_counts');
 staticAssert(setupSql.includes("v_patch ? 'shiny_counts'"), 'setup.sql RPC shiny_counts');
 staticAssert(pkg.includes('despertar-shiny-smoke.mjs'), 'check inclui shiny smoke');
-staticAssert(SHINY_MULT === '2' && SHINY_CHANCE === 0.01, 'constantes Q9');
+staticAssert(NEGATIVO_MULT === '15' && NEGATIVO_CHANCE === 0.005, 'negativo ×15 / 0,5%');
+staticAssert(GOLD_MULT === '2' && GOLD_CHANCE === 0.02, 'gold ×2 / 2%');
+staticAssert(SHINY_MULT === NEGATIVO_MULT && SHINY_CHANCE === NEGATIVO_CHANCE, 'alias shiny=negativo');
+staticAssert(worldSrc.includes('shinyGlitch') || worldSrc.includes('shinyTearBands') || worldSrc.includes('unitRarityAt'), 'shelf raridade');
+staticAssert(worldSrc.includes('drawImageAsGold'), 'shelf gold usa drawImageAsGold');
+const goldJuiceSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/world/goldJuice.js'), 'utf8');
+staticAssert(goldJuiceSrc.includes('recolorImageDataToGold'), 'goldJuice remapeia pixels');
+staticAssert(altarSrc.includes('unitRarityAt') || altarSrc.includes('rarity'), 'órbita raridade');
+staticAssert(stateSrc.includes('_goldCounts') || stateSrc.includes('goldCounts'), 'GameState goldCounts');
+staticAssert(validateSrc.includes('normalizeGoldCounts') || validateSrc.includes('gold_counts'), 'validate gold');
 
 if (errors.length) {
   console.error('despertar-shiny-smoke (estático):');
@@ -91,11 +104,11 @@ run('lineSPS sem shiny = qty × base × upgrade', () => {
   eqMoney(lineSPS({ qty: 5, shiny: 0, baseRate: '0.8', upgradeMult: '2' }), '8');
 });
 
-run('lineSPS: (qty-shiny)*u + shiny*u*2', () => {
-  // 8 normal + 2 shiny ×2 = 8*0.1 + 2*0.1*2 = 0.8 + 0.4 = 1.2
-  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1', upgradeMult: '1' }), '1.2');
-  // shiny capped to qty
-  eqMoney(lineSPS({ qty: 3, shiny: 9, baseRate: '0.1', upgradeMult: '1' }), '0.6');
+run('lineSPS: (qty-shiny)*u + shiny*u*SHINY_MULT', () => {
+  // 8 normal + 2 shiny ×15 = 8*0.1 + 2*0.1*15 = 0.8 + 3.0 = 3.8
+  eqMoney(lineSPS({ qty: 10, shiny: 2, baseRate: '0.1', upgradeMult: '1' }), '3.8');
+  // shiny capped to qty → 3 × 0.1 × 15 = 4.5
+  eqMoney(lineSPS({ qty: 3, shiny: 9, baseRate: '0.1', upgradeMult: '1' }), '4.5');
 });
 
 run('calculateTotalSPS com shinyCounts', () => {
@@ -105,19 +118,31 @@ run('calculateTotalSPS com shinyCounts', () => {
     generators: { wandering_shade: 10 },
     shinyCounts: { wandering_shade: 2 },
   });
-  eqMoney(boosted, '1.2');
+  eqMoney(boosted, '3.8');
 });
 
-run('buyGenerator rola shiny (RNG injetável)', () => {
-  const always = new GameState(
+run('buyGenerator rola negativo / gold (RNG injetável)', () => {
+  // 0: hit negativo primeiro (0,5%, mais raro)
+  const alwaysNeg = new GameState(
     { souls: '10000', generators: {} },
-    { random: () => 0 }, // sempre < 0.01
+    { random: () => 0 },
   );
-  const lot = always.buyGenerator('wandering_shade', '10');
+  const lot = alwaysNeg.buyGenerator('wandering_shade', '10');
   assert.equal(lot.ok, true);
   assert.equal(lot.bought, 10);
   assert.equal(lot.shinyGained, 10);
-  assert.equal(always.shinyCounts().wandering_shade, 10);
+  assert.equal(lot.goldGained, 0);
+  assert.equal(alwaysNeg.shinyCounts().wandering_shade, 10);
+
+  // 0.015: miss negativo (0,5%), hit gold (2%)
+  const alwaysGold = new GameState(
+    { souls: '10000', generators: {} },
+    { random: () => 0.015 },
+  );
+  const lotGold = alwaysGold.buyGenerator('wandering_shade', '10');
+  assert.equal(lotGold.goldGained, 10);
+  assert.equal(lotGold.shinyGained, 0);
+  assert.equal(alwaysGold.goldCounts().wandering_shade, 10);
 
   const never = new GameState(
     { souls: '10000', generators: {} },
@@ -125,21 +150,30 @@ run('buyGenerator rola shiny (RNG injetável)', () => {
   );
   const lot2 = never.buyGenerator('wandering_shade', '10');
   assert.equal(lot2.shinyGained, 0);
+  assert.equal(lot2.goldGained, 0);
   assert.equal(never.shinyCounts().wandering_shade, undefined);
 });
 
-run('Lethe zera shiny com geradores (Q12)', () => {
+run('Lethe zera negativo e gold com geradores (Q12)', () => {
   const state = new GameState({
     souls: '0',
     runSouls: '1000000000',
     lifetimeSouls: '1000000000',
     generators: { wandering_shade: 5 },
     shinyCounts: { wandering_shade: 2 },
+    goldCounts: { wandering_shade: 1 },
   });
   assert.equal(state.shinyCounts().wandering_shade, 2);
+  assert.equal(state.goldCounts().wandering_shade, 1);
   assert.equal(state.applyPrestige().ok, true);
   assert.deepEqual(state.shinyCounts(), {});
+  assert.deepEqual(state.goldCounts(), {});
   assert.equal(Object.keys(state.quantities()).length, 0);
+});
+
+run('lineSPS com gold ×2', () => {
+  // 7 normal + 2 neg×15 + 1 gold×2 = 0.7 + 3.0 + 0.2 = 3.9
+  eqMoney(lineSPS({ qty: 10, shiny: 2, gold: 1, baseRate: '0.1', upgradeMult: '1' }), '3.9');
 });
 
 run('snapshot round-trip preserva shinyCounts', () => {
@@ -239,10 +273,15 @@ run('applyPrestige (server) zera shinyCounts', () => {
   assert.deepEqual(buildStateDto(result.next).shinyCounts, {});
 });
 
-run('chance defaults Q9', () => {
-  assert.equal(SHINY_CHANCE, 0.01);
-  assert.equal(SHINY_MULT, '2');
-  assert.equal(mul('0.1', SHINY_MULT), '0.2');
+run('chance defaults negativo ×15 / gold ×2', () => {
+  assert.equal(SHINY_CHANCE, 0.005);
+  assert.equal(SHINY_MULT, '15');
+  assert.equal(NEGATIVO_MULT, '15');
+  assert.equal(NEGATIVO_CHANCE, 0.005);
+  assert.equal(GOLD_MULT, '2');
+  assert.equal(GOLD_CHANCE, 0.02);
+  assert.equal(mul('0.1', SHINY_MULT), '1.5');
+  assert.equal(mul('0.1', GOLD_MULT), '0.2');
 });
 
 run('G4.2: sync shelf marca shinyCount e repinta', () => {

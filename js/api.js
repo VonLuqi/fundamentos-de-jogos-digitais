@@ -1473,6 +1473,14 @@ export function despertarDebugGrant(token, grantId) {
   });
 }
 
+/** Admin: define recursos absolutos (B2 DEBUG_SET_PATCH). */
+export function despertarDebugSet(token, set) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'debugGrant', set }),
+  });
+}
+
 export function despertarStateSync(token, clientState) {
   return request('/despertar', {
     method: 'POST',

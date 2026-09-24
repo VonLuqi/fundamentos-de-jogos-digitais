@@ -3,7 +3,7 @@
  * Reset a zero, concessões de recursos e sandbox Lethe.
  */
 
-import { add } from '../../js/hades-despertar/core/decimal.js';
+import { add, money } from '../../js/hades-despertar/core/decimal.js';
 import { DESPERTAR_ACHIEVEMENT_IDS } from './despertar-achievements.js';
 
 /** Estela vazia — recomeço limpo. */
@@ -144,4 +144,134 @@ export function buildDebugGrantPatch(row, grantId) {
   }
 
   return { ok: true, patch, label: preset.label, grantId: id };
+}
+
+/**
+ * Expande notação científica simples (`1e12`, `1.5e3`) para decimal string.
+ * @param {string} raw
+ * @returns {string|null}
+ */
+export function expandDebugSci(raw) {
+  const s = String(raw || '').trim().replace(/_/g, '');
+  const m = s.match(/^(-?)(\d+)(?:\.(\d+))?e\+?(\d+)$/i);
+  if (!m) return null;
+  const sign = m[1];
+  const intPart = m[2];
+  const fracPart = m[3] || '';
+  const exp = Number.parseInt(m[4], 10);
+  if (!Number.isFinite(exp) || exp < 0 || exp > 38) return null;
+  const digits = `${intPart}${fracPart}`;
+  const shift = exp - fracPart.length;
+  if (shift >= 0) return `${sign}${digits}${'0'.repeat(shift)}`;
+  const cut = digits.length + shift;
+  if (cut <= 0) return `${sign}0.${'0'.repeat(-cut)}${digits}`;
+  return `${sign}${digits.slice(0, cut)}.${digits.slice(cut)}`;
+}
+
+/**
+ * Valor absoluto de dinheiro (≥ 0). Aceita decimal ou `1e12`.
+ * @param {unknown} raw
+ * @returns {string|null} money() ou null se inválido
+ */
+export function parseAbsoluteMoney(raw) {
+  if (raw == null || raw === '') return null;
+  let s = String(raw).trim().replace(/_/g, '');
+  const sci = expandDebugSci(s);
+  if (sci != null) s = sci;
+  try {
+    const value = money(s);
+    if (value.startsWith('-')) return money('0');
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function pickSetField(set, snake, camel) {
+  if (Object.prototype.hasOwnProperty.call(set, snake)) return set[snake];
+  if (camel && Object.prototype.hasOwnProperty.call(set, camel)) return set[camel];
+  return undefined;
+}
+
+function hasSetField(set, snake, camel) {
+  return Object.prototype.hasOwnProperty.call(set, snake)
+    || (camel != null && Object.prototype.hasOwnProperty.call(set, camel));
+}
+
+/**
+ * Patch absoluto (DEBUG_SET_PATCH) — substitui campos, não soma.
+ * Não toca generators_state / upgrades / etc.
+ *
+ * @param {object} _row row atual (reservado; set é absoluto)
+ * @param {object} setInput { souls?, run_souls?, lifetime_souls?, obols?, mnemosyne?, verdicts? }
+ * @returns {{ ok: true, patch: object, label: string } | { ok: false, error: string }}
+ */
+export function buildDebugSetPatch(_row, setInput) {
+  if (!setInput || typeof setInput !== 'object' || Array.isArray(setInput)) {
+    return { ok: false, error: 'Patch absoluto ausente.' };
+  }
+
+  const patch = {};
+  const parts = [];
+
+  if (hasSetField(setInput, 'souls')) {
+    const v = parseAbsoluteMoney(pickSetField(setInput, 'souls'));
+    if (v == null) return { ok: false, error: 'Valor de almas inválido.' };
+    patch.souls = v;
+    parts.push(`almas=${v}`);
+    // UX: definir almas também ancora run/lifetime se o Mestre não passou esses campos.
+    if (!hasSetField(setInput, 'run_souls', 'runSouls')) {
+      patch.run_souls = v;
+    }
+    if (!hasSetField(setInput, 'lifetime_souls', 'lifetimeSouls')) {
+      patch.lifetime_souls = v;
+    }
+  }
+
+  if (hasSetField(setInput, 'run_souls', 'runSouls')) {
+    const v = parseAbsoluteMoney(pickSetField(setInput, 'run_souls', 'runSouls'));
+    if (v == null) return { ok: false, error: 'Valor de run_souls inválido.' };
+    patch.run_souls = v;
+    parts.push(`run=${v}`);
+  }
+
+  if (hasSetField(setInput, 'lifetime_souls', 'lifetimeSouls')) {
+    const v = parseAbsoluteMoney(pickSetField(setInput, 'lifetime_souls', 'lifetimeSouls'));
+    if (v == null) return { ok: false, error: 'Valor de lifetime_souls inválido.' };
+    patch.lifetime_souls = v;
+    parts.push(`lifetime=${v}`);
+  }
+
+  if (hasSetField(setInput, 'obols')) {
+    const v = parseAbsoluteMoney(pickSetField(setInput, 'obols'));
+    if (v == null) return { ok: false, error: 'Valor de óbolos inválido.' };
+    patch.obols = v;
+    parts.push(`óbolos=${v}`);
+  }
+
+  if (hasSetField(setInput, 'mnemosyne')) {
+    const v = parseAbsoluteMoney(pickSetField(setInput, 'mnemosyne'));
+    if (v == null) return { ok: false, error: 'Valor de essência inválido.' };
+    patch.mnemosyne = v;
+    parts.push(`essência=${v}`);
+  }
+
+  if (hasSetField(setInput, 'verdicts')) {
+    const n = Number.parseInt(pickSetField(setInput, 'verdicts'), 10);
+    if (!Number.isFinite(n) || n < 0) {
+      return { ok: false, error: 'Valor de vereditos inválido.' };
+    }
+    patch.verdicts = Math.floor(n);
+    parts.push(`vereditos=${patch.verdicts}`);
+  }
+
+  if (!Object.keys(patch).length) {
+    return { ok: false, error: 'Nenhum campo para definir.' };
+  }
+
+  return {
+    ok: true,
+    patch,
+    label: `Definido: ${parts.join(', ')}`,
+  };
 }

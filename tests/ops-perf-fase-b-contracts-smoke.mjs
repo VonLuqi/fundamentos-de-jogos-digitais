@@ -39,6 +39,8 @@ assert(contratos.includes('despertar_persist_and_award'), 'contrato RPC');
 assert(contratos.includes('p_user_id integer'), 'RPC user id integer');
 assert(contratos.includes('DESPERTAR_SYNC_RPC'), 'flag D3');
 assert(contratos.includes('sanitizeUser'), 'DTO user = sanitizeUser');
+assert(contratos.includes('clientEpoch'), 'extensão Fase A clientEpoch');
+assert(contratos.includes('echoEpoch'), 'extensão Fase A echoEpoch');
 
 assert(/D1–D8|congelad/i.test(faseB) || faseB.includes('**Congelado**'), 'Task 0 congelada no doc B');
 assert(faseB.includes('contratos-fase-b.md'), 'Fase B aponta contratos');

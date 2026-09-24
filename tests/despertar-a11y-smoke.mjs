@@ -82,6 +82,51 @@ staticAssert(
     && (css.includes('box-shadow') || css.includes('text-shadow')),
   'aba selecionada com glow (G5.1)',
 );
+staticAssert(html.includes('id="despertar-tutorial-toast"'), 'toast tutorial Lethe (C3)');
+staticAssert(html.includes('id="despertar-tutorial-toast-dismiss"'), 'botão Entendi no toast');
+staticAssert(/Entendi/.test(html), 'copy Entendi');
+staticAssert(
+  /id="despertar-tutorial-toast"[^>]*aria-live="polite"|aria-live="polite"[^>]*id="despertar-tutorial-toast"/.test(html)
+    || (html.includes('id="despertar-tutorial-toast"') && html.includes('aria-live="polite"')),
+  'toast com aria-live polite',
+);
+staticAssert(css.includes('.despertar-tutorial-toast'), 'CSS toast tutorial');
+staticAssert(css.includes('#tab-lethe.is-just-unlocked'), 'CSS first unlock aba Lethe');
+staticAssert(
+  /prefers-reduced-motion: reduce[\s\S]*#tab-lethe\.is-just-unlocked/.test(css)
+    || /#tab-lethe\.is-just-unlocked[\s\S]*prefers-reduced-motion/.test(css),
+  'reduced-motion cobre aba Lethe unlock',
+);
+
+/* Fase F — Juramentos Selados (a11y grade + tip) */
+const uiSrc = read('js/hades-despertar/ui/UIRenderer.js');
+staticAssert(html.includes('id="sealed-tooltip"'), 'F3: #sealed-tooltip');
+staticAssert(
+  /id="sealed-tooltip"[^>]*role="tooltip"|role="tooltip"[^>]*id="sealed-tooltip"/.test(html)
+    || (html.includes('id="sealed-tooltip"') && html.includes('role="tooltip"')),
+  'F3: sealed tip role=tooltip',
+);
+staticAssert(html.includes('class="despertar-sealed-icons"'), 'F3: grade sealed-icons');
+staticAssert(css.includes('.despertar-sealed-icons'), 'F3: CSS sealed-icons');
+staticAssert(/gap:\s*2px/.test(css.match(/\.despertar-sealed-icons\s*\{[^}]+\}/s)?.[0] || ''), 'F3: gap denso');
+staticAssert(uiSrc.includes("setAttribute('aria-label', def.name)"), 'F3: aria-label nos ícones');
+staticAssert(
+  uiSrc.includes("setAttribute('aria-describedby', 'sealed-tooltip')"),
+  'F3: aria-describedby no tip Selados',
+);
+staticAssert(uiSrc.includes('#hideSealedTip') || uiSrc.includes('hideSealedTip'), 'F3: hideSealedTip');
+staticAssert(
+  /Escape[\s\S]*hideSealedTip|hideSealedTip[\s\S]*Escape/.test(uiSrc),
+  'F3: Esc fecha tip Selados',
+);
+staticAssert(
+  uiSrc.includes("btn.type = 'button'") || uiSrc.includes('btn.type = "button"'),
+  'F3: botões tabáveis (type=button)',
+);
+staticAssert(
+  uiSrc.includes("addEventListener('focus'") && uiSrc.includes("addEventListener('blur'"),
+  'F3: focus/blur tip (teclado)',
+);
 
 const bg = '#0a0a0f';
 const styxAtmosphere = '#00a896';
@@ -156,6 +201,46 @@ await run('contraste WCAG dos acentos de texto', () => {
   assert.ok(contrastRatio('#00a896', '#0a0a0f') >= 4.5);
   assert.ok(contrastRatio('#a855f7', '#0a0a0f') >= 4.5);
   assert.ok(contrastRatio('#7209b7', '#0a0a0f') < 4.5);
+});
+
+await run('toast tutorial: show + Entendi esconde (C3)', async () => {
+  const { showTutorialToast } = await import('../js/hades-despertar/ui/juice.js');
+  const nodes = new Map();
+  const makeEl = (id) => {
+    const el = {
+      id,
+      hidden: true,
+      classList: {
+        _set: new Set(),
+        add(c) { this._set.add(c); },
+        remove(c) { this._set.delete(c); },
+        contains(c) { return this._set.has(c); },
+      },
+      textContent: '',
+      addEventListener(type, fn) {
+        this._on = this._on || {};
+        this._on[type] = fn;
+      },
+      click() { this._on?.click?.(); },
+    };
+    nodes.set(id, el);
+    return el;
+  };
+  const toast = makeEl('despertar-tutorial-toast');
+  const text = makeEl('despertar-tutorial-toast-text');
+  const btn = makeEl('despertar-tutorial-toast-dismiss');
+  const root = {
+    getElementById(id) {
+      return nodes.get(id) || null;
+    },
+  };
+  assert.equal(showTutorialToast({ text: 'O Lethe se abre.', root, holdMs: 60_000 }), true);
+  assert.equal(toast.hidden, false);
+  assert.ok(toast.classList.contains('is-visible'));
+  assert.equal(text.textContent, 'O Lethe se abre.');
+  btn.click();
+  assert.equal(toast.hidden, true);
+  assert.equal(toast.classList.contains('is-visible'), false);
 });
 
 console.log(`\ndespertar-a11y-smoke: ${passed} passed, ${failed} failed`);

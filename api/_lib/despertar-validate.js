@@ -67,32 +67,83 @@ export function normalizeGenerators(raw) {
 }
 
 /**
- * Shiny counts (G4.1 / Q10).
+ * Contagens de raridade por gerador.
+ * Bound: count + peer ≤ qty. Em soft (clamp), o peer já ocupou slots — gold primeiro.
  * @param {unknown} raw
  * @param {Record<string, number>} generators
- * @returns {{ ok: true, shinyCounts: Record<string, number> } | { ok: false, error: string }}
+ * @param {Record<string, number>} [peerCounts]
+ * @param {{ soft?: boolean, error?: string }} [opts]
+ * @returns {{ ok: true, counts: Record<string, number> } | { ok: false, error: string }}
  */
-export function normalizeShinyCounts(raw, generators = {}) {
+function normalizeRarityCounts(raw, generators = {}, peerCounts = {}, opts = {}) {
+  const soft = Boolean(opts.soft);
+  const error = opts.error || 'rarity_bounds';
   const src = asObject(raw);
+  const peer = asObject(peerCounts);
   const out = {};
   for (const [id, val] of Object.entries(src)) {
     if (!GENERATOR_BY_ID[id]) continue;
     const qty = Math.max(0, Math.floor(Number(generators[id]) || 0));
-    const n = Number.parseInt(val, 10);
-    if (!Number.isFinite(n) || n < 0 || n > qty) {
-      return { ok: false, error: 'shiny_bounds' };
+    const peerN = Math.max(0, Math.floor(Number(peer[id]) || 0));
+    const room = Math.max(0, qty - peerN);
+    let n = Number.parseInt(val, 10);
+    if (!Number.isFinite(n) || n < 0) {
+      if (soft) continue;
+      return { ok: false, error };
+    }
+    if (n > room) {
+      if (soft) n = room;
+      else return { ok: false, error };
     }
     if (n > 0) out[id] = n;
   }
-  return { ok: true, shinyCounts: out };
+  return { ok: true, counts: out };
+}
+
+/**
+ * Gold counts — slots preferenciais vs qty.
+ * @param {unknown} raw
+ * @param {Record<string, number>} generators
+ * @param {{ soft?: boolean }} [opts]
+ * @returns {{ ok: true, goldCounts: Record<string, number> } | { ok: false, error: string }}
+ */
+export function normalizeGoldCounts(raw, generators = {}, opts = {}) {
+  const result = normalizeRarityCounts(raw, generators, {}, {
+    soft: opts.soft,
+    error: 'rarity_bounds',
+  });
+  if (!result.ok) return result;
+  return { ok: true, goldCounts: result.counts };
+}
+
+/**
+ * Shiny / negativo (G4.1 / Q10). peerGold reserva slots (gold preferido).
+ * @param {unknown} raw
+ * @param {Record<string, number>} generators
+ * @param {Record<string, number>} [peerGold]
+ * @param {{ soft?: boolean }} [opts]
+ * @returns {{ ok: true, shinyCounts: Record<string, number> } | { ok: false, error: string }}
+ */
+export function normalizeShinyCounts(raw, generators = {}, peerGold = {}, opts = {}) {
+  const result = normalizeRarityCounts(raw, generators, peerGold, {
+    soft: opts.soft,
+    error: 'shiny_bounds',
+  });
+  if (!result.ok) return result;
+  return { ok: true, shinyCounts: result.counts };
 }
 
 export function rowToCanonical(row) {
   const generators = normalizeGenerators(row?.generators_state ?? row?.generators);
+  const goldRaw = row?.gold_counts ?? row?.goldCounts;
   const shinyRaw = row?.shiny_counts ?? row?.shinyCounts;
-  // Coluna shiny_counts (G4.3); ausente → {}.
+  // Colunas gold_counts / shiny_counts; ausentes → {}. Gold preferido no clamp.
+  const goldParsed = goldRaw != null
+    ? normalizeGoldCounts(goldRaw, generators, { soft: true })
+    : { ok: true, goldCounts: {} };
+  const goldCounts = goldParsed.ok ? goldParsed.goldCounts : {};
   const shinyParsed = shinyRaw != null
-    ? normalizeShinyCounts(shinyRaw, generators)
+    ? normalizeShinyCounts(shinyRaw, generators, goldCounts, { soft: true })
     : { ok: true, shinyCounts: {} };
   return {
     souls: money(decimalString(row?.souls)),
@@ -102,6 +153,7 @@ export function rowToCanonical(row) {
     runSouls: money(decimalString(row?.run_souls ?? row?.runSouls)),
     prestigeCount: Number.parseInt(row?.prestige_count ?? row?.prestigeCount, 10) || 0,
     generators,
+    goldCounts,
     shinyCounts: shinyParsed.ok ? shinyParsed.shinyCounts : {},
     upgrades: asStringArray(row?.upgrades_state ?? row?.upgrades).filter((id) => UPGRADE_BY_ID[id]),
     talents: asStringArray(row?.talents_state ?? row?.talents).filter((id) => TALENT_BY_ID[id]),
@@ -122,12 +174,13 @@ export function rowToCanonical(row) {
   };
 }
 
-export function buildStateDto(rowOrCanonical) {
+export function buildStateDto(rowOrCanonical, options = {}) {
   const state = rowOrCanonical?.souls != null && rowOrCanonical?.generators
     && !rowOrCanonical?.generators_state
     ? {
       ...rowOrCanonical,
       generators: normalizeGenerators(rowOrCanonical.generators),
+      goldCounts: asObject(rowOrCanonical.goldCounts ?? rowOrCanonical.gold_counts),
       shinyCounts: asObject(rowOrCanonical.shinyCounts ?? rowOrCanonical.shiny_counts),
       upgrades: asStringArray(rowOrCanonical.upgrades),
       talents: asStringArray(rowOrCanonical.talents),
@@ -149,7 +202,10 @@ export function buildStateDto(rowOrCanonical) {
     }
     : rowToCanonical(rowOrCanonical);
 
-  const shinyNorm = normalizeShinyCounts(state.shinyCounts, state.generators);
+  // Gold preferido: clampa gold vs qty, depois shiny no restante.
+  const goldNorm = normalizeGoldCounts(state.goldCounts, state.generators, { soft: true });
+  const goldCounts = goldNorm.ok ? goldNorm.goldCounts : {};
+  const shinyNorm = normalizeShinyCounts(state.shinyCounts, state.generators, goldCounts, { soft: true });
   const shinyCounts = shinyNorm.ok ? shinyNorm.shinyCounts : {};
 
   const sps = money(calculateTotalSPS({
@@ -159,10 +215,11 @@ export function buildStateDto(rowOrCanonical) {
     obols: state.obols,
     verdictPurchases: state.verdictPurchases,
     shinyCounts,
+    goldCounts,
   }));
   const preview = prestigePreview(state.runSouls);
 
-  return {
+  const dto = {
     souls: decimalString(state.souls),
     obols: decimalString(state.obols),
     mnemosyne: decimalString(state.mnemosyne),
@@ -171,6 +228,7 @@ export function buildStateDto(rowOrCanonical) {
     prestigeCount: state.prestigeCount,
     generators: state.generators,
     shinyCounts,
+    goldCounts,
     upgrades: state.upgrades,
     talents: state.talents,
     eduLogsSeen: state.eduLogsSeen,
@@ -189,6 +247,28 @@ export function buildStateDto(rowOrCanonical) {
     juizoMilestonesClaimed: asStringArray(state.juizoMilestonesClaimed),
     verdictPurchases: asStringArray(state.verdictPurchases),
   };
+
+  // Fase A / A3 — hint de rebase do client (sem autoridade de economia)
+  const echo = options?.echoEpoch;
+  if (echo != null && Number.isFinite(echo) && echo >= 0) {
+    dto.echoEpoch = echo;
+  }
+
+  return dto;
+}
+
+/**
+ * Lê clientEpoch/syncEpoch do payload. Retorna null se ausente ou inválido.
+ * @param {object|null|undefined} clientState
+ * @returns {number|null}
+ */
+export function parseClientEpoch(clientState) {
+  if (!clientState || typeof clientState !== 'object') return null;
+  const raw = clientState.clientEpoch ?? clientState.syncEpoch;
+  if (raw == null || raw === '') return null;
+  const n = Math.floor(Number(raw));
+  if (!Number.isFinite(n) || n < 0) return null;
+  return n;
 }
 
 export function canonicalToRowPatch(state, nowIso) {
@@ -202,6 +282,9 @@ export function canonicalToRowPatch(state, nowIso) {
     generators_state: state.generators,
     shiny_counts: state.shinyCounts && typeof state.shinyCounts === 'object'
       ? state.shinyCounts
+      : {},
+    gold_counts: state.goldCounts && typeof state.goldCounts === 'object'
+      ? state.goldCounts
       : {},
     upgrades_state: state.upgrades,
     talents_state: state.talents,
@@ -260,6 +343,7 @@ function computeSpend(db, client) {
     if (!meetsUpgradeRequirement(upgrade, {
       souls: client.souls,
       generators: client.generators,
+      upgrades: client.upgrades,
     })) {
       return { ok: false, error: `Juramento sem requisito: ${id}` };
     }
@@ -294,14 +378,20 @@ export function validateSync(dbRow, clientState, now = new Date()) {
   const db = rowToCanonical(dbRow);
   const nowDate = now instanceof Date ? now : new Date(now);
   const nowIso = nowDate.toISOString();
+  const echoEpoch = parseClientEpoch(clientState);
+  const echoOpts = echoEpoch != null ? { echoEpoch } : {};
+  const dto = (row) => buildStateDto(row, echoOpts);
+  const withEcho = (result) => (
+    echoEpoch != null ? { ...result, echoEpoch } : result
+  );
 
   if (!clientState || typeof clientState !== 'object') {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
-    };
+      state: dto(db),
+    });
   }
 
   const clientLast = clientState.lastSyncAt || clientState.last_sync_at || null;
@@ -309,12 +399,12 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     const clientMs = new Date(clientLast).getTime();
     const dbMs = new Date(db.lastSyncAt).getTime();
     if (Number.isFinite(clientMs) && Number.isFinite(dbMs) && clientMs < dbMs - 1000) {
-      return {
+      return withEcho({
         ok: false,
         status: 409,
         error: 'A Estela do servidor é mais recente. Estado restaurado.',
-        state: buildStateDto(db),
-      };
+        state: dto(db),
+      });
     }
   }
 
@@ -324,13 +414,13 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     talents: asStringArray(clientState.talents ?? clientState.talents_state),
   });
   if (unknown.length) {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
+      state: dto(db),
       unknown,
-    };
+    });
   }
 
   // Talentos / óbolos / essência / prestígio não mudam via stateSync.
@@ -348,59 +438,75 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     milestones: asObject(clientState.milestones),
   };
 
-  const shinyResult = normalizeShinyCounts(
-    clientState.shinyCounts ?? clientState.shiny_counts ?? {},
+  const goldResult = normalizeGoldCounts(
+    clientState.goldCounts ?? clientState.gold_counts ?? {},
     client.generators,
   );
-  if (!shinyResult.ok) {
-    return {
+  if (!goldResult.ok) {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
+      state: dto(db),
+      detail: goldResult.error,
+    });
+  }
+  client.goldCounts = goldResult.goldCounts;
+
+  const shinyResult = normalizeShinyCounts(
+    clientState.shinyCounts ?? clientState.shiny_counts ?? {},
+    client.generators,
+    client.goldCounts,
+  );
+  if (!shinyResult.ok) {
+    return withEcho({
+      ok: false,
+      status: 400,
+      error: JUDGES_REFUSED_MESSAGE,
+      state: dto(db),
       detail: shinyResult.error,
-    };
+    });
   }
   client.shinyCounts = shinyResult.shinyCounts;
 
   if (cmp(client.souls, '0') < 0) {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
-    };
+      state: dto(db),
+    });
   }
 
   if (cmp(client.runSouls, db.runSouls) < 0 || cmp(client.lifetimeSouls, db.lifetimeSouls) < 0) {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
-    };
+      state: dto(db),
+    });
   }
 
   for (const id of Object.keys(asObject(clientState.generators ?? clientState.generators_state))) {
     if (!GENERATOR_BY_ID[id]) {
-      return {
+      return withEcho({
         ok: false,
         status: 400,
         error: JUDGES_REFUSED_MESSAGE,
-        state: buildStateDto(db),
-      };
+        state: dto(db),
+      });
     }
   }
 
   const spend = computeSpend(db, client);
   if (!spend.ok) {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
+      state: dto(db),
       detail: spend.error,
-    };
+    });
   }
 
   const dt = deltaSecondsBetween(db.lastSyncAt, nowDate, db.talents, db.verdictPurchases);
@@ -411,6 +517,7 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     obols: db.obols,
     verdictPurchases: db.verdictPurchases,
     shinyCounts: db.shinyCounts,
+    goldCounts: db.goldCounts,
   });
   const power = clickPower({
     generators: db.generators,
@@ -420,6 +527,7 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     sps,
     verdictPurchases: db.verdictPurchases,
     shinyCounts: db.shinyCounts,
+    goldCounts: db.goldCounts,
   });
   const maxGain = theoreticalMaxGain({ sps, clickPower: power, deltaSeconds: dt });
 
@@ -430,25 +538,25 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     // Gastou mais do que o saldo + ganho plausível (wallet caiu além do gasto declarado).
     const available = add(db.souls, maxGain);
     if (cmp(spend.spent, available) > 0) {
-      return {
+      return withEcho({
         ok: false,
         status: 400,
         error: JUDGES_REFUSED_MESSAGE,
-        state: buildStateDto(db),
-      };
+        state: dto(db),
+      });
     }
   }
 
   const excess = sub(claimedGain, maxGain);
   if (cmp(claimedGain, maxGain) > 0 && cmp(excess, SYNC_ABSURD_GAIN_FLOOR) > 0) {
-    return {
+    return withEcho({
       ok: false,
       status: 400,
       error: JUDGES_REFUSED_MESSAGE,
-      state: buildStateDto(db),
+      state: dto(db),
       maxGain: decimalString(maxGain),
       claimedGain: decimalString(claimedGain),
-    };
+    });
   }
 
   const next = {
@@ -456,6 +564,7 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     souls: client.souls,
     generators: client.generators,
     shinyCounts: client.shinyCounts,
+    goldCounts: client.goldCounts,
     upgrades: client.upgrades,
     runSouls: client.runSouls,
     lifetimeSouls: client.lifetimeSouls,
@@ -464,13 +573,13 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     lastSyncAt: nowIso,
   };
 
-  return {
+  return withEcho({
     ok: true,
     status: 200,
-    state: buildStateDto(next),
+    state: dto(next),
     patch: canonicalToRowPatch(next, nowIso),
     next,
-  };
+  });
 }
 
 export function applyPrestige(dbRow, now = new Date()) {
@@ -503,6 +612,7 @@ export function applyPrestige(dbRow, now = new Date()) {
     upgrades: [],
     generators: nextGenerators,
     shinyCounts: {},
+    goldCounts: {},
     souls: startingSouls,
     runSouls: startingSouls,
     lastSyncAt: nowIso,

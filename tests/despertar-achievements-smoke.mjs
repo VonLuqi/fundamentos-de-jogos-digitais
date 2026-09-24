@@ -55,7 +55,7 @@ const despertarCss = read('css/despertar.css');
 
 staticAssert(Array.isArray(catalogJson.achievements), 'game-catalog.json tem achievements');
 staticAssert(Array.isArray(artCatalog), 'assets/achievements/catalog.json é array');
-staticAssert(EDU_LOG_IDS.length === 13, `Códice tem 13 logs (tem ${EDU_LOG_IDS.length})`);
+staticAssert(EDU_LOG_IDS.length === 16, `Códice tem 16 logs (tem ${EDU_LOG_IDS.length})`);
 staticAssert(DESPERTAR_PUBLIC_IDS.length === 11, '11 conquistas públicas do Despertar');
 staticAssert(DESPERTAR_HIDDEN_IDS.length === 1, '1 conquista hidden (Arquiteto)');
 staticAssert(
@@ -116,7 +116,7 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
   staticAssert(eligible.includes('log_authority'), 'syncOk → log_authority');
   staticAssert(!eligible.includes('log_prestige'), 'sem catábase → sem log_prestige');
   staticAssert(!eligible.includes('log_offline'), 'sem marco/progresso → sem log_offline');
-  staticAssert(eligible.length < EDU_LOG_IDS.length, 'estado pobre não elegibiliza os 13');
+  staticAssert(eligible.length < EDU_LOG_IDS.length, 'estado pobre não elegibiliza os 16');
 
   const sanitized = sanitizeEduLogsSeen(poor.eduLogsSeen, poor, { syncOk: true });
   staticAssert(
@@ -142,7 +142,7 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
   const rich = {
     lifetimeSouls: '1000',
     souls: '100',
-    runSouls: '100000',
+    runSouls: '100000000',
     prestigeCount: 1,
     generators,
     upgrades: ['styx_shade_x2'],
@@ -154,10 +154,10 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
   const eligible = computeEligibleEduLogs(rich, { syncOk: true });
   staticAssert(
     eligible.length === EDU_LOG_IDS.length,
-    `estado rico elegibiliza os 13 (tem ${eligible.length})`,
+    `estado rico elegibiliza os 16 (tem ${eligible.length})`,
   );
   const sanitized = sanitizeEduLogsSeen(rich.eduLogsSeen, rich, { syncOk: true });
-  staticAssert(sanitized.length === 13, 'sanitize aceita os 13 quando elegíveis');
+  staticAssert(sanitized.length === 16, 'sanitize aceita os 16 quando elegíveis');
   const earned = evaluateDespertarAchievementIds(rich, { unlocked: [], syncOk: true });
   staticAssert(earned.includes('despertar_arquiteto_do_loop'), 'Arquiteto com Códice completo');
   staticAssert(earned.includes('despertar_catabase'), 'Catábase com prestige≥1');

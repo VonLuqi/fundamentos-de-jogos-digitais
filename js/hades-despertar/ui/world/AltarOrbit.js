@@ -4,6 +4,22 @@
  */
 
 import { cmp } from '../../core/decimal.js';
+import { applyReapCosmeticClasses } from '../../config/upgrade-cosmetics.js';
+import {
+  shinyChromaticPx,
+  shinyGlitchNow,
+  shinyTearBands,
+} from './shinyGlitch.js';
+import {
+  GOLD_BODY,
+  GOLD_BORDER,
+  GOLD_GEM,
+  GOLD_SHADOW,
+  goldPulse,
+  paintGoldAura,
+  paintGoldSparkles,
+} from './goldJuice.js';
+import { unitRarityAt } from './unitRarity.js';
 import {
   BUY_PULSE_MS,
   buyPulseScale,
@@ -11,18 +27,32 @@ import {
   prefersReducedMotion,
 } from './WorldView.js';
 
+/**
+ * @param {{ rarity?: string, shiny?: boolean, gold?: boolean }} [opts]
+ * @returns {'normal'|'gold'|'negativo'}
+ */
+function rarityFromOpts(opts = {}) {
+  if (opts.rarity === 'gold' || opts.rarity === 'negativo' || opts.rarity === 'normal') {
+    return opts.rarity;
+  }
+  if (opts.gold) return 'gold';
+  if (opts.shiny) return 'negativo';
+  return 'normal';
+}
+
 /** Cap visual de cursors na órbita (Cookie: muitos; budget canvas). */
 export const ORBIT_CURSOR_CAP = 200;
 
 /**
- * Slots por anel, do interno ao externo (densos, lado a lado como Cookie).
- * Soma 210 ≥ cap. Qty 63 → anéis 12+18+24+9.
+ * Slots por anel, do interno ao externo — densos como Cookie Clicker.
+ * Soma 220 ≥ cap 200. Qty 63 → 28+35 no anel 0–1.
  */
-export const ORBIT_RING_SLOTS = Object.freeze([12, 18, 24, 30, 36, 42, 48]);
+export const ORBIT_RING_SLOTS = Object.freeze([28, 36, 44, 52, 60]);
 
 /** Raio do anel 0 e espaçamento entre anéis (fração do min(w,h)). */
-export const ORBIT_BASE_RADIUS_FRAC = 0.26;
-export const ORBIT_RING_GAP_FRAC = 0.072;
+export const ORBIT_BASE_RADIUS_FRAC = 0.24;
+/** Gap curto entre anéis para auréola “juntinha”. */
+export const ORBIT_RING_GAP_FRAC = 0.048;
 
 /** Spin base (rad/s); anéis externos mais lentos (parallax). */
 export const ORBIT_SPIN_RAD_PER_SEC = 0.55;
@@ -135,9 +165,9 @@ export function soulRainRate(sps) {
   return Math.min(SOUL_RAIN_MAX_PER_SEC, Math.max(0, soft));
 }
 
-/** Escala: anel externo ~8% menor por nível (piso 0.72). */
-export const ORBIT_RING_SCALE_STEP = 0.08;
-export const ORBIT_RING_SCALE_MIN = 0.72;
+/** Escala: anel externo um pouco menor (piso 0.65). */
+export const ORBIT_RING_SCALE_STEP = 0.07;
+export const ORBIT_RING_SCALE_MIN = 0.65;
 
 /**
  * Escala visual do cursor por índice de anel (G1.2).
@@ -148,22 +178,49 @@ export function orbitRingScale(ring) {
   return Math.max(ORBIT_RING_SCALE_MIN, 1 - r * ORBIT_RING_SCALE_STEP);
 }
 
+/** Opacidade: anel interno cheio; externos esmaecem (Cookie). */
+export const ORBIT_RING_OPACITY_STEP = 0.14;
+export const ORBIT_RING_OPACITY_MIN = 0.28;
+
 /**
- * Marca os primeiros `shinyCount` placements como shiny (convenção G4).
- * @param {{ ring: number, slot: number, slotsInRing: number, shiny?: boolean }[]} placements
- * @param {number} shinyCount
+ * Opacidade do cursor por anel — quanto mais longe da Foice, mais transparente.
+ * @param {number} ring
  */
-export function markShinyPlacements(placements, shinyCount = 0) {
-  const n = Math.max(0, Math.floor(Number(shinyCount) || 0));
+export function orbitRingOpacity(ring) {
+  const r = Math.max(0, Math.floor(Number(ring) || 0));
+  return Math.max(ORBIT_RING_OPACITY_MIN, 1 - r * ORBIT_RING_OPACITY_STEP);
+}
+
+/**
+ * Marca raridades nos placements: 0..shiny-1 = negativo; shiny..shiny+gold-1 = gold.
+ * Cada placement recebe `rarity`, `shiny` (negativo) e `gold`.
+ *
+ * @param {{ ring: number, slot: number, slotsInRing: number, rarity?: string, shiny?: boolean, gold?: boolean }[]} placements
+ * @param {number|{ shiny?: number, negativo?: number, gold?: number }} shinyOrCounts
+ * @param {number} [goldCount]
+ */
+export function markShinyPlacements(placements, shinyOrCounts = 0, goldCount = 0) {
+  let shiny = 0;
+  let gold = 0;
+  if (shinyOrCounts && typeof shinyOrCounts === 'object') {
+    shiny = Math.max(0, Math.floor(Number(shinyOrCounts.shiny ?? shinyOrCounts.negativo) || 0));
+    gold = Math.max(0, Math.floor(Number(shinyOrCounts.gold) || 0));
+  } else {
+    shiny = Math.max(0, Math.floor(Number(shinyOrCounts) || 0));
+    gold = Math.max(0, Math.floor(Number(goldCount) || 0));
+  }
   if (!placements?.length) return placements || [];
   for (let i = 0; i < placements.length; i += 1) {
-    placements[i].shiny = i < n;
+    const rarity = unitRarityAt(i, { gold, shiny });
+    placements[i].rarity = rarity;
+    placements[i].shiny = rarity === 'negativo';
+    placements[i].gold = rarity === 'gold';
   }
   return placements;
 }
 
 /**
- * Lê shinyCount de T1 no state (gancho G4; default 0).
+ * Lê shinyCount (negativo) de T1 no state (gancho G4; default 0).
  * @param {object} state
  * @param {number} cursorCount
  */
@@ -175,6 +232,24 @@ export function orbitShinyCountFromState(state, cursorCount = 0) {
     raw = Number(map?.[T1_ID] || 0);
   } else if (state.shinyCounts && typeof state.shinyCounts === 'object') {
     raw = Number(state.shinyCounts[T1_ID] || 0);
+  }
+  const cap = Math.max(0, Math.floor(Number(cursorCount) || 0));
+  return Math.min(cap, Math.max(0, Math.floor(raw) || 0));
+}
+
+/**
+ * Lê goldCount de T1 no state (default 0).
+ * @param {object} state
+ * @param {number} cursorCount
+ */
+export function orbitGoldCountFromState(state, cursorCount = 0) {
+  if (!state) return 0;
+  let raw = 0;
+  if (typeof state.goldCounts === 'function') {
+    const map = state.goldCounts();
+    raw = Number(map?.[T1_ID] || 0);
+  } else if (state.goldCounts && typeof state.goldCounts === 'object') {
+    raw = Number(state.goldCounts[T1_ID] || 0);
   }
   const cap = Math.max(0, Math.floor(Number(cursorCount) || 0));
   return Math.min(cap, Math.max(0, Math.floor(raw) || 0));
@@ -219,52 +294,140 @@ export function orbitHitIndex(mx, my, placements, geom, hitRadiusBase = ORBIT_HI
 }
 
 /**
- * Cursor procedural Hades (Q2). Shiny = invert + glow Styx; reduced = borda dourada (Q11).
+ * Cursor procedural Hades (Q2).
+ * Gold: corpo/glow quentes (sem invert/glitch); reduced = borda dourada.
+ * Negativo (legacy shiny): invert + glow Styx; reduced = borda dourada (Q11).
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} x
  * @param {number} y
  * @param {number} angle
  * @param {number} [scale]
- * @param {{ shiny?: boolean, reducedMotion?: boolean }} [opts]
+ * @param {{ rarity?: 'gold'|'negativo'|false, shiny?: boolean, gold?: boolean, reducedMotion?: boolean, opacity?: number }} [opts]
  */
 export function drawOrbitCursor(ctx, x, y, angle, scale = 1, opts = {}) {
-  const shiny = Boolean(opts.shiny);
+  const rarity = rarityFromOpts(opts);
+  const isGold = rarity === 'gold';
+  const isNegativo = rarity === 'negativo';
   const reduced = Boolean(opts.reducedMotion);
-  const body = shiny && !reduced ? 'rgba(242, 232, 220, 0.95)' : 'rgba(8, 16, 20, 0.92)';
-  const gem = shiny && !reduced ? 'rgba(217, 4, 41, 0.95)' : 'rgba(0, 168, 150, 0.9)';
+  const opacity = Number.isFinite(Number(opts.opacity))
+    ? Math.min(1, Math.max(0, Number(opts.opacity)))
+    : 1;
+  let body = 'rgba(8, 16, 20, 0.92)';
+  let gem = 'rgba(0, 168, 150, 0.9)';
+  if (isGold) {
+    body = GOLD_BODY;
+    gem = GOLD_GEM;
+  } else if (isNegativo && !reduced) {
+    body = 'rgba(242, 232, 220, 0.95)';
+    gem = 'rgba(217, 4, 41, 0.95)';
+  }
+
+  const paintCursor = (bodyColor, gemColor) => {
+    ctx.fillStyle = bodyColor;
+    ctx.beginPath();
+    ctx.moveTo(0, -7);
+    ctx.quadraticCurveTo(5, -1, 3, 8);
+    ctx.lineTo(0, 5);
+    ctx.lineTo(-3, 8);
+    ctx.quadraticCurveTo(-5, -1, 0, -7);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = gemColor;
+    ctx.beginPath();
+    ctx.arc(0, -3, 1.6, 0, Math.PI * 2);
+    ctx.fill();
+  };
 
   ctx.save();
+  ctx.globalAlpha = opacity;
   ctx.translate(x, y);
   ctx.rotate(angle + Math.PI / 2);
   ctx.scale(scale, scale);
 
-  if (shiny) {
+  if (isGold) {
     if (reduced) {
-      ctx.strokeStyle = 'rgba(207, 167, 89, 0.95)';
+      ctx.strokeStyle = GOLD_BORDER;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.shadowColor = GOLD_SHADOW;
+      ctx.shadowBlur = 8;
+      paintCursor(body, gem);
+    } else {
+      const t = shinyGlitchNow();
+      const pulse = goldPulse(t);
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = opacity;
+      paintGoldAura(ctx, x, y, 14 * scale, pulse);
+      ctx.restore();
+
+      ctx.shadowColor = GOLD_SHADOW;
+      ctx.shadowBlur = 12 + pulse * 14;
+      paintCursor(body, gem);
+
+      ctx.save();
+      ctx.globalAlpha = opacity * (0.4 + pulse * 0.25);
+      ctx.globalCompositeOperation = 'screen';
+      paintCursor('rgba(255, 236, 180, 0.95)', 'rgba(255, 252, 230, 1)');
+      ctx.restore();
+      ctx.shadowBlur = 0;
+
+      // gem brilha mais
+      ctx.save();
+      ctx.shadowColor = 'rgba(255, 240, 180, 1)';
+      ctx.shadowBlur = 8 + pulse * 8;
+      ctx.fillStyle = 'rgba(255, 252, 230, 1)';
+      ctx.beginPath();
+      ctx.arc(0, -3, 1.9 + pulse * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.globalAlpha = opacity;
+      paintGoldSparkles(ctx, x, y, 12 * scale, t);
+      ctx.restore();
+    }
+  } else if (isNegativo) {
+    if (reduced) {
+      ctx.strokeStyle = GOLD_BORDER;
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
       ctx.stroke();
+      paintCursor(body, gem);
     } else {
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.85)';
-      ctx.shadowBlur = 10;
+      const t = shinyGlitchNow();
+      const chroma = shinyChromaticPx(t);
+      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowBlur = 12;
+      paintCursor(body, gem);
+
+      ctx.save();
+      ctx.globalAlpha = opacity * 0.45;
+      ctx.globalCompositeOperation = 'screen';
+      ctx.translate(-chroma, 0);
+      paintCursor('rgba(0, 255, 220, 0.9)', 'rgba(255, 40, 80, 0.95)');
+      ctx.translate(chroma * 2, 0);
+      paintCursor('rgba(255, 40, 120, 0.9)', 'rgba(0, 255, 200, 0.95)');
+      ctx.restore();
+
+      for (const band of shinyTearBands(-10, 20, t)) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(-10, band.y, 20, Math.max(0.5, band.h));
+        ctx.clip();
+        ctx.translate(band.dx * 0.35, 0);
+        paintCursor(body, gem);
+        ctx.restore();
+      }
     }
+  } else {
+    paintCursor(body, gem);
   }
 
-  ctx.fillStyle = body;
-  ctx.beginPath();
-  ctx.moveTo(0, -7);
-  ctx.quadraticCurveTo(5, -1, 3, 8);
-  ctx.lineTo(0, 5);
-  ctx.lineTo(-3, 8);
-  ctx.quadraticCurveTo(-5, -1, 0, -7);
-  ctx.fill();
-
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = gem;
-  ctx.beginPath();
-  ctx.arc(0, -3, 1.6, 0, Math.PI * 2);
-  ctx.fill();
   ctx.restore();
 }
 
@@ -286,6 +449,7 @@ export class AltarOrbit {
     this._ctx = null;
     this._particles = null;
     this._veil = null;
+    this._reap = null;
     this._cursorCount = 0;
     this._placements = [];
     this._sps = '0';
@@ -295,7 +459,7 @@ export class AltarOrbit {
     this._rainCarry = 0;
     this._angle = 0;
     this._lastGeom = null;
-    /** @type {((hit: { generatorId: string, index: number, shiny: boolean, source: string }|null, event?: PointerEvent) => void)|null} */
+    /** @type {((hit: { generatorId: string, index: number, rarity?: string, shiny: boolean, gold?: boolean, source: string }|null, event?: PointerEvent) => void)|null} */
     this.onNpcHover = typeof options.onNpcHover === 'function' ? options.onNpcHover : null;
     this._hoverKey = null;
     this._hoverIndex = -1;
@@ -308,13 +472,16 @@ export class AltarOrbit {
   }
 
   /**
-   * @param {{ orbitHost?: Element|null, particleLayer?: Element|null, veil?: Element|null }} hosts
+   * @param {{ orbitHost?: Element|null, particleLayer?: Element|null, veil?: Element|null, reapButton?: Element|null }} hosts
    */
   mount(hosts = {}) {
     if (!this.root || this._mounted) return this;
     this._orbitHost = hosts.orbitHost || null;
     this._particles = hosts.particleLayer || null;
     this._veil = hosts.veil || null;
+    this._reap = hosts.reapButton
+      || this.root.getElementById?.('despertar-reap')
+      || null;
 
     if (this._orbitHost) {
       this._orbitHost.replaceChildren();
@@ -352,7 +519,10 @@ export class AltarOrbit {
     const shades = Number(qtyMap[T1_ID] || 0);
     this._cursorCount = orbitCursorCount(shades, this.cap);
     this._placements = orbitSlotLayout(this._cursorCount, this.ringSlots, this.cap);
-    markShinyPlacements(this._placements, orbitShinyCountFromState(state, this._cursorCount));
+    markShinyPlacements(this._placements, {
+      shiny: orbitShinyCountFromState(state, this._cursorCount),
+      gold: orbitGoldCountFromState(state, this._cursorCount),
+    });
     this._sps = typeof state.sps === 'function' ? state.sps() : (state.sps || '0');
 
     if (this._pendingBuyPulse && this._cursorCount > 0) {
@@ -367,6 +537,12 @@ export class AltarOrbit {
       this._veil.classList.toggle('is-milk', pct > 14);
       this._veil.hidden = false;
     }
+
+    // Fase E / E3 — cosméticos target:reap (ex.: blade_glow).
+    if (!this._reap && this.root?.getElementById) {
+      this._reap = this.root.getElementById('despertar-reap');
+    }
+    applyReapCosmeticClasses(this._reap, state);
 
     if (this._cursorCount === 0) {
       this.#clearOrbit();
@@ -506,10 +682,14 @@ export class AltarOrbit {
       return;
     }
     const placement = this._placements[index];
+    const rarity = placement?.rarity
+      || (placement?.gold ? 'gold' : (placement?.shiny ? 'negativo' : 'normal'));
     this.#emitNpcHover({
       generatorId: T1_ID,
       index,
-      shiny: Boolean(placement?.shiny),
+      rarity,
+      shiny: rarity === 'negativo',
+      gold: rarity === 'gold',
       source: 'orbit',
     }, event);
   }
@@ -522,7 +702,7 @@ export class AltarOrbit {
       this.onNpcHover?.(null, event);
       return;
     }
-    this._hoverKey = `orbit:${hit.generatorId}:${hit.index}:${hit.shiny ? 1 : 0}`;
+    this._hoverKey = `orbit:${hit.generatorId}:${hit.index}:${hit.rarity || 'normal'}`;
     this._hoverIndex = hit.index;
     this.onNpcHover?.(hit, event);
   }
@@ -563,9 +743,12 @@ export class AltarOrbit {
     this._ctx.setLineDash([4, 6]);
     for (let ring = 0; ring < ringsActive; ring += 1) {
       const r = baseRadius + ring * ringGap;
+      this._ctx.save();
+      this._ctx.globalAlpha = Math.max(0.12, orbitRingOpacity(ring) * 0.55);
       this._ctx.beginPath();
       this._ctx.arc(cx, cy, r, 0, Math.PI * 2);
       this._ctx.stroke();
+      this._ctx.restore();
     }
     this._ctx.setLineDash([]);
 
@@ -600,12 +783,17 @@ export class AltarOrbit {
       const ringScale = orbitRingScale(placement.ring);
       const buyScale = pulseFactor ? pulseFactor(i) : 1;
       const scale = ringScale * buyScale;
+      const opacity = orbitRingOpacity(placement.ring);
       drawOrbitCursor(this._ctx, x, y, theta, scale, {
+        rarity: placement.rarity === 'normal' ? false : placement.rarity,
         shiny: Boolean(placement.shiny),
+        gold: Boolean(placement.gold),
         reducedMotion: this._reducedMotion,
+        opacity,
       });
       if (this._hoverIndex === i) {
         this._ctx.save();
+        this._ctx.globalAlpha = Math.max(0.55, opacity);
         this._ctx.strokeStyle = 'rgba(0, 168, 150, 0.95)';
         this._ctx.lineWidth = 2;
         this._ctx.beginPath();

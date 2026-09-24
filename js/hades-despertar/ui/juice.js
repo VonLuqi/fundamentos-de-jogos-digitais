@@ -44,6 +44,70 @@ export function flashStyx(options = {}) {
 }
 
 /**
+ * Flash roxo na primeira abertura do Lethe (Fase C / C1).
+ * Reusa #despertar-styx-flash com modificador `.is-lethe`.
+ */
+export function flashLetheUnlock(options = {}) {
+  if (resolveReduced(options)) return false;
+  const root = options.root ?? (typeof document !== 'undefined' ? document : null);
+  if (!root) return false;
+  const flash = root.getElementById('despertar-styx-flash');
+  if (!flash) return false;
+  flash.classList.add('is-lethe');
+  bumpClass(flash, 'is-active', 920);
+  const timer = typeof globalThis.setTimeout === 'function' ? globalThis.setTimeout.bind(globalThis) : null;
+  timer?.(() => flash.classList.remove('is-lethe'), 920);
+  return true;
+}
+
+let _tutorialToastTimer = null;
+let _tutorialToastBound = false;
+
+/**
+ * Toast tutorial leve (Fase C / C3) — uma linha + “Entendi”. Não bloqueia.
+ * @param {{ text?: string, root?: Document|Element, reducedMotion?: boolean, holdMs?: number }} [options]
+ */
+export function showTutorialToast(options = {}) {
+  const root = options.root ?? (typeof document !== 'undefined' ? document : null);
+  if (!root) return false;
+  const toast = root.getElementById('despertar-tutorial-toast');
+  const textEl = root.getElementById('despertar-tutorial-toast-text');
+  const dismiss = root.getElementById('despertar-tutorial-toast-dismiss');
+  if (!toast || !textEl) return false;
+
+  const message = String(options.text ?? '').trim();
+  if (!message) return false;
+
+  textEl.textContent = message;
+  toast.hidden = false;
+  toast.classList.add('is-visible');
+
+  const hide = () => {
+    toast.classList.remove('is-visible');
+    toast.hidden = true;
+    if (_tutorialToastTimer != null && typeof globalThis.clearTimeout === 'function') {
+      globalThis.clearTimeout(_tutorialToastTimer);
+      _tutorialToastTimer = null;
+    }
+  };
+
+  if (!_tutorialToastBound && dismiss) {
+    dismiss.addEventListener('click', hide);
+    _tutorialToastBound = true;
+  }
+
+  if (_tutorialToastTimer != null && typeof globalThis.clearTimeout === 'function') {
+    globalThis.clearTimeout(_tutorialToastTimer);
+    _tutorialToastTimer = null;
+  }
+  const holdMs = Number(options.holdMs) > 0 ? Number(options.holdMs) : 12_000;
+  if (typeof globalThis.setTimeout === 'function') {
+    _tutorialToastTimer = globalThis.setTimeout(hide, holdMs);
+  }
+  return true;
+}
+
+/**
  * Vinheta roxa + card no Ritual do Lethe. Copy própria — sem XP falso.
  */
 export function playLetheRitualFeel({

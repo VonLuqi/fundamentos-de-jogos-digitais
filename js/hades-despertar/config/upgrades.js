@@ -2,10 +2,18 @@
  * Juramentos do Styx — todos ×2 no alvo. Resetam no Lethe.
  */
 
+function freezeRequires(requires = {}) {
+  const next = { ...requires };
+  if (Array.isArray(requires.allUpgradeIds)) {
+    next.allUpgradeIds = Object.freeze([...requires.allUpgradeIds]);
+  }
+  return Object.freeze(next);
+}
+
 function freezeAll(list) {
   return Object.freeze(list.map((item) => Object.freeze({
     ...item,
-    requires: Object.freeze({ ...item.requires }),
+    requires: freezeRequires(item.requires),
   })));
 }
 
@@ -24,7 +32,7 @@ export const UPGRADES = freezeAll([
     cost: '500',
     kind: 'clickMult',
     factor: '2',
-    requires: { minSouls: '0' },
+    requires: { upgradeId: 'foice_afilada', minSouls: '0' },
   },
   {
     id: 'pacto_das_margens',
@@ -32,7 +40,7 @@ export const UPGRADES = freezeAll([
     cost: '2500',
     kind: 'clickMult',
     factor: '2',
-    requires: { minSouls: '0' },
+    requires: { upgradeId: 'juramento_acheron', minSouls: '0' },
   },
   {
     id: 'ceifador_ctoniano',
@@ -40,7 +48,7 @@ export const UPGRADES = freezeAll([
     cost: '10000',
     kind: 'clickMult',
     factor: '2',
-    requires: { minSouls: '0' },
+    requires: { upgradeId: 'pacto_das_margens', minSouls: '0' },
   },
   {
     id: 'colheita_eterna',
@@ -48,7 +56,7 @@ export const UPGRADES = freezeAll([
     cost: '50000',
     kind: 'clickMult',
     factor: '2',
-    requires: { minSouls: '0' },
+    requires: { upgradeId: 'ceifador_ctoniano', minSouls: '0' },
   },
   {
     id: 'umbras_despertas',
