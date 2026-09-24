@@ -69,8 +69,8 @@ assert(lib.includes('findActiveSoulRecovery'), 'lib find');
 assert(lib.includes('markSoulRecoveryUsed'), 'lib mark used');
 assert(lib.includes('soul:'), 'hash prefix soul: distinto do Caronte');
 
-assert(AUTH_RATE_LIMITS.soul_recovery_issue_user.max === 10, 'rate issue 10/h');
-assert(AUTH_RATE_LIMITS.soul_recovery_consume_ip.max === 5, 'rate consume 5/15min');
+assert(AUTH_RATE_LIMITS.soul_recovery_issue_user.max === Infinity, 'rate issue sem teto');
+assert(AUTH_RATE_LIMITS.soul_recovery_consume_ip.max === Infinity, 'rate consume sem teto');
 assert(ADMIN_AUDIT_ACTIONS.issueSoulRecoveryCode === 'admin_issue_soul_recovery_code', 'audit issue');
 assert(ADMIN_AUDIT_ACTIONS.consumeSoulRecoveryCode === 'consume_soul_recovery_code', 'audit consume');
 

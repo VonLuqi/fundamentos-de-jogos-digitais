@@ -2,12 +2,16 @@ import crypto from 'node:crypto';
 import { sendMail } from './mailer.js';
 
 export const TOKEN_TTL_MS = 60 * 60 * 1000;
+/** Verificação de e-mail ainda limitada; recuperação (reset) sem teto. */
 export const RATE_LIMIT_EMAIL_PER_HOUR = 3;
 export const RATE_LIMIT_IP_PER_HOUR = 5;
 
 const PURPOSE_VERIFY = 'verify_email';
 const PURPOSE_RESET = 'reset_password';
 const PURPOSE_LEGACY = 'legacy_reset';
+
+/** Recuperação de senha / legado — sem limite de tentativas. */
+const UNLIMITED_EMAIL_PURPOSES = new Set([PURPOSE_RESET, PURPOSE_LEGACY]);
 
 export function normalizeEmail(value) {
   return String(value || '').trim().toLowerCase();
@@ -159,6 +163,8 @@ export function legacyResetEmailCopy({ name, url }) {
 }
 
 export async function isRateLimited({ supabase, email, ip, purpose }) {
+  if (UNLIMITED_EMAIL_PURPOSES.has(purpose)) return false;
+
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
   if (email) {

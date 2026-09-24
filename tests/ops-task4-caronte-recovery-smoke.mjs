@@ -60,9 +60,9 @@ assert(PURPOSE.legacyReset === 'legacy_reset', 'PURPOSE.legacyReset');
 assert(authEmail.includes('dispatchLegacyReset'), 'auth-email tem dispatchLegacyReset');
 assert(authEmail.includes('legacyResetEmailCopy'), 'auth-email tem copy do e-mail legado');
 
-assert(AUTH_RATE_LIMITS.legacy_bind_ip?.max === 10, 'legacy_bind 10/IP/15min');
-assert(AUTH_RATE_LIMITS.legacy_bind_user?.max === 5, 'legacy_bind 5/username/15min');
-assert(rateLib.includes("action === 'legacy_bind'"), 'auth-rate trata legacy_bind');
+assert(AUTH_RATE_LIMITS.legacy_bind_ip?.max === Infinity, 'legacy_bind sem teto');
+assert(AUTH_RATE_LIMITS.legacy_bind_user?.max === Infinity, 'legacy_bind user sem teto');
+assert(rateLib.includes("UNLIMITED_ACTIONS") || rateLib.includes('legacy_bind'), 'auth-rate trata legacy_bind');
 
 assert(RECOVERY_SETTING_KEY === 'caronte_recovery_code', 'chave site_settings');
 assert(RECOVERY_CODE_LENGTH === 10, 'código tem 10 chars');
