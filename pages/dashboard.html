@@ -67,7 +67,8 @@
         <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
         <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
         <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
-<a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="./prova-admin.html" hidden>Prova Módulo 1</a>
       </nav>
 
       <div class="app-shell__footer">
@@ -132,6 +133,9 @@
             <button class="btn-gold btn-gold--ghost" type="button" id="btn-reset-despertar">
               Limpar Estelas antecipadas
             </button>
+            <button class="btn-gold btn-gold--ghost" type="button" id="btn-prova-modulo1">
+              Prova Módulo 1
+            </button>
             <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
               Ver Almas Registradas
             </button>
@@ -157,6 +161,7 @@
 
               <p class="profile-panel__username" id="profile-username">@—</p>
               <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
+              <p class="profile-panel__turma" id="profile-turma" hidden></p>
               <p class="profile-panel__rank" id="profile-rank">—</p>
 
               <button

@@ -12,11 +12,13 @@ import {
   fetchLessonsPublishMap,
   getSession,
   logout,
+  provaGetExamStatus,
   requireSession,
   setLessonGate,
 } from './api.js';
 import {
   PUBLISHED_GATE_KEY,
+  isAssessmentLesson,
   isLessonPublished,
   renderModulesTrail,
 } from './lessons-ui.js';
@@ -24,6 +26,8 @@ import {
 let currentUser = null;
 let currentToken = null;
 let publishMap = {};
+/** @type {Record<string, string>} */
+let assessmentStates = {};
 
 function showApiWarning(message) {
   const box = document.getElementById('api-warning');
@@ -50,6 +54,7 @@ function updateTrailMeta() {
 
 function appendAdminToggle(lesson, _state, row) {
   if (currentUser?.role !== 'admin') return;
+  if (isAssessmentLesson(lesson)) return; // gate da prova fica no Painel / hub
 
   const published = isLessonPublished(lesson.id, publishMap);
   const toggle = document.createElement('button');
@@ -89,12 +94,45 @@ function appendAdminToggle(lesson, _state, row) {
   row.appendChild(toggle);
 }
 
+/**
+ * Mapeia status da API da prova → estado da linha na trilha.
+ * @param {object|null} status
+ */
+function resolveProvaAssessmentState(status) {
+  if (!status) return 'coming-soon';
+  const attempt = status.attempt;
+  if (attempt?.status === 'in_progress' || status.mustResume) return 'in_progress';
+  if (attempt?.status === 'graded') return 'completed';
+  if (attempt?.status === 'submitted' || attempt?.status === 'timed_out') return 'awaiting';
+  if (status.canStart) return 'available';
+  const exam = status.exam;
+  if (exam?.isOpen && exam?.openTurma && exam.openTurma === currentUser?.turma) {
+    return 'available';
+  }
+  if (currentUser?.role === 'admin') return 'available';
+  return 'coming-soon';
+}
+
+async function refreshAssessmentStates() {
+  assessmentStates = {};
+  if (!currentToken) return;
+  try {
+    const status = await provaGetExamStatus(currentToken);
+    assessmentStates['prova-modulo1'] = resolveProvaAssessmentState(status);
+  } catch {
+    assessmentStates['prova-modulo1'] = currentUser?.role === 'admin'
+      ? 'available'
+      : 'coming-soon';
+  }
+}
+
 function renderTrail() {
   const container = document.getElementById('trail-modules');
   if (!container || !currentUser) return;
 
   renderModulesTrail(container, currentUser, {
     publishMap,
+    assessmentStates,
     afterRow: appendAdminToggle,
   });
   updateTrailMeta();
@@ -136,6 +174,7 @@ async function init() {
     publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
   }
 
+  await refreshAssessmentStates();
   renderTrail();
 }
 

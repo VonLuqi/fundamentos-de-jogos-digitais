@@ -9,19 +9,41 @@ import { LESSONS, MODULES, ROUTES } from './api.js';
 
 export const PUBLISHED_GATE_KEY = 'published';
 
+/** @param {object|null|undefined} lesson */
+export function isAssessmentLesson(lesson) {
+  return lesson?.kind === 'assessment';
+}
+
 export function isLessonPublished(lessonId, publishMap = {}) {
   if (Object.prototype.hasOwnProperty.call(publishMap, lessonId)) {
     return Boolean(publishMap[lessonId]);
   }
   // Sem mapa (ou entrada ausente): só aula1 começa liberada; Despertar fica selado.
   if (lessonId === 'despertar') return false;
+  if (String(lessonId || '').startsWith('prova-')) return true; // gate próprio da prova
   return lessonId === 'aula1';
 }
 
 /**
  * @returns {'completed'|'available'|'coming-soon'|'locked'}
  */
-export function resolveLessonState(lesson, user, { published = true } = {}) {
+export function resolveLessonState(lesson, user, { published = true, assessmentState = null } = {}) {
+  if (isAssessmentLesson(lesson)) {
+    if (assessmentState === 'completed') return 'completed';
+    if (
+      assessmentState === 'available'
+      || assessmentState === 'in_progress'
+      || assessmentState === 'awaiting'
+    ) {
+      return 'available';
+    }
+    if (assessmentState === 'coming-soon') {
+      return user?.role === 'admin' ? 'available' : 'coming-soon';
+    }
+    // Sem status da API: admin vê disponível; aluno aguarda
+    return user?.role === 'admin' ? 'available' : 'coming-soon';
+  }
+
   const completedLessons = Array.isArray(user?.completedLessons) ? user.completedLessons : [];
   if (completedLessons.includes(lesson.id)) return 'completed';
   if (!published) {
@@ -31,10 +53,46 @@ export function resolveLessonState(lesson, user, { published = true } = {}) {
   return 'available';
 }
 
-function defaultSubtitle(lesson, state) {
+function defaultSubtitle(lesson, state, assessmentState = null) {
+  if (isAssessmentLesson(lesson)) {
+    if (assessmentState === 'in_progress') {
+      return 'Em andamento — o tempo não pausa. Continue a prova.';
+    }
+    if (assessmentState === 'awaiting') {
+      return 'Enviada — aguardando correção do Mestre.';
+    }
+    if (state === 'completed') {
+      return 'Nota liberada — veja o resultado na Provação.';
+    }
+    if (state === 'coming-soon' || state === 'locked') {
+      return 'Aguardando o Mestre liberar a prova para a sua turma.';
+    }
+    return lesson.subtitle || 'Avaliação do módulo';
+  }
   if (state === 'completed') return `Concluída — +${lesson.rewardXp} XP recebidos`;
   if (state === 'coming-soon' || state === 'locked') return 'Em breve — aguardando liberação do Mestre';
   return lesson.subtitle;
+}
+
+function defaultHref(lesson, user, assessmentState = null) {
+  if (isAssessmentLesson(lesson)) {
+    if (user?.role === 'admin' && assessmentState !== 'in_progress') {
+      return ROUTES.provaAdmin();
+    }
+    return ROUTES.prova();
+  }
+  if (lesson.href && typeof ROUTES[lesson.href] === 'function') {
+    return ROUTES[lesson.href]();
+  }
+  return ROUTES.lesson(lesson.id);
+}
+
+function assessmentActionLabel(user, state, assessmentState) {
+  if (assessmentState === 'in_progress') return 'Continuar';
+  if (assessmentState === 'awaiting') return 'Ver status';
+  if (state === 'completed') return 'Ver nota';
+  if (user?.role === 'admin') return 'Hub';
+  return 'Abrir prova';
 }
 
 /**
@@ -45,7 +103,9 @@ function defaultSubtitle(lesson, state) {
  * @param {object} [options]
  * @param {typeof LESSONS} [options.lessons]
  * @param {Record<string, boolean>} [options.publishMap]
+ * @param {Record<string, string>} [options.assessmentStates] — id → available|coming-soon|in_progress|awaiting|completed
  * @param {(lesson: object) => string} [options.getHref]
+ * @param {(lesson: object, state: string) => string} [options.getActionLabel]
  * @param {string} [options.emptyMessage]
  * @param {(lesson: object, state: string) => string} [options.getSubtitle]
  * @param {(lesson: object, state: string, row: HTMLElement) => void} [options.afterRow]
@@ -56,7 +116,9 @@ export function renderLessonsList(container, user, options = {}) {
   const {
     lessons = LESSONS,
     publishMap = {},
-    getHref = (lesson) => ROUTES.lesson(lesson.id),
+    assessmentStates = {},
+    getHref,
+    getActionLabel,
     emptyMessage = 'Nenhuma aula cadastrada ainda.',
     getSubtitle,
     afterRow,
@@ -72,18 +134,25 @@ export function renderLessonsList(container, user, options = {}) {
   }
 
   lessons.forEach((lesson, index) => {
-    const published = isLessonPublished(lesson.id, publishMap);
-    const state = resolveLessonState(lesson, user, { published });
+    const assessmentState = assessmentStates[lesson.id] || null;
+    const published = isAssessmentLesson(lesson)
+      ? true
+      : isLessonPublished(lesson.id, publishMap);
+    const state = resolveLessonState(lesson, user, { published, assessmentState });
     const lockedVisual = state === 'locked' || state === 'coming-soon';
-    const canNavigate = state === 'available' || state === 'completed';
+    const canNavigate = state === 'available' || state === 'completed'
+      || assessmentState === 'awaiting'
+      || assessmentState === 'in_progress';
 
     const li = document.createElement('li');
     li.className = [
       'lesson-row',
+      isAssessmentLesson(lesson) ? 'is-assessment' : '',
       lockedVisual ? 'is-locked' : '',
       state === 'coming-soon' ? 'is-coming-soon' : '',
       state === 'completed' ? 'is-completed' : '',
-      !published && user?.role === 'admin' ? 'is-unpublished' : '',
+      assessmentState === 'in_progress' ? 'is-in-progress' : '',
+      !published && user?.role === 'admin' && !isAssessmentLesson(lesson) ? 'is-unpublished' : '',
     ]
       .filter(Boolean)
       .join(' ');
@@ -91,6 +160,7 @@ export function renderLessonsList(container, user, options = {}) {
     li.dataset.lessonId = lesson.id;
     li.dataset.state = state;
     li.dataset.published = String(published);
+    if (isAssessmentLesson(lesson)) li.dataset.kind = 'assessment';
 
     const number = document.createElement('span');
     number.className = 'lesson-row__number';
@@ -107,14 +177,17 @@ export function renderLessonsList(container, user, options = {}) {
     subtitle.className = 'lesson-row__subtitle';
     if (typeof getSubtitle === 'function') {
       subtitle.textContent = getSubtitle(lesson, state);
-    } else if (!published && user?.role === 'admin') {
+    } else if (!published && user?.role === 'admin' && !isAssessmentLesson(lesson)) {
       subtitle.textContent = 'Não liberada para a turma — você pode abrir como prévia';
     } else {
-      subtitle.textContent = defaultSubtitle(lesson, state);
+      subtitle.textContent = defaultSubtitle(lesson, state, assessmentState);
     }
     body.append(title, subtitle);
 
-    if (!canNavigate) {
+    // awaiting: aluno pode abrir a tela da prova (status), mesmo sem "available"
+    const navigate = canNavigate || (isAssessmentLesson(lesson) && assessmentState === 'awaiting');
+
+    if (!navigate) {
       const lock = document.createElement('span');
       lock.className = 'lesson-row__lock';
       lock.setAttribute('aria-hidden', 'true');
@@ -123,9 +196,16 @@ export function renderLessonsList(container, user, options = {}) {
     } else {
       const action = document.createElement('a');
       action.className = 'lesson-row__action';
-      action.href = getHref(lesson);
-      action.textContent = state === 'completed' ? 'Rever' : 'Iniciar';
-      action.setAttribute('aria-label', `${state === 'completed' ? 'Rever' : 'Iniciar'} ${lesson.title}`);
+      action.href = typeof getHref === 'function'
+        ? getHref(lesson)
+        : defaultHref(lesson, user, assessmentState);
+      const label = typeof getActionLabel === 'function'
+        ? getActionLabel(lesson, state)
+        : (isAssessmentLesson(lesson)
+          ? assessmentActionLabel(user, state, assessmentState)
+          : (state === 'completed' ? 'Rever' : 'Iniciar'));
+      action.textContent = label;
+      action.setAttribute('aria-label', `${label} — ${lesson.title}`);
       li.append(number, body, action);
     }
 

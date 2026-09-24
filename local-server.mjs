@@ -7,6 +7,7 @@ import handler from './api/auth.js';
 import progressHandler from './api/progress.js';
 import despertarHandler from './api/despertar.js';
 import classindHandler from './api/classind.js';
+import provaHandler from './api/prova.js';
 import sessionBootstrapHandler from './api/session-bootstrap.js';
 import sessionsPurgeHandler from './api/cron/sessions-purge.js';
 import warmupHandler from './api/cron/warmup.js';
@@ -72,6 +73,7 @@ const server = http.createServer(async (req, res) => {
       '/api/progress': progressHandler,
       '/api/despertar': despertarHandler,
       '/api/classind': classindHandler,
+      '/api/prova': provaHandler,
       '/api/session-bootstrap': sessionBootstrapHandler,
       '/api/cron/sessions-purge': sessionsPurgeHandler,
       '/api/cron/warmup': warmupHandler,

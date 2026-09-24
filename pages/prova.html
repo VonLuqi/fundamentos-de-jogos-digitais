@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Task E2: pinch-zoom do usuário permanece habilitado (não restringir escala) -->
+  <meta name="description" content="Provação do Círculo Mágico — Avaliação do Módulo 1." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Provação do Círculo Mágico | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/prova.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="prova-page" data-route="prova" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <!-- Aviso sticky: não sair (tempo continua) -->
+  <div class="prova-warn" id="prova-warn" role="status" hidden>
+    <p class="prova-warn__text">
+      <strong>Não saia desta página.</strong>
+      Se sair ou fechar a aba, o tempo <em>continua passando</em>.
+    </p>
+  </div>
+
+  <header class="prova-topbar" id="prova-topbar">
+    <div class="prova-topbar__brand">
+      <p class="prova-topbar__eyebrow">Módulo 1 · Avaliação</p>
+      <h1 class="prova-topbar__title" id="prova-exam-title">Provação do Círculo Mágico</h1>
+    </div>
+    <div class="prova-topbar__meta" id="prova-topbar-meta" hidden>
+      <p class="prova-topbar__counter" id="prova-counter" aria-live="polite">Questão 1 de 20</p>
+      <p class="prova-topbar__timer" id="prova-timer" aria-live="polite" title="Tempo restante">
+        <span class="prova-topbar__timer-label">Tempo</span>
+        <span class="prova-topbar__timer-value" id="prova-timer-value">—:—</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="prova-main" id="prova-main">
+
+    <!-- Boot / loading -->
+    <section class="prova-panel" id="prova-loading" aria-busy="true" aria-live="polite">
+      <div class="prova-card prova-card--narrow">
+        <p class="prova-card__status">Preparando a prova…</p>
+      </div>
+    </section>
+
+    <!-- Intro (antes do startAttempt — B2 liga o botão) -->
+    <section class="prova-panel" id="prova-intro" hidden>
+      <article class="prova-card">
+        <p class="prova-card__eyebrow">Bem-vindo, Iniciante</p>
+        <h2 class="prova-card__heading" id="prova-intro-heading">A Provação do Círculo Mágico</h2>
+        <p class="prova-card__lead" id="prova-intro-lead">
+          20 questões · 12 de marcar · 8 para escrever · vale <strong>20 pontos</strong>.
+        </p>
+
+        <ul class="prova-rules">
+          <li>Você tem <strong>1 hora e 30 minutos</strong>. O tempo começa quando apertar <em>Iniciar prova</em>.</li>
+          <li>Aparece <strong>1 questão por vez</strong>. Use Anterior e Próxima para navegar.</li>
+          <li><strong>Não saia desta página</strong>. Se sair, o tempo <strong>não pausa</strong>.</li>
+          <li>As respostas salvam sozinhas. No fim, aperte <em>Enviar prova</em>.</li>
+          <li>Depois do envio, o Mestre corrige as questões escritas.</li>
+        </ul>
+
+        <p class="prova-card__note" id="prova-intro-status" role="status"></p>
+
+        <div class="prova-card__actions">
+          <button type="button" class="prova-btn prova-btn--primary" id="prova-btn-start" disabled>
+            Iniciar prova
+          </button>
+          <button type="button" class="prova-btn prova-btn--ghost" id="prova-btn-leave-intro">
+            Voltar ao Painel
+          </button>
+        </div>
+      </article>
+    </section>
+
+    <!-- Exame ativo (1 questão por tela) -->
+    <section class="prova-panel" id="prova-exam" hidden>
+      <nav class="prova-progress" id="prova-progress" aria-label="Progresso das questões"></nav>
+
+      <article class="prova-card" id="prova-question-card">
+        <p class="prova-card__eyebrow" id="prova-question-eyebrow">Questão 1</p>
+        <div class="prova-prompt" id="prova-prompt">
+          <!-- preenchido em B2 -->
+        </div>
+
+        <fieldset class="prova-choices" id="prova-choices" hidden>
+          <legend class="prova-choices__legend">Escolha uma alternativa</legend>
+          <!-- radios A–E montados em B2; placeholder visual B1 -->
+        </fieldset>
+
+        <div class="prova-discursive" id="prova-discursive" hidden>
+          <label class="prova-discursive__label" for="prova-textarea">Sua resposta</label>
+          <textarea
+            class="prova-discursive__input"
+            id="prova-textarea"
+            rows="10"
+            maxlength="12000"
+            placeholder="Escreva com clareza. Use os termos das aulas."
+            autocomplete="off"
+            autocorrect="on"
+            autocapitalize="sentences"
+            enterkeyhint="done"
+            inputmode="text"
+            spellcheck="true"
+            disabled
+          ></textarea>
+          <p class="prova-discursive__hint"><span id="prova-char-count">0</span> / 12000</p>
+        </div>
+
+        <p class="prova-card__note" id="prova-save-status" role="status" aria-live="polite"></p>
+      </article>
+
+      <footer class="prova-nav">
+        <button type="button" class="prova-btn prova-btn--ghost" id="prova-btn-prev" disabled>
+          Anterior
+        </button>
+        <button type="button" class="prova-btn prova-btn--primary" id="prova-btn-next" disabled>
+          Próxima
+        </button>
+        <button type="button" class="prova-btn prova-btn--danger" id="prova-btn-submit" hidden disabled>
+          Enviar prova
+        </button>
+      </footer>
+    </section>
+
+    <!-- Pós-envio / nota (Task D4) -->
+    <section class="prova-panel" id="prova-done" hidden>
+      <article class="prova-card prova-card--narrow prova-card--done">
+        <p class="prova-card__eyebrow" id="prova-done-eyebrow">Resultado</p>
+        <h2 class="prova-card__heading" id="prova-done-heading">Aguardando correção</h2>
+        <p class="prova-card__lead" id="prova-done-message">
+          Sua prova foi enviada. O Mestre ainda vai corrigir as questões escritas.
+        </p>
+        <p class="prova-card__note" id="prova-done-submitted" hidden></p>
+
+        <div class="prova-result" id="prova-done-result" hidden>
+          <p class="prova-result__score" id="prova-done-score" aria-live="polite">— / 20</p>
+          <ul class="prova-result__breakdown" id="prova-done-breakdown" aria-label="Detalhe da nota">
+            <li>
+              <span class="prova-result__label" id="prova-done-mc-label">Múltipla escolha</span>
+              <span class="prova-result__value" id="prova-done-mc-value">—</span>
+            </li>
+            <li>
+              <span class="prova-result__label" id="prova-done-disc-label">Questões escritas</span>
+              <span class="prova-result__value" id="prova-done-disc-value">—</span>
+            </li>
+            <li class="prova-result__total">
+              <span class="prova-result__label" id="prova-done-total-label">Total</span>
+              <span class="prova-result__value" id="prova-done-total-value">—</span>
+            </li>
+          </ul>
+          <p class="prova-result__footnote" id="prova-done-footnote">
+            Confira abaixo o gabarito e os comentários de cada questão.
+          </p>
+        </div>
+
+        <div class="prova-review" id="prova-done-review" hidden>
+          <h3 class="prova-review__title" id="prova-done-review-title">Gabarito e comentários</h3>
+          <p class="prova-review__general" id="prova-done-review-general" hidden></p>
+          <ol class="prova-review__list" id="prova-done-review-list"></ol>
+        </div>
+
+        <div class="prova-contest" id="prova-done-contest" hidden>
+          <h3 class="prova-contest__title" id="prova-done-contest-title">Contestar a nota</h3>
+          <p class="prova-contest__lead" id="prova-done-contest-lead"></p>
+          <div class="prova-contest__thread" id="prova-done-contest-thread" hidden></div>
+          <form class="prova-contest__form" id="prova-done-contest-form" hidden>
+            <label class="prova-contest__label" for="prova-done-contest-message">
+              O que você acha que está errado?
+            </label>
+            <textarea
+              id="prova-done-contest-message"
+              class="prova-contest__textarea"
+              rows="4"
+              maxlength="4000"
+              required
+            ></textarea>
+            <p class="prova-contest__status" id="prova-done-contest-status" aria-live="polite"></p>
+            <button type="submit" class="prova-btn prova-btn--ghost" id="prova-done-contest-submit">
+              Enviar contestação
+            </button>
+          </form>
+        </div>
+
+        <div class="prova-card__actions">
+          <button type="button" class="prova-btn prova-btn--ghost" id="prova-btn-refresh-status" hidden>
+            Atualizar status
+          </button>
+          <a class="prova-btn prova-btn--primary" id="prova-btn-dashboard" href="./dashboard.html">
+            Ir ao Painel
+          </a>
+        </div>
+      </article>
+    </section>
+
+    <!-- Erro / prova fechada -->
+    <section class="prova-panel" id="prova-blocked" hidden>
+      <article class="prova-card prova-card--narrow">
+        <h2 class="prova-card__heading">Prova indisponível</h2>
+        <p class="prova-card__lead" id="prova-blocked-message">
+          A prova não está aberta no momento.
+        </p>
+        <div class="prova-card__actions">
+          <a class="prova-btn prova-btn--primary" href="./dashboard.html">Voltar ao Painel</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <!-- Aviso: saiu da aba / janela pela 1ª vez (Task C2) -->
+  <dialog class="prova-dialog" id="prova-dialog-integrity" aria-labelledby="prova-dialog-integrity-title">
+    <form method="dialog" class="prova-dialog__form">
+      <h2 class="prova-dialog__title" id="prova-dialog-integrity-title">Ei — você saiu da prova</h2>
+      <p class="prova-dialog__body">
+        O Mestre pode ver se você muda de aba ou fecha a janela.
+        O tempo <strong>continua passando</strong>. Volte e termine as questões.
+      </p>
+      <div class="prova-dialog__actions">
+        <button type="submit" class="prova-btn prova-btn--primary" value="ok" id="prova-dialog-integrity-ok">
+          Entendi, continuar
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Confirmação: enviar (Task E2 — texto + resumo de questões em branco) -->
+  <dialog class="prova-dialog" id="prova-dialog-submit" aria-labelledby="prova-dialog-submit-title">
+    <form method="dialog" class="prova-dialog__form">
+      <h2 class="prova-dialog__title" id="prova-dialog-submit-title">Enviar a prova?</h2>
+      <p class="prova-dialog__body" id="prova-dialog-submit-body">
+        Depois de enviar, você <strong>não pode mudar</strong> as respostas.
+        O Mestre corrige as questões escritas.
+      </p>
+      <p class="prova-dialog__summary" id="prova-dialog-submit-summary" hidden></p>
+      <div class="prova-dialog__actions">
+        <button type="submit" class="prova-btn prova-btn--ghost" value="cancel">Revisar mais</button>
+        <button type="submit" class="prova-btn prova-btn--primary" value="confirm" id="prova-dialog-submit-confirm">
+          Confirmar envio
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Tempo esgotado -->
+  <dialog class="prova-dialog" id="prova-dialog-expired" aria-labelledby="prova-dialog-expired-title">
+    <form method="dialog" class="prova-dialog__form">
+      <h2 class="prova-dialog__title" id="prova-dialog-expired-title">Tempo esgotado</h2>
+      <p class="prova-dialog__body" id="prova-dialog-expired-body">
+        Os 90 minutos acabaram. Estamos enviando sua prova…
+      </p>
+      <div class="prova-dialog__actions">
+        <button type="submit" class="prova-btn prova-btn--primary" value="ok" id="prova-dialog-expired-ok" disabled>
+          Aguarde…
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="../js/prova.js"></script>
+</body>
+</html>

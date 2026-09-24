@@ -339,6 +339,8 @@ export const ROUTES = {
   despertar: () => `${rootPath()}/pages/despertar.html`,
   ranking: () => `${rootPath()}/pages/ranking.html`,
   classindDle: () => `${rootPath()}/pages/classind-dle.html`,
+  prova: () => `${rootPath()}/pages/prova.html`,
+  provaAdmin: () => `${rootPath()}/pages/prova-admin.html`,
   lesson: (id) => `${rootPath()}/pages/${id}.html`,
 };
 
@@ -558,13 +560,21 @@ export async function fetchSessionBootstrap(token) {
   );
   const gates = payload?.gates && typeof payload.gates === 'object'
     ? payload.gates
-    : { despertar: { published: false } };
+    : { despertar: { published: false }, prova: { inProgress: false } };
   return {
     ...payload,
     user: normalizeUser(payload.user),
     gates: {
       despertar: {
         published: Boolean(gates?.despertar?.published),
+      },
+      prova: {
+        inProgress: Boolean(gates?.prova?.inProgress),
+        attemptId: gates?.prova?.attemptId ?? null,
+        examId: gates?.prova?.examId ?? null,
+        endsAt: gates?.prova?.endsAt ?? null,
+        remainingMs: gates?.prova?.remainingMs ?? null,
+        currentQuestionIndex: gates?.prova?.currentQuestionIndex ?? null,
       },
     },
   };
@@ -574,7 +584,7 @@ export async function fetchSessionBootstrap(token) {
 let bootstrapGatesCache = null;
 
 /**
- * @returns {{ token: string, gates: { despertar: { published: boolean } } } | null}
+ * @returns {{ token: string, gates: { despertar: { published: boolean }, prova?: { inProgress: boolean } } } | null}
  */
 export function getBootstrapGates() {
   return bootstrapGatesCache;
@@ -590,6 +600,62 @@ function setBootstrapGates(token, gates) {
 
 function isBootstrapFallbackStatus(status) {
   return status === 404 || status === 405 || status === 503;
+}
+
+/**
+ * Rotas onde NÃO redirecionamos para a prova (Task C1).
+ * Fechar o navegador NÃO pausa o cronômetro — ao voltar, o aluno é trazido de volta.
+ */
+export function shouldSkipProvaInProgressRedirect() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return true;
+  const route = String(document.body?.dataset?.route || '').toLowerCase();
+  const path = String(window.location?.pathname || '').toLowerCase();
+  if (route === 'prova' || route === 'auth') return true;
+  if (path.includes('/prova.html') || path.includes('/auth.html')) return true;
+  if (path.includes('/prova-admin.html')) return true;
+  return false;
+}
+
+/**
+ * Se o aluno tem tentativa `in_progress`, força retorno à prova.
+ * Admin isento. Não pausa o tempo — só redireciona.
+ * @returns {boolean} true se redirecionou
+ */
+export function redirectIfProvaInProgress(user, gates) {
+  if (!user || user.role === 'admin') return false;
+  if (shouldSkipProvaInProgressRedirect()) return false;
+  if (!gates?.prova?.inProgress) return false;
+  // Task C2: registra saída para outra página do site (best-effort)
+  const session = getSession();
+  if (session?.token) {
+    void provaReportIntegrityEvent(session.token, {
+      eventType: 'navigated_away',
+      meta: {
+        from: typeof window !== 'undefined' ? String(window.location?.pathname || '') : '',
+      },
+    }).catch(() => {});
+  }
+  window.location.replace(ROUTES.prova());
+  return true;
+}
+
+/**
+ * Fallback quando bootstrap legado não traz gates.prova.
+ * @returns {Promise<boolean>} true se redirecionou
+ */
+export async function enforceProvaInProgressRedirect(token, user) {
+  if (!token || !user || user.role === 'admin') return false;
+  if (shouldSkipProvaInProgressRedirect()) return false;
+  try {
+    const status = await provaGetExamStatus(token);
+    if (status?.attempt?.status === 'in_progress' || status?.mustResume) {
+      window.location.replace(ROUTES.prova());
+      return true;
+    }
+  } catch {
+    // Best-effort: não bloqueia navegação se a API da prova falhar
+  }
+  return false;
 }
 
 /* ============================================================
@@ -1585,6 +1651,113 @@ export function classindListRoster(token, { roomId } = {}) {
 }
 
 /* ============================================================
+   5.3 PROVA MÓDULO 1 (/api/prova) — Task A3
+   ============================================================ */
+export function provaRequest(token, action, payload = {}) {
+  return request('/prova', {
+    method: 'POST',
+    body: JSON.stringify({ token, action, ...payload }),
+  });
+}
+
+export function provaGetExamStatus(token, options = {}) {
+  return provaRequest(token, 'getExamStatus', options);
+}
+
+export function provaStartAttempt(token, options = {}) {
+  return provaRequest(token, 'startAttempt', options);
+}
+
+export function provaGetAttempt(token, options = {}) {
+  return provaRequest(token, 'getAttempt', options);
+}
+
+export function provaSaveAnswer(token, payload = {}) {
+  return provaRequest(token, 'saveAnswer', payload);
+}
+
+export function provaSetCurrentQuestion(token, currentQuestionIndex, options = {}) {
+  return provaRequest(token, 'setCurrentQuestion', {
+    ...options,
+    currentQuestionIndex,
+  });
+}
+
+export function provaSubmitAttempt(token, options = {}) {
+  return provaRequest(token, 'submitAttempt', options);
+}
+
+export function provaReportIntegrityEvent(token, payload = {}) {
+  return provaRequest(token, 'reportIntegrityEvent', payload);
+}
+
+export function provaAdminGetOverview(token, options = {}) {
+  return provaRequest(token, 'adminGetProvaOverview', options);
+}
+
+/**
+ * @param {string} token
+ * @param {{ mode?: 'closed'|'TCG01'|'TCG02', examId?: string }} payload
+ */
+export function provaAdminSetExamOpen(token, payload = {}) {
+  return provaRequest(token, 'adminSetExamOpen', payload);
+}
+
+/**
+ * @param {string} token
+ * @param {{ examId?: string, status?: string, turma?: string, alertsOnly?: boolean }} [filters]
+ */
+export function provaAdminListAttempts(token, filters = {}) {
+  return provaRequest(token, 'adminListAttempts', filters);
+}
+
+export function provaAdminGetAttempt(token, attemptId, options = {}) {
+  return provaRequest(token, 'adminGetAttempt', { ...options, attemptId });
+}
+
+/**
+ * @param {string} token
+ * @param {{ attemptId: string, scores?: Array<{questionId:string,points:number,comment?:string}>, questionId?: string, points?: number, comment?: string, generalNote?: string }} payload
+ */
+export function provaAdminScoreDiscursive(token, payload = {}) {
+  return provaRequest(token, 'adminScoreDiscursive', payload);
+}
+
+/**
+ * @param {string} token
+ * @param {{ attemptId: string, allowPartial?: boolean, contestMessage?: string }} payload
+ */
+export function provaAdminFinalizeGrade(token, payload = {}) {
+  return provaRequest(token, 'adminFinalizeGrade', payload);
+}
+
+export function provaContestGrade(token, message, options = {}) {
+  return provaRequest(token, 'contestGrade', { ...options, message });
+}
+
+export function provaAdminRespondContest(token, payload = {}) {
+  return provaRequest(token, 'adminRespondContest', payload);
+}
+
+/**
+ * Apaga a tentativa do aluno (respostas + integridade). Ele pode fazer a prova de novo.
+ * @param {string} token
+ * @param {{ attemptId: string }} payload
+ */
+export function provaAdminResetAttempt(token, payload = {}) {
+  return provaRequest(token, 'adminResetAttempt', payload);
+}
+
+/**
+ * Apaga todas as tentativas do exame (opcionalmente filtradas por turma).
+ * @param {string} token
+ * @param {{ confirm: 'RESETAR', turma?: string }} payload
+ */
+export function provaAdminResetAllAttempts(token, payload = {}) {
+  return provaRequest(token, 'adminResetAllAttempts', payload);
+}
+
+/* ============================================================
    6. GUARD DE ROTA
    ============================================================
    Chamado no boot das páginas protegidas. Se não houver sessão
@@ -1614,12 +1787,18 @@ export async function requireSession(options = {}) {
     saveSession({ token: session.token, name: user.name, role: user.role });
     if (gates) setBootstrapGates(session.token, gates);
     else setBootstrapGates(null);
+    // Task C1: tentativa in_progress → força retorno à prova (exceto prova/auth/admin)
+    if (redirectIfProvaInProgress(user, gates)) return null;
     return { session, user, gates };
   };
 
   const validateLegacy = async () => {
     const { user } = await validateSession(session.token);
-    return finishOk(user, null);
+    const result = finishOk(user, null);
+    if (!result) return null;
+    // Bootstrap legado sem gates.prova: consulta status da prova
+    if (await enforceProvaInProgressRedirect(session.token, user)) return null;
+    return result;
   };
 
   try {
@@ -1721,7 +1900,7 @@ export const MODULES = [
     id: 'modulo1',
     number: 'M1',
     title: 'Fundações, Cultura e Interface',
-    subtitle: 'Aulas 1 a 4 · trilha inicial',
+    subtitle: 'Aulas 01–05 · Provação do Círculo Mágico',
     lessons: [
       {
         id: 'aula1',
@@ -1758,16 +1937,28 @@ export const MODULES = [
         subtitle: 'Faixas etárias · ClassInd-dle · Adequação de público',
         rewardXp: 30,
       },
+      {
+        id: 'prova-modulo1',
+        number: 'P',
+        kind: 'assessment',
+        title: 'Provação do Círculo Mágico',
+        subtitle: 'Avaliação do módulo · 20 pontos · 90 min · 1 tentativa',
+        href: 'prova',
+        rewardXp: 0,
+      },
     ],
   },
 ];
 
-export const LESSONS = MODULES.flatMap((module) => module.lessons.map((lesson) => ({
-  ...lesson,
-  moduleId: module.id,
-  moduleNumber: module.number,
-  moduleTitle: module.title,
-  moduleSubtitle: module.subtitle,
-})));
+/** Aulas da trilha (sem avaliações — provas têm gate próprio). */
+export const LESSONS = MODULES.flatMap((module) => (module.lessons || [])
+  .filter((lesson) => lesson.kind !== 'assessment')
+  .map((lesson) => ({
+    ...lesson,
+    moduleId: module.id,
+    moduleNumber: module.number,
+    moduleTitle: module.title,
+    moduleSubtitle: module.subtitle,
+  })));
 
 installDevtoolsGuard();

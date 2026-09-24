@@ -1,0 +1,607 @@
+/**
+ * Hub admin — Prova Módulo 1 (Task D2)
+ */
+
+.prova-admin-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 2.5rem;
+}
+
+.prova-admin-gate {
+  padding: 1rem 1.15rem;
+  background: var(--hades-panel, rgba(18, 12, 16, 0.92));
+  border: 1px solid rgba(194, 160, 72, 0.35);
+}
+
+.prova-admin-gate__label {
+  margin: 0;
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-gate__counts {
+  margin: 0.35rem 0 0;
+  font-size: 0.92rem;
+  color: rgba(232, 220, 200, 0.9);
+}
+
+.prova-admin-gate__hint {
+  margin: 0.65rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.72);
+}
+
+.prova-admin-gate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.prova-admin-link {
+  color: var(--hades-gold, #c9a227);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.prova-admin-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.85rem 1.25rem;
+}
+
+.prova-admin-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(232, 220, 200, 0.7);
+}
+
+.prova-admin-filters__field select {
+  min-width: 10rem;
+  padding: 0.45rem 0.55rem;
+  background: rgba(12, 8, 12, 0.85);
+  border: 1px solid rgba(194, 160, 72, 0.4);
+  color: var(--hades-parchment, #efe6d4);
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.prova-admin-filters__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: var(--hades-parchment, #efe6d4);
+  cursor: pointer;
+}
+
+.prova-admin-meta {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.75);
+}
+
+.prova-admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid rgba(194, 160, 72, 0.3);
+}
+
+.prova-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.prova-admin-table th,
+.prova-admin-table td {
+  padding: 0.65rem 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid rgba(194, 160, 72, 0.18);
+  vertical-align: top;
+}
+
+.prova-admin-table th {
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(201, 162, 39, 0.9);
+  background: rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.prova-admin-table tr.has-alert {
+  background: rgba(122, 31, 43, 0.22);
+}
+
+.prova-admin-name {
+  display: block;
+  font-weight: 600;
+  color: var(--hades-parchment, #efe6d4);
+}
+
+.prova-admin-user {
+  display: block;
+  font-size: 0.8rem;
+  color: rgba(232, 220, 200, 0.65);
+}
+
+.prova-admin-badge {
+  display: inline-block;
+  margin-top: 0.25rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffc9c0;
+  border: 1px solid rgba(220, 80, 90, 0.55);
+  background: rgba(122, 31, 43, 0.45);
+}
+
+.prova-admin-badge--contest {
+  color: #ffe8b0;
+  border-color: rgba(201, 162, 39, 0.65);
+  background: rgba(90, 68, 18, 0.55);
+}
+
+.prova-admin-contest {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  background: rgba(40, 28, 12, 0.45);
+}
+
+.prova-admin-contest[hidden] {
+  display: none !important;
+}
+
+.prova-admin-contest h3 {
+  margin: 0 0 0.65rem;
+  font-size: 1rem;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-contest__status-label {
+  margin: 0 0 0.55rem;
+  font-size: 0.9rem;
+  color: rgba(232, 220, 200, 0.9);
+}
+
+.prova-admin-contest__bubble {
+  margin-bottom: 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(232, 220, 200, 0.2);
+  background: rgba(20, 14, 8, 0.35);
+}
+
+.prova-admin-contest__bubble span {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 220, 200, 0.65);
+}
+
+.prova-admin-contest__bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--hades-parchment, #efe6d4);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.prova-admin-contest__form label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.85);
+}
+
+.prova-admin-contest__form textarea {
+  width: 100%;
+  min-height: 4.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0.55rem 0.65rem;
+  font: inherit;
+  color: #1a1208;
+  background: #efe6d4;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+  resize: vertical;
+}
+
+.prova-admin-contest__hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.82rem;
+  color: rgba(232, 220, 200, 0.65);
+}
+
+.prova-admin-contest__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.prova-admin-contest__status {
+  min-height: 1.2rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.8);
+}
+
+.prova-admin-row-link {
+  color: var(--hades-gold, #c9a227);
+  white-space: nowrap;
+}
+
+.prova-admin-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 0.75rem;
+  align-items: center;
+}
+
+.prova-admin-row-reset {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: #ffb090;
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.prova-admin-row-reset:hover {
+  color: #ffd4b8;
+}
+
+.prova-admin-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin: 0 0 0.85rem;
+}
+
+.prova-admin-list-actions[hidden] {
+  display: none !important;
+}
+
+.prova-admin-list-actions__hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: rgba(232, 220, 200, 0.65);
+  max-width: 36rem;
+}
+
+.prova-admin-dialog__confirm-label {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.85);
+}
+
+.prova-admin-dialog__confirm-label input {
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #1a1208;
+  background: #efe6d4;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+}
+
+.prova-admin-dialog__confirm-label textarea {
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: #1a1208;
+  background: #efe6d4;
+  border: 1px solid rgba(201, 162, 39, 0.45);
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.prova-admin-dialog__confirm-label[hidden] {
+  display: none !important;
+}
+
+.prova-admin-empty {
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  color: rgba(232, 220, 200, 0.7);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 720px) {
+  .prova-admin-table th:nth-child(5),
+  .prova-admin-table td:nth-child(5) {
+    display: none;
+  }
+}
+
+/* ---- Detalhe / correção (D3) ---- */
+.prova-admin-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* display:flex acima vence o [hidden] da UA */
+.prova-admin-detail[hidden],
+.prova-admin-detail__actions[hidden],
+.prova-admin-contest[hidden],
+.prova-admin-contest__form[hidden],
+.prova-admin-answers[hidden] {
+  display: none !important;
+}
+
+.prova-admin-back {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--hades-gold, #c9a227);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+.prova-admin-detail__title {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 1.25rem;
+  color: var(--hades-parchment, #efe6d4);
+}
+
+.prova-admin-detail__meta,
+.prova-admin-detail__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.75);
+}
+
+.prova-admin-detail__summary {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(194, 160, 72, 0.3);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.92rem;
+}
+
+.prova-admin-detail__summary p {
+  margin: 0.25rem 0;
+}
+
+.prova-admin-detail__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+}
+
+.prova-admin-finalize {
+  border-color: rgba(194, 53, 72, 0.65) !important;
+}
+
+.prova-admin-reset {
+  border-color: rgba(180, 90, 40, 0.75) !important;
+  color: #ffd4b8 !important;
+}
+
+.prova-admin-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.prova-admin-q {
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(194, 160, 72, 0.28);
+  background: rgba(18, 12, 16, 0.75);
+}
+
+.prova-admin-q h3 {
+  margin: 0;
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 0.95rem;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-q__prompt {
+  margin: 0.5rem 0 0.75rem;
+  white-space: pre-wrap;
+  color: var(--hades-parchment, #efe6d4);
+}
+
+.prova-admin-q__just,
+.prova-admin-q__rubric {
+  margin: 0.5rem 0;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.78);
+}
+
+.prova-admin-q__answer {
+  margin: 0.5rem 0 0.85rem;
+  padding: 0.75rem;
+  max-height: 16rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 0.92rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--hades-parchment, #efe6d4);
+}
+
+.prova-admin-q__score,
+.prova-admin-q__comment {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: rgba(232, 220, 200, 0.7);
+}
+
+.prova-admin-q__score input,
+.prova-admin-q__comment textarea {
+  padding: 0.45rem 0.55rem;
+  background: rgba(12, 8, 12, 0.85);
+  border: 1px solid rgba(194, 160, 72, 0.4);
+  color: var(--hades-parchment, #efe6d4);
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 0.95rem;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.prova-admin-q__score input {
+  max-width: 6rem;
+}
+
+.is-ok {
+  margin-left: 0.35rem;
+  color: #8fd49a;
+  font-size: 0.8rem;
+}
+
+.is-bad {
+  margin-left: 0.35rem;
+  color: #f0a0a0;
+  font-size: 0.8rem;
+}
+
+.prova-admin-integrity h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 0.95rem;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-integrity__list {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.85);
+}
+
+.prova-admin-integrity__list li {
+  margin: 0.35rem 0;
+}
+
+.prova-admin-integrity__list time {
+  display: inline-block;
+  min-width: 7.5rem;
+  color: rgba(232, 220, 200, 0.6);
+  margin-right: 0.5rem;
+}
+
+/* ---- Dialog Fechar nota (E2) ---- */
+.prova-admin-dialog {
+  padding: 0;
+  border: 1px solid rgba(194, 160, 72, 0.55);
+  background: rgba(18, 12, 16, 0.98);
+  color: var(--hades-parchment, #efe6d4);
+  max-width: min(26rem, calc(100vw - 1.5rem));
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.prova-admin-dialog::backdrop {
+  background: rgba(8, 6, 10, 0.72);
+}
+
+.prova-admin-dialog__form {
+  padding: 1.25rem 1.2rem 1.1rem;
+}
+
+.prova-admin-dialog__title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 1.1rem;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-dialog__body {
+  margin: 0 0 0.85rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: rgba(232, 220, 200, 0.9);
+}
+
+.prova-admin-dialog__warn {
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: #ffc9c0;
+  background: rgba(122, 31, 43, 0.35);
+  border: 1px solid rgba(194, 53, 72, 0.45);
+}
+
+.prova-admin-dialog__warn[hidden] {
+  display: none !important;
+}
+
+.prova-admin-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .prova-admin-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .prova-admin-dialog__actions .btn-refresh {
+    width: 100%;
+  }
+
+  .prova-admin-q__score input,
+  .prova-admin-q__comment textarea {
+    font-size: max(1rem, 16px);
+  }
+
+  .prova-admin-detail__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .prova-admin-detail__actions .btn-refresh {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+}

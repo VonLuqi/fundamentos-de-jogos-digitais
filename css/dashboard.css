@@ -179,6 +179,20 @@ body {
   margin: 0.2rem 0 0.15rem;
 }
 
+.profile-panel__turma {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.profile-panel__turma[hidden] {
+  display: none !important;
+}
+
 .profile-panel__rank {
   font-family: var(--font-title);
   font-size: 0.7rem;
@@ -238,7 +252,7 @@ body {
 /* Legado hard-gate (classe não é mais aplicada; regras mantidas por segurança) */
 body.is-messenger-gate .dashboard-layout > *:not(.dashboard-rail),
 body.is-messenger-gate .dashboard-rail > *:not(.profile-panel),
-body.is-messenger-gate .profile-panel > *:not(.messenger-seal):not(.profile-panel__username):not(.profile-panel__name):not(.master-badge),
+body.is-messenger-gate .profile-panel > *:not(.messenger-seal):not(.profile-panel__username):not(.profile-panel__name):not(.profile-panel__turma):not(.master-badge),
 body.is-messenger-gate .master-tools,
 body.is-messenger-gate .hub-preview,
 body.is-messenger-gate .altar,
@@ -1912,6 +1926,66 @@ img.achievement-card__art.has-art {
 .master-tools__actions .btn-gold {
   padding: 0.55rem 0.85rem;
   font-size: 0.62rem;
+}
+
+/* Task D1 — modal gate da Prova (1 turma por vez) */
+.prova-gate-modal__status {
+  margin: 0.75rem 0 0.35rem;
+  font-family: var(--font-body, Georgia, serif);
+  font-size: 0.95rem;
+  color: var(--hades-parchment);
+}
+
+.prova-gate-modal__counts {
+  margin: 0 0 1rem;
+  padding-left: 1.1rem;
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.88);
+}
+
+.prova-gate-modal__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.prova-gate-modal__hub {
+  margin: 1rem 0 0;
+}
+
+.prova-gate-modal__hub-link {
+  color: var(--hades-gold, #c9a227);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.prova-gate-modal__btn {
+  appearance: none;
+  border: 1px solid rgba(194, 160, 72, 0.55);
+  background: rgba(20, 14, 18, 0.75);
+  color: var(--hades-parchment);
+  font-family: var(--font-display, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+}
+
+.prova-gate-modal__btn:hover:not(:disabled) {
+  border-color: var(--hades-gold);
+  color: #fff;
+}
+
+.prova-gate-modal__btn.is-active {
+  background: rgba(122, 31, 43, 0.85);
+  border-color: rgba(220, 80, 90, 0.75);
+  color: #fff;
+}
+
+.prova-gate-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
 }
 
 /* Legado: coluna antiga de admin (não deve mais aparecer no DOM) */

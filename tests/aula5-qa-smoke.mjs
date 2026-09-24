@@ -156,6 +156,13 @@ assert.ok(
   'MODULES título curricular'
 );
 assert.ok(apiJs.includes("id: 'aula5'"), 'MODULES inclui aula5');
+assert.ok(apiJs.includes("id: 'prova-modulo1'"), 'MODULES inclui Provação');
+assert.ok(apiJs.includes("kind: 'assessment'"), 'Provação é assessment (fora de LESSONS)');
+assert.ok(
+  /filter\(\(lesson\)\s*=>\s*lesson\.kind\s*!==\s*'assessment'\)/.test(apiJs)
+    || apiJs.includes("kind !== 'assessment'"),
+  'LESSONS exclui assessments',
+);
 assert.ok(
   apiJs.includes('Faixas etárias · ClassInd-dle · Adequação de público'),
   'MODULES subtitle'
@@ -163,8 +170,11 @@ assert.ok(
 assert.ok(!apiJs.includes('Conteúdo em preparação'), 'MODULES sem stub');
 
 const lessonsUi = read('js/lessons-ui.js');
+const aulasJs = read('js/aulas.js');
 assert.ok(lessonsUi.includes('from \'./api.js\'') || lessonsUi.includes('from "./api.js"'), 'Trilha importa catálogo');
 assert.ok(lessonsUi.includes('LESSONS') || lessonsUi.includes('MODULES'), 'Trilha consome LESSONS/MODULES');
+assert.ok(lessonsUi.includes('isAssessmentLesson') || lessonsUi.includes("kind === 'assessment'"), 'trilha trata assessment');
+assert.ok(aulasJs.includes('provaGetExamStatus') || aulasJs.includes('assessmentStates'), 'aulas carrega status da prova');
 assert.ok(lessonsUi.includes('coming-soon') || lessonsUi.includes('Em breve'), 'copy Em breve para gate false');
 
 // —— Álbum: secretas no catálogo ——

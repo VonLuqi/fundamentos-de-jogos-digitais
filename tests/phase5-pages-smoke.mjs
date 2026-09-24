@@ -95,6 +95,8 @@ assert(apiJs.includes("id: 'aula2'"), 'MODULES deve incluir aula2');
 assert(apiJs.includes("id: 'aula3'"), 'MODULES deve incluir aula3');
 assert(apiJs.includes("id: 'aula4'"), 'MODULES deve incluir aula4');
 assert(apiJs.includes("id: 'aula5'"), 'MODULES deve incluir aula5');
+assert(apiJs.includes("id: 'prova-modulo1'"), 'MODULES deve incluir Provação no M1');
+assert(apiJs.includes("kind: 'assessment'"), 'Provação marcada como assessment');
 assert(
   apiJs.includes('O Glossário do Desenvolvedor e o Player na Tela'),
   'MODULES.aula2 deve usar o título curricular novo'

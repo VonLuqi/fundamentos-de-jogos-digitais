@@ -53,11 +53,13 @@ assert(mwSrc.includes('consumeEdgeIpRateLimit'), 'middleware chama consumeEdgeIp
 assert(mwSrc.includes('/api/auth'), 'matcher cobre auth');
 assert(mwSrc.includes('/api/despertar'), 'matcher cobre despertar');
 assert(mwSrc.includes('/api/progress'), 'matcher cobre progress');
+assert(mwSrc.includes('/api/prova'), 'matcher cobre prova (E1)');
 assert(!mwSrc.includes('/api/cron') || mwSrc.includes('cron'), 'middleware menciona cron (exempt)');
 
 assert(EDGE_RATE_LIMITS.auth.limit === 30, 'D2 auth = 30/min/IP');
 assert(EDGE_RATE_LIMITS.despertar.limit === 60, 'D2 despertar = 60/min/IP');
 assert(EDGE_RATE_LIMITS.progress.limit === 90, 'D2 progress = 90/min/IP');
+assert(EDGE_RATE_LIMITS.prova?.limit === 120, 'prova edge = 120/min/IP');
 assert(EDGE_RATE_LIMITS.auth.windowMs === 60_000, 'janela auth 60s');
 assert(EDGE_KEY_PREFIX === KEY_PREFIX, 'prefixo Edge = fjd: (A1)');
 
@@ -65,10 +67,10 @@ assert(matchEdgePathGroup('/api/auth') === 'auth', 'match /api/auth');
 assert(matchEdgePathGroup('/api/auth/login') === 'auth', 'match /api/auth/*');
 assert(matchEdgePathGroup('/api/despertar') === 'despertar', 'match despertar');
 assert(matchEdgePathGroup('/api/progress') === 'progress', 'match progress');
+assert(matchEdgePathGroup('/api/prova') === 'prova', 'match /api/prova');
 assert(matchEdgePathGroup('/api/cron/sessions-purge') === null, 'cron fora do teto aluno');
 assert(matchEdgePathGroup('/api/session-bootstrap') === null, 'bootstrap fora do matcher C1');
 assert(matchEdgePathGroup('/assets/x.webp') === null, 'estáticos fora');
-
 assert(
   clientIpFromRequest({ headers: { 'x-forwarded-for': '203.0.113.9, 10.0.0.1' } }) === '203.0.113.9',
   'xff pega primeiro hop',

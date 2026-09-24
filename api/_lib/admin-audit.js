@@ -54,4 +54,11 @@ export const ADMIN_AUDIT_ACTIONS = Object.freeze({
   probeMailer: 'admin_probe_mailer',
   issueSoulRecoveryCode: 'admin_issue_soul_recovery_code',
   consumeSoulRecoveryCode: 'consume_soul_recovery_code',
+  setProvaExamOpen: 'admin_set_prova_exam_open',
+  scoreProvaDiscursive: 'admin_score_prova_discursive',
+  finalizeProvaGrade: 'admin_finalize_prova_grade',
+  respondProvaContest: 'admin_respond_prova_contest',
+  reopenProvaGrade: 'admin_reopen_prova_grade',
+  resetProvaAttempt: 'admin_reset_prova_attempt',
+  resetAllProvaAttempts: 'admin_reset_all_prova_attempts',
 });

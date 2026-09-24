@@ -33,6 +33,11 @@ export const EDGE_RATE_LIMITS = Object.freeze({
     windowMs: 60_000,
     match: /^\/api\/progress(\/|$)/,
   }),
+  prova: Object.freeze({
+    limit: 120,
+    windowMs: 60_000,
+    match: /^\/api\/prova(\/|$)/,
+  }),
 });
 
 /** @type {Map<string, number[]>} */

@@ -123,6 +123,29 @@
   border-color: rgba(207, 167, 89, 0.55);
 }
 
+.lesson-row.is-assessment {
+  border-color: rgba(194, 53, 72, 0.55);
+  background:
+    linear-gradient(105deg, rgba(122, 31, 43, 0.28), transparent 42%),
+    var(--hades-panel-alt);
+}
+
+.lesson-row.is-assessment .lesson-row__number {
+  color: var(--hades-blood-bright, #c23548);
+  font-size: 1.35rem;
+}
+
+.lesson-row.is-assessment:not(.is-locked):hover {
+  border-color: rgba(207, 167, 89, 0.85);
+  box-shadow: 0 0 14px rgba(194, 53, 72, 0.28);
+}
+
+.lesson-row.is-assessment.is-in-progress {
+  opacity: 1;
+  filter: none;
+  box-shadow: 0 0 12px rgba(207, 167, 89, 0.35);
+}
+
 .lesson-row__number {
   font-family: var(--font-title);
   font-size: 1.5rem;

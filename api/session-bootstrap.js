@@ -1,9 +1,9 @@
 /**
  * GET /api/session-bootstrap?token=
- * Sessão + perfil sanitize + gate Despertar em um request (Fase B / B2).
+ * Sessão + perfil sanitize + gate Despertar + gate Prova (Task C1) em um request.
  *
  * @see docs/otimizacoes/contratos-fase-b.md §1
- * @see docs/otimizacoes/02-tasks-fase-b-rtt-batching.md Task B2
+ * @see docs/plano-prova-modulo1-online.md Task C1
  */
 
 import supabase from './supabaseClient.js';
@@ -11,6 +11,7 @@ import {
   getLastDespertarGateCacheStatus,
   isDespertarPublished,
 } from './_lib/despertar-gate.js';
+import { loadProvaGateForUser } from './_lib/prova/active-attempt.js';
 import { sanitizeUser } from './_lib/sanitize-user.js';
 import { loadValidSession } from './_lib/sessions.js';
 import {
@@ -85,12 +86,27 @@ async function handleBootstrap(req, res) {
     const published = await isDespertarPublished(supabase);
     metricsSetGateCache(getLastDespertarGateCacheStatus());
 
+    // Task C1: tentativa de prova em andamento (barato; não finaliza timed_out aqui)
+    let provaGate = { inProgress: false };
+    if (user.role !== 'admin') {
+      provaGate = await loadProvaGateForUser(supabase, user.id);
+      metricsBumpDb(1);
+    }
+
     return res.status(200).json({
       ok: true,
       user: sanitizeUser(user),
       gates: {
         despertar: {
           published: Boolean(published),
+        },
+        prova: {
+          inProgress: Boolean(provaGate.inProgress),
+          attemptId: provaGate.attemptId || null,
+          examId: provaGate.examId || null,
+          endsAt: provaGate.endsAt || null,
+          remainingMs: provaGate.remainingMs ?? null,
+          currentQuestionIndex: provaGate.currentQuestionIndex ?? null,
         },
       },
     });

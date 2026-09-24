@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Hub de correção — Provação do Círculo Mágico." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Prova Módulo 1 | Hub do Mestre</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/prova-admin.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page prova-admin-page" data-route="prova-admin" data-role-scope="admin">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div id="prova-admin-app" class="app-shell" data-shell hidden>
+
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="./prova-admin.html" hidden>Prova Módulo 1</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Painel Administrativo</p>
+            <h1 class="app-shell__title" id="prova-admin-page-title">PROVA <span class="accent">MÓDULO 1</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <button class="btn-refresh" type="button" id="prova-admin-refresh" aria-label="Atualizar listagem">
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content prova-admin-main" aria-labelledby="prova-admin-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <section class="prova-admin-gate" aria-label="Estado do gate">
+          <p class="prova-admin-gate__label" id="prova-admin-gate-label">Gate: …</p>
+          <p class="prova-admin-gate__counts" id="prova-admin-gate-counts"></p>
+          <p class="prova-admin-gate__hint">
+            A prova começa bloqueada. Liberar uma turma por vez no Painel. Cada aluno só faz 1 vez.
+            <strong>Saídas</strong> = vezes que o aluno tirou o foco da prova (mudou de aba / saiu da página).
+          </p>
+          <div class="prova-admin-gate__actions">
+            <a class="prova-admin-link" href="./dashboard.html">Abrir / fechar no Painel</a>
+            <a class="prova-admin-link" href="./prova.html">Ver como aluno (teste)</a>
+          </div>
+        </section>
+
+        <section class="prova-admin-filters" aria-label="Filtros">
+          <label class="prova-admin-filters__field">
+            <span>Turma</span>
+            <select id="prova-admin-filter-turma">
+              <option value="all">Todas</option>
+              <option value="TCG01">TCG01</option>
+              <option value="TCG02">TCG02</option>
+            </select>
+          </label>
+          <label class="prova-admin-filters__field">
+            <span>Status</span>
+            <select id="prova-admin-filter-status">
+              <option value="all">Todos</option>
+              <option value="in_progress">Em andamento</option>
+              <option value="awaiting">Aguardando nota</option>
+              <option value="submitted">Enviada</option>
+              <option value="timed_out">Tempo esgotado</option>
+              <option value="graded">Nota fechada</option>
+            </select>
+          </label>
+          <label class="prova-admin-filters__check">
+            <input type="checkbox" id="prova-admin-filter-alerts" />
+            <span>Só com alertas</span>
+          </label>
+        </section>
+
+        <p class="prova-admin-meta" id="prova-admin-meta" role="status">Carregando…</p>
+
+        <div class="prova-admin-list-actions" id="prova-admin-list-actions">
+          <button type="button" class="btn-refresh prova-admin-reset" id="prova-admin-reset-all">
+            Resetar todas as tentativas
+          </button>
+          <p class="prova-admin-list-actions__hint" id="prova-admin-reset-all-hint">
+            Apaga as provas da lista (respeita o filtro de turma). Cada aluno poderá fazer de novo.
+          </p>
+        </div>
+
+        <div class="prova-admin-table-wrap">
+          <table class="prova-admin-table" id="prova-admin-table">
+            <thead>
+              <tr>
+                <th scope="col">Aluno</th>
+                <th scope="col">Turma</th>
+                <th scope="col">Status</th>
+                <th scope="col">Tempo / envio</th>
+                <th scope="col" title="Quantas vezes o aluno saiu da aba ou perdeu o foco da janela durante a prova">
+                  Saídas
+                </th>
+                <th scope="col">MC</th>
+                <th scope="col">Nota</th>
+                <th scope="col"><span class="visually-hidden">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody id="prova-admin-tbody">
+            </tbody>
+          </table>
+        </div>
+
+        <p class="prova-admin-empty" id="prova-admin-empty" hidden>
+          Nenhuma tentativa com esses filtros.
+        </p>
+
+        <!-- Detalhe / correção (Task D3) -->
+        <section class="prova-admin-detail" id="prova-admin-detail" hidden aria-labelledby="prova-admin-detail-title">
+          <div class="prova-admin-detail__head">
+            <button type="button" class="prova-admin-back" id="prova-admin-back">← Voltar à lista</button>
+            <h2 class="prova-admin-detail__title" id="prova-admin-detail-title">Detalhe da tentativa</h2>
+            <p class="prova-admin-detail__meta" id="prova-admin-detail-meta"></p>
+          </div>
+
+          <div class="prova-admin-detail__summary" id="prova-admin-detail-summary"></div>
+
+          <section class="prova-admin-contest" id="prova-admin-contest" hidden aria-labelledby="prova-admin-contest-title">
+            <h3 id="prova-admin-contest-title">Contestação do aluno</h3>
+            <div class="prova-admin-contest__thread" id="prova-admin-contest-thread"></div>
+            <form class="prova-admin-contest__form" id="prova-admin-contest-form" hidden>
+              <label for="prova-admin-contest-message">Resposta ao aluno (obrigatória para só responder)</label>
+              <textarea id="prova-admin-contest-message" rows="3" maxlength="4000"></textarea>
+              <p class="prova-admin-contest__hint">
+                Responder mantém a nota. Reabrir permite alterar pontos; a mensagem da revisão vai junto no Fechar nota.
+              </p>
+              <div class="prova-admin-contest__actions">
+                <button type="button" class="btn-refresh" id="prova-admin-contest-answer">Responder</button>
+                <button type="button" class="btn-refresh prova-admin-finalize" id="prova-admin-contest-reopen">
+                  Reabrir correção
+                </button>
+              </div>
+              <p class="prova-admin-contest__status" id="prova-admin-contest-status" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <div class="prova-admin-detail__actions" id="prova-admin-detail-actions" hidden>
+            <button type="button" class="btn-refresh" id="prova-admin-save-scores">Salvar notas discursivas</button>
+            <button type="button" class="btn-refresh prova-admin-finalize" id="prova-admin-finalize">Fechar nota</button>
+            <button type="button" class="btn-refresh prova-admin-reset" id="prova-admin-reset">Resetar prova</button>
+            <p class="prova-admin-detail__hint" id="prova-admin-detail-hint"></p>
+          </div>
+
+          <div id="prova-admin-answers" class="prova-admin-answers"></div>
+
+          <section class="prova-admin-integrity" aria-labelledby="prova-admin-integrity-title">
+            <h3 id="prova-admin-integrity-title">Linha do tempo de integridade</h3>
+            <ol class="prova-admin-integrity__list" id="prova-admin-integrity-list"></ol>
+            <p class="prova-admin-empty" id="prova-admin-integrity-empty" hidden>Nenhum evento registrado.</p>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/prova-admin.js"></script>
+
+  <!-- Confirmação: Fechar nota (Task E2) -->
+  <dialog class="prova-admin-dialog" id="prova-admin-dialog-finalize" aria-labelledby="prova-admin-dialog-finalize-title">
+    <form method="dialog" class="prova-admin-dialog__form">
+      <h2 class="prova-admin-dialog__title" id="prova-admin-dialog-finalize-title">Fechar a nota?</h2>
+      <p class="prova-admin-dialog__body" id="prova-admin-dialog-finalize-body">
+        O aluno verá a nota final. Se contestar, você poderá responder ou reabrir a correção.
+      </p>
+      <p class="prova-admin-dialog__warn" id="prova-admin-dialog-finalize-warn" hidden></p>
+      <label
+        class="prova-admin-dialog__confirm-label"
+        id="prova-admin-dialog-finalize-message-wrap"
+        for="prova-admin-dialog-finalize-message"
+        hidden
+      >
+        Mensagem ao aluno sobre a revisão (obrigatória)
+        <textarea
+          id="prova-admin-dialog-finalize-message"
+          rows="3"
+          maxlength="4000"
+          placeholder="Ex.: revisei a Q15 — agora vale 1 ponto porque…"
+        ></textarea>
+      </label>
+      <div class="prova-admin-dialog__actions">
+        <button type="submit" class="btn-refresh" value="cancel">Cancelar</button>
+        <button type="submit" class="btn-refresh prova-admin-finalize" value="confirm" id="prova-admin-dialog-finalize-confirm">
+          Fechar nota
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Confirmação: Resetar tentativa -->
+  <dialog class="prova-admin-dialog" id="prova-admin-dialog-reset" aria-labelledby="prova-admin-dialog-reset-title">
+    <form method="dialog" class="prova-admin-dialog__form">
+      <h2 class="prova-admin-dialog__title" id="prova-admin-dialog-reset-title">Resetar a prova deste aluno?</h2>
+      <p class="prova-admin-dialog__body" id="prova-admin-dialog-reset-body">
+        Apaga respostas, nota e eventos de integridade. É como se ele nunca tivesse feito —
+        poderá iniciar de novo se o gate estiver aberto para a turma.
+      </p>
+      <p class="prova-admin-dialog__warn" id="prova-admin-dialog-reset-warn">
+        Esta ação não tem volta.
+      </p>
+      <div class="prova-admin-dialog__actions">
+        <button type="submit" class="btn-refresh" value="cancel">Cancelar</button>
+        <button type="submit" class="btn-refresh prova-admin-reset" value="confirm" id="prova-admin-dialog-reset-confirm">
+          Apagar tentativa
+        </button>
+      </div>
+    </form>
+  </dialog>
+  <!-- Confirmação: Resetar todas -->
+  <dialog class="prova-admin-dialog" id="prova-admin-dialog-reset-all" aria-labelledby="prova-admin-dialog-reset-all-title">
+    <form method="dialog" class="prova-admin-dialog__form" id="prova-admin-dialog-reset-all-form">
+      <h2 class="prova-admin-dialog__title" id="prova-admin-dialog-reset-all-title">Resetar todas as tentativas?</h2>
+      <p class="prova-admin-dialog__body" id="prova-admin-dialog-reset-all-body">
+        Apaga respostas, notas e alertas dos alunos listados. Eles poderão fazer a prova de novo.
+      </p>
+      <p class="prova-admin-dialog__warn">
+        Digite <strong>RESETAR</strong> para confirmar. Não tem volta.
+      </p>
+      <label class="prova-admin-dialog__confirm-label" for="prova-admin-dialog-reset-all-input">
+        Confirmação
+        <input
+          type="text"
+          id="prova-admin-dialog-reset-all-input"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="RESETAR"
+        />
+      </label>
+      <div class="prova-admin-dialog__actions">
+        <button type="submit" class="btn-refresh" value="cancel">Cancelar</button>
+        <button type="submit" class="btn-refresh prova-admin-reset" value="confirm" id="prova-admin-dialog-reset-all-confirm">
+          Apagar todas
+        </button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>

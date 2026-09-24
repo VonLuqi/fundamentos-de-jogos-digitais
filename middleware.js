@@ -1,6 +1,6 @@
 /**
  * Vercel Routing Middleware — Fase C / Task C1.
- * Teto por IP em /api/auth, /api/despertar, /api/progress (antes do isolate Node).
+ * Teto por IP em /api/auth, /api/despertar, /api/progress, /api/prova (antes do isolate Node).
  * Cron (/api/cron/*) fica fora do matcher.
  *
  * @see docs/otimizacoes/03-tasks-fase-c-escala-obs.md
@@ -22,6 +22,8 @@ export const config = {
     '/api/despertar/:path*',
     '/api/progress',
     '/api/progress/:path*',
+    '/api/prova',
+    '/api/prova/:path*',
   ],
 };
 

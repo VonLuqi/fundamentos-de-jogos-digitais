@@ -64,6 +64,8 @@ import {
   listFriends,
   listClassmates,
   listNotes,
+  provaAdminGetOverview,
+  provaAdminSetExamOpen,
 } from './api.js';
 import {
   formatRate,
@@ -314,6 +316,24 @@ function renderProfile(user) {
   const usernameEl = document.getElementById('profile-username');
   if (usernameEl) usernameEl.textContent = `@${username}`;
   document.getElementById('profile-name').textContent = fullName;
+
+  const turmaEl = document.getElementById('profile-turma');
+  if (turmaEl) {
+    const turma = user.turma != null && String(user.turma).trim() !== ''
+      ? String(user.turma).trim().toUpperCase()
+      : null;
+    if (turma) {
+      turmaEl.hidden = false;
+      turmaEl.textContent = `Turma ${turma}`;
+    } else if (isAdmin) {
+      turmaEl.hidden = false;
+      turmaEl.textContent = 'Todas as turmas';
+    } else {
+      turmaEl.hidden = true;
+      turmaEl.textContent = '';
+    }
+  }
+
   const progress = describeLevelProgress(user.xp, { isAdmin });
   document.getElementById('profile-rank').textContent = progress.rank;
   document.getElementById('level-value').textContent = progress.levelLabel;
@@ -489,6 +509,137 @@ async function renderRailPreviews(token) {
   }
 
   await despertarPreviewPromise;
+}
+
+function formatProvaGateLabel(state) {
+  if (state === 'TCG01' || state === 'TCG02') return `Só ${state}`;
+  return 'Fechada';
+}
+
+/**
+ * Modal do Mestre: Fechada · Só TCG01 · Só TCG02 (Task D1).
+ */
+async function openProvaGateModal() {
+  if (!currentToken || currentUser?.role !== 'admin') return;
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'prova-gate-modal';
+
+  const help = document.createElement('p');
+  help.className = 'scroll-modal__note';
+  help.textContent = 'A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.';
+  wrapper.appendChild(help);
+
+  const statusEl = document.createElement('p');
+  statusEl.className = 'prova-gate-modal__status';
+  statusEl.setAttribute('role', 'status');
+  statusEl.textContent = 'Carregando…';
+  wrapper.appendChild(statusEl);
+
+  const countsEl = document.createElement('ul');
+  countsEl.className = 'prova-gate-modal__counts';
+  wrapper.appendChild(countsEl);
+
+  const actions = document.createElement('div');
+  actions.className = 'prova-gate-modal__actions';
+  wrapper.appendChild(actions);
+
+  const hub = document.createElement('p');
+  hub.className = 'prova-gate-modal__hub';
+  const hubLink = document.createElement('a');
+  hubLink.href = ROUTES.provaAdmin();
+  hubLink.className = 'prova-gate-modal__hub-link';
+  hubLink.textContent = 'Abrir hub de correção';
+  hub.appendChild(hubLink);
+  wrapper.appendChild(hub);
+
+  const modes = [
+    { mode: 'closed', label: 'Fechada' },
+    { mode: 'TCG01', label: 'Só TCG01' },
+    { mode: 'TCG02', label: 'Só TCG02' },
+  ];
+
+  /** @type {Record<string, HTMLButtonElement>} */
+  const buttons = {};
+
+  function paintOverview(overview) {
+    const gate = overview?.gate || {};
+    const counts = overview?.counts || {};
+    const state = gate.state || 'closed';
+    statusEl.textContent = `Agora: ${formatProvaGateLabel(state)}.`;
+    countsEl.replaceChildren();
+    const items = [
+      ['Em andamento', counts.inProgress ?? 0],
+      ['Aguardando nota', counts.awaitingGrade ?? 0],
+      ['Notas fechadas', counts.graded ?? 0],
+      ['Total', counts.total ?? 0],
+    ];
+    for (const [label, value] of items) {
+      const li = document.createElement('li');
+      li.textContent = `${label}: ${value}`;
+      countsEl.appendChild(li);
+    }
+    for (const { mode } of modes) {
+      const btn = buttons[mode];
+      if (!btn) continue;
+      const active = mode === state || (mode === 'closed' && state === 'closed');
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+      btn.disabled = false;
+    }
+  }
+
+  for (const { mode, label } of modes) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'prova-gate-modal__btn';
+    btn.textContent = label;
+    btn.dataset.mode = mode;
+    btn.addEventListener('click', async () => {
+      if (!currentToken) return;
+      Object.values(buttons).forEach((b) => {
+        b.disabled = true;
+      });
+      statusEl.textContent = 'Salvando…';
+      try {
+        const result = await provaAdminSetExamOpen(currentToken, { mode });
+        paintOverview(result);
+        statusEl.textContent = result?.message || `Agora: ${formatProvaGateLabel(result?.gate?.state)}.`;
+        syncProvaMasterButton(result?.gate?.state);
+      } catch (error) {
+        statusEl.textContent = error instanceof ApiError
+          ? error.message
+          : 'Falha ao atualizar o gate.';
+        Object.values(buttons).forEach((b) => {
+          b.disabled = false;
+        });
+      }
+    });
+    buttons[mode] = btn;
+    actions.appendChild(btn);
+  }
+
+  openScrollModal('Prova Módulo 1', wrapper, { closeLabel: 'Fechar' });
+
+  try {
+    const overview = await provaAdminGetOverview(currentToken);
+    paintOverview(overview);
+    syncProvaMasterButton(overview?.gate?.state);
+  } catch (error) {
+    statusEl.textContent = error instanceof ApiError
+      ? error.message
+      : 'Falha ao carregar o resumo da prova.';
+  }
+}
+
+function syncProvaMasterButton(gateState) {
+  const btn = document.getElementById('btn-prova-modulo1');
+  if (!btn) return;
+  const open = gateState === 'TCG01' || gateState === 'TCG02';
+  btn.textContent = open ? `Prova (${gateState})` : 'Prova Módulo 1';
+  btn.classList.toggle('btn-gold--pulse', open);
+  btn.classList.toggle('btn-gold--ghost', !open);
+  btn.setAttribute('aria-pressed', String(open));
 }
 
 /**
@@ -1416,11 +1567,19 @@ function initAdminTools() {
   const btnManageLessons = document.getElementById('btn-manage-lessons');
   const btnAcheron = document.getElementById('btn-toggle-acheron');
   const btnResetDespertar = document.getElementById('btn-reset-despertar');
+  const btnProva = document.getElementById('btn-prova-modulo1');
   const btnSouls = document.getElementById('btn-list-souls');
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
   syncAcheronToggleButton();
   refreshMasterMailerStatus();
+  provaAdminGetOverview(currentToken)
+    .then((overview) => syncProvaMasterButton(overview?.gate?.state))
+    .catch(() => syncProvaMasterButton('closed'));
+
+  btnProva?.addEventListener('click', () => {
+    void openProvaGateModal();
+  });
 
   btnRotateCaronte?.addEventListener('click', async () => {
     if (!currentToken) return;

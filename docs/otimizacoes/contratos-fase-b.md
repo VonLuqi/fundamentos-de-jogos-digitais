@@ -42,6 +42,14 @@ Este arquivo é a referência de shape para smokes estáticos e PRs. Mudanças e
   "gates": {
     "despertar": {
       "published": false
+    },
+    "prova": {
+      "inProgress": false,
+      "attemptId": null,
+      "examId": null,
+      "endsAt": null,
+      "remainingMs": null,
+      "currentQuestionIndex": null
     }
   }
 }
@@ -51,6 +59,7 @@ Regras:
 
 - `user` = **mesmo DTO** de `sanitizeUser` em `api/auth.js` / `api/progress.js` (aliases `name` / `fullName` / `achievements`).
 - `gates.despertar.published` = resultado de `isDespertarPublished` (default **false** / selado).
+- `gates.prova` (Task C1, **aditivo**): `inProgress` se existe tentativa `in_progress` do aluno; campos extras para o cliente retomar. Admin sempre `inProgress: false`. Cliente antigo ignora; novo usa para redirect global.
 - Sem notes, friends, leaderboard, estado Despertar.
 
 ### Erros

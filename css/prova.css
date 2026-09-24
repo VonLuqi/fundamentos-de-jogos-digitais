@@ -1,0 +1,967 @@
+/* ============================================================
+   Prova Módulo 1 — layout tipo Google Forms (1 questão / tela)
+   Task B1 — docs/plano-prova-modulo1-online.md
+   ============================================================ */
+
+.prova-page {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.55;
+  color: var(--hades-text);
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(122, 31, 43, 0.22), transparent 48%),
+    radial-gradient(ellipse at 80% 100%, rgba(92, 67, 34, 0.18), transparent 40%),
+    var(--hades-bg);
+}
+
+.prova-page .vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at center, transparent 45%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+/* ---- Aviso sticky ---- */
+.prova-warn {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 0.65rem 1rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(122, 31, 43, 0.95), rgba(90, 22, 32, 0.92));
+  border-bottom: 1px solid rgba(194, 53, 72, 0.55);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.prova-warn__text {
+  margin: 0 auto;
+  max-width: 42rem;
+  font-size: 0.95rem;
+  color: var(--hades-parchment);
+}
+
+.prova-warn__text strong {
+  color: #fff;
+}
+
+.prova-warn.is-alert {
+  background: linear-gradient(180deg, rgba(150, 40, 28, 0.98), rgba(110, 24, 18, 0.95));
+  border-bottom-color: rgba(255, 120, 90, 0.65);
+  animation: prova-warn-pulse 1.2s ease-in-out 2;
+}
+
+@keyframes prova-warn-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.12); }
+}
+
+/* ---- Topbar ---- */
+.prova-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.prova-topbar__eyebrow {
+  margin: 0 0 0.2rem;
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.prova-topbar__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(1.15rem, 2.5vw, 1.45rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--hades-gold-bright);
+  line-height: 1.25;
+}
+
+.prova-topbar__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+}
+
+.prova-topbar__counter {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim);
+}
+
+.prova-topbar__timer {
+  margin: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--hades-gold-dark);
+  background: rgba(24, 18, 26, 0.85);
+  font-variant-numeric: tabular-nums;
+  min-height: 2.75rem;
+}
+
+.prova-topbar__timer-label {
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-text-muted);
+}
+
+.prova-topbar__timer-value {
+  font-family: var(--font-title);
+  font-size: clamp(1.2rem, 4.5vw, 1.45rem);
+  font-weight: 700;
+  color: var(--hades-gold-bright);
+  letter-spacing: 0.04em;
+}
+
+.prova-topbar__timer.is-urgent {
+  border-color: var(--hades-blood-bright);
+  box-shadow: var(--shadow-blood-glow);
+}
+
+.prova-topbar__timer.is-urgent .prova-topbar__timer-value {
+  color: #ffb4bc;
+}
+
+/* ---- Main / panels ---- */
+.prova-main {
+  position: relative;
+  z-index: 1;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0.5rem 1.25rem 3rem;
+}
+
+.prova-panel[hidden] {
+  display: none !important;
+}
+
+/* ---- Card (pergaminho / Forms) ---- */
+.prova-card {
+  padding: 1.5rem 1.4rem 1.35rem;
+  background:
+    linear-gradient(180deg, rgba(242, 230, 201, 0.97), rgba(232, 214, 176, 0.95));
+  color: #2a2118;
+  border: 1px solid rgba(122, 92, 46, 0.45);
+  box-shadow: var(--shadow-panel), 0 0 0 1px rgba(207, 167, 89, 0.12);
+  border-radius: 2px;
+}
+
+.prova-card--narrow {
+  max-width: 28rem;
+  margin: 2rem auto 0;
+  text-align: center;
+}
+
+.prova-card--done {
+  max-width: 40rem;
+}
+
+.prova-result {
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  text-align: left;
+  background: rgba(42, 28, 18, 0.08);
+  border: 1px solid rgba(122, 92, 46, 0.28);
+}
+
+.prova-result__score {
+  margin: 0 0 0.85rem;
+  text-align: center;
+  font-family: var(--font-title);
+  font-size: clamp(1.75rem, 5vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1a1208;
+}
+
+.prova-result__breakdown {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prova-result__breakdown li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.4rem 0;
+  border-top: 1px solid rgba(122, 92, 46, 0.18);
+  font-size: 0.95rem;
+  color: #3d3226;
+}
+
+.prova-result__breakdown li:first-child {
+  border-top: 0;
+}
+
+.prova-result__total {
+  font-weight: 700;
+  color: #1a1208;
+}
+
+.prova-result__footnote {
+  margin: 0.75rem 0 0;
+  font-size: 0.82rem;
+  color: #5c4d3a;
+  text-align: center;
+}
+
+/* ---- Gabarito / review (pós-nota) ---- */
+.prova-card--done .prova-card__heading,
+.prova-card--done .prova-card__lead,
+.prova-card--done .prova-card__eyebrow {
+  text-align: center;
+}
+
+.prova-card--done .prova-card__actions {
+  justify-content: center;
+}
+
+.prova-review {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(122, 92, 46, 0.28);
+}
+
+.prova-review[hidden] {
+  display: none !important;
+}
+
+.prova-review__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+  text-align: center;
+}
+
+.prova-review__general {
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.85rem;
+  font-size: 0.95rem;
+  color: #3d3226;
+  background: rgba(42, 28, 18, 0.08);
+  border: 1px solid rgba(122, 92, 46, 0.22);
+}
+
+.prova-review__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.prova-review__item {
+  padding: 0.85rem 0.9rem;
+  background: rgba(255, 252, 245, 0.65);
+  border: 1px solid rgba(92, 67, 34, 0.28);
+}
+
+.prova-review__item.is-correct {
+  border-color: rgba(70, 120, 70, 0.45);
+  box-shadow: inset 3px 0 0 rgba(70, 120, 70, 0.65);
+}
+
+.prova-review__item.is-wrong {
+  border-color: rgba(150, 50, 50, 0.4);
+  box-shadow: inset 3px 0 0 rgba(150, 50, 50, 0.7);
+}
+
+.prova-review__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.35rem 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.prova-review__qnum {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-review__points {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1a1208;
+}
+
+.prova-review__prompt {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  color: #241c14;
+  white-space: pre-wrap;
+}
+
+.prova-review__meta {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #3d3226;
+}
+
+.prova-review__meta strong {
+  color: #1a1208;
+}
+
+.prova-review__answer {
+  margin: 0.45rem 0 0;
+  padding: 0.55rem 0.65rem;
+  max-height: 10rem;
+  overflow: auto;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(42, 28, 18, 0.06);
+  border: 1px solid rgba(122, 92, 46, 0.18);
+  color: #2a2118;
+}
+
+.prova-review__comment {
+  margin: 0.55rem 0 0;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.9rem;
+  color: #3d3226;
+  background: rgba(207, 167, 89, 0.18);
+  border: 1px solid rgba(122, 92, 46, 0.28);
+}
+
+.prova-review__comment-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-contest {
+  margin: 1.25rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(122, 92, 46, 0.28);
+}
+
+.prova-contest[hidden] {
+  display: none;
+}
+
+.prova-contest__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  color: #1a1208;
+}
+
+.prova-contest__lead {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  color: #3d3226;
+  line-height: 1.45;
+}
+
+.prova-contest__thread {
+  display: grid;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.prova-contest__thread[hidden] {
+  display: none;
+}
+
+.prova-contest__bubble {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(122, 92, 46, 0.28);
+  background: rgba(255, 248, 235, 0.65);
+}
+
+.prova-contest__bubble--admin {
+  background: rgba(207, 167, 89, 0.16);
+}
+
+.prova-contest__bubble-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-family: var(--font-title);
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-contest__bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: #2a2118;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.prova-contest__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  color: #3d3226;
+}
+
+.prova-contest__textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: 0.65rem 0.75rem;
+  font: inherit;
+  color: #1a1208;
+  background: rgba(255, 252, 245, 0.9);
+  border: 1px solid rgba(122, 92, 46, 0.35);
+  resize: vertical;
+}
+
+.prova-contest__status {
+  min-height: 1.25rem;
+  margin: 0.45rem 0;
+  font-size: 0.88rem;
+  color: #5a4a36;
+}
+
+.prova-contest__form .prova-btn {
+  margin-top: 0.15rem;
+}
+
+.prova-card__eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-card__heading {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-title);
+  font-size: clamp(1.25rem, 3vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #1a1208;
+  line-height: 1.3;
+}
+
+.prova-card__lead {
+  margin: 0 0 1.1rem;
+  font-size: 1.05rem;
+  color: #3d3226;
+}
+
+.prova-card__status {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-card__note {
+  margin: 0.85rem 0 0;
+  min-height: 1.25em;
+  font-size: 0.95rem;
+  color: #5c4a36;
+}
+
+.prova-card__note.is-error {
+  color: var(--hades-blood);
+}
+
+.prova-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+  justify-content: flex-start;
+}
+
+.prova-card--narrow .prova-card__actions {
+  justify-content: center;
+}
+
+.prova-rules {
+  margin: 0 0 0.5rem;
+  padding-left: 1.2rem;
+  color: #3d3226;
+}
+
+.prova-rules li + li {
+  margin-top: 0.55rem;
+}
+
+/* ---- Progress dots ---- */
+.prova-progress {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.85rem;
+  padding: 0.15rem 0;
+}
+
+.prova-progress__dot {
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: 1px solid rgba(207, 167, 89, 0.45);
+  background: rgba(24, 18, 26, 0.65);
+  color: var(--hades-text-dim);
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+  line-height: 1;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.prova-progress__dot:hover:not(:disabled) {
+  border-color: var(--hades-gold);
+  color: var(--hades-gold-bright);
+}
+
+.prova-progress__dot:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.prova-progress__dot.is-current {
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+  border-color: var(--hades-gold-bright);
+  color: #1a1208;
+  opacity: 1;
+}
+
+.prova-progress__dot.is-answered {
+  border-color: var(--hades-gold);
+  color: var(--hades-gold-bright);
+}
+
+.prova-progress__dot:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
+/* ---- Prompt / choices / discursive ---- */
+.prova-prompt {
+  margin: 0 0 1.15rem;
+  font-size: 1.08rem;
+  color: #241c14;
+  white-space: pre-wrap;
+}
+
+.prova-prompt p {
+  margin: 0 0 0.75rem;
+}
+
+.prova-prompt p:last-child {
+  margin-bottom: 0;
+}
+
+.prova-choices {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.prova-choices__legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space:nowrap;
+}
+
+.prova-choice {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 0.65rem 0.7rem;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid rgba(92, 67, 34, 0.35);
+  background: rgba(255, 252, 245, 0.72);
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(207, 167, 89, 0.35);
+  touch-action: manipulation;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.prova-choice:hover {
+  border-color: rgba(122, 92, 46, 0.7);
+  background: rgba(255, 252, 245, 0.95);
+}
+
+.prova-choice:has(input:checked) {
+  border-color: var(--hades-gold-dark);
+  background: rgba(207, 167, 89, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(122, 92, 46, 0.25);
+}
+
+.prova-choice:has(input:focus-visible) {
+  outline: 2px solid var(--hades-gold-dark);
+  outline-offset: 2px;
+}
+
+.prova-choice__letter {
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--hades-gold-dark);
+  min-width: 1.25rem;
+}
+
+.prova-choice__text {
+  font-size: 1.05rem;
+  color: #2a2118;
+  line-height: 1.4;
+}
+
+.prova-choice input {
+  width: 1.35rem;
+  height: 1.35rem;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--hades-gold-dark);
+  cursor: pointer;
+}
+
+.prova-discursive__label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-dark);
+}
+
+.prova-discursive__input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 12rem;
+  padding: 0.85rem 0.95rem;
+  resize: vertical;
+  font-family: var(--font-body);
+  /* ≥16px: evita zoom automático do iOS no foco; pinch-zoom do usuário continua livre */
+  font-size: max(1rem, 16px);
+  line-height: 1.55;
+  color: #2a2118;
+  background: rgba(255, 252, 245, 0.9);
+  border: 1px solid rgba(92, 67, 34, 0.4);
+  border-radius: 2px;
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
+}
+
+.prova-discursive__input:focus {
+  outline: 2px solid var(--hades-gold);
+  outline-offset: 1px;
+}
+
+.prova-discursive__input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.prova-discursive__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #6b5a45;
+  text-align: right;
+}
+
+/* ---- Nav footer ---- */
+.prova-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+  justify-content: space-between;
+}
+
+.prova-nav .prova-btn--primary,
+.prova-nav .prova-btn--danger {
+  margin-left: auto;
+}
+
+/* ---- Buttons ---- */
+.prova-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.1rem;
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform var(--transition-fast), filter var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.prova-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.prova-btn--primary {
+  color: #1a1208;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold) 55%, var(--hades-gold-dark));
+  border-color: var(--hades-gold-bright);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.prova-btn--primary:hover:not(:disabled) {
+  transform: scale(1.02);
+  filter: brightness(1.08);
+}
+
+.prova-btn--ghost {
+  color: var(--hades-gold-bright);
+  background: transparent;
+  border-color: var(--hades-gold-dark);
+}
+
+.prova-btn--ghost:hover:not(:disabled) {
+  border-color: var(--hades-gold);
+  box-shadow: 0 0 12px rgba(207, 167, 89, 0.35);
+}
+
+/* Ghost sobre o card pergaminho */
+.prova-card .prova-btn--ghost {
+  color: var(--hades-gold-dark);
+  border-color: rgba(122, 92, 46, 0.55);
+}
+
+.prova-card .prova-btn--ghost:hover:not(:disabled) {
+  border-color: var(--hades-gold-dark);
+  color: #1a1208;
+}
+
+.prova-btn--danger {
+  color: #fff5f5;
+  background: linear-gradient(180deg, #a32d3c, var(--hades-blood));
+  border-color: rgba(194, 53, 72, 0.8);
+  box-shadow: var(--shadow-blood-glow);
+}
+
+.prova-btn--danger:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.prova-btn:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
+/* ---- Dialogs ---- */
+.prova-dialog {
+  padding: 0;
+  border: 1px solid var(--hades-gold-dark);
+  background: var(--hades-panel);
+  color: var(--hades-text);
+  max-width: min(24rem, calc(100vw - 2rem));
+  box-shadow: var(--shadow-panel);
+}
+
+.prova-dialog::backdrop {
+  background: rgba(8, 6, 10, 0.72);
+}
+
+.prova-dialog__form {
+  padding: 1.25rem 1.2rem 1.1rem;
+}
+
+.prova-dialog__title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-title);
+  font-size: 1.05rem;
+  color: var(--hades-gold-bright);
+}
+
+.prova-dialog__body {
+  margin: 0 0 1.1rem;
+  font-size: 1rem;
+  color: var(--hades-text-dim);
+}
+
+.prova-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.prova-dialog__summary {
+  margin: -0.35rem 0 1rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--hades-parchment);
+  background: rgba(122, 31, 43, 0.28);
+  border: 1px solid rgba(194, 53, 72, 0.4);
+}
+
+.prova-dialog__summary[hidden] {
+  display: none !important;
+}
+
+.prova-dialog__summary.is-ok {
+  background: rgba(40, 80, 48, 0.35);
+  border-color: rgba(120, 180, 110, 0.45);
+  color: var(--hades-parchment);
+}
+
+/* ---- Mobile / touch (Task E2) ---- */
+@media (max-width: 640px) {
+  .prova-page {
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  .prova-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 0.85rem 1rem 0.65rem;
+    background: linear-gradient(180deg, rgba(13, 10, 16, 0.97), rgba(13, 10, 16, 0.88));
+    border-bottom: 1px solid rgba(122, 92, 46, 0.35);
+    backdrop-filter: blur(6px);
+  }
+
+  .prova-warn ~ .prova-topbar {
+    top: 0;
+  }
+
+  .prova-topbar__meta {
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .prova-topbar__timer {
+    flex: 1 1 auto;
+    justify-content: center;
+    max-width: 11rem;
+    margin-left: auto;
+  }
+
+  .prova-topbar__timer-value {
+    font-size: 1.4rem;
+  }
+
+  .prova-main {
+    padding: 0.5rem 1rem calc(2.5rem + env(safe-area-inset-bottom, 0));
+  }
+
+  .prova-card {
+    padding: 1.2rem 1rem 1.1rem;
+  }
+
+  .prova-choice {
+    min-height: 3rem;
+    padding: 0.95rem 0.85rem;
+    align-items: flex-start;
+  }
+
+  .prova-choice input {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-top: 0.1rem;
+  }
+
+  .prova-discursive__input {
+    min-height: 14rem;
+    font-size: max(1.0625rem, 17px);
+  }
+
+  .prova-nav {
+    flex-direction: column;
+    position: sticky;
+    bottom: 0;
+    z-index: 25;
+    margin-top: 0.75rem;
+    padding: 0.65rem 0 calc(0.35rem + env(safe-area-inset-bottom, 0));
+    background: linear-gradient(180deg, transparent, rgba(13, 10, 16, 0.92) 28%);
+  }
+
+  .prova-nav .prova-btn {
+    width: 100%;
+  }
+
+  .prova-nav .prova-btn--primary,
+  .prova-nav .prova-btn--danger {
+    margin-left: 0;
+  }
+
+  .prova-progress__dot {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.58rem;
+  }
+
+  .prova-dialog {
+    max-width: calc(100vw - 1.25rem);
+    margin: auto;
+  }
+
+  .prova-dialog__actions {
+    flex-direction: column-reverse;
+  }
+
+  .prova-dialog__actions .prova-btn {
+    width: 100%;
+  }
+}
