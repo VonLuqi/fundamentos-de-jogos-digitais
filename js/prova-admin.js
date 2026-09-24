@@ -249,7 +249,6 @@ function paintDetail(attempt) {
   if (meta) {
     meta.textContent = [
       student.turma || '—',
-      attempt.questionBank ? `banco ${attempt.questionBank}` : null,
       student.username ? `@${student.username}` : null,
       attempt.hasAlerts ? 'com alertas' : null,
     ].filter(Boolean).join(' · ');

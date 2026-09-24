@@ -21,20 +21,6 @@ export {
 } from './questions-modulo1.js';
 
 export {
-  MC_ANSWER_KEY_TCG01,
-  QUESTIONS_TCG01,
-} from './questions-modulo1-tcg01.js';
-
-export {
-  PROVA_DEFAULT_TURMA_BANK,
-  getMcAnswerKeyForTurma,
-  getQuestionByIdForTurma,
-  getQuestionsForTurma,
-  normalizeProvaTurma,
-  resolveQuestionBankTurma,
-} from './questions-by-turma.js';
-
-export {
   DISCURSIVE_RUBRICS,
   MC_ANSWER_KEY,
   MC_JUSTIFICATIONS,

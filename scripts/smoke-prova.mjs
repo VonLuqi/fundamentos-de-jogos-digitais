@@ -28,7 +28,7 @@ import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
-import { getMcAnswerKeyForTurma } from '../api/_lib/prova/questions-by-turma.js';
+import { MC_ANSWER_KEY } from '../api/_lib/prova/answer-key-modulo1.js';
 import { EXAM_ID, listDiscursiveQuestionIds } from '../api/_lib/prova/questions-modulo1.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -245,7 +245,6 @@ async function main() {
     // Gate: liberar só a turma do aluno
     await prova(args.baseUrl, admin.token, 'adminSetExamOpen', { mode: turma });
     console.log(`  · gate: liberado ${turma}`);
-    const answerKey = getMcAnswerKeyForTurma(turma);
 
     const started = await prova(args.baseUrl, student.token, 'startAttempt');
     const attemptId = started.attempt?.id;
@@ -255,11 +254,11 @@ async function main() {
     // save MC (gabarito q01) + uma discursiva
     await prova(args.baseUrl, student.token, 'saveAnswer', {
       questionId: 'q01',
-      choice: answerKey.q01,
+      choice: MC_ANSWER_KEY.q01,
     });
     await prova(args.baseUrl, student.token, 'saveAnswer', {
       questionId: 'q02',
-      choice: answerKey.q02,
+      choice: MC_ANSWER_KEY.q02,
     });
     await prova(args.baseUrl, student.token, 'saveAnswer', {
       questionId: 'q13',
@@ -280,8 +279,8 @@ async function main() {
 
     const submitted = await prova(args.baseUrl, student.token, 'submitAttempt', {
       answers: [
-        { questionId: 'q01', choice: answerKey.q01 },
-        { questionId: 'q02', choice: answerKey.q02 },
+        { questionId: 'q01', choice: MC_ANSWER_KEY.q01 },
+        { questionId: 'q02', choice: MC_ANSWER_KEY.q02 },
         {
           questionId: 'q13',
           textAnswer: 'Smoke E3: círculo mágico = contrato de regras ao apertar Play.',
