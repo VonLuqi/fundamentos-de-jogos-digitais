@@ -89,6 +89,22 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+/**
+ * @param {unknown} rubric
+ */
+function formatRubricHtml(rubric) {
+  if (!rubric) return '';
+  if (typeof rubric === 'string') {
+    return `<p class="prova-admin-q__rubric"><em>Rubrica:</em> ${escapeHtml(rubric)}</p>`;
+  }
+  if (typeof rubric !== 'object') return '';
+  const focus = rubric.focus ? `<p><em>Foco:</em> ${escapeHtml(rubric.focus)}</p>` : '';
+  const synthesis = rubric.synthesis ? `<p><em>Síntese:</em> ${escapeHtml(rubric.synthesis)}</p>` : '';
+  const excellent = rubric.excellent ? `<p><em>Excelente:</em> ${escapeHtml(rubric.excellent)}</p>` : '';
+  if (!focus && !synthesis && !excellent) return '';
+  return `<div class="prova-admin-q__rubric">${focus}${synthesis}${excellent}</div>`;
+}
+
 function readFilters() {
   return {
     turma: $('prova-admin-filter-turma')?.value || 'all',
@@ -290,8 +306,9 @@ function paintDetail(attempt) {
       article.className = `prova-admin-q prova-admin-q--${q.type}`;
       article.dataset.questionId = q.questionId;
 
+      const qNum = q.number != null ? q.number : String(q.questionId || '').replace(/^q0?/, '') || '?';
       const head = document.createElement('header');
-      head.innerHTML = `<h3>Q${escapeHtml(String(q.number || q.questionId))} · ${escapeHtml(q.type === 'mc' ? 'Múltipla escolha' : 'Discursiva')}</h3>
+      head.innerHTML = `<h3>Q${escapeHtml(String(qNum))} · ${escapeHtml(q.type === 'mc' ? 'Múltipla escolha' : 'Discursiva')}${q.title ? ` · ${escapeHtml(q.title)}` : ''}</h3>
         <p class="prova-admin-q__prompt">${escapeHtml(q.prompt || '')}</p>`;
       article.appendChild(head);
 
@@ -300,10 +317,31 @@ function paintDetail(attempt) {
         body.className = 'prova-admin-q__mc';
         const ok = q.isCorrect === true;
         const bad = q.isCorrect === false;
+        const choiceLetters = ['A', 'B', 'C', 'D', 'E'];
+        const choices = q.choices && typeof q.choices === 'object' ? q.choices : {};
+        const choicesHtml = choiceLetters
+          .filter((letter) => choices[letter] != null && choices[letter] !== '')
+          .map((letter) => {
+            const isStudent = q.studentChoice === letter;
+            const isCorrect = q.correctChoice === letter;
+            const marks = [
+              isCorrect ? '<span class="prova-admin-choice__tag is-ok">gabarito</span>' : '',
+              isStudent ? `<span class="prova-admin-choice__tag ${ok ? 'is-ok' : 'is-bad'}">aluno</span>` : '',
+            ].filter(Boolean).join(' ');
+            const cls = [
+              'prova-admin-choice',
+              isCorrect ? 'prova-admin-choice--correct' : '',
+              isStudent ? 'prova-admin-choice--student' : '',
+            ].filter(Boolean).join(' ');
+            return `<li class="${cls}"><span class="prova-admin-choice__letter">${letter})</span><span class="prova-admin-choice__text">${escapeHtml(String(choices[letter]))}</span><span class="prova-admin-choice__marks">${marks}</span></li>`;
+          })
+          .join('');
         body.innerHTML = `
+          <ul class="prova-admin-choices">${choicesHtml || '<li class="prova-admin-choice">(alternativas indisponíveis)</li>'}</ul>
           <p>Resposta do aluno: <strong>${escapeHtml(q.studentChoice || '—')}</strong>
             ${ok ? '<span class="is-ok">acertou</span>' : ''}
-            ${bad ? '<span class="is-bad">errou</span>' : ''}</p>
+            ${bad ? '<span class="is-bad">errou</span>' : ''}
+            ${q.studentChoice == null ? '<span class="is-bad">em branco</span>' : ''}</p>
           <p>Gabarito: <strong>${escapeHtml(q.correctChoice || '—')}</strong>
             ${q.pointsAwarded != null ? `· ${escapeHtml(String(q.pointsAwarded))} pt` : ''}</p>
           ${q.justification ? `<p class="prova-admin-q__just">${escapeHtml(q.justification)}</p>` : ''}
@@ -314,8 +352,9 @@ function paintDetail(attempt) {
         body.className = 'prova-admin-q__disc';
         const locked = Boolean(grading.locked) || !grading.canScore;
         const text = q.studentText || '(sem resposta)';
+        const rubricHtml = formatRubricHtml(q.rubric);
         body.innerHTML = `
-          ${q.rubric ? `<p class="prova-admin-q__rubric"><em>Rubrica:</em> ${escapeHtml(q.rubric)}</p>` : ''}
+          ${rubricHtml}
           <pre class="prova-admin-q__answer">${escapeHtml(text)}</pre>
           <label class="prova-admin-q__score">
             <span>Nota (0–1)</span>

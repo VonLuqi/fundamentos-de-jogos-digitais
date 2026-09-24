@@ -64,6 +64,7 @@ assert(html.includes('prova-admin-integrity'), 'HTML timeline');
 assert(js.includes('paintDetail'), 'JS paintDetail');
 assert(js.includes('provaAdminFinalizeGrade'), 'JS finalize');
 assert(js.includes('correctChoice') || js.includes('Gabarito'), 'mostra gabarito MC');
+assert(js.includes('prova-admin-choices'), 'lista alternativas MC na correção');
 assert(pkg.includes('admin-grade.js') || pkg.includes('prova-admin.js'), 'npm check');
 assert(/Task D3[\s\S]*\[x\].*adminFinalizeGrade|Task D3[\s\S]*\[x\].*Fechar nota/i.test(plano), 'plano D3');
 
@@ -125,6 +126,8 @@ const detail = buildAdminAttemptDetail(
 );
 assert(detail.answers?.length === 20, `20 questões no detalhe, veio ${detail.answers?.length}`);
 assert(detail.answers.find((a) => a.questionId === 'q01')?.correctChoice, 'MC com gabarito');
+assert(detail.answers.find((a) => a.questionId === 'q01')?.number === 1, 'número Q1');
+assert(detail.answers.find((a) => a.questionId === 'q01')?.choices?.B || detail.answers.find((a) => a.questionId === 'q01')?.choices?.A, 'texto das alternativas MC');
 assert(detail.answers.find((a) => a.questionId === 'q13')?.rubric, 'discursiva com rubrica');
 assert(detail.answers.find((a) => a.questionId === 'q13')?.comment === 'bom', 'comment');
 assert(detail.grading.canScore === true, 'canScore');

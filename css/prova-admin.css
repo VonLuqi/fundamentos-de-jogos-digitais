@@ -460,6 +460,69 @@
   color: rgba(232, 220, 200, 0.78);
 }
 
+.prova-admin-choices {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.prova-admin-choice {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr auto;
+  gap: 0.35rem 0.5rem;
+  align-items: start;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgba(194, 160, 72, 0.2);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.88rem;
+  color: rgba(232, 220, 200, 0.88);
+}
+
+.prova-admin-choice--correct {
+  border-color: rgba(120, 180, 120, 0.65);
+  background: rgba(40, 80, 50, 0.28);
+}
+
+.prova-admin-choice--student:not(.prova-admin-choice--correct) {
+  border-color: rgba(200, 100, 100, 0.55);
+  background: rgba(90, 30, 35, 0.28);
+}
+
+.prova-admin-choice__letter {
+  font-weight: 700;
+  color: var(--hades-gold, #c9a227);
+}
+
+.prova-admin-choice__text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.prova-admin-choice__tag {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  align-self: center;
+}
+
+.prova-admin-choice__marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  justify-content: flex-end;
+  align-self: center;
+}
+
+.prova-admin-choice__tag.is-ok,
+.prova-admin-choice__tag.is-bad {
+  margin-left: 0;
+}
+
 .prova-admin-q__answer {
   margin: 0.5rem 0 0.85rem;
   padding: 0.75rem;

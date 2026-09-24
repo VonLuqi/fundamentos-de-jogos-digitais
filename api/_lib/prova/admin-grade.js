@@ -123,7 +123,7 @@ export function buildAdminAnswerDetails(answerRows, notes = {}, { turma = null }
     const row = byId.get(q.id) || null;
     const base = {
       questionId: q.id,
-      number: q.number,
+      number: typeof q.index === 'number' ? q.index + 1 : Number(String(q.id).replace(/\D/g, '')) || null,
       type: q.type,
       title: q.title || null,
       prompt: q.prompt,
