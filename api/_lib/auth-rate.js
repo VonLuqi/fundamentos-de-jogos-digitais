@@ -1,6 +1,8 @@
 /**
- * Rate limit de login / register / legado (Tasks 2 + 4).
+ * Rate limit de register / legado / soul recovery (Tasks 2 + 4 + 3).
  * Persistido em auth_rate_events — adequado a serverless.
+ *
+ * Login: sem limite de tentativas (turma em aula — sem bloqueio 429).
  */
 
 import crypto from 'node:crypto';
@@ -9,10 +11,10 @@ export const AUTH_RATE_TABLE = 'auth_rate_events';
 export const AUTH_RATE_LIMIT_MESSAGE =
   'Muitas tentativas. O Submundo pede paciência — tente novamente em breve.';
 
-/** Limites congelados (plano Task 0 D2 + C2b + Task 3 soul recovery). */
+/** Limites (register / legado / soul recovery). Login sem teto (max Infinity). */
 export const AUTH_RATE_LIMITS = Object.freeze({
-  login_ip: { action: 'login', windowMs: 15 * 60 * 1000, max: 10, by: 'ip' },
-  login_user: { action: 'login', windowMs: 15 * 60 * 1000, max: 10, by: 'username' },
+  login_ip: { action: 'login', windowMs: 15 * 60 * 1000, max: Infinity, by: 'ip' },
+  login_user: { action: 'login', windowMs: 15 * 60 * 1000, max: Infinity, by: 'username' },
   register_ip: { action: 'register', windowMs: 60 * 60 * 1000, max: 5, by: 'ip' },
   legacy_bind_ip: { action: 'legacy_bind', windowMs: 15 * 60 * 1000, max: 10, by: 'ip' },
   legacy_bind_user: { action: 'legacy_bind', windowMs: 15 * 60 * 1000, max: 5, by: 'username' },
@@ -60,26 +62,15 @@ async function countEvents(supabase, { action, ipHash, usernameHash, sinceIso })
  */
 export async function isAuthActionRateLimited(supabase, { action, ip, username }) {
   if (!supabase) return { limited: false };
+  // Login livre — sem teto por IP/usuário.
+  if (action === 'login') return { limited: false };
 
   const ipHash = hashIp(ip);
   const usernameHash = username ? hashUsername(username) : null;
   const now = Date.now();
 
   const checks = [];
-  if (action === 'login') {
-    checks.push({
-      ...AUTH_RATE_LIMITS.login_ip,
-      ipHash,
-      usernameHash: null,
-    });
-    if (usernameHash) {
-      checks.push({
-        ...AUTH_RATE_LIMITS.login_user,
-        ipHash: null,
-        usernameHash,
-      });
-    }
-  } else if (action === 'register') {
+  if (action === 'register') {
     checks.push({
       ...AUTH_RATE_LIMITS.register_ip,
       ipHash,
@@ -115,6 +106,7 @@ export async function isAuthActionRateLimited(supabase, { action, ip, username }
   }
 
   for (const check of checks) {
+    if (!Number.isFinite(check.max)) continue;
     const sinceIso = new Date(now - check.windowMs).toISOString();
     const { count, error } = await countEvents(supabase, {
       action: check.action,
@@ -139,9 +131,11 @@ export async function isAuthActionRateLimited(supabase, { action, ip, username }
 
 /**
  * Registra tentativa (sucesso ou falha). Melhor esforço.
+ * Login não grava (sem limite).
  */
 export async function recordAuthRateEvent(supabase, { action, ip, username }) {
   if (!supabase) return;
+  if (action === 'login') return;
   try {
     const { error } = await supabase.from(AUTH_RATE_TABLE).insert({
       action,

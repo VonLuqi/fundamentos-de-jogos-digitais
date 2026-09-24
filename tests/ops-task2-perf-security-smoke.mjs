@@ -74,7 +74,7 @@ assert(hasUnlockedLesson({ completedLessons: ['aula4'] }, 'aula5') === true, 'ca
 assert(SESSION_TTL_MS === 14 * 24 * 60 * 60 * 1000, 'TTL 14 dias');
 assert(SESSION_RENEW_WINDOW_MS === 7 * 24 * 60 * 60 * 1000, 'renew window 7 dias');
 assert(typeof sessionExpiresAt() === 'string', 'sessionExpiresAt ISO');
-assert(AUTH_RATE_LIMITS.login_ip.max === 10, 'login 10/IP/15min');
+assert(AUTH_RATE_LIMITS.login_ip.max === Infinity, 'login sem teto de tentativas');
 assert(AUTH_RATE_LIMITS.register_ip.max === 5, 'register 5/IP/hora');
 assert(hashIp('1.2.3.4') !== hashIp('5.6.7.8'), 'ip hash distinto');
 assert(hashUsername('Alice') === hashUsername('alice'), 'username hash normalizado');
