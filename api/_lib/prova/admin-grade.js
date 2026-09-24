@@ -10,6 +10,7 @@ import {
 import {
   normalizeDiscursivePoints,
   questionsForAdmin,
+  getMcCorrectChoice,
 } from './answer-key-modulo1.js';
 import { attemptAdminListItem } from './admin-list.js';
 
@@ -126,9 +127,24 @@ export function buildAdminAnswerDetails(answerRows, notes = {}) {
       isCorrect: row?.is_correct == null ? null : Boolean(row.is_correct),
     };
     if (q.type === 'mc') {
+      const correctChoice = q.correctChoice || getMcCorrectChoice(q.id) || null;
+      const studentChoice = row?.choice || null;
+      let isCorrect = row?.is_correct == null ? null : Boolean(row.is_correct);
+      // Recalcula pelo gabarito atual (evita flag stale após regrade / troca de chave)
+      if (correctChoice && studentChoice) {
+        isCorrect = studentChoice === correctChoice;
+      } else if (correctChoice && !studentChoice) {
+        isCorrect = false;
+      }
+      const pointsAwarded = studentChoice
+        ? (isCorrect ? 1 : 0)
+        : (row?.points_awarded != null ? Number(row.points_awarded) : null);
       return {
         ...base,
-        correctChoice: q.correctChoice || null,
+        studentChoice,
+        pointsAwarded,
+        isCorrect,
+        correctChoice,
         justification: q.justification || null,
       };
     }
