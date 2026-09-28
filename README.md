@@ -288,7 +288,7 @@ Executa `node --check` nos módulos de front-end e API e roda os smokes (incl. D
 | GET    | `/api/auth?token=...`    | Valida sessão ativa (token de **sessão**, não o selo de e-mail) |
 | GET    | `/api/progress?token=...`| Retorna o perfil do usuário autenticado|
 | POST   | `/api/progress`          | `redeem`, `avatar`, `lessonCode`, `lessonGates`, `lessonGatesBatch`, `setLessonGate` (admin), `getLessonParagraph`, `saveLessonParagraph`, `lessonView`, `generateCode` (admin), `listCodes` (admin), `listUsers` (admin), `friendsList`, `friendSearch`, `friendRequest`, `friendRespond`, `friendRemove`, `friendProfile`, `classmatesList`, `leaderboardGet` (Placar: turma/global · xp/achievements/juizoBest) |
-| POST   | `/api/despertar`         | `stateGet`, `stateSync`, `prestige`, `talentBuy`, `verdictBuy` (Bancada), `juizoStart` / `juizoGuess` / `juizoAbandon` (Juízo); `stateResetStudents` (admin). Gate published + Selo |
+| POST   | `/api/despertar`         | `stateGet`, `stateSync`, `prestige`, `talentBuy`, `verdictBuy` (Bancada), `juizoStart` / `juizoGuess` / `juizoAbandon` (Juízo); `pauseSet` / `pauseClear` (admin, Véu da Aula); `stateResetStudents` (admin). Gate published + classroom_pause + Selo |
 
 ### Companheiros de Jornada
 

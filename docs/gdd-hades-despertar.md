@@ -1,6 +1,6 @@
 # Documento de Design de Jogo (GDD) & Arquitetura de Software: Hades - O Despertar do Submundo
 
-> **Implementação:** [`docs/plano-hades-despertar.md`](plano-hades-despertar.md) (Fases 0–8) · UI Cookie / Juízo dle: [`plano-despertar-ui-cookieclicker.md`](plano-despertar-ui-cookieclicker.md) · Juízo v2: [`gdd-juizo-v2.md`](gdd-juizo-v2.md) — este GDD é a referência de design; os planos rastreiam o que já está no código.
+> **Implementação / status de produção:** [`docs/plano-hades-despertar.md`](plano-hades-despertar.md) (Fases 0–8 **feitas** + inventário P0–P2 para abrir o Acheron) · UI Cookie / Juízo dle: [`plano-despertar-ui-cookieclicker.md`](plano-despertar-ui-cookieclicker.md) · Juízo v2: [`gdd-juizo-v2.md`](gdd-juizo-v2.md) · Sync A–F: [`despertar-sync/00-master-plan.md`](despertar-sync/00-master-plan.md) — este GDD é a referência de design; o plano rastreia o que já está no código e o que falta para produção.
 
 ---
 

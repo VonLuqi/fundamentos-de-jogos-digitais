@@ -2,64 +2,163 @@
 
 Implementação completa do GDD [`docs/gdd-hades-despertar.md`](./gdd-hades-despertar.md) **dentro do ecossistema** Fundamentos de Jogos Digitais (HTML/CSS/JS ES-Modules, `api/*` serverless, sessão opaca, Supabase via service role, app-shell Hades).
 
-Este documento é a fonte operacional de implementação. O GDD permanece a fonte de **design**. Onde o GDD descreve um stack paralelo (`/src`, `/api/sync`, `auth.users` UUID, RLS com update do cliente), este plano **adapta** a ideia ao que o repositório já faz — sem diluir mecânicas, rios, fórmulas nem o pilar educacional.
+Este documento é a fonte operacional de implementação **e o inventário de status para produção**. O GDD permanece a fonte de **design**. Onde o GDD descreve um stack paralelo (`/src`, `/api/sync`, `auth.users` UUID, RLS com update do cliente), este plano **adapta** a ideia ao que o repositório já faz — sem diluir mecânicas, rios, fórmulas nem o pilar educacional.
 
-**Extensão pós-GDD (Fase 7):** minigame **Juízo do Tartarus** (ClassInd streak), moeda **Vereditos**, **Bancada do Juiz**, e **Placar do Domínio** (turma + global). Catálogo stub: [`data/despertar-juizo-pool.stub.json`](../data/despertar-juizo-pool.stub.json). Gates de acesso alinhados a [`plano-ops-nav-email-perf-admin.md`](./plano-ops-nav-email-perf-admin.md).
+**Status (2026-09-28):** Fases **0–8** do clicker + Juízo + Placar + UI Cookie estão **feitas**. Guia sync/loja/selados/debug (**A–F**) **fechado**. O jogo é **jogável e shippable** atrás do **gate do Mestre** (`lesson_gates` `despertar`/`published` + Selo do Mensageiro). O que falta para “produção polida” é ops/arte/balance fino — ver [Estado de produção](#estado-de-produção--inventário).
 
-**Extensão UI (Fase 8):** layout Cookie Clicker + WorldView/AltarOrbit + Juízo Higher/Lower — plano e aceite em [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md); GDD Juízo v2 em [`gdd-juizo-v2.md`](./gdd-juizo-v2.md).
+**Extensão pós-GDD (Fase 7 — feita):** minigame **Juízo do Tartarus** (ClassInd streak Higher/Lower), moeda **Vereditos**, **Bancada do Juiz**, **Placar do Domínio** (turma + global). Catálogo stub: [`data/despertar-juizo-pool.stub.json`](../data/despertar-juizo-pool.stub.json). Gates alinhados a [`plano-ops-nav-email-perf-admin.md`](./plano-ops-nav-email-perf-admin.md).
+
+**Extensão UI (Fase 8 — feita):** layout Cookie Clicker + WorldView/AltarOrbit + Juízo Higher/Lower — [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md); GDD Juízo v2 em [`gdd-juizo-v2.md`](./gdd-juizo-v2.md).
+
+**Pós-Fase 8 (feitos):** sync anti-rubberband · debug admin · Lethe progressivo · Styx encadeado · cosméticos procedurais · Juramentos Selados · aureolas/letreiro/shiny/gold/HUD/Juízo B1 Soft — ver [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md) · [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md) · [`plano-despertar-polish-foice-juizo-upgrades.md`](./plano-despertar-polish-foice-juizo-upgrades.md).
+
+**Roadmap produção profunda (planejamento):** pausa com timer na aula · Códice livro · subabas permanentes · conquistas · cosméticos/VFX · Lethe/Bancada profundos — [`plano-despertar-producao-profundo.md`](./plano-despertar-producao-profundo.md).
 
 ---
 
 ## Contexto
 
-A plataforma já é um hub gamificado (Trilha, Álbum, Salão, Grimório, ARG do Submundo). O item de navegação **Minigame em breve** está travado em todas as páginas do shell. Não existe clicker/incremental, nem `GameLoop` com RAF, nem persistência de estado de jogo além de XP/conquistas/notas.
+A plataforma é um hub gamificado (Trilha, Álbum, Salão, Grimório, ARG do Submundo, **O Despertar**). O destino **Minigame em breve** foi substituído por **O Despertar** (`pages/despertar.html`, `ROUTES.despertar`).
 
-O GDD pede um **módulo prático** que ensine, jogando:
+O GDD pedia um **módulo prático** que ensine, jogando:
 
 - game loop (RAF + delta time + ticks fixos);
 - ES-Modules com simulação separada da UI;
 - economia exponencial (custo, SPS, amortização, prestígio);
 - persistência local + **server-authoritative**.
 
-Isso encaixa no destino vazio do Minigame e no mantra do curso — sem ocupar as URLs secretas `/submundo/*` (Enigma do Soberano).
+Isso vive em `/pages/despertar.html` — **sem** ocupar as URLs secretas `/submundo/*` (Enigma do Soberano).
 
 Documento de design: [`docs/gdd-hades-despertar.md`](./gdd-hades-despertar.md).  
 Stack e convenções: [`docs/contexto.md`](./contexto.md), [`README.md`](../README.md).  
-Design system: `css/hades-tokens.css` (`--hades-*`, Cinzel / Crimson Text).
+Design system: `css/hades-tokens.css` (`--hades-*`, Cinzel / Crimson Text) + `--despertar-*`.
 
 ---
 
 ## Objetivos
 
-1. Entregar o jogo incremental **completo** descrito no GDD: clique no Acheron, 6 geradores, upgrades do Styx, prestígio no Lethe, óbolos, essência de Mnemosyne, offline catch-up, sync autoritativo.
-2. Servir de **módulo educacional** visível: logs da plataforma que nomeiam loop, delta, curva `1.15^n` e prestígio quando o aluno os encontra.
-3. Integrar ao ecossistema: sessão, shell, tokens Hades, conquistas, preview no Painel, API no padrão das rotas existentes.
-4. Não quebrar o ARG `/submundo/*`, nem a página admin **Almas Registradas**, nem o teto de destinos do shell.
+1. Entregar o jogo incremental **completo** descrito no GDD: clique no Acheron, 6 geradores, upgrades do Styx, prestígio no Lethe, óbolos, essência de Mnemosyne, offline catch-up, sync autoritativo. ✅
+2. Servir de **módulo educacional** visível: logs da plataforma que nomeiam loop, delta, curva `1.15^n` e prestígio quando o aluno os encontra. ✅ (Códice do Loop)
+3. Integrar ao ecossistema: sessão, shell, tokens Hades, conquistas, preview no Painel, API no padrão das rotas existentes. ✅
+4. Não quebrar o ARG `/submundo/*`, nem a página admin **Almas Registradas**, nem o teto de destinos do shell. ✅
 
 ---
 
-## Diagnóstico rápido (estado atual)
+## Estado de produção — inventário
 
-| Peça | Onde | Situação |
+> Fonte de verdade para “o que já roda / o que falta / o que sugerimos antes (ou depois) de abrir o Acheron para a turma”.
+> Checklists históricos das Fases 1–8 permanecem abaixo; este inventário resume o **hoje**.
+
+### Mecânicas implementadas
+
+| Área | O que está no ar | Evidência |
 | --- | --- | --- |
-| GDD | `docs/gdd-hades-despertar.md` | Completo em visão/mecânica/arquitetura de referência; lacunas em upgrades, árvore Mnemosyne, fórmula de clique e copy educacional |
-| Minigame no shell | `data-nav-item="minigame"` em 10 HTMLs | Travado (`is-locked`, `href="#"`) |
-| Rota `minigame` | `js/app-shell.js`, `js/api.js` `ROUTES` | Mapeada no shell; **sem** `ROUTES.despertar` / página |
-| Clicker / GameLoop | — | **Não existe** |
-| ARG Submundo | `/submundo/*`, `js/submundo/*` | 8 salas secretas; **não** reutilizar pasta nem URLs |
-| Almas (admin) | `pages/souls.html` | Lista de alunos; colide **semântica** com a moeda do GDD |
-| Auth | `sessions` + token opaco | **Não** é Supabase Auth; `users.id` é `integer` |
-| API de progresso | `POST /api/progress` actions | Arquivo já grande; sync de jogo **não** deve inchá-lo |
-| Persistência | Supabase service role | Sem tabela de estado de clicker |
-| IndexedDB | — | Não usado (só `localStorage` da sessão) |
-| Tokens | `--hades-*` | Paleta GDD (`#0a0a0f`, Styx `#00a896`, fogo `#d90429`) ainda não mapeada |
-| Aula 03 | `pages/aula3.html` | Placeholder; **não** substitui o minigame neste ciclo |
+| **Loop** | Ceifar (clique), RAF 60 Hz, panic, SPS passivo, clock de parede ≈ 1 s | `GameLoop.js`, `GameState.js`, `despertar-clock-smoke` |
+| **Geradores** | T1–T6 (Sombra → Trono), compra 1/10/100/Máx, custo `Base×1.15^n` | `config/generators.js` |
+| **Styx** | 19 Juramentos (cadeia Foice um-a-um; affordáveis primeiro; owned → Selados) | `config/upgrades.js`, Fase D/F |
+| **Lethe** | Ritual com modal; óbolos √; essência; preview/unlock progressivo + log | `prestige`, `despertar-lethe-smoke` |
+| **Mnemosyne** | **13** talentos (+5 F1; sobrevivem ao Lethe) | `config/talents.js`, `talentBuy` |
+| **Offline** | Catch-up 8 h / 80% (estendível por talentos/Bancada); boot autoritativo | `OfflineEngine.js` |
+| **Sync** | Heartbeat dirty + flush em compra/prestígio/talento; epoch; dirty-preserve; merge em `ok`; reject = replace | `ApiService.js`, Fase A |
+| **Anti-cheat** | Recalcula SPS no server; teto `SPS×Δt×1.05`; CPS cap; 409 stale; rate limit | `despertar-validate.js` |
+| **Gate** | `published` + Selo do Mensageiro; admin bypass; UI “Acheron selado” | `despertar-gate.js` |
+| **Códice** | ~16 logs educacionais; hidden Arquiteto exige elegibilidade server-side | `edu-logs.js`, `despertar-achievements.js` |
+| **XP / conquistas** | 24 `despertar_*` (12 base + 12 D2 P0; 5–50 XP) no sync/prestige/talent/Juízo — cliente **nunca** soma XP | `game-catalog.json`, `planDespertarAwards` |
+| **Juízo** | Higher/Lower; streak/recorde; Vereditos por milestone; no acerto o desafiante assume o trono | `JuizoModal.js`, `despertar-juizo.js` |
+| **Bancada** | **8** itens (B1 Soft + F2; custos Σ 64 V) | `verdict-shop.js` |
+| **Placar** | Turma + global: XP · #conquistas · juizoBest (nunca SPS/Almas) | `pages/ranking.html` |
+| **UI Cookie** | Altar · Mundo (WorldView + AltarOrbit) · Store; caps de órbita/prateleira | Fase 8 |
+| **Raridade** | Negativo (0,5% ×15) + Gold (2% ×2); force só debug | `constants.js`, shiny/gold counts |
+| **Presença** | Aureolas, letreiro/Marquee, rumores, juice de ceifa, slash da Foice, hover NPC | aureolas + polish |
+| **Cosméticos** | 12 P0 procedural/CSS (E1–E2); WebP opcional `assets/despertar/cosmetics/` (E3 open) | `upgrade-cosmetics.js`, `CosmeticsAtlas.js` |
+| **Preview** | Card no Painel: Almas · Almas/s · Descer ao Acheron | `dashboard.js` |
+| **Admin debug** | Sandbox, set absoluto, grants, free shopping (sync off), force shiny/gold | `#despertar-debug`, `despertar-debug.js` |
+| **QA** | ~37 smokes `tests/despertar-*-smoke.mjs` + `ranking-smoke` no `npm run check` | `package.json` |
+
+### Parcial / frágil (funciona, mas não está “fechado”)
+
+| Peça | Estado | Risco |
+| --- | --- | --- |
+| **Arte** | Placeholders WebP/SVG + Foice PNG; pipeline `despertar:sprites` | Visual “procgen”; pedidos abertos em [`PEDIDOS-MESTRE.md`](../assets/despertar/PEDIDOS-MESTRE.md) |
+| **Pool Juízo** | Stub ≥200; CTA exige ≥30 com `rating` | Sem ratings o Juízo fica disabled |
+| **SFX** | Stub `ui/audio.js` (`SFX_ENABLED = false`) | Silêncio total — intencional até polish |
+| **Cosméticos** | 12 shipped procedural; WebP P3 open | Entrega Mestre em `cosmetics/` |
+| **Shiny RNG** | Cliente rola; server só clampa bounds | Exploit teórico = linha ×15 (congelado) |
+| **Sync de idle** | Flush só se `_dirty` (compra/resume/…) | Clique puro pode atrasar push até o próximo evento |
+| **Task 11b** | Métrica Despertar em `souls.html` | Opcional / adiada |
+| **Docs satélites** | Algumas frases antigas (“1% shiny”, “Fase 7 aberta”, Q19 “lado vencedor”) | Preferir este inventário + README |
+
+### Não implementado (adiado ou fora de escopo)
+
+| Item | Motivo | Onde vive a decisão |
+| --- | --- | --- |
+| SFX real (ceifa, compra, Lethe, Juízo) | Adiado; mute default do curso | Cookie Q18 |
+| Juízo **B2** (sink item) / **B3** (repeat pós-s100) | Adiados após B1 Soft | Aureolas Q15 |
+| Daily / season Juízo | Fora de escopo | Cookie Q23 |
+| Vender geradores | Não | Cookie Q10 |
+| Leaderboard de SPS/Almas / PvP | Economia manipulável | Task 0 / fora de escopo |
+| Wrinklers / parasitas do Tártaro | Fora | Aureolas |
+| WebSocket / sync por ação | Fora; heartbeat dirty basta | Sync master |
+| RNG shiny no server | Congelado client-side | Aureolas Q10 |
+| Prestígio 3ª camada além de Mnemosyne | Fora | Task 0 |
+| Métrica compacta em Almas Registradas (11b) | Opcional | Task 11 |
+
+### Sugestões para ir a produção
+
+Ordem sugerida — **não bloqueia** abrir o Acheron se o gate + migrations + KV estiverem ok.
+
+#### P0 — abrir o Acheron com segurança
+
+1. **Migrations aplicadas** no Supabase de produção: base + Juízo + shiny + gold (+ RPC `despertar_persist_and_award` se `DESPERTAR_SYNC_RPC=1`).
+2. **KV** (`KV_REST_API_*` ou Upstash) para rate limit Edge + cache de gate — sem KV o isolate degrada (ok em dev; frágil em multi-instância).
+3. **Gate fechado por default** → Mestre publica `despertar`/`published` só quando a turma deve jogar; alunos precisam do **Selo do Mensageiro**.
+4. **Smoke de go-live:** `npm run check`; abrir Despertar como aluno (selo + published); ceifar → comprar T1 → F5 (estado volta); sync reject artificial restaura.
+5. **Pool Juízo:** garantir ≥30 entradas `ready` (rating preenchido) **antes** de anunciar o Juízo; senão CTA fica “ainda cataloga as almas”.
+6. **Admin debug** só com `role === admin`; free shopping nunca persiste no Postgres.
+
+#### P1 — polish de primeira aula (recomendado na 1ª semana)
+
+7. **Arte P0 do Mestre:** Foice idle/pressed + Sombra + Servos ([`PEDIDOS-MESTRE.md`](../assets/despertar/PEDIDOS-MESTRE.md) §1ª leva) — maior ganho perceptual por hora.
+8. **Capas Juízo P2** faltantes (minecraft, fortnite, …) ou reuso ClassInd.
+9. **SFX mínimo** (3–5 sons: ceifa, compra, unlock Lethe, acerto/erro Juízo) atrás de mute default / `prefers-reduced-motion`.
+10. **Telemetria leve** de rejects `JUDGES_REFUSED` e `edge_rate_degraded` (já há logs/métricas parciais) — baseline pós-abertura.
+11. Corrigir **drift de docs** satélites (chance shiny/gold; champion = desafiante; “Fase 7 aberta”) apontando para este inventário.
+
+#### P2 — pós-abertura (não bloqueia)
+
+12. Pacote completo em [`plano-despertar-producao-profundo.md`](./plano-despertar-producao-profundo.md) (Véu da Aula → Códice livro → subabas → conquistas → VFX → Lethe/Bancada).
+13. Cosméticos WebP reais (`hat_charon`, `blade_glow`) + amarrar mais Juramentos visuais (Fase E do plano profundo).
+14. Juízo **B2/B3** se a turma esgotar a Bancada cedo (Fase F).
+15. Task **11b** (espelho compacto em Almas Registradas) para o Mestre acompanhar quem desceu ao Acheron.
+16. Avaliar `DESPERTAR_PG_POOL=1` só com evidência de saturação (README C5).
+
+### XP nesta etapa (lembrete operacional)
+
+O Despertar **não** converte Almas em XP. XP vem só de conquistas `despertar_*` (uma vez cada), concedidas no server no sync/prestige/talent/Juízo. Família baixa (5–50); teto ~270 XP. Ver catálogo em `data/game-catalog.json`.
+
+---
+
+## Diagnóstico rápido (histórico → atual)
+
+| Peça | Onde | Situação **hoje** |
+| --- | --- | --- |
+| GDD | `docs/gdd-hades-despertar.md` | Design de referência; lacunas de upgrade/Panteão/clique **preenchidas neste plano** e no código |
+| Nav | Shell | **O Despertar** (substitui Minigame); gate published + selo |
+| Página | `pages/despertar.html` | Jogável; layout Cookie 3 colunas |
+| Clicker / GameLoop | `js/hades-despertar/` | Completo (simulação + UI + sync) |
+| API | `POST /api/despertar` | stateGet/Sync, prestige, talentBuy, verdictBuy, juizo*, debug* |
+| Persistência | `despertar_states` + IndexedDB | Server autoritativo; IDB cache |
+| Juízo + Placar | modal + `ranking.html` | Feitos (Fase 7) |
+| ARG Submundo | `/submundo/*` | Intactos |
+| Almas (admin) | `pages/souls.html` | Continua **Almas Registradas** (semântica distinta) |
+| Arte | `assets/despertar/` | Placeholders; pedidos ao Mestre abertos |
+| Produção | Gate + KV + migrations | **Checklist P0** acima |
 
 ---
 
 ## Status da Fase 0
 
-**Fase 0 fechada neste documento.** Decisões abaixo estão congeladas por coerência com o GDD + o que o repositório já impõe (auth customizada, shell, tokens, ARG). Implementação começa na Task 1.
+**Fase 0 fechada neste documento.** Decisões abaixo estão congeladas por coerência com o GDD + o que o repositório já impõe (auth customizada, shell, tokens, ARG). Implementação das Tasks 1+ está **concluída** (ver inventário).
 
 ---
 
@@ -362,7 +461,7 @@ Ritual com 0 óbolos: botão bloqueado (não queimar a corrida à toa).
 | Rio | Papel | Unlock |
 | --- | --- | --- |
 | **Acheron** | Clique + HUD | Sempre |
-| **Cocytus** | Geradores T1–T3 visíveis como “lamento automatizado” | Sempre T1; T2 com ≥ 50 almas **ou** 1× T1; T3 com 1× T2 **ou** almas ≥ `BaseCost/4` |
+| **Cocytus** | Geradores T1–T4 (escada de máscaras) | Sempre T1; T2 ≥ 50 almas **ou** 1× T1; T3 1× T2 **ou** almas ≥ `BaseCost/4`; T4 1× T3 **ou** almas ≥ `BaseCost/4` (3 000) |
 | **Styx** | Aba Juramentos | Primeira compra de gerador **ou** 100 almas |
 | **Phlegethon** | Geradores T5–T6 + visual de fogo | 1× T4 **ou** almas ≥ 32_500 |
 | **Lethe + Mnemosyne** | Aba ritual | `runSouls ≥ 1e8` (prévia) ou `obolsGain ≥ 1` (ritual ativo) |
@@ -472,18 +571,24 @@ Sufixos até a ordem de `NUMERIC(38)`: `K M B T Qa Qi Sx Sp Oc No Dc`. Uma casa 
 | Id | Nome | Raridade | XP | Gatilho no server |
 | --- | --- | --- | ---: | --- |
 | `despertar_primeira_alma` | Primeira Alma | stone | 5 | `lifetimeSouls ≥ 1` |
-| `despertar_primeira_sombra` | Primeira Sombra | copper | 10 | `wandering_shade ≥ 1` (corrida ou histórico via lifetime/geradores atuais) |
+| `despertar_primeira_sombra` | Primeira Sombra | copper | 10 | `wandering_shade ≥ 1` (ou milestone `shade`) |
 | `despertar_automacao` | Máquina do Pesar | copper | 10 | SPS derivado ≥ 1 |
-| `despertar_forja` | Brasa do Phlegethon | silver | 20 | possuir T5 nesta corrida **ou** `lifetime` já teve (simplificar: `phlegethon_forge ≥ 1` no estado **ou** flag `seenForge` — MVP: quantidade atual **ou** `run` pós-prestígio não apaga `lifetime` flags). **MVP rígido:** `lifetimeSouls ≥ 130000` **e** `prestigeCount ≥ 0` não basta. Persistir `milestones jsonb` no estado: `{ forge: true, throne: true, ... }` setado quando compra. |
-| `despertar_trono` | Trono de Obsidiana | silver | 25 | milestone `throne` |
+| `despertar_forja` | Brasa do Phlegethon | silver | 20 | `phlegethon_forge ≥ 1` **ou** milestone `forge` |
+| `despertar_trono` | Trono de Obsidiana | silver | 25 | milestone `throne` / qty Trono |
 | `despertar_catabase` | Catábase | gold | 35 | `prestigeCount ≥ 1` |
 | `despertar_mnemosyne` | Memória Despertada | gold | 35 | `talents.length ≥ 1` |
-| `despertar_soberania` | Seis Rios | rainbow | 50 | possuir ≥ 1 de cada gerador **ao mesmo tempo** (corrida) |
-| `despertar_arquiteto_do_loop` | Arquiteto do Loop | gold, **hidden** | 30 | `eduLogsSeen` contém todos os ids do Códice |
+| `despertar_soberania` | Seis Rios | rainbow | 50 | ≥ 1 de cada gerador **ao mesmo tempo** |
+| `despertar_juizo_5` | Quinta sentença | copper | 10 | `juizoBestStreak ≥ 5` (minigame Juízo) |
+| `despertar_juizo_25` | Recorde do Juízo | gold | 25 | `juizoBestStreak ≥ 25` |
+| `despertar_veredito` | Bancada Aberta | silver | 15 | 1ª compra na Bancada (`verdictPurchases`) |
+| `despertar_arquiteto_do_loop` | Arquiteto do Loop | gold, **hidden** | 30 | Códice completo com logs **elegíveis** no server |
+| `despertar_juizo_1` | Primeira audiência | stone | 5 | `juizoBestStreak ≥ 1` (D2/D3) |
+| `despertar_juizo_10` | Décima sentença | copper | 15 | `juizoBestStreak ≥ 10` |
+| … | (+10 P0 D2: almas/Styx/shiny/gold/catabase_3/bancada/paciencia) | … | … | ver `plano-despertar-producao-profundo.md` |
 
-Milestones em `milestones jsonb` default `{}` para não perder Forja/Trono no Lethe.
+Milestones em `milestones jsonb` default `{}` para não perder Forja/Trono no Lethe. Grant: `planDespertarAwards` no sync/prestige/talent/Juízo — nunca no cliente.
 
-Arte: ids em `assets/achievements/catalog.json`; WebP placeholder ok no MVP.
+Arte: ids em `assets/achievements/catalog.json` + WebP (placeholders ok).
 
 ---
 
@@ -698,7 +803,7 @@ Cada task é fatiável em PR. Critério de pronto = checklist da task + smoke se
 - [x] Aba Juramentos: lista filtrada pelo que já pode aparecer (`requires`); compra.
 - [x] Aba Lethe: preview de óbolos/essência; bloqueio se 0 óbolos; modal **Ritual do Lethe** (confirmar / recuar).
 - [x] Reset local da corrida + crédito de óbolos/essência; PrestigeBonus visível na HUD.
-- [x] Panteão: 8 talentos, compra com essência, efeitos imediatos na corrida atual quando fizer sentido (bonus SPS) ou na **próxima** (memória / segundo fôlego).
+- [x] Panteão: 13 talentos (F1), compra com essência, efeitos imediatos na corrida atual quando fizer sentido (bonus SPS) ou na **próxima** (memória / segundo fôlego / eco).
 
 **Pronto quando:** uma corrida “cheat” de harness consegue prestigiar e comprar 1 talento; geradores zeram; óbolos permanecem.
 
@@ -834,7 +939,7 @@ No boot: `stateGet` → se server `lastSyncAt` > local, server vence → então 
 
 - [x] Checklist de aceite do **clicker** verificado via `tests/despertar-qa-smoke.mjs` (+ smokes 1–15 no `npm run check`).
 - [x] Itens Funcional / Ecossistema / Qualidade do clicker marcados abaixo.
-- Fase 7 (Juízo / Placar) permanece aberta — aceite separado.
+- [x] Fase 7 (Juízo / Placar) — aceite fechado (Tasks 17–20); ver inventário de produção no topo.
 
 **Manual restante (device):** Performance 60 fps no DevTools; F5 após DevTools hack no saldo (já coberto no smoke de sync).
 
@@ -873,7 +978,7 @@ Ver seção [Checklist de aceite](#checklist-de-aceite).
 | Onde gasta | Aba **Bancada do Juiz** — talentos **permanentes** (sobrevivem ao Lethe), fracos o bastante para não quebrar a curva |
 | Catálogo sugerido (4 itens) | `selo_do_juiz` (+5% clique, 3V) · `memoria_classind` (offline +30 min teto, 5V) · `olho_do_tartarus` (+2% SPS, 8V) · `pacto_duplo` (1º gerador da corrida −10% custo, 12V) |
 | Anti-farm | Milestone **uma vez** por limiar (`juizoMilestonesClaimed`); errar e recomeçar **não** re-paga limiares já pagos |
-| XP | +5 na 1ª abertura do Juízo; +10 no milestone 25; +15 no 100 — baixos, família `despertar` |
+| XP | Via conquistas `despertar_juizo_1` / `_5` / `_10` / `_25` + `despertar_veredito` — família `despertar`; **não** XP por acerto avulso |
 
 #### Loop do Juízo (server)
 
@@ -1236,8 +1341,10 @@ Qualidade
 
 ## Critério de “GDD implementado”
 
-O ciclo do **clicker GDD** só se encerra quando **todas** as linhas da tabela [Mapa GDD → tasks](#mapa-gdd--tasks-rastreio) (exceto a linha Fase 7) têm task marcada feita **e** o [checklist de aceite](#checklist-de-aceite) funcional/ecossistema/qualidade está verde. Lacunas que este plano preenche (juramentos, Panteão, clique, Códice, ids, auth) fazem parte do aceite — não são “extras opcionais”.
+**Status:** cumprido (2026-09-22+). O ciclo do **clicker GDD** encerrou quando todas as linhas da tabela [Mapa GDD → tasks](#mapa-gdd--tasks-rastreio) (exceto a linha Fase 7) tiveram task feita **e** o [checklist de aceite](#checklist-de-aceite) funcional/ecossistema/qualidade ficou verde. Lacunas que este plano preencheu (juramentos, Panteão, clique, Códice, ids, auth) fazem parte do aceite — não são “extras opcionais”.
 
-A **Fase 7** (Juízo + Vereditos + Placar) é extensão pedagógica/ops do Domínio: aceita-se depois do GDD verde, sem reabrir o escopo do clicker.
+A **Fase 7** (Juízo + Vereditos + Placar) está **feita** — extensão pedagógica/ops do Domínio, sem reabrir o escopo do clicker.
 
-A **Fase 8** (UI Cookie + Juízo Higher/Lower) é polish de presença/juice: aceita-se no plano Cookie; não reabre sync nem a curva econômica.
+A **Fase 8** (UI Cookie + Juízo Higher/Lower) está **feita** — polish de presença/juice; não reabre sync nem a curva econômica.
+
+O **guia sync A–F** + aureolas/shiny/gold/polish Foice estão **feitos**. O que resta para “produção polida” está no [inventário](#estado-de-produção--inventário) (P0 ops · P1 arte/SFX · P2 B2/B3/11b).
