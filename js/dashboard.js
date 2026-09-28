@@ -70,7 +70,7 @@ import {
   provaAdminGetOverview,
   provaAdminSetExamOpen,
 } from './api.js';
-import { formatRate, formatWhole, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
+import { formatRate, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
 import { localDatetimeToIsoUtc } from './hades-despertar/ui/pauseVeil.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
