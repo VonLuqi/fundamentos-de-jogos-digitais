@@ -66,6 +66,12 @@ staticAssert(pkg.includes('js/hades-despertar/ui/world/WorldView.js'), 'check co
 staticAssert(worldSrc.includes('SHELF_ORBIT_ONLY') || worldSrc.includes('isShelfGenerator'), 'T1 só na órbita');
 staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('pulseBuy'), 'G5.2 highlight + pulseBuy');
 staticAssert(worldSrc.includes('drawAccessory'), 'E2 drawAccessory');
+staticAssert(worldSrc.includes('drawOrbitHalo'), 'E2 drawOrbitHalo');
+staticAssert(worldSrc.includes('applyShelfCosmeticClasses'), 'E2 shelf classes');
+staticAssert(worldSrc.includes('boat_wake'), 'E2 boat_wake');
+staticAssert(css.includes('has-cosmetic-blade_ember'), 'CSS blade_ember');
+staticAssert(css.includes('has-cosmetic-reap_ripple'), 'CSS reap_ripple');
+staticAssert(css.includes('prefers-reduced-motion'), 'reduced-motion CSS');
 staticAssert(worldSrc.includes('activeCosmetics') || worldSrc.includes('cosmeticsForGenerator'), 'E2 cosméticos no sync');
 staticAssert(
   fs.readFileSync(path.join(root, 'assets/despertar/PEDIDOS-MESTRE.md'), 'utf8').includes('cosmetics'),

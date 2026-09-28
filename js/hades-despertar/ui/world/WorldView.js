@@ -28,6 +28,7 @@ import {
   paintGoldSparkles,
 } from './goldJuice.js';
 import { loadGeneratorImage } from './SpriteAtlas.js';
+import { peekCosmeticImage, prefetchCosmeticImages } from './CosmeticsAtlas.js';
 import { unitRarityAt } from './unitRarity.js';
 
 /**
@@ -548,14 +549,13 @@ export function drawNpcSilhouette(ctx, cellX, cellY, tier, bobY = 0, cell = SHEL
 
 /**
  * Overlay procedural de accessory (Fase E / E2).
- * P0: `hat_charon` = triângulo + aba na cor do tier.
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} accessory
  * @param {number} cellX
  * @param {number} cellY
  * @param {number} [cell]
  * @param {number} [bobY]
- * @param {{ tier?: number }} [opts]
+ * @param {{ tier?: number, reducedMotion?: boolean, timeSec?: number }} [opts]
  */
 export function drawAccessory(ctx, accessory, cellX, cellY, cell = SHELF_CELL, bobY = 0, opts = {}) {
   if (!ctx || !accessory) return false;
@@ -565,9 +565,23 @@ export function drawAccessory(ctx, accessory, cellX, cellY, cell = SHELF_CELL, b
   const x = Number(cellX) || 0;
   const y = (Number(cellY) || 0) + (Number(bobY) || 0);
   const s = Number(cell) > 0 ? Number(cell) : SHELF_CELL;
+  const reduced = Boolean(opts.reducedMotion);
+  const t = Number(opts.timeSec) || 0;
+  const cx = x + s * 0.5;
+
+  // E3: WebP/SVG se o Mestre entregou; senão procedural abaixo.
+  const asset = opts.image !== undefined ? opts.image : peekCosmeticImage(id);
+  if (asset) {
+    const pad = s * 0.06;
+    try {
+      ctx.drawImage(asset, x + pad, y + pad, s - pad * 2, s - pad * 2);
+      return true;
+    } catch {
+      /* fallback procedural */
+    }
+  }
 
   if (id === 'hat_charon') {
-    const cx = x + s * 0.5;
     const peak = y + s * 0.06;
     const brimY = y + s * 0.3;
     ctx.save();
@@ -591,7 +605,152 @@ export function drawAccessory(ctx, accessory, cellX, cellY, cell = SHELF_CELL, b
     return true;
   }
 
+  if (id === 'boat_wake') {
+    const baseY = y + s * 0.82;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(94, 234, 212, 0.55)';
+    ctx.lineWidth = Math.max(1, s * 0.035);
+    ctx.lineCap = 'round';
+    const phase = reduced ? 0 : Math.sin(t * 3 + cx * 0.05) * s * 0.02;
+    for (let i = 0; i < 3; i += 1) {
+      const yy = baseY + i * s * 0.06 + phase;
+      const spread = s * (0.18 + i * 0.1);
+      ctx.globalAlpha = 0.55 - i * 0.12;
+      ctx.beginPath();
+      ctx.arc(cx, yy, spread, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return true;
+  }
+
+  if (id === 'shade_wisp') {
+    ctx.save();
+    const drift = reduced ? 0 : Math.sin(t * 2.4 + cx) * s * 0.04;
+    ctx.fillStyle = 'rgba(0, 168, 150, 0.28)';
+    ctx.beginPath();
+    ctx.ellipse(cx + drift, y + s * 0.22, s * 0.22, s * 0.14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(94, 234, 212, 0.35)';
+    ctx.beginPath();
+    ctx.ellipse(cx - drift * 0.6, y + s * 0.12, s * 0.12, s * 0.08, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return true;
+  }
+
+  if (id === 'hound_chain') {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(207, 167, 89, 0.75)';
+    ctx.lineWidth = Math.max(1, s * 0.04);
+    const linkY = y + s * 0.38;
+    for (let i = -1; i <= 1; i += 1) {
+      ctx.beginPath();
+      ctx.ellipse(cx + i * s * 0.12, linkY + Math.abs(i) * s * 0.04, s * 0.08, s * 0.06, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(217, 4, 41, 0.7)';
+    ctx.beginPath();
+    ctx.arc(cx - s * 0.1, y + s * 0.28, s * 0.035, 0, Math.PI * 2);
+    ctx.arc(cx + s * 0.1, y + s * 0.28, s * 0.035, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return true;
+  }
+
+  if (id === 'hound_triple_aura') {
+    ctx.save();
+    const pulse = reduced ? 0.85 : 0.7 + 0.3 * Math.sin(t * 2.8);
+    ctx.strokeStyle = `rgba(217, 4, 41, ${0.35 * pulse})`;
+    ctx.lineWidth = Math.max(1, s * 0.03);
+    for (let i = 0; i < 3; i += 1) {
+      const ox = (i - 1) * s * 0.16;
+      ctx.beginPath();
+      ctx.arc(cx + ox, y + s * 0.42, s * 0.28, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
+    return true;
+  }
+
+  if (id === 'judge_scale_fx') {
+    ctx.save();
+    const beamY = y + s * 0.18;
+    ctx.strokeStyle = 'rgba(168, 85, 247, 0.85)';
+    ctx.fillStyle = 'rgba(207, 167, 89, 0.7)';
+    ctx.lineWidth = Math.max(1, s * 0.03);
+    ctx.beginPath();
+    ctx.moveTo(cx, y + s * 0.08);
+    ctx.lineTo(cx, beamY);
+    ctx.moveTo(cx - s * 0.22, beamY);
+    ctx.lineTo(cx + s * 0.22, beamY);
+    ctx.stroke();
+    const tip = reduced ? 0 : Math.sin(t * 2) * s * 0.02;
+    ctx.beginPath();
+    ctx.arc(cx - s * 0.2, beamY + tip + s * 0.08, s * 0.07, 0, Math.PI * 2);
+    ctx.arc(cx + s * 0.2, beamY - tip + s * 0.08, s * 0.07, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+    return true;
+  }
+
   return false;
+}
+
+/**
+ * Aureola do altar (`orbit_halo`) — anel dourado ao redor da órbita.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} cx
+ * @param {number} cy
+ * @param {number} radius
+ * @param {{ reducedMotion?: boolean, timeSec?: number }} [opts]
+ */
+export function drawOrbitHalo(ctx, cx, cy, radius, opts = {}) {
+  if (!ctx || !(radius > 0)) return false;
+  const reduced = Boolean(opts.reducedMotion);
+  const t = Number(opts.timeSec) || 0;
+  const pulse = reduced ? 1 : 0.85 + 0.15 * Math.sin(t * 1.6);
+  ctx.save();
+  ctx.strokeStyle = `rgba(207, 167, 89, ${0.42 * pulse})`;
+  ctx.lineWidth = Math.max(2, radius * 0.035);
+  ctx.shadowColor = 'rgba(207, 167, 89, 0.55)';
+  ctx.shadowBlur = reduced ? 6 : 14;
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 1.06, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = `rgba(242, 232, 220, ${0.22 * pulse})`;
+  ctx.lineWidth = Math.max(1, radius * 0.015);
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius * 1.12, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+  return true;
+}
+
+/**
+ * Aplica classes `has-cosmetic-*` num shelf (prateleira).
+ * @param {Element|null|undefined} element
+ * @param {ReturnType<typeof activeCosmetics>} active
+ * @param {string} generatorId
+ */
+export function applyShelfCosmeticClasses(element, active, generatorId) {
+  if (!element?.classList) return [];
+  const next = new Set(
+    cosmeticsForGenerator(active, generatorId)
+      .filter((c) => c.accessory)
+      .map((c) => `has-cosmetic-${c.accessory}`),
+  );
+  const list = element.classList;
+  const existing = typeof list.values === 'function'
+    ? [...list]
+    : (list._on ? [...list._on] : []);
+  for (const cls of existing) {
+    const name = String(cls);
+    if (name.startsWith('has-cosmetic-') && !next.has(name)) list.remove(name);
+  }
+  for (const cls of next) list.add(cls);
+  return [...next];
 }
 
 /**
@@ -719,6 +878,7 @@ export class WorldView {
     this._reducedMotion = prefersReducedMotion(this.matchMedia);
     this.#listenVisibility(true);
     this.#prefetchSprites();
+    this.#prefetchCosmetics();
     return this;
   }
 
@@ -758,6 +918,7 @@ export class WorldView {
           nodes.count = 0;
           nodes.cosmetics = [];
           nodes.cosmeticSig = '';
+          applyShelfCosmeticClasses(nodes.shelf, [], def.id);
           this.#paintShelf(nodes, true);
         }
         nodes.motes?.replaceChildren?.();
@@ -783,6 +944,7 @@ export class WorldView {
       const cosChanged = cosSig !== (nodes.cosmeticSig || '');
       nodes.cosmetics = shelfCosmetics;
       nodes.cosmeticSig = cosSig;
+      applyShelfCosmeticClasses(nodes.shelf, cosmeticsActive, def.id);
       this.#refreshShelfLabel(nodes);
       weights[def.id] = shelfLineMoteWeight(qty, def.baseRate);
 
@@ -1029,7 +1191,11 @@ export class WorldView {
         for (const cos of cosmetics) {
           const salt = cos.upgradeId || cos.accessory || 0;
           if (!indexMatchesCoverage(i, cos.coverage, salt)) continue;
-          drawAccessory(ctx, cos.accessory, ox, oy, SHELF_CELL, bob, { tier: def.tier });
+          drawAccessory(ctx, cos.accessory, ox, oy, SHELF_CELL, bob, {
+            tier: def.tier,
+            reducedMotion: this._reducedMotion,
+            timeSec,
+          });
         }
       };
 
@@ -1206,6 +1372,18 @@ export class WorldView {
         if (nodes.count > 0) this.#paintShelf(nodes, this._reducedMotion);
       });
     }
+  }
+
+  /** E3: tenta WebP dos accessories; falha → procedural. */
+  #prefetchCosmetics() {
+    prefetchCosmeticImages().then(() => {
+      if (!this._mounted) return;
+      for (const nodes of this._shelves.values()) {
+        if (nodes.count > 0 && nodes.cosmetics?.length) {
+          this.#paintShelf(nodes, this._reducedMotion);
+        }
+      }
+    }).catch(() => {});
   }
 
   #startLoop() {

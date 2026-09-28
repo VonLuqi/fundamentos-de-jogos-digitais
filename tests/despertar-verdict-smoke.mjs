@@ -44,18 +44,24 @@ const validateSrc = read('api/_lib/despertar-validate.js');
 const pkg = read('package.json');
 
 staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/config/verdict-shop.js')), 'verdict-shop.js');
-staticAssert(VERDICT_SHOP.length === 4, `4 itens na Bancada (tem ${VERDICT_SHOP.length})`);
+staticAssert(VERDICT_SHOP.length === 8, `8 itens na Bancada (tem ${VERDICT_SHOP.length})`);
 staticAssert(VERDICT_SHOP_IDS.includes('selo_do_juiz'), 'selo_do_juiz');
 staticAssert(VERDICT_SHOP_IDS.includes('memoria_classind'), 'memoria_classind');
 staticAssert(VERDICT_SHOP_IDS.includes('olho_do_tartarus'), 'olho_do_tartarus');
 staticAssert(VERDICT_SHOP_IDS.includes('pacto_duplo'), 'pacto_duplo');
+staticAssert(VERDICT_SHOP_IDS.includes('sentenca_afiada'), 'sentenca_afiada F2');
+staticAssert(VERDICT_SHOP_IDS.includes('eco_do_veredito'), 'eco_do_veredito F2');
+staticAssert(VERDICT_SHOP_IDS.includes('catalogo_vivo'), 'catalogo_vivo F2');
+staticAssert(VERDICT_SHOP_IDS.includes('peso_das_faixas'), 'peso_das_faixas F2');
 staticAssert(VERDICT_SHOP.find((i) => i.id === 'selo_do_juiz')?.cost === 2, 'B1 Soft: selo custa 2');
 staticAssert(VERDICT_SHOP.find((i) => i.id === 'memoria_classind')?.cost === 4, 'B1 Soft: memória custa 4');
-staticAssert(VERDICT_SHOP_TOTAL_COST === 26, 'B1 Soft: Bancada total 26');
+staticAssert(VERDICT_SHOP_TOTAL_COST === 64, 'F2: Bancada total 64');
 
 staticAssert(html.includes('id="tab-bancada"'), 'aba Bancada no HTML');
 staticAssert(html.includes('id="panel-bancada"'), 'painel Bancada no HTML');
-staticAssert(html.includes('id="bancada-list"'), 'lista Bancada');
+staticAssert(html.includes('id="bancada-list-available"'), 'lista Bancada disponíveis');
+staticAssert(html.includes('id="bancada-list-owned"'), 'lista Bancada comprados');
+staticAssert(html.includes('id="bancada-subtabs"'), 'subtabs Bancada');
 staticAssert(html.includes('marcos do melhor streak') || html.includes('não cada acerto'), 'Bancada hint B4/J.1');
 staticAssert(indexJs.includes('onBuyVerdict'), 'index wire onBuyVerdict');
 staticAssert(indexJs.includes('verdictBuy'), 'index chama verdictBuy');

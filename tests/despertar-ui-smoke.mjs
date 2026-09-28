@@ -128,12 +128,12 @@ await run('NumberFormatter usa sufixos 1.2M / 4.7B sem Number na carteira', () =
   assert.equal(formatAmortSeconds('150'), '150 s');
 });
 
-await run('máscaras de rio: T1 sempre, T2/T5 fechados no minuto zero', () => {
+await run('máscaras de rio: T1 sempre; T2–T6 fechados no minuto zero', () => {
   const empty = { souls: '0', generators: {} };
   assert.equal(isGeneratorRevealed('wandering_shade', empty), true);
   assert.equal(isGeneratorRevealed('charon_servants', empty), false);
   assert.equal(isGeneratorRevealed('cerberian_hound', empty), false);
-  assert.equal(isGeneratorRevealed('tartarus_judge', empty), true);
+  assert.equal(isGeneratorRevealed('tartarus_judge', empty), false);
   assert.equal(isGeneratorRevealed('phlegethon_forge', empty), false);
   assert.equal(isGeneratorRevealed('obsidian_throne', empty), false);
 
@@ -142,6 +142,17 @@ await run('máscaras de rio: T1 sempre, T2/T5 fechados no minuto zero', () => {
     souls: '0',
     generators: { wandering_shade: 1 },
   }), true);
+  assert.equal(isGeneratorRevealed('cerberian_hound', {
+    souls: '0',
+    generators: { charon_servants: 1 },
+  }), true);
+  assert.equal(isGeneratorRevealed('cerberian_hound', { souls: '275', generators: {} }), true);
+  assert.equal(isGeneratorRevealed('tartarus_judge', {
+    souls: '0',
+    generators: { cerberian_hound: 1 },
+  }), true);
+  assert.equal(isGeneratorRevealed('tartarus_judge', { souls: '3000', generators: {} }), true);
+  assert.equal(isGeneratorRevealed('tartarus_judge', { souls: '2999', generators: {} }), false);
   assert.equal(isGeneratorRevealed('phlegethon_forge', {
     souls: '0',
     generators: { tartarus_judge: 1 },

@@ -36,11 +36,14 @@ const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 staticAssert(pkg.includes('despertar-codex-smoke.mjs'), 'npm run check inclui este smoke');
 
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
-staticAssert(html.includes('id="tab-codex"'), 'aba Códice');
+staticAssert(html.includes('id="tab-codex"'), 'aba Arquivo (Códice)');
 staticAssert(html.includes('id="panel-codex"'), 'painel do Códice');
 staticAssert(html.includes('id="codex-list"'), 'lista do Códice');
 staticAssert(html.includes('id="codex-empty"'), 'empty state do Códice');
-staticAssert(html.includes('>Códice<') || html.includes('Códice do Loop') || html.includes('O Códice'), 'copy Códice');
+staticAssert(
+  html.includes('>Arquivo<') || html.includes('Códice do Loop') || html.includes('O Códice'),
+  'copy Arquivo/Códice',
+);
 
 const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
 staticAssert(css.includes('.despertar-codex-list'), 'estilo da lista');
@@ -77,12 +80,17 @@ function check(label, fn) {
   }
 }
 
-check('catálogo tem 16 logs', () => {
-  assert.equal(EDU_LOGS.length, 16);
-  assert.equal(EDU_LOG_IDS.length, 16);
+check('catálogo tem 21 logs', () => {
+  assert.equal(EDU_LOGS.length, 21);
+  assert.equal(EDU_LOG_IDS.length, 21);
   assert.ok(EDU_LOG_IDS.includes('log_lethe_unlock'));
   assert.ok(EDU_LOG_IDS.includes('log_lethe_ritual'));
   assert.ok(EDU_LOG_IDS.includes('log_styx_open'));
+  assert.ok(EDU_LOG_IDS.includes('log_reap_power'));
+  assert.ok(EDU_LOG_IDS.includes('log_buy_modes'));
+  assert.ok(EDU_LOG_IDS.includes('log_sealed_juramentos'));
+  assert.ok(EDU_LOG_IDS.includes('log_verdicts_milestone'));
+  assert.ok(EDU_LOG_IDS.includes('log_obols_bonus'));
 });
 
 check('Códice vazio antes do primeiro clique', () => {
@@ -114,9 +122,31 @@ check('1º gerador revela log_generator', () => {
   assert.equal(state.eduLogsSeen.includes('log_generator'), false);
   assert.ok(state.buyGenerator('wandering_shade', 1));
   assert.ok(state.eduLogsSeen.includes('log_generator'));
+  assert.ok(state.eduLogsSeen.includes('log_buy_modes'));
+  assert.ok(state.eduLogsSeen.includes('log_sealed_juramentos'));
   const entry = describeCodexEntry(state, 'log_generator');
   assert.equal(entry.unlocked, true);
   assert.equal(entry.title, 'Automação');
+});
+
+check('25 cliques revelam log_reap_power (B3)', () => {
+  const state = new GameState();
+  for (let i = 0; i < 25; i += 1) state.click();
+  assert.ok(state.eduLogsSeen.includes('log_reap_power'));
+  assert.equal(state.milestones.reap, true);
+  assert.equal(describeCodexEntry(state, 'log_reap_power').title, 'A Foice e o clique');
+});
+
+check('óbolos / catábase revelam log_obols_bonus (B3)', () => {
+  const state = new GameState({ prestigeCount: 1, obols: '1' });
+  state.unlockLogs();
+  assert.ok(state.eduLogsSeen.includes('log_obols_bonus'));
+});
+
+check('vereditos revelam log_verdicts_milestone (B3)', () => {
+  const state = new GameState({ verdicts: 1 });
+  state.unlockLogs();
+  assert.ok(state.eduLogsSeen.includes('log_verdicts_milestone'));
 });
 
 check('eduLogsSeen persiste no snapshot', () => {

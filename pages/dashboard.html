@@ -143,6 +143,66 @@
               Grimórios sob Vigília
             </button>
           </div>
+
+          <div class="master-tools__pause" id="master-despertar-pause" aria-label="Véu da Aula">
+            <p class="master-tools__pause-heading">Véu da Aula</p>
+            <p class="master-tools__pause-hint">
+              Pausa temporária durante a explicação — o progresso dos alunos permanece na Estela.
+              Separado de “Limpar Estelas” (destrutivo).
+            </p>
+            <p class="master-tools__pause-status" id="master-pause-status" role="status" aria-live="polite">
+              Sem pausa de aula
+            </p>
+            <div class="master-tools__pause-row" role="group" aria-label="Pausar por duração">
+              <button class="btn-gold btn-gold--ghost" type="button" data-pause-minutes="15">15 min</button>
+              <button class="btn-gold btn-gold--ghost" type="button" data-pause-minutes="30">30 min</button>
+              <button class="btn-gold btn-gold--ghost" type="button" data-pause-minutes="45">45 min</button>
+              <button class="btn-gold btn-gold--ghost" type="button" data-pause-minutes="60">60 min</button>
+            </div>
+            <div class="master-tools__pause-row master-tools__pause-row--until">
+              <label class="master-tools__pause-field" for="master-pause-until">
+                <span>Até (horário local)</span>
+                <input
+                  class="master-tools__pause-input"
+                  type="datetime-local"
+                  id="master-pause-until"
+                  name="master-pause-until"
+                />
+              </label>
+              <button class="btn-gold btn-gold--ghost" type="button" id="btn-pause-until">
+                Pausar até horário
+              </button>
+            </div>
+            <div class="master-tools__pause-row master-tools__pause-row--reason">
+              <label class="master-tools__pause-field" for="master-pause-reason-preset">
+                <span>Motivo</span>
+                <select class="master-tools__pause-input" id="master-pause-reason-preset" name="master-pause-reason-preset">
+                  <option value="aula" selected>Aula em andamento</option>
+                  <option value="explicacao">Explicação do Mestre</option>
+                  <option value="intervalo">Intervalo</option>
+                  <option value="custom">Outro…</option>
+                </select>
+              </label>
+              <label class="master-tools__pause-field" for="master-pause-reason-custom" id="master-pause-reason-custom-wrap" hidden>
+                <span>Texto livre</span>
+                <input
+                  class="master-tools__pause-input"
+                  type="text"
+                  id="master-pause-reason-custom"
+                  name="master-pause-reason-custom"
+                  maxlength="120"
+                  placeholder="Ex.: Prova oral"
+                  autocomplete="off"
+                />
+              </label>
+            </div>
+            <div class="master-tools__pause-row">
+              <button class="btn-gold" type="button" id="btn-pause-clear">
+                Liberar agora
+              </button>
+            </div>
+          </div>
+
           <p class="master-tools__mailer-status" id="master-mailer-status" role="status" aria-live="polite" hidden></p>
         </section>
 

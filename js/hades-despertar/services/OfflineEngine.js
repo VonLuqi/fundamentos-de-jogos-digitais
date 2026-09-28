@@ -2,6 +2,7 @@
  * Catch-up offline de O Despertar (GDD 5.5) + boot autoritativo (Task 5b).
  * Teto 8 h (12 h com talento), eficiência 80% (100% com talento).
  * Usa o SPS do estado salvo — não um SPS otimista.
+ * Task A4: Véu da Aula — não farmá SPS no intervalo pausado.
  */
 
 import { OFFLINE_MAX_HOURS_BASE } from '../config/constants.js';
@@ -44,9 +45,116 @@ export function formatHarvest(result) {
   };
 }
 
-export function previewCatchUp(snapshot, { savedAt, now = Date.now() } = {}) {
-  const lastMs = Date.parse(savedAt ?? snapshot?.savedAt ?? snapshot?.lastSyncAt ?? '');
-  const elapsedSeconds = Number.isFinite(lastMs) ? Math.max(0, (now - lastMs) / 1000) : 0;
+/**
+ * Normaliza DTO de pausa (cliente ou meta snake_case).
+ * @param {object|null|undefined} pause
+ */
+export function normalizePauseWindow(pause) {
+  if (!pause || typeof pause !== 'object') return null;
+  const pauseUntil = pause.pauseUntil ?? pause.pause_until ?? null;
+  const pauseStartedAt = pause.pauseStartedAt ?? pause.pause_started_at ?? null;
+  if (pauseUntil == null && pauseStartedAt == null && pause.active == null) return null;
+  return {
+    active: pause.active === true,
+    pauseUntil: pauseUntil != null ? String(pauseUntil) : null,
+    pauseStartedAt: pauseStartedAt != null ? String(pauseStartedAt) : null,
+  };
+}
+
+/**
+ * Pausa efetiva agora (lazy): active flag ou pauseUntil no futuro.
+ * @param {object|null|undefined} pause
+ * @param {number} [now]
+ */
+export function isPauseWindowActive(pause, now = Date.now()) {
+  const win = normalizePauseWindow(pause);
+  if (!win) return false;
+  const until = Date.parse(win.pauseUntil || '');
+  if (win.active) {
+    if (Number.isFinite(until)) return until > now;
+    return true;
+  }
+  if (!Number.isFinite(until)) return false;
+  return until > now;
+}
+
+/**
+ * Segundos offline creditáveis, excluindo o Véu da Aula.
+ * - Pausa ativa → 0
+ * - Com pauseStartedAt+pauseUntil → subtrai interseção com [savedAt, now]
+ * - Sem pauseStartedAt → clamp conservador (início = savedAt)
+ *
+ * @param {{ savedAt?: string|null, now?: number, pause?: object|null }} opts
+ * @returns {number}
+ */
+export function effectiveOfflineSeconds({
+  savedAt = null,
+  now = Date.now(),
+  pause = null,
+} = {}) {
+  const lastMs = Date.parse(savedAt ?? '');
+  const nowMs = typeof now === 'number' ? now : Date.parse(String(now));
+  if (!Number.isFinite(lastMs) || !Number.isFinite(nowMs) || nowMs <= lastMs) {
+    return 0;
+  }
+
+  const win = normalizePauseWindow(pause);
+  if (isPauseWindowActive(win, nowMs)) {
+    return 0;
+  }
+
+  let seconds = (nowMs - lastMs) / 1000;
+  const untilMs = Date.parse(win?.pauseUntil || '');
+  if (!Number.isFinite(untilMs) || untilMs <= lastMs) {
+    return Math.max(0, seconds);
+  }
+
+  let startMs = Date.parse(win?.pauseStartedAt || '');
+  if (!Number.isFinite(startMs)) {
+    // Conservador (A4): sem âncora de início, assume pausa cobriu desde o save.
+    startMs = lastMs;
+  }
+
+  const overlapStart = Math.max(lastMs, startMs);
+  const overlapEnd = Math.min(nowMs, untilMs);
+  if (overlapEnd > overlapStart) {
+    seconds -= (overlapEnd - overlapStart) / 1000;
+  }
+  return Math.max(0, seconds);
+}
+
+/**
+ * Clamp de tempo escondido (aba em background) vs janela de pausa.
+ * @param {number} elapsedSeconds
+ * @param {{ pause?: object|null, now?: number }} [opts]
+ */
+export function clampHiddenSeconds(elapsedSeconds, { pause = null, now = Date.now() } = {}) {
+  const elapsed = Math.max(0, Number(elapsedSeconds) || 0);
+  if (elapsed <= 0) return 0;
+  if (isPauseWindowActive(pause, now)) return 0;
+
+  const win = normalizePauseWindow(pause);
+  const untilMs = Date.parse(win?.pauseUntil || '');
+  if (!Number.isFinite(untilMs)) return elapsed;
+
+  const hiddenStart = now - elapsed * 1000;
+  let startMs = Date.parse(win?.pauseStartedAt || '');
+  if (!Number.isFinite(startMs)) startMs = hiddenStart;
+
+  const overlapStart = Math.max(hiddenStart, startMs);
+  const overlapEnd = Math.min(now, untilMs);
+  if (overlapEnd > overlapStart) {
+    return Math.max(0, elapsed - (overlapEnd - overlapStart) / 1000);
+  }
+  return elapsed;
+}
+
+export function previewCatchUp(snapshot, { savedAt, now = Date.now(), pause = null } = {}) {
+  const elapsedSeconds = effectiveOfflineSeconds({
+    savedAt: savedAt ?? snapshot?.savedAt ?? snapshot?.lastSyncAt ?? null,
+    now,
+    pause,
+  });
   const probe = snapshot instanceof GameState
     ? snapshot
     : GameState.fromSnapshot(snapshot ?? {});
@@ -62,11 +170,12 @@ export function previewCatchUp(snapshot, { savedAt, now = Date.now() } = {}) {
     elapsedSeconds,
     maxHours: economyEffects(probe.talents, probe.verdictPurchases).offlineHours,
     sps,
+    pauseExcluded: Boolean(normalizePauseWindow(pause)),
   };
 }
 
-export function applyCatchUp(gameState, { savedAt, now = Date.now() } = {}) {
-  const preview = previewCatchUp(gameState, { savedAt, now });
+export function applyCatchUp(gameState, { savedAt, now = Date.now(), pause = null } = {}) {
+  const preview = previewCatchUp(gameState, { savedAt, now, pause });
   const applied = gameState.applyOffline(preview.elapsedSeconds);
   const result = {
     ...preview,
@@ -78,15 +187,17 @@ export function applyCatchUp(gameState, { savedAt, now = Date.now() } = {}) {
   return result;
 }
 
-export function resumeFromHidden(gameState, elapsedSeconds) {
-  gameState.noteHiddenDuration(elapsedSeconds);
-  const applied = gameState.applyOffline(elapsedSeconds);
+export function resumeFromHidden(gameState, elapsedSeconds, { pause = null, now = Date.now() } = {}) {
+  const seconds = clampHiddenSeconds(elapsedSeconds, { pause, now });
+  gameState.noteHiddenDuration(seconds);
+  const applied = gameState.applyOffline(seconds);
   const maxHours = economyEffects(gameState.talents, gameState.verdictPurchases).offlineHours;
   return {
     ...applied,
-    elapsedSeconds: Number(elapsedSeconds) || 0,
+    elapsedSeconds: seconds,
     maxHours,
     harvest: formatHarvest({ ...applied, maxHours }),
+    pauseExcluded: Boolean(normalizePauseWindow(pause)),
   };
 }
 
@@ -169,12 +280,13 @@ export async function bootLocalSession(userId, {
   storage,
   now = Date.now,
   attachTarget,
+  pause = null,
 } = {}) {
   if (!storage) throw new Error('StorageService é obrigatório no boot local.');
   const clock = typeof now === 'function' ? now : () => now;
   const record = await storage.load(userId);
   const state = GameState.fromSnapshot(record?.state ?? {});
-  const catchUp = applyCatchUp(state, { savedAt: record?.savedAt, now: clock() });
+  const catchUp = applyCatchUp(state, { savedAt: record?.savedAt, now: clock(), pause });
   await storage.save(userId, state.toSnapshot());
   const detach = storage.attach(state, userId, { target: attachTarget });
   return { state, record, catchUp, detach };
@@ -183,12 +295,14 @@ export async function bootLocalSession(userId, {
 /**
  * Boot IndexedDB ↔ servidor (Task 5b).
  * Um único catch-up, âncora = last_sync do vencedor (server) ou savedAt (local).
+ * `fetchServerState` pode devolver o state puro **ou** `{ state, pause }`.
  */
 export async function bootAuthoritativeSession(userId, {
   storage,
   fetchServerState,
   now = Date.now,
   attachTarget,
+  pause = null,
 } = {}) {
   if (!storage) throw new Error('StorageService é obrigatório no boot autoritativo.');
   const clock = typeof now === 'function' ? now : () => now;
@@ -196,9 +310,16 @@ export async function bootAuthoritativeSession(userId, {
 
   let server = null;
   let fetchError = null;
+  let pauseFromFetch = null;
   if (typeof fetchServerState === 'function') {
     try {
-      server = await fetchServerState();
+      const remote = await fetchServerState();
+      if (remote && typeof remote === 'object' && Object.prototype.hasOwnProperty.call(remote, 'state')) {
+        server = remote.state ?? null;
+        pauseFromFetch = remote.pause ?? null;
+      } else {
+        server = remote;
+      }
     } catch (error) {
       fetchError = error;
     }
@@ -210,10 +331,13 @@ export async function bootAuthoritativeSession(userId, {
     server,
   });
 
+  const pauseWindow = normalizePauseWindow(pause) || normalizePauseWindow(pauseFromFetch);
+
   const state = GameState.fromSnapshot(decision.snapshot);
   const catchUp = applyCatchUp(state, {
     savedAt: decision.catchUpAnchor,
     now: clock(),
+    pause: pauseWindow,
   });
   await storage.save(userId, state.toSnapshot());
   const detach = storage.attach(state, userId, { target: attachTarget });
@@ -226,5 +350,6 @@ export async function bootAuthoritativeSession(userId, {
     detach,
     fetchError,
     server,
+    pause: pauseWindow,
   };
 }

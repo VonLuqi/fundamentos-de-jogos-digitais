@@ -1,5 +1,7 @@
 /**
  * Panteão de Mnemosyne — permanente, custo em essência, sem reset no Lethe.
+ *
+ * Task 0F (congelada): +5 talentos P0 — docs/plano-despertar-producao-profundo.md (F1).
  */
 
 function freezeAll(list) {
@@ -57,6 +59,37 @@ export const TALENTS = freezeAll([
     name: 'Segundo Fôlego',
     cost: '5',
     effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 1 },
+  },
+  // --- Task F1 (0F P0) ---
+  {
+    id: 'margem_generosa',
+    name: 'Margem Generosa',
+    cost: '3',
+    effects: { startingSouls: '250' },
+  },
+  {
+    id: 'pacto_do_silencio',
+    name: 'Pacto do Silêncio',
+    cost: '3',
+    effects: { offlineExtraHours: 2 },
+  },
+  {
+    id: 'olho_da_curva',
+    name: 'Olho da Curva',
+    cost: '4',
+    effects: { richAmort: true },
+  },
+  {
+    id: 'eco_do_styx',
+    name: 'Eco do Styx',
+    cost: '4',
+    effects: { softPrestigeStyx: true },
+  },
+  {
+    id: 'rebanho_despertado',
+    name: 'Rebanho',
+    cost: '5',
+    effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 3 },
   },
 ]);
 

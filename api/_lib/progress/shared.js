@@ -169,7 +169,7 @@ export const LESSON_GATES = {
   aula6: { published: false },
   aula7: { published: false },
   /** Módulo transversal O Despertar — default selado até o Mestre abrir o Acheron. */
-  despertar: { published: false },
+  despertar: { published: false, classroom_pause: false },
 };
 
 /** IDs que aceitam lesson_gates sem serem aula curricular (não entram em redeem/parágrafos). */

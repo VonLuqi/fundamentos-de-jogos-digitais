@@ -730,6 +730,18 @@ export const DESPERTAR_GATE_ID = 'despertar';
 export const DESPERTAR_NAV_LABEL = 'O Despertar';
 export const DESPERTAR_NAV_LOCKED_LABEL = 'O Despertar · em breve';
 export const DESPERTAR_SEALED_ERROR = 'despertar_sealed';
+export const DESPERTAR_PAUSED_ERROR = 'despertar_paused';
+
+/** Presets de duração do Véu da Aula (Task A3). */
+export const DESPERTAR_PAUSE_MINUTE_PRESETS = Object.freeze([15, 30, 45, 60]);
+
+/** Presets de motivo — ids alinhados a api/_lib/despertar-gate.js. */
+export const DESPERTAR_PAUSE_REASON_OPTIONS = Object.freeze([
+  { id: 'aula', label: 'Aula em andamento' },
+  { id: 'explicacao', label: 'Explicação do Mestre' },
+  { id: 'intervalo', label: 'Intervalo' },
+  { id: 'custom', label: 'Outro…' },
+]);
 
 export function fetchLessonGates(token, lessonId) {
   return request('/progress', {
@@ -1504,6 +1516,30 @@ export function despertarStateGet(token) {
   return request('/despertar', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'stateGet' }),
+  });
+}
+
+/** Admin: arma pausa de aula (Véu). Body: minutes | pauseUntil + reasonPreset | reason. */
+export function despertarPauseSet(token, opts = {}) {
+  const { minutes, pauseUntil, reasonPreset, reason } = opts;
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'pauseSet',
+      minutes,
+      pauseUntil,
+      reasonPreset,
+      reason,
+    }),
+  });
+}
+
+/** Admin: libera pausa de aula (não altera published). */
+export function despertarPauseClear(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'pauseClear' }),
   });
 }
 

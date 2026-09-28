@@ -36,14 +36,19 @@ staticAssert(doc.defaults?.formatFallback === 'svg', 'fallback SVG');
 staticAssert(Array.isArray(doc.requests) && doc.requests.length >= 10, '≥10 pedidos');
 
 const byList = Object.fromEntries(doc.requests.map((r) => [r.listId, r]));
-['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10'].forEach((id) => {
+['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11'].forEach((id) => {
   staticAssert(byList[id], `lista §11 ${id}`);
 });
 
 staticAssert(doc.leva1?.includes('art_foice'), '1ª leva inclui foice');
 staticAssert(byList.B1.priority === 'P0', 'B1 P0');
 staticAssert(byList.B10.priority === 'P2', 'B10 P2');
+staticAssert(byList.B11.priority === 'P3', 'B11 P3 cosméticos E3');
 staticAssert(Array.isArray(byList.B10.fileMissing), 'B10 fileMissing');
+staticAssert(
+  Array.isArray(byList.B11.accessoryIds) && byList.B11.accessoryIds.length === 12,
+  'B11 12 accessories',
+);
 
 const genIds = new Set(GENERATORS.map((g) => g.id));
 for (const key of ['art_t1', 'art_t2', 'art_t3', 'art_t4', 'art_t5', 'art_t6']) {
@@ -90,6 +95,33 @@ run('brief do Mestre cita paths e paleta', () => {
   assert.ok(brief.includes('#00a896'));
   assert.ok(brief.includes('foice-idle.webp'));
   assert.ok(brief.includes('minecraft.webp'));
+  assert.ok(brief.includes('hat_charon'));
+  assert.ok(brief.includes('orbit_halo'));
+  assert.ok(brief.includes('blade_seal'));
+  assert.ok(brief.includes('fallback procedural') || brief.includes('procedural/CSS'));
+});
+
+run('E3: CosmeticsAtlas + P0 accessories alinhados', async () => {
+  const {
+    P0_COSMETIC_ACCESSORIES,
+  } = await import('../js/hades-despertar/config/upgrade-cosmetics.js');
+  const {
+    cosmeticPaths,
+    loadCosmeticImage,
+    clearCosmeticImageCache,
+  } = await import('../js/hades-despertar/ui/world/CosmeticsAtlas.js');
+
+  assert.equal(P0_COSMETIC_ACCESSORIES.length, 12);
+  assert.deepEqual(
+    [...byList.B11.accessoryIds].sort(),
+    [...P0_COSMETIC_ACCESSORIES].sort(),
+  );
+  const paths = cosmeticPaths('hat_charon');
+  assert.match(paths.webp, /cosmetics\/hat_charon\.webp$/);
+  clearCosmeticImageCache();
+  // Sem arquivo → null (fallback procedural)
+  const missing = await loadCosmeticImage('hat_charon_never_exists_xyz');
+  assert.equal(missing, null);
 });
 
 console.log(`\ndespertar-art-requests-smoke: ${passed} passed, ${failed} failed`);

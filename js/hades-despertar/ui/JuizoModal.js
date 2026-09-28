@@ -350,6 +350,17 @@ export class JuizoModal {
     this.btnRestart?.focus();
   }
 
+  async #showMercy(result) {
+    this.#renderHud(result.hud);
+    this.#clearConfetti();
+    if (!juicePrefersReducedMotion()) {
+      juiceBumpClass(this.stage, 'is-shake', 400);
+      juiceBumpClass(this.cardB?.root, 'is-miss', 400);
+      await wait(420);
+    }
+    this.#showPlay(result, { celebrate: false, slide: true });
+  }
+
   async #guess(choice) {
     if (this._busy || !this.isOpen) return;
     if (this.play?.hidden) return;
@@ -362,6 +373,8 @@ export class JuizoModal {
       }
       if (result.ended) {
         this.#showFail(result);
+      } else if (result.mercy) {
+        await this.#showMercy(result);
       } else {
         await this.#celebrateHit(result);
       }

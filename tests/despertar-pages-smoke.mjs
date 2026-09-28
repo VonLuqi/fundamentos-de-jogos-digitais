@@ -60,7 +60,7 @@ assert(html.includes('Ceifar'), 'botão Ceifar');
 assert(html.includes('Juramentos do Styx'), 'faixa Juramentos do Styx');
 assert(html.includes('id="tab-lethe"') && html.includes('>Lethe<'), 'aba Lethe');
 assert(html.includes('id="tab-stele"') && html.includes('>Estela<'), 'aba Estela');
-assert(html.includes('id="tab-codex"') && html.includes('>Códice<'), 'aba Códice');
+assert(html.includes('id="tab-codex"') && html.includes('>Arquivo<'), 'aba Arquivo (Códice)');
 assert(html.includes('id="tab-mundo"'), 'aba Mundo (Cookie center)');
 assert(html.includes('despertar-layout'), 'grid Cookie 3 colunas');
 assert(html.includes('despertar-market-list--store'), 'store densa à direita');

@@ -37,6 +37,7 @@ import {
   generatorUpgradeMult,
   meetsUpgradeRequirement,
   prestigePreview as formulaPrestigePreview,
+  pickEcoDoStyxUpgrade,
   talentEffects,
 } from './formulas.js';
 
@@ -349,6 +350,7 @@ export class GameState {
     const gained = this.clickPower();
     this.clickCount += 1;
     this.#credit(gained);
+    this.#refreshMilestones();
     this.unlockLogs();
     this.#bump();
     return { ok: true, gained };
@@ -429,6 +431,11 @@ export class GameState {
     }
     this.#clampRarityCounts();
 
+    const modeKey = String(mode ?? '1').trim().toLowerCase();
+    if (modeKey && modeKey !== '1') {
+      this.milestones = { ...this.milestones, buyModes: true };
+    }
+
     this.#refreshMilestones();
     this.unlockLogs();
     this.#bumpSyncEpoch();
@@ -506,10 +513,23 @@ export class GameState {
     this._shinyCounts = {};
     this._goldCounts = {};
 
+    // F-D3: Eco do Styx — 1 juramento revelado elegível (pós starting).
+    let ecoStyxId = null;
+    if (effects.softPrestigeStyx) {
+      ecoStyxId = pickEcoDoStyxUpgrade({
+        souls: this.souls,
+        generators: this.quantities(),
+        upgrades: this.upgrades,
+      });
+      if (ecoStyxId && isKnownUpgradeId(ecoStyxId)) {
+        this.upgrades = [ecoStyxId];
+      }
+    }
+
     this.unlockLogs();
     this.#bumpSyncEpoch();
     this.#bump();
-    return { ok: true, ...preview };
+    return { ok: true, ...preview, ecoStyxId };
   }
 
   applyOffline(elapsedSeconds) {
@@ -520,8 +540,13 @@ export class GameState {
       verdictPurchases: this.verdictPurchases,
     });
     this.lastOfflineSeconds = Math.max(this.lastOfflineSeconds, result.effectiveSeconds);
+    // D2: ≥ 1 h creditável → milestones.offline (paciencia / log_offline)
+    if (result.effectiveSeconds >= 3600) {
+      this.milestones.offline = true;
+    }
     if (result.ignored || isZero(result.offlineSouls)) {
       this.unlockLogs();
+      if (result.effectiveSeconds >= 3600) this.#bump();
       return { ok: false, ...result };
     }
     this.#credit(result.offlineSouls);
@@ -858,6 +883,8 @@ export class GameState {
     const qty = this.quantities();
     if (qty.phlegethon_forge >= 1) this.milestones.forge = true;
     if (qty.obsidian_throne >= 1) this.milestones.throne = true;
+    if (this.clickCount >= 25) this.milestones.reap = true;
+    if (Object.values(qty).some((n) => n >= 1)) this.milestones.buyModes = true;
   }
 
   /** Garante gold + negativo ≤ qty (gold tem prioridade de slot). */
@@ -934,6 +961,18 @@ export class GameState {
         return this.lastOfflineSeconds > 60;
       case 'log_juizo':
         return this.verdictPurchases.length >= 1;
+      case 'log_reap_power':
+        return this.clickCount >= 25 || Boolean(this.milestones?.reap);
+      case 'log_buy_modes':
+        return ownedAny || Boolean(this.milestones?.buyModes);
+      case 'log_sealed_juramentos':
+        return this.upgrades.length >= 1
+          || ownedAny
+          || cmp(this.souls, STYX_UNLOCK_SOULS) >= 0;
+      case 'log_verdicts_milestone':
+        return this.verdicts >= 1 || this.verdictPurchases.length >= 1;
+      case 'log_obols_bonus':
+        return this.prestigeCount >= 1 || cmp(this.obols, '0') > 0;
       default:
         return false;
     }

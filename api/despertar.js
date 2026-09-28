@@ -3,18 +3,27 @@
  * /api/despertar — estado autoritativo de O Despertar (Task 9)
  * ============================================================
  * Identidade vem APENAS da sessão. `userId` no body é ignorado.
- * Gate: lesson_gates (despertar / published). Aluno bloqueado se selado;
- * admin sempre passa.
+ * Gate: lesson_gates (despertar / published + classroom_pause).
+ * Aluno bloqueado se selado ou pausa efetiva; admin sempre passa.
+ * stateGet com published=true funciona sob pausa (read-only + DTO do Véu).
  * ============================================================
  */
 
 import supabase from './supabaseClient.js';
 import {
+  DESPERTAR_PAUSED_ERROR,
+  DESPERTAR_PAUSED_MESSAGE,
   DESPERTAR_SEALED_ERROR,
   DESPERTAR_SEALED_MESSAGE,
+  clearDespertarClassroomPause,
+  getDespertarPauseState,
   getLastDespertarGateCacheStatus,
+  isDespertarPlayBlocked,
   isDespertarPublished,
   isDespertarSealedForUser,
+  pausePublicDto,
+  pauseWindowDto,
+  setDespertarClassroomPause,
 } from './_lib/despertar-gate.js';
 import {
   applyPrestige,
@@ -89,6 +98,7 @@ const ROW_SELECT = [
   'talents_state',
   'edu_logs_seen',
   'milestones',
+  'stats',
   'verdicts',
   'juizo_best_streak',
   'juizo_current_streak',
@@ -342,7 +352,20 @@ async function handleDespertar(req, res) {
       return res.status(503).json({ ok: false, error: 'O Despertar está offline: Supabase não configurado.' });
     }
 
-    const { action, token, clientState, talentId, purchaseId, choice, grantId, set } = req.body || {};
+    const {
+      action,
+      token,
+      clientState,
+      talentId,
+      purchaseId,
+      choice,
+      grantId,
+      set,
+      minutes,
+      pauseUntil,
+      reasonPreset,
+      reason,
+    } = req.body || {};
     metricsSetAction(action || 'n/a');
     const user = await loadSessionUser(token);
     if (!user) {
@@ -350,6 +373,51 @@ async function handleDespertar(req, res) {
     }
 
     if (rejectUnlessMessengerSeal(user, res)) return;
+
+    // Admin: pausa de aula (Véu) — independente de published; não apaga Estelas.
+    if (action === 'pauseSet' || action === 'pauseClear') {
+      if (user.role !== 'admin') {
+        return res.status(403).json({ ok: false, error: 'Esta senda é só do Mestre.' });
+      }
+
+      if (action === 'pauseClear') {
+        const cleared = await clearDespertarClassroomPause(supabase, { userId: user.id });
+        if (!cleared.ok) {
+          return res.status(cleared.error?.includes('meta') ? 503 : 500).json({
+            ok: false,
+            error: cleared.error || 'Não foi possível liberar a pausa.',
+          });
+        }
+        return res.status(200).json({
+          ok: true,
+          pause: null,
+          serverNow: cleared.serverNow,
+          published: await isDespertarPublished(supabase),
+        });
+      }
+
+      const armed = await setDespertarClassroomPause(supabase, {
+        userId: user.id,
+        minutes,
+        pauseUntil,
+        reasonPreset,
+        reason,
+      });
+      if (!armed.ok) {
+        const status = /inválid|máxima|futuro|Motivo/i.test(armed.error || '') ? 400 : 500;
+        const metaMissing = /meta ausente/i.test(armed.error || '');
+        return res.status(metaMissing ? 503 : status).json({
+          ok: false,
+          error: armed.error || 'Não foi possível pausar o Acheron.',
+        });
+      }
+      return res.status(200).json({
+        ok: true,
+        pause: pausePublicDto(armed.pause),
+        serverNow: armed.serverNow,
+        published: await isDespertarPublished(supabase),
+      });
+    }
 
     // Admin pode limpar Estelas mesmo com o Acheron selado (correção pós-vazamento).
     if (action === 'stateResetStudents') {
@@ -510,18 +578,62 @@ async function handleDespertar(req, res) {
 
     const published = await isDespertarPublished(supabase);
     metricsSetGateCache(getLastDespertarGateCacheStatus());
+    const pauseState = await getDespertarPauseState(supabase);
+    const serverNow = new Date().toISOString();
+    const nowMs = Date.parse(serverNow) || Date.now();
+    const pauseDto = pausePublicDto(pauseState, nowMs);
+    const pauseWindow = pauseWindowDto(pauseState, nowMs);
+
+    if (action === 'stateGet') {
+      // Selado: mantém 403 (não cria Estela antes do Mestre abrir o Acheron).
+      if (isDespertarSealedForUser(user, published)) {
+        return res.status(403).json({
+          ok: false,
+          error: DESPERTAR_SEALED_ERROR,
+          message: DESPERTAR_SEALED_MESSAGE,
+          published: false,
+          pause: null,
+          pauseWindow: null,
+          serverNow,
+        });
+      }
+
+      // Publicado (mesmo sob pausa): read-only para montar o Véu / HUD.
+      const { row, error } = await getOrCreateState(user.id);
+      if (error) return tableErrorResponse(res, error, 'Não foi possível ler a Estela de Memória.');
+      return res.status(200).json({
+        ok: true,
+        state: buildStateDto(row),
+        awarded: emptyAwarded(),
+        published: true,
+        pause: pauseDto,
+        pauseWindow,
+        serverNow,
+      });
+    }
+
     if (isDespertarSealedForUser(user, published)) {
       return res.status(403).json({
         ok: false,
         error: DESPERTAR_SEALED_ERROR,
         message: DESPERTAR_SEALED_MESSAGE,
+        published: false,
+        pause: null,
+        pauseWindow: null,
+        serverNow,
       });
     }
 
-    if (action === 'stateGet') {
-      const { row, error } = await getOrCreateState(user.id);
-      if (error) return tableErrorResponse(res, error, 'Não foi possível ler a Estela de Memória.');
-      return res.status(200).json({ ok: true, state: buildStateDto(row), awarded: emptyAwarded() });
+    if (isDespertarPlayBlocked(user, published, pauseState, nowMs)) {
+      return res.status(403).json({
+        ok: false,
+        error: DESPERTAR_PAUSED_ERROR,
+        message: DESPERTAR_PAUSED_MESSAGE,
+        published: true,
+        pause: pauseDto,
+        pauseWindow,
+        serverNow,
+      });
     }
 
     if (action === 'stateSync') {
@@ -697,6 +809,7 @@ async function handleDespertar(req, res) {
         hud: result.hud,
         ended: Boolean(result.ended),
         abandoned: Boolean(result.abandoned),
+        mercy: Boolean(result.mercy),
         pair: result.pair || null,
         milestones: result.milestones || { newly: [], verdictGain: 0 },
         awarded: grantAwards ? awarded : emptyAwarded(),
@@ -708,8 +821,13 @@ async function handleDespertar(req, res) {
         payload.brokenStreak = result.brokenStreak;
       } else if (!result.ended && result.ratingA != null) {
         // F3 juice: revelar faixas da rodada vencida antes do próximo par.
+        // F2 mercy: também envia faixas do erro perdoado.
         payload.ratingA = result.ratingA;
         payload.ratingB = result.ratingB;
+        if (result.mercy) {
+          payload.deltaLabel = result.deltaLabel;
+          payload.brokenStreak = result.brokenStreak;
+        }
       }
       return res.status(200).json(payload);
     }

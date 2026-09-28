@@ -45,7 +45,7 @@ function mapRouteToNavItem(route) {
 /**
  * Admin sempre vê o link vivo (pode pré-visualizar). Aluno só quando o Acheron está aberto.
  */
-export function applyDespertarNavState(shell, { published = false, isAdmin = false } = {}) {
+export function applyDespertarNavState(shell, { published = false, isAdmin = false, pauseActive = false } = {}) {
   const root = shell || document.querySelector('[data-shell]');
   if (!root) return;
   const link = root.querySelector('[data-nav-item="despertar"]');
@@ -58,14 +58,22 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
   if (open) {
     link.removeAttribute('aria-disabled');
     link.removeAttribute('tabindex');
-    link.removeAttribute('title');
     if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
       link.setAttribute('href', './despertar.html');
+    }
+    // A4 stub: badge textual — link continua clicável (véu na página).
+    if (pauseActive && !isAdmin) {
+      link.setAttribute('title', 'Em aula');
+      link.dataset.despertarPause = '1';
+    } else {
+      link.removeAttribute('title');
+      delete link.dataset.despertarPause;
     }
   } else {
     link.setAttribute('aria-disabled', 'true');
     link.setAttribute('tabindex', '-1');
     link.setAttribute('title', 'Em breve');
+    delete link.dataset.despertarPause;
   }
 
   bindLockedNavClicks(root);

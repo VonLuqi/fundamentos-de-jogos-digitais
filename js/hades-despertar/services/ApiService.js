@@ -232,6 +232,9 @@ export class ApiService {
           status,
           error: payload.error || error?.message || 'sync_failed',
           state: payload.state,
+          pause: payload.pause ?? null,
+          serverNow: payload.serverNow ?? null,
+          payload,
         });
         if (status === 400 || status === 409) {
           this._dirty = false;

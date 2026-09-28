@@ -59,7 +59,7 @@ staticAssert(pkg.includes('despertar-formulas-smoke.mjs'), 'npm run check inclui
 
 staticAssert(GENERATORS.length === 6, '6 geradores no catálogo');
 staticAssert(UPGRADES.length === 19, '19 juramentos no catálogo');
-staticAssert(TALENTS.length === 8, '8 talentos no Panteão');
+staticAssert(TALENTS.length === 13, '13 talentos no Panteão');
 
 if (errors.length) {
   console.error('despertar-formulas-smoke (estático):');

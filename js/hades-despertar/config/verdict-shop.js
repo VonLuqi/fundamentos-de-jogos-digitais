@@ -2,6 +2,8 @@
  * Bancada do Juiz — itens permanentes pagos com Vereditos (Task 19 / J.2 B1 Soft).
  * Não resetam no Lethe (ficam em verdictPurchases).
  * B1: −1 Veredito nos dois itens baratos (selo, memória).
+ *
+ * Task 0F (congelada): +4 itens P0 — docs/plano-despertar-producao-profundo.md (F2).
  */
 
 function freezeAll(list) {
@@ -27,11 +29,32 @@ export const VERDICT_SHOP = freezeAll([
     effects: { offlineExtraHours: 0.5 },
   },
   {
+    id: 'sentenca_afiada',
+    name: 'Sentença Afiada',
+    blurb: '+8% no clique. A lâmina corta com mais peso.',
+    cost: 6,
+    effects: { clickMult: '1.08' },
+  },
+  {
     id: 'olho_do_tartarus',
     name: 'Olho do Tártaro',
     blurb: '+2% SPS. A sentença observa a máquina.',
     cost: 8,
     effects: { spsMult: '1.02' },
+  },
+  {
+    id: 'eco_do_veredito',
+    name: 'Eco do Veredito',
+    blurb: '+1 Veredito no próximo marco de streak (1×).',
+    cost: 8,
+    effects: { verdictBonus: true },
+  },
+  {
+    id: 'catalogo_vivo',
+    name: 'Catálogo Vivo',
+    blurb: 'Juízo: 1 segunda chance por corrida (1 erro).',
+    cost: 10,
+    effects: { juizoMercy: true },
   },
   {
     id: 'pacto_duplo',
@@ -40,9 +63,16 @@ export const VERDICT_SHOP = freezeAll([
     cost: 12,
     effects: { firstGeneratorCostMult: '0.90' },
   },
+  {
+    id: 'peso_das_faixas',
+    name: 'Peso das Faixas',
+    blurb: '+3% SPS. As faixas puxam a máquina.',
+    cost: 14,
+    effects: { spsMult: '1.03' },
+  },
 ]);
 
-/** Soma dos custos da Bancada (B1 Soft = 26). */
+/** Soma dos custos da Bancada (B1 Soft 26 + F2 38 = 64). */
 export const VERDICT_SHOP_TOTAL_COST = VERDICT_SHOP.reduce((sum, item) => sum + item.cost, 0);
 
 export const VERDICT_SHOP_IDS = Object.freeze(VERDICT_SHOP.map((item) => item.id));

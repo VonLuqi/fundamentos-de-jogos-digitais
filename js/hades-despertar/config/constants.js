@@ -21,12 +21,18 @@ export const CLICK_CAP_PER_SECOND = 20;
 export const OFFLINE_MIN_SECONDS = 10;
 export const OFFLINE_MAX_HOURS_BASE = 8;
 export const OFFLINE_MAX_HOURS_TALENT = 12;
+/** Pacto do Silêncio (F1) — soma com Noite / Bancada. */
+export const OFFLINE_EXTRA_HOURS_SILENCIO = 2;
 export const OFFLINE_EFFICIENCY_BASE = '0.80';
 export const OFFLINE_EFFICIENCY_TALENT = '1.00';
 
 export const GENERATOR_COST_MULT_BASE = '1';
 export const GENERATOR_COST_MULT_CHARON = '0.95';
 export const STARTING_SOULS_MEMORY = '100';
+/** Margem Generosa (F1) — soma com Memória das Sombras. */
+export const STARTING_SOULS_MARGIN = '250';
+/** Rebanho (F1) — starting shade qty (max com Segundo Fôlego). */
+export const STARTING_SHADE_REBANHO = 3;
 
 export const MNEMOSYNE_MULT_BASE = '1';
 export const TALENT_JURAMENTO_ETERNO_MULT = '1.10';

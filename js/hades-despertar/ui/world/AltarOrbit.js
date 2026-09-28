@@ -4,7 +4,13 @@
  */
 
 import { cmp } from '../../core/decimal.js';
-import { applyReapCosmeticClasses } from '../../config/upgrade-cosmetics.js';
+import {
+  activeCosmetics,
+  applyReapCosmeticClasses,
+  cosmeticsForAltar,
+  cosmeticsForGenerator,
+  indexMatchesCoverage,
+} from '../../config/upgrade-cosmetics.js';
 import {
   shinyChromaticPx,
   shinyGlitchNow,
@@ -24,8 +30,13 @@ import {
   BUY_PULSE_MS,
   buyPulseScale,
   cappedNpcCount,
+  drawAccessory,
+  drawOrbitHalo,
   prefersReducedMotion,
 } from './WorldView.js';
+
+const T1_ID = 'wandering_shade';
+const ORBIT_NPC_CELL = 28;
 
 /**
  * @param {{ rarity?: string, shiny?: boolean, gold?: boolean }} [opts]
@@ -61,8 +72,6 @@ export const ORBIT_RING_PARALLAX = 0.07;
 /** Chuva passiva: teto de spawns/s e motes simultâneos. */
 export const SOUL_RAIN_MAX_PER_SEC = 6;
 export const SOUL_RAIN_MAX_MOTES = 16;
-
-const T1_ID = 'wandering_shade';
 
 /**
  * Quantos cursors desenhar a partir das Sombras Vagantes.
@@ -469,6 +478,10 @@ export class AltarOrbit {
     this._stage = null;
     this._onStageMove = null;
     this._onStageLeave = null;
+    /** @type {ReturnType<typeof activeCosmetics>} */
+    this._altarCosmetics = [];
+    /** @type {ReturnType<typeof activeCosmetics>} */
+    this._shadeCosmetics = [];
   }
 
   /**
@@ -538,11 +551,16 @@ export class AltarOrbit {
       this._veil.hidden = false;
     }
 
-    // Fase E / E3 — cosméticos target:reap (ex.: blade_glow).
+    // Fase E / E2 — cosméticos reap + altar + Sombras (órbita).
     if (!this._reap && this.root?.getElementById) {
       this._reap = this.root.getElementById('despertar-reap');
     }
     applyReapCosmeticClasses(this._reap, state);
+    const cosmeticsActive = activeCosmetics(state);
+    this._altarCosmetics = cosmeticsForAltar(cosmeticsActive);
+    this._shadeCosmetics = cosmeticsForGenerator(cosmeticsActive, T1_ID);
+    const hasHalo = this._altarCosmetics.some((c) => c.accessory === 'orbit_halo');
+    this._orbitHost?.classList?.toggle?.('has-cosmetic-orbit_halo', hasHalo);
 
     if (this._cursorCount === 0) {
       this.#clearOrbit();
@@ -752,6 +770,14 @@ export class AltarOrbit {
     }
     this._ctx.setLineDash([]);
 
+    const timeSec = this.now() / 1000;
+    if (this._altarCosmetics?.some((c) => c.accessory === 'orbit_halo')) {
+      drawOrbitHalo(this._ctx, cx, cy, baseRadius + Math.max(0, ringsActive - 1) * ringGap, {
+        reducedMotion: this._reducedMotion,
+        timeSec,
+      });
+    }
+
     const geom = {
       cx,
       cy,
@@ -777,6 +803,8 @@ export class AltarOrbit {
       }
     }
 
+    const shadeCos = Array.isArray(this._shadeCosmetics) ? this._shadeCosmetics : [];
+
     for (let i = 0; i < placements.length; i += 1) {
       const placement = placements[i];
       const { x, y, theta } = orbitPlacementXY(placement, geom);
@@ -791,6 +819,16 @@ export class AltarOrbit {
         reducedMotion: this._reducedMotion,
         opacity,
       });
+      for (const cos of shadeCos) {
+        const salt = cos.upgradeId || cos.accessory || 0;
+        if (!indexMatchesCoverage(i, cos.coverage, salt)) continue;
+        const cell = ORBIT_NPC_CELL * scale;
+        drawAccessory(this._ctx, cos.accessory, x - cell / 2, y - cell / 2, cell, 0, {
+          tier: 1,
+          reducedMotion: this._reducedMotion,
+          timeSec,
+        });
+      }
       if (this._hoverIndex === i) {
         this._ctx.save();
         this._ctx.globalAlpha = Math.max(0.55, opacity);

@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "updated": "2026-09-22",
-  "task": "B4",
+  "updated": "2026-09-28",
+  "task": "B4+E3",
   "audience": "Mestre",
   "defaults": {
     "formatPrimary": "webp",
@@ -20,7 +20,7 @@
     },
     "dropPath": "assets/despertar/sprites/",
     "naming": "kebab ou snake = id do catálogo (igual generators.js / upgrades.js)",
-    "note": "Placeholders procedurais já existem; substituir o arquivo mantém o path."
+    "note": "Placeholders procedurais já existem; substituir o arquivo mantém o path. Cosméticos: assets/despertar/cosmetics/ (E3)."
   },
   "leva1": [
     "art_foice",
@@ -215,6 +215,49 @@
       ],
       "notes": "Há ~499 entradas com cover:null no stub — editorial. Esta lista P2 é só arquivo ausente com nome já declarado (npm run despertar:art-requests regenera).",
       "nullCoverCount": 499
+    },
+    {
+      "id": "art_cosmetics",
+      "listId": "B11",
+      "priority": "P3",
+      "status": "open",
+      "title": "Cosméticos de Juramento / Bancada (Fase E)",
+      "desc": "12 accessories P0. Runtime: WebP→SVG→procedural/CSS. Não bloqueia jogabilidade.",
+      "sizes": [
+        "64x64 (prateleira/órbita)",
+        "512x512 (overlay Foice / halo)"
+      ],
+      "dropPath": "assets/despertar/cosmetics/",
+      "filesGlob": "cosmetics/*.webp",
+      "accessoryIds": [
+        "hat_charon",
+        "boat_wake",
+        "shade_wisp",
+        "hound_chain",
+        "hound_triple_aura",
+        "judge_scale_fx",
+        "blade_glow",
+        "blade_runes",
+        "blade_ember",
+        "blade_seal",
+        "reap_ripple",
+        "orbit_halo"
+      ],
+      "files": [
+        "cosmetics/hat_charon.webp",
+        "cosmetics/boat_wake.webp",
+        "cosmetics/shade_wisp.webp",
+        "cosmetics/hound_chain.webp",
+        "cosmetics/hound_triple_aura.webp",
+        "cosmetics/judge_scale_fx.webp",
+        "cosmetics/blade_glow.webp",
+        "cosmetics/blade_runes.webp",
+        "cosmetics/blade_ember.webp",
+        "cosmetics/blade_seal.webp",
+        "cosmetics/reap_ripple.webp",
+        "cosmetics/orbit_halo.webp"
+      ],
+      "notes": "Ver PEDIDOS-MESTRE.md § P3. blade_* / reap_ripple / orbit_halo podem permanecer CSS até entrega. world_vignette fora do P0."
     }
   ]
 }

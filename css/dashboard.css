@@ -1923,6 +1923,86 @@ img.achievement-card__art.has-art {
   color: #e8a090;
 }
 
+.master-tools__pause {
+  flex: 1 1 100%;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(0, 168, 150, 0.4);
+  border-radius: 0.35rem;
+  background: rgba(0, 18, 20, 0.55);
+}
+
+.master-tools__pause-heading {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #4ecdc4;
+}
+
+.master-tools__pause-hint {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-body, 'Crimson Text', Georgia, serif);
+  font-size: 0.88rem;
+  line-height: 1.35;
+  color: rgba(232, 220, 196, 0.78);
+}
+
+.master-tools__pause-status {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  color: var(--hades-gold-bright);
+}
+
+.master-tools__pause-status.is-active {
+  color: #4ecdc4;
+}
+
+.master-tools__pause-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: flex-end;
+  margin-bottom: 0.55rem;
+}
+
+.master-tools__pause-row:last-child {
+  margin-bottom: 0;
+}
+
+.master-tools__pause-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: var(--font-body, 'Crimson Text', Georgia, serif);
+  font-size: 0.8rem;
+  color: rgba(232, 220, 196, 0.85);
+  min-width: 11rem;
+  flex: 1 1 12rem;
+}
+
+.master-tools__pause-input {
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(207, 167, 89, 0.4);
+  background: rgba(10, 10, 15, 0.9);
+  color: var(--hades-cream, #f2e8d5);
+}
+
+.master-tools__pause-input:focus-visible {
+  outline: 2px solid #4ecdc4;
+  outline-offset: 2px;
+}
+
+.master-tools__pause .btn-gold {
+  padding: 0.55rem 0.85rem;
+  font-size: 0.62rem;
+}
+
 .master-tools__actions .btn-gold {
   padding: 0.55rem 0.85rem;
   font-size: 0.62rem;

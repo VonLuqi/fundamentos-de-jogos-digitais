@@ -1,16 +1,35 @@
 /**
- * Cosméticos de upgrade → sprites / Foice (Fase E).
- * P0: procedural/CSS; WebP reais ficam para arte depois.
+ * Cosméticos de upgrade / Bancada → sprites / Foice / altar (Fase E).
+ * P0: procedural/CSS; WebP reais ficam para arte (E3).
+ *
+ * Catálogo congelado 0E — docs/plano-despertar-producao-profundo.md
  */
 
+export const COSMETIC_LAYERS = Object.freeze([
+  'hat',
+  'aura',
+  'blade',
+  'trail',
+  'shelf_fx',
+]);
+
 function freezeCosmetic(def) {
-  return Object.freeze({ ...def });
+  const source = def.source === 'verdict' ? 'verdict' : 'upgrade';
+  const layer = COSMETIC_LAYERS.includes(def.layer) ? def.layer : 'aura';
+  const target = def.target === 'reap' || def.target === 'altar' ? def.target : undefined;
+  return Object.freeze({
+    ...def,
+    source,
+    layer,
+    ...(target ? { target } : {}),
+  });
 }
 
 /**
  * @typedef {{
+ *   source?: 'upgrade'|'verdict',
  *   targetGeneratorId?: string,
- *   target?: 'reap',
+ *   target?: 'reap'|'altar',
  *   accessory: string,
  *   coverage: number,
  *   layer?: string,
@@ -20,13 +39,7 @@ function freezeCosmetic(def) {
 
 /** @type {Readonly<Record<string, UpgradeCosmeticDef>>} */
 export const UPGRADE_COSMETICS = Object.freeze({
-  moeda_no_barquinho: freezeCosmetic({
-    targetGeneratorId: 'charon_servants',
-    accessory: 'hat_charon',
-    coverage: 0.5,
-    layer: 'hat',
-    priority: 1,
-  }),
+  // --- Foice (cadeia click) ---
   foice_afilada: freezeCosmetic({
     target: 'reap',
     accessory: 'blade_glow',
@@ -34,9 +47,96 @@ export const UPGRADE_COSMETICS = Object.freeze({
     layer: 'blade',
     priority: 1,
   }),
+  juramento_acheron: freezeCosmetic({
+    target: 'reap',
+    accessory: 'blade_runes',
+    coverage: 1,
+    layer: 'blade',
+    priority: 2,
+  }),
+  pacto_das_margens: freezeCosmetic({
+    target: 'reap',
+    accessory: 'reap_ripple',
+    coverage: 1,
+    layer: 'trail',
+    priority: 1,
+  }),
+  ceifador_ctoniano: freezeCosmetic({
+    target: 'reap',
+    accessory: 'blade_ember',
+    coverage: 1,
+    layer: 'blade',
+    priority: 3,
+  }),
+  colheita_eterna: freezeCosmetic({
+    target: 'altar',
+    accessory: 'orbit_halo',
+    coverage: 1,
+    layer: 'aura',
+    priority: 1,
+  }),
+
+  // --- Prateleiras / geradores ---
+  moeda_no_barquinho: freezeCosmetic({
+    targetGeneratorId: 'charon_servants',
+    accessory: 'hat_charon',
+    coverage: 0.5,
+    layer: 'hat',
+    priority: 1,
+  }),
+  frota_de_caronte: freezeCosmetic({
+    targetGeneratorId: 'charon_servants',
+    accessory: 'boat_wake',
+    coverage: 0.5,
+    layer: 'trail',
+    priority: 1,
+  }),
+  umbras_despertas: freezeCosmetic({
+    targetGeneratorId: 'wandering_shade',
+    accessory: 'shade_wisp',
+    coverage: 0.5,
+    layer: 'aura',
+    priority: 1,
+  }),
+  trela_cerberiana: freezeCosmetic({
+    targetGeneratorId: 'cerberian_hound',
+    accessory: 'hound_chain',
+    coverage: 0.5,
+    layer: 'shelf_fx',
+    priority: 1,
+  }),
+  tres_cabecas: freezeCosmetic({
+    targetGeneratorId: 'cerberian_hound',
+    accessory: 'hound_triple_aura',
+    coverage: 0.5,
+    layer: 'aura',
+    priority: 2,
+  }),
+  veredito_tartaro: freezeCosmetic({
+    targetGeneratorId: 'tartarus_judge',
+    accessory: 'judge_scale_fx',
+    coverage: 0.5,
+    layer: 'shelf_fx',
+    priority: 1,
+  }),
+
+  // --- Bancada (persiste no Lethe) ---
+  selo_do_juiz: freezeCosmetic({
+    source: 'verdict',
+    target: 'reap',
+    accessory: 'blade_seal',
+    coverage: 1,
+    layer: 'blade',
+    priority: 4,
+  }),
 });
 
 export const UPGRADE_COSMETIC_IDS = Object.freeze(Object.keys(UPGRADE_COSMETICS));
+
+/** Accessories P0 (12). */
+export const P0_COSMETIC_ACCESSORIES = Object.freeze(
+  UPGRADE_COSMETIC_IDS.map((id) => UPGRADE_COSMETICS[id].accessory),
+);
 
 /**
  * Hash estável → [0, 1). Visualmente irregular; não re-rola entre frames.
@@ -62,10 +162,9 @@ export function coverageHash01(index, salt = 0) {
 
 /**
  * Mask ~coverage dos índices — espalhamento pseudo-aleatório estável.
- * (Bresenham em grade coluna-major pintava faixas inteiras de chapéu.)
  * @param {number} index
  * @param {number} coverage
- * @param {number|string} [salt] upgradeId / accessory p/ padrões distintos
+ * @param {number|string} [salt]
  */
 export function indexMatchesCoverage(index, coverage, salt = 0) {
   const i = Math.max(0, Math.floor(Number(index) || 0));
@@ -76,7 +175,6 @@ export function indexMatchesCoverage(index, coverage, salt = 0) {
 }
 
 /**
- * Máscara booleana para índices `[0, count)`.
  * @param {number} count
  * @param {number} coverage
  * @param {number|string} [salt]
@@ -92,7 +190,6 @@ export function cosmeticCoverageMask(count, coverage, salt = 0) {
 }
 
 /**
- * Índices que recebem o accessory.
  * @param {number} count
  * @param {number} coverage
  * @param {number|string} [salt]
@@ -109,31 +206,38 @@ export function cosmeticCoverageIndices(count, coverage, salt = 0) {
 
 /**
  * @param {UpgradeCosmeticDef} def
- * @param {string} upgradeId
+ * @param {string} sourceId
  */
-function normalizeActive(def, upgradeId) {
+function normalizeActive(def, sourceId) {
+  const target = def.target === 'reap' || def.target === 'altar' ? def.target : null;
   return {
-    upgradeId,
+    upgradeId: sourceId,
+    sourceId,
+    source: def.source === 'verdict' ? 'verdict' : 'upgrade',
     targetGeneratorId: def.targetGeneratorId ? String(def.targetGeneratorId) : null,
-    target: def.target === 'reap' ? 'reap' : null,
+    target,
     accessory: String(def.accessory || ''),
     coverage: Number(def.coverage) || 0,
-    layer: String(def.layer || 'default'),
+    layer: String(def.layer || 'aura'),
     priority: Number(def.priority) || 0,
   };
 }
 
+function layerKey(item) {
+  if (item.target === 'reap') return `reap:${item.layer}`;
+  if (item.target === 'altar') return `altar:${item.layer}`;
+  return `gen:${item.targetGeneratorId || ''}:${item.layer}`;
+}
+
 /**
- * Mesma layer → maior priority; layers distintas empilham.
+ * Mesma (target, layer) → maior priority; layers distintas empilham.
  * @param {ReturnType<typeof normalizeActive>[]} list
  */
 export function resolveCosmeticLayers(list = []) {
   const best = new Map();
   for (const item of list) {
     if (!item?.accessory) continue;
-    const key = item.target === 'reap'
-      ? `reap:${item.layer}`
-      : `gen:${item.targetGeneratorId || ''}:${item.layer}`;
+    const key = layerKey(item);
     const prev = best.get(key);
     if (!prev || item.priority >= prev.priority) best.set(key, item);
   }
@@ -141,32 +245,40 @@ export function resolveCosmeticLayers(list = []) {
 }
 
 /**
- * Cosméticos ativos para o state (upgrades owned) — pronto para WorldView / Foice.
- * @param {{ upgrades?: string[] }|null|undefined} state
+ * Cosméticos ativos — upgrades owned + compras da Bancada (`source: verdict`).
+ * @param {{ upgrades?: string[], verdictPurchases?: string[] }|null|undefined} state
  */
 export function activeCosmetics(state) {
-  const owned = new Set(
+  const ownedUpgrades = new Set(
     (Array.isArray(state?.upgrades) ? state.upgrades : []).map((id) => String(id)),
+  );
+  const ownedVerdicts = new Set(
+    (Array.isArray(state?.verdictPurchases) ? state.verdictPurchases : []).map((id) => String(id)),
   );
   const raw = [];
   for (const id of UPGRADE_COSMETIC_IDS) {
-    if (!owned.has(id)) continue;
     const def = UPGRADE_COSMETICS[id];
     if (!def) continue;
+    const source = def.source === 'verdict' ? 'verdict' : 'upgrade';
+    if (source === 'verdict') {
+      if (!ownedVerdicts.has(id)) continue;
+    } else if (!ownedUpgrades.has(id)) {
+      continue;
+    }
     raw.push(normalizeActive(def, id));
   }
   return resolveCosmeticLayers(raw);
 }
 
 /**
- * Filtra cosméticos de prateleira para um gerador.
+ * Filtra cosméticos de prateleira para um gerador (não reap/altar).
  * @param {ReturnType<typeof activeCosmetics>} active
  * @param {string} generatorId
  */
 export function cosmeticsForGenerator(active, generatorId) {
   const id = String(generatorId || '');
   return (Array.isArray(active) ? active : []).filter(
-    (item) => item.targetGeneratorId === id && item.target !== 'reap',
+    (item) => item.targetGeneratorId === id && !item.target,
   );
 }
 
@@ -179,8 +291,16 @@ export function cosmeticsForReap(active) {
 }
 
 /**
+ * Cosméticos do altar / órbita (`target: 'altar'`).
+ * @param {ReturnType<typeof activeCosmetics>} active
+ */
+export function cosmeticsForAltar(active) {
+  return (Array.isArray(active) ? active : []).filter((item) => item.target === 'altar');
+}
+
+/**
  * Classes CSS `has-cosmetic-<accessory>` para `#despertar-reap`.
- * @param {{ upgrades?: string[] }|ReturnType<typeof activeCosmetics>|null|undefined} stateOrActive
+ * @param {{ upgrades?: string[], verdictPurchases?: string[] }|ReturnType<typeof activeCosmetics>|null|undefined} stateOrActive
  * @returns {string[]}
  */
 export function reapCosmeticClassNames(stateOrActive) {
@@ -195,7 +315,7 @@ export function reapCosmeticClassNames(stateOrActive) {
 /**
  * Aplica/remove classes cosméticas no botão da Foice.
  * @param {Element|null|undefined} element
- * @param {{ upgrades?: string[] }|ReturnType<typeof activeCosmetics>|null|undefined} stateOrActive
+ * @param {{ upgrades?: string[], verdictPurchases?: string[] }|ReturnType<typeof activeCosmetics>|null|undefined} stateOrActive
  * @returns {string[]} classes ativas
  */
 export function applyReapCosmeticClasses(element, stateOrActive) {

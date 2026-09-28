@@ -17,19 +17,22 @@ import {
   OBOL_BONUS_PER,
   OFFLINE_EFFICIENCY_BASE,
   OFFLINE_EFFICIENCY_TALENT,
+  OFFLINE_EXTRA_HOURS_SILENCIO,
   OFFLINE_MAX_HOURS_BASE,
   OFFLINE_MAX_HOURS_TALENT,
   OFFLINE_MIN_SECONDS,
   PRESTIGE_RUN_DIVISOR,
   GOLD_MULT,
   NEGATIVO_MULT,
+  STARTING_SHADE_REBANHO,
+  STARTING_SOULS_MARGIN,
   STARTING_SOULS_MEMORY,
   SYNC_GAIN_TOLERANCE,
   TALENT_JURAMENTO_ETERNO_MULT,
   TALENT_MNEMOSYNE_PROFUNDA_MULT,
 } from '../config/constants.js';
 import { GENERATOR_BY_ID, GENERATORS, getGenerator } from '../config/generators.js';
-import { UPGRADE_BY_ID, getUpgrade } from '../config/upgrades.js';
+import { UPGRADE_BY_ID, UPGRADES, getUpgrade } from '../config/upgrades.js';
 import { TALENT_BY_ID, getTalent } from '../config/talents.js';
 import { VERDICT_SHOP_BY_ID, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import {
@@ -83,18 +86,59 @@ export function talentEffects(talentIds = []) {
   if (owned.has('juramento_eterno')) mnemosyneMult = mul(mnemosyneMult, TALENT_JURAMENTO_ETERNO_MULT);
   if (owned.has('mnemosyne_profunda')) mnemosyneMult = mul(mnemosyneMult, TALENT_MNEMOSYNE_PROFUNDA_MULT);
 
+  let startingSouls = '0';
+  if (owned.has('memoria_das_sombras')) startingSouls = add(startingSouls, STARTING_SOULS_MEMORY);
+  if (owned.has('margem_generosa')) startingSouls = add(startingSouls, STARTING_SOULS_MARGIN);
+
+  // Max-rule: Rebanho (3) ⊇ Segundo Fôlego (1) — nunca 4.
+  let shadeQty = 0;
+  if (owned.has('segundo_folego')) shadeQty = Math.max(shadeQty, 1);
+  if (owned.has('rebanho_despertado')) shadeQty = Math.max(shadeQty, STARTING_SHADE_REBANHO);
   const startingGenerators = {};
-  if (owned.has('segundo_folego')) startingGenerators.wandering_shade = 1;
+  if (shadeQty > 0) startingGenerators.wandering_shade = shadeQty;
+
+  let offlineHours = owned.has('noite_prolongada')
+    ? OFFLINE_MAX_HOURS_TALENT
+    : OFFLINE_MAX_HOURS_BASE;
+  if (owned.has('pacto_do_silencio')) offlineHours += OFFLINE_EXTRA_HOURS_SILENCIO;
 
   return {
-    startingSouls: owned.has('memoria_das_sombras') ? STARTING_SOULS_MEMORY : '0',
+    startingSouls,
     mnemosyneMult,
-    offlineHours: owned.has('noite_prolongada') ? OFFLINE_MAX_HOURS_TALENT : OFFLINE_MAX_HOURS_BASE,
+    offlineHours,
     offlineEfficiency: owned.has('veu_eficiente') ? OFFLINE_EFFICIENCY_TALENT : OFFLINE_EFFICIENCY_BASE,
     kSps: owned.has('foice_ancestral') ? CLICK_K_SPS_ANCESTRAL : CLICK_K_SPS_BASE,
     generatorCostMult: owned.has('favor_de_caronte') ? GENERATOR_COST_MULT_CHARON : GENERATOR_COST_MULT_BASE,
     startingGenerators,
+    richAmort: owned.has('olho_da_curva'),
+    softPrestigeStyx: owned.has('eco_do_styx'),
   };
+}
+
+/**
+ * Soft prestige Eco do Styx (F-D3): 1 juramento revelado elegível de menor custo.
+ * Critério de revelação = loja Styx: owned || meets → para candidatos não owned, = meets.
+ */
+export function pickEcoDoStyxUpgrade({
+  souls = '0',
+  generators = {},
+  upgrades = [],
+} = {}) {
+  const owned = new Set(
+    (Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)),
+  );
+  let best = null;
+  for (const upgrade of UPGRADES) {
+    if (owned.has(upgrade.id)) continue;
+    if (!meetsUpgradeRequirement(upgrade, { souls, generators, upgrades })) continue;
+    if (!best) {
+      best = upgrade;
+      continue;
+    }
+    const costCmp = cmp(upgrade.cost, best.cost);
+    if (costCmp < 0 || (costCmp === 0 && upgrade.id < best.id)) best = upgrade;
+  }
+  return best?.id ?? null;
 }
 
 /** Efeitos da Bancada (Vereditos) — permanentes, fora do Panteão. */

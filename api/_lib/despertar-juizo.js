@@ -1,6 +1,8 @@
 /**
  * Lógica pura do Juízo do Tartarus (Task 18).
  * Pool e ratings ficam no server; cliente só vê cards públicos.
+ *
+ * Task F2: mercy (`catalogo_vivo`) · eco Veredito (`eco_do_veredito`).
  */
 
 import {
@@ -10,6 +12,7 @@ import {
   toPublicJuizoCard,
 } from '../../js/hades-despertar/config/juizo-pool.js';
 import { asNonNegInt, asStringArray } from './despertar-validate.js';
+import { bumpJuizoTieWins, statsToRowJson } from './despertar-stats.js';
 
 export const JUIZO_CHOICES = Object.freeze(['A', 'B', 'tie']);
 
@@ -57,6 +60,48 @@ export const JUIZO_MILESTONE_VERDICT_CAP = JUIZO_STREAK_MILESTONES.reduce(
 );
 
 const RECENT_EXCLUDE = 8;
+
+function asMilestonesObject(raw) {
+  return raw && typeof raw === 'object' && !Array.isArray(raw) ? { ...raw } : {};
+}
+
+function hasPurchase(state, id) {
+  return asStringArray(state?.verdictPurchases).includes(id);
+}
+
+/**
+ * F-D4 — `verdictBonusPending` derivado: owns eco && !ecoVereditoConsumed.
+ * Consumo sticky (OR) anti re-arm via sync de milestones.
+ */
+export function isVerdictBonusPending(state) {
+  if (!hasPurchase(state, 'eco_do_veredito')) return false;
+  return !Boolean(asMilestonesObject(state.milestones).ecoVereditoConsumed);
+}
+
+/**
+ * Aplica +1 Veredito se há claim novo e pending.
+ * @returns {{ verdictGain: number, milestones: object, ecoBonus: number, verdictBonusPending: boolean }}
+ */
+export function applyEcoVereditoBonus(state, milestonesResult) {
+  const marks = asMilestonesObject(state.milestones);
+  const newly = Array.isArray(milestonesResult?.newly) ? milestonesResult.newly : [];
+  const baseGain = Math.max(0, Number(milestonesResult?.verdictGain) || 0);
+  const pending = isVerdictBonusPending(state);
+  if (!pending || newly.length === 0) {
+    return {
+      verdictGain: baseGain,
+      milestones: marks,
+      ecoBonus: 0,
+      verdictBonusPending: pending,
+    };
+  }
+  return {
+    verdictGain: baseGain + 1,
+    milestones: { ...marks, ecoVereditoConsumed: true },
+    ecoBonus: 1,
+    verdictBonusPending: false,
+  };
+}
 
 export function ratingRank(rating, order = JUIZO_RATING_ORDER) {
   const idx = order.indexOf(String(rating));
@@ -125,13 +170,14 @@ function pickDistinct(pool, count, exclude, rng) {
   return picked;
 }
 
-export function buildJuizoRun(champion, challenger, recentIds = []) {
+export function buildJuizoRun(champion, challenger, recentIds = [], extras = {}) {
   return {
     championId: champion.id,
     challengerId: challenger.id,
     ratingA: String(champion.rating),
     ratingB: String(challenger.rating),
     recentIds: [...recentIds].slice(-RECENT_EXCLUDE),
+    mercyUsed: Boolean(extras.mercyUsed),
   };
 }
 
@@ -154,6 +200,12 @@ export function juizoHud(state) {
   };
 }
 
+function dealNextChallenger(pool, championId, recentIds, rng) {
+  const recent = asStringArray(recentIds).filter(Boolean).slice(-RECENT_EXCLUDE);
+  return pickDistinct(pool, 1, [championId, ...recent], rng)
+    || pickDistinct(pool, 1, [championId], rng);
+}
+
 /**
  * @param {object} state canonical
  * @param {object[]} pool ready games
@@ -174,7 +226,7 @@ export function juizoStart(state, pool = JUIZO_READY_POOL, opts = {}) {
     return { ok: false, status: 503, error: 'O Juízo ainda cataloga as almas.' };
   }
   const [champion, challenger] = pair;
-  const run = buildJuizoRun(champion, challenger, []);
+  const run = buildJuizoRun(champion, challenger, [], { mercyUsed: false });
   const next = {
     ...state,
     juizoCurrentStreak: 0,
@@ -209,8 +261,44 @@ export function juizoGuess(state, choice, pool = JUIZO_READY_POOL, opts = {}) {
 
   const correct = isCorrectJuizoGuess(run.ratingA, run.ratingB, pick);
   const brokenStreak = asNonNegInt(state.juizoCurrentStreak);
+  const poolById = Object.fromEntries(pool.map((g) => [g.id, g]));
+  const rng = typeof opts.rng === 'function' ? opts.rng : defaultRng;
 
   if (!correct) {
+    // F-D5: Catálogo Vivo — 1 mercy / corrida (server-only).
+    const canMercy = hasPurchase(state, 'catalogo_vivo') && !Boolean(run.mercyUsed);
+    if (canMercy) {
+      const champion = poolById[run.championId];
+      if (!champion) {
+        return { ok: false, status: 500, error: 'Campeão ausente do pool.' };
+      }
+      const recent = [...asStringArray(run.recentIds), run.challengerId]
+        .filter(Boolean)
+        .slice(-RECENT_EXCLUDE);
+      const nextPick = dealNextChallenger(pool, run.championId, recent, rng);
+      if (!nextPick) {
+        return { ok: false, status: 503, error: 'O Juízo ainda cataloga as almas.' };
+      }
+      const nextRun = buildJuizoRun(champion, nextPick[0], recent, { mercyUsed: true });
+      const next = {
+        ...state,
+        juizoRun: nextRun,
+      };
+      return {
+        ok: true,
+        next,
+        ended: false,
+        mercy: true,
+        ratingA: run.ratingA,
+        ratingB: run.ratingB,
+        deltaLabel: juizoDeltaLabel(run.ratingA, run.ratingB),
+        brokenStreak,
+        pair: publicPairFromRun(nextRun, poolById),
+        hud: juizoHud(next),
+        milestones: { newly: [], verdictGain: 0, ecoBonus: 0 },
+      };
+    }
+
     const next = {
       ...state,
       juizoCurrentStreak: 0,
@@ -225,7 +313,7 @@ export function juizoGuess(state, choice, pool = JUIZO_READY_POOL, opts = {}) {
       deltaLabel: juizoDeltaLabel(run.ratingA, run.ratingB),
       brokenStreak,
       hud: juizoHud(next),
-      milestones: { newly: [], verdictGain: 0 },
+      milestones: { newly: [], verdictGain: 0, ecoBonus: 0 },
     };
   }
 
@@ -237,11 +325,10 @@ export function juizoGuess(state, choice, pool = JUIZO_READY_POOL, opts = {}) {
     bestAfter,
     state.juizoMilestonesClaimed,
   );
+  const eco = applyEcoVereditoBonus(state, milestones);
 
   // F3 — sempre o desafiante vira o próximo campeão (slide clássico HL).
   const championId = run.challengerId;
-
-  const poolById = Object.fromEntries(pool.map((g) => [g.id, g]));
   const champion = poolById[championId];
   if (!champion) {
     return { ok: false, status: 500, error: 'Campeão ausente do pool.' };
@@ -250,21 +337,24 @@ export function juizoGuess(state, choice, pool = JUIZO_READY_POOL, opts = {}) {
   const recent = [...asStringArray(run.recentIds), run.championId, run.challengerId]
     .filter(Boolean)
     .slice(-RECENT_EXCLUDE);
-  const rng = typeof opts.rng === 'function' ? opts.rng : defaultRng;
-  const nextPick = pickDistinct(pool, 1, [championId, ...recent], rng)
-    || pickDistinct(pool, 1, [championId], rng);
+  const nextPick = dealNextChallenger(pool, championId, recent, rng);
   if (!nextPick) {
     return { ok: false, status: 503, error: 'O Juízo ainda cataloga as almas.' };
   }
   const challenger = nextPick[0];
-  const nextRun = buildJuizoRun(champion, challenger, recent);
+  const nextRun = buildJuizoRun(champion, challenger, recent, {
+    mercyUsed: Boolean(run.mercyUsed),
+  });
   const next = {
     ...state,
     juizoCurrentStreak: current,
     juizoBestStreak: bestAfter,
     juizoMilestonesClaimed: milestones.claimed,
-    verdicts: asNonNegInt(state.verdicts) + milestones.verdictGain,
+    verdicts: asNonNegInt(state.verdicts) + eco.verdictGain,
     juizoRun: nextRun,
+    milestones: eco.milestones,
+    // D1: empate acertado — métrica autoritativa (P1 conquistas).
+    ...(pick === 'tie' ? { stats: bumpJuizoTieWins(state.stats) } : {}),
   };
 
   return {
@@ -278,7 +368,8 @@ export function juizoGuess(state, choice, pool = JUIZO_READY_POOL, opts = {}) {
     hud: juizoHud(next),
     milestones: {
       newly: milestones.newly,
-      verdictGain: milestones.verdictGain,
+      verdictGain: eco.verdictGain,
+      ecoBonus: eco.ecoBonus,
     },
   };
 }
@@ -298,9 +389,9 @@ export function juizoAbandon(state) {
   };
 }
 
-/** Patch SQL só dos campos Juízo / Bancada. */
+/** Patch SQL só dos campos Juízo / Bancada (+ stats / milestones F2 se presente). */
 export function juizoPatchFromState(state) {
-  return {
+  const patch = {
     verdicts: asNonNegInt(state.verdicts),
     juizo_best_streak: asNonNegInt(state.juizoBestStreak),
     juizo_current_streak: asNonNegInt(state.juizoCurrentStreak),
@@ -308,4 +399,11 @@ export function juizoPatchFromState(state) {
     verdict_purchases: asStringArray(state.verdictPurchases),
     juizo_run: state.juizoRun ?? null,
   };
+  if (state.stats != null) {
+    patch.stats = statsToRowJson(state.stats);
+  }
+  if (state.milestones != null) {
+    patch.milestones = asMilestonesObject(state.milestones);
+  }
+  return patch;
 }

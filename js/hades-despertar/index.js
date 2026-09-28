@@ -5,9 +5,12 @@
 
 'use strict';
 
-import { initAppShell } from '../app-shell.js';
+import { initAppShell, applyDespertarNavState } from '../app-shell.js';
 import {
   ApiError,
+  DESPERTAR_PAUSED_ERROR,
+  DESPERTAR_SEALED_ERROR,
+  despertarStateGet,
   fetchDespertarPublished,
   getSession,
   logout,
@@ -18,12 +21,13 @@ import { GameLoop } from './core/GameLoop.js';
 import { ApiService } from './services/ApiService.js';
 import { bootAuthoritativeSession, resumeFromHidden } from './services/OfflineEngine.js';
 import { StorageService } from './services/StorageService.js';
-import { UIRenderer } from './ui/UIRenderer.js';
+import { UIRenderer, countLethePermanents, formatLetheMemoryPreview, formatLetheMemoryToast } from './ui/UIRenderer.js';
 import { applyHarnessGrant, harnessEnabled, logSyncDiag, syncDiagEnabled } from './ui/harness.js';
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
-import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass } from './ui/juice.js';
+import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
+import { presentClassroomPauseVeil, presentSealedVeil } from './ui/pauseVeil.js';
 import { getJuizoCtaState } from './config/juizo-pool.js';
 import {
   API_WARNING_DISMISS_MS,
@@ -35,6 +39,21 @@ import { presentGrimoireAwards } from '../grimorio-awards.js';
 let apiWarningTimer = null;
 /** Preenchido após montar o UIRenderer — interrupts do ticker. */
 const uiRef = { renderer: null };
+/** Evita abrir o Véu duas vezes (boot + sync reject). */
+let pauseVeilOpen = false;
+/** Janela de pausa para catch-up (A4) — ativa ou recentemente expirada. */
+const pauseWindowRef = { current: null };
+
+function rememberPauseWindow(pauseOrWindow) {
+  if (!pauseOrWindow || typeof pauseOrWindow !== 'object') return;
+  const until = pauseOrWindow.pauseUntil || pauseOrWindow.pause_until;
+  if (!until) return;
+  pauseWindowRef.current = {
+    active: pauseOrWindow.active === true,
+    pauseUntil: String(until),
+    pauseStartedAt: pauseOrWindow.pauseStartedAt || pauseOrWindow.pause_started_at || null,
+  };
+}
 
 function showApiWarning(message, { dismissMs = API_WARNING_DISMISS_MS } = {}) {
   const box = document.getElementById('api-warning');
@@ -63,17 +82,38 @@ function pushJudgesTickerHint() {
 function showSealedState() {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
-  main.innerHTML = `
-    <article class="hades-frame" style="max-width: 36rem; margin: 2rem auto; padding: 1.5rem;">
-      <h2 class="app-shell__title" style="font-size: 1.35rem;">O Acheron ainda está selado</h2>
-      <p style="font-family: 'Crimson Text', serif; opacity: 0.85;">
-        O Mestre ainda não abriu O Despertar para a turma. Volte à Trilha e aguarde a liberação.
-      </p>
-      <p style="margin-top: 1.25rem;">
-        <a class="btn-gold" href="${ROUTES.aulas()}">Voltar à Trilha</a>
-      </p>
-    </article>
-  `;
+  presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
+}
+
+/**
+ * Mostra o Véu da Aula e, ao liberar, recarrega a página (boot limpo sem F5 manual).
+ * @returns {Promise<boolean>} true se retomou
+ */
+async function enterClassroomPauseVeil({ pause, serverNow, token }) {
+  if (pauseVeilOpen) return false;
+  const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!main || !pause?.pauseUntil) return false;
+  pauseVeilOpen = true;
+
+  const result = await presentClassroomPauseVeil(main, {
+    pause,
+    serverNow,
+    reducedMotion: juicePrefersReducedMotion(),
+    fetchPause: async () => {
+      const remote = await despertarStateGet(token);
+      return {
+        pause: remote?.pause ?? null,
+        serverNow: remote?.serverNow,
+      };
+    },
+  });
+
+  if (result === 'resumed') {
+    globalThis.location.reload();
+    return true;
+  }
+  pauseVeilOpen = false;
+  return false;
 }
 
 function bindTabs(root) {
@@ -93,6 +133,9 @@ function bindTabs(root) {
       panel.hidden = panel.id !== panelId;
     });
     if (focus) tab.focus();
+    if (tab.id === 'tab-codex') {
+      uiRef.renderer?.markCodexDrawerSeen?.();
+    }
   }
 
   tabs.forEach((tab) => {
@@ -433,6 +476,7 @@ function bindLetheModal(state, { onConfirm } = {}) {
   const confirm = document.getElementById('despertar-lethe-confirm');
   const cancel = document.getElementById('despertar-lethe-cancel');
   const preview = document.getElementById('despertar-lethe-preview');
+  const memory = document.getElementById('despertar-lethe-memory');
   if (!modal || !confirm || !cancel) {
     return { open() {}, close() {} };
   }
@@ -448,31 +492,41 @@ function bindLetheModal(state, { onConfirm } = {}) {
       preview.hidden = false;
       preview.textContent = `Esta corrida renderia ${next.obolsGain} Óbolos de Caronte e ${next.mnemosyneGain} Essência de Mnemosyne.`;
     }
+    if (memory) {
+      memory.hidden = false;
+      memory.textContent = formatLetheMemoryPreview(countLethePermanents(state));
+    }
     modal.hidden = false;
     confirm.focus();
   }
 
+  function celebrateRitual(gainPreview, permanents) {
+    playLetheRitualFeel({
+      title: 'Catábase',
+      detail: `O Lethe bebeu a corrida. +${gainPreview.obolsGain} Óbolos · +${gainPreview.mnemosyneGain} Essência.`,
+    });
+    showTutorialToast({
+      text: formatLetheMemoryToast(permanents),
+      holdMs: 8_000,
+    });
+  }
+
   cancel.addEventListener('click', close);
   confirm.addEventListener('click', async () => {
-    const preview = state.prestigePreview();
+    const gainPreview = state.prestigePreview();
+    const permanents = countLethePermanents(state);
     confirm.disabled = true;
     try {
       if (typeof onConfirm === 'function') {
         const ok = await onConfirm();
         if (ok) {
-          playLetheRitualFeel({
-            title: 'Catábase',
-            detail: `O Lethe bebeu a corrida. +${preview.obolsGain} Óbolos · +${preview.mnemosyneGain} Essência.`,
-          });
+          celebrateRitual(gainPreview, permanents);
           close();
         }
       } else {
         const result = state.applyPrestige();
         if (result.ok) {
-          playLetheRitualFeel({
-            title: 'Catábase',
-            detail: `O Lethe bebeu a corrida. +${preview.obolsGain} Óbolos · +${preview.mnemosyneGain} Essência.`,
-          });
+          celebrateRitual(gainPreview, permanents);
           close();
         }
       }
@@ -517,6 +571,57 @@ async function init() {
     return;
   }
 
+  // Probe: Acheron publicado mas sob Véu da Aula → countdown (aluno).
+  if (!isAdmin && token) {
+    try {
+      const probe = await despertarStateGet(token);
+      rememberPauseWindow(probe?.pauseWindow || probe?.pause);
+      applyDespertarNavState(document.querySelector('[data-shell]'), {
+        published: true,
+        isAdmin: false,
+        pauseActive: Boolean(probe?.pause?.active),
+      });
+      if (probe?.pause?.active) {
+        await enterClassroomPauseVeil({
+          pause: probe.pause,
+          serverNow: probe.serverNow,
+          token,
+        });
+        return;
+      }
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 403) {
+        const code = error.payload?.error;
+        if (code === DESPERTAR_SEALED_ERROR) {
+          showSealedState();
+          return;
+        }
+        if (code === DESPERTAR_PAUSED_ERROR && error.payload?.pause?.active) {
+          rememberPauseWindow(error.payload.pauseWindow || error.payload.pause);
+          await enterClassroomPauseVeil({
+            pause: error.payload.pause,
+            serverNow: error.payload.serverNow,
+            token,
+          });
+          return;
+        }
+      }
+      // Falha de rede: segue boot local; sync pode abrir o véu depois.
+    }
+  } else if (isAdmin && token) {
+    try {
+      const probe = await despertarStateGet(token);
+      rememberPauseWindow(probe?.pauseWindow || probe?.pause);
+      applyDespertarNavState(document.querySelector('[data-shell]'), {
+        published,
+        isAdmin: true,
+        pauseActive: Boolean(probe?.pause?.active),
+      });
+    } catch {
+      // admin segue
+    }
+  }
+
   bindTabs(document.getElementById('despertar-tabs'));
   const harvestUi = bindHarvestModal();
 
@@ -558,7 +663,44 @@ async function init() {
       }
       storage.scheduleSave(user.id, stateRef.current);
     },
-    onRejected: ({ error }) => {
+    onRejected: ({ error, pause, serverNow, payload }) => {
+      if (error === DESPERTAR_PAUSED_ERROR) {
+        rememberPauseWindow(payload?.pauseWindow || pause);
+        const tokenNow = getSession()?.token ?? null;
+        const pauseDto = pause?.active
+          ? pause
+          : null;
+        if (pauseDto && tokenNow) {
+          void enterClassroomPauseVeil({
+            pause: pauseDto,
+            serverNow,
+            token: tokenNow,
+          });
+          return;
+        }
+        if (tokenNow) {
+          void despertarStateGet(tokenNow)
+            .then((remote) => {
+              rememberPauseWindow(remote?.pauseWindow || remote?.pause);
+              if (remote?.pause?.active) {
+                return enterClassroomPauseVeil({
+                  pause: remote.pause,
+                  serverNow: remote.serverNow,
+                  token: tokenNow,
+                });
+              }
+              return null;
+            })
+            .catch(() => {
+              showApiWarning(JUDGES_REFUSED_MESSAGE);
+            });
+          return;
+        }
+      }
+      if (error === DESPERTAR_SEALED_ERROR) {
+        showSealedState();
+        return;
+      }
       showApiWarning(error || JUDGES_REFUSED_MESSAGE);
       pushJudgesTickerHint();
     },
@@ -574,13 +716,32 @@ async function init() {
 
   const boot = await bootAuthoritativeSession(user.id, {
     storage,
+    pause: pauseWindowRef.current,
     fetchServerState: async () => {
       const remote = await api.pullState({ apply: false });
-      return remote?.state ?? null;
+      rememberPauseWindow(remote?.pauseWindow || remote?.pause);
+      return {
+        state: remote?.state ?? null,
+        pause: remote?.pauseWindow || remote?.pause || pauseWindowRef.current,
+      };
     },
   });
 
+  if (boot.pause) {
+    rememberPauseWindow(boot.pause);
+  }
+
   if (boot.fetchError instanceof ApiError && boot.fetchError.status === 403) {
+    const code = boot.fetchError.payload?.error;
+    if (code === DESPERTAR_PAUSED_ERROR && boot.fetchError.payload?.pause?.active) {
+      rememberPauseWindow(boot.fetchError.payload.pauseWindow || boot.fetchError.payload.pause);
+      await enterClassroomPauseVeil({
+        pause: boot.fetchError.payload.pause,
+        serverNow: boot.fetchError.payload.serverNow,
+        token,
+      });
+      return;
+    }
     showSealedState();
     return;
   }
@@ -624,6 +785,7 @@ async function init() {
 
   const renderer = new UIRenderer(document, {
     state,
+    getUserId: () => user?.id ?? null,
     onBuy: (id, mode) => {
       const result = state.buyGenerator(id, mode);
       if (result?.ok) {
@@ -717,7 +879,9 @@ async function init() {
     },
     {
       onResume: (seconds) => {
-        const resumed = resumeFromHidden(state, seconds);
+        const resumed = resumeFromHidden(state, seconds, {
+          pause: pauseWindowRef.current,
+        });
         harvestUi.show(resumed.harvest);
         api.requestSync();
       },

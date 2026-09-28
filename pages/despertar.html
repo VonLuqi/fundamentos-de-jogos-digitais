@@ -89,7 +89,7 @@
     role="dialog"
     aria-modal="true"
     aria-labelledby="despertar-lethe-title"
-    aria-describedby="despertar-lethe-body"
+    aria-describedby="despertar-lethe-body despertar-lethe-preview despertar-lethe-memory"
     hidden
   >
     <div class="despertar-modal__panel">
@@ -98,6 +98,7 @@
         As almas e os servos desta corrida se dissolvem. Restam os Óbolos e a memória de Mnemosyne.
       </p>
       <p class="despertar-modal__cap" id="despertar-lethe-preview"></p>
+      <p class="despertar-modal__memory" id="despertar-lethe-memory"></p>
       <div class="despertar-modal__actions">
         <button class="btn-gold" type="button" id="despertar-lethe-confirm">Beber do Lethe</button>
         <button class="despertar-ghost" type="button" id="despertar-lethe-cancel">Recuar</button>
@@ -317,7 +318,7 @@
             <div class="despertar-tablist" role="tablist" aria-label="Abas do Domínio">
               <button class="despertar-tab" type="button" role="tab" id="tab-mundo" aria-controls="panel-mundo" aria-selected="true" tabindex="0">Mundo</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-stats" aria-controls="panel-stats" aria-selected="false" tabindex="-1">Stats</button>
-              <button class="despertar-tab" type="button" role="tab" id="tab-codex" aria-controls="panel-codex" aria-selected="false" tabindex="-1">Códice</button>
+              <button class="despertar-tab" type="button" role="tab" id="tab-codex" aria-controls="panel-codex" aria-selected="false" tabindex="-1" aria-label="Arquivo do Códice">Arquivo</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-lethe" aria-controls="panel-lethe" aria-selected="false" tabindex="-1">Lethe</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-bancada" aria-controls="panel-bancada" aria-selected="false" tabindex="-1">Bancada</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-stele" aria-controls="panel-stele" aria-selected="false" tabindex="-1">Estela</button>
@@ -356,6 +357,31 @@
               <ol class="despertar-codex-list" id="codex-list" hidden></ol>
             </div>
 
+            <button
+              type="button"
+              id="despertar-codex-book"
+              class="despertar-codex-book"
+              aria-label="Códice do Loop"
+              aria-expanded="false"
+              aria-controls="despertar-codex-drawer"
+            >
+              <span class="despertar-codex-book__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="28" height="28" focusable="false">
+                  <path fill="currentColor" d="M6 5h9a3 3 0 0 1 3 3v16a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2V8a3 3 0 0 1 3-3zm11 0h9a3 3 0 0 1 3 3v16a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2V8a3 3 0 0 1 3-3z"/>
+                </svg>
+              </span>
+              <span class="despertar-codex-book__badge" hidden>0</span>
+            </button>
+            <div
+              id="despertar-codex-tip"
+              class="despertar-codex-tip"
+              role="status"
+              aria-live="polite"
+              hidden
+            >
+              <p class="despertar-codex-tip__text"></p>
+            </div>
+
             <div class="despertar-tabpanel" role="tabpanel" id="panel-lethe" aria-labelledby="tab-lethe" hidden>
               <p class="despertar-empty" id="lethe-locked">O Lethe só se abre quando a corrida encontra a parede.</p>
               <div id="lethe-open" hidden>
@@ -370,10 +396,60 @@
                   </div>
                 </dl>
                 <p class="despertar-lethe-preview" id="lethe-preview">A parede ainda não cedeu — o ritual não rende Óbolos.</p>
+                <p class="despertar-lethe-memory" id="lethe-memory" hidden></p>
                 <button class="btn-gold" type="button" id="lethe-ritual" disabled>Ritual do Lethe</button>
                 <h3 class="despertar-subsection" id="pantheon-heading">Panteão de Mnemosyne</h3>
                 <p class="despertar-empty" id="pantheon-empty">Mnemosyne ainda não bebeu tua memória.</p>
-                <ul class="despertar-market-list" id="pantheon-list" hidden></ul>
+                <div id="pantheon-shop" class="despertar-shop-block" hidden>
+                  <div
+                    class="despertar-subtabs"
+                    id="pantheon-subtabs"
+                    role="tablist"
+                    aria-label="Panteão de Mnemosyne"
+                  >
+                    <button
+                      class="despertar-subtab"
+                      type="button"
+                      role="tab"
+                      id="pantheon-tab-available"
+                      aria-controls="pantheon-panel-available"
+                      aria-selected="true"
+                      tabindex="0"
+                    >
+                      Disponíveis (0)
+                    </button>
+                    <button
+                      class="despertar-subtab"
+                      type="button"
+                      role="tab"
+                      id="pantheon-tab-owned"
+                      aria-controls="pantheon-panel-owned"
+                      aria-selected="false"
+                      tabindex="-1"
+                    >
+                      Comprados (0)
+                    </button>
+                  </div>
+                  <div
+                    class="despertar-subtabpanel"
+                    role="tabpanel"
+                    id="pantheon-panel-available"
+                    aria-labelledby="pantheon-tab-available"
+                  >
+                    <p class="despertar-empty" id="pantheon-empty-available" hidden></p>
+                    <ul class="despertar-market-list" id="pantheon-list-available"></ul>
+                  </div>
+                  <div
+                    class="despertar-subtabpanel"
+                    role="tabpanel"
+                    id="pantheon-panel-owned"
+                    aria-labelledby="pantheon-tab-owned"
+                    hidden
+                  >
+                    <p class="despertar-empty" id="pantheon-empty-owned" hidden></p>
+                    <ul class="despertar-market-list" id="pantheon-list-owned"></ul>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -385,7 +461,56 @@
                 </div>
               </dl>
               <p class="despertar-empty" id="bancada-hint">Vereditos: marcos do melhor streak no Juízo (não cada acerto). Bancada sobrevive ao Lethe. Juízo ≠ Juiz do Tártaro (gerador) ≠ Juramentos do Styx.</p>
-              <ul class="despertar-market-list" id="bancada-list"></ul>
+              <div id="bancada-shop" class="despertar-shop-block">
+                <div
+                  class="despertar-subtabs"
+                  id="bancada-subtabs"
+                  role="tablist"
+                  aria-label="Bancada do Juiz"
+                >
+                  <button
+                    class="despertar-subtab"
+                    type="button"
+                    role="tab"
+                    id="bancada-tab-available"
+                    aria-controls="bancada-panel-available"
+                    aria-selected="true"
+                    tabindex="0"
+                  >
+                    Disponíveis (0)
+                  </button>
+                  <button
+                    class="despertar-subtab"
+                    type="button"
+                    role="tab"
+                    id="bancada-tab-owned"
+                    aria-controls="bancada-panel-owned"
+                    aria-selected="false"
+                    tabindex="-1"
+                  >
+                    Comprados (0)
+                  </button>
+                </div>
+                <div
+                  class="despertar-subtabpanel"
+                  role="tabpanel"
+                  id="bancada-panel-available"
+                  aria-labelledby="bancada-tab-available"
+                >
+                  <p class="despertar-empty" id="bancada-empty-available" hidden></p>
+                  <ul class="despertar-market-list" id="bancada-list-available"></ul>
+                </div>
+                <div
+                  class="despertar-subtabpanel"
+                  role="tabpanel"
+                  id="bancada-panel-owned"
+                  aria-labelledby="bancada-tab-owned"
+                  hidden
+                >
+                  <p class="despertar-empty" id="bancada-empty-owned" hidden></p>
+                  <ul class="despertar-market-list" id="bancada-list-owned"></ul>
+                </div>
+              </div>
             </div>
 
             <div class="despertar-tabpanel" role="tabpanel" id="panel-stele" aria-labelledby="tab-stele" hidden>
@@ -514,6 +639,36 @@
         </div>
       </main>
     </div>
+  </div>
+
+  <div
+    id="despertar-codex-drawer"
+    class="despertar-codex-drawer"
+    hidden
+    aria-hidden="true"
+  >
+    <div class="despertar-codex-drawer__backdrop" data-codex-close tabindex="-1"></div>
+    <aside
+      class="despertar-codex-drawer__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="codex-drawer-title"
+      tabindex="-1"
+    >
+      <header class="despertar-codex-drawer__head">
+        <h2 class="despertar-codex-drawer__title" id="codex-drawer-title">Códice do Loop</h2>
+        <button
+          type="button"
+          class="despertar-codex-drawer__close"
+          data-codex-close
+          aria-label="Fechar Códice"
+        >
+          Fechar
+        </button>
+      </header>
+      <p class="despertar-empty" id="codex-drawer-empty">O Códice espera o primeiro clique.</p>
+      <ol class="despertar-codex-list" id="codex-drawer-list" hidden></ol>
+    </aside>
   </div>
 
   <div

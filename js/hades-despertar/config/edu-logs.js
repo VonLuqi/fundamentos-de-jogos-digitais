@@ -90,6 +90,31 @@ export const EDU_LOGS = freezeAll([
     title: JUIZO_CODEX_TITLE,
     body: JUIZO_CODEX_BODY,
   },
+  {
+    id: 'log_reap_power',
+    title: 'A Foice e o clique',
+    body: 'O clique é input; potência da Foice multiplica o ganho por ação.',
+  },
+  {
+    id: 'log_buy_modes',
+    title: 'Modos de compra',
+    body: 'Mercado: ×1 / ×10 / máx. — o input muda o quanto você gasta.',
+  },
+  {
+    id: 'log_sealed_juramentos',
+    title: 'Juramentos selados',
+    body: 'Alguns juramentos ficam selados até a máquina crescer.',
+  },
+  {
+    id: 'log_verdicts_milestone',
+    title: 'Vereditos do Juízo',
+    body: 'Vereditos compram sentenças na Bancada — meta-moeda do loop.',
+  },
+  {
+    id: 'log_obols_bonus',
+    title: 'Óbolos e memória',
+    body: 'Óbolos vêm do Lethe; alimentam bônus permanente entre corridas.',
+  },
 ]);
 
 export const EDU_LOG_IDS = Object.freeze(EDU_LOGS.map((item) => item.id));
@@ -104,6 +129,36 @@ export const EDU_LOG_TICKER_IDS = Object.freeze([
   'log_lethe_ritual',
   'log_styx_open',
 ]);
+
+/** Duração do popover no livro (B-D3). */
+export const CODEX_TIP_MS = 5_000;
+
+/**
+ * Tips curtas no unlock do livro (≤90 chars).
+ * Ausente ⇒ só badge, sem popover. Inclui ids B-D4 para B3.
+ */
+export const EDU_LOG_TIP = Object.freeze({
+  log_input: 'Cada clique altera o estado — começo do loop.',
+  log_lethe_unlock: 'O Lethe se abre — a memória do Submundo te espera.',
+  log_lethe_ritual: 'Beber do Lethe reseta a corrida e guarda óbolos.',
+  log_styx_open: 'Juramentos do Styx multiplicam a máquina.',
+  log_reap_power: 'A Foice multiplica o clique — potencia o input.',
+  log_buy_modes: 'Troca ×1 / ×10 / máx. no Mercado para gastar melhor.',
+  log_sealed_juramentos: 'Juramentos selados abrem conforme a máquina cresce.',
+  log_verdicts_milestone: 'Vereditos do Juízo compram sentenças na Bancada.',
+  log_obols_bonus: 'Óbolos do Lethe são memória entre catábases.',
+});
+
+export const EDU_LOG_TIP_IDS = Object.freeze(Object.keys(EDU_LOG_TIP));
+
+/**
+ * @param {string} id
+ * @returns {string}
+ */
+export function eduLogTip(id) {
+  const tip = EDU_LOG_TIP[String(id ?? '')];
+  return tip ? String(tip) : '';
+}
 
 /**
  * Primeira frase do body (ou title) para o letreiro.

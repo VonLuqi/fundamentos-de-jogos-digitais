@@ -57,6 +57,9 @@ import {
   fetchDespertarPublished,
   setLessonGate,
   DESPERTAR_GATE_ID,
+  DESPERTAR_PAUSE_MINUTE_PRESETS,
+  despertarPauseClear,
+  despertarPauseSet,
   despertarResetStudents,
   despertarStateGet,
   needsMessengerSeal,
@@ -67,10 +70,8 @@ import {
   provaAdminGetOverview,
   provaAdminSetExamOpen,
 } from './api.js';
-import {
-  formatRate,
-  formatSouls,
-} from './hades-despertar/ui/NumberFormatter.js';
+import { formatRate, formatWhole, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
+import { localDatetimeToIsoUtc } from './hades-despertar/ui/pauseVeil.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
@@ -1510,6 +1511,169 @@ function syncAcheronToggleButton() {
   btn.classList.toggle('btn-gold--ghost', despertarPublished);
 }
 
+/**
+ * Lê motivo + duração do painel Véu da Aula.
+ * @returns {{ reasonPreset: string, reason?: string } | { error: string }}
+ */
+function readMasterPauseReason() {
+  const presetEl = document.getElementById('master-pause-reason-preset');
+  const customEl = document.getElementById('master-pause-reason-custom');
+  const reasonPreset = String(presetEl?.value || 'aula').trim() || 'aula';
+  if (reasonPreset !== 'custom') {
+    return { reasonPreset };
+  }
+  const reason = String(customEl?.value || '').trim();
+  if (!reason) {
+    return { error: 'Escreva o motivo da pausa (1–120 caracteres).' };
+  }
+  return { reasonPreset: 'custom', reason };
+}
+
+/**
+ * @param {{ active?: boolean, pauseUntil?: string, reason?: string } | null | undefined} pause
+ */
+function formatMasterPauseStatus(pause) {
+  if (!pause?.active || !pause.pauseUntil) {
+    return { text: 'Sem pausa de aula', active: false };
+  }
+  let when = pause.pauseUntil;
+  try {
+    when = new Intl.DateTimeFormat('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      day: '2-digit',
+      month: '2-digit',
+    }).format(new Date(pause.pauseUntil));
+  } catch {
+    // keep ISO fragment
+  }
+  const reason = String(pause.reason || 'Aula em andamento').trim();
+  return {
+    text: `Pausado até ${when} — ${reason}`,
+    active: true,
+  };
+}
+
+function renderMasterPauseStatus(pause) {
+  const el = document.getElementById('master-pause-status');
+  if (!el) return;
+  const view = formatMasterPauseStatus(pause);
+  el.textContent = view.text;
+  el.classList.toggle('is-active', view.active);
+}
+
+async function refreshMasterPauseStatus() {
+  if (!currentToken || currentUser?.role !== 'admin') return;
+  try {
+    const result = await despertarStateGet(currentToken);
+    renderMasterPauseStatus(result?.pause ?? null);
+  } catch (error) {
+    // Admin com Acheron selado ainda pode armar pausa; status fica neutro.
+    if (error instanceof ApiError && error.status === 403) {
+      renderMasterPauseStatus(error.payload?.pause ?? null);
+      return;
+    }
+    renderMasterPauseStatus(null);
+  }
+}
+
+function syncMasterPauseReasonCustom() {
+  const presetEl = document.getElementById('master-pause-reason-preset');
+  const wrap = document.getElementById('master-pause-reason-custom-wrap');
+  if (!presetEl || !wrap) return;
+  const isCustom = presetEl.value === 'custom';
+  wrap.hidden = !isCustom;
+}
+
+function setMasterPauseControlsDisabled(disabled) {
+  const root = document.getElementById('master-despertar-pause');
+  if (!root) return;
+  root.querySelectorAll('button, input, select').forEach((el) => {
+    el.disabled = Boolean(disabled);
+  });
+}
+
+/**
+ * @param {{ minutes?: number, pauseUntil?: string }} timing
+ */
+async function armMasterClassroomPause(timing = {}) {
+  if (!currentToken) return;
+  const reason = readMasterPauseReason();
+  if (reason.error) {
+    showApiWarning(reason.error);
+    return;
+  }
+
+  setMasterPauseControlsDisabled(true);
+  try {
+    const result = await despertarPauseSet(currentToken, {
+      minutes: timing.minutes,
+      pauseUntil: timing.pauseUntil,
+      reasonPreset: reason.reasonPreset,
+      reason: reason.reason,
+    });
+    renderMasterPauseStatus(result?.pause ?? null);
+  } catch (error) {
+    const message = error instanceof ApiError
+      ? error.message
+      : 'Falha ao pausar o Acheron.';
+    showApiWarning(message);
+  } finally {
+    setMasterPauseControlsDisabled(false);
+  }
+}
+
+function bindMasterClassroomPauseControls() {
+  const root = document.getElementById('master-despertar-pause');
+  if (!root) return;
+
+  syncMasterPauseReasonCustom();
+  document.getElementById('master-pause-reason-preset')?.addEventListener('change', () => {
+    syncMasterPauseReasonCustom();
+  });
+
+  root.querySelectorAll('[data-pause-minutes]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const minutes = Number(btn.getAttribute('data-pause-minutes'));
+      if (!DESPERTAR_PAUSE_MINUTE_PRESETS.includes(minutes)) return;
+      void armMasterClassroomPause({ minutes });
+    });
+  });
+
+  document.getElementById('btn-pause-until')?.addEventListener('click', () => {
+    const input = document.getElementById('master-pause-until');
+    const iso = localDatetimeToIsoUtc(input?.value);
+    if (!iso) {
+      showApiWarning('Escolha um horário válido para reabrir o Acheron.');
+      return;
+    }
+    void armMasterClassroomPause({ pauseUntil: iso });
+  });
+
+  document.getElementById('btn-pause-clear')?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    const confirmed = window.confirm(
+      'Liberar o Véu da Aula agora?\n\nOs alunos poderão voltar a jogar O Despertar (se o Acheron estiver aberto).',
+    );
+    if (!confirmed) return;
+
+    setMasterPauseControlsDisabled(true);
+    try {
+      const result = await despertarPauseClear(currentToken);
+      renderMasterPauseStatus(result?.pause ?? null);
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao liberar a pausa.';
+      showApiWarning(message);
+    } finally {
+      setMasterPauseControlsDisabled(false);
+    }
+  });
+
+  void refreshMasterPauseStatus();
+}
+
 function renderMasterMailerStatus(status, probe = null) {
   const el = document.getElementById('master-mailer-status');
   if (!el) return;
@@ -1572,6 +1736,7 @@ function initAdminTools() {
   const btnVigilancia = document.getElementById('btn-vigilancia');
 
   syncAcheronToggleButton();
+  bindMasterClassroomPauseControls();
   refreshMasterMailerStatus();
   provaAdminGetOverview(currentToken)
     .then((overview) => syncProvaMasterButton(overview?.gate?.state))

@@ -26,10 +26,17 @@ import {
   generatorBatchCost,
   meetsUpgradeRequirement,
   prestigePreview,
+  pickEcoDoStyxUpgrade,
   talentEffects,
   theoreticalMaxGain,
   unknownCatalogIds,
 } from '../../js/hades-despertar/core/formulas.js';
+import {
+  bumpMaxBuyBiggest,
+  normalizeDespertarStats,
+  statsToDto,
+  statsToRowJson,
+} from './despertar-stats.js';
 
 const EDU_LOG_SET = new Set(EDU_LOG_IDS);
 
@@ -159,6 +166,7 @@ export function rowToCanonical(row) {
     talents: asStringArray(row?.talents_state ?? row?.talents).filter((id) => TALENT_BY_ID[id]),
     eduLogsSeen: asStringArray(row?.edu_logs_seen ?? row?.eduLogsSeen).filter((id) => EDU_LOG_SET.has(id)),
     milestones: asObject(row?.milestones),
+    stats: normalizeDespertarStats(row?.stats),
     verdicts: asNonNegInt(row?.verdicts),
     juizoBestStreak: asNonNegInt(row?.juizo_best_streak ?? row?.juizoBestStreak),
     juizoCurrentStreak: asNonNegInt(row?.juizo_current_streak ?? row?.juizoCurrentStreak),
@@ -186,6 +194,7 @@ export function buildStateDto(rowOrCanonical, options = {}) {
       talents: asStringArray(rowOrCanonical.talents),
       eduLogsSeen: asStringArray(rowOrCanonical.eduLogsSeen),
       milestones: asObject(rowOrCanonical.milestones),
+      stats: normalizeDespertarStats(rowOrCanonical.stats),
       souls: money(rowOrCanonical.souls),
       obols: money(rowOrCanonical.obols),
       mnemosyne: money(rowOrCanonical.mnemosyne),
@@ -233,6 +242,8 @@ export function buildStateDto(rowOrCanonical, options = {}) {
     talents: state.talents,
     eduLogsSeen: state.eduLogsSeen,
     milestones: state.milestones,
+    // Fase D / D1 — métricas auxiliares (server-owned)
+    stats: statsToDto(state.stats),
     lastSyncAt: state.lastSyncAt || new Date().toISOString(),
     sps: decimalString(sps),
     prestigePreview: {
@@ -290,6 +301,7 @@ export function canonicalToRowPatch(state, nowIso) {
     talents_state: state.talents,
     edu_logs_seen: state.eduLogsSeen,
     milestones: state.milestones,
+    stats: statsToRowJson(state.stats),
     last_sync_at: nowIso,
     updated_at: nowIso,
   };
@@ -320,6 +332,7 @@ function computeSpend(db, client) {
     costMult = mul(costMult, effects.firstGeneratorCostMult);
   }
   let spent = '0';
+  let biggestBuy = 0;
 
   for (const def of GENERATORS) {
     const from = Number(db.generators[def.id] || 0);
@@ -329,6 +342,7 @@ function computeSpend(db, client) {
     }
     const delta = to - from;
     if (delta > 0) {
+      if (delta > biggestBuy) biggestBuy = delta;
       spent = add(spent, generatorBatchCost(def.baseCost, from, delta, costMult));
     }
   }
@@ -356,7 +370,7 @@ function computeSpend(db, client) {
     }
   }
 
-  return { ok: true, spent: money(spent) };
+  return { ok: true, spent: money(spent), biggestBuy };
 }
 
 function deltaSecondsBetween(lastSyncAt, now, talents, verdictPurchases = []) {
@@ -570,6 +584,8 @@ export function validateSync(dbRow, clientState, now = new Date()) {
     lifetimeSouls: client.lifetimeSouls,
     eduLogsSeen: mergeEduLogs(db.eduLogsSeen, client.eduLogsSeen),
     milestones: mergeMilestones(db.milestones, client.milestones),
+    // D1: max_buy_biggest a partir de deltas de gerador já validados (não confiar no cliente).
+    stats: bumpMaxBuyBiggest(db.stats, spend.biggestBuy || 0),
     lastSyncAt: nowIso,
   };
 
@@ -604,12 +620,24 @@ export function applyPrestige(dbRow, now = new Date()) {
   }
 
   const startingSouls = money(effects.startingSouls || '0');
+
+  // F-D3: Eco do Styx — após starting; 1 juramento grátis revelado elegível.
+  let nextUpgrades = [];
+  if (effects.softPrestigeStyx) {
+    const ecoId = pickEcoDoStyxUpgrade({
+      souls: startingSouls,
+      generators: nextGenerators,
+      upgrades: [],
+    });
+    if (ecoId && UPGRADE_BY_ID[ecoId]) nextUpgrades = [ecoId];
+  }
+
   const next = {
     ...db,
     obols: money(add(db.obols, preview.obolsGain)),
     mnemosyne: money(add(db.mnemosyne, preview.mnemosyneGain)),
     prestigeCount: db.prestigeCount + 1,
-    upgrades: [],
+    upgrades: nextUpgrades,
     generators: nextGenerators,
     shinyCounts: {},
     goldCounts: {},

@@ -38,6 +38,7 @@ import {
   lineSPS,
   meetsUpgradeRequirement,
   prestigeBonus,
+  talentEffects,
 } from '../core/formulas.js';
 import { formatAmortSeconds, formatOwned, formatRate, formatSouls } from './NumberFormatter.js';
 import { AltarOrbit, veilPercent } from './world/AltarOrbit.js';
@@ -45,6 +46,30 @@ import { createSpriteNode, generatorSprite, upgradeSprite } from './world/Sprite
 import { WorldView } from './world/WorldView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
+import { CodexBook, describeCodex, describeCodexEntry } from './CodexBook.js';
+import {
+  BANCADA_EMPTY_AVAILABLE,
+  BANCADA_EMPTY_OWNED,
+  PANTHEON_EMPTY_AVAILABLE,
+  PANTHEON_EMPTY_OWNED,
+  SHOP_OWNED_BADGE,
+  bindSubTabs,
+  defaultShopSubTab,
+  partitionShopCatalog,
+  shopTabLabel,
+} from './subTabs.js';
+
+export { describeCodex, describeCodexEntry };
+export {
+  BANCADA_EMPTY_AVAILABLE,
+  BANCADA_EMPTY_OWNED,
+  PANTHEON_EMPTY_AVAILABLE,
+  PANTHEON_EMPTY_OWNED,
+  SHOP_OWNED_BADGE,
+  partitionShopCatalog,
+  shopTabLabel,
+  defaultShopSubTab,
+};
 
 const RIVER_VEIL = 'Este rio ainda não aceita teu nome.';
 const STYX_EMPTY = 'Os juramentos do Styx exigem servos — ou um punhado de almas.';
@@ -59,7 +84,6 @@ const EDU_LOG_TICKER_HOLD_MS = 5_000;
 const LETHE_TUTORIAL_TOAST =
   'O Lethe se abre. Confira a aba Lethe — o Códice também ganhou uma página.';
 const PANTHEON_EMPTY = 'Mnemosyne ainda não bebeu tua memória.';
-const CODEX_EMPTY = 'O Códice espera o primeiro clique.';
 const CODEX_LOCKED_TITLE = 'Página selada';
 const CODEX_LOCKED_BODY = 'O Submundo só revela o que a corrida já encontrou.';
 
@@ -75,7 +99,20 @@ const TALENT_BLURB = Object.freeze({
   favor_de_caronte: 'Geradores custam 5% menos — vale já nesta corrida.',
   mnemosyne_profunda: 'A essência rende 25% a mais no bônus.',
   segundo_folego: 'A próxima corrida começa com 1 Sombra Vagante.',
+  margem_generosa: 'A próxima corrida começa com +250 almas.',
+  pacto_do_silencio: 'A colheita na ausência ganha +2 h de teto.',
+  olho_da_curva: 'Amortização sempre visível no Mercado — sem números de SPS.',
+  eco_do_styx: 'Após o Lethe, 1 Juramento Styx revelado começa selado.',
+  rebanho_despertado: 'A próxima corrida começa com 3 Sombras Vagantes.',
 });
+
+const TALENT_NEXT_RUN = Object.freeze(new Set([
+  'memoria_das_sombras',
+  'segundo_folego',
+  'margem_generosa',
+  'rebanho_despertado',
+  'eco_do_styx',
+]));
 
 function setText(node, value) {
   if (!node) return;
@@ -131,12 +168,13 @@ export function interpolatedSouls(souls, sps, alpha, reducedMotion = false) {
 /**
  * Máscaras de rio (catálogo congelado).
  * T1 sempre; T2 ≥ 50 almas ou 1× T1; T3 1× T2 ou almas ≥ BaseCost/4;
- * T4 sempre visível (salão do Tártaro); T5–T6 Phlegethon.
+ * T4 1× T3 ou almas ≥ BaseCost/4; T5–T6 Phlegethon (1× T4 ou ≥ PHLEGETHON_SOULS).
  */
 export function isGeneratorRevealed(id, { souls = '0', generators = {} } = {}) {
   const qty = generators && typeof generators === 'object' ? generators : {};
   const t1 = Number(qty.wandering_shade || 0);
   const t2 = Number(qty.charon_servants || 0);
+  const t3 = Number(qty.cerberian_hound || 0);
   const t4 = Number(qty.tartarus_judge || 0);
 
   switch (id) {
@@ -149,8 +187,11 @@ export function isGeneratorRevealed(id, { souls = '0', generators = {} } = {}) {
       const threshold = def ? div(def.baseCost, '4') : '275';
       return t2 >= 1 || cmp(souls, threshold) >= 0;
     }
-    case 'tartarus_judge':
-      return true;
+    case 'tartarus_judge': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '3000';
+      return t3 >= 1 || cmp(souls, threshold) >= 0;
+    }
     case 'phlegethon_forge':
     case 'obsidian_throne':
       return t4 >= 1 || cmp(souls, PHLEGETHON_SOULS) >= 0;
@@ -257,36 +298,6 @@ export function describeNpcUnit(state, generatorId, opts = {}) {
 
 export function formatMultiplier(value) {
   return `×${formatSouls(value)}`;
-}
-
-/**
- * Entrada do Códice do Loop (Task 10a).
- * @param {{ eduLogsSeen?: string[] }|null|undefined} state
- * @param {string} id
- */
-export function describeCodexEntry(state, id) {
-  const def = EDU_LOGS.find((item) => item.id === id);
-  if (!def) return null;
-  const seen = new Set(state?.eduLogsSeen || []);
-  const unlocked = seen.has(id);
-  return {
-    id: def.id,
-    unlocked,
-    title: unlocked ? def.title : CODEX_LOCKED_TITLE,
-    body: unlocked ? def.body : CODEX_LOCKED_BODY,
-  };
-}
-
-export function describeCodex(state) {
-  const entries = EDU_LOGS.map((item) => describeCodexEntry(state, item.id)).filter(Boolean);
-  const unlockedCount = entries.filter((item) => item.unlocked).length;
-  return {
-    entries,
-    unlockedCount,
-    total: entries.length,
-    showList: unlockedCount > 0,
-    emptyText: CODEX_EMPTY,
-  };
 }
 
 export function isStyxUnlocked({ souls = '0', generators = {} } = {}) {
@@ -407,7 +418,7 @@ export function describeTalentCard(state, id) {
     cost: talent.cost,
     owned,
     canBuy,
-    nextRun: id === 'memoria_das_sombras' || id === 'segundo_folego',
+    nextRun: TALENT_NEXT_RUN.has(id),
   };
 }
 
@@ -450,6 +461,7 @@ export function describeLethe(state) {
   } else if (open) {
     previewText = 'A parede já se vê, mas o ritual ainda não rende Óbolos.';
   }
+  const permanents = countLethePermanents(state);
   return {
     open,
     canDrink,
@@ -459,7 +471,29 @@ export function describeLethe(state) {
     pantheonOpen,
     obols: state.obols,
     mnemosyne: state.mnemosyne,
+    ...permanents,
+    memoryPreviewText: formatLetheMemoryPreview(permanents),
+    memoryToastText: formatLetheMemoryToast(permanents),
   };
+}
+
+/** Contagens permanentes que sobrevivem ao Lethe (F3). */
+export function countLethePermanents(state) {
+  const talentCount = Array.isArray(state?.talents) ? state.talents.length : 0;
+  const verdictCount = Array.isArray(state?.verdictPurchases)
+    ? state.verdictPurchases.length
+    : 0;
+  return { talentCount, verdictCount };
+}
+
+/** Copy 0F — bloco preview do painel / modal. */
+export function formatLetheMemoryPreview({ talentCount = 0, verdictCount = 0 } = {}) {
+  return `Memória que permanece · Óbolos · ${talentCount} talentos · ${verdictCount} sentenças da Bancada`;
+}
+
+/** Copy 0F — toast pós-ritual. */
+export function formatLetheMemoryToast({ talentCount = 0, verdictCount = 0 } = {}) {
+  return `Memória preservada: ${talentCount} talentos · ${verdictCount} sentenças`;
 }
 
 export class UIRenderer {
@@ -476,6 +510,7 @@ export class UIRenderer {
     this.onAmortSeen = typeof options.onAmortSeen === 'function' ? options.onAmortSeen : null;
     this.onLetheFirstUnlock =
       typeof options.onLetheFirstUnlock === 'function' ? options.onLetheFirstUnlock : null;
+    this.getUserId = typeof options.getUserId === 'function' ? options.getUserId : () => null;
     this._hud = null;
     this._cards = new Map();
     this._upgrades = new Map();
@@ -491,6 +526,16 @@ export class UIRenderer {
     this._bancada = null;
     this._bancadaTip = null;
     this._codexPanel = null;
+    /** @type {CodexBook|null} */
+    this._codexBook = null;
+    /** @type {{ activate: Function, getSelectedKey: Function, tabs: Element[] }|null} */
+    this._pantheonSubTabs = null;
+    this._pantheonSubKey = 'available';
+    this._pantheonSubUserPicked = false;
+    /** @type {{ activate: Function, getSelectedKey: Function, tabs: Element[] }|null} */
+    this._bancadaSubTabs = null;
+    this._bancadaSubKey = 'available';
+    this._bancadaSubUserPicked = false;
     this._world = null;
     this._altar = null;
     this._modeButtons = [];
@@ -530,6 +575,7 @@ export class UIRenderer {
     this.#mountLethe();
     this.#mountBancada();
     this.#mountCodex();
+    this.#mountCodexBook();
     this._ticker = this.root.getElementById('despertar-ticker');
     if (this._ticker) bindMarquee(this._ticker);
     this._stats = this.root.getElementById('despertar-stats');
@@ -559,6 +605,11 @@ export class UIRenderer {
     this.onBuyMode?.(next);
     if (this.state) this.#renderMarket(this.state);
     return next;
+  }
+
+  /** Marca páginas do Códice como lidas no widget livro (B-D5). */
+  markCodexDrawerSeen() {
+    this._codexBook?.markCurrentSeen();
   }
 
   render(alpha = 0, meta = {}) {
@@ -593,6 +644,7 @@ export class UIRenderer {
     this.#renderLethe(state, { reducedMotion });
     this.#renderBancada(state);
     this.#renderCodex(state);
+    this._codexBook?.sync(state);
     this.#announceEduLogTickers(state, { reducedMotion });
   }
 
@@ -649,6 +701,11 @@ export class UIRenderer {
       price.dataset.price = '';
       price.textContent = formatSouls(def.baseCost);
       meta.append(price);
+      const amort = this.root.createElement('span');
+      amort.className = 'despertar-card__amort';
+      amort.dataset.amort = '';
+      amort.hidden = true;
+      meta.append(amort);
 
       const owned = this.root.createElement('span');
       owned.className = 'despertar-card__owned despertar-num';
@@ -668,7 +725,7 @@ export class UIRenderer {
 
       item.append(icon, name, meta, owned, blurb, veil, buy);
       list.append(item);
-      this._cards.set(def.id, { item, blurb, veil, meta, qty: owned, rate, price, buy });
+      this._cards.set(def.id, { item, blurb, veil, meta, qty: owned, rate, price, amort, buy });
     }
   }
 
@@ -685,6 +742,7 @@ export class UIRenderer {
   }
 
   #renderMarket(state) {
+    const richAmort = Boolean(talentEffects(state.talents || []).richAmort);
     for (const def of GENERATORS) {
       const nodes = this._cards.get(def.id);
       if (!nodes) continue;
@@ -704,9 +762,21 @@ export class UIRenderer {
         if (nameNode) nameNode.textContent = '???';
       }
       if (view.revealed && view.amort != null) {
-        // Mercado = linha total; amortização na unidade (como hoje).
-        nodes.item.title = `Linha total · Amortização ~ ${formatAmortSeconds(view.amort)}`;
+        const amortLabel = formatAmortSeconds(view.amort);
+        if (richAmort) {
+          // Olho da Curva: amortização visível + tip sem SPS.
+          nodes.item.title = `Próxima unidade se paga em ~ ${amortLabel} (amortização)`;
+          if (nodes.amort) {
+            setHidden(nodes.amort, false);
+            setText(nodes.amort, ` · paga em ~ ${amortLabel}`);
+          }
+        } else {
+          nodes.item.title = `Linha total · Amortização ~ ${amortLabel}`;
+          if (nodes.amort) setHidden(nodes.amort, true);
+        }
         this.onAmortSeen?.();
+      } else if (nodes.amort) {
+        setHidden(nodes.amort, true);
       }
 
       setHidden(nodes.blurb, !view.revealed);
@@ -1337,9 +1407,16 @@ export class UIRenderer {
       obols: this.root.getElementById('lethe-obols'),
       mnemosyne: this.root.getElementById('lethe-mnemosyne'),
       preview: this.root.getElementById('lethe-preview'),
+      memory: this.root.getElementById('lethe-memory'),
       ritual: this.root.getElementById('lethe-ritual'),
       pantheonEmpty: this.root.getElementById('pantheon-empty'),
-      pantheonList: this.root.getElementById('pantheon-list'),
+      pantheonShop: this.root.getElementById('pantheon-shop'),
+      pantheonTabAvailable: this.root.getElementById('pantheon-tab-available'),
+      pantheonTabOwned: this.root.getElementById('pantheon-tab-owned'),
+      pantheonEmptyAvailable: this.root.getElementById('pantheon-empty-available'),
+      pantheonEmptyOwned: this.root.getElementById('pantheon-empty-owned'),
+      pantheonListAvailable: this.root.getElementById('pantheon-list-available'),
+      pantheonListOwned: this.root.getElementById('pantheon-list-owned'),
     };
     if (this._lethe.locked && !this._lethe.locked.textContent.trim()) {
       this._lethe.locked.textContent = LETHE_EMPTY;
@@ -1348,9 +1425,22 @@ export class UIRenderer {
       if (this._lethe.ritual.disabled) return;
       this.onOpenLethe?.();
     });
-    const list = this._lethe.pantheonList;
-    if (!list) return;
-    list.replaceChildren();
+
+    const tablist = this.root.getElementById('pantheon-subtabs');
+    this._pantheonSubTabs = bindSubTabs(tablist, {
+      doc: this.root,
+      onActivate: (_tab, key) => {
+        this._pantheonSubKey = key;
+        this._pantheonSubUserPicked = true;
+      },
+    });
+
+    const listA = this._lethe.pantheonListAvailable;
+    const listB = this._lethe.pantheonListOwned;
+    if (!listA || !listB) return;
+    listA.replaceChildren();
+    listB.replaceChildren();
+    this._talents.clear();
     for (const def of TALENTS) {
       const item = this.root.createElement('li');
       item.className = 'despertar-card';
@@ -1372,6 +1462,11 @@ export class UIRenderer {
       price.textContent = formatSouls(def.cost);
       meta.append(price, ' essência');
 
+      const badge = this.root.createElement('p');
+      badge.className = 'despertar-card__badge';
+      badge.textContent = SHOP_OWNED_BADGE;
+      badge.hidden = true;
+
       const buy = this.root.createElement('button');
       buy.className = 'btn-gold';
       buy.type = 'button';
@@ -1383,9 +1478,9 @@ export class UIRenderer {
         this.onBuyTalent?.(def.id);
       });
 
-      item.append(name, blurb, meta, buy);
-      list.append(item);
-      this._talents.set(def.id, { item, blurb, price, buy });
+      item.append(name, blurb, meta, badge, buy);
+      listA.append(item);
+      this._talents.set(def.id, { item, blurb, price, buy, badge });
     }
   }
 
@@ -1406,24 +1501,93 @@ export class UIRenderer {
     setText(this._lethe.obols, formatSouls(view.obols));
     setText(this._lethe.mnemosyne, formatSouls(view.mnemosyne));
     setText(this._lethe.preview, view.previewText);
+    if (this._lethe.memory) {
+      setHidden(this._lethe.memory, false);
+      setText(this._lethe.memory, view.memoryPreviewText);
+    }
     setDisabled(this._lethe.ritual, !view.canDrink);
 
     setHidden(this._lethe.pantheonEmpty, view.pantheonOpen);
-    setHidden(this._lethe.pantheonList, !view.pantheonOpen);
+    setHidden(this._lethe.pantheonShop, !view.pantheonOpen);
     if (!view.pantheonOpen && this._lethe.pantheonEmpty) {
       setText(this._lethe.pantheonEmpty, PANTHEON_EMPTY);
     }
     if (!view.pantheonOpen) return;
 
-    for (const def of TALENTS) {
-      const nodes = this._talents.get(def.id);
-      const card = describeTalentCard(state, def.id);
-      if (!nodes || !card) continue;
-      toggleClass(nodes.item, 'is-owned', card.owned);
+    const cards = TALENTS.map((def) => describeTalentCard(state, def.id)).filter(Boolean);
+    const partitioned = partitionShopCatalog(cards, {
+      isOwned: (card) => Boolean(card.owned),
+      canBuy: (card) => Boolean(card.canBuy),
+    });
+
+    setText(
+      this._lethe.pantheonTabAvailable,
+      shopTabLabel('Disponíveis', partitioned.counts.available),
+    );
+    setText(
+      this._lethe.pantheonTabOwned,
+      shopTabLabel('Comprados', partitioned.counts.owned),
+    );
+
+    const listA = this._lethe.pantheonListAvailable;
+    const listB = this._lethe.pantheonListOwned;
+    if (listA) listA.replaceChildren();
+    if (listB) listB.replaceChildren();
+
+    for (const card of partitioned.available) {
+      const nodes = this._talents.get(card.id);
+      if (!nodes) continue;
+      toggleClass(nodes.item, 'is-owned', false);
       setText(nodes.price, formatSouls(card.cost));
-      setText(nodes.buy, card.owned ? 'Na memória' : 'Selar');
+      setText(nodes.buy, 'Selar');
       setDisabled(nodes.buy, !card.canBuy);
+      setHidden(nodes.buy, false);
+      setHidden(nodes.badge, true);
+      listA?.append(nodes.item);
     }
+
+    for (const card of partitioned.owned) {
+      const nodes = this._talents.get(card.id);
+      if (!nodes) continue;
+      toggleClass(nodes.item, 'is-owned', true);
+      setText(nodes.price, formatSouls(card.cost));
+      setText(nodes.buy, 'Na memória');
+      setDisabled(nodes.buy, true);
+      setHidden(nodes.buy, true);
+      setHidden(nodes.badge, false);
+      setText(nodes.badge, SHOP_OWNED_BADGE);
+      listB?.append(nodes.item);
+    }
+
+    const emptyA = partitioned.counts.available === 0;
+    const emptyB = partitioned.counts.owned === 0;
+    setHidden(this._lethe.pantheonEmptyAvailable, !emptyA);
+    setHidden(this._lethe.pantheonListAvailable, emptyA);
+    setHidden(this._lethe.pantheonEmptyOwned, !emptyB);
+    setHidden(this._lethe.pantheonListOwned, emptyB);
+    if (emptyA && this._lethe.pantheonEmptyAvailable) {
+      setText(this._lethe.pantheonEmptyAvailable, PANTHEON_EMPTY_AVAILABLE);
+    }
+    if (emptyB && this._lethe.pantheonEmptyOwned) {
+      setText(this._lethe.pantheonEmptyOwned, PANTHEON_EMPTY_OWNED);
+    }
+
+    this.#syncPantheonSubTab(partitioned.counts.available);
+  }
+
+  #syncPantheonSubTab(availableCount) {
+    if (!this._pantheonSubTabs) return;
+    let key = this._pantheonSubKey;
+    if (!this._pantheonSubUserPicked) {
+      key = defaultShopSubTab(availableCount);
+    } else if (availableCount <= 0 && key === 'available') {
+      key = 'owned';
+    }
+    this._pantheonSubKey = key;
+    const tab = key === 'owned'
+      ? this._lethe?.pantheonTabOwned
+      : this._lethe?.pantheonTabAvailable;
+    if (tab) this._pantheonSubTabs.activate(tab, { silent: true });
   }
 
   /**
@@ -1483,7 +1647,13 @@ export class UIRenderer {
     this._bancada = {
       verdicts: this.root.getElementById('bancada-verdicts'),
       hint: this.root.getElementById('bancada-hint'),
-      list: this.root.getElementById('bancada-list'),
+      shop: this.root.getElementById('bancada-shop'),
+      tabAvailable: this.root.getElementById('bancada-tab-available'),
+      tabOwned: this.root.getElementById('bancada-tab-owned'),
+      emptyAvailable: this.root.getElementById('bancada-empty-available'),
+      emptyOwned: this.root.getElementById('bancada-empty-owned'),
+      listAvailable: this.root.getElementById('bancada-list-available'),
+      listOwned: this.root.getElementById('bancada-list-owned'),
     };
     setText(this._bancada.hint, JUIZO_BANCADA_HINT);
 
@@ -1514,6 +1684,7 @@ export class UIRenderer {
         blurb: tip.querySelector('[data-tip="blurb"]'),
         cost: tip.querySelector('[data-tip="cost"]'),
         activeId: null,
+        activeAnchor: null,
       }
       : null;
     this._bancadaKeyHandler = (event) => {
@@ -1521,9 +1692,21 @@ export class UIRenderer {
     };
     this.root.addEventListener?.('keydown', this._bancadaKeyHandler);
 
-    const list = this._bancada.list;
-    if (!list) return;
-    list.replaceChildren();
+    const tablist = this.root.getElementById('bancada-subtabs');
+    this._bancadaSubTabs = bindSubTabs(tablist, {
+      doc: this.root,
+      onActivate: (_tab, key) => {
+        this._bancadaSubKey = key;
+        this._bancadaSubUserPicked = true;
+      },
+    });
+
+    const listA = this._bancada.listAvailable;
+    const listB = this._bancada.listOwned;
+    if (!listA || !listB) return;
+    listA.replaceChildren();
+    listB.replaceChildren();
+    this._verdicts.clear();
     for (const def of VERDICT_SHOP) {
       const item = this.root.createElement('li');
       item.className = 'despertar-card';
@@ -1545,6 +1728,11 @@ export class UIRenderer {
       price.textContent = String(def.cost);
       meta.append(price, ' Vereditos');
 
+      const badge = this.root.createElement('p');
+      badge.className = 'despertar-card__badge';
+      badge.textContent = SHOP_OWNED_BADGE;
+      badge.hidden = true;
+
       const buy = this.root.createElement('button');
       buy.className = 'btn-gold';
       buy.type = 'button';
@@ -1560,9 +1748,9 @@ export class UIRenderer {
       buy.addEventListener('focus', () => this.#showBancadaTip(def.id, buy));
       buy.addEventListener('blur', () => this.#hideBancadaTip(def.id));
 
-      item.append(name, blurb, meta, buy);
-      list.append(item);
-      this._verdicts.set(def.id, { item, price, buy });
+      item.append(name, blurb, meta, badge, buy);
+      listA.append(item);
+      this._verdicts.set(def.id, { item, price, buy, badge, blurb });
     }
   }
 
@@ -1578,6 +1766,7 @@ export class UIRenderer {
       view.owned ? 'Na Bancada' : `Custo: ${view.cost} Vereditos`,
     );
     tip.activeId = id;
+    tip.activeAnchor = anchor;
     tip.root.hidden = false;
     tip.root.classList.remove('is-below');
     tip.root.classList.add('is-fixed');
@@ -1612,6 +1801,8 @@ export class UIRenderer {
     if (id != null && tip.activeId && tip.activeId !== id) return;
     tip.root.hidden = true;
     tip.activeId = null;
+    tip.activeAnchor?.removeAttribute?.('aria-describedby');
+    tip.activeAnchor = null;
     for (const nodes of this._verdicts.values()) {
       nodes.buy?.removeAttribute('aria-describedby');
     }
@@ -1620,19 +1811,88 @@ export class UIRenderer {
   #renderBancada(state) {
     if (!this._bancada) return;
     setText(this._bancada.verdicts, String(Number(state.verdicts) || 0));
-    for (const def of VERDICT_SHOP) {
-      const nodes = this._verdicts.get(def.id);
-      const card = describeVerdictCard(state, def.id);
-      if (!nodes || !card) continue;
-      toggleClass(nodes.item, 'is-owned', card.owned);
+
+    const cards = VERDICT_SHOP.map((def) => describeVerdictCard(state, def.id)).filter(Boolean);
+    const partitioned = partitionShopCatalog(cards, {
+      isOwned: (card) => Boolean(card.owned),
+      canBuy: (card) => Boolean(card.canBuy),
+    });
+
+    setText(
+      this._bancada.tabAvailable,
+      shopTabLabel('Disponíveis', partitioned.counts.available),
+    );
+    setText(
+      this._bancada.tabOwned,
+      shopTabLabel('Comprados', partitioned.counts.owned),
+    );
+
+    const listA = this._bancada.listAvailable;
+    const listB = this._bancada.listOwned;
+    if (listA) listA.replaceChildren();
+    if (listB) listB.replaceChildren();
+
+    for (const card of partitioned.available) {
+      const nodes = this._verdicts.get(card.id);
+      if (!nodes) continue;
+      toggleClass(nodes.item, 'is-owned', false);
       setText(nodes.price, String(card.cost));
-      setText(nodes.buy, card.owned ? 'Na Bancada' : 'Comprar');
+      setText(nodes.buy, 'Comprar');
       setDisabled(nodes.buy, !card.canBuy);
+      setHidden(nodes.buy, false);
+      setHidden(nodes.badge, true);
+      if (nodes.blurb) setText(nodes.blurb, card.blurb);
+      listA?.append(nodes.item);
     }
+
+    for (const card of partitioned.owned) {
+      const nodes = this._verdicts.get(card.id);
+      if (!nodes) continue;
+      toggleClass(nodes.item, 'is-owned', true);
+      setText(nodes.price, String(card.cost));
+      setText(nodes.buy, 'Na Bancada');
+      setDisabled(nodes.buy, true);
+      setHidden(nodes.buy, true);
+      setHidden(nodes.badge, false);
+      setText(nodes.badge, SHOP_OWNED_BADGE);
+      if (nodes.blurb) setText(nodes.blurb, card.blurb);
+      listB?.append(nodes.item);
+    }
+
+    const emptyA = partitioned.counts.available === 0;
+    const emptyB = partitioned.counts.owned === 0;
+    setHidden(this._bancada.emptyAvailable, !emptyA);
+    setHidden(this._bancada.listAvailable, emptyA);
+    setHidden(this._bancada.emptyOwned, !emptyB);
+    setHidden(this._bancada.listOwned, emptyB);
+    if (emptyA && this._bancada.emptyAvailable) {
+      setText(this._bancada.emptyAvailable, BANCADA_EMPTY_AVAILABLE);
+    }
+    if (emptyB && this._bancada.emptyOwned) {
+      setText(this._bancada.emptyOwned, BANCADA_EMPTY_OWNED);
+    }
+
+    this.#syncBancadaSubTab(partitioned.counts.available);
+
     if (this._bancadaTip?.activeId) {
       const active = this._verdicts.get(this._bancadaTip.activeId);
-      if (!active) this.#hideBancadaTip();
+      if (!active || active.buy?.hidden) this.#hideBancadaTip();
     }
+  }
+
+  #syncBancadaSubTab(availableCount) {
+    if (!this._bancadaSubTabs) return;
+    let key = this._bancadaSubKey;
+    if (!this._bancadaSubUserPicked) {
+      key = defaultShopSubTab(availableCount);
+    } else if (availableCount <= 0 && key === 'available') {
+      key = 'owned';
+    }
+    this._bancadaSubKey = key;
+    const tab = key === 'owned'
+      ? this._bancada?.tabOwned
+      : this._bancada?.tabAvailable;
+    if (tab) this._bancadaSubTabs.activate(tab, { silent: true });
   }
 
   #mountCodex() {
@@ -1671,6 +1931,15 @@ export class UIRenderer {
       list.append(item);
       this._codex.set(def.id, { item, title, body });
     }
+  }
+
+  #mountCodexBook() {
+    if (this._codexBook) return;
+    this._codexBook = new CodexBook(this.root, {
+      getUserId: () => this.getUserId(),
+      getState: () => this.state,
+    });
+    this._codexBook.mount();
   }
 
   #renderCodex(state) {

@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS lesson_gates (
   released_by integer REFERENCES users(id) ON DELETE SET NULL,
   released_at timestamptz NULL,
   updated_at timestamptz NOT NULL DEFAULT now(),
+  meta jsonb NOT NULL DEFAULT '{}'::jsonb,
   PRIMARY KEY (lesson_id, gate_key)
 );
 
@@ -258,6 +259,8 @@ CREATE TABLE IF NOT EXISTS despertar_states (
   talents_state jsonb NOT NULL DEFAULT '[]'::jsonb,
   edu_logs_seen jsonb NOT NULL DEFAULT '[]'::jsonb,
   milestones jsonb NOT NULL DEFAULT '{}'::jsonb,
+  -- Fase D / D1 — métricas auxiliares (clicks, max_buy_biggest, juizo_tie_wins)
+  stats jsonb NOT NULL DEFAULT '{}'::jsonb,
   verdicts integer NOT NULL DEFAULT 0,
   juizo_best_streak integer NOT NULL DEFAULT 0,
   juizo_current_streak integer NOT NULL DEFAULT 0,
@@ -279,9 +282,10 @@ ALTER TABLE despertar_states ENABLE ROW LEVEL SECURITY;
 -- Sem policies de INSERT/UPDATE para anon/authenticated.
 -- O backend usa SUPABASE_SERVICE_ROLE_KEY (bypass RLS), igual ao restante do Domínio.
 
--- Fase B / B3 + G4.3 + gold: RPC híbrida (persist + award). Espelho de
--- db/migrate-2026-09-22-despertar-shiny-counts.sql e
--- db/migrate-2026-09-22-despertar-gold-counts.sql (shiny_counts / gold_counts + CASE no patch).
+-- Fase B / B3 + G4.3 + gold + D1 stats: RPC híbrida (persist + award). Espelho de
+-- db/migrate-2026-09-22-despertar-shiny-counts.sql,
+-- db/migrate-2026-09-22-despertar-gold-counts.sql e
+-- db/migrate-2026-09-28-despertar-stats.sql (shiny/gold/stats + CASE no patch).
 CREATE OR REPLACE FUNCTION public.despertar_persist_and_award(
   p_user_id integer,
   p_patch jsonb,
@@ -323,6 +327,7 @@ BEGIN
     talents_state = CASE WHEN v_patch ? 'talents_state' THEN COALESCE(v_patch->'talents_state', '[]'::jsonb) ELSE ds.talents_state END,
     edu_logs_seen = CASE WHEN v_patch ? 'edu_logs_seen' THEN COALESCE(v_patch->'edu_logs_seen', '[]'::jsonb) ELSE ds.edu_logs_seen END,
     milestones = CASE WHEN v_patch ? 'milestones' THEN COALESCE(v_patch->'milestones', '{}'::jsonb) ELSE ds.milestones END,
+    stats = CASE WHEN v_patch ? 'stats' THEN COALESCE(v_patch->'stats', '{}'::jsonb) ELSE ds.stats END,
     verdicts = CASE WHEN v_patch ? 'verdicts' THEN (v_patch->>'verdicts')::integer ELSE ds.verdicts END,
     juizo_best_streak = CASE WHEN v_patch ? 'juizo_best_streak' THEN (v_patch->>'juizo_best_streak')::integer ELSE ds.juizo_best_streak END,
     juizo_current_streak = CASE WHEN v_patch ? 'juizo_current_streak' THEN (v_patch->>'juizo_current_streak')::integer ELSE ds.juizo_current_streak END,
