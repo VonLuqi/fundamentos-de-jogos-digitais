@@ -179,6 +179,8 @@ const catalog = [
   { id: 'aula3', number: '03', title: 'Homo Ludens, Identidade e Expressão Cultural' },
   { id: 'aula4', number: '04', title: 'A Linha do Tempo das Plataformas e as Restrições Técnicas' },
   { id: 'aula5', number: '05', title: 'Classificação Indicativa (ClassInd), IARC e Design Saudável' },
+  { id: 'aula6', number: '06', title: 'Mercado de Jogos, Propriedade Intelectual e Monetização Ética' },
+  { id: 'aula7', number: '07', title: 'Papéis na Indústria, Workflow e Versionamento Visual' },
 ];
 
 assert.equal(

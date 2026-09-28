@@ -646,6 +646,69 @@ img.discovery-card__item-art.has-art {
   color: var(--hades-gold);
 }
 
+.lesson-pre {
+  margin: 1rem 0 1.4rem;
+  padding: 0.9rem 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--hades-bronze);
+  background: rgba(10, 8, 12, 0.9);
+  color: var(--hades-text-dim);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  white-space: pre;
+}
+
+.lesson-code-block {
+  margin: 1rem 0 1.35rem;
+  padding: 0.85rem 0.95rem 0.55rem;
+  border: 1px solid rgba(207, 167, 89, 0.4);
+  background: rgba(14, 11, 17, 0.72);
+}
+
+.lesson-code-block__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem 0.85rem;
+  margin-bottom: 0.45rem;
+}
+
+.lesson-code-block__label {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.lesson-code-block__hint {
+  margin: 0 0 0.65rem;
+  color: var(--hades-text-dim);
+  font-size: 0.9rem;
+}
+
+.lesson-code-block .lesson-pre {
+  margin: 0 0 0.45rem;
+}
+
+.lesson-code-block__status {
+  min-height: 1.2em;
+  margin: 0 0 0.25rem;
+  font-size: 0.82rem;
+  color: var(--hades-text-dim);
+}
+
+.lesson-code-block__status.is-success {
+  color: var(--hades-gold-bright);
+}
+
+.lesson-code-block__status.is-error {
+  color: #e8a0a0;
+}
+
 .triplet-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

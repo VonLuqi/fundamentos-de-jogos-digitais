@@ -364,7 +364,7 @@ if (loaded.error) return res.status(loaded.errorStatus).json({ ok: false, error:
 const target = loaded.target;
 
 const lesson = String(lessonId || '').trim();
-if (!LESSON_CATALOG[lesson] && !['aula1', 'aula2', 'aula3', 'aula4', 'aula5'].includes(lesson)) {
+if (!LESSON_CATALOG[lesson] && !['aula1', 'aula2', 'aula3', 'aula4', 'aula5', 'aula6', 'aula7'].includes(lesson)) {
   return res.status(400).json({ ok: false, error: 'Aula inválida.' });
 }
 

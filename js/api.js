@@ -1948,6 +1948,28 @@ export const MODULES = [
       },
     ],
   },
+  {
+    id: 'modulo2',
+    number: 'M2',
+    title: 'Introdução ao GDScript “Do Zero”',
+    subtitle: 'Aulas 06–10 · Mercado, UI e primeiros scripts',
+    lessons: [
+      {
+        id: 'aula6',
+        number: '06',
+        title: 'Mercado de Jogos, Propriedade Intelectual e Monetização Ética',
+        subtitle: 'Mercado BR/internacional · Loja cosmética com moedas ganhas jogando',
+        rewardXp: 30,
+      },
+      {
+        id: 'aula7',
+        number: '07',
+        title: 'Papéis na Indústria, Workflow e Versionamento Visual',
+        subtitle: 'Equipes · Labirinto de Moedas 2D · pastas Godot e pasta compartilhada',
+        rewardXp: 30,
+      },
+    ],
+  },
 ];
 
 /** Aulas da trilha (sem avaliações — provas têm gate próprio). */

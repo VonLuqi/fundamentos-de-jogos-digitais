@@ -739,6 +739,246 @@ export function matchesBalancaDaFaixa(normalizedText) {
   return fantasyHit && realismHit;
 }
 
+/* ============================================================
+   AULA 06 — Mercado / PI / Monetização ética / Loja Godot
+   ============================================================ */
+
+/** Polo mercado (geografia / indústria). */
+const MERCADO_CORE = Object.freeze([
+  ['mercado', 'industria de jogos', 'industria dos jogos', 'industria'],
+]);
+
+const MERCADO_GEO = Object.freeze([
+  ['brasil', 'brasileiro', 'nacional', 'bgs', 'sbgames'],
+  ['internacional', 'global', 'exterior', 'mundo', 'steam', 'mobile'],
+  ['indie', 'aaa', 'mid-core', 'midcore'],
+]);
+
+/** Polo Original IP × prestação de serviços. */
+const IP_AUTHORAL = Object.freeze([
+  ['original ip', 'ip proprio', 'ip próprio', 'propriedade intelectual', 'autoral', 'dono do ip'],
+  ['ip'],
+]);
+
+const IP_SERVICE = Object.freeze([
+  ['prestacao de servicos', 'prestação de serviços', 'outsourcing', 'gamificacao', 'gamificação'],
+  ['servico', 'servicos', 'serviço', 'serviços', 'work-for-hire', 'work for hire'],
+]);
+
+/** Sinais da loja prática (preço fixo / cosmético / UI / anti-azar). */
+const LOJA_SHOP_SIGNALS = Object.freeze([
+  ['loja', 'balcao', 'balcão', 'interface de loja'],
+]);
+
+const LOJA_PRICE_SIGNALS = Object.freeze([
+  ['preco fixo', 'preço fixo', 'preco', 'preço', 'deterministico', 'determinístico'],
+]);
+
+const LOJA_COSMETIC_SIGNALS = Object.freeze([
+  ['cosmetico', 'cosmético', 'chapeu', 'chapéu', 'capa', 'aura', 'skin'],
+]);
+
+const LOJA_COIN_SIGNALS = Object.freeze([
+  ['moeda', 'moedas', 'saldo', 'coletar moeda', 'moedas da fase', 'ganhas jogando'],
+]);
+
+const LOJA_UI_SIGNALS = Object.freeze([
+  ['button', 'botao', 'botão', 'panelcontainer', 'panel', 'pressed', 'sinal', 'gdscript', 'control'],
+]);
+
+const LOJA_ANTI_LOOT_SIGNALS = Object.freeze([
+  ['sem loot', 'sem sorte', 'sem randi', 'sem aposta', 'sem azar', 'nao loot', 'não loot'],
+  ['loot box', 'lootbox'],
+]);
+
+/** Ética / tempo do jogador / ClassInd 18+ em azar. */
+const ETICA_PHRASE_SIGNALS = Object.freeze([
+  ['monetizacao etica', 'monetização ética', 'design etico', 'design ético', 'receita etica', 'receita ética'],
+  ['sustentavel', 'sustentável', 'respeitar o jogador', 'respeita o jogador'],
+]);
+
+const TEMPO_JOGADOR_SIGNALS = Object.freeze([
+  ['tempo do jogador', 'respeitar o tempo', 'respeita o tempo', 'respeito ao tempo'],
+]);
+
+const CLASSIND_AZAR_SIGNALS = Object.freeze([
+  ['classind', '18+', '18 +', 'jogo de azar', 'jogos de azar', 'microtransacao', 'microtransação'],
+  ['loot box', 'lootbox', 'mecanica abusiva', 'mecânica abusiva'],
+]);
+
+export const AULA6_SECRET_THRESHOLDS = Object.freeze({
+  mercadorMarketMin: 2,
+  mercadorIpMin: 2,
+  balcaoMin: 3,
+  balcaoTotal: 6,
+  tempoEthicsMin: 1,
+  tempoPoleMin: 1,
+});
+
+/** `etica`/`etico` com fronteira de palavra — evita falso positivo em "cosmetico". */
+function hasEthicsWord(normalizedText) {
+  return /\betica\b|\betico\b/.test(String(normalizedText || ''));
+}
+
+/**
+ * Mercado BR/internacional (≥2 sinais de mercado) OU Original IP × serviços (ambos polos).
+ */
+export function matchesMercadorDoStyx(normalizedText) {
+  const marketCore = coverageAtLeast(normalizedText, MERCADO_CORE, 1);
+  const marketGeo = coverageAtLeast(normalizedText, MERCADO_GEO, 1);
+  if (marketCore && marketGeo) return true;
+  if (coverageAtLeast(normalizedText, MERCADO_GEO, AULA6_SECRET_THRESHOLDS.mercadorMarketMin)) {
+    return true;
+  }
+
+  const ipHit = coverageAtLeast(normalizedText, IP_AUTHORAL, 1);
+  const serviceHit = coverageAtLeast(normalizedText, IP_SERVICE, 1);
+  return ipHit && serviceHit;
+}
+
+/**
+ * Loja com evidência prática: ≥3 entre loja · preço · cosmético · moeda · UI · anti-loot.
+ */
+export function matchesBalcaoSemAzar(normalizedText) {
+  const groups = [
+    LOJA_SHOP_SIGNALS,
+    LOJA_PRICE_SIGNALS,
+    LOJA_COSMETIC_SIGNALS,
+    LOJA_COIN_SIGNALS,
+    LOJA_UI_SIGNALS,
+    LOJA_ANTI_LOOT_SIGNALS,
+  ];
+  let hits = 0;
+  for (const group of groups) {
+    if (coverageAtLeast(normalizedText, group, 1)) hits += 1;
+  }
+  return hits >= AULA6_SECRET_THRESHOLDS.balcaoMin;
+}
+
+/**
+ * Monetização ética E (tempo do jogador OU ClassInd/18+/azar abusivo).
+ */
+export function matchesTempoRespeitado(normalizedText) {
+  const ethicsOk = hasEthicsWord(normalizedText)
+    || coverageAtLeast(
+      normalizedText,
+      ETICA_PHRASE_SIGNALS,
+      AULA6_SECRET_THRESHOLDS.tempoEthicsMin
+    );
+  if (!ethicsOk) return false;
+
+  const timeOk = coverageAtLeast(
+    normalizedText,
+    TEMPO_JOGADOR_SIGNALS,
+    AULA6_SECRET_THRESHOLDS.tempoPoleMin
+  );
+  const classindOk = coverageAtLeast(
+    normalizedText,
+    CLASSIND_AZAR_SIGNALS,
+    AULA6_SECRET_THRESHOLDS.tempoPoleMin
+  );
+  return timeOk || classindOk;
+}
+
+/* ============================================================
+   AULA 07 — Papéis / Workflow / Scope Creep / Versionamento
+   ============================================================ */
+
+/** Cinco ofícios de estúdio (cada grupo = um papel). */
+const OFICIO_PROGRAMACAO = Object.freeze([
+  ['programacao', 'programação', 'programador', 'codigo', 'código', 'script', 'gdscript'],
+]);
+
+const OFICIO_ARTE = Object.freeze([
+  ['artista', 'sprites', 'sprite', 'pixel art', 'arte do cenario', 'arte do cenário', 'papel de arte', 'oficio de arte', 'ofício de arte'],
+]);
+
+const OFICIO_AUDIO = Object.freeze([
+  ['audio', 'áudio', 'sfx', 'musica', 'música', 'efeito sonoro', 'papel de audio', 'papel de áudio'],
+]);
+
+const OFICIO_DESIGN = Object.freeze([
+  ['game design', 'gamedesign', 'designer', 'gdd', 'regras do jogo', 'core loop'],
+]);
+
+const OFICIO_PRODUCAO = Object.freeze([
+  ['producao', 'produção', 'produtor', 'cronograma', 'produtor do dia'],
+]);
+
+/** Scope Creep / cercado do MVP. */
+const SCOPE_CREEP_SIGNALS = Object.freeze([
+  ['scope creep', 'scopecreep', 'estouro de escopo', 'escopo creep'],
+]);
+
+const SCOPE_CUT_SIGNALS = Object.freeze([
+  ['fora do escopo', 'fora do mvp', 'cortamos', 'cortar', 'cercado'],
+  ['mvp', 'nao faremos', 'não faremos', 'fica de fora', 'deixamos de fora'],
+]);
+
+/** Pastas / cenas / sync. */
+const PASTA_GODOT_SIGNALS = Object.freeze([
+  ['pasta', 'pastas', 'filesystem', 'file system'],
+  ['cenas/', 'sprites/', 'audio/', 'scripts/', 'labirintodemoedas', 'labirinto de moedas'],
+]);
+
+const CENA_TSCN_SIGNALS = Object.freeze([
+  ['.tscn', 'tscn', 'player.tscn', 'moeda.tscn', 'cenario.tscn', 'cenário.tscn'],
+  ['cena-esqueleto', 'cena esqueleto', 'cenas-esqueleto', 'stub'],
+]);
+
+const PASTA_SYNC_SIGNALS = Object.freeze([
+  ['pasta compartilhada', 'pasta sync', 'drive', 'onedrive', 'google drive'],
+  ['versionamento', 'backup', 'zip', 'nao sobrescrever', 'não sobrescrever', 'anti-sobrescrita'],
+]);
+
+export const AULA7_SECRET_THRESHOLDS = Object.freeze({
+  oficiosMin: 2,
+  pastaMin: 2,
+  pastaTotal: 3,
+});
+
+/**
+ * ≥2 papéis de estúdio citados (prog / arte / áudio / design / produção).
+ */
+export function matchesCincoOficios(normalizedText) {
+  const groups = [
+    OFICIO_PROGRAMACAO,
+    OFICIO_ARTE,
+    OFICIO_AUDIO,
+    OFICIO_DESIGN,
+    OFICIO_PRODUCAO,
+  ];
+  let hits = 0;
+  for (const group of groups) {
+    if (coverageAtLeast(normalizedText, group, 1)) hits += 1;
+  }
+  return hits >= AULA7_SECRET_THRESHOLDS.oficiosMin;
+}
+
+/**
+ * Menciona Scope Creep OU evidencia corte explícito / fora do escopo / MVP.
+ */
+export function matchesCercadoDoEscopo(normalizedText) {
+  if (coverageAtLeast(normalizedText, SCOPE_CREEP_SIGNALS, 1)) return true;
+  return coverageAtLeast(normalizedText, SCOPE_CUT_SIGNALS, 1);
+}
+
+/**
+ * ≥2 entre: pastas Godot · cena/.tscn · pasta compartilhada/versionamento.
+ */
+export function matchesPastaSagrada(normalizedText) {
+  const groups = [
+    PASTA_GODOT_SIGNALS,
+    CENA_TSCN_SIGNALS,
+    PASTA_SYNC_SIGNALS,
+  ];
+  let hits = 0;
+  for (const group of groups) {
+    if (coverageAtLeast(normalizedText, group, 1)) hits += 1;
+  }
+  return hits >= AULA7_SECRET_THRESHOLDS.pastaMin;
+}
+
 const LESSON_SECRET_RULES = Object.freeze({
   aula1: Object.freeze([
     {
@@ -808,6 +1048,34 @@ const LESSON_SECRET_RULES = Object.freeze({
     {
       id: 'segredo_balanca_da_faixa',
       test: (ctx) => matchesBalancaDaFaixa(ctx.normalizedText),
+    },
+  ]),
+  aula6: Object.freeze([
+    {
+      id: 'segredo_mercador_do_styx',
+      test: (ctx) => matchesMercadorDoStyx(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_balcao_sem_azar',
+      test: (ctx) => matchesBalcaoSemAzar(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_tempo_respeitado',
+      test: (ctx) => matchesTempoRespeitado(ctx.normalizedText),
+    },
+  ]),
+  aula7: Object.freeze([
+    {
+      id: 'segredo_cinco_oficios',
+      test: (ctx) => matchesCincoOficios(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_cercado_do_escopo',
+      test: (ctx) => matchesCercadoDoEscopo(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_pasta_sagrada',
+      test: (ctx) => matchesPastaSagrada(ctx.normalizedText),
     },
   ]),
 });

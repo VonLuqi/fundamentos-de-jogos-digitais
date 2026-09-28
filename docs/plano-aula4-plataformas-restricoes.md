@@ -549,7 +549,7 @@ Próximo currículo → Aula 05 (ClassInd / IARC / Design Saudável — ver Pont
 ## Ponte — Aula 05 (próxima do Módulo 1)
 
 > **Ementa oficial (2026-09-21):** Aula 05 = *Classificação Indicativa (ClassInd), IARC e Design Saudável* + práticas **ClassInd-dle** (Higher/Lower ao vivo) e **Adequação Reversa / Patch Note** no site (**sem Godot**). Plano: [`plano-aula5-classind-iarc.md`](./plano-aula5-classind-iarc.md).  
-> A sugestão anterior (câmera / cena de teste / AnimatedSprite) fica para **Módulo 2+**.
+> Depois da Provação do Módulo 1: **Aula 06** = mercado + loja ética (Godot) — [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md). Câmera / AnimatedSprite ficam para **aulas posteriores do Módulo 2**, não para a Aula 06.
 
 Com o **contrato de tela** definido (viewport retrô + stretch clássico), a sequência curricular oficial:
 

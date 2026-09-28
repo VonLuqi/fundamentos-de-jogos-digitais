@@ -66,10 +66,16 @@ assert(rateLib.includes('AUTH_RATE_LIMITS'), 'auth-rate.js exporta limites');
 assert(progress.includes('hasUnlockedLesson'), 'redeem importa hasUnlockedLesson');
 assert(progress.includes('LESSON_PREREQUISITES'), 'redeem conhece prerequisites');
 assert(LESSON_PREREQUISITES.aula5 === 'aula4', 'aula5 exige aula4');
+assert(LESSON_PREREQUISITES.aula6 === 'aula5', 'aula6 exige aula5');
+assert(LESSON_PREREQUISITES.aula7 === 'aula6', 'aula7 exige aula6');
 assert(hasUnlockedLesson({ completed_lessons: [] }, 'aula1') === true, 'aula1 sem prereq');
 assert(hasUnlockedLesson({ completed_lessons: [] }, 'aula2') === false, 'aula2 bloqueada sem aula1');
 assert(hasUnlockedLesson({ completed_lessons: ['aula1'] }, 'aula2') === true, 'aula2 ok após aula1');
 assert(hasUnlockedLesson({ completedLessons: ['aula4'] }, 'aula5') === true, 'camelCase também funciona');
+assert(hasUnlockedLesson({ completedLessons: ['aula5'] }, 'aula6') === true, 'aula6 desbloqueia com aula5');
+assert(hasUnlockedLesson({ completedLessons: ['aula4'] }, 'aula6') === false, 'aula6 bloqueia sem aula5');
+assert(hasUnlockedLesson({ completedLessons: ['aula6'] }, 'aula7') === true, 'aula7 desbloqueia com aula6');
+assert(hasUnlockedLesson({ completedLessons: ['aula5'] }, 'aula7') === false, 'aula7 bloqueia sem aula6');
 
 assert(SESSION_TTL_MS === 14 * 24 * 60 * 60 * 1000, 'TTL 14 dias');
 assert(SESSION_RENEW_WINDOW_MS === 7 * 24 * 60 * 60 * 1000, 'renew window 7 dias');

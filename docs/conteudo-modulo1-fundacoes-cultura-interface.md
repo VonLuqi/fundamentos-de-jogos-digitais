@@ -255,7 +255,7 @@ Dois jogos podem ter o mesmo loop (atirar, curar) e faixas diferentes — o **fe
 
 ---
 
-## Progressão e ponte para o Módulo 2+
+## Progressão e ponte para o Módulo 2
 
 ```
 Círculo Mágico + Inspector
@@ -270,8 +270,16 @@ ClassInd / IARC / design saudável
         ↓
 Provação do Círculo Mágico (avaliação online)
         ↓
-Módulo 2+ (câmera, AnimatedSprite, polish — quando houver ementa)
+Módulo 2 · Aula 06 — Mercado, PI e Monetização Ética
+        (loja cosmética ética na Godot · GDScript “do zero”)
+        ↓
+Módulo 2 · Aula 07 — Papéis, Workflow e Versionamento Visual
+        (equipes · Labirinto de Moedas 2D · pastas / pasta compartilhada)
+        ↓
+Aulas 08–10 (ementa a definir) · câmera / AnimatedSprite quando listados
 ```
+
+**Planos:** [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md) · [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md) · conteúdo M2: [`conteudo-modulo2-gdscript-do-zero.md`](./conteudo-modulo2-gdscript-do-zero.md)
 
 ---
 
@@ -280,16 +288,17 @@ Módulo 2+ (câmera, AnimatedSprite, polish — quando houver ementa)
 
 | Artefato | Caminho |
 | --- | --- |
-| Páginas das aulas | `pages/aula1.html` … `pages/aula5.html` |
+| Páginas das aulas (M1) | `pages/aula1.html` … `pages/aula5.html` |
+| **Aula 06 (M2)** | `pages/aula6.html` |
 | **Prova online (aluno)** | `pages/prova.html` · entrada em **Aulas → Módulo 1** |
 | **Hub correção (Mestre)** | `pages/prova-admin.html` |
-| Catálogo do módulo | `js/api.js` → `MODULES` (`modulo1`) |
-| Planos de implementação | `docs/plano-aula1-modulo1.md` … `docs/plano-aula5-classind-iarc.md` |
+| Catálogo do módulo | `js/api.js` → `MODULES` (`modulo1`, `modulo2`) |
+| Planos de implementação | `docs/plano-aula1-modulo1.md` … `docs/plano-aula6-mercado-loja-etica.md` |
 | Plano da prova | `docs/plano-prova-modulo1-online.md` |
 | Playbook liberar prova | `docs/playbook-liberar-prova-modulo1.md` |
-| Playbooks de liberação (aulas) | `docs/playbook-liberar-aula2.md` … `aula5` |
+| Playbooks de liberação (aulas) | `docs/playbook-liberar-aula2.md` … `aula6` |
 | Materiais baixáveis | `assets/docs/aulas/aula0N-*/` |
 
 ---
 
-*Documento de conteúdo do Módulo 1 — reunido a partir das páginas de aula e planos pedagógicos (2026-09-24).*
+*Documento de conteúdo do Módulo 1 — reunido a partir das páginas de aula e planos pedagógicos (atualizado 2026-09-28 · ponte M2 → Aulas 06–07).*

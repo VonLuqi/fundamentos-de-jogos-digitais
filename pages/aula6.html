@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 06 — Mercado de Jogos, Propriedade Intelectual e Monetização Ética: loja cosmética na Godot 4 com moedas ganhas jogando." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 06 — Mercado, PI e Monetização Ética | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page" data-route="aula6" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 2 · Introdução ao GDScript “Do Zero”</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 06: MERCADO, PI E <span class="accent">MONETIZAÇÃO ÉTICA</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 06</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina da Loja
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 2 · Aulas 6 a 10 · 10h</p>
+        <h2 class="lesson-title">Mercado brasileiro e internacional de jogos</h2>
+        <p>
+          O Módulo 1 fechou o círculo: regras, player, pixel, viewport e ClassInd.
+          Agora o Submundo abre o <strong>balcão</strong> — e o primeiro GDScript “do zero” da trilha:
+          uma loja cosmética que respeita o tempo do jogador.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Mercado</h3>
+            <p>Indústria criativa + software + entretenimento: console, PC, mobile, Steam, itch.io — quem joga, quem publica, como o dinheiro circula (BR e mundo).</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Original IP × Serviços</h3>
+            <p><strong>IP autoral</strong> = você detém o jogo/mundo. <strong>Serviços</strong> = vende capacidade (art outsourcing, gamificação) sob contrato.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Monetização ética</h3>
+            <p>Receita sustentável sem explorar o jogador: preço justo, DLC claro, cosméticos transparentes — e moedas <strong>ganhas jogando</strong>.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Onde o dinheiro mora</h2>
+        <ul class="lesson-list">
+          <li><strong>Brasil:</strong> mobile forte, studios autorais e de service, eventos (SBGames, BGS), fomento e desafios de câmbio/publicação.</li>
+          <li><strong>Internacional:</strong> AAA, mid-core e indie; lojas digitais ditam corte de receita e regras de IAP/idade.</li>
+          <li><strong>Dois caminhos de viver de jogo:</strong> criar e deter a IP — ou prestar serviços criativos para terceiros. Nenhum é “menor”; ética e contrato mudam.</li>
+        </ul>
+
+        <h2 class="lesson-title">Receita sustentável (sem explorar)</h2>
+        <ul class="lesson-list">
+          <li>Preço único justo (premium).</li>
+          <li>Expansões / DLC de conteúdo claro.</li>
+          <li>Cosméticos / battle pass <strong>transparentes</strong> (o jogador sabe o que compra).</li>
+          <li>Assinatura com valor contínuo explícito.</li>
+          <li><strong>Moeda ganha jogando</strong> — recompensa tempo e habilidade (foco desta aula).</li>
+        </ul>
+
+        <h2 class="lesson-title">Microtransações aceitáveis × mecânicas de azar</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Aceitável nesta trilha</h3>
+            <p>Skin com moedas da fase · preço fixo visível · recompensa por jogar · cosmético sem vantagem injusta.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Abusivo / risco alto</h3>
+            <p>Loot box paga com chance oculta · pay-to-win · pressão em crianças · dark patterns de recompra.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Elo ClassInd (Aula 05)</h3>
+            <p>No Brasil, mecânicas que <strong>simulam jogo de azar</strong> (loot boxes) tendem a elevar a faixa — frequentemente <strong>18+</strong>.</p>
+          </article>
+        </div>
+
+        <div class="quote-block">
+          <p>Respeitar o tempo do jogador é também um modelo de negócio: a loja do Submundo só aceita moedas que você conquistou na fase — nunca a sorte embalada de um baú pago.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
+        <p>
+          Na Godot 4, montar uma <strong>interface de loja</strong> com
+          <code>PanelContainer</code>, <code>Button</code> e <code>Label</code>,
+          conectar o sinal <code>pressed</code> e programar compras cosméticas com preços <strong>fixos</strong>
+          (sem dinheiro real, sem <code>randi()</code> na compra).
+        </p>
+        <ul class="lesson-list">
+          <li>Situar o mercado BR/internacional e distinguir Original IP de prestação de serviços.</li>
+          <li>Explicar monetização ética e por que loot box eleva a classificação.</li>
+          <li>Entregar uma loja operacional abastecida só por moedas ganhas jogando.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · Oficina de Interface de Loja</p>
+        <h2 class="lesson-title">Prática na Godot Engine</h2>
+        <p>
+          Continue o projeto das <strong>Aulas 02–04</strong> (Player + Nearest + viewport retrô).
+          Hoje você <strong>adiciona</strong> a cena <code>ui/loja.tscn</code> —
+          tela de UI com botões que “compram” cosméticos usando moedas coletadas na fase (simuladas).
+          Sem IAP real. Sem loot box.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Control</h3>
+            <p>Família de nós de interface (âncoras/retângulos). A raiz da loja é <code>Control</code>, não <code>Node2D</code>.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>PanelContainer + Button</h3>
+            <p>Painéis embrulham itens; botões emitem o sinal <code>pressed</code> que liga às funções do script.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Moeda in-game</h3>
+            <p>Saldo inicial <strong>10</strong>; botão “Coletar moeda da fase” dá <strong>+5</strong>. Preços fixos: 5 · 12 · 20.</p>
+          </article>
+        </div>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>
+            Guia completo com Blocos 0–5 (mesmos nomes de nós), troubleshooting e
+            <strong>script-espelho</strong> para consultar se travar — preferir construir por etapas.
+          </p>
+          <div class="slides-actions">
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula06-loja-etica/README.md" target="_blank" rel="noopener noreferrer">
+              Abrir guia da oficina (README)
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula06-loja-etica/loja-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
+              Baixar loja-exemplo.gd
+            </a>
+          </div>
+        </div>
+
+        <h3 class="lesson-subtitle">Cronograma da oficina (~100 min)</h3>
+        <ul class="lesson-list">
+          <li><strong>0. Setup (8 min)</strong> — pasta <code>ui/</code> · cena <code>Control</code> · <code>loja.tscn</code></li>
+          <li><strong>1. Árvore (20 min)</strong> — <code>PanelContainer</code> · labels · botões (como na foto)</li>
+          <li><strong>2. Layout (12 min)</strong> — âncoras · tamanhos · F6 legível</li>
+          <li><strong>3. Script + sinal (25 min)</strong> — <code>loja.gd</code> · coletar moeda · atualizar HUD</li>
+          <li><strong>4. Regras éticas (20 min)</strong> — bloquear sem saldo / item já comprado · status</li>
+          <li><strong>5. Play + registro (15 min)</strong> — fluxo completo · anotações · finalizar</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">0. Setup</h3>
+        <ol class="lesson-list">
+          <li>Abra o projeto Godot 4 das Aulas 02–04.</li>
+          <li>FileSystem → New Folder → <code>ui</code>.</li>
+          <li>Scene → New Scene → <strong>Other Node</strong> → <code>Control</code> → renomeie a raiz para <code>Loja</code>.</li>
+          <li>Salve como <code>ui/loja.tscn</code>. Anchors Preset da raiz → <strong>Full Rect</strong>.</li>
+        </ol>
+        <p><strong>Checkpoint 0:</strong> existe <code>ui/loja.tscn</code>; raiz <code>Loja</code> é <code>Control</code>.</p>
+
+        <h3 class="lesson-subtitle">1. Árvore da loja (nomes são contrato)</h3>
+        <figure class="lesson-media">
+          <img
+            class="lesson-media__img"
+            src="../assets/docs/aulas/aula06-loja-etica/hierarquia-loja-godot.png"
+            alt="Aba Scene da Godot com a hierarquia Loja → PanelContainer → MarginContainer → VBoxContainer e itens Aura, Chapeu, Capa, GanharMoedas e Status"
+            width="420"
+            height="520"
+            loading="lazy"
+          >
+          <figcaption class="lesson-media__caption">
+            Referência na Godot: a raiz <code>Loja</code> leva o script; os ícones de sinal nos botões mostram o <code>pressed</code> já conectado.
+          </figcaption>
+        </figure>
+        <pre class="lesson-pre" aria-label="Hierarquia de nós da loja com tipos">Loja (Control) ← script loja.gd
+└── PanelContainer
+    └── MarginContainer
+        └── VBoxContainer
+            ├── Título (Label)
+            ├── Moedas (Label)
+            ├── Aura (PanelContainer)
+            │   └── HBoxContainer
+            │       ├── Label
+            │       └── Button
+            ├── Chapeu (PanelContainer)
+            │   └── HBoxContainer
+            │       ├── Label
+            │       └── Button
+            ├── Capa (PanelContainer)
+            │   └── HBoxContainer
+            │       ├── Label
+            │       └── Button
+            ├── GanharMoedas (Button)
+            └── Status (Label)</pre>
+        <ul class="lesson-list">
+          <li><code>Control</code> — raiz da UI; recebe o script.</li>
+          <li><code>PanelContainer</code> — painel de fundo (também usado em cada item: Aura / Chapeu / Capa).</li>
+          <li><code>MarginContainer</code> — margem interna (10–16 px).</li>
+          <li><code>VBoxContainer</code> — empilha os filhos na vertical.</li>
+          <li><code>HBoxContainer</code> — lado a lado: texto do item + botão Comprar.</li>
+          <li><code>Label</code> — texto (<code>Título</code>, <code>Moedas</code>, <code>Status</code>, nome do item).</li>
+          <li><code>Button</code> — clique (<code>GanharMoedas</code> e os três Comprar).</li>
+        </ul>
+        <ul class="lesson-list">
+          <li><code>Título</code>: Loja do Submundo</li>
+          <li><code>Moedas</code>: Moedas: 10</li>
+          <li>Itens: Chapéu espectral — 5 · Capa de névoa — 12 · Aura de carvão — 20</li>
+          <li><code>GanharMoedas</code>: Coletar moeda da fase (+5)</li>
+          <li><code>Status</code>: Bem-vindo. Só moedas ganhas jogando.</li>
+        </ul>
+        <p><strong>Checkpoint 1:</strong> nomes na aba Scene iguais ao diagrama (maiúsculas importam).</p>
+
+        <h3 class="lesson-subtitle">2. Layout legível</h3>
+        <ol class="lesson-list">
+          <li><code>PanelContainer</code>: Anchors Center ou Full Rect (use <code>MarginContainer</code> 10–16 px).</li>
+          <li>Botões: Custom Minimum Size ~120×32 se estiverem minúsculos.</li>
+          <li>Viewport retrô (Aula 04): aumente font size nos Labels se o texto apertar.</li>
+          <li>Teste com <strong>F6</strong> (Play This Scene) — não só F5 se a Main Scene for o Player.</li>
+        </ol>
+
+        <h3 class="lesson-subtitle">3. Script <code>loja.gd</code> + sinal <code>pressed</code></h3>
+        <ol class="lesson-list">
+          <li>Selecione a raiz <code>Loja</code> → Attach Script → <code>ui/loja.gd</code>.</li>
+          <li>Declare <code>var moedas: int = 10</code>, flags <code>tem_chapeu/capa/aura</code>, <code>const</code> de preços e <code>GANHO_FASE = 5</code>.</li>
+          <li>Use <code>@onready</code> para <code>Moedas</code>, <code>Status</code> e os três <code>Button</code> de compra (caminhos como na foto).</li>
+          <li>
+            <strong>Padrão de sala (Forma A):</strong> aba <strong>Sinais</strong> → sinal <code>pressed</code> de cada botão → Connect no nó <code>Loja</code>
+            (<code>_on_btn_ganhar_moedas_pressed</code>, <code>_on_btn_comprar_chapeu_pressed</code>, etc.).
+          </li>
+          <li>Função de coletar: <code>moedas += GANHO_FASE</code> · atualizar status · <code>_atualizar_hud()</code>.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Bloco 3 (cole se estiver atrasado)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="loja-bloco3" aria-describedby="loja-bloco3-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="loja-bloco3-hint" class="lesson-code-block__hint">
+            Cole em <code>ui/loja.gd</code>. Os <code>@onready</code> seguem a árvore da foto.
+            Conecte o <code>pressed</code> de <code>GanharMoedas</code> para <code>_on_btn_ganhar_moedas_pressed</code>.
+          </p>
+          <pre id="loja-bloco3" class="lesson-pre" aria-label="Código do bloco 3 — base e coletar moeda">extends Control
+
+var moedas: int = 10
+
+var tem_chapeu: bool = false
+var tem_capa: bool = false
+var tem_aura: bool = false
+
+const PRECO_CHAPEU: int = 5
+const PRECO_CAPA: int = 12
+const PRECO_AURA: int = 20
+const GANHO_FASE: int = 5
+
+@onready var label_moedas: Label = $PanelContainer/MarginContainer/VBoxContainer/Moedas
+@onready var label_status: Label = $PanelContainer/MarginContainer/VBoxContainer/Status
+@onready var btn_chapeu: Button = $PanelContainer/MarginContainer/VBoxContainer/Chapeu/HBoxContainer/Button
+@onready var btn_capa: Button = $PanelContainer/MarginContainer/VBoxContainer/Capa/HBoxContainer/Button
+@onready var btn_aura: Button = $PanelContainer/MarginContainer/VBoxContainer/Aura/HBoxContainer/Button
+
+
+func _ready() -&gt; void:
+	_atualizar_hud()
+	label_status.text = "Bem-vindo. Só moedas ganhas jogando."
+
+
+func _atualizar_hud() -&gt; void:
+	label_moedas.text = "Moedas: %d" % moedas
+
+
+func _on_btn_ganhar_moedas_pressed() -&gt; void:
+	moedas += GANHO_FASE
+	label_status.text = "Você coletou +%d moedas na fase." % GANHO_FASE
+	_atualizar_hud()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="loja-bloco3" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 3:</strong> F6 → <code>GanharMoedas</code> → <code>Moedas</code> sobe de 5 em 5.</p>
+
+        <h3 class="lesson-subtitle">4. Regras de compra ética</h3>
+        <ol class="lesson-list">
+          <li>Se já possui o item → status “já possui” e <code>return</code>.</li>
+          <li>Se <code>moedas &lt; preço</code> → “Moedas insuficientes…” e <code>return</code>.</li>
+          <li>Senão: descontar · marcar flag · <code>disabled = true</code> · texto <code>Adquirido</code> · atualizar status.</li>
+          <li><strong>Proibido:</strong> <code>randi()</code>, loot box, preço em dinheiro real.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Bloco 4 (cole abaixo do Bloco 3)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="loja-bloco4" aria-describedby="loja-bloco4-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="loja-bloco4-hint" class="lesson-code-block__hint">
+            Cole <strong>no final</strong> de <code>loja.gd</code> (depois de <code>_on_btn_ganhar_moedas_pressed</code>).
+            Conecte o <code>pressed</code> de cada <code>Button</code> (Chapeu / Capa / Aura) ao método correspondente.
+          </p>
+          <pre id="loja-bloco4" class="lesson-pre" aria-label="Código do bloco 4 — compras éticas">func _on_btn_comprar_chapeu_pressed() -&gt; void:
+	if tem_chapeu:
+		label_status.text = "Você já tem chapéu."
+		return
+	if moedas &lt; PRECO_CHAPEU:
+		label_status.text = "Moedas insuficientes."
+		return
+	moedas -= PRECO_CHAPEU
+	tem_chapeu = true
+	btn_chapeu.disabled = true
+	btn_chapeu.text = "Adquirido"
+	label_status.text = "Chapéu comprado!"
+	_atualizar_hud()
+
+
+func _on_btn_comprar_capa_pressed() -&gt; void:
+	if tem_capa:
+		label_status.text = "Você já tem capa."
+		return
+	if moedas &lt; PRECO_CAPA:
+		label_status.text = "Moedas insuficientes."
+		return
+	moedas -= PRECO_CAPA
+	tem_capa = true
+	btn_capa.disabled = true
+	btn_capa.text = "Adquirido"
+	label_status.text = "Capa comprada!"
+	_atualizar_hud()
+
+
+func _on_btn_comprar_aura_pressed() -&gt; void:
+	if tem_aura:
+		label_status.text = "Você já tem aura."
+		return
+	if moedas &lt; PRECO_AURA:
+		label_status.text = "Moedas insuficientes."
+		return
+	moedas -= PRECO_AURA
+	tem_aura = true
+	btn_aura.disabled = true
+	btn_aura.text = "Adquirido"
+	label_status.text = "Aura comprada!"
+	_atualizar_hud()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="loja-bloco4" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 4:</strong> comprar chapéu com 10 → saldo 5; tentar aura sem saldo → bloqueio; recompra → “já possui”.</p>
+
+        <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
+        <ul class="lesson-list">
+          <li>Integrar a loja na cena do Player (mistura UI com movimento — Aula 07+).</li>
+          <li>Usar <code>Node2D</code> como raiz da loja.</li>
+          <li>Implementar loot box “só de brincadeira”.</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">Checklist do artefato</h3>
+        <ul class="lesson-list">
+          <li>Cena <code>ui/loja.tscn</code> com raiz <code>Control</code> nomeada <code>Loja</code>.</li>
+          <li>Pelo menos um <code>PanelContainer</code> e três <code>Button</code> de compra + um de coletar moeda.</li>
+          <li>Script <code>ui/loja.gd</code> anexado; sinal <code>pressed</code> conectado.</li>
+          <li>Saldo atualiza no label <code>Moedas</code>.</li>
+          <li>Compra com preço fixo; bloqueia sem moedas e item repetido.</li>
+          <li>Nenhum uso de sorte na compra.</li>
+          <li>Play (F6) demonstra o fluxo completo.</li>
+          <li>Anotações + síntese enviadas nesta página.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Preço fixo e cosmético sem azar: o balcão ensina GDScript e, ao mesmo tempo, respeito ao jogador.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 6">
+          <p><strong>Pistas secretas do Submundo:</strong> fale do mercado ou do IP; descreva sua loja com botões e moedas ganhas na fase; e diga por que preço fixo respeita o jogador melhor que um baú da sorte. O altar reconhece quem documenta o balcão ético.</p>
+        </section>
+
+        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
+          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+          <p>
+            Registre mercado, IP, ética da loja, hierarquia de nós e o que viu no Play.
+            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+          </p>
+          <textarea
+            id="config-notes"
+            class="config-notes-text"
+            rows="14"
+            placeholder="1) Uma ideia do mercado brasileiro OU internacional que me marcou:&#10;2) Original IP vs prestação de serviços — em uma frase, a diferença:&#10;3) Exemplo de monetização ética vs. mecânica abusiva (loot box / azar):&#10;4) Por que loot box pode subir a classificação (eco ClassInd):&#10;5) Hierarquia da minha loja (raiz + 3 nós importantes):&#10;6) Como conectei o sinal pressed (editor ou código):&#10;7) Preços dos itens e saldo inicial / ganho por coleta:&#10;8) O que acontece se faltar moeda OU se o item já foi comprado:&#10;9) Observações / dúvidas:"
+          ></textarea>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
+            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
+            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <h3 class="lesson-subtitle">Artefato gerado</h3>
+        <p>
+          Interface operacional de loja interna baseada inteiramente em moedas ganhas jogando —
+          cosméticos com preços fixos, sem aposta e sem gasto financeiro real, documentada nas anotações.
+        </p>
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            No Brasil o mobile e os studios de service convivem com jogos autorais; Original IP é quando você detém o mundo,
+            serviços é vender capacidade sob contrato. Montei a Loja do Submundo com PanelContainer e Buttons: saldo 10,
+            +5 por coleta, chapéu/capa/aura a 5/12/20 — preço fixo, sem randi. Sem moeda, o jogo pede voltar à fase;
+            isso respeita o tempo do jogador melhor que um loot box que no ClassInd pode ir a 18+.
+          </p>
+        </section>
+        <textarea
+          id="gdd-text"
+          class="gdd-text"
+          rows="8"
+          placeholder="Síntese final (5–8 linhas): amarre mercado / IP → monetização ética → por que sua loja na Godot só vende cosméticos com moedas ganhas jogando e preço fixo (sem aposta).&#10;Ex.: mercado BR · IP vs serviço · loja Control + pressed · moedas da fase · sem loot box."
+        ></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+        </div>
+      </article>
+    </section>
+
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 06</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre mercado, propriedade intelectual,
+          monetização ética e a oficina de loja na Godot 4.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 06" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 06" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 2 · Aula 06</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/aula6.js"></script>
+</body>
+</html>

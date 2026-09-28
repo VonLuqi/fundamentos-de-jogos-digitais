@@ -147,6 +147,16 @@ export const LESSON_CATALOG = {
     lessonTitle: 'Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável',
     xp: 30,
   },
+  aula6: {
+    lessonId: 'aula6',
+    lessonTitle: 'Aula 06 — Mercado de Jogos, Propriedade Intelectual e Monetização Ética',
+    xp: 30,
+  },
+  aula7: {
+    lessonId: 'aula7',
+    lessonTitle: 'Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual',
+    xp: 30,
+  },
 };
 
 /** Gates por aula/módulo: objeto { gateKey: defaultReleased }. `published` controla liberação. */
@@ -156,6 +166,8 @@ export const LESSON_GATES = {
   aula3: { published: false },
   aula4: { published: false },
   aula5: { published: false },
+  aula6: { published: false },
+  aula7: { published: false },
   /** Módulo transversal O Despertar — default selado até o Mestre abrir o Acheron. */
   despertar: { published: false },
 };
@@ -196,6 +208,14 @@ export const ACHIEVEMENT_RULES = [
   {
     id: 'aula5_concluida',
     test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula5'),
+  },
+  {
+    id: 'aula6_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula6'),
+  },
+  {
+    id: 'aula7_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula7'),
   },
 ];
 

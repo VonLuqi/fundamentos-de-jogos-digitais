@@ -1,0 +1,23 @@
+LabirintoDeMoedas/                 # projeto Godot 4 NOVO (Aula 07)
+├── project.godot
+├── cenas/
+│   ├── player.tscn               # dono: Programação · raiz CharacterBody2D
+│   ├── moeda.tscn                # dono: Game Design · raiz Area2D (ou Node2D)
+│   └── cenario.tscn              # dono: Arte · raiz Node2D
+├── sprites/                      # arte / placeholders (ok vazio ou 1 PNG)
+├── audio/                        # vazia nesta aula — “SFX depois”
+├── scripts/                      # .gd futuros (movimento/coleta = Aula 08+)
+└── ui/                           # HUD depois (não obrigatório hoje)
+
+# Pasta compartilhada (Drive / OneDrive / rede):
+#   LabirintoDeMoedas_<NomeEquipe>/
+#     ├── (cópia do projeto acima)
+#     ├── quadro-atribuicao (foto / PDF / MD)
+#     └── backup_AAAA-MM-DD_HHMM.zip
+
+# NÃO precisa sync obsessivo:
+#   .godot/     → cache local da editora
+#   *.tmp / thumbs do SO
+
+# Contrato desta aula: pastas + stubs .tscn — SEM movimento jogável,
+# SEM coleta, SEM loja da Aula 06.

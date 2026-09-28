@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual: equipes do Labirinto de Moedas 2D, quadro de papéis e pastas Godot." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 07 — Papéis, Workflow e Versionamento | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page" data-route="aula7" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 2 · Introdução ao GDScript “Do Zero”</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 07: PAPÉIS, WORKFLOW E <span class="accent">VERSIONAMENTO</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 07</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina da Equipe
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 2 · Aulas 6 a 10 · 10h</p>
+        <h2 class="lesson-title">Papéis no desenvolvimento e workflow</h2>
+        <p>
+          A Aula 06 abriu o balcão ético. Agora o Submundo forma <strong>equipes</strong>:
+          quem faz o quê num estúdio, como organizar o trabalho em etapas e como
+          <strong>fechar o cercado do escopo</strong> antes do projeto estourar.
+          O kickoff do integrador <strong>Labirinto de Moedas 2D</strong> começa aqui.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Cinco ofícios</h3>
+            <p>Programação, Arte, Áudio, Game Design e Produção — cada um responde uma pergunta diferente do jogo.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Workflow</h3>
+            <p>Ideia → escopo fechado (MVP) → produção por papel → integração → playtest → corte ou próximo incremento.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Scope Creep</h3>
+            <p>O projeto cresce em ideias <strong>sem</strong> cortar tempo, pessoas ou features — o monstro amigável que mata indies e trabalhos de sala.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Quem faz o quê num estúdio</h2>
+        <ul class="lesson-list">
+          <li><strong>Game Design</strong> — o que é divertido e quais as regras? Entrega: GDD curto, loops, balanço.</li>
+          <li><strong>Programação</strong> — como o jogo <em>funciona</em> na engine? Entrega: scripts, cenas jogáveis, bugs.</li>
+          <li><strong>Arte</strong> — o que se vê e a identidade visual? Entrega: sprites, tiles, UI, animações.</li>
+          <li><strong>Áudio</strong> — o que se ouve e sente? Entrega: SFX, música, feedback sonoro.</li>
+          <li><strong>Produção</strong> — quando, com quem, até onde? Entrega: cronograma, escopo, rituais de sync.</li>
+        </ul>
+        <p>
+          Em indie e na sala de aula, a mesma pessoa veste vários chapéus —
+          mas o quadro ainda nomeia a <strong>dona(o) de cada entrega</strong>, senão ninguém é dono.
+        </p>
+
+        <h2 class="lesson-title">Workflow em etapas (evitar caos)</h2>
+        <pre class="lesson-pre" aria-label="Fluxo de workflow">Ideia → Escopo fechado (MVP) → Produção por papel → Integração → Playtest → Corte ou próximo incremento</pre>
+        <ul class="lesson-list">
+          <li>Sem <strong>escopo fechado</strong>, cada ideia nova empurra o prazo.</li>
+          <li>Integração cedo vence “cada um no seu ZIP até a véspera”.</li>
+          <li>Playtest curto revela se a meta (coletar moedas no labirinto) está clara.</li>
+        </ul>
+
+        <h2 class="lesson-title">Scope Creep — o monstro amigável</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Sintomas</h3>
+            <p>“Só mais um inimigo” · “e se tiver loja?” · “e se for online?” — ideias boas no momento errado.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Antídoto</h3>
+            <p>Lista do que está <strong>fora</strong> · produção como guarda do cercado · dizer não com carinho.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Elo Aula 06</h3>
+            <p>A loja ética <strong>existe</strong>, mas <strong>não</strong> entra no MVP do Labirinto hoje — isso seria Scope Creep clássico.</p>
+          </article>
+        </div>
+
+        <div class="quote-block">
+          <p>Um labirinto pequeno e terminado ensina mais que um mundo aberto abandonado. Hoje vocês escolhem papéis, fecham o cercado do escopo e aprendem a não apagar o trabalho do colega na pasta compartilhada.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula</h2>
+        <p>
+          Formar equipes de <strong>3</strong>, preencher o quadro de atribuição
+          (cenário · moedas · player), criar o projeto Godot <code>LabirintoDeMoedas</code>
+          com pastas e cenas-esqueleto, e organizar a <strong>pasta compartilhada</strong>
+          da equipe — sem implementar o labirinto jogável completo.
+        </p>
+        <ul class="lesson-list">
+          <li>Nomear os cinco papéis de estúdio e o entregável de cada um.</li>
+          <li>Explicar Scope Creep e listar o que fica fora do MVP.</li>
+          <li>Entregar quadro + cronograma + estrutura de pastas versionada com segurança.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · Minha Equipe, Meu Escopo</p>
+        <h2 class="lesson-title">Prática — equipes + Godot organizada</h2>
+        <p>
+          Divisão oficial em <strong>equipes de 3</strong> para o projeto integrador
+          <strong>“O Labirinto de Moedas 2D”</strong>. Vocês preenchem o quadro de papéis,
+          montam a árvore de pastas no Godot 4 e sincronizam na pasta compartilhada —
+          <strong>sem</strong> movimento jogável nem loja integrada nesta aula.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Trio de sala</h3>
+            <p>Arte do cenário · moedas (props + regra) · movimentação do Player — um dono por entrega.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Projeto canônico</h3>
+            <p><code>LabirintoDeMoedas</code> — projeto <strong>novo</strong> (loja da Aula 06 fica no projeto antigo).</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Versionamento visual</h3>
+            <p>Pasta sync + uma cena por aluno + ZIP datado. Git é só teaser — não é obrigatório hoje.</p>
+          </article>
+        </div>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>
+            Guia com Blocos 0–5, template do quadro de atribuição e árvore de pastas canônica.
+            Preferir preencher o quadro juntos e só então abrir a Godot.
+          </p>
+          <div class="slides-actions">
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/README.md" target="_blank" rel="noopener noreferrer">
+              Abrir guia da oficina (README)
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/quadro-atribuicao.md" target="_blank" rel="noopener noreferrer">
+              Abrir quadro de atribuição
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/estrutura-pastas.txt" target="_blank" rel="noopener noreferrer" download>
+              Baixar estrutura-pastas.txt
+            </a>
+          </div>
+        </div>
+
+        <h3 class="lesson-subtitle">Cronograma da oficina (~100 min)</h3>
+        <ul class="lesson-list">
+          <li><strong>0. Formação (10 min)</strong> — equipes de 3 · produtor do dia · nome da equipe</li>
+          <li><strong>1. Quadro (20 min)</strong> — atribuições + lista “fora do escopo” (≥3)</li>
+          <li><strong>2. Cronograma (15 min)</strong> — 3–5 tarefas com dono e alvo</li>
+          <li><strong>3. Pastas Godot (25 min)</strong> — projeto <code>LabirintoDeMoedas</code> · 3 cenas-esqueleto</li>
+          <li><strong>4. Pasta compartilhada (15 min)</strong> — sync · regras · ZIP backup</li>
+          <li><strong>5. Registro (15 min)</strong> — anotações · síntese · finalizar</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">0. Formação de equipes</h3>
+        <ol class="lesson-list">
+          <li>O Mestre anuncia a <strong>lista oficial</strong> de equipes (3 alunos fixos).</li>
+          <li>Ímpar na turma: dupla + produtor itinerante <strong>ou</strong> grupo de 4 com 2 na arte.</li>
+          <li>Escolham o <strong>Produtor do dia</strong> (dono do quadro e da pasta compartilhada).</li>
+          <li>Registrem o nome da equipe (ex.: Três Moedas, Styx Runners).</li>
+        </ol>
+        <p><strong>Checkpoint 0:</strong> três nomes + produtor do dia no quadro.</p>
+
+        <h3 class="lesson-subtitle">1. Quadro de atribuição</h3>
+        <p>Preencham o template (campos canônicos):</p>
+        <pre class="lesson-pre" aria-label="Campos do quadro de atribuição">Equipe: ____________________    Data: __________
+Produtor do dia: ____________________
+
+| Entrega              | Aluno | Chapéu de estúdio | Nesta aula        |
+| Arte do cenário      |       | Arte              | pastas / cenario  |
+| Moedas (props+regra) |       | Game Design       | pastas / moeda    |
+| Movimentação Player  |       | Programação       | pastas / player   |
+| Áudio (depois)       | —     | Áudio             | só pasta vazia    |
+
+FORA DO ESCOPO (≥3 itens que NÃO faremos agora):
+1) …
+2) …
+3) …</pre>
+        <p><strong>Checkpoint 1:</strong> três entregas com dono + ≥3 itens fora do escopo.</p>
+
+        <h3 class="lesson-subtitle">2. Cronograma curto</h3>
+        <ul class="lesson-list">
+          <li>Stub <code>player.tscn</code> · stub <code>moeda.tscn</code> · stub <code>cenario.tscn</code> → Aula 07</li>
+          <li>Movimento 4 direções · coleta + HUD → <strong>Aula 08+</strong></li>
+          <li>Se algo novo aparecer: entra no fim da fila <strong>ou</strong> sai outra coisa.</li>
+        </ul>
+        <p><strong>Checkpoint 2:</strong> pelo menos 3 tarefas com dono no artefato.</p>
+
+        <h3 class="lesson-subtitle">3. Estrutura Godot (nomes são contrato)</h3>
+        <pre class="lesson-pre" aria-label="Árvore de pastas do LabirintoDeMoedas">LabirintoDeMoedas/
+├── project.godot
+├── cenas/
+│   ├── player.tscn      ← Programação · raiz CharacterBody2D
+│   ├── moeda.tscn       ← Design · raiz Area2D (ou Node2D)
+│   └── cenario.tscn     ← Arte · raiz Node2D
+├── sprites/
+├── audio/               ← vazia (SFX depois)
+├── scripts/             ← .gd na Aula 08+
+└── ui/                  ← HUD depois</pre>
+        <ol class="lesson-list">
+          <li>Godot 4 → <strong>New Project</strong> → pasta <code>LabirintoDeMoedas</code>.</li>
+          <li>Crie as pastas no FileSystem.</li>
+          <li>Cada aluno cria <strong>só a cena do seu papel</strong> com a raiz correta e salva.</li>
+          <li><strong>Não</strong> implemente movimento nem coleta hoje.</li>
+        </ol>
+        <p><strong>Checkpoint 3:</strong> as três <code>.tscn</code> existem; pastas <code>sprites/</code>, <code>audio/</code>, <code>scripts/</code> visíveis.</p>
+
+        <h3 class="lesson-subtitle">4. Pasta compartilhada (versionamento visual)</h3>
+        <ol class="lesson-list">
+          <li>Uma pasta no Drive/OneDrive/rede: <code>LabirintoDeMoedas_&lt;NomeEquipe&gt;</code>.</li>
+          <li>Antes de editar uma <code>.tscn</code>, avise no grupo (“estou na player.tscn”).</li>
+          <li>Cada um edita <strong>só a cena do seu papel</strong> nesta fase.</li>
+          <li>Ao fim: ZIP datado <code>backup_AAAA-MM-DD_HHMM.zip</code> na pasta.</li>
+          <li>Não sync obsessivo de <code>.godot/</code> — se conflitar, apague e reabra o projeto.</li>
+          <li>Nunca salvar por cima do ZIP do colega sem renomear.</li>
+        </ol>
+        <p><strong>Checkpoint 4:</strong> pasta compartilhada tem o projeto (ou o ZIP) + quadro digital/foto.</p>
+
+        <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
+        <ul class="lesson-list">
+          <li>Implementar o Labirinto jogável completo (é o integrador das próximas aulas).</li>
+          <li>Integrar a loja da Aula 06 (Scope Creep).</li>
+          <li>Dois alunos editando a mesma <code>.tscn</code> ao vivo na pasta sync.</li>
+          <li>Combate, NPCs, multiplayer, Git obrigatório.</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">Contrato de escopo (MVP do Labirinto)</h3>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Entra (depois / hoje)</h3>
+            <p>Hoje: papéis + pastas + stubs. Depois: player 4 dirs · moedas + contador · 1 fase curta.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Fica fora</h3>
+            <p>Combate · NPCs · loja Aula 06 · multiplayer · bosses · áudio polido · shaders.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Vocabulário</h3>
+            <p>Papel · workflow · Scope Creep · MVP · pasta compartilhada · <code>.tscn</code> · <code>.godot/</code>.</p>
+          </article>
+        </div>
+
+        <h3 class="lesson-subtitle">Checklist do artefato</h3>
+        <ul class="lesson-list">
+          <li>Equipe de 3 nomeada + produtor do dia.</li>
+          <li>Quadro: cenário · moedas · player com responsáveis.</li>
+          <li>≥3 itens <strong>fora do escopo</strong>.</li>
+          <li>Cronograma com ≥3 tarefas e donos.</li>
+          <li>Projeto <code>LabirintoDeMoedas</code> + três cenas-esqueleto.</li>
+          <li>Pasta compartilhada ou ZIP de backup criado.</li>
+          <li>Anotações + síntese enviadas nesta página.</li>
+        </ul>
+
+        <div class="quote-block">
+          <p>Fechar o cercado do escopo e não apagar a cena do colega: isso também é fazer jogo.</p>
+        </div>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 7">
+          <p><strong>Pistas secretas do Submundo:</strong> nomeie ofícios de um estúdio; diga o que vocês cortaram para não estourar o escopo; e descreva como a equipe guarda as cenas sem um apagar o outro. O altar reconhece quem cartografa o trabalho.</p>
+        </section>
+
+        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
+          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+          <p>
+            Registre equipe, papéis, Scope Creep, pastas Godot e a regra da pasta compartilhada.
+            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+          </p>
+          <textarea
+            id="config-notes"
+            class="config-notes-text"
+            rows="14"
+            placeholder="1) Nome da minha equipe e dos 3 integrantes:&#10;2) Meu papel nesta aula (cenário / moedas / player) e o chapéu de estúdio equivalente:&#10;3) Em uma frase: o que faz Produção (e quem é o produtor do dia):&#10;4) Scope Creep — um exemplo que quase entraríamos e por que cortamos:&#10;5) Três itens que estão FORA do escopo do Labirinto por enquanto:&#10;6) Árvore de pastas / cenas que criamos (nomes):&#10;7) Onde está a pasta compartilhada e a regra para não sobrescrever .tscn:&#10;8) Próxima tarefa minha no cronograma (e até quando):&#10;9) Observações / dúvidas:"
+          ></textarea>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
+            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
+            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <h3 class="lesson-subtitle">Artefato gerado</h3>
+        <p>
+          Quadro (físico ou digital) de atribuição de papéis + cronograma da equipe,
+          estrutura inicial do projeto <strong>Labirinto de Moedas 2D</strong> no FileSystem Godot,
+          e registro escrito amarrando papéis ↔ escopo fechado ↔ versionamento na pasta compartilhada.
+        </p>
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            Equipe Três Moedas: Ana (cenário/Arte), Bruno (player/Programação), Caio (moedas/Design); produtor do dia = Caio.
+            Cortamos loja da Aula 06, combate e multiplayer — Scope Creep. Criamos LabirintoDeMoedas com
+            cenas/player.tscn (CharacterBody2D), moeda.tscn (Area2D), cenario.tscn (Node2D) + pastas sprites/audio/scripts.
+            Pasta no Drive LabirintoDeMoedas_TresMoedas: um dono por .tscn, aviso no grupo antes de editar, ZIP backup no fim.
+          </p>
+        </section>
+        <textarea
+          id="gdd-text"
+          class="gdd-text"
+          rows="8"
+          placeholder="Síntese final (5–8 linhas): amarre papéis do estúdio → como o trio evita Scope Creep → como organizam pastas/cenas na Godot e na pasta compartilhada para o Labirinto de Moedas 2D.&#10;Ex.: cinco ofícios · meu papel no trio · fora do escopo · LabirintoDeMoedas · regra anti-sobrescrita."
+        ></textarea>
+        <div class="gdd-actions">
+          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
+          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+        </div>
+      </article>
+    </section>
+
+    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 07</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre papéis na indústria,
+          workflow, Scope Creep e o kickoff do Labirinto de Moedas 2D.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 07" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 07" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 2 · Aula 07</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/aula7.js"></script>
+</body>
+</html>

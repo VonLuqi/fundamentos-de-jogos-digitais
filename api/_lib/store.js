@@ -76,6 +76,18 @@ export const REDEEM_CODES = {
     xp: 30,
     achievement: 'aula5_concluida',
   },
+  LOJAETICA2026: {
+    lessonId: 'aula6',
+    lessonTitle: 'Aula 06 — Mercado de Jogos, Propriedade Intelectual e Monetização Ética',
+    xp: 30,
+    achievement: 'aula6_concluida',
+  },
+  EQUIPE2026: {
+    lessonId: 'aula7',
+    lessonTitle: 'Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual',
+    xp: 30,
+    achievement: 'aula7_concluida',
+  },
 };
 
 /* ============================================================
@@ -90,6 +102,8 @@ export const LESSON_PREREQUISITES = {
   aula3: 'aula2',
   aula4: 'aula3',
   aula5: 'aula4',
+  aula6: 'aula5',
+  aula7: 'aula6',
 };
 
 /** Retorna true se o usuário já cumpriu o pré-requisito da aula informada. */
@@ -119,6 +133,8 @@ export const ACHIEVEMENT_RULES = [
   { id: 'aula3_concluida', test: (u) => u.completedLessons.includes('aula3') },
   { id: 'aula4_concluida', test: (u) => u.completedLessons.includes('aula4') },
   { id: 'aula5_concluida', test: (u) => u.completedLessons.includes('aula5') },
+  { id: 'aula6_concluida', test: (u) => u.completedLessons.includes('aula6') },
+  { id: 'aula7_concluida', test: (u) => u.completedLessons.includes('aula7') },
 ];
 
 /* ============================================================

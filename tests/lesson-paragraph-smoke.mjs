@@ -89,7 +89,7 @@ assert.deepEqual(roundtrip, {
   notes: 'Core Loop: andar e coletar.',
 });
 
-const aulas = ['js/aula1.js', 'js/aula2.js', 'js/aula3.js', 'js/aula4.js', 'js/aula5.js'];
+const aulas = ['js/aula1.js', 'js/aula2.js', 'js/aula3.js', 'js/aula4.js', 'js/aula5.js', 'js/aula6.js', 'js/aula7.js'];
 for (const rel of aulas) {
   const src = read(rel);
   assert.ok(

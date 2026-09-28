@@ -1,7 +1,7 @@
 # Plano — Sync anti-rubberband · Debug · Lethe/Tutoriais · Loja Styx · Cosméticos · Juramentos Selados
 
-**Status:** análise congelada (2026-09-22) — execução via guia fatiado  
-**Data:** 2026-09-22  
+**Status:** análise congelada (2026-09-22) — **execução A–F fechada** (ver [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md))  
+**Data:** 2026-09-22 · checklists sincronizados 2026-09-24  
 **Pai:** [`plano-hades-despertar.md`](./plano-hades-despertar.md) · [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md) · [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md)  
 **Guia de implementação (fases A–F):** [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md)  
 **Gatilho:** feedback do Mestre — rubberbanding em compras rápidas; painel debug incompleto; Lethe sem reveal; loja Styx poluída; Juramentos Selados espaçados vs Cookie; cosméticos de upgrade; shiny raro/invisível em teste  
@@ -109,14 +109,14 @@ sequenceDiagram
 
 ### 1.3 Tarefas
 
-- [ ] Instrumentar log temporário (harness): `epoch`, `_dirty`, `_inFlight`, `souls before/after apply` em spam buy.
-- [ ] Adicionar `syncEpoch` em `GameState` (+ snapshot opcional; server ignora se ausente).
-- [ ] Ecoar `clientEpoch` em `buildStateDto` / resposta `stateSync`.
-- [ ] `ApiService.flush`: preservar `_dirty` se epoch avançou durante RTT.
-- [ ] `applyServerState` / `applyAuthoritativeState`: modo `merge: 'reconcile'` vs `replace` (reject).
-- [ ] Smoke: simular buy durante `_inFlight` → geradores/upgrades **não** somem; souls não andam para trás > 1 tick de erro.
-- [ ] Smoke reject (`JUDGES_REFUSED`): ainda restaura DB completo + ticker/aviso.
-- [ ] Documentar contrato em `docs/otimizacoes/contratos-fase-b.md` (campo opcional).
+- [x] Instrumentar log temporário (harness): `epoch`, `_dirty`, `_inFlight`, `souls before/after apply` em spam buy.
+- [x] Adicionar `syncEpoch` em `GameState` (+ snapshot opcional; server ignora se ausente).
+- [x] Ecoar `clientEpoch` em `buildStateDto` / resposta `stateSync`.
+- [x] `ApiService.flush`: preservar `_dirty` se epoch avançou durante RTT.
+- [x] `applyServerState` / `applyAuthoritativeState`: modo `merge: 'reconcile'` vs `replace` (reject).
+- [x] Smoke: simular buy durante `_inFlight` → geradores/upgrades **não** somem; souls não andam para trás > 1 tick de erro.
+- [x] Smoke reject (`JUDGES_REFUSED`): ainda restaura DB completo + ticker/aviso.
+- [x] Documentar contrato em `docs/otimizacoes/contratos-fase-b.md` (campo opcional).
 
 **Arquivos-chave:** `js/hades-despertar/services/ApiService.js`, `core/GameState.js`, `index.js` (`applyServerState`), `api/_lib/despertar-validate.js`, `api/despertar.js`, `tests/despertar-sync-smoke.mjs`.
 
@@ -177,12 +177,12 @@ Checkbox no painel: `data-debug-flag="freeShopping"`.
 
 ### 2.3 Tarefas
 
-- [ ] HTML: inputs set + checkboxes Free Shopping / Force Shiny + botão “Aplicar shiny 50%”.
-- [ ] `despertar-debug.js`: `action` set absoluto; validar `role === admin`.
-- [ ] `GameState`: `debugFlags`; ramos em `buyGenerator` / `buyUpgrade` / custo UI (`describeGeneratorCard` mostra 0 se free).
-- [ ] Free shopping: bloquear `requestSync` (ou sync só após sair do modo).
-- [ ] Smoke admin: set souls → valor absoluto; force shiny → `shinyGained === bought`.
-- [ ] Nota no painel: “1% natural; use Force Shiny ou buy ×100”.
+- [x] HTML: inputs set + checkboxes Free Shopping / Force Shiny + botão “Aplicar shiny 50%”.
+- [x] `despertar-debug.js`: `action` set absoluto; validar `role === admin`.
+- [x] `GameState`: `debugFlags`; ramos em `buyGenerator` / `buyUpgrade` / custo UI (`describeGeneratorCard` mostra 0 se free).
+- [x] Free shopping: bloquear `requestSync` (ou sync só após sair do modo).
+- [x] Smoke admin: set souls → valor absoluto; force shiny → `shinyGained === bought`.
+- [x] Nota no painel: “1% natural; use Force Shiny ou buy ×100”.
 
 **Arquivos:** `pages/despertar.html`, `index.js` (`bindDebugSandbox`), `api/_lib/despertar-debug.js`, `core/GameState.js`, `ui/harness.js` (opcional espelho localhost).
 
@@ -227,11 +227,11 @@ UX do tutorial (leve, Cookie-like):
 
 ### 3.3 Tarefas
 
-- [ ] Flag `milestones.letheSeen` + sync/merge (objeto milestones já existe).
-- [ ] Em `#renderLethe`: detectar transição locked→open → juice + ticker + unlock log.
-- [ ] Entradas `edu-logs.js` + `#logTriggered` em `GameState`.
-- [ ] CSS: animação curta na aba `#tab-lethe` (`is-just-unlocked`); reduced-motion = só texto.
-- [ ] Smoke: estado com `runSouls = 1e8` → log presente; segunda render não re-dispara toast.
+- [x] Flag `milestones.letheSeen` + sync/merge (objeto milestones já existe).
+- [x] Em `#renderLethe`: detectar transição locked→open → juice + ticker + unlock log.
+- [x] Entradas `edu-logs.js` + `#logTriggered` em `GameState`.
+- [x] CSS: animação curta na aba `#tab-lethe` (`is-just-unlocked`); reduced-motion = só texto.
+- [x] Smoke: estado com `runSouls = 1e8` → log presente; segunda render não re-dispara toast.
 
 **Arquivos:** `UIRenderer.js`, `GameState.js`, `edu-logs.js`, `rumors.js` (opcional na fila), `css/despertar.css`, `juice.js`.
 
@@ -289,11 +289,11 @@ Aplicar só na render da strip (lista DOM já montada: reordenar `li` com `appen
 
 ### 4.3 Tarefas
 
-- [ ] Schema `requires.upgradeId` + testes em `meetsUpgradeRequirement`.
-- [ ] Atualizar cadeia Foice em `upgrades.js` (+ blurbs se necessário).
-- [ ] `sortStyxVisible` + `#renderStyx` reordena.
-- [ ] Smoke: sem `foice_afilada`, `juramento_acheron` não revela; após compra, aparece e pode ir ao topo se affordável.
-- [ ] Smoke sort: 2 affordáveis + 1 caro → affordáveis primeiro.
+- [x] Schema `requires.upgradeId` + testes em `meetsUpgradeRequirement`.
+- [x] Atualizar cadeia Foice em `upgrades.js` (+ blurbs se necessário).
+- [x] `sortStyxVisible` + `#renderStyx` reordena.
+- [x] Smoke: sem `foice_afilada`, `juramento_acheron` não revela; após compra, aparece e pode ir ao topo se affordável.
+- [x] Smoke sort: 2 affordáveis + 1 caro → affordáveis primeiro.
 
 **Arquivos:** `config/upgrades.js`, `core/formulas.js`, `UIRenderer.js` (`describeUpgradeCard`, `#renderStyx`), `tests/despertar-styx-smoke.mjs`.
 
@@ -345,12 +345,12 @@ Se 2 upgrades na mesma linha: aplicar ambos se layers diferentes (`hat` + `tool`
 
 ### 5.3 Tarefas
 
-- [ ] Criar `upgrade-cosmetics.js` com 1–2 exemplos (Servos + Foice).
-- [ ] Helper `cosmeticCoverageMask(count, coverage)` + smoke determinismo.
-- [ ] `drawAccessory` mínimo (canvas path) em `WorldView` / `SpriteAtlas`.
-- [ ] Classe CSS na Foice para `foice_afilada` (glow Styx).
-- [ ] Smoke: com upgrade owned + qty 10 → ~5 células com accessory (assert contagem ±1).
-- [ ] Documento curto no plano de arte (`PEDIDOS-MESTRE.md`) para sprites reais depois.
+- [x] Criar `upgrade-cosmetics.js` com 1–2 exemplos (Servos + Foice).
+- [x] Helper `cosmeticCoverageMask(count, coverage)` + smoke determinismo.
+- [x] `drawAccessory` mínimo (canvas path) em `WorldView` / `SpriteAtlas`.
+- [x] Classe CSS na Foice para `foice_afilada` (glow Styx).
+- [x] Smoke: com upgrade owned + qty 10 → ~5 células com accessory (assert contagem ±1).
+- [x] Documento curto no plano de arte (`PEDIDOS-MESTRE.md`) para sprites reais depois.
 
 **Arquivos:** `config/upgrade-cosmetics.js` (novo), `WorldView.js`, `AltarOrbit.js` / reap CSS, `UIRenderer` (só se precisar sync), smokes world/altar.
 
@@ -393,11 +393,11 @@ Reusar `#styx-tooltip` **ou** `#sealed-tooltip` com as mesmas classes `.desperta
 
 ### 6.3 Tarefas
 
-- [ ] Refatorar `#renderSealed` / `#mountSealed`: botões ícone sem `<span>` de nome.
-- [ ] CSS: grid denso; remover chip “largo”; estados hover iguais ao Styx `is-owned`.
-- [ ] Wire tip (compartilhar helper com Styx se possível: `#showUpgradeTip(view, anchor)`).
-- [ ] Smoke a11y/styx: sealed usa `despertar-upgrade-tooltip`; gap ≤ 4px no CSS.
-- [ ] Print-test 360px: muitas juramentos não estouram a coluna (wrap ok).
+- [x] Refatorar `#renderSealed` / `#mountSealed`: botões ícone sem `<span>` de nome.
+- [x] CSS: grid denso; remover chip “largo”; estados hover iguais ao Styx `is-owned`.
+- [x] Wire tip (compartilhar helper com Styx se possível: `#showUpgradeTip(view, anchor)`).
+- [x] Smoke a11y/styx: sealed usa `despertar-upgrade-tooltip`; gap ≤ 4px no CSS.
+- [x] Print-test 360px: muitas juramentos não estouram a coluna (wrap ok).
 
 **Arquivos:** `UIRenderer.js` (`#renderSealed`), `css/despertar.css`, `pages/despertar.html` (estrutura sealed-list), `tests/despertar-styx-smoke.mjs` ou smoke dedicado.
 
@@ -422,9 +422,9 @@ Reusar `#styx-tooltip` **ou** `#sealed-tooltip` com as mesmas classes `.desperta
 
 - [x] Spam de compras sem rubberband perceptível; reject ainda restaura. *(Fase A — ver [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md))*
 - [x] Admin: set almas, free shopping, force shiny funcionam só com role adequada. *(Fase B)*
-- [ ] Primeiro unlock do Lethe tem feedback + log/tutorial.
-- [ ] Styx: cadeia Foice um-a-um; affordáveis primeiro.
-- [ ] ≥1 upgrade reflete visualmente em sprites/Foice.
+- [x] Primeiro unlock do Lethe tem feedback + log/tutorial.
+- [x] Styx: cadeia Foice um-a-um; affordáveis primeiro.
+- [x] ≥1 upgrade reflete visualmente em sprites/Foice.
 - [x] Juramentos Selados = grade densa + tooltip hover.
 
 ---

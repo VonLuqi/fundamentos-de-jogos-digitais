@@ -10,7 +10,8 @@
 
 Este documento é o **mapa de implementação** da Aula 05: conteúdo pedagógico, página da aula, módulo live ClassInd-dle, formulário IARC de mesa, backend, schema, conquistas e critérios de aceite.
 
-> **Nota de ponte:** em [`plano-aula4-plataformas-restricoes.md`](./plano-aula4-plataformas-restricoes.md), a seção *Ponte — Aula 05* **já aponta** para este plano (ClassInd/IARC). Câmera/`AnimatedSprite` ficam para **Módulo 2+** (Task 11).
+> **Nota de ponte:** em [`plano-aula4-plataformas-restricoes.md`](./plano-aula4-plataformas-restricoes.md), a seção *Ponte — Aula 05* **já aponta** para este plano (ClassInd/IARC).  
+> **Próxima trilha:** Módulo 2 · Aula 06 = mercado + loja ética — [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md) · Aula 07 = papéis / workflow / Labirinto — [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md). Câmera/`AnimatedSprite` ficam para **aulas posteriores** (quando a ementa as listar), **não** para 06 nem 07.
 
 ---
 
@@ -542,6 +543,25 @@ Checklist operacional em [`docs/playbook-liberar-aula5.md`](./playbook-liberar-a
 ### Aceite
 
 - [x] Nenhum doc ativo promete Godot-câmera como Aula 05 oficial.
+
+---
+
+## Ponte — Aula 06 / Módulo 2
+
+> **Ementa oficial (2026-09-28):** Aula 06 = *Mercado de Jogos, Propriedade Intelectual e Monetização Ética* + oficina **Loja cosmética ética** na Godot 4 (`Control` · `PanelContainer` · `Button` · GDScript `pressed` · moedas in-game, sem loot box).  
+> Plano: [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md) · Playbook: [`playbook-liberar-aula6.md`](./playbook-liberar-aula6.md) · Página: `pages/aula6.html`.
+
+Com ClassInd/IARC e design saudável fechados no Módulo 1 (e a Provação), a sequência do **Módulo 2** começa assim:
+
+| Tema | Por quê |
+| :--- | :--- |
+| **Mercado BR + internacional** | Como o dinheiro e a indústria circulam |
+| **Original IP vs serviços** | Autoral × outsourcing / gamificação |
+| **Monetização ética** | Cosméticos / preço fixo vs loot box (eco 18+) |
+| **Loja UI + GDScript do zero** | Primeiro script de UI do Módulo 2 |
+
+**Fora da Aula 06:** `Camera2D`, `AnimatedSprite2D`, integração loja↔Player — **não** são Aula 07. A Aula 07 oficial é papéis / workflow / kickoff Labirinto — [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md). Câmera/`AnimatedSprite` ficam para **08+** se a ementa as listar.
+
 ---
 
 ## Ordem de implementação sugerida
