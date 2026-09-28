@@ -169,9 +169,24 @@ def write_code(tf, text: str, *, size_pt=11):
         p.alignment = PP_ALIGN.LEFT
         p.space_after = Pt(0)
         p.space_before = Pt(0)
+        p.line_spacing = 1.0
         run = p.add_run()
         run.text = line if line else " "
         _set_run(run, size_pt=size_pt, bold=False, color=TEXT, font=CODE_FONT)
+
+
+def add_code_slide(prs, *, badge: str, title: str, code: str, size_pt: float = 9):
+    """Slide de código com painel contido acima do rodapé (slide 10×5.625\")."""
+    s = new_slide(prs)
+    W, H = prs.slide_width, prs.slide_height
+    add_num_badge(s, badge)
+    add_title(s, title)
+    # Rodapé ocupa ~0.5"; painel termina em ~4.95"
+    add_panel(s, Inches(0.4), Inches(0.88), Inches(9.2), Inches(4.0))
+    _, tf = add_textbox(s, Inches(0.55), Inches(0.98), Inches(8.9), Inches(3.75))
+    write_code(tf, code, size_pt=size_pt)
+    add_footer(s, W, H)
+    return s
 
 
 def delete_all_slides(prs: Presentation):
@@ -486,15 +501,12 @@ def build_deck() -> Presentation:
     add_footer(s, W, H)
 
     # 15 — Código bloco 3
-    s = new_slide(prs)
-    add_num_badge(s, "14")
-    add_title(s, "Script — Bloco 3 (base + coletar)")
-    add_panel(s, Inches(0.4), Inches(0.95), Inches(9.2), Inches(4.2))
-    _, tf = add_textbox(s, Inches(0.55), Inches(1.05), Inches(8.9), Inches(3.95))
-    write_code(
-        tf,
-        """extends Control
-
+    add_code_slide(
+        prs,
+        badge="14",
+        title="Script — Bloco 3 (base + coletar)",
+        size_pt=9,
+        code="""extends Control
 var moedas: int = 10
 var tem_chapeu: bool = false
 var tem_capa: bool = false
@@ -503,57 +515,47 @@ const PRECO_CHAPEU: int = 5
 const PRECO_CAPA: int = 12
 const PRECO_AURA: int = 20
 const GANHO_FASE: int = 5
-
 @onready var label_moedas: Label = $PanelContainer/MarginContainer/VBoxContainer/Moedas
 @onready var label_status: Label = $PanelContainer/MarginContainer/VBoxContainer/Status
 @onready var btn_chapeu: Button = $PanelContainer/MarginContainer/VBoxContainer/Chapeu/HBoxContainer/Button
 @onready var btn_capa: Button = $PanelContainer/MarginContainer/VBoxContainer/Capa/HBoxContainer/Button
 @onready var btn_aura: Button = $PanelContainer/MarginContainer/VBoxContainer/Aura/HBoxContainer/Button
-
 func _ready() -> void:
-    _atualizar_hud()
-    label_status.text = "Bem-vindo. Só moedas ganhas jogando."
-
+	_atualizar_hud()
+	label_status.text = "Bem-vindo. Só moedas ganhas jogando."
 func _atualizar_hud() -> void:
-    label_moedas.text = "Moedas: %d" % moedas
-
+	label_moedas.text = "Moedas: %d" % moedas
 func _on_btn_ganhar_moedas_pressed() -> void:
-    moedas += GANHO_FASE
-    label_status.text = "Você coletou +%d moedas na fase." % GANHO_FASE
-    _atualizar_hud()""",
-        size_pt=10,
+	moedas += GANHO_FASE
+	label_status.text = "Você coletou +%d moedas na fase." % GANHO_FASE
+	_atualizar_hud()""",
     )
-    add_footer(s, W, H)
 
     # 16 — Código bloco 4
-    s = new_slide(prs)
-    add_num_badge(s, "15")
-    add_title(s, "Script — Bloco 4 (compra ética)")
-    add_panel(s, Inches(0.4), Inches(0.95), Inches(9.2), Inches(4.2))
-    _, tf = add_textbox(s, Inches(0.55), Inches(1.05), Inches(8.9), Inches(3.95))
-    write_code(
-        tf,
-        """func _on_btn_comprar_chapeu_pressed() -> void:
-    if tem_chapeu:
-        label_status.text = "Você já tem chapéu."
-        return
-    if moedas < PRECO_CHAPEU:
-        label_status.text = "Moedas insuficientes."
-        return
-    moedas -= PRECO_CHAPEU
-    tem_chapeu = true
-    btn_chapeu.disabled = true
-    btn_chapeu.text = "Adquirido"
-    label_status.text = "Chapéu comprado!"
-    _atualizar_hud()
+    add_code_slide(
+        prs,
+        badge="15",
+        title="Script — Bloco 4 (compra ética)",
+        size_pt=11,
+        code="""func _on_btn_comprar_chapeu_pressed() -> void:
+	if tem_chapeu:
+		label_status.text = "Você já tem chapéu."
+		return
+	if moedas < PRECO_CHAPEU:
+		label_status.text = "Moedas insuficientes."
+		return
+	moedas -= PRECO_CHAPEU
+	tem_chapeu = true
+	btn_chapeu.disabled = true
+	btn_chapeu.text = "Adquirido"
+	label_status.text = "Chapéu comprado!"
+	_atualizar_hud()
 
 # Repita o mesmo padrão para Capa e Aura
 # (PRECO_CAPA / PRECO_AURA · tem_capa / tem_aura · btn_capa / btn_aura)
 
 # Proibido: randi() · loot box · preço em dinheiro real""",
-        size_pt=12,
     )
-    add_footer(s, W, H)
 
     # 17 — Checklist
     s = new_slide(prs)
