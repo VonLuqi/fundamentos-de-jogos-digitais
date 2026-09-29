@@ -45,7 +45,7 @@ export const VERDICT_SHOP = freezeAll([
   {
     id: 'eco_do_veredito',
     name: 'Eco do Veredito',
-    blurb: '+1 Veredito no próximo marco de streak (1×).',
+    blurb: '+1 Veredito extra em cada marco de streak (permanente).',
     cost: 8,
     effects: { verdictBonus: true },
   },

@@ -58,8 +58,12 @@ const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 staticAssert(juizoSrc.includes('mercyUsed'), 'mercyUsed no run');
 staticAssert(juizoSrc.includes('catalogo_vivo'), 'mercy catalogo_vivo');
 staticAssert(juizoSrc.includes('applyEcoVereditoBonus'), 'eco helper');
-staticAssert(juizoSrc.includes('ecoVereditoConsumed'), 'consumo sticky');
+staticAssert(juizoSrc.includes('newly.length'), 'eco permanente por marco');
 staticAssert(juizoSrc.includes('patch.milestones'), 'juizo patch grava milestones');
+staticAssert(
+  shop.eco_do_veredito?.blurb?.includes('permanente'),
+  'eco blurb permanente',
+);
 staticAssert(modalSrc.includes('result.mercy'), 'modal trata mercy');
 staticAssert(pkg.includes('despertar-bancada-f2-smoke.mjs'), 'check inclui F2 smoke');
 
@@ -116,7 +120,7 @@ run('peso_das_faixas ×1.03 SPS (stack com olho)', () => {
   assert.equal(cmp(eco.spsVerdictMult, '1.03'), 0);
 });
 
-run('eco pending derivado + consome 1× no claim', () => {
+run('eco permanente: +1 por marco em cada claim', () => {
   const state = {
     verdictPurchases: ['eco_do_veredito'],
     milestones: {},
@@ -128,22 +132,37 @@ run('eco pending derivado + consome 1× no claim', () => {
   const eco = applyEcoVereditoBonus(state, claimed);
   assert.equal(eco.ecoBonus, 1);
   assert.equal(eco.verdictGain, 1 + 1);
-  assert.equal(eco.milestones.ecoVereditoConsumed, true);
-  assert.equal(eco.verdictBonusPending, false);
+  assert.equal(eco.verdictBonusPending, true);
 
   const again = applyEcoVereditoBonus(
-    { ...state, milestones: eco.milestones },
+    state,
     claimJuizoMilestones(5, 10, claimed.claimed),
   );
-  assert.equal(again.ecoBonus, 0);
-  assert.equal(again.verdictGain, 2);
+  assert.equal(again.ecoBonus, 1);
+  assert.equal(again.verdictGain, 2 + 1);
+
+  const catchUpBase = claimJuizoMilestones(0, 10, []);
+  const catchUp = applyEcoVereditoBonus(state, catchUpBase);
+  assert.deepEqual(catchUpBase.newly, ['s5', 's10']);
+  assert.equal(catchUp.ecoBonus, 2);
+  assert.equal(catchUp.verdictGain, catchUpBase.verdictGain + 2);
 });
 
-run('eco sem newly não consome', () => {
+run('eco sem newly não paga', () => {
   const state = { verdictPurchases: ['eco_do_veredito'], milestones: {} };
   const eco = applyEcoVereditoBonus(state, { newly: [], verdictGain: 0 });
   assert.equal(eco.ecoBonus, 0);
-  assert.equal(isVerdictBonusPending({ ...state, milestones: eco.milestones }), true);
+  assert.equal(isVerdictBonusPending(state), true);
+});
+
+run('eco legado ecoVereditoConsumed ainda ecoa', () => {
+  const state = {
+    verdictPurchases: ['eco_do_veredito'],
+    milestones: { ecoVereditoConsumed: true },
+  };
+  assert.equal(isVerdictBonusPending(state), true);
+  const eco = applyEcoVereditoBonus(state, claimJuizoMilestones(0, 5, []));
+  assert.equal(eco.ecoBonus, 1);
 });
 
 run('mercy: 1º erro continua; 2º encerra', () => {
@@ -241,7 +260,7 @@ run('juizoGuess paga eco no milestone s5', () => {
   assert.equal(hit.milestones.ecoBonus, 1);
   assert.equal(hit.milestones.verdictGain, 2); // 1 + eco
   assert.equal(hit.next.verdicts, 2);
-  assert.equal(hit.next.milestones.ecoVereditoConsumed, true);
+  assert.equal(isVerdictBonusPending(hit.next), true);
 });
 
 run('server verdictBuy aceita ids F2', () => {

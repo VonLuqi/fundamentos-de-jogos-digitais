@@ -70,36 +70,35 @@ function hasPurchase(state, id) {
 }
 
 /**
- * F-D4 — `verdictBonusPending` derivado: owns eco && !ecoVereditoConsumed.
- * Consumo sticky (OR) anti re-arm via sync de milestones.
+ * F-D4 — eco permanente: owns `eco_do_veredito` (legado `ecoVereditoConsumed` ignorado).
  */
 export function isVerdictBonusPending(state) {
-  if (!hasPurchase(state, 'eco_do_veredito')) return false;
-  return !Boolean(asMilestonesObject(state.milestones).ecoVereditoConsumed);
+  return hasPurchase(state, 'eco_do_veredito');
 }
 
 /**
- * Aplica +1 Veredito se há claim novo e pending.
+ * Aplica +1 Veredito por marco novo claimed (permanente enquanto owns eco).
  * @returns {{ verdictGain: number, milestones: object, ecoBonus: number, verdictBonusPending: boolean }}
  */
 export function applyEcoVereditoBonus(state, milestonesResult) {
   const marks = asMilestonesObject(state.milestones);
   const newly = Array.isArray(milestonesResult?.newly) ? milestonesResult.newly : [];
   const baseGain = Math.max(0, Number(milestonesResult?.verdictGain) || 0);
-  const pending = isVerdictBonusPending(state);
-  if (!pending || newly.length === 0) {
+  const active = isVerdictBonusPending(state);
+  if (!active || newly.length === 0) {
     return {
       verdictGain: baseGain,
       milestones: marks,
       ecoBonus: 0,
-      verdictBonusPending: pending,
+      verdictBonusPending: active,
     };
   }
+  const ecoBonus = newly.length;
   return {
-    verdictGain: baseGain + 1,
-    milestones: { ...marks, ecoVereditoConsumed: true },
-    ecoBonus: 1,
-    verdictBonusPending: false,
+    verdictGain: baseGain + ecoBonus,
+    milestones: marks,
+    ecoBonus,
+    verdictBonusPending: true,
   };
 }
 
