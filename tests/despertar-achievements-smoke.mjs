@@ -325,7 +325,7 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
     'Veredito s25 intacto',
   );
   assert.equal(VERDICT_SHOP.length, 8, 'Bancada 8 itens');
-  assert.equal(VERDICT_SHOP_TOTAL_COST, 64, 'Bancada custos F2');
+  assert.equal(VERDICT_SHOP_TOTAL_COST, 63, 'Bancada custos F2');
 
   const at10 = evaluateDespertarAchievementIds(
     { juizoBestStreak: 10, lifetimeSouls: '0', generators: {}, upgrades: [], talents: [] },

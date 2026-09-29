@@ -81,7 +81,7 @@ staticAssert(SYNC_HEARTBEAT_MS === 30_000, 'sync heartbeat 30 s');
 staticAssert(validateSrc.includes('validateSync'), 'validateSync autoritativo');
 staticAssert(apiSrc.includes('JUDGES_REFUSED') || apiSrc.includes('recus') || validateSrc.includes('teto') || validateSrc.includes('1.05'), 'anti-cheat no validate');
 staticAssert(html.includes('despertar-layout'), 'três colunas no markup');
-staticAssert(html.includes('tab-codex') || html.includes('panel-codex'), 'Códice na UI');
+staticAssert(html.includes('despertar-codex-book') || html.includes('despertar-codex-drawer'), 'Códice na UI');
 staticAssert(EDU_LOG_IDS.length === 21, '21 logs do Códice');
 staticAssert(!rendererSrc.includes('innerHTML'), 'UIRenderer sem innerHTML');
 

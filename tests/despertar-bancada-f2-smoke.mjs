@@ -39,7 +39,7 @@ const F2_IDS = [
 ];
 
 staticAssert(VERDICT_SHOP.length === 8, '8 itens na Bancada após F2');
-staticAssert(VERDICT_SHOP_TOTAL_COST === 64, 'Bancada total 64 V');
+staticAssert(VERDICT_SHOP_TOTAL_COST === 63, 'Bancada total 63 V');
 for (const id of F2_IDS) {
   staticAssert(isKnownVerdictPurchase(id), `item F2: ${id}`);
   staticAssert(VERDICT_SHOP_IDS.includes(id), `IDS inclui ${id}`);

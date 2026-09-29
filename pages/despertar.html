@@ -318,10 +318,9 @@
             <div class="despertar-tablist" role="tablist" aria-label="Abas do Domínio">
               <button class="despertar-tab" type="button" role="tab" id="tab-mundo" aria-controls="panel-mundo" aria-selected="true" tabindex="0">Mundo</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-stats" aria-controls="panel-stats" aria-selected="false" tabindex="-1">Stats</button>
-              <button class="despertar-tab" type="button" role="tab" id="tab-codex" aria-controls="panel-codex" aria-selected="false" tabindex="-1" aria-label="Arquivo do Códice">Arquivo</button>
-              <button class="despertar-tab" type="button" role="tab" id="tab-lethe" aria-controls="panel-lethe" aria-selected="false" tabindex="-1">Lethe</button>
+              <button class="despertar-tab" type="button" role="tab" id="tab-lethe" aria-controls="panel-lethe" aria-selected="false" tabindex="-1" hidden>Lethe</button>
               <button class="despertar-tab" type="button" role="tab" id="tab-bancada" aria-controls="panel-bancada" aria-selected="false" tabindex="-1">Bancada</button>
-              <button class="despertar-tab" type="button" role="tab" id="tab-stele" aria-controls="panel-stele" aria-selected="false" tabindex="-1">Estela</button>
+              <button class="despertar-tab" type="button" role="tab" id="tab-stele" aria-controls="panel-stele" aria-selected="false" tabindex="-1" hidden>Estela</button>
             </div>
 
             <div class="despertar-tabpanel" role="tabpanel" id="panel-mundo" aria-labelledby="tab-mundo">
@@ -350,11 +349,6 @@
                 <p class="despertar-empty" id="sealed-empty">Nenhum juramento selado nesta corrida.</p>
                 <ul class="despertar-sealed-icons" id="sealed-list" hidden></ul>
               </section>
-            </div>
-
-            <div class="despertar-tabpanel" role="tabpanel" id="panel-codex" aria-labelledby="tab-codex" hidden>
-              <p class="despertar-empty" id="codex-empty">O Códice espera o primeiro clique.</p>
-              <ol class="despertar-codex-list" id="codex-list" hidden></ol>
             </div>
 
             <button

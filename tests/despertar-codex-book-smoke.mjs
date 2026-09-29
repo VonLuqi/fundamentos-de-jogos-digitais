@@ -45,8 +45,8 @@ assert.match(html, /id="despertar-codex-book"/);
 assert.match(html, /id="despertar-codex-drawer"/);
 assert.match(html, /id="despertar-codex-tip"/);
 assert.match(html, /id="codex-drawer-list"/);
-assert.match(html, />Arquivo</);
-assert.match(html, /aria-label="Arquivo do Códice"/);
+assert.doesNotMatch(html, /id="tab-codex"/);
+assert.doesNotMatch(html, />Arquivo</);
 assert.match(css, /\.despertar-codex-book\b/);
 assert.match(css, /z-index:\s*35/);
 assert.match(css, /\.despertar-codex-drawer\b/);
@@ -238,7 +238,6 @@ function makeDomHarness({ state, storage, timers }) {
     hidden: true,
   }, [backdrop, panel]);
   const realm = el('section', { class: 'despertar-col--realm' }, [button, tip]);
-  const tab = el('button', { id: 'tab-codex' });
 
   const byId = {
     'despertar-codex-book': button,
@@ -246,7 +245,6 @@ function makeDomHarness({ state, storage, timers }) {
     'despertar-codex-tip': tip,
     'codex-drawer-list': list,
     'codex-drawer-empty': empty,
-    'tab-codex': tab,
   };
 
   const doc = {

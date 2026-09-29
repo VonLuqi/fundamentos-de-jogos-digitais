@@ -36,23 +36,26 @@ const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 staticAssert(pkg.includes('despertar-codex-smoke.mjs'), 'npm run check inclui este smoke');
 
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
-staticAssert(html.includes('id="tab-codex"'), 'aba Arquivo (Códice)');
-staticAssert(html.includes('id="panel-codex"'), 'painel do Códice');
-staticAssert(html.includes('id="codex-list"'), 'lista do Códice');
-staticAssert(html.includes('id="codex-empty"'), 'empty state do Códice');
+staticAssert(html.includes('id="despertar-codex-book"'), 'livro flutuante do Códice');
+staticAssert(html.includes('id="despertar-codex-drawer"'), 'drawer do Códice');
+staticAssert(html.includes('id="codex-drawer-list"'), 'lista do drawer');
+staticAssert(html.includes('id="codex-drawer-empty"'), 'empty state do drawer');
 staticAssert(
-  html.includes('>Arquivo<') || html.includes('Códice do Loop') || html.includes('O Códice'),
-  'copy Arquivo/Códice',
+  html.includes('Códice do Loop') || html.includes('O Códice'),
+  'copy Códice',
 );
+staticAssert(!html.includes('id="tab-codex"'), 'aba Arquivo removida (livro no canto)');
+staticAssert(!html.includes('id="panel-codex"'), 'painel Arquivo removido');
 
 const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
 staticAssert(css.includes('.despertar-codex-list'), 'estilo da lista');
 staticAssert(css.includes('.despertar-codex-entry'), 'estilo da entrada');
+staticAssert(css.includes('.despertar-codex-book'), 'estilo do livro');
 staticAssert(css.includes('is-locked'), 'estado bloqueado');
 
 const rendererSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
-staticAssert(rendererSrc.includes('#mountCodex') || rendererSrc.includes('mountCodex'), 'monta o Códice');
-staticAssert(rendererSrc.includes('#renderCodex') || rendererSrc.includes('renderCodex'), 'renderiza o Códice');
+staticAssert(rendererSrc.includes('mountCodexBook') || rendererSrc.includes('_codexBook'), 'monta o livro');
+staticAssert(!rendererSrc.includes('#mountCodex(') && !rendererSrc.includes('#renderCodex('), 'sem painel Arquivo');
 staticAssert(rendererSrc.includes('describeCodex'), 'describeCodex exportado');
 staticAssert(!rendererSrc.includes('innerHTML'), 'UIRenderer não usa innerHTML');
 

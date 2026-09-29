@@ -53,9 +53,9 @@ staticAssert(VERDICT_SHOP_IDS.includes('sentenca_afiada'), 'sentenca_afiada F2')
 staticAssert(VERDICT_SHOP_IDS.includes('eco_do_veredito'), 'eco_do_veredito F2');
 staticAssert(VERDICT_SHOP_IDS.includes('catalogo_vivo'), 'catalogo_vivo F2');
 staticAssert(VERDICT_SHOP_IDS.includes('peso_das_faixas'), 'peso_das_faixas F2');
-staticAssert(VERDICT_SHOP.find((i) => i.id === 'selo_do_juiz')?.cost === 2, 'B1 Soft: selo custa 2');
+staticAssert(VERDICT_SHOP.find((i) => i.id === 'selo_do_juiz')?.cost === 1, 'B1 Soft: selo custa 1');
 staticAssert(VERDICT_SHOP.find((i) => i.id === 'memoria_classind')?.cost === 4, 'B1 Soft: memória custa 4');
-staticAssert(VERDICT_SHOP_TOTAL_COST === 64, 'F2: Bancada total 64');
+staticAssert(VERDICT_SHOP_TOTAL_COST === 63, 'F2: Bancada total 63');
 
 staticAssert(html.includes('id="tab-bancada"'), 'aba Bancada no HTML');
 staticAssert(html.includes('id="panel-bancada"'), 'painel Bancada no HTML');
@@ -105,7 +105,7 @@ run('compra debita Vereditos e libera log_juizo', () => {
   const before = state.clickPower();
   const result = state.buyVerdict('selo_do_juiz');
   assert.equal(result.ok, true);
-  assert.equal(state.verdicts, 1); // B1 Soft: selo custa 2
+  assert.equal(state.verdicts, 2); // B1 Soft: selo custa 1
   assert.deepEqual(state.verdictPurchases, ['selo_do_juiz']);
   assert.ok(state.eduLogsSeen.includes('log_juizo'));
   assert.ok(cmp(state.clickPower(), before) > 0);
@@ -170,14 +170,14 @@ run('applyVerdictBuy server-authoritative', () => {
   };
   const ok = applyVerdictBuy(row, 'selo_do_juiz');
   assert.equal(ok.ok, true);
-  assert.equal(ok.next.verdicts, 1); // B1 Soft: selo custa 2
+  assert.equal(ok.next.verdicts, 2); // B1 Soft: selo custa 1
   assert.deepEqual(ok.next.verdictPurchases, ['selo_do_juiz']);
-  assert.equal(ok.patch.verdicts, 1);
+  assert.equal(ok.patch.verdicts, 2);
 
   const again = applyVerdictBuy({ ...row, ...ok.patch, verdict_purchases: ok.next.verdictPurchases }, 'selo_do_juiz');
   assert.equal(again.ok, false);
 
-  const poor = applyVerdictBuy({ ...row, verdicts: 1 }, 'selo_do_juiz');
+  const poor = applyVerdictBuy({ ...row, verdicts: 0 }, 'selo_do_juiz');
   assert.equal(poor.ok, false);
 });
 

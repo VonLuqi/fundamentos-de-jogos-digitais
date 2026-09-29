@@ -118,11 +118,18 @@ async function enterClassroomPauseVeil({ pause, serverNow, token }) {
 
 function bindTabs(root) {
   if (!root) return;
-  const tabs = [...root.querySelectorAll('[role="tab"]')];
-  const panels = [...root.querySelectorAll('[role="tabpanel"]')];
+  // Só abas/painéis do Domínio — subabas (Bancada/Panteão) têm role="tab" aninhado
+  // e não podem entrar neste activate (senão escondem #panel-bancada / #panel-lethe).
+  const tabs = [...root.querySelectorAll('.despertar-tablist > [role="tab"]')];
+  const panels = [...root.querySelectorAll(':scope > [role="tabpanel"]')];
   if (!tabs.length) return;
 
+  function visibleTabs() {
+    return tabs.filter((tab) => !tab.hidden);
+  }
+
   function activate(tab, { focus = false } = {}) {
+    if (!tab || tab.hidden) return;
     const panelId = tab.getAttribute('aria-controls');
     tabs.forEach((item) => {
       const selected = item === tab;
@@ -133,9 +140,6 @@ function bindTabs(root) {
       panel.hidden = panel.id !== panelId;
     });
     if (focus) tab.focus();
-    if (tab.id === 'tab-codex') {
-      uiRef.renderer?.markCodexDrawerSeen?.();
-    }
   }
 
   tabs.forEach((tab) => {
@@ -143,26 +147,28 @@ function bindTabs(root) {
   });
 
   root.addEventListener('keydown', (event) => {
-    if (!(event.target instanceof Element) || !event.target.closest('[role="tab"]')) return;
+    if (!(event.target instanceof Element) || !tabs.includes(event.target)) return;
 
-    const current = tabs.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
-    if (current < 0) return;
+    const visible = visibleTabs();
+    if (!visible.length) return;
+    const current = visible.findIndex((tab) => tab.getAttribute('aria-selected') === 'true');
+    const from = current >= 0 ? current : 0;
 
     let nextIndex = -1;
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-      nextIndex = (current + 1) % tabs.length;
+      nextIndex = (from + 1) % visible.length;
     } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-      nextIndex = (current - 1 + tabs.length) % tabs.length;
+      nextIndex = (from - 1 + visible.length) % visible.length;
     } else if (event.key === 'Home') {
       nextIndex = 0;
     } else if (event.key === 'End') {
-      nextIndex = tabs.length - 1;
+      nextIndex = visible.length - 1;
     } else {
       return;
     }
 
     event.preventDefault();
-    activate(tabs[nextIndex], { focus: true });
+    activate(visible[nextIndex], { focus: true });
   });
 }
 
@@ -184,11 +190,16 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
     ? [...panel.querySelectorAll('[data-debug-flag]')]
     : [];
   if (!panel) return;
+  const steleTab = document.getElementById('tab-stele');
+  const stelePanel = document.getElementById('panel-stele');
   if (!isAdmin) {
     panel.hidden = true;
+    if (steleTab) steleTab.hidden = true;
+    if (stelePanel) stelePanel.hidden = true;
     return;
   }
   panel.hidden = false;
+  if (steleTab) steleTab.hidden = false;
 
   const setBusy = (busy) => {
     if (resetBtn) resetBtn.disabled = busy;

@@ -15,7 +15,7 @@ import {
   STYX_UNLOCK_SOULS,
   TICK_FPS,
 } from '../config/constants.js';
-import { EDU_LOGS, EDU_LOG_BY_ID, EDU_LOG_TICKER_IDS, eduLogTickerPhrase } from '../config/edu-logs.js';
+import { EDU_LOG_BY_ID, EDU_LOG_TICKER_IDS, eduLogTickerPhrase } from '../config/edu-logs.js';
 import { GENERATORS, getGenerator } from '../config/generators.js';
 import {
   RUMOR_INTERRUPT_MS,
@@ -82,10 +82,8 @@ const LETHE_UNLOCK_HOLD_MS = 5_000;
 const EDU_LOG_TICKER_HOLD_MS = 5_000;
 /** Copy curta do toast first-unlock (C3). */
 const LETHE_TUTORIAL_TOAST =
-  'O Lethe se abre. Confira a aba Lethe — o Códice também ganhou uma página.';
+  'O Lethe se abre. Confira a aba Lethe — o livro do Códice também ganhou uma página.';
 const PANTHEON_EMPTY = 'Mnemosyne ainda não bebeu tua memória.';
-const CODEX_LOCKED_TITLE = 'Página selada';
-const CODEX_LOCKED_BODY = 'O Submundo só revela o que a corrida já encontrou.';
 
 /** Copy do tip de NPC (G3.2) — shelf/órbita = uma unidade. */
 export const NPC_UNIT_PRODUCTION_BLURB = 'produção desta unidade';
@@ -516,7 +514,6 @@ export class UIRenderer {
     this._upgrades = new Map();
     this._talents = new Map();
     this._verdicts = new Map();
-    this._codex = new Map();
     this._styx = null;
     this._styxTip = null;
     this._npcTip = null;
@@ -525,7 +522,8 @@ export class UIRenderer {
     this._lethe = null;
     this._bancada = null;
     this._bancadaTip = null;
-    this._codexPanel = null;
+    this._bancadaOrderSig = '';
+    this._pantheonOrderSig = '';
     /** @type {CodexBook|null} */
     this._codexBook = null;
     /** @type {{ activate: Function, getSelectedKey: Function, tabs: Element[] }|null} */
@@ -574,7 +572,6 @@ export class UIRenderer {
     this.#mountAltar();
     this.#mountLethe();
     this.#mountBancada();
-    this.#mountCodex();
     this.#mountCodexBook();
     this._ticker = this.root.getElementById('despertar-ticker');
     if (this._ticker) bindMarquee(this._ticker);
@@ -605,11 +602,6 @@ export class UIRenderer {
     this.onBuyMode?.(next);
     if (this.state) this.#renderMarket(this.state);
     return next;
-  }
-
-  /** Marca páginas do Códice como lidas no widget livro (B-D5). */
-  markCodexDrawerSeen() {
-    this._codexBook?.markCurrentSeen();
   }
 
   render(alpha = 0, meta = {}) {
@@ -643,7 +635,6 @@ export class UIRenderer {
     this.#renderStats(state);
     this.#renderLethe(state, { reducedMotion });
     this.#renderBancada(state);
-    this.#renderCodex(state);
     this._codexBook?.sync(state);
     this.#announceEduLogTickers(state, { reducedMotion });
   }
@@ -1487,6 +1478,10 @@ export class UIRenderer {
   #renderLethe(state, meta = {}) {
     if (!this._lethe) return;
     const view = describeLethe(state);
+    const tab = this.root.getElementById('tab-lethe');
+    setHidden(tab, !view.open);
+    if (tab?.hidden) this.#fallbackHiddenDomainTab(tab);
+
     setHidden(this._lethe.locked, view.open);
     setHidden(this._lethe.open, !view.open);
     if (!view.open && this._lethe.locked) setText(this._lethe.locked, LETHE_EMPTY);
@@ -1531,8 +1526,16 @@ export class UIRenderer {
 
     const listA = this._lethe.pantheonListAvailable;
     const listB = this._lethe.pantheonListOwned;
-    if (listA) listA.replaceChildren();
-    if (listB) listB.replaceChildren();
+    const orderSig = [
+      partitioned.available.map((card) => card.id).join('\0'),
+      partitioned.owned.map((card) => card.id).join('\0'),
+    ].join('|');
+    const remount = orderSig !== this._pantheonOrderSig;
+    if (remount) {
+      this._pantheonOrderSig = orderSig;
+      if (listA) listA.replaceChildren();
+      if (listB) listB.replaceChildren();
+    }
 
     for (const card of partitioned.available) {
       const nodes = this._talents.get(card.id);
@@ -1543,7 +1546,7 @@ export class UIRenderer {
       setDisabled(nodes.buy, !card.canBuy);
       setHidden(nodes.buy, false);
       setHidden(nodes.badge, true);
-      listA?.append(nodes.item);
+      if (remount) listA?.append(nodes.item);
     }
 
     for (const card of partitioned.owned) {
@@ -1556,7 +1559,7 @@ export class UIRenderer {
       setHidden(nodes.buy, true);
       setHidden(nodes.badge, false);
       setText(nodes.badge, SHOP_OWNED_BADGE);
-      listB?.append(nodes.item);
+      if (remount) listB?.append(nodes.item);
     }
 
     const emptyA = partitioned.counts.available === 0;
@@ -1588,6 +1591,18 @@ export class UIRenderer {
       ? this._lethe?.pantheonTabOwned
       : this._lethe?.pantheonTabAvailable;
     if (tab) this._pantheonSubTabs.activate(tab, { silent: true });
+  }
+
+  /**
+   * Se a aba selecionada sumiu (Lethe/Estela), volta para Mundo.
+   * @param {Element|null|undefined} [maybeHidden]
+   */
+  #fallbackHiddenDomainTab(maybeHidden = null) {
+    if (maybeHidden && maybeHidden.getAttribute('aria-selected') !== 'true') return;
+    const selected = this.root.querySelector?.('.despertar-tablist > [role="tab"][aria-selected="true"]');
+    if (selected && !selected.hidden) return;
+    const mundo = this.root.getElementById('tab-mundo');
+    if (mundo && !mundo.hidden && typeof mundo.click === 'function') mundo.click();
   }
 
   /**
@@ -1687,10 +1702,16 @@ export class UIRenderer {
         activeAnchor: null,
       }
       : null;
+    this._bancadaOrderSig = '';
     this._bancadaKeyHandler = (event) => {
       if (event.key === 'Escape') this.#hideBancadaTip();
     };
     this.root.addEventListener?.('keydown', this._bancadaKeyHandler);
+    // Sair da loja fecha o tip (DOM reorder / disabled não engolem o leave).
+    this._bancada.shop?.addEventListener?.('pointerleave', (event) => {
+      if (event.currentTarget?.contains?.(event.relatedTarget)) return;
+      this.#hideBancadaTip();
+    });
 
     const tablist = this.root.getElementById('bancada-subtabs');
     this._bancadaSubTabs = bindSubTabs(tablist, {
@@ -1698,6 +1719,7 @@ export class UIRenderer {
       onActivate: (_tab, key) => {
         this._bancadaSubKey = key;
         this._bancadaSubUserPicked = true;
+        this.#hideBancadaTip();
       },
     });
 
@@ -1829,8 +1851,16 @@ export class UIRenderer {
 
     const listA = this._bancada.listAvailable;
     const listB = this._bancada.listOwned;
-    if (listA) listA.replaceChildren();
-    if (listB) listB.replaceChildren();
+    const orderSig = [
+      partitioned.available.map((card) => card.id).join('\0'),
+      partitioned.owned.map((card) => card.id).join('\0'),
+    ].join('|');
+    const remount = orderSig !== this._bancadaOrderSig;
+    if (remount) {
+      this._bancadaOrderSig = orderSig;
+      if (listA) listA.replaceChildren();
+      if (listB) listB.replaceChildren();
+    }
 
     for (const card of partitioned.available) {
       const nodes = this._verdicts.get(card.id);
@@ -1842,7 +1872,7 @@ export class UIRenderer {
       setHidden(nodes.buy, false);
       setHidden(nodes.badge, true);
       if (nodes.blurb) setText(nodes.blurb, card.blurb);
-      listA?.append(nodes.item);
+      if (remount) listA?.append(nodes.item);
     }
 
     for (const card of partitioned.owned) {
@@ -1856,7 +1886,7 @@ export class UIRenderer {
       setHidden(nodes.badge, false);
       setText(nodes.badge, SHOP_OWNED_BADGE);
       if (nodes.blurb) setText(nodes.blurb, card.blurb);
-      listB?.append(nodes.item);
+      if (remount) listB?.append(nodes.item);
     }
 
     const emptyA = partitioned.counts.available === 0;
@@ -1876,7 +1906,11 @@ export class UIRenderer {
 
     if (this._bancadaTip?.activeId) {
       const active = this._verdicts.get(this._bancadaTip.activeId);
-      if (!active || active.buy?.hidden) this.#hideBancadaTip();
+      if (!active || active.buy?.hidden) {
+        this.#hideBancadaTip();
+      } else if (active.buy && !this._bancadaTip.root.hidden) {
+        this.#showBancadaTip(this._bancadaTip.activeId, active.buy);
+      }
     }
   }
 
@@ -1895,44 +1929,6 @@ export class UIRenderer {
     if (tab) this._bancadaSubTabs.activate(tab, { silent: true });
   }
 
-  #mountCodex() {
-    const panel = this.root.getElementById('panel-codex');
-    if (!panel) return;
-    let empty = this.root.getElementById('codex-empty');
-    if (!empty) {
-      empty = panel.querySelector('.despertar-empty');
-      if (empty) empty.id = 'codex-empty';
-    }
-    let list = this.root.getElementById('codex-list');
-    if (!list) {
-      list = this.root.createElement('ol');
-      list.id = 'codex-list';
-      list.className = 'despertar-codex-list';
-      list.hidden = true;
-      panel.append(list);
-    }
-    list.replaceChildren();
-    this._codex.clear();
-    this._codexPanel = { empty, list };
-    for (const def of EDU_LOGS) {
-      const item = this.root.createElement('li');
-      item.className = 'despertar-codex-entry is-locked';
-      item.dataset.logId = def.id;
-
-      const title = this.root.createElement('p');
-      title.className = 'despertar-codex-entry__title';
-      title.textContent = CODEX_LOCKED_TITLE;
-
-      const body = this.root.createElement('p');
-      body.className = 'despertar-codex-entry__body';
-      body.textContent = CODEX_LOCKED_BODY;
-
-      item.append(title, body);
-      list.append(item);
-      this._codex.set(def.id, { item, title, body });
-    }
-  }
-
   #mountCodexBook() {
     if (this._codexBook) return;
     this._codexBook = new CodexBook(this.root, {
@@ -1940,25 +1936,5 @@ export class UIRenderer {
       getState: () => this.state,
     });
     this._codexBook.mount();
-  }
-
-  #renderCodex(state) {
-    if (!this._codexPanel) return;
-    const view = describeCodex(state);
-    setHidden(this._codexPanel.empty, view.showList);
-    setHidden(this._codexPanel.list, !view.showList);
-    if (this._codexPanel.empty && !view.showList) {
-      setText(this._codexPanel.empty, view.emptyText);
-    }
-    if (!view.showList) return;
-
-    for (const entry of view.entries) {
-      const nodes = this._codex.get(entry.id);
-      if (!nodes) continue;
-      toggleClass(nodes.item, 'is-locked', !entry.unlocked);
-      toggleClass(nodes.item, 'is-unlocked', entry.unlocked);
-      setText(nodes.title, entry.title);
-      setText(nodes.body, entry.body);
-    }
   }
 }
