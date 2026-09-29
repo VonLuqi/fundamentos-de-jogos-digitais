@@ -37,6 +37,10 @@ const RATING_SET = new Set(JUIZO_RATING_ORDER);
 const CLASSIND_COVER_BASE = '/assets/classind-dle/covers';
 const DESPERTAR_COVER_BASE = '/assets/despertar-juizo/covers';
 
+/** Capa stub quando o arquivo WebP falta ou o `cover` vem vazio. */
+export const JUIZO_COVER_FALLBACK_FILE = 'no-image.webp';
+export const JUIZO_COVER_FALLBACK_URL = `${DESPERTAR_COVER_BASE}/${JUIZO_COVER_FALLBACK_FILE}`;
+
 /**
  * Capas já publicadas no ClassInd-dle (compartilhadas pelo filename).
  * Demais covers caem em assets/despertar-juizo/covers/.
@@ -87,7 +91,7 @@ export function isReadyJuizoGame(game) {
 
 export function resolveJuizoCoverUrl(cover) {
   const file = String(cover || '').trim();
-  if (!file) return `${DESPERTAR_COVER_BASE}/placeholder.webp`;
+  if (!file || file === JUIZO_COVER_FALLBACK_FILE) return JUIZO_COVER_FALLBACK_URL;
   if (CLASSIND_SHARED_COVERS.has(file)) return `${CLASSIND_COVER_BASE}/${file}`;
   return `${DESPERTAR_COVER_BASE}/${file}`;
 }

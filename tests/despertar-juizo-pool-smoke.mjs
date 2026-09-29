@@ -14,6 +14,7 @@ import {
   CLASSIND_SHARED_COVERS,
   JUIZO_BANCADA_HINT,
   JUIZO_CODEX_BODY,
+  JUIZO_COVER_FALLBACK_URL,
   JUIZO_CTA_LABEL,
   JUIZO_CTA_READY_HINT,
   JUIZO_MIN_READY,
@@ -90,6 +91,21 @@ const uiSrc = read('js/hades-despertar/ui/UIRenderer.js');
 staticAssert(uiSrc.includes('Não é Veredito do Juízo'), 'Juramento Styx blurb Q16');
 staticAssert(uiSrc.includes('JUIZO_BANCADA_HINT'), 'Bancada hint wired no renderer');
 staticAssert(fs.existsSync(path.join(root, 'assets/despertar-juizo/covers/README.md')), 'pasta capas Juízo');
+staticAssert(
+  fs.existsSync(path.join(root, 'assets/despertar-juizo/covers/no-image.webp')),
+  'capa fallback no-image.webp',
+);
+staticAssert(
+  resolveJuizoCoverUrl('') === JUIZO_COVER_FALLBACK_URL,
+  'cover vazio resolve para no-image',
+);
+staticAssert(
+  resolveJuizoCoverUrl('no-image.webp') === JUIZO_COVER_FALLBACK_URL,
+  'no-image.webp não se auto-referencia em pasta errada',
+);
+const juizoModalSrc = read('js/hades-despertar/ui/JuizoModal.js');
+staticAssert(juizoModalSrc.includes('JUIZO_COVER_FALLBACK_URL'), 'modal importa fallback de capa');
+staticAssert(juizoModalSrc.includes('bindJuizoCoverFallback') || juizoModalSrc.includes('error'), 'modal trata onerror da capa');
 staticAssert(pkg.includes('despertar-juizo-pool-smoke.mjs'), 'check inclui este smoke');
 staticAssert(
   readme.includes('despertar-juizo-pool.stub') || readme.includes('Juízo'),

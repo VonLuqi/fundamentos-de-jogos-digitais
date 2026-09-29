@@ -4,4 +4,5 @@ Quando o `cover` de um título do stub **não** existir em
 [`assets/classind-dle/covers/`](../classind-dle/covers/), coloque o WebP aqui
 com o mesmo filename.
 
-O runtime resolve na ordem: ClassInd compartilhado → esta pasta.
+O runtime resolve na ordem: ClassInd compartilhado → esta pasta →
+[`no-image.webp`](./no-image.webp) (fallback em `onerror` se o arquivo faltar).

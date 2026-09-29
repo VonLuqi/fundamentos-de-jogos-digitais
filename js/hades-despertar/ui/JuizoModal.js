@@ -7,7 +7,7 @@
 'use strict';
 
 import { juiceBumpClass, juicePrefersReducedMotion } from './juice.js';
-import { JUIZO_MODAL_EDU_HINT } from '../config/juizo-pool.js';
+import { JUIZO_COVER_FALLBACK_URL, JUIZO_MODAL_EDU_HINT } from '../config/juizo-pool.js';
 
 function setText(el, value) {
   if (el) el.textContent = value == null ? '' : String(value);
@@ -15,6 +15,18 @@ function setText(el, value) {
 
 function setHidden(el, hidden) {
   if (el) el.hidden = Boolean(hidden);
+}
+
+/** Troca capa quebrada/404 pelo stub "no image" (uma vez). */
+function bindJuizoCoverFallback(img) {
+  if (!img || img.dataset.juizoCoverFallbackBound === '1') return;
+  img.dataset.juizoCoverFallbackBound = '1';
+  img.addEventListener('error', () => {
+    if (img.dataset.juizoCoverFallback === '1') return;
+    img.dataset.juizoCoverFallback = '1';
+    img.alt = img.alt || 'no image';
+    img.src = JUIZO_COVER_FALLBACK_URL;
+  });
 }
 
 function wait(ms) {
@@ -204,9 +216,12 @@ export class JuizoModal {
     setText(nodes.title, card.title || '—');
     if (nodes.blurb) setText(nodes.blurb, card.blurb || '');
     if (nodes.cover) {
+      bindJuizoCoverFallback(nodes.cover);
       nodes.cover.alt = card.title || '';
-      nodes.cover.src = card.coverUrl || card.cover || '';
-      nodes.cover.hidden = !(card.coverUrl || card.cover);
+      delete nodes.cover.dataset.juizoCoverFallback;
+      const src = card.coverUrl || card.cover || JUIZO_COVER_FALLBACK_URL;
+      nodes.cover.src = src;
+      nodes.cover.hidden = !src;
     }
     if (!nodes.rating) return;
     nodes.rating.classList.toggle('is-mystery', mystery);
