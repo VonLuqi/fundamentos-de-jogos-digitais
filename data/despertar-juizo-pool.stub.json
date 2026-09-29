@@ -146,7 +146,7 @@
     {
       "id": "doom-eternal",
       "title": "Doom Eternal",
-      "rating": "16",
+      "rating": "18",
       "blurb": "FPS com violência intensa e gore demoníaco.",
       "cover": "doom-eternal.webp",
       "descriptors": [
@@ -254,7 +254,7 @@
     {
       "id": "minecraft",
       "title": "Minecraft",
-      "rating": "10",
+      "rating": "14",
       "blurb": "Sandbox com exploração e combate opcional.",
       "cover": "minecraft.webp",
       "descriptors": [],
@@ -272,7 +272,7 @@
     {
       "id": "roblox",
       "title": "Roblox",
-      "rating": "L",
+      "rating": "18",
       "blurb": "Plataforma UGC com experiências variadas.",
       "cover": "roblox.webp",
       "descriptors": [],
@@ -290,7 +290,7 @@
     {
       "id": "valorant",
       "title": "Valorant",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -299,7 +299,7 @@
     {
       "id": "league-of-legends",
       "title": "League of Legends",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -308,7 +308,7 @@
     {
       "id": "counter-strike-2",
       "title": "Counter-Strike 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -317,7 +317,7 @@
     {
       "id": "dota-2",
       "title": "Dota 2",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -326,7 +326,7 @@
     {
       "id": "overwatch-2",
       "title": "Overwatch 2",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -335,7 +335,7 @@
     {
       "id": "apex-legends",
       "title": "Apex Legends",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -344,7 +344,7 @@
     {
       "id": "genshin-impact",
       "title": "Genshin Impact",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -353,7 +353,7 @@
     {
       "id": "honkai-star-rail",
       "title": "Honkai: Star Rail",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -371,7 +371,7 @@
     {
       "id": "dark-souls-iii",
       "title": "Dark Souls III",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -380,7 +380,7 @@
     {
       "id": "bloodborne",
       "title": "Bloodborne",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -389,7 +389,7 @@
     {
       "id": "sekiro-shadows-die-twice",
       "title": "Sekiro: Shadows Die Twice",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -398,7 +398,7 @@
     {
       "id": "lies-of-p",
       "title": "Lies of P",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -407,7 +407,7 @@
     {
       "id": "black-myth-wukong",
       "title": "Black Myth: Wukong",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -416,7 +416,7 @@
     {
       "id": "baldur-s-gate-3",
       "title": "Baldur's Gate 3",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -425,7 +425,7 @@
     {
       "id": "divinity-original-sin-2",
       "title": "Divinity: Original Sin 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -434,7 +434,7 @@
     {
       "id": "the-witcher-3-wild-hunt",
       "title": "The Witcher 3: Wild Hunt",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -443,7 +443,7 @@
     {
       "id": "cyberpunk-2077",
       "title": "Cyberpunk 2077",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -452,7 +452,7 @@
     {
       "id": "red-dead-redemption-2",
       "title": "Red Dead Redemption 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -461,7 +461,7 @@
     {
       "id": "grand-theft-auto-v",
       "title": "Grand Theft Auto V",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -470,7 +470,7 @@
     {
       "id": "grand-theft-auto-vi",
       "title": "Grand Theft Auto VI",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -479,7 +479,7 @@
     {
       "id": "assassin-s-creed-valhalla",
       "title": "Assassin's Creed Valhalla",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -488,7 +488,7 @@
     {
       "id": "assassin-s-creed-odyssey",
       "title": "Assassin's Creed Odyssey",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -497,7 +497,7 @@
     {
       "id": "horizon-forbidden-west",
       "title": "Horizon Forbidden West",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -506,7 +506,7 @@
     {
       "id": "horizon-zero-dawn",
       "title": "Horizon Zero Dawn",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -515,7 +515,7 @@
     {
       "id": "marvel-s-spider-man-2",
       "title": "Marvel's Spider-Man 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -524,7 +524,7 @@
     {
       "id": "marvel-s-spider-man-miles-morales",
       "title": "Marvel's Spider-Man: Miles Morales",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -533,7 +533,7 @@
     {
       "id": "the-last-of-us-part-i",
       "title": "The Last of Us Part I",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -542,7 +542,7 @@
     {
       "id": "the-last-of-us-part-ii",
       "title": "The Last of Us Part II",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -551,7 +551,7 @@
     {
       "id": "uncharted-4-a-thief-s-end",
       "title": "Uncharted 4: A Thief's End",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -560,7 +560,7 @@
     {
       "id": "god-of-war-2018",
       "title": "God of War (2018)",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -569,7 +569,7 @@
     {
       "id": "ghost-of-tsushima",
       "title": "Ghost of Tsushima",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -578,7 +578,7 @@
     {
       "id": "days-gone",
       "title": "Days Gone",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -587,7 +587,7 @@
     {
       "id": "death-stranding",
       "title": "Death Stranding",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -596,7 +596,7 @@
     {
       "id": "death-stranding-2",
       "title": "Death Stranding 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -605,7 +605,7 @@
     {
       "id": "hades",
       "title": "Hades",
-      "rating": "16",
+      "rating": "14",
       "blurb": "Roguelike mitológico com sangue e combate intenso.",
       "cover": "hades.webp",
       "descriptors": [],
@@ -614,7 +614,7 @@
     {
       "id": "hades-ii",
       "title": "Hades II",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -632,7 +632,7 @@
     {
       "id": "dead-cells",
       "title": "Dead Cells",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -641,7 +641,7 @@
     {
       "id": "ori-and-the-blind-forest",
       "title": "Ori and the Blind Forest",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -650,7 +650,7 @@
     {
       "id": "ori-and-the-will-of-the-wisps",
       "title": "Ori and the Will of the Wisps",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -659,7 +659,7 @@
     {
       "id": "hollow-knight-silksong",
       "title": "Hollow Knight: Silksong",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -668,7 +668,7 @@
     {
       "id": "stardew-valley",
       "title": "Stardew Valley",
-      "rating": "L",
+      "rating": "10",
       "blurb": "Fazenda e vida rural; relacionamento adulto opcional.",
       "cover": "stardew-valley.webp",
       "descriptors": [],
@@ -686,7 +686,7 @@
     {
       "id": "terraria",
       "title": "Terraria",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -695,7 +695,7 @@
     {
       "id": "no-man-s-sky",
       "title": "No Man's Sky",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -704,7 +704,7 @@
     {
       "id": "subnautica",
       "title": "Subnautica",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -713,7 +713,7 @@
     {
       "id": "subnautica-below-zero",
       "title": "Subnautica: Below Zero",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -722,7 +722,7 @@
     {
       "id": "raft",
       "title": "Raft",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -731,7 +731,7 @@
     {
       "id": "valheim",
       "title": "Valheim",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -740,7 +740,7 @@
     {
       "id": "don-t-starve",
       "title": "Don't Starve",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -749,7 +749,7 @@
     {
       "id": "don-t-starve-together",
       "title": "Don't Starve Together",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -758,7 +758,7 @@
     {
       "id": "the-binding-of-isaac-rebirth",
       "title": "The Binding of Isaac: Rebirth",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -767,7 +767,7 @@
     {
       "id": "enter-the-gungeon",
       "title": "Enter the Gungeon",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -776,7 +776,7 @@
     {
       "id": "slay-the-spire",
       "title": "Slay the Spire",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -785,7 +785,7 @@
     {
       "id": "balatro",
       "title": "Balatro",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -794,7 +794,7 @@
     {
       "id": "hearthstone",
       "title": "Hearthstone",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -803,7 +803,7 @@
     {
       "id": "magic-the-gathering-arena",
       "title": "Magic: The Gathering Arena",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -812,7 +812,7 @@
     {
       "id": "pokemon-go",
       "title": "Pokémon GO",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -821,7 +821,7 @@
     {
       "id": "pokemon-scarlet",
       "title": "Pokémon Scarlet",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -830,7 +830,7 @@
     {
       "id": "pokemon-legends-arceus",
       "title": "Pokémon Legends: Arceus",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -839,7 +839,7 @@
     {
       "id": "fire-emblem-three-houses",
       "title": "Fire Emblem: Three Houses",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -848,7 +848,7 @@
     {
       "id": "xenoblade-chronicles-3",
       "title": "Xenoblade Chronicles 3",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -857,7 +857,7 @@
     {
       "id": "the-legend-of-zelda-breath-of-the-wild",
       "title": "The Legend of Zelda: Breath of the Wild",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -866,7 +866,7 @@
     {
       "id": "the-legend-of-zelda-tears-of-the-kingdom",
       "title": "The Legend of Zelda: Tears of the Kingdom",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -875,7 +875,7 @@
     {
       "id": "mario-kart-8-deluxe",
       "title": "Mario Kart 8 Deluxe",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -893,7 +893,7 @@
     {
       "id": "super-smash-bros-ultimate",
       "title": "Super Smash Bros. Ultimate",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -902,7 +902,7 @@
     {
       "id": "kirby-and-the-forgotten-land",
       "title": "Kirby and the Forgotten Land",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -911,7 +911,7 @@
     {
       "id": "pikmin-4",
       "title": "Pikmin 4",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -920,7 +920,7 @@
     {
       "id": "splatoon-3",
       "title": "Splatoon 3",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -929,7 +929,7 @@
     {
       "id": "metroid-dread",
       "title": "Metroid Dread",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -938,7 +938,7 @@
     {
       "id": "metroid-prime-remastered",
       "title": "Metroid Prime Remastered",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -947,7 +947,7 @@
     {
       "id": "resident-evil-4-remake",
       "title": "Resident Evil 4 Remake",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -956,7 +956,7 @@
     {
       "id": "resident-evil-2-remake",
       "title": "Resident Evil 2 Remake",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -965,7 +965,7 @@
     {
       "id": "resident-evil-7-biohazard",
       "title": "Resident Evil 7: Biohazard",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -974,7 +974,7 @@
     {
       "id": "resident-evil-3-remake",
       "title": "Resident Evil 3 Remake",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -983,7 +983,7 @@
     {
       "id": "silent-hill-f",
       "title": "Silent Hill f",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -992,7 +992,7 @@
     {
       "id": "outlast",
       "title": "Outlast",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1001,7 +1001,7 @@
     {
       "id": "outlast-2",
       "title": "Outlast 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1010,7 +1010,7 @@
     {
       "id": "amnesia-the-bunker",
       "title": "Amnesia: The Bunker",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1019,7 +1019,7 @@
     {
       "id": "phasmophobia",
       "title": "Phasmophobia",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1028,7 +1028,7 @@
     {
       "id": "dead-by-daylight",
       "title": "Dead by Daylight",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1037,7 +1037,7 @@
     {
       "id": "left-4-dead-2",
       "title": "Left 4 Dead 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1046,7 +1046,7 @@
     {
       "id": "back-4-blood",
       "title": "Back 4 Blood",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1055,7 +1055,7 @@
     {
       "id": "payday-2",
       "title": "Payday 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1064,7 +1064,7 @@
     {
       "id": "payday-3",
       "title": "Payday 3",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1073,7 +1073,7 @@
     {
       "id": "tom-clancy-s-rainbow-six-siege",
       "title": "Tom Clancy's Rainbow Six Siege",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1082,7 +1082,7 @@
     {
       "id": "call-of-duty-modern-warfare-ii",
       "title": "Call of Duty: Modern Warfare II",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1091,7 +1091,7 @@
     {
       "id": "call-of-duty-warzone",
       "title": "Call of Duty: Warzone",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1100,7 +1100,7 @@
     {
       "id": "battlefield-2042",
       "title": "Battlefield 2042",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1109,7 +1109,7 @@
     {
       "id": "battlefield-v",
       "title": "Battlefield V",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1118,7 +1118,7 @@
     {
       "id": "halo-infinite",
       "title": "Halo Infinite",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1127,7 +1127,7 @@
     {
       "id": "gears-5",
       "title": "Gears 5",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1136,7 +1136,7 @@
     {
       "id": "doom-2016",
       "title": "Doom (2016)",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1145,7 +1145,7 @@
     {
       "id": "doom-the-dark-ages",
       "title": "Doom: The Dark Ages",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1154,7 +1154,7 @@
     {
       "id": "ultrakill",
       "title": "Ultrakill",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1163,7 +1163,7 @@
     {
       "id": "half-life-2",
       "title": "Half-Life 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1172,7 +1172,7 @@
     {
       "id": "half-life-alyx",
       "title": "Half-Life: Alyx",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1181,7 +1181,7 @@
     {
       "id": "portal",
       "title": "Portal",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1199,7 +1199,7 @@
     {
       "id": "team-fortress-2",
       "title": "Team Fortress 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1208,7 +1208,7 @@
     {
       "id": "garry-s-mod",
       "title": "Garry's Mod",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1217,7 +1217,7 @@
     {
       "id": "rust",
       "title": "Rust",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1226,7 +1226,7 @@
     {
       "id": "dayz",
       "title": "DayZ",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1235,7 +1235,7 @@
     {
       "id": "ark-survival-evolved",
       "title": "ARK: Survival Evolved",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1244,7 +1244,7 @@
     {
       "id": "palworld",
       "title": "Palworld",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1253,7 +1253,7 @@
     {
       "id": "satisfactory",
       "title": "Satisfactory",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1262,7 +1262,7 @@
     {
       "id": "factorio",
       "title": "Factorio",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1271,7 +1271,7 @@
     {
       "id": "cities-skylines-ii",
       "title": "Cities: Skylines II",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1280,7 +1280,7 @@
     {
       "id": "euro-truck-simulator-2",
       "title": "Euro Truck Simulator 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1289,7 +1289,7 @@
     {
       "id": "microsoft-flight-simulator",
       "title": "Microsoft Flight Simulator",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1298,7 +1298,7 @@
     {
       "id": "forza-horizon-5",
       "title": "Forza Horizon 5",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1307,7 +1307,7 @@
     {
       "id": "gran-turismo-7",
       "title": "Gran Turismo 7",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1316,7 +1316,7 @@
     {
       "id": "need-for-speed-unbound",
       "title": "Need for Speed Unbound",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1325,7 +1325,7 @@
     {
       "id": "rocket-league",
       "title": "Rocket League",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1334,7 +1334,7 @@
     {
       "id": "ea-sports-fc-24",
       "title": "EA Sports FC 24",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1343,7 +1343,7 @@
     {
       "id": "nba-2k24",
       "title": "NBA 2K24",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1352,7 +1352,7 @@
     {
       "id": "madden-nfl-24",
       "title": "Madden NFL 24",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1361,7 +1361,7 @@
     {
       "id": "wwe-2k24",
       "title": "WWE 2K24",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1370,7 +1370,7 @@
     {
       "id": "tekken-8",
       "title": "Tekken 8",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1379,7 +1379,7 @@
     {
       "id": "mortal-kombat-1",
       "title": "Mortal Kombat 1",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1388,7 +1388,7 @@
     {
       "id": "guilty-gear-strive",
       "title": "Guilty Gear -Strive-",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1397,7 +1397,7 @@
     {
       "id": "dragon-ball-fighterz",
       "title": "Dragon Ball FighterZ",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1406,7 +1406,7 @@
     {
       "id": "multiversus",
       "title": "MultiVersus",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1415,7 +1415,7 @@
     {
       "id": "brawlhalla",
       "title": "Brawlhalla",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1424,7 +1424,7 @@
     {
       "id": "it-takes-two",
       "title": "It Takes Two",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1433,7 +1433,7 @@
     {
       "id": "a-way-out",
       "title": "A Way Out",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1442,7 +1442,7 @@
     {
       "id": "untitled-goose-game",
       "title": "Untitled Goose Game",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1451,7 +1451,7 @@
     {
       "id": "overcooked-2",
       "title": "Overcooked! 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1460,7 +1460,7 @@
     {
       "id": "moving-out",
       "title": "Moving Out",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1469,7 +1469,7 @@
     {
       "id": "fall-guys",
       "title": "Fall Guys",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1478,7 +1478,7 @@
     {
       "id": "party-animals",
       "title": "Party Animals",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1487,7 +1487,7 @@
     {
       "id": "the-jackbox-party-pack-9",
       "title": "The Jackbox Party Pack 9",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1496,7 +1496,7 @@
     {
       "id": "keep-talking-and-nobody-explodes",
       "title": "Keep Talking and Nobody Explodes",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1505,7 +1505,7 @@
     {
       "id": "the-stanley-parable-ultra-deluxe",
       "title": "The Stanley Parable: Ultra Deluxe",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1514,7 +1514,7 @@
     {
       "id": "outer-wilds",
       "title": "Outer Wilds",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1523,7 +1523,7 @@
     {
       "id": "outer-wilds-echoes-of-the-eye",
       "title": "Outer Wilds: Echoes of the Eye",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1532,7 +1532,7 @@
     {
       "id": "disco-elysium",
       "title": "Disco Elysium",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1541,7 +1541,7 @@
     {
       "id": "return-of-the-obra-dinn",
       "title": "Return of the Obra Dinn",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1550,7 +1550,7 @@
     {
       "id": "papers-please",
       "title": "Papers, Please",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1559,7 +1559,7 @@
     {
       "id": "this-war-of-mine",
       "title": "This War of Mine",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1568,7 +1568,7 @@
     {
       "id": "spec-ops-the-line",
       "title": "Spec Ops: The Line",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1577,7 +1577,7 @@
     {
       "id": "bioshock",
       "title": "BioShock",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1586,7 +1586,7 @@
     {
       "id": "bioshock-infinite",
       "title": "BioShock Infinite",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1595,7 +1595,7 @@
     {
       "id": "system-shock-2023",
       "title": "System Shock (2023)",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1604,7 +1604,7 @@
     {
       "id": "prey-2017",
       "title": "Prey (2017)",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1613,7 +1613,7 @@
     {
       "id": "control",
       "title": "Control",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1622,7 +1622,7 @@
     {
       "id": "alan-wake-2",
       "title": "Alan Wake 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1631,7 +1631,7 @@
     {
       "id": "detroit-become-human",
       "title": "Detroit: Become Human",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1640,7 +1640,7 @@
     {
       "id": "heavy-rain",
       "title": "Heavy Rain",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1649,7 +1649,7 @@
     {
       "id": "beyond-two-souls",
       "title": "Beyond: Two Souls",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1658,7 +1658,7 @@
     {
       "id": "until-dawn",
       "title": "Until Dawn",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1667,7 +1667,7 @@
     {
       "id": "the-quarry",
       "title": "The Quarry",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1676,7 +1676,7 @@
     {
       "id": "life-is-strange",
       "title": "Life is Strange",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1685,7 +1685,7 @@
     {
       "id": "life-is-strange-true-colors",
       "title": "Life is Strange: True Colors",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1694,7 +1694,7 @@
     {
       "id": "oxenfree",
       "title": "Oxenfree",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1703,7 +1703,7 @@
     {
       "id": "night-in-the-woods",
       "title": "Night in the Woods",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1712,7 +1712,7 @@
     {
       "id": "deltarune",
       "title": "Deltarune",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1721,7 +1721,7 @@
     {
       "id": "omori",
       "title": "OMORI",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1730,7 +1730,7 @@
     {
       "id": "lisa-the-painful",
       "title": "Lisa: The Painful",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1739,7 +1739,7 @@
     {
       "id": "final-fantasy-vii-remake",
       "title": "Final Fantasy VII Remake",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1748,7 +1748,7 @@
     {
       "id": "final-fantasy-xvi",
       "title": "Final Fantasy XVI",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1757,7 +1757,7 @@
     {
       "id": "final-fantasy-xiv-online",
       "title": "Final Fantasy XIV Online",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1766,7 +1766,7 @@
     {
       "id": "persona-5-royal",
       "title": "Persona 5 Royal",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1775,7 +1775,7 @@
     {
       "id": "persona-3-reload",
       "title": "Persona 3 Reload",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1784,7 +1784,7 @@
     {
       "id": "shin-megami-tensei-v-vengeance",
       "title": "Shin Megami Tensei V: Vengeance",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1793,7 +1793,7 @@
     {
       "id": "like-a-dragon-infinite-wealth",
       "title": "Like a Dragon: Infinite Wealth",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1802,7 +1802,7 @@
     {
       "id": "yakuza-like-a-dragon",
       "title": "Yakuza: Like a Dragon",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1811,7 +1811,7 @@
     {
       "id": "nier-automata",
       "title": "NieR:Automata",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1820,7 +1820,7 @@
     {
       "id": "nier-replicant-ver-1-22474487139",
       "title": "NieR Replicant ver.1.22474487139...",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1829,7 +1829,7 @@
     {
       "id": "bayonetta-3",
       "title": "Bayonetta 3",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1838,7 +1838,7 @@
     {
       "id": "devil-may-cry-5",
       "title": "Devil May Cry 5",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1847,7 +1847,7 @@
     {
       "id": "metal-gear-solid-v-the-phantom-pain",
       "title": "Metal Gear Solid V: The Phantom Pain",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1856,7 +1856,7 @@
     {
       "id": "deathloop",
       "title": "Deathloop",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1865,7 +1865,7 @@
     {
       "id": "dishonored-2",
       "title": "Dishonored 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1874,7 +1874,7 @@
     {
       "id": "hitman-world-of-assassination",
       "title": "HITMAN World of Assassination",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1883,7 +1883,7 @@
     {
       "id": "watch-dogs-legion",
       "title": "Watch Dogs: Legion",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1892,7 +1892,7 @@
     {
       "id": "far-cry-6",
       "title": "Far Cry 6",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1901,7 +1901,7 @@
     {
       "id": "far-cry-3",
       "title": "Far Cry 3",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1910,7 +1910,7 @@
     {
       "id": "just-cause-4",
       "title": "Just Cause 4",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1919,7 +1919,7 @@
     {
       "id": "saints-row-2022",
       "title": "Saints Row (2022)",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1928,7 +1928,7 @@
     {
       "id": "sleeping-dogs-definitive-edition",
       "title": "Sleeping Dogs: Definitive Edition",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1937,7 +1937,7 @@
     {
       "id": "mafia-definitive-edition",
       "title": "Mafia: Definitive Edition",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1946,7 +1946,7 @@
     {
       "id": "mafia-iii-definitive-edition",
       "title": "Mafia III: Definitive Edition",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1955,7 +1955,7 @@
     {
       "id": "bully-scholarship-edition",
       "title": "Bully: Scholarship Edition",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1964,7 +1964,7 @@
     {
       "id": "l-a-noire",
       "title": "L.A. Noire",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1973,7 +1973,7 @@
     {
       "id": "red-dead-redemption",
       "title": "Red Dead Redemption",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1982,7 +1982,7 @@
     {
       "id": "stray",
       "title": "Stray",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -1991,7 +1991,7 @@
     {
       "id": "little-nightmares-ii",
       "title": "Little Nightmares II",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2000,7 +2000,7 @@
     {
       "id": "inside",
       "title": "INSIDE",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2009,7 +2009,7 @@
     {
       "id": "limbo",
       "title": "LIMBO",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2018,7 +2018,7 @@
     {
       "id": "gris",
       "title": "GRIS",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2027,7 +2027,7 @@
     {
       "id": "journey",
       "title": "Journey",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2036,7 +2036,7 @@
     {
       "id": "abzu",
       "title": "ABZû",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2045,7 +2045,7 @@
     {
       "id": "sky-children-of-the-light",
       "title": "Sky: Children of the Light",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2054,7 +2054,7 @@
     {
       "id": "spiritfarer",
       "title": "Spiritfarer",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2063,7 +2063,7 @@
     {
       "id": "what-remains-of-edith-finch",
       "title": "What Remains of Edith Finch",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2072,7 +2072,7 @@
     {
       "id": "gone-home",
       "title": "Gone Home",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2081,7 +2081,7 @@
     {
       "id": "firewatch",
       "title": "Firewatch",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2090,7 +2090,7 @@
     {
       "id": "the-witness",
       "title": "The Witness",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2099,7 +2099,7 @@
     {
       "id": "the-talos-principle-2",
       "title": "The Talos Principle 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2108,7 +2108,7 @@
     {
       "id": "baba-is-you",
       "title": "Baba Is You",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2117,7 +2117,7 @@
     {
       "id": "tetris-effect-connected",
       "title": "Tetris Effect: Connected",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2126,7 +2126,7 @@
     {
       "id": "sonic-frontiers",
       "title": "Sonic Frontiers",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2135,7 +2135,7 @@
     {
       "id": "sonic-superstars",
       "title": "Sonic Superstars",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2144,7 +2144,7 @@
     {
       "id": "crash-bandicoot-4-it-s-about-time",
       "title": "Crash Bandicoot 4: It's About Time",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2153,7 +2153,7 @@
     {
       "id": "spyro-reignited-trilogy",
       "title": "Spyro Reignited Trilogy",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2162,7 +2162,7 @@
     {
       "id": "ratchet-and-clank-rift-apart",
       "title": "Ratchet & Clank: Rift Apart",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2171,7 +2171,7 @@
     {
       "id": "astro-bot",
       "title": "Astro Bot",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2180,7 +2180,7 @@
     {
       "id": "sackboy-a-big-adventure",
       "title": "Sackboy: A Big Adventure",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2189,7 +2189,7 @@
     {
       "id": "no-more-heroes-3",
       "title": "No More Heroes 3",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2198,7 +2198,7 @@
     {
       "id": "katana-zero",
       "title": "Katana ZERO",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2207,7 +2207,7 @@
     {
       "id": "hotline-miami-2-wrong-number",
       "title": "Hotline Miami 2: Wrong Number",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2216,7 +2216,7 @@
     {
       "id": "broforce",
       "title": "Broforce",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2225,7 +2225,7 @@
     {
       "id": "nuclear-throne",
       "title": "Nuclear Throne",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2234,7 +2234,7 @@
     {
       "id": "risk-of-rain-2",
       "title": "Risk of Rain 2",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2243,7 +2243,7 @@
     {
       "id": "deep-rock-galactic",
       "title": "Deep Rock Galactic",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2252,7 +2252,7 @@
     {
       "id": "helldivers-2",
       "title": "Helldivers 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2261,7 +2261,7 @@
     {
       "id": "warhammer-40-000-space-marine-2",
       "title": "Warhammer 40,000: Space Marine 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2270,7 +2270,7 @@
     {
       "id": "warhammer-vermintide-2",
       "title": "Warhammer: Vermintide 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2279,7 +2279,7 @@
     {
       "id": "warhammer-40-000-darktide",
       "title": "Warhammer 40,000: Darktide",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2288,7 +2288,7 @@
     {
       "id": "total-war-warhammer-iii",
       "title": "Total War: Warhammer III",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2297,7 +2297,7 @@
     {
       "id": "age-of-empires-iv",
       "title": "Age of Empires IV",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2306,7 +2306,7 @@
     {
       "id": "sid-meier-s-civilization-vi",
       "title": "Sid Meier's Civilization VI",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2315,7 +2315,7 @@
     {
       "id": "crusader-kings-iii",
       "title": "Crusader Kings III",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2324,7 +2324,7 @@
     {
       "id": "europa-universalis-iv",
       "title": "Europa Universalis IV",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2333,7 +2333,7 @@
     {
       "id": "stellaris",
       "title": "Stellaris",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2342,7 +2342,7 @@
     {
       "id": "xcom-2",
       "title": "XCOM 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2351,7 +2351,7 @@
     {
       "id": "into-the-breach",
       "title": "Into the Breach",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2360,7 +2360,7 @@
     {
       "id": "frostpunk",
       "title": "Frostpunk",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2369,7 +2369,7 @@
     {
       "id": "frostpunk-2",
       "title": "Frostpunk 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2378,7 +2378,7 @@
     {
       "id": "against-the-storm",
       "title": "Against the Storm",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2387,7 +2387,7 @@
     {
       "id": "manor-lords",
       "title": "Manor Lords",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2396,7 +2396,7 @@
     {
       "id": "rimworld",
       "title": "RimWorld",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2405,7 +2405,7 @@
     {
       "id": "dwarf-fortress",
       "title": "Dwarf Fortress",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2414,7 +2414,7 @@
     {
       "id": "oxygen-not-included",
       "title": "Oxygen Not Included",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2423,7 +2423,7 @@
     {
       "id": "kerbal-space-program",
       "title": "Kerbal Space Program",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2432,7 +2432,7 @@
     {
       "id": "kerbal-space-program-2",
       "title": "Kerbal Space Program 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2441,7 +2441,7 @@
     {
       "id": "noita",
       "title": "Noita",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2450,7 +2450,7 @@
     {
       "id": "teardown",
       "title": "Teardown",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2459,7 +2459,7 @@
     {
       "id": "people-playground",
       "title": "People Playground",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2468,7 +2468,7 @@
     {
       "id": "goat-simulator-3",
       "title": "Goat Simulator 3",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2477,7 +2477,7 @@
     {
       "id": "powerwash-simulator",
       "title": "PowerWash Simulator",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2486,7 +2486,7 @@
     {
       "id": "house-flipper-2",
       "title": "House Flipper 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2495,7 +2495,7 @@
     {
       "id": "cooking-simulator",
       "title": "Cooking Simulator",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2504,7 +2504,7 @@
     {
       "id": "farming-simulator-22",
       "title": "Farming Simulator 22",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2513,7 +2513,7 @@
     {
       "id": "train-sim-world-4",
       "title": "Train Sim World 4",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2522,7 +2522,7 @@
     {
       "id": "bus-simulator-21",
       "title": "Bus Simulator 21",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2531,7 +2531,7 @@
     {
       "id": "candy-crush-saga",
       "title": "Candy Crush Saga",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2540,7 +2540,7 @@
     {
       "id": "clash-of-clans",
       "title": "Clash of Clans",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2549,7 +2549,7 @@
     {
       "id": "clash-royale",
       "title": "Clash Royale",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2558,7 +2558,7 @@
     {
       "id": "brawl-stars",
       "title": "Brawl Stars",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2567,7 +2567,7 @@
     {
       "id": "zenless-zone-zero",
       "title": "Zenless Zone Zero",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2585,7 +2585,7 @@
     {
       "id": "tower-of-fantasy",
       "title": "Tower of Fantasy",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2594,7 +2594,7 @@
     {
       "id": "blue-archive",
       "title": "Blue Archive",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2603,7 +2603,7 @@
     {
       "id": "diablo-iv",
       "title": "Diablo IV",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2612,7 +2612,7 @@
     {
       "id": "diablo-immortal",
       "title": "Diablo Immortal",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2621,7 +2621,7 @@
     {
       "id": "path-of-exile",
       "title": "Path of Exile",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2630,7 +2630,7 @@
     {
       "id": "path-of-exile-2",
       "title": "Path of Exile 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2639,7 +2639,7 @@
     {
       "id": "last-epoch",
       "title": "Last Epoch",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2648,7 +2648,7 @@
     {
       "id": "grim-dawn",
       "title": "Grim Dawn",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2657,7 +2657,7 @@
     {
       "id": "deadlock",
       "title": "Deadlock",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2666,7 +2666,7 @@
     {
       "id": "teamfight-tactics",
       "title": "Teamfight Tactics",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2675,7 +2675,7 @@
     {
       "id": "marvel-snap",
       "title": "Marvel Snap",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2684,7 +2684,7 @@
     {
       "id": "yu-gi-oh-master-duel",
       "title": "Yu-Gi-Oh! Master Duel",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2693,7 +2693,7 @@
     {
       "id": "inscryption",
       "title": "Inscryption",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2702,7 +2702,7 @@
     {
       "id": "slay-the-princess",
       "title": "Slay the Princess",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2711,7 +2711,7 @@
     {
       "id": "cult-of-the-lamb",
       "title": "Cult of the Lamb",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2720,7 +2720,7 @@
     {
       "id": "the-coffin-of-andy-and-leyley",
       "title": "The Coffin of Andy and Leyley",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2729,7 +2729,7 @@
     {
       "id": "doki-doki-literature-club-plus",
       "title": "Doki Doki Literature Club Plus!",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2738,7 +2738,7 @@
     {
       "id": "coral-island",
       "title": "Coral Island",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2747,7 +2747,7 @@
     {
       "id": "my-time-at-sandrock",
       "title": "My Time at Sandrock",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2756,7 +2756,7 @@
     {
       "id": "rune-factory-5",
       "title": "Rune Factory 5",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2765,7 +2765,7 @@
     {
       "id": "dragon-quest-xi-s-echoes-of-an-elusive-age",
       "title": "Dragon Quest XI S: Echoes of an Elusive Age",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2774,7 +2774,7 @@
     {
       "id": "chrono-trigger",
       "title": "Chrono Trigger",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2783,7 +2783,7 @@
     {
       "id": "sea-of-stars",
       "title": "Sea of Stars",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2792,7 +2792,7 @@
     {
       "id": "chained-echoes",
       "title": "Chained Echoes",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2801,7 +2801,7 @@
     {
       "id": "octopath-traveler-ii",
       "title": "Octopath Traveler II",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2810,7 +2810,7 @@
     {
       "id": "triangle-strategy",
       "title": "Triangle Strategy",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2819,7 +2819,7 @@
     {
       "id": "tactics-ogre-reborn",
       "title": "Tactics Ogre: Reborn",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2828,7 +2828,7 @@
     {
       "id": "fire-emblem-engage",
       "title": "Fire Emblem Engage",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2837,7 +2837,7 @@
     {
       "id": "advance-wars-1-2-re-boot-camp",
       "title": "Advance Wars 1+2: Re-Boot Camp",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2846,7 +2846,7 @@
     {
       "id": "kingdom-come-deliverance-ii",
       "title": "Kingdom Come: Deliverance II",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2855,7 +2855,7 @@
     {
       "id": "mount-and-blade-ii-bannerlord",
       "title": "Mount & Blade II: Bannerlord",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2864,7 +2864,7 @@
     {
       "id": "chivalry-2",
       "title": "Chivalry 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2873,7 +2873,7 @@
     {
       "id": "for-honor",
       "title": "For Honor",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2882,7 +2882,7 @@
     {
       "id": "mordhau",
       "title": "Mordhau",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2891,7 +2891,7 @@
     {
       "id": "hunt-showdown-1896",
       "title": "Hunt: Showdown 1896",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2900,7 +2900,7 @@
     {
       "id": "escape-from-tarkov",
       "title": "Escape from Tarkov",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2909,7 +2909,7 @@
     {
       "id": "war-thunder",
       "title": "War Thunder",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2918,7 +2918,7 @@
     {
       "id": "world-of-tanks",
       "title": "World of Tanks",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2927,7 +2927,7 @@
     {
       "id": "world-of-warships",
       "title": "World of Warships",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2936,7 +2936,7 @@
     {
       "id": "ace-combat-7-skies-unknown",
       "title": "Ace Combat 7: Skies Unknown",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2945,7 +2945,7 @@
     {
       "id": "project-wingman",
       "title": "Project Wingman",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2954,7 +2954,7 @@
     {
       "id": "microsoft-flight-simulator-2024",
       "title": "Microsoft Flight Simulator 2024",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2963,7 +2963,7 @@
     {
       "id": "x-plane-12",
       "title": "X-Plane 12",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2972,7 +2972,7 @@
     {
       "id": "american-truck-simulator",
       "title": "American Truck Simulator",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2981,7 +2981,7 @@
     {
       "id": "beamng-drive",
       "title": "BeamNG.drive",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2990,7 +2990,7 @@
     {
       "id": "assetto-corsa-competizione",
       "title": "Assetto Corsa Competizione",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -2999,7 +2999,7 @@
     {
       "id": "iracing",
       "title": "iRacing",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3008,7 +3008,7 @@
     {
       "id": "f1-24",
       "title": "F1 24",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3017,7 +3017,7 @@
     {
       "id": "dirt-rally-2-0",
       "title": "DiRT Rally 2.0",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3026,7 +3026,7 @@
     {
       "id": "wreckfest",
       "title": "Wreckfest",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3035,7 +3035,7 @@
     {
       "id": "trackmania",
       "title": "Trackmania",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3044,7 +3044,7 @@
     {
       "id": "geometry-dash",
       "title": "Geometry Dash",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3053,7 +3053,7 @@
     {
       "id": "osu",
       "title": "osu!",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3062,7 +3062,7 @@
     {
       "id": "beat-saber",
       "title": "Beat Saber",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3071,7 +3071,7 @@
     {
       "id": "synth-riders",
       "title": "Synth Riders",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3080,7 +3080,7 @@
     {
       "id": "pistol-whip",
       "title": "Pistol Whip",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3089,7 +3089,7 @@
     {
       "id": "vrchat",
       "title": "VRChat",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3098,7 +3098,7 @@
     {
       "id": "rec-room",
       "title": "Rec Room",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3107,7 +3107,7 @@
     {
       "id": "the-sims-3",
       "title": "The Sims 3",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3116,7 +3116,7 @@
     {
       "id": "simcity-4",
       "title": "SimCity 4",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3125,7 +3125,7 @@
     {
       "id": "cities-skylines",
       "title": "Cities: Skylines",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3134,7 +3134,7 @@
     {
       "id": "planet-zoo",
       "title": "Planet Zoo",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3143,7 +3143,7 @@
     {
       "id": "planet-coaster",
       "title": "Planet Coaster",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3152,7 +3152,7 @@
     {
       "id": "jurassic-world-evolution-2",
       "title": "Jurassic World Evolution 2",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3161,7 +3161,7 @@
     {
       "id": "rollercoaster-tycoon-classic",
       "title": "RollerCoaster Tycoon Classic",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3170,7 +3170,7 @@
     {
       "id": "two-point-hospital",
       "title": "Two Point Hospital",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3179,7 +3179,7 @@
     {
       "id": "two-point-campus",
       "title": "Two Point Campus",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3188,7 +3188,7 @@
     {
       "id": "game-dev-tycoon",
       "title": "Game Dev Tycoon",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3197,7 +3197,7 @@
     {
       "id": "prison-architect",
       "title": "Prison Architect",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3206,7 +3206,7 @@
     {
       "id": "halo-the-master-chief-collection",
       "title": "Halo: The Master Chief Collection",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3215,7 +3215,7 @@
     {
       "id": "sea-of-thieves",
       "title": "Sea of Thieves",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3224,7 +3224,7 @@
     {
       "id": "grounded",
       "title": "Grounded",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3233,7 +3233,7 @@
     {
       "id": "core-keeper",
       "title": "Core Keeper",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3242,7 +3242,7 @@
     {
       "id": "v-rising",
       "title": "V Rising",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3251,7 +3251,7 @@
     {
       "id": "enshrouded",
       "title": "Enshrouded",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3260,7 +3260,7 @@
     {
       "id": "once-human",
       "title": "Once Human",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3269,7 +3269,7 @@
     {
       "id": "content-warning",
       "title": "Content Warning",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3278,7 +3278,7 @@
     {
       "id": "lethal-company",
       "title": "Lethal Company",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3287,7 +3287,7 @@
     {
       "id": "r-e-p-o",
       "title": "R.E.P.O.",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3296,7 +3296,7 @@
     {
       "id": "buckshot-roulette",
       "title": "Buckshot Roulette",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3305,7 +3305,7 @@
     {
       "id": "mouthwashing",
       "title": "Mouthwashing",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3314,7 +3314,7 @@
     {
       "id": "signalis",
       "title": "Signalis",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3323,7 +3323,7 @@
     {
       "id": "fear-and-hunger",
       "title": "Fear & Hunger",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3332,7 +3332,7 @@
     {
       "id": "fear-and-hunger-2-termina",
       "title": "Fear & Hunger 2: Termina",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3341,7 +3341,7 @@
     {
       "id": "lobotomy-corporation",
       "title": "Lobotomy Corporation",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3350,7 +3350,7 @@
     {
       "id": "library-of-ruina",
       "title": "Library of Ruina",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3359,7 +3359,7 @@
     {
       "id": "limbus-company",
       "title": "Limbus Company",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3368,7 +3368,7 @@
     {
       "id": "arknights",
       "title": "Arknights",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3377,7 +3377,7 @@
     {
       "id": "honkai-impact-3rd",
       "title": "Honkai Impact 3rd",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3386,7 +3386,7 @@
     {
       "id": "cookie-run-kingdom",
       "title": "Cookie Run: Kingdom",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3395,7 +3395,7 @@
     {
       "id": "lost-ark",
       "title": "Lost Ark",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3404,7 +3404,7 @@
     {
       "id": "new-world",
       "title": "New World",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3413,7 +3413,7 @@
     {
       "id": "throne-and-liberty",
       "title": "Throne and Liberty",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3422,7 +3422,7 @@
     {
       "id": "black-desert-online",
       "title": "Black Desert Online",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3431,7 +3431,7 @@
     {
       "id": "world-of-warcraft",
       "title": "World of Warcraft",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3440,7 +3440,7 @@
     {
       "id": "guild-wars-2",
       "title": "Guild Wars 2",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3449,7 +3449,7 @@
     {
       "id": "the-elder-scrolls-online",
       "title": "The Elder Scrolls Online",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3458,7 +3458,7 @@
     {
       "id": "the-elder-scrolls-v-skyrim",
       "title": "The Elder Scrolls V: Skyrim",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3467,7 +3467,7 @@
     {
       "id": "fallout-4",
       "title": "Fallout 4",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3476,7 +3476,7 @@
     {
       "id": "fallout-76",
       "title": "Fallout 76",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3485,7 +3485,7 @@
     {
       "id": "fallout-new-vegas",
       "title": "Fallout: New Vegas",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3494,7 +3494,7 @@
     {
       "id": "starfield",
       "title": "Starfield",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3503,7 +3503,7 @@
     {
       "id": "elite-dangerous",
       "title": "Elite Dangerous",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3512,7 +3512,7 @@
     {
       "id": "eve-online",
       "title": "EVE Online",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3521,7 +3521,7 @@
     {
       "id": "warframe",
       "title": "Warframe",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3530,7 +3530,7 @@
     {
       "id": "destiny-2",
       "title": "Destiny 2",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3539,7 +3539,7 @@
     {
       "id": "the-division-2",
       "title": "The Division 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3548,7 +3548,7 @@
     {
       "id": "tom-clancy-s-ghost-recon-breakpoint",
       "title": "Tom Clancy's Ghost Recon Breakpoint",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3557,7 +3557,7 @@
     {
       "id": "7-days-to-die",
       "title": "7 Days to Die",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3566,7 +3566,7 @@
     {
       "id": "project-zomboid",
       "title": "Project Zomboid",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3575,7 +3575,7 @@
     {
       "id": "state-of-decay-2",
       "title": "State of Decay 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3584,7 +3584,7 @@
     {
       "id": "dying-light-2-stay-human",
       "title": "Dying Light 2 Stay Human",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3593,7 +3593,7 @@
     {
       "id": "dying-light",
       "title": "Dying Light",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3602,7 +3602,7 @@
     {
       "id": "dead-island-2",
       "title": "Dead Island 2",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3611,7 +3611,7 @@
     {
       "id": "dead-rising-deluxe-remaster",
       "title": "Dead Rising Deluxe Remaster",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3620,7 +3620,7 @@
     {
       "id": "telltale-s-the-walking-dead",
       "title": "Telltale's The Walking Dead",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3629,7 +3629,7 @@
     {
       "id": "code-vein",
       "title": "Code Vein",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3638,7 +3638,7 @@
     {
       "id": "nioh-2",
       "title": "Nioh 2",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3647,7 +3647,7 @@
     {
       "id": "wo-long-fallen-dynasty",
       "title": "Wo Long: Fallen Dynasty",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3656,7 +3656,7 @@
     {
       "id": "rise-of-the-ronin",
       "title": "Rise of the Ronin",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3665,7 +3665,7 @@
     {
       "id": "stellar-blade",
       "title": "Stellar Blade",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3674,7 +3674,7 @@
     {
       "id": "final-fantasy-vii-rebirth",
       "title": "Final Fantasy VII Rebirth",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3683,7 +3683,7 @@
     {
       "id": "clair-obscur-expedition-33",
       "title": "Clair Obscur: Expedition 33",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3692,7 +3692,7 @@
     {
       "id": "avowed",
       "title": "Avowed",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3701,7 +3701,7 @@
     {
       "id": "pillars-of-eternity-ii-deadfire",
       "title": "Pillars of Eternity II: Deadfire",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3710,7 +3710,7 @@
     {
       "id": "wasteland-3",
       "title": "Wasteland 3",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3719,7 +3719,7 @@
     {
       "id": "s-t-a-l-k-e-r-2-heart-of-chornobyl",
       "title": "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3728,7 +3728,7 @@
     {
       "id": "metro-exodus",
       "title": "Metro Exodus",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3737,7 +3737,7 @@
     {
       "id": "metro-last-light-redux",
       "title": "Metro: Last Light Redux",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3746,7 +3746,7 @@
     {
       "id": "chernobylite",
       "title": "Chernobylite",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3755,7 +3755,7 @@
     {
       "id": "hardspace-shipbreaker",
       "title": "Hardspace: Shipbreaker",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3764,7 +3764,7 @@
     {
       "id": "astroneer",
       "title": "Astroneer",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3773,7 +3773,7 @@
     {
       "id": "deep-rock-galactic-survivor",
       "title": "Deep Rock Galactic: Survivor",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3782,7 +3782,7 @@
     {
       "id": "brotato",
       "title": "Brotato",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3791,7 +3791,7 @@
     {
       "id": "soulstone-survivors",
       "title": "Soulstone Survivors",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3800,7 +3800,7 @@
     {
       "id": "halls-of-torment",
       "title": "Halls of Torment",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3809,7 +3809,7 @@
     {
       "id": "20-minutes-till-dawn",
       "title": "20 Minutes Till Dawn",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3818,7 +3818,7 @@
     {
       "id": "peglin",
       "title": "Peglin",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3827,7 +3827,7 @@
     {
       "id": "luck-be-a-landlord",
       "title": "Luck be a Landlord",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3836,7 +3836,7 @@
     {
       "id": "dicey-dungeons",
       "title": "Dicey Dungeons",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3845,7 +3845,7 @@
     {
       "id": "monster-train",
       "title": "Monster Train",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3854,7 +3854,7 @@
     {
       "id": "monster-hunter-wilds",
       "title": "Monster Hunter Wilds",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3863,7 +3863,7 @@
     {
       "id": "monster-hunter-world",
       "title": "Monster Hunter: World",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3872,7 +3872,7 @@
     {
       "id": "monster-hunter-rise",
       "title": "Monster Hunter Rise",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3881,7 +3881,7 @@
     {
       "id": "wild-hearts",
       "title": "Wild Hearts",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3890,7 +3890,7 @@
     {
       "id": "the-finals",
       "title": "The Finals",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3899,7 +3899,7 @@
     {
       "id": "xdefiant",
       "title": "XDefiant",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3908,7 +3908,7 @@
     {
       "id": "splitgate-2",
       "title": "Splitgate 2",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3917,7 +3917,7 @@
     {
       "id": "smite",
       "title": "Smite",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3926,7 +3926,7 @@
     {
       "id": "fallout-shelter",
       "title": "Fallout Shelter",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3935,7 +3935,7 @@
     {
       "id": "cookie-clicker",
       "title": "Cookie Clicker",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3944,7 +3944,7 @@
     {
       "id": "adventure-capitalist",
       "title": "Adventure Capitalist",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3953,7 +3953,7 @@
     {
       "id": "universal-paperclips",
       "title": "Universal Paperclips",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3962,7 +3962,7 @@
     {
       "id": "a-dark-room",
       "title": "A Dark Room",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3971,7 +3971,7 @@
     {
       "id": "reigns",
       "title": "Reigns",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3980,7 +3980,7 @@
     {
       "id": "unpacking",
       "title": "Unpacking",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3989,7 +3989,7 @@
     {
       "id": "a-little-to-the-left",
       "title": "A Little to the Left",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -3998,7 +3998,7 @@
     {
       "id": "donut-county",
       "title": "Donut County",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4007,7 +4007,7 @@
     {
       "id": "alba-a-wildlife-adventure",
       "title": "Alba: A Wildlife Adventure",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4016,7 +4016,7 @@
     {
       "id": "a-short-hike",
       "title": "A Short Hike",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4025,7 +4025,7 @@
     {
       "id": "cozy-grove",
       "title": "Cozy Grove",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4034,7 +4034,7 @@
     {
       "id": "slime-rancher",
       "title": "Slime Rancher",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4043,7 +4043,7 @@
     {
       "id": "slime-rancher-2",
       "title": "Slime Rancher 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4052,7 +4052,7 @@
     {
       "id": "bugsnax",
       "title": "Bugsnax",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4061,7 +4061,7 @@
     {
       "id": "webbed",
       "title": "Webbed",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4070,7 +4070,7 @@
     {
       "id": "rain-world",
       "title": "Rain World",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4079,7 +4079,7 @@
     {
       "id": "owlboy",
       "title": "Owlboy",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4088,7 +4088,7 @@
     {
       "id": "shovel-knight-treasure-trove",
       "title": "Shovel Knight: Treasure Trove",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4097,7 +4097,7 @@
     {
       "id": "castle-crashers",
       "title": "Castle Crashers",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4106,7 +4106,7 @@
     {
       "id": "battleblock-theater",
       "title": "BattleBlock Theater",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4115,7 +4115,7 @@
     {
       "id": "pizza-tower",
       "title": "Pizza Tower",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4124,7 +4124,7 @@
     {
       "id": "antonblast",
       "title": "Antonblast",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4133,7 +4133,7 @@
     {
       "id": "warioware-move-it",
       "title": "WarioWare: Move It!",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4142,7 +4142,7 @@
     {
       "id": "rhythm-heaven-megamix",
       "title": "Rhythm Heaven Megamix",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4151,7 +4151,7 @@
     {
       "id": "jet-set-radio",
       "title": "Jet Set Radio",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4160,7 +4160,7 @@
     {
       "id": "crazy-taxi",
       "title": "Crazy Taxi",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4169,7 +4169,7 @@
     {
       "id": "sonic-mania",
       "title": "Sonic Mania",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4178,7 +4178,7 @@
     {
       "id": "sonic-x-shadow-generations",
       "title": "Sonic x Shadow Generations",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4187,7 +4187,7 @@
     {
       "id": "puyo-puyo-tetris-2",
       "title": "Puyo Puyo Tetris 2",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4196,7 +4196,7 @@
     {
       "id": "tetris-99",
       "title": "Tetris 99",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4205,7 +4205,7 @@
     {
       "id": "diablo-ii-resurrected",
       "title": "Diablo II: Resurrected",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4214,7 +4214,7 @@
     {
       "id": "warcraft-iii-reforged",
       "title": "Warcraft III: Reforged",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4223,7 +4223,7 @@
     {
       "id": "starcraft-remastered",
       "title": "StarCraft: Remastered",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4232,7 +4232,7 @@
     {
       "id": "starcraft-ii",
       "title": "StarCraft II",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4241,7 +4241,7 @@
     {
       "id": "age-of-mythology-retold",
       "title": "Age of Mythology: Retold",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4250,7 +4250,7 @@
     {
       "id": "command-and-conquer-remastered-collection",
       "title": "Command & Conquer Remastered Collection",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4259,7 +4259,7 @@
     {
       "id": "company-of-heroes-3",
       "title": "Company of Heroes 3",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4268,7 +4268,7 @@
     {
       "id": "hearts-of-iron-iv",
       "title": "Hearts of Iron IV",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4277,7 +4277,7 @@
     {
       "id": "victoria-3",
       "title": "Victoria 3",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4286,7 +4286,7 @@
     {
       "id": "humankind",
       "title": "Humankind",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4295,7 +4295,7 @@
     {
       "id": "civilization-vii",
       "title": "Civilization VII",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4304,7 +4304,7 @@
     {
       "id": "total-war-pharaoh",
       "title": "Total War: Pharaoh",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4313,7 +4313,7 @@
     {
       "id": "total-war-three-kingdoms",
       "title": "Total War: Three Kingdoms",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4322,7 +4322,7 @@
     {
       "id": "rome-total-war-remastered",
       "title": "Rome: Total War Remastered",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4331,7 +4331,7 @@
     {
       "id": "returnal",
       "title": "Returnal",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4340,7 +4340,7 @@
     {
       "id": "hi-fi-rush",
       "title": "Hi-Fi Rush",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4349,7 +4349,7 @@
     {
       "id": "armored-core-vi-fires-of-rubicon",
       "title": "Armored Core VI: Fires of Rubicon",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4358,7 +4358,7 @@
     {
       "id": "elden-ring-nightreign",
       "title": "Elden Ring Nightreign",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4367,7 +4367,7 @@
     {
       "id": "dark-souls-remastered",
       "title": "Dark Souls Remastered",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4376,7 +4376,7 @@
     {
       "id": "dark-souls-ii-scholar-of-the-first-sin",
       "title": "Dark Souls II: Scholar of the First Sin",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4385,7 +4385,7 @@
     {
       "id": "demon-s-souls",
       "title": "Demon's Souls",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4394,7 +4394,7 @@
     {
       "id": "ninja-gaiden-ii-black",
       "title": "Ninja Gaiden II Black",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4403,7 +4403,7 @@
     {
       "id": "tunic",
       "title": "Tunic",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4412,7 +4412,7 @@
     {
       "id": "animal-well",
       "title": "Animal Well",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4421,7 +4421,7 @@
     {
       "id": "pseudoregalia",
       "title": "Pseudoregalia",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4430,7 +4430,7 @@
     {
       "id": "nine-sols",
       "title": "Nine Sols",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4439,7 +4439,7 @@
     {
       "id": "blasphemous-ii",
       "title": "Blasphemous II",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4448,7 +4448,7 @@
     {
       "id": "the-messenger",
       "title": "The Messenger",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4457,7 +4457,7 @@
     {
       "id": "dead-cells-return-to-castlevania",
       "title": "Dead Cells: Return to Castlevania",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4466,7 +4466,7 @@
     {
       "id": "castlevania-symphony-of-the-night",
       "title": "Castlevania: Symphony of the Night",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4475,7 +4475,7 @@
     {
       "id": "bloodstained-ritual-of-the-night",
       "title": "Bloodstained: Ritual of the Night",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4484,7 +4484,7 @@
     {
       "id": "axiom-verge",
       "title": "Axiom Verge",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4493,7 +4493,7 @@
     {
       "id": "axiom-verge-2",
       "title": "Axiom Verge 2",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4502,7 +4502,7 @@
     {
       "id": "afterimage",
       "title": "Afterimage",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4511,7 +4511,7 @@
     {
       "id": "ender-lilies-quietus-of-the-knights",
       "title": "Ender Lilies: Quietus of the Knights",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4520,7 +4520,7 @@
     {
       "id": "ender-magnolia-bloom-in-the-mist",
       "title": "Ender Magnolia: Bloom in the Mist",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4529,7 +4529,7 @@
     {
       "id": "salt-and-sanctuary",
       "title": "Salt and Sanctuary",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4538,7 +4538,7 @@
     {
       "id": "salt-and-sacrifice",
       "title": "Salt and Sacrifice",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4547,7 +4547,7 @@
     {
       "id": "sifu",
       "title": "Sifu",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4556,7 +4556,7 @@
     {
       "id": "absolver",
       "title": "Absolver",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4565,7 +4565,7 @@
     {
       "id": "streets-of-rage-4",
       "title": "Streets of Rage 4",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4574,7 +4574,7 @@
     {
       "id": "teenage-mutant-ninja-turtles-shredder-s-revenge",
       "title": "Teenage Mutant Ninja Turtles: Shredder's Revenge",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4583,7 +4583,7 @@
     {
       "id": "scott-pilgrim-vs-the-world-the-game-complete-edition",
       "title": "Scott Pilgrim vs. The World: The Game Complete Edition",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4592,7 +4592,7 @@
     {
       "id": "river-city-girls-2",
       "title": "River City Girls 2",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4601,7 +4601,7 @@
     {
       "id": "fight-n-rage",
       "title": "Fight'N Rage",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4610,7 +4610,7 @@
     {
       "id": "kaze-and-the-wild-masks",
       "title": "Kaze and the Wild Masks",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4619,7 +4619,7 @@
     {
       "id": "yoku-s-island-express",
       "title": "Yoku's Island Express",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4628,7 +4628,7 @@
     {
       "id": "sable",
       "title": "Sable",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4637,7 +4637,7 @@
     {
       "id": "eastward",
       "title": "Eastward",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4646,7 +4646,7 @@
     {
       "id": "crosscode",
       "title": "CrossCode",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4655,7 +4655,7 @@
     {
       "id": "hyper-light-drifter",
       "title": "Hyper Light Drifter",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4664,7 +4664,7 @@
     {
       "id": "deadlight-director-s-cut",
       "title": "Deadlight: Director's Cut",
-      "rating": null,
+      "rating": "18",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4673,7 +4673,7 @@
     {
       "id": "the-swapper",
       "title": "The Swapper",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4682,7 +4682,7 @@
     {
       "id": "fez",
       "title": "Fez",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4691,7 +4691,7 @@
     {
       "id": "super-meat-boy-forever",
       "title": "Super Meat Boy Forever",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4700,7 +4700,7 @@
     {
       "id": "super-meat-boy",
       "title": "Super Meat Boy",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4709,7 +4709,7 @@
     {
       "id": "the-end-is-nigh",
       "title": "The End Is Nigh",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4718,7 +4718,7 @@
     {
       "id": "vvvvvv",
       "title": "VVVVVV",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4727,7 +4727,7 @@
     {
       "id": "cave-story",
       "title": "Cave Story+",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4736,7 +4736,7 @@
     {
       "id": "ikaruga",
       "title": "Ikaruga",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4745,7 +4745,7 @@
     {
       "id": "touhou-luna-nights",
       "title": "Touhou Luna Nights",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4754,7 +4754,7 @@
     {
       "id": "crimson-clover",
       "title": "Crimson Clover",
-      "rating": null,
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4763,7 +4763,7 @@
     {
       "id": "dodonpachi-resurrection",
       "title": "DoDonPachi Resurrection",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4772,7 +4772,7 @@
     {
       "id": "mushihimesama",
       "title": "Mushihimesama",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4781,7 +4781,7 @@
     {
       "id": "blazing-beaks",
       "title": "Blazing Beaks",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4790,7 +4790,7 @@
     {
       "id": "enter-the-gungeon-house-of-the-gundead",
       "title": "Enter the Gungeon: House of the Gundead",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4799,7 +4799,7 @@
     {
       "id": "gunfire-reborn",
       "title": "Gunfire Reborn",
-      "rating": null,
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4808,7 +4808,7 @@
     {
       "id": "roboquest",
       "title": "Roboquest",
-      "rating": null,
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4817,7 +4817,7 @@
     {
       "id": "curse-of-the-dead-gods",
       "title": "Curse of the Dead Gods",
-      "rating": null,
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4826,7 +4826,7 @@
     {
       "id": "dead-estate",
       "title": "Dead Estate",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4835,7 +4835,7 @@
     {
       "id": "binding-of-isaac-repentance",
       "title": "Binding of Isaac: Repentance",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
@@ -4844,7 +4844,7 @@
     {
       "id": "the-binding-of-isaac-afterbirth",
       "title": "The Binding of Isaac: Afterbirth+",
-      "rating": null,
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
