@@ -234,6 +234,8 @@ function bindLockedNavClicks(shell) {
     if (item.dataset.lockedNavBound === '1') return;
     item.dataset.lockedNavBound = '1';
     item.addEventListener('click', (event) => {
+      // Reavalia no clique: o Acheron pode ter aberto depois do bind inicial.
+      if (item.getAttribute('aria-disabled') !== 'true') return;
       event.preventDefault();
       event.stopPropagation();
     });

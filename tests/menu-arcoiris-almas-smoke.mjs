@@ -93,8 +93,9 @@ assert(
 assert(
   appShellJs.includes('bindLockedNavClicks')
     && appShellJs.includes('aria-disabled')
+    && appShellJs.includes("getAttribute('aria-disabled')")
     && appShellJs.includes('applyDespertarNavState'),
-  'app-shell.js deve bloquear clique e sincronizar gate do Despertar'
+  'app-shell.js deve reavaliar aria-disabled no clique e sincronizar gate do Despertar'
 );
 assert(
   !apiJs.includes('ARCANE_SURVIVORS_FEATURE_ID')
