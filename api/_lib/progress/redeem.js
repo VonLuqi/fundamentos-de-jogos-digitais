@@ -5,6 +5,7 @@ import {
   LESSON_CATALOG,
   USERS_TABLE,
   addMinutesIso,
+  codeExpiresAt,
   getAchievementXp,
   hasUnlockedLesson,
   insertCodeWithRetry,
