@@ -583,8 +583,8 @@ for (const title of [...fromAula5, ...extra]) {
 const out = {
   poolId: 'despertar-juizo-v1',
   note:
-    'Stub para o Mestre preencher. rating ∈ {L,10,12,14,16,18}. Só entram no Juízo entries com rating preenchido. Capas em assets/classind-dle/covers/ ou assets/despertar-juizo/covers/.',
-  ratingOrder: ['L', '10', '12', '14', '16', '18'],
+    'Stub para o Mestre preencher. rating ∈ {L,6,10,12,14,16,18}. Só entram no Juízo entries com rating preenchido. Capas em assets/classind-dle/covers/ ou assets/despertar-juizo/covers/.',
+  ratingOrder: ['L', '6', '10', '12', '14', '16', '18'],
   count: games.length,
   games,
 };

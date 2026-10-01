@@ -29,7 +29,7 @@ export const JUIZO_CODEX_BODY =
   'Vereditos vêm dos marcos do teu melhor streak no Juízo ClassInd — não de cada acerto. A Bancada compra buffs permanentes. O Juiz do Tártaro é gerador de almas/s; Juramentos como Veredito do Tártaro multiplicam esse gerador no Styx — outro sistema.';
 
 export const JUIZO_RATING_ORDER = Object.freeze(
-  Array.isArray(stub.ratingOrder) ? stub.ratingOrder.map(String) : ['L', '10', '12', '14', '16', '18'],
+  Array.isArray(stub.ratingOrder) ? stub.ratingOrder.map(String) : ['L', '6', '10', '12', '14', '16', '18'],
 );
 
 const RATING_SET = new Set(JUIZO_RATING_ORDER);

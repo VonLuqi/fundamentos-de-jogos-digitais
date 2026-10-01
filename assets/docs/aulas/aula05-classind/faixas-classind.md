@@ -8,6 +8,7 @@
 | Faixa | Leitura operacional |
 | :---: | :--- |
 | **L** (Livre) | Adequado a todas as idades; violência inexistente ou muito fantasiosa/cômica |
+| **6** | Nova faixa (Portaria MJSP 1.048/2025); conteúdo muito leve / primeira infância |
 | **10** | Violência leve / fantasiosa; medo leve; linguagem ocasional sem carga sexual |
 | **12** | Violência mais presente (sem extremo); temas sexuais insinuados; linguagem mais pesada |
 | **14** | Violência mais intensa; sexualidade mais explícita em tom; drogas em menção / contexto |

@@ -1,0 +1,602 @@
+{
+  "updated": "2026-10-01T19:13:00.519Z",
+  "mode": "apply",
+  "bySource": {
+    "stub-keep": 172,
+    "steam-dejus-auto": 88,
+    "steam-dejus": 261,
+    "steam-pegi-map": 10
+  },
+  "changed": 170,
+  "unresolved": [],
+  "sample": [
+    {
+      "id": "street-fighter-6",
+      "title": "Street Fighter 6",
+      "before": "12",
+      "rating": "10",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 2154900,
+      "previous": "12",
+      "changed": true
+    },
+    {
+      "id": "hollow-knight",
+      "title": "Hollow Knight",
+      "before": "10",
+      "rating": "6",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 367520,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "undertale",
+      "title": "Undertale",
+      "before": "10",
+      "rating": "16",
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Drogas lícitas"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 391540,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "supermarket-simulator",
+      "title": "Supermarket Simulator",
+      "before": "L",
+      "rating": "10",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 2670630,
+      "previous": "L",
+      "changed": true
+    },
+    {
+      "id": "marvel-rivals",
+      "title": "Marvel Rivals",
+      "before": "12",
+      "rating": "18",
+      "descriptors": [
+        "Violência",
+        "Conteúdo sexual"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 2767030,
+      "previous": "12",
+      "changed": true
+    },
+    {
+      "id": "crimson-desert",
+      "title": "Crimson Desert",
+      "before": "16",
+      "rating": "18",
+      "descriptors": [
+        "Drogas ilícitas",
+        "Linguagem imprópria",
+        "Violência Extrema"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 3321460,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "among-us",
+      "title": "Among Us",
+      "before": "10",
+      "rating": "L",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 945360,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "dota-2",
+      "title": "Dota 2",
+      "before": "14",
+      "rating": "18",
+      "descriptors": [
+        "Drogas lícitas",
+        "Medo"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 570,
+      "previous": "14",
+      "changed": true
+    },
+    {
+      "id": "apex-legends",
+      "title": "Apex Legends",
+      "before": "14",
+      "rating": "18",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1172470,
+      "previous": "14",
+      "changed": true
+    },
+    {
+      "id": "lies-of-p",
+      "title": "Lies of P",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1627720,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "black-myth-wukong",
+      "title": "Black Myth: Wukong",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 2358720,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "baldur-s-gate-3",
+      "title": "Baldur's Gate 3",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Nudez"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1086940,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "divinity-original-sin-2",
+      "title": "Divinity: Original Sin 2",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 435150,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "the-witcher-3-wild-hunt",
+      "title": "The Witcher 3: Wild Hunt",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Conteúdo Sexual",
+        "Drogas Lícitas",
+        "Violência"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 292030,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "marvel-s-spider-man-2",
+      "title": "Marvel's Spider-Man 2",
+      "before": "16",
+      "rating": "12",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 2651280,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "marvel-s-spider-man-miles-morales",
+      "title": "Marvel's Spider-Man: Miles Morales",
+      "before": "14",
+      "rating": "12",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1817190,
+      "previous": "14",
+      "changed": true
+    },
+    {
+      "id": "days-gone",
+      "title": "Days Gone",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Violência",
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Linguagem imprópria",
+        "Nudez",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1259420,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "death-stranding",
+      "title": "Death Stranding",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1850570,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "celeste",
+      "title": "Celeste",
+      "before": "10",
+      "rating": "6",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 504230,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "hollow-knight-silksong",
+      "title": "Hollow Knight: Silksong",
+      "before": "10",
+      "rating": "6",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 1030300,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "stardew-valley",
+      "title": "Stardew Valley",
+      "before": "10",
+      "rating": "12",
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 413150,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "terraria",
+      "title": "Terraria",
+      "before": "10",
+      "rating": "6",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 105600,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "no-man-s-sky",
+      "title": "No Man's Sky",
+      "before": "10",
+      "rating": "6",
+      "descriptors": [],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 275850,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "don-t-starve",
+      "title": "Don't Starve",
+      "before": "12",
+      "rating": "10",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 219740,
+      "previous": "12",
+      "changed": true
+    },
+    {
+      "id": "don-t-starve-together",
+      "title": "Don't Starve Together",
+      "before": "12",
+      "rating": "L",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 322330,
+      "previous": "12",
+      "changed": true
+    },
+    {
+      "id": "the-binding-of-isaac-rebirth",
+      "title": "The Binding of Isaac: Rebirth",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Violência",
+        "Medo"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 250900,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "balatro",
+      "title": "Balatro",
+      "before": "18",
+      "rating": "L",
+      "descriptors": [],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 2379780,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "magic-the-gathering-arena",
+      "title": "Magic: The Gathering Arena",
+      "before": "12",
+      "rating": "18",
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 2141910,
+      "previous": "12",
+      "changed": true
+    },
+    {
+      "id": "resident-evil-2-remake",
+      "title": "Resident Evil 2 Remake",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Language",
+        "Extreme Violence"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 883710,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "resident-evil-3-remake",
+      "title": "Resident Evil 3 Remake",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 952060,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "outlast-2",
+      "title": "Outlast 2",
+      "before": "18",
+      "rating": "16",
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 414700,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "phasmophobia",
+      "title": "Phasmophobia",
+      "before": "14",
+      "rating": "12",
+      "descriptors": [
+        "Violência",
+        "Medo"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 739630,
+      "previous": "14",
+      "changed": true
+    },
+    {
+      "id": "left-4-dead-2",
+      "title": "Left 4 Dead 2",
+      "before": "18",
+      "rating": "14",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 550,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "payday-3",
+      "title": "Payday 3",
+      "before": "18",
+      "rating": "14",
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria",
+        "Drogas ilícitas"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1272080,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "call-of-duty-modern-warfare-ii",
+      "title": "Call of Duty: Modern Warfare II",
+      "before": "18",
+      "rating": "14",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 3595230,
+      "previous": "18",
+      "changed": true
+    },
+    {
+      "id": "halo-infinite",
+      "title": "Halo Infinite",
+      "before": "14",
+      "rating": "16",
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1240440,
+      "previous": "14",
+      "changed": true
+    },
+    {
+      "id": "ultrakill",
+      "title": "Ultrakill",
+      "before": "16",
+      "rating": "L",
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "steam-dejus",
+      "generated": false,
+      "steamAppId": 1229490,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "half-life-2",
+      "title": "Half-Life 2",
+      "before": "16",
+      "rating": "14",
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 220,
+      "previous": "16",
+      "changed": true
+    },
+    {
+      "id": "portal-2",
+      "title": "Portal 2",
+      "before": "10",
+      "rating": "12",
+      "descriptors": [
+        "Linguagem imprópria"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 620,
+      "previous": "10",
+      "changed": true
+    },
+    {
+      "id": "team-fortress-2",
+      "title": "Team Fortress 2",
+      "before": "16",
+      "rating": "18",
+      "descriptors": [
+        "Nudez",
+        "Violência"
+      ],
+      "source": "steam-dejus-auto",
+      "generated": true,
+      "steamAppId": 440,
+      "previous": "16",
+      "changed": true
+    }
+  ]
+}

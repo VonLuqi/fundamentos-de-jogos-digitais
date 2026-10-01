@@ -37,7 +37,7 @@ Dois títulos ClassInd. O **campeão** mostra a faixa. O **desafiante** mostra `
    - **Erro** → `current = 0`; limpa run; revela faixas + `deltaLabel` (ex. `12 → 18`); CTAs Recomeçar / Voltar.
 5. Esc / Voltar = `juizoAbandon` (zera current, **sem** revelar ratings).
 
-**Ordem de faixa (inalterada):** `L < 10 < 12 < 14 < 16 < 18`.
+**Ordem de faixa (Portaria MJSP 1.048/2025):** `L < 6 < 10 < 12 < 14 < 16 < 18`.
 
 ---
 

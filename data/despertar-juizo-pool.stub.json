@@ -1,8 +1,9 @@
 {
   "poolId": "despertar-juizo-v1",
-  "note": "Stub para o Mestre preencher. rating ∈ {L,10,12,14,16,18}. Só entram no Juízo entries com rating preenchido. Capas em assets/classind-dle/covers/ ou assets/despertar-juizo/covers/.",
+  "note": "Pool Juízo ClassInd. rating ∈ {L,6,10,12,14,16,18}. Fontes: steam-dejus / steam-*-map / wikipedia-pt / stub-keep. Capas em assets/classind-dle/covers/ ou assets/despertar-juizo/covers/.",
   "ratingOrder": [
     "L",
+    "6",
     "10",
     "12",
     "14",
@@ -21,18 +22,22 @@
         "violência extrema",
         "gore"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "stub-keep",
+      "steamAppId": 518699
     },
     {
       "id": "street-fighter-6",
       "title": "Street Fighter 6",
-      "rating": "12",
+      "rating": "10",
       "blurb": "Luta competitiva com impacto, sem desmembramento pedagógico.",
       "cover": "street-fighter-6.webp",
       "descriptors": [
-        "violência"
+        "Violência fantasiosa"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2154900
     },
     {
       "id": "the-sims-4",
@@ -41,34 +46,39 @@
       "blurb": "Simulação de vida com temas sexuais, nudez censurada e relacionamentos adultos.",
       "cover": "the-sims-4.webp",
       "descriptors": [
-        "temas sexuais",
-        "nudez"
+        "Conteúdo Sexual"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1222670
     },
     {
       "id": "hollow-knight",
       "title": "Hollow Knight",
-      "rating": "10",
+      "rating": "6",
       "blurb": "Metroidvania com combate fantasioso, criaturas e clima de medo.",
       "cover": "hollow-knight.webp",
       "descriptors": [
-        "violência fantasiosa",
-        "medo"
+        "Violência fantasiosa"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 367520
     },
     {
       "id": "undertale",
       "title": "Undertale",
-      "rating": "10",
+      "rating": "16",
       "blurb": "RPG com combate fantasioso contra monstros e humor; violência estilizada.",
       "cover": "undertale.webp",
       "descriptors": [
-        "violência fantasiosa",
-        "não-humanos"
+        "Violência",
+        "Temas sensíveis",
+        "Drogas lícitas"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 391540
     },
     {
       "id": "hotline-miami",
@@ -77,11 +87,13 @@
       "blurb": "Ação top-down com violência gráfica explícita contra humanos e sangue.",
       "cover": "hotline-miami.webp",
       "descriptors": [
-        "violência extrema",
-        "gore",
-        "humanos"
+        "Violência Extrema",
+        "Drogas ilícitas",
+        "Linguagem imprópria"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 219150
     },
     {
       "id": "cuphead",
@@ -90,10 +102,12 @@
       "blurb": "Run-and-gun cartunesco com violência estilizada e humor clássico.",
       "cover": "cuphead.webp",
       "descriptors": [
-        "violência fantasiosa",
-        "comicidade"
+        "Violence",
+        "Inappropriate Language"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 268910
     },
     {
       "id": "blasphemous",
@@ -102,22 +116,26 @@
       "blurb": "Metroidvania penitent com gore religioso, execução e horror corporal.",
       "cover": "blasphemous.webp",
       "descriptors": [
-        "violência extrema",
-        "gore",
-        "temas adultos"
+        "Nudez",
+        "Violência Extrema",
+        "Medo"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 774361
     },
     {
       "id": "supermarket-simulator",
       "title": "Supermarket Simulator",
-      "rating": "L",
+      "rating": "10",
       "blurb": "Simulação de loja: empilhar prateleiras, caixa e rotina sem violência.",
       "cover": "supermarket-simulator.webp",
       "descriptors": [
-        "conteúdo livre"
+        "Violência"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2670630
     },
     {
       "id": "grand-theft-auto-san-andreas",
@@ -130,7 +148,9 @@
         "drogas",
         "temas adultos"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1547000
     },
     {
       "id": "vampire-survivors",
@@ -139,9 +159,11 @@
       "blurb": "Horda survival com sprites e violência fantasiosa arcade.",
       "cover": "vampire-survivors.webp",
       "descriptors": [
-        "violência fantasiosa"
+        "Violência fantasiosa"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1794680
     },
     {
       "id": "doom-eternal",
@@ -150,10 +172,11 @@
       "blurb": "FPS com violência intensa e gore demoníaco.",
       "cover": "doom-eternal.webp",
       "descriptors": [
-        "violência intensa",
-        "gore"
+        "Extreme Violence"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 782330
     },
     {
       "id": "the-simpsons-hit-and-run",
@@ -165,7 +188,8 @@
         "violência fantasiosa",
         "comicidade"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "silent-hill-2-2024",
@@ -178,7 +202,8 @@
         "violência",
         "temas adultos"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "five-nights-at-freddy-s",
@@ -187,9 +212,12 @@
       "blurb": "Terror de jumpscare com animatrônicos; medo forte, violência pouco gráfica.",
       "cover": "five-nights-at-freddys.webp",
       "descriptors": [
-        "medo"
+        "Medo",
+        "Temas sensíveis"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 319510
     },
     {
       "id": "god-of-war-ragnarok",
@@ -198,22 +226,27 @@
       "blurb": "Ação mitológica com combate visceral, sangue e temas maduros.",
       "cover": "god-of-war-ragnarok.webp",
       "descriptors": [
-        "violência",
-        "sangue",
-        "temas adultos"
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Drogas lícitas"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2322010
     },
     {
       "id": "marvel-rivals",
       "title": "Marvel Rivals",
-      "rating": "12",
+      "rating": "18",
       "blurb": "Hero shooter com combate estilizado entre heróis.",
       "cover": "marvel-rivals.webp",
       "descriptors": [
-        "violência"
+        "Violência",
+        "Conteúdo sexual"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2767030
     },
     {
       "id": "resident-evil-village",
@@ -222,11 +255,11 @@
       "blurb": "Survival horror com violência gráfica, gore e terror.",
       "cover": "resident-evil-village.webp",
       "descriptors": [
-        "violência extrema",
-        "gore",
-        "medo"
+        "Violência Extrema"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1196590
     },
     {
       "id": "call-of-duty-black-ops",
@@ -235,21 +268,27 @@
       "blurb": "FPS militar com violência realista de combate contemporâneo.",
       "cover": "call-of-duty-black-ops.webp",
       "descriptors": [
-        "violência",
-        "sangue"
+        "Drogas",
+        "Violência Extrema"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 3606480
     },
     {
       "id": "crimson-desert",
       "title": "Crimson Desert",
-      "rating": "16",
+      "rating": "18",
       "blurb": "Ação/aventura com combate; referência pedagógica de violência intensa em mundo aberto.",
       "cover": "crimson-desert.webp",
       "descriptors": [
-        "violência"
+        "Drogas ilícitas",
+        "Linguagem imprópria",
+        "Violência Extrema"
       ],
-      "source": "aula5-v1"
+      "source": "aula5-v1",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 3321460
     },
     {
       "id": "minecraft",
@@ -258,7 +297,8 @@
       "blurb": "Sandbox com exploração e combate opcional.",
       "cover": "minecraft.webp",
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "fortnite",
@@ -267,7 +307,8 @@
       "blurb": "Battle royale com violência estilizada.",
       "cover": "fortnite.webp",
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "roblox",
@@ -276,16 +317,21 @@
       "blurb": "Plataforma UGC com experiências variadas.",
       "cover": "roblox.webp",
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "among-us",
       "title": "Among Us",
-      "rating": "10",
+      "rating": "L",
       "blurb": "Social deduction com humor e tensão leve.",
       "cover": "among-us.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 945360
     },
     {
       "id": "valorant",
@@ -294,7 +340,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "league-of-legends",
@@ -303,7 +350,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "counter-strike-2",
@@ -311,17 +359,26 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 730
     },
     {
       "id": "dota-2",
       "title": "Dota 2",
-      "rating": "14",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas lícitas",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 570
     },
     {
       "id": "overwatch-2",
@@ -330,16 +387,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "apex-legends",
       "title": "Apex Legends",
-      "rating": "14",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1172470
     },
     {
       "id": "genshin-impact",
@@ -348,7 +410,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "honkai-star-rail",
@@ -357,7 +420,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "elden-ring",
@@ -365,8 +429,13 @@
       "rating": "16",
       "blurb": "Action RPG com violência fantasiosa intensa.",
       "cover": "elden-ring.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1245620
     },
     {
       "id": "dark-souls-iii",
@@ -374,8 +443,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence, Online Gameplay"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 374320
     },
     {
       "id": "bloodborne",
@@ -384,7 +457,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "sekiro-shadows-die-twice",
@@ -392,53 +466,84 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 814380
     },
     {
       "id": "lies-of-p",
       "title": "Lies of P",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1627720
     },
     {
       "id": "black-myth-wukong",
       "title": "Black Myth: Wukong",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2358720
     },
     {
       "id": "baldur-s-gate-3",
       "title": "Baldur's Gate 3",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Nudez"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1086940
     },
     {
       "id": "divinity-original-sin-2",
       "title": "Divinity: Original Sin 2",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 435150
     },
     {
       "id": "the-witcher-3-wild-hunt",
       "title": "The Witcher 3: Wild Hunt",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo Sexual",
+        "Drogas Lícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 292030
     },
     {
       "id": "cyberpunk-2077",
@@ -446,8 +551,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo sexual",
+        "Drogas",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1091500
     },
     {
       "id": "red-dead-redemption-2",
@@ -455,8 +566,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Atos criminosos",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1174180
     },
     {
       "id": "grand-theft-auto-v",
@@ -464,8 +581,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas ilícitas",
+        "Nudez",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3240220
     },
     {
       "id": "grand-theft-auto-vi",
@@ -474,7 +597,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1546990
     },
     {
       "id": "assassin-s-creed-valhalla",
@@ -482,8 +607,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo sexual",
+        "Drogas",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2208920
     },
     {
       "id": "assassin-s-creed-odyssey",
@@ -491,8 +622,12 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Sexual content, illicit drugs, extreme violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 812140
     },
     {
       "id": "horizon-forbidden-west",
@@ -500,8 +635,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2420110
     },
     {
       "id": "horizon-zero-dawn",
@@ -509,26 +649,38 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Líticas, Violencia"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2561580
     },
     {
       "id": "marvel-s-spider-man-2",
       "title": "Marvel's Spider-Man 2",
-      "rating": "16",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2651280
     },
     {
       "id": "marvel-s-spider-man-miles-morales",
       "title": "Marvel's Spider-Man: Miles Morales",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1817190
     },
     {
       "id": "the-last-of-us-part-i",
@@ -536,8 +688,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Lícitas",
+        "Linguagem Imprópria",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1888930
     },
     {
       "id": "the-last-of-us-part-ii",
@@ -545,8 +703,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Nudez",
+        "Drogas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2531310
     },
     {
       "id": "uncharted-4-a-thief-s-end",
@@ -554,8 +718,14 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas lícitas",
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1659420
     },
     {
       "id": "god-of-war-2018",
@@ -563,8 +733,13 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1593500
     },
     {
       "id": "ghost-of-tsushima",
@@ -572,26 +747,45 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2215430
     },
     {
       "id": "days-gone",
       "title": "Days Gone",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Linguagem imprópria",
+        "Nudez",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1259420
     },
     {
       "id": "death-stranding",
       "title": "Death Stranding",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1850570
     },
     {
       "id": "death-stranding-2",
@@ -600,7 +794,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "hades",
@@ -608,8 +803,12 @@
       "rating": "14",
       "blurb": "Roguelike mitológico com sangue e combate intenso.",
       "cover": "hades.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1145360
     },
     {
       "id": "hades-ii",
@@ -617,17 +816,26 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1145350
     },
     {
       "id": "celeste",
       "title": "Celeste",
-      "rating": "10",
+      "rating": "6",
       "blurb": "Plataforma com temas de ansiedade e perseverança.",
       "cover": "celeste.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 504230
     },
     {
       "id": "dead-cells",
@@ -635,8 +843,12 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 588650
     },
     {
       "id": "ori-and-the-blind-forest",
@@ -645,7 +857,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 261570
     },
     {
       "id": "ori-and-the-will-of-the-wisps",
@@ -653,26 +867,40 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1057090
     },
     {
       "id": "hollow-knight-silksong",
       "title": "Hollow Knight: Silksong",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1030300
     },
     {
       "id": "stardew-valley",
       "title": "Stardew Valley",
-      "rating": "10",
+      "rating": "12",
       "blurb": "Fazenda e vida rural; relacionamento adulto opcional.",
       "cover": "stardew-valley.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 413150
     },
     {
       "id": "animal-crossing-new-horizons",
@@ -681,25 +909,32 @@
       "blurb": "Simulação social leve; sem violência.",
       "cover": "animal-crossing-new-horizons.webp",
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "terraria",
       "title": "Terraria",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 105600
     },
     {
       "id": "no-man-s-sky",
       "title": "No Man's Sky",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 275850
     },
     {
       "id": "subnautica",
@@ -707,8 +942,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 264710
     },
     {
       "id": "subnautica-below-zero",
@@ -716,8 +955,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 848450
     },
     {
       "id": "raft",
@@ -725,8 +968,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 648800
     },
     {
       "id": "valheim",
@@ -734,35 +981,53 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Nudez"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 892970
     },
     {
       "id": "don-t-starve",
       "title": "Don't Starve",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 219740
     },
     {
       "id": "don-t-starve-together",
       "title": "Don't Starve Together",
-      "rating": "12",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 322330
     },
     {
       "id": "the-binding-of-isaac-rebirth",
       "title": "The Binding of Isaac: Rebirth",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 250900
     },
     {
       "id": "enter-the-gungeon",
@@ -770,8 +1035,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 311690
     },
     {
       "id": "slay-the-spire",
@@ -779,17 +1049,23 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 646570
     },
     {
       "id": "balatro",
       "title": "Balatro",
-      "rating": "18",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2379780
     },
     {
       "id": "hearthstone",
@@ -798,16 +1074,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "magic-the-gathering-arena",
       "title": "Magic: The Gathering Arena",
-      "rating": "12",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2141910
     },
     {
       "id": "pokemon-go",
@@ -816,7 +1097,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "pokemon-scarlet",
@@ -825,7 +1107,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "pokemon-legends-arceus",
@@ -834,7 +1117,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "fire-emblem-three-houses",
@@ -843,7 +1127,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "xenoblade-chronicles-3",
@@ -852,7 +1137,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "the-legend-of-zelda-breath-of-the-wild",
@@ -861,7 +1147,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "the-legend-of-zelda-tears-of-the-kingdom",
@@ -870,7 +1157,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "mario-kart-8-deluxe",
@@ -879,7 +1167,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "super-mario-odyssey",
@@ -888,7 +1177,8 @@
       "blurb": "Plataforma familiar sem violência realista.",
       "cover": "super-mario-odyssey.webp",
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "super-smash-bros-ultimate",
@@ -897,7 +1187,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "kirby-and-the-forgotten-land",
@@ -906,7 +1197,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "pikmin-4",
@@ -915,7 +1207,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "splatoon-3",
@@ -924,7 +1217,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "metroid-dread",
@@ -933,7 +1227,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "metroid-prime-remastered",
@@ -942,7 +1237,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "resident-evil-4-remake",
@@ -950,17 +1246,27 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2050650
     },
     {
       "id": "resident-evil-2-remake",
       "title": "Resident Evil 2 Remake",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Language",
+        "Extreme Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 883710
     },
     {
       "id": "resident-evil-7-biohazard",
@@ -968,17 +1274,29 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem Imprópria",
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 418370
     },
     {
       "id": "resident-evil-3-remake",
       "title": "Resident Evil 3 Remake",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 952060
     },
     {
       "id": "silent-hill-f",
@@ -986,8 +1304,13 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2947440
     },
     {
       "id": "outlast",
@@ -995,17 +1318,29 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência",
+        "Temas sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 238320
     },
     {
       "id": "outlast-2",
       "title": "Outlast 2",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 414700
     },
     {
       "id": "amnesia-the-bunker",
@@ -1013,17 +1348,27 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1944430
     },
     {
       "id": "phasmophobia",
       "title": "Phasmophobia",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 739630
     },
     {
       "id": "dead-by-daylight",
@@ -1031,17 +1376,25 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 381210
     },
     {
       "id": "left-4-dead-2",
       "title": "Left 4 Dead 2",
-      "rating": "18",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 550
     },
     {
       "id": "back-4-blood",
@@ -1049,8 +1402,12 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 924970
     },
     {
       "id": "payday-2",
@@ -1058,17 +1415,32 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Medo",
+        "Atos criminosos",
+        "Linguagem imprópria",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 218620
     },
     {
       "id": "payday-3",
       "title": "Payday 3",
-      "rating": "18",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1272080
     },
     {
       "id": "tom-clancy-s-rainbow-six-siege",
@@ -1076,17 +1448,26 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 359550
     },
     {
       "id": "call-of-duty-modern-warfare-ii",
       "title": "Call of Duty: Modern Warfare II",
-      "rating": "18",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3595230
     },
     {
       "id": "call-of-duty-warzone",
@@ -1095,7 +1476,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1962663
     },
     {
       "id": "battlefield-2042",
@@ -1104,7 +1487,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1932460
     },
     {
       "id": "battlefield-v",
@@ -1113,16 +1498,23 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1238810
     },
     {
       "id": "halo-infinite",
       "title": "Halo Infinite",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1240440
     },
     {
       "id": "gears-5",
@@ -1130,8 +1522,13 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Legal Drugs"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1097840
     },
     {
       "id": "doom-2016",
@@ -1140,7 +1537,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "doom-the-dark-ages",
@@ -1148,26 +1546,40 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Inappropriate Language",
+        "Sensitive Themes"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 3017860
     },
     {
       "id": "ultrakill",
       "title": "Ultrakill",
-      "rating": "16",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1229490
     },
     {
       "id": "half-life-2",
       "title": "Half-Life 2",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 220
     },
     {
       "id": "half-life-alyx",
@@ -1175,8 +1587,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 546560
     },
     {
       "id": "portal",
@@ -1184,35 +1600,52 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 400
     },
     {
       "id": "portal-2",
       "title": "Portal 2",
-      "rating": "10",
+      "rating": "12",
       "blurb": "Puzzle com humor ácido e violência cartoon.",
       "cover": "portal-2.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 620
     },
     {
       "id": "team-fortress-2",
       "title": "Team Fortress 2",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 440
     },
     {
       "id": "garry-s-mod",
       "title": "Garry's Mod",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 4000
     },
     {
       "id": "rust",
@@ -1220,8 +1653,16 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Medo",
+        "Linguagem imprópria",
+        "Nudez"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 252490
     },
     {
       "id": "dayz",
@@ -1229,8 +1670,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 221100
     },
     {
       "id": "ark-survival-evolved",
@@ -1238,17 +1685,24 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 346110
     },
     {
       "id": "palworld",
       "title": "Palworld",
-      "rating": "14",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1623730
     },
     {
       "id": "satisfactory",
@@ -1256,17 +1710,25 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 526870
     },
     {
       "id": "factorio",
       "title": "Factorio",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 427520
     },
     {
       "id": "cities-skylines-ii",
@@ -1275,7 +1737,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 949230
     },
     {
       "id": "euro-truck-simulator-2",
@@ -1284,16 +1748,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 227300
     },
     {
       "id": "microsoft-flight-simulator",
       "title": "Microsoft Flight Simulator",
-      "rating": "L",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2537590
     },
     {
       "id": "forza-horizon-5",
@@ -1302,7 +1770,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1551360
     },
     {
       "id": "gran-turismo-7",
@@ -1311,7 +1781,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "need-for-speed-unbound",
@@ -1319,8 +1790,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem Imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1846380
     },
     {
       "id": "rocket-league",
@@ -1329,7 +1805,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "ea-sports-fc-24",
@@ -1338,7 +1815,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "nba-2k24",
@@ -1347,7 +1825,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "madden-nfl-24",
@@ -1356,7 +1835,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "wwe-2k24",
@@ -1364,17 +1844,32 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo sexual",
+        "Drogas lícitas",
+        "Compra on-line",
+        "Interação entre usuários"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2315690
     },
     {
       "id": "tekken-8",
       "title": "Tekken 8",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo Sexual",
+        "Interação de usuários",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1778820
     },
     {
       "id": "mortal-kombat-1",
@@ -1382,17 +1877,29 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Drogas lícitas",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1971870
     },
     {
       "id": "guilty-gear-strive",
       "title": "Guilty Gear -Strive-",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1384160
     },
     {
       "id": "dragon-ball-fighterz",
@@ -1400,8 +1907,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 678950
     },
     {
       "id": "multiversus",
@@ -1410,16 +1921,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "brawlhalla",
       "title": "Brawlhalla",
-      "rating": "10",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 291550
     },
     {
       "id": "it-takes-two",
@@ -1427,8 +1943,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Inappropriate language",
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1426210
     },
     {
       "id": "a-way-out",
@@ -1436,8 +1957,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo Sexual, Drogas e Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1222700
     },
     {
       "id": "untitled-goose-game",
@@ -1446,25 +1971,33 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 837470
     },
     {
       "id": "overcooked-2",
       "title": "Overcooked! 2",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 728880
     },
     {
       "id": "moving-out",
       "title": "Moving Out",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 996770
     },
     {
       "id": "fall-guys",
@@ -1473,7 +2006,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "party-animals",
@@ -1481,8 +2015,14 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Compras on-line",
+        "Interação de Usuários"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1260320
     },
     {
       "id": "the-jackbox-party-pack-9",
@@ -1490,17 +2030,27 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Drogas ilícitas",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1850960
     },
     {
       "id": "keep-talking-and-nobody-explodes",
       "title": "Keep Talking and Nobody Explodes",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 341800
     },
     {
       "id": "the-stanley-parable-ultra-deluxe",
@@ -1508,8 +2058,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Temas sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1703340
     },
     {
       "id": "outer-wilds",
@@ -1517,35 +2072,58 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 753640
     },
     {
       "id": "outer-wilds-echoes-of-the-eye",
       "title": "Outer Wilds: Echoes of the Eye",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Mild Violence",
+        "Fear"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 1622100
     },
     {
       "id": "disco-elysium",
       "title": "Disco Elysium",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria",
+        "Drogas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 632470
     },
     {
       "id": "return-of-the-obra-dinn",
       "title": "Return of the Obra Dinn",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Nudez"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 653530
     },
     {
       "id": "papers-please",
@@ -1553,8 +2131,14 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Nudez",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 239030
     },
     {
       "id": "this-war-of-mine",
@@ -1562,8 +2146,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 282070
     },
     {
       "id": "spec-ops-the-line",
@@ -1572,7 +2162,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "bioshock",
@@ -1580,8 +2171,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Sexual Content",
+        "Usage of illicit drug",
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 409710
     },
     {
       "id": "bioshock-infinite",
@@ -1590,7 +2187,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 8870
     },
     {
       "id": "system-shock-2023",
@@ -1599,16 +2198,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "prey-2017",
       "title": "Prey (2017)",
-      "rating": "16",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 480430
     },
     {
       "id": "control",
@@ -1616,8 +2220,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas lícitas",
+        "Violência Extrema",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 870780
     },
     {
       "id": "alan-wake-2",
@@ -1625,8 +2235,13 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Medo",
+        "Conteúdo Sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "detroit-become-human",
@@ -1634,8 +2249,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1222140
     },
     {
       "id": "heavy-rain",
@@ -1643,8 +2264,20 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Atos criminosos",
+        "Violência",
+        "Temas sensíveis",
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Nudez",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 960910
     },
     {
       "id": "beyond-two-souls",
@@ -1652,8 +2285,17 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo",
+        "Atos criminosos",
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 960990
     },
     {
       "id": "until-dawn",
@@ -1661,8 +2303,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteudo Impactante",
+        "Conteudo Sexual",
+        "Linguagem Impropria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2172010
     },
     {
       "id": "the-quarry",
@@ -1670,62 +2318,94 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1577120
     },
     {
       "id": "life-is-strange",
       "title": "Life is Strange",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo Sexual",
+        "Drogas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 532210
     },
     {
       "id": "life-is-strange-true-colors",
       "title": "Life is Strange: True Colors",
-      "rating": "16",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 936790
     },
     {
       "id": "oxenfree",
       "title": "Oxenfree",
-      "rating": "12",
-      "blurb": null,
-      "cover": null,
-      "descriptors": [],
-      "source": "stub"
-    },
-    {
-      "id": "night-in-the-woods",
-      "title": "Night in the Woods",
       "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 388880
+    },
+    {
+      "id": "night-in-the-woods",
+      "title": "Night in the Woods",
+      "rating": "12",
+      "blurb": null,
+      "cover": null,
+      "descriptors": [
+        "Drogas ilícitas",
+        "Linguagem imprópria",
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 481510
     },
     {
       "id": "deltarune",
       "title": "Deltarune",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência",
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1671210
     },
     {
       "id": "omori",
       "title": "OMORI",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1150690
     },
     {
       "id": "lisa-the-painful",
@@ -1733,8 +2413,15 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drugs",
+        "Extreme Violence",
+        "Strong Language",
+        "Use of Alcohol/Tabacco"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 335670
     },
     {
       "id": "final-fantasy-vii-remake",
@@ -1742,8 +2429,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo sexual",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1462040
     },
     {
       "id": "final-fantasy-xvi",
@@ -1751,26 +2443,44 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo sexual",
+        "Temas sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2515020
     },
     {
       "id": "final-fantasy-xiv-online",
       "title": "Final Fantasy XIV Online",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 39210
     },
     {
       "id": "persona-5-royal",
       "title": "Persona 5 Royal",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1687950
     },
     {
       "id": "persona-3-reload",
@@ -1778,8 +2488,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2161700
     },
     {
       "id": "shin-megami-tensei-v-vengeance",
@@ -1787,8 +2503,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo Sexual",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1875830
     },
     {
       "id": "like-a-dragon-infinite-wealth",
@@ -1796,8 +2518,12 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drugs, Extreme Violence, and Sexual Content."
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2072450
     },
     {
       "id": "yakuza-like-a-dragon",
@@ -1805,26 +2531,43 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1235140
     },
     {
       "id": "nier-automata",
       "title": "NieR:Automata",
-      "rating": "16",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "conteúdo impacante",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 524220
     },
     {
       "id": "nier-replicant-ver-1-22474487139",
       "title": "NieR Replicant ver.1.22474487139...",
-      "rating": "16",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3514150
     },
     {
       "id": "bayonetta-3",
@@ -1833,7 +2576,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "devil-may-cry-5",
@@ -1841,8 +2585,13 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Language"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 601150
     },
     {
       "id": "metal-gear-solid-v-the-phantom-pain",
@@ -1850,26 +2599,38 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 287700
     },
     {
       "id": "deathloop",
       "title": "Deathloop",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Conteúdo Sexual",
+        "Drogas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1252330
     },
     {
       "id": "dishonored-2",
       "title": "Dishonored 2",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 403640
     },
     {
       "id": "hitman-world-of-assassination",
@@ -1877,8 +2638,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Drogas",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1659040
     },
     {
       "id": "watch-dogs-legion",
@@ -1886,8 +2653,12 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo Sexual, Drogas, Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2239550
     },
     {
       "id": "far-cry-6",
@@ -1895,8 +2666,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Illegal Drugs",
+        "Extreme Violence",
+        "Sexual Content"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2432590
     },
     {
       "id": "far-cry-3",
@@ -1905,7 +2682,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 220240
     },
     {
       "id": "just-cause-4",
@@ -1914,7 +2693,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 517630
     },
     {
       "id": "saints-row-2022",
@@ -1923,7 +2704,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 742420
     },
     {
       "id": "sleeping-dogs-definitive-edition",
@@ -1932,7 +2715,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 307690
     },
     {
       "id": "mafia-definitive-edition",
@@ -1941,7 +2726,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1030840
     },
     {
       "id": "mafia-iii-definitive-edition",
@@ -1950,7 +2737,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 360430
     },
     {
       "id": "bully-scholarship-edition",
@@ -1959,7 +2748,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 12200
     },
     {
       "id": "l-a-noire",
@@ -1968,7 +2759,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 110800
     },
     {
       "id": "red-dead-redemption",
@@ -1977,7 +2770,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2668510
     },
     {
       "id": "stray",
@@ -1986,7 +2781,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1332010
     },
     {
       "id": "little-nightmares-ii",
@@ -1995,7 +2792,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 860510
     },
     {
       "id": "inside",
@@ -2004,7 +2803,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 304430
     },
     {
       "id": "limbo",
@@ -2013,7 +2814,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 48000
     },
     {
       "id": "gris",
@@ -2022,7 +2825,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 683320
     },
     {
       "id": "journey",
@@ -2031,7 +2836,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 638230
     },
     {
       "id": "abzu",
@@ -2040,7 +2847,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 384190
     },
     {
       "id": "sky-children-of-the-light",
@@ -2049,7 +2858,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2325290
     },
     {
       "id": "spiritfarer",
@@ -2058,7 +2869,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 972660
     },
     {
       "id": "what-remains-of-edith-finch",
@@ -2067,7 +2880,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 501300
     },
     {
       "id": "gone-home",
@@ -2076,7 +2891,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 232430
     },
     {
       "id": "firewatch",
@@ -2085,7 +2902,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 383870
     },
     {
       "id": "the-witness",
@@ -2094,7 +2913,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 210970
     },
     {
       "id": "the-talos-principle-2",
@@ -2103,7 +2924,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 835960
     },
     {
       "id": "baba-is-you",
@@ -2112,7 +2935,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 736260
     },
     {
       "id": "tetris-effect-connected",
@@ -2121,7 +2946,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1003590
     },
     {
       "id": "sonic-frontiers",
@@ -2130,7 +2957,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1237320
     },
     {
       "id": "sonic-superstars",
@@ -2139,7 +2968,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2022670
     },
     {
       "id": "crash-bandicoot-4-it-s-about-time",
@@ -2148,7 +2979,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1378990
     },
     {
       "id": "spyro-reignited-trilogy",
@@ -2157,7 +2990,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 996580
     },
     {
       "id": "ratchet-and-clank-rift-apart",
@@ -2166,7 +3001,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1895880
     },
     {
       "id": "astro-bot",
@@ -2175,7 +3012,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2232520
     },
     {
       "id": "sackboy-a-big-adventure",
@@ -2184,7 +3023,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1599660
     },
     {
       "id": "no-more-heroes-3",
@@ -2193,7 +3034,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1744330
     },
     {
       "id": "katana-zero",
@@ -2202,7 +3045,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 460950
     },
     {
       "id": "hotline-miami-2-wrong-number",
@@ -2211,7 +3056,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 274170
     },
     {
       "id": "broforce",
@@ -2220,7 +3067,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 274190
     },
     {
       "id": "nuclear-throne",
@@ -2229,7 +3078,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 242680
     },
     {
       "id": "risk-of-rain-2",
@@ -2238,7 +3089,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 632360
     },
     {
       "id": "deep-rock-galactic",
@@ -2247,25 +3100,37 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 548430
     },
     {
       "id": "helldivers-2",
       "title": "Helldivers 2",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Compras online",
+        "Interação de usuários"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 553850
     },
     {
       "id": "warhammer-40-000-space-marine-2",
       "title": "Warhammer 40,000: Space Marine 2",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2183900
     },
     {
       "id": "warhammer-vermintide-2",
@@ -2273,26 +3138,42 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 552500
     },
     {
       "id": "warhammer-40-000-darktide",
       "title": "Warhammer 40,000: Darktide",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1361210
     },
     {
       "id": "total-war-warhammer-iii",
       "title": "Total War: Warhammer III",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1142710
     },
     {
       "id": "age-of-empires-iv",
@@ -2300,8 +3181,12 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1466860
     },
     {
       "id": "sid-meier-s-civilization-vi",
@@ -2309,53 +3194,82 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 289070
     },
     {
       "id": "crusader-kings-iii",
       "title": "Crusader Kings III",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drugs",
+        "Sexual Content",
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1158310
     },
     {
       "id": "europa-universalis-iv",
       "title": "Europa Universalis IV",
-      "rating": "10",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas ilícitas",
+        "Conteúdo sexual",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 236850
     },
     {
       "id": "stellaris",
       "title": "Stellaris",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 281990
     },
     {
       "id": "xcom-2",
       "title": "XCOM 2",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 593380
     },
     {
       "id": "into-the-breach",
       "title": "Into the Breach",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 590380
     },
     {
       "id": "frostpunk",
@@ -2363,8 +3277,20 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Atos criminosos",
+        "Temas sensíveis",
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Nudez",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 323190
     },
     {
       "id": "frostpunk-2",
@@ -2372,26 +3298,40 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1601580
     },
     {
       "id": "against-the-storm",
       "title": "Against the Storm",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1336490
     },
     {
       "id": "manor-lords",
       "title": "Manor Lords",
-      "rating": "14",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1363080
     },
     {
       "id": "rimworld",
@@ -2399,17 +3339,28 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas ilícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 294100
     },
     {
       "id": "dwarf-fortress",
       "title": "Dwarf Fortress",
-      "rating": "12",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Linguagem imprópria",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 975370
     },
     {
       "id": "oxygen-not-included",
@@ -2418,7 +3369,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 457140
     },
     {
       "id": "kerbal-space-program",
@@ -2427,7 +3380,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 220200
     },
     {
       "id": "kerbal-space-program-2",
@@ -2436,16 +3391,22 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 954850
     },
     {
       "id": "noita",
       "title": "Noita",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 881100
     },
     {
       "id": "teardown",
@@ -2453,26 +3414,43 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1167630
     },
     {
       "id": "people-playground",
       "title": "People Playground",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Atos criminosos",
+        "Violência",
+        "Violência Extrema",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1118200
     },
     {
       "id": "goat-simulator-3",
       "title": "Goat Simulator 3",
-      "rating": "12",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 850190
     },
     {
       "id": "powerwash-simulator",
@@ -2481,7 +3459,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1290000
     },
     {
       "id": "house-flipper-2",
@@ -2490,7 +3470,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1190970
     },
     {
       "id": "cooking-simulator",
@@ -2499,7 +3481,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 641320
     },
     {
       "id": "farming-simulator-22",
@@ -2508,7 +3492,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1248130
     },
     {
       "id": "train-sim-world-4",
@@ -2517,16 +3503,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2362300
     },
     {
       "id": "bus-simulator-21",
       "title": "Bus Simulator 21",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 976590
     },
     {
       "id": "candy-crush-saga",
@@ -2535,7 +3525,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "clash-of-clans",
@@ -2544,7 +3535,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "clash-royale",
@@ -2553,7 +3545,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "brawl-stars",
@@ -2562,16 +3555,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "zenless-zone-zero",
       "title": "Zenless Zone Zero",
-      "rating": "14",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 4162040
     },
     {
       "id": "wuthering-waves",
@@ -2579,26 +3577,37 @@
       "rating": "14",
       "blurb": "Ação em mundo aberto com combate e fantasia.",
       "cover": "wuthering-waves.webp",
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3513350
     },
     {
       "id": "tower-of-fantasy",
       "title": "Tower of Fantasy",
-      "rating": "12",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2064650
     },
     {
       "id": "blue-archive",
       "title": "Blue Archive",
-      "rating": "14",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3557620
     },
     {
       "id": "diablo-iv",
@@ -2606,8 +3615,13 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2344520
     },
     {
       "id": "diablo-immortal",
@@ -2616,34 +3630,50 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "path-of-exile",
       "title": "Path of Exile",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 238960
     },
     {
       "id": "path-of-exile-2",
       "title": "Path of Exile 2",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Nudez"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2694490
     },
     {
       "id": "last-epoch",
       "title": "Last Epoch",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 899770
     },
     {
       "id": "grim-dawn",
@@ -2651,8 +3681,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 219990
     },
     {
       "id": "deadlock",
@@ -2660,8 +3694,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1422450
     },
     {
       "id": "teamfight-tactics",
@@ -2670,7 +3709,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "marvel-snap",
@@ -2678,17 +3718,26 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1997040
     },
     {
       "id": "yu-gi-oh-master-duel",
       "title": "Yu-Gi-Oh! Master Duel",
-      "rating": "10",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1449850
     },
     {
       "id": "inscryption",
@@ -2696,26 +3745,45 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Medo",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1092790
     },
     {
       "id": "slay-the-princess",
       "title": "Slay the Princess",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1989270
     },
     {
       "id": "cult-of-the-lamb",
       "title": "Cult of the Lamb",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1313140
     },
     {
       "id": "the-coffin-of-andy-and-leyley",
@@ -2723,8 +3791,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência extrema",
+        "Linguagem imprópria",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2378900
     },
     {
       "id": "doki-doki-literature-club-plus",
@@ -2732,8 +3806,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence, Sexual Content, Inappropriate Language"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1388880
     },
     {
       "id": "coral-island",
@@ -2741,44 +3819,68 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1158160
     },
     {
       "id": "my-time-at-sandrock",
       "title": "My Time at Sandrock",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1084600
     },
     {
       "id": "rune-factory-5",
       "title": "Rune Factory 5",
-      "rating": "12",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1702330
     },
     {
       "id": "dragon-quest-xi-s-echoes-of-an-elusive-age",
       "title": "Dragon Quest XI S: Echoes of an Elusive Age",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1295510
     },
     {
       "id": "chrono-trigger",
       "title": "Chrono Trigger",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 613830
     },
     {
       "id": "sea-of-stars",
@@ -2786,17 +3888,27 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1244090
     },
     {
       "id": "chained-echoes",
       "title": "Chained Echoes",
-      "rating": "12",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "conteúdo sexual",
+        "linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1229240
     },
     {
       "id": "octopath-traveler-ii",
@@ -2804,17 +3916,28 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Lícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1971650
     },
     {
       "id": "triangle-strategy",
       "title": "Triangle Strategy",
-      "rating": "12",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1850510
     },
     {
       "id": "tactics-ogre-reborn",
@@ -2822,8 +3945,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1451090
     },
     {
       "id": "fire-emblem-engage",
@@ -2832,7 +3960,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "advance-wars-1-2-re-boot-camp",
@@ -2841,7 +3970,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "kingdom-come-deliverance-ii",
@@ -2849,44 +3979,70 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Conteúdo sexual",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1771300
     },
     {
       "id": "mount-and-blade-ii-bannerlord",
       "title": "Mount & Blade II: Bannerlord",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 261550
     },
     {
       "id": "chivalry-2",
       "title": "Chivalry 2",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Drogas lícitas",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1824220
     },
     {
       "id": "for-honor",
       "title": "For Honor",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 304390
     },
     {
       "id": "mordhau",
       "title": "Mordhau",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 629760
     },
     {
       "id": "hunt-showdown-1896",
@@ -2894,35 +4050,56 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Inappropriate Language",
+        "Sensitive themes",
+        "Users Interact"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 594650
     },
     {
       "id": "escape-from-tarkov",
       "title": "Escape from Tarkov",
-      "rating": "18",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3932890
     },
     {
       "id": "war-thunder",
       "title": "War Thunder",
-      "rating": "12",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 236390
     },
     {
       "id": "world-of-tanks",
       "title": "World of Tanks",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1407200
     },
     {
       "id": "world-of-warships",
@@ -2930,8 +4107,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 552990
     },
     {
       "id": "ace-combat-7-skies-unknown",
@@ -2939,8 +4120,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 502500
     },
     {
       "id": "project-wingman",
@@ -2948,17 +4134,23 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 895870
     },
     {
       "id": "microsoft-flight-simulator-2024",
       "title": "Microsoft Flight Simulator 2024",
-      "rating": "L",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2537590
     },
     {
       "id": "x-plane-12",
@@ -2967,7 +4159,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2014780
     },
     {
       "id": "american-truck-simulator",
@@ -2976,7 +4170,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 270880
     },
     {
       "id": "beamng-drive",
@@ -2985,7 +4181,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 284160
     },
     {
       "id": "assetto-corsa-competizione",
@@ -2994,16 +4192,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 805550
     },
     {
       "id": "iracing",
       "title": "iRacing",
-      "rating": "L",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 266410
     },
     {
       "id": "f1-24",
@@ -3012,7 +4214,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2488620
     },
     {
       "id": "dirt-rally-2-0",
@@ -3021,7 +4225,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 690790
     },
     {
       "id": "wreckfest",
@@ -3029,8 +4235,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 228380
     },
     {
       "id": "trackmania",
@@ -3039,16 +4249,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2225070
     },
     {
       "id": "geometry-dash",
       "title": "Geometry Dash",
-      "rating": "L",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 322170
     },
     {
       "id": "osu",
@@ -3057,16 +4271,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 608160
     },
     {
       "id": "beat-saber",
       "title": "Beat Saber",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 620980
     },
     {
       "id": "synth-riders",
@@ -3075,7 +4293,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 885000
     },
     {
       "id": "pistol-whip",
@@ -3083,8 +4303,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1079800
     },
     {
       "id": "vrchat",
@@ -3093,16 +4318,24 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 438100
     },
     {
       "id": "rec-room",
       "title": "Rec Room",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Linguagem imprópria",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 4877420
     },
     {
       "id": "the-sims-3",
@@ -3111,34 +4344,44 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 223594
     },
     {
       "id": "simcity-4",
       "title": "SimCity 4",
-      "rating": "L",
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 24780
     },
     {
       "id": "cities-skylines",
       "title": "Cities: Skylines",
-      "rating": "L",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 255710
     },
     {
       "id": "planet-zoo",
       "title": "Planet Zoo",
-      "rating": "L",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 703080
     },
     {
       "id": "planet-coaster",
@@ -3146,8 +4389,12 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 493340
     },
     {
       "id": "jurassic-world-evolution-2",
@@ -3155,17 +4402,25 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1244460
     },
     {
       "id": "rollercoaster-tycoon-classic",
       "title": "RollerCoaster Tycoon Classic",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 683900
     },
     {
       "id": "two-point-hospital",
@@ -3173,8 +4428,12 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 535930
     },
     {
       "id": "two-point-campus",
@@ -3182,62 +4441,96 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1649080
     },
     {
       "id": "game-dev-tycoon",
       "title": "Game Dev Tycoon",
-      "rating": "L",
-      "blurb": null,
-      "cover": null,
-      "descriptors": [],
-      "source": "stub"
-    },
-    {
-      "id": "prison-architect",
-      "title": "Prison Architect",
-      "rating": "16",
-      "blurb": null,
-      "cover": null,
-      "descriptors": [],
-      "source": "stub"
-    },
-    {
-      "id": "halo-the-master-chief-collection",
-      "title": "Halo: The Master Chief Collection",
-      "rating": "16",
-      "blurb": null,
-      "cover": null,
-      "descriptors": [],
-      "source": "stub"
-    },
-    {
-      "id": "sea-of-thieves",
-      "title": "Sea of Thieves",
-      "rating": "14",
-      "blurb": null,
-      "cover": null,
-      "descriptors": [],
-      "source": "stub"
-    },
-    {
-      "id": "grounded",
-      "title": "Grounded",
       "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 239820
+    },
+    {
+      "id": "prison-architect",
+      "title": "Prison Architect",
+      "rating": "14",
+      "blurb": null,
+      "cover": null,
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Linguagem imprópria",
+        "Nudez",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 233450
+    },
+    {
+      "id": "halo-the-master-chief-collection",
+      "title": "Halo: The Master Chief Collection",
+      "rating": "14",
+      "blurb": null,
+      "cover": null,
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 976730
+    },
+    {
+      "id": "sea-of-thieves",
+      "title": "Sea of Thieves",
+      "rating": "12",
+      "blurb": null,
+      "cover": null,
+      "descriptors": [
+        "Drogas lícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1172620
+    },
+    {
+      "id": "grounded",
+      "title": "Grounded",
+      "rating": "14",
+      "blurb": null,
+      "cover": null,
+      "descriptors": [
+        "Violência fantasiosa",
+        "Medo",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 962130
     },
     {
       "id": "core-keeper",
       "title": "Core Keeper",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1621690
     },
     {
       "id": "v-rising",
@@ -3245,35 +4538,50 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Atos criminosos"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1604030
     },
     {
       "id": "enshrouded",
       "title": "Enshrouded",
-      "rating": "14",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1203620
     },
     {
       "id": "once-human",
       "title": "Once Human",
-      "rating": "16",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2139460
     },
     {
       "id": "content-warning",
       "title": "Content Warning",
-      "rating": "14",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2881650
     },
     {
       "id": "lethal-company",
@@ -3281,44 +4589,69 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1966720
     },
     {
       "id": "r-e-p-o",
       "title": "R.E.P.O.",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 3241660
     },
     {
       "id": "buckshot-roulette",
       "title": "Buckshot Roulette",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2835570
     },
     {
       "id": "mouthwashing",
       "title": "Mouthwashing",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2475490
     },
     {
       "id": "signalis",
       "title": "Signalis",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "violência",
+        "temas sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1262350
     },
     {
       "id": "fear-and-hunger",
@@ -3327,7 +4660,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1002300
     },
     {
       "id": "fear-and-hunger-2-termina",
@@ -3335,8 +4670,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Violência Extrema",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2171440
     },
     {
       "id": "lobotomy-corporation",
@@ -3344,44 +4685,68 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 568220
     },
     {
       "id": "library-of-ruina",
       "title": "Library of Ruina",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1256670
     },
     {
       "id": "limbus-company",
       "title": "Limbus Company",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1973530
     },
     {
       "id": "arknights",
       "title": "Arknights",
-      "rating": "12",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Nudez",
+        "Linguagem imprópria",
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 4732690
     },
     {
       "id": "honkai-impact-3rd",
       "title": "Honkai Impact 3rd",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1671200
     },
     {
       "id": "cookie-run-kingdom",
@@ -3390,7 +4755,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "lost-ark",
@@ -3398,8 +4764,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Interacio de Usarios",
+        "Compras on-line"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1599340
     },
     {
       "id": "new-world",
@@ -3407,17 +4779,27 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1063730
     },
     {
       "id": "throne-and-liberty",
       "title": "Throne and Liberty",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence",
+        "Sexual Content",
+        "Legal Drugs"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2429640
     },
     {
       "id": "black-desert-online",
@@ -3426,7 +4808,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "world-of-warcraft",
@@ -3435,7 +4818,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "guild-wars-2",
@@ -3443,26 +4827,44 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência",
+        "Medo",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1284210
     },
     {
       "id": "the-elder-scrolls-online",
       "title": "The Elder Scrolls Online",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Conteúdo sexual",
+        "Drogas ilícitas",
+        "In-Game Purchases"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 3571620
     },
     {
       "id": "the-elder-scrolls-v-skyrim",
       "title": "The Elder Scrolls V: Skyrim",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 489830
     },
     {
       "id": "fallout-4",
@@ -3470,17 +4872,27 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Illegal Drugs",
+        "Inappropriate Language"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 377160
     },
     {
       "id": "fallout-76",
       "title": "Fallout 76",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo impactante, Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1151340
     },
     {
       "id": "fallout-new-vegas",
@@ -3489,7 +4901,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 22380
     },
     {
       "id": "starfield",
@@ -3497,8 +4911,13 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Extreme Violence",
+        "Drugs"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1716740
     },
     {
       "id": "elite-dangerous",
@@ -3506,26 +4925,39 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Atos criminosos",
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 359320
     },
     {
       "id": "eve-online",
       "title": "EVE Online",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 8500
     },
     {
       "id": "warframe",
       "title": "Warframe",
-      "rating": "16",
+      "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence, Legal Drugs, Inappropriate Language"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 230410
     },
     {
       "id": "destiny-2",
@@ -3533,8 +4965,12 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1085660
     },
     {
       "id": "the-division-2",
@@ -3542,8 +4978,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Inappropriate language, violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2221490
     },
     {
       "id": "tom-clancy-s-ghost-recon-breakpoint",
@@ -3551,35 +4991,53 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas lícitas",
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2231380
     },
     {
       "id": "7-days-to-die",
       "title": "7 Days to Die",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Drogas ilícitas",
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 251570
     },
     {
       "id": "project-zomboid",
       "title": "Project Zomboid",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 108600
     },
     {
       "id": "state-of-decay-2",
       "title": "State of Decay 2",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 495420
     },
     {
       "id": "dying-light-2-stay-human",
@@ -3587,17 +5045,26 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Temas Sensíveis",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 534380
     },
     {
       "id": "dying-light",
       "title": "Dying Light",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 239140
     },
     {
       "id": "dead-island-2",
@@ -3605,8 +5072,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas",
+        "Linguagem Imprópria",
+        "Violência Extrema"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 934700
     },
     {
       "id": "dead-rising-deluxe-remaster",
@@ -3614,8 +5087,14 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência extrema",
+        "Linguagem imprópria",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2527390
     },
     {
       "id": "telltale-s-the-walking-dead",
@@ -3624,16 +5103,22 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "code-vein",
       "title": "Code Vein",
-      "rating": "16",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo Sexual",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 678960
     },
     {
       "id": "nioh-2",
@@ -3641,8 +5126,12 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1325200
     },
     {
       "id": "wo-long-fallen-dynasty",
@@ -3650,26 +5139,44 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Compras on-line",
+        "Interação de Usuários"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1448440
     },
     {
       "id": "rise-of-the-ronin",
       "title": "Rise of the Ronin",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência extrema",
+        "Conteúdo sexual",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1340990
     },
     {
       "id": "stellar-blade",
       "title": "Stellar Blade",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Conteúdo sexual",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 3489700
     },
     {
       "id": "final-fantasy-vii-rebirth",
@@ -3677,8 +5184,14 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Drogas",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2909400
     },
     {
       "id": "clair-obscur-expedition-33",
@@ -3686,8 +5199,13 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas Sensíveis"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1903340
     },
     {
       "id": "avowed",
@@ -3695,17 +5213,28 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência extrema",
+        "Drogas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2457220
     },
     {
       "id": "pillars-of-eternity-ii-deadfire",
       "title": "Pillars of Eternity II: Deadfire",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "violência",
+        "nudez",
+        "linguagem imprópria"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 560130
     },
     {
       "id": "wasteland-3",
@@ -3713,53 +5242,92 @@
       "rating": "18",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo",
+        "Atos criminosos",
+        "Violência",
+        "Temas sensíveis",
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 719040
     },
     {
       "id": "s-t-a-l-k-e-r-2-heart-of-chornobyl",
       "title": "S.T.A.L.K.E.R. 2: Heart of Chornobyl",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria",
+        "Drogas lícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1643320
     },
     {
       "id": "metro-exodus",
       "title": "Metro Exodus",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drugs, Nudity, Violence"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 412020
     },
     {
       "id": "metro-last-light-redux",
       "title": "Metro: Last Light Redux",
-      "rating": "18",
+      "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Temas sensíveis",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 287390
     },
     {
       "id": "chernobylite",
       "title": "Chernobylite",
-      "rating": "16",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo",
+        "Atos criminosos",
+        "Violência",
+        "Linguagem imprópria",
+        "Conteúdo sexual",
+        "Drogas lícitas",
+        "Drogas ilícitas"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1016800
     },
     {
       "id": "hardspace-shipbreaker",
       "title": "Hardspace: Shipbreaker",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1161580
     },
     {
       "id": "astroneer",
@@ -3767,26 +5335,38 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Não se aplica."
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 361420
     },
     {
       "id": "deep-rock-galactic-survivor",
       "title": "Deep Rock Galactic: Survivor",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2321470
     },
     {
       "id": "brotato",
       "title": "Brotato",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1942280
     },
     {
       "id": "soulstone-survivors",
@@ -3794,17 +5374,25 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2066020
     },
     {
       "id": "halls-of-torment",
       "title": "Halls of Torment",
-      "rating": "14",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2218750
     },
     {
       "id": "20-minutes-till-dawn",
@@ -3812,62 +5400,93 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1966900
     },
     {
       "id": "peglin",
       "title": "Peglin",
-      "rating": "10",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1296610
     },
     {
       "id": "luck-be-a-landlord",
       "title": "Luck be a Landlord",
-      "rating": "14",
+      "rating": "L",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1404850
     },
     {
       "id": "dicey-dungeons",
       "title": "Dicey Dungeons",
-      "rating": "10",
+      "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 861540
     },
     {
       "id": "monster-train",
       "title": "Monster Train",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1102190
     },
     {
       "id": "monster-hunter-wilds",
       "title": "Monster Hunter Wilds",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência",
+        "Linguagem imprópria",
+        "Compras online",
+        "Interação de Usuários"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2246340
     },
     {
       "id": "monster-hunter-world",
       "title": "Monster Hunter: World",
-      "rating": "14",
+      "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Lícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 582010
     },
     {
       "id": "monster-hunter-rise",
@@ -3875,8 +5494,12 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Licitas, Violencia"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1446780
     },
     {
       "id": "wild-hearts",
@@ -3884,8 +5507,13 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Drogas Lícitas",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1938010
     },
     {
       "id": "the-finals",
@@ -3893,8 +5521,12 @@
       "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2073850
     },
     {
       "id": "xdefiant",
@@ -3903,7 +5535,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "splitgate-2",
@@ -3912,7 +5545,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "smite",
@@ -3920,8 +5554,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Conteúdo sexual",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2437170
     },
     {
       "id": "fallout-shelter",
@@ -3929,8 +5568,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Moderate Violence",
+        "Sexual Innuendo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 588430
     },
     {
       "id": "cookie-clicker",
@@ -3939,16 +5583,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1454400
     },
     {
       "id": "adventure-capitalist",
       "title": "Adventure Capitalist",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 346900
     },
     {
       "id": "universal-paperclips",
@@ -3957,7 +5605,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "a-dark-room",
@@ -3965,8 +5614,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2460660
     },
     {
       "id": "reigns",
@@ -3974,8 +5627,13 @@
       "rating": "12",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 474750
     },
     {
       "id": "unpacking",
@@ -3984,7 +5642,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1135690
     },
     {
       "id": "a-little-to-the-left",
@@ -3993,16 +5653,22 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1629520
     },
     {
       "id": "donut-county",
       "title": "Donut County",
-      "rating": "L",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 702670
     },
     {
       "id": "alba-a-wildlife-adventure",
@@ -4011,7 +5677,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1337010
     },
     {
       "id": "a-short-hike",
@@ -4020,16 +5688,20 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1055540
     },
     {
       "id": "cozy-grove",
       "title": "Cozy Grove",
-      "rating": "L",
+      "rating": "10",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1458100
     },
     {
       "id": "slime-rancher",
@@ -4038,7 +5710,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 433340
     },
     {
       "id": "slime-rancher-2",
@@ -4047,7 +5721,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1657630
     },
     {
       "id": "bugsnax",
@@ -4055,8 +5731,12 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 674140
     },
     {
       "id": "webbed",
@@ -4065,16 +5745,22 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1390350
     },
     {
       "id": "rain-world",
       "title": "Rain World",
-      "rating": "12",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Medo"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 312520
     },
     {
       "id": "owlboy",
@@ -4082,8 +5768,12 @@
       "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 115800
     },
     {
       "id": "shovel-knight-treasure-trove",
@@ -4092,43 +5782,61 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 250760
     },
     {
       "id": "castle-crashers",
       "title": "Castle Crashers",
-      "rating": "14",
+      "rating": "16",
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-pegi-map",
+      "steamAppId": 204360
     },
     {
       "id": "battleblock-theater",
       "title": "BattleBlock Theater",
-      "rating": "12",
+      "rating": "6",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 238460
     },
     {
       "id": "pizza-tower",
       "title": "Pizza Tower",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2231450
     },
     {
       "id": "antonblast",
       "title": "Antonblast",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1887400
     },
     {
       "id": "warioware-move-it",
@@ -4137,7 +5845,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "rhythm-heaven-megamix",
@@ -4146,7 +5855,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "jet-set-radio",
@@ -4155,16 +5865,23 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "crazy-taxi",
       "title": "Crazy Taxi",
-      "rating": "10",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Linguagem imprópria",
+        "Atos criminosos",
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2924540
     },
     {
       "id": "sonic-mania",
@@ -4172,17 +5889,25 @@
       "rating": "L",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência fantasiosa"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 584400
     },
     {
       "id": "sonic-x-shadow-generations",
       "title": "Sonic x Shadow Generations",
-      "rating": "L",
+      "rating": "10",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 2513280
     },
     {
       "id": "puyo-puyo-tetris-2",
@@ -4191,7 +5916,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "steam-dejus",
+      "steamAppId": 1259790
     },
     {
       "id": "tetris-99",
@@ -4200,7 +5927,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "diablo-ii-resurrected",
@@ -4208,8 +5936,14 @@
       "rating": "16",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência Extrema",
+        "Linguagem imprópria",
+        "Conteúdo sexual"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 2536520
     },
     {
       "id": "warcraft-iii-reforged",
@@ -4218,7 +5952,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "starcraft-remastered",
@@ -4227,7 +5962,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "starcraft-ii",
@@ -4236,16 +5972,21 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "age-of-mythology-retold",
       "title": "Age of Mythology: Retold",
-      "rating": "12",
+      "rating": "14",
       "blurb": null,
       "cover": null,
-      "descriptors": [],
-      "source": "stub"
+      "descriptors": [
+        "Violência"
+      ],
+      "source": "stub",
+      "ratingSource": "steam-dejus-auto",
+      "steamAppId": 1934680
     },
     {
       "id": "command-and-conquer-remastered-collection",
@@ -4254,7 +5995,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1213210
     },
     {
       "id": "company-of-heroes-3",
@@ -4263,7 +6006,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1677280
     },
     {
       "id": "hearts-of-iron-iv",
@@ -4272,7 +6017,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 394360
     },
     {
       "id": "victoria-3",
@@ -4281,7 +6028,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 529340
     },
     {
       "id": "humankind",
@@ -4290,7 +6039,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1124300
     },
     {
       "id": "civilization-vii",
@@ -4299,7 +6050,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1295660
     },
     {
       "id": "total-war-pharaoh",
@@ -4308,7 +6061,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1937780
     },
     {
       "id": "total-war-three-kingdoms",
@@ -4317,7 +6072,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 779340
     },
     {
       "id": "rome-total-war-remastered",
@@ -4326,7 +6083,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 885970
     },
     {
       "id": "returnal",
@@ -4335,7 +6094,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1649240
     },
     {
       "id": "hi-fi-rush",
@@ -4344,7 +6105,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1817230
     },
     {
       "id": "armored-core-vi-fires-of-rubicon",
@@ -4353,7 +6116,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1888160
     },
     {
       "id": "elden-ring-nightreign",
@@ -4362,7 +6127,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2622380
     },
     {
       "id": "dark-souls-remastered",
@@ -4371,7 +6138,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 570940
     },
     {
       "id": "dark-souls-ii-scholar-of-the-first-sin",
@@ -4380,7 +6149,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 335300
     },
     {
       "id": "demon-s-souls",
@@ -4389,7 +6160,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "ninja-gaiden-ii-black",
@@ -4398,7 +6170,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 3287520
     },
     {
       "id": "tunic",
@@ -4407,7 +6181,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 553420
     },
     {
       "id": "animal-well",
@@ -4416,7 +6192,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 813230
     },
     {
       "id": "pseudoregalia",
@@ -4425,7 +6203,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2365810
     },
     {
       "id": "nine-sols",
@@ -4434,7 +6214,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1809540
     },
     {
       "id": "blasphemous-ii",
@@ -4443,7 +6225,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2114740
     },
     {
       "id": "the-messenger",
@@ -4452,7 +6236,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 764790
     },
     {
       "id": "dead-cells-return-to-castlevania",
@@ -4461,7 +6247,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2101430
     },
     {
       "id": "castlevania-symphony-of-the-night",
@@ -4470,7 +6258,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "bloodstained-ritual-of-the-night",
@@ -4479,7 +6268,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 692850
     },
     {
       "id": "axiom-verge",
@@ -4488,7 +6279,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 332200
     },
     {
       "id": "axiom-verge-2",
@@ -4497,7 +6290,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 946030
     },
     {
       "id": "afterimage",
@@ -4506,7 +6301,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1701520
     },
     {
       "id": "ender-lilies-quietus-of-the-knights",
@@ -4515,7 +6312,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1369630
     },
     {
       "id": "ender-magnolia-bloom-in-the-mist",
@@ -4524,7 +6323,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2725260
     },
     {
       "id": "salt-and-sanctuary",
@@ -4533,7 +6334,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 283640
     },
     {
       "id": "salt-and-sacrifice",
@@ -4542,7 +6345,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1437400
     },
     {
       "id": "sifu",
@@ -4551,7 +6356,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2138710
     },
     {
       "id": "absolver",
@@ -4560,7 +6367,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 473690
     },
     {
       "id": "streets-of-rage-4",
@@ -4569,7 +6378,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 985890
     },
     {
       "id": "teenage-mutant-ninja-turtles-shredder-s-revenge",
@@ -4578,7 +6389,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1361510
     },
     {
       "id": "scott-pilgrim-vs-the-world-the-game-complete-edition",
@@ -4587,7 +6400,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 2215260
     },
     {
       "id": "river-city-girls-2",
@@ -4596,7 +6411,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1920480
     },
     {
       "id": "fight-n-rage",
@@ -4605,7 +6422,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 674520
     },
     {
       "id": "kaze-and-the-wild-masks",
@@ -4614,7 +6433,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 829280
     },
     {
       "id": "yoku-s-island-express",
@@ -4623,7 +6444,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 334940
     },
     {
       "id": "sable",
@@ -4632,7 +6455,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 757310
     },
     {
       "id": "eastward",
@@ -4641,7 +6466,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 977880
     },
     {
       "id": "crosscode",
@@ -4650,7 +6477,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 368340
     },
     {
       "id": "hyper-light-drifter",
@@ -4659,7 +6488,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 257850
     },
     {
       "id": "deadlight-director-s-cut",
@@ -4668,7 +6499,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 423950
     },
     {
       "id": "the-swapper",
@@ -4677,7 +6510,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 231160
     },
     {
       "id": "fez",
@@ -4686,7 +6521,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 224760
     },
     {
       "id": "super-meat-boy-forever",
@@ -4695,7 +6532,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 581660
     },
     {
       "id": "super-meat-boy",
@@ -4704,7 +6543,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 40800
     },
     {
       "id": "the-end-is-nigh",
@@ -4713,7 +6554,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 583470
     },
     {
       "id": "vvvvvv",
@@ -4722,7 +6565,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 70300
     },
     {
       "id": "cave-story",
@@ -4731,7 +6576,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 200900
     },
     {
       "id": "ikaruga",
@@ -4740,7 +6587,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 253750
     },
     {
       "id": "touhou-luna-nights",
@@ -4749,7 +6598,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 851100
     },
     {
       "id": "crimson-clover",
@@ -4758,7 +6609,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 753817
     },
     {
       "id": "dodonpachi-resurrection",
@@ -4767,7 +6620,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 464450
     },
     {
       "id": "mushihimesama",
@@ -4776,7 +6631,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 377860
     },
     {
       "id": "blazing-beaks",
@@ -4785,7 +6642,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 585710
     },
     {
       "id": "enter-the-gungeon-house-of-the-gundead",
@@ -4794,7 +6653,8 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep"
     },
     {
       "id": "gunfire-reborn",
@@ -4803,7 +6663,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1217060
     },
     {
       "id": "roboquest",
@@ -4812,7 +6674,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 692890
     },
     {
       "id": "curse-of-the-dead-gods",
@@ -4821,7 +6685,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1123770
     },
     {
       "id": "dead-estate",
@@ -4830,7 +6696,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1484720
     },
     {
       "id": "binding-of-isaac-repentance",
@@ -4839,7 +6707,9 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 1426300
     },
     {
       "id": "the-binding-of-isaac-afterbirth",
@@ -4848,8 +6718,11 @@
       "blurb": null,
       "cover": null,
       "descriptors": [],
-      "source": "stub"
+      "source": "stub",
+      "ratingSource": "stub-keep",
+      "steamAppId": 570660
     }
   ],
-  "readyHint": 20
+  "readyHint": 20,
+  "classindSyncedAt": "2026-10-01T19:13:00.519Z"
 }

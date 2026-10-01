@@ -45,7 +45,7 @@ const lines = [
   '',
   '## Como liberar um título no sorteio',
   '',
-  '1. No stub, preencha `rating` ∈ `{L, 10, 12, 14, 16, 18}`.',
+  '1. No stub, preencha `rating` ∈ `{L, 6, 10, 12, 14, 16, 18}`.',
   '2. Complete `blurb` (1 frase) e confira `cover` (filename WebP).',
   '3. Capas: `assets/classind-dle/covers/` (compartilhadas) ou `assets/despertar-juizo/covers/`.',
   '4. Só entradas com `rating` válido entram no Juízo. CTA exige ≥30 ready.',
