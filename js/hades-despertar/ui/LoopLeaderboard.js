@@ -1,5 +1,5 @@
 /**
- * Placar do Loop — leaderboard in-game (turma · Juízo) ao lado do Códice.
+ * Placar do Loop — leaderboard in-game (turma · Catábases) ao lado do Códice.
  */
 
 import { leaderboardGet } from '../../api.js';
@@ -27,7 +27,9 @@ export function describeLoopBoardSelf(self, total) {
   const podium = podiumTierForRank(self.rank);
   const note = podium ? ` · Pódio ${podium.label}` : '';
   const totalLabel = total != null ? ` de ${formatLoopBoardScore(total)}` : '';
-  return `#${self.rank}${totalLabel} · recorde ${formatLoopBoardScore(self.juizoBest)}${note}`;
+  const catabases = formatLoopBoardScore(self.prestigeCount);
+  const label = Number(self.prestigeCount) === 1 ? 'catábase' : 'catábases';
+  return `#${self.rank}${totalLabel} · ${catabases} ${label}${note}`;
 }
 
 /**
@@ -146,7 +148,7 @@ export class LoopLeaderboard {
     try {
       const payload = await this.fetchLeaderboard(token, {
         scope: 'turma',
-        sort: 'juizoBest',
+        sort: 'prestigeCount',
         limit: LOOP_BOARD_LIMIT,
       });
       if (requestId !== this._requestId) return;
@@ -176,8 +178,8 @@ export class LoopLeaderboard {
       } else {
         this.status.hidden = false;
         this.status.textContent = turma
-          ? `Turma ${turma} · top ${entries.length} por Juízo`
-          : `Top ${entries.length} por Juízo`;
+          ? `Turma ${turma} · top ${entries.length} por Catábases`
+          : `Top ${entries.length} por Catábases`;
       }
     }
 
@@ -226,7 +228,8 @@ export class LoopLeaderboard {
 
     const score = this.root.createElement('span');
     score.className = 'despertar-loop-board-row__score';
-    score.textContent = formatLoopBoardScore(row.juizoBest);
+    score.textContent = formatLoopBoardScore(row.prestigeCount);
+    score.title = 'Catábases';
 
     li.append(rank, name, score);
     return li;

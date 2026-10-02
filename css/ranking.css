@@ -174,22 +174,47 @@
 }
 
 .ranking-table tbody tr.is-podium-1 {
-  background:
-    linear-gradient(90deg, rgba(126, 216, 255, 0.14), rgba(227, 179, 79, 0.12), rgba(194, 53, 72, 0.12), transparent 70%);
-  box-shadow:
-    inset 3px 0 0 transparent,
-    inset 0 0 24px rgba(126, 216, 255, 0.12);
-  animation: podiumRainbowRow 4.5s linear infinite;
+  background-image:
+    linear-gradient(
+      180deg,
+      #7ed8ff 0%,
+      #e3b34f 20%,
+      #c23548 40%,
+      #a778ff 60%,
+      #b57947 80%,
+      #7ed8ff 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(126, 216, 255, 0.2),
+      rgba(227, 179, 79, 0.16),
+      rgba(194, 53, 72, 0.14),
+      rgba(167, 120, 255, 0.12),
+      transparent 72%
+    );
+  background-size: 3px 100%, auto;
+  background-position: left top, left top;
+  background-repeat: no-repeat, no-repeat;
+  box-shadow: inset 0 0 28px rgba(126, 216, 255, 0.1);
 }
 
 .ranking-table tbody tr.is-podium-1 .ranking-table__rank {
-  background: linear-gradient(90deg, #7ed8ff, #e3b34f, #c23548, #b57947, #7ed8ff);
-  background-size: 220% 100%;
+  background: linear-gradient(
+    90deg,
+    #7ed8ff,
+    #e3b34f,
+    #c23548,
+    #a778ff,
+    #b57947,
+    #7ed8ff,
+    #e3b34f
+  );
+  background-size: 320% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: podiumRainbowText 3.2s linear infinite;
-  font-size: 1.05em;
+  animation: podiumRainbowText 2.8s linear infinite;
+  font-size: 1.08em;
 }
 
 /* Nomes do pódio */
@@ -220,17 +245,26 @@
 
 .ranking-table__name--podium-1,
 .ranking-table__name.is-podium-glitch {
-  background: linear-gradient(90deg, #7ed8ff, #e3b34f, #c23548, #b57947, #7ed8ff);
-  background-size: 220% 100%;
+  background: linear-gradient(
+    90deg,
+    #7ed8ff,
+    #e3b34f,
+    #c23548,
+    #a778ff,
+    #b57947,
+    #7ed8ff,
+    #e3b34f
+  );
+  background-size: 320% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: podiumRainbowText 3.2s linear infinite;
+  animation: podiumRainbowText 2.8s linear infinite;
   text-shadow: none;
-  filter: drop-shadow(0 0 8px rgba(126, 216, 255, 0.35));
+  filter: drop-shadow(0 0 6px rgba(227, 179, 79, 0.35)) drop-shadow(0 0 10px rgba(126, 216, 255, 0.25));
 }
 
-/* Glitch RGB no nome do 1º (camadas sólidas — legível sobre o arco-íris) */
+/* Glitch RGB leve — não cobre o arco-íris */
 .ranking-table__name.is-podium-glitch::before,
 .ranking-table__name.is-podium-glitch::after {
   content: attr(data-glitch);
@@ -241,41 +275,43 @@
   white-space: nowrap;
   overflow: hidden;
   max-width: 100%;
+  opacity: 0.4;
 }
 
 .ranking-table__name.is-podium-glitch::before {
-  text-shadow: -1.5px 0 rgba(80, 255, 220, 0.85);
+  text-shadow: -1.5px 0 rgba(80, 255, 220, 0.7);
   clip-path: inset(0 0 55% 0);
   animation: podiumNameGlitchA 2.6s steps(2, end) infinite;
 }
 
 .ranking-table__name.is-podium-glitch::after {
-  text-shadow: 1.5px 0 rgba(255, 70, 120, 0.8);
+  text-shadow: 1.5px 0 rgba(255, 70, 120, 0.65);
   clip-path: inset(45% 0 0 0);
   animation: podiumNameGlitchB 2.1s steps(2, end) infinite;
 }
 
 @keyframes podiumNameGlitchA {
-  0%, 88%, 100% { transform: translate(-1.5px, 0); opacity: 0.55; }
-  90% { transform: translate(2px, -1px); opacity: 0.9; }
-  94% { transform: translate(-3px, 1px); opacity: 0.7; }
+  0%, 88%, 100% { transform: translate(-1.5px, 0); opacity: 0.35; }
+  90% { transform: translate(2px, -1px); opacity: 0.55; }
+  94% { transform: translate(-3px, 1px); opacity: 0.4; }
 }
 
 @keyframes podiumNameGlitchB {
-  0%, 84%, 100% { transform: translate(1.5px, 0); opacity: 0.5; }
-  86% { transform: translate(-2px, 1px); opacity: 0.85; }
-  92% { transform: translate(3px, -1px); opacity: 0.65; }
+  0%, 84%, 100% { transform: translate(1.5px, 0); opacity: 0.3; }
+  86% { transform: translate(-2px, 1px); opacity: 0.5; }
+  92% { transform: translate(3px, -1px); opacity: 0.4; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .ranking-table__name.is-podium-glitch::before,
   .ranking-table__name.is-podium-glitch::after {
     animation: none;
-    opacity: 0.35;
+    opacity: 0.25;
   }
 
   .ranking-table__name--podium-1,
-  .ranking-table__name.is-podium-glitch {
+  .ranking-table__name.is-podium-glitch,
+  .ranking-table tbody tr.is-podium-1 .ranking-table__rank {
     animation: none;
   }
 }

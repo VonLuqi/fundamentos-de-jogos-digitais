@@ -1,6 +1,7 @@
 /**
  * Placar do Domínio — ranking puro (Task 20 + Fase B / B5).
- * Métricas públicas: XP, #conquistas, juizoBest. Sem almas/SPS/óbolos.
+ * Métricas públicas: XP, #conquistas, juizoBest, prestigeCount.
+ * Sem almas/SPS/óbolos.
  * Path quente: RPC `leaderboard_page` (ORDER BY + LIMIT no SQL).
  */
 
@@ -8,7 +9,7 @@ import { metricsBumpDb } from './request-metrics.js';
 
 export const LEADERBOARD_TOP = 50;
 export const LEADERBOARD_SCOPES = Object.freeze(['turma', 'global']);
-export const LEADERBOARD_SORTS = Object.freeze(['xp', 'achievements', 'juizoBest']);
+export const LEADERBOARD_SORTS = Object.freeze(['xp', 'achievements', 'juizoBest', 'prestigeCount']);
 export const LEADERBOARD_PAGE_RPC = 'leaderboard_page';
 
 export function normalizeLeaderboardScope(raw) {
@@ -18,7 +19,14 @@ export function normalizeLeaderboardScope(raw) {
 
 export function normalizeLeaderboardSort(raw) {
   const value = String(raw || '').trim();
-  if (value === 'achievements' || value === 'juizoBest' || value === 'xp') return value;
+  if (
+    value === 'achievements'
+    || value === 'juizoBest'
+    || value === 'prestigeCount'
+    || value === 'xp'
+  ) {
+    return value;
+  }
   return 'xp';
 }
 
@@ -35,10 +43,22 @@ export function achievementCount(conquistas) {
 
 /**
  * @param {object} user row users
- * @param {number} [juizoBest]
+ * @param {number|{ juizoBest?: number, prestigeCount?: number }} [juizoOrExtras]
+ * @param {number} [prestigeCount]
  */
-export function toLeaderboardEntry(user, juizoBest = 0) {
-  const best = Number.parseInt(juizoBest, 10);
+export function toLeaderboardEntry(user, juizoOrExtras = 0, prestigeCount = 0) {
+  let juizoBest = 0;
+  let prestige = prestigeCount;
+  if (juizoOrExtras && typeof juizoOrExtras === 'object') {
+    juizoBest = Number.parseInt(juizoOrExtras.juizoBest ?? juizoOrExtras.juizo_best, 10);
+    prestige = Number.parseInt(
+      juizoOrExtras.prestigeCount ?? juizoOrExtras.prestige_count ?? prestigeCount,
+      10,
+    );
+  } else {
+    juizoBest = Number.parseInt(juizoOrExtras, 10);
+    prestige = Number.parseInt(prestigeCount, 10);
+  }
   return {
     userId: Number(user.id),
     username: String(user.username || ''),
@@ -46,18 +66,20 @@ export function toLeaderboardEntry(user, juizoBest = 0) {
     turma: user.turma ? String(user.turma) : null,
     xp: Math.max(0, Number(user.xp) || 0),
     achievements: achievementCount(user.conquistas),
-    juizoBest: Number.isFinite(best) && best >= 0 ? best : 0,
+    juizoBest: Number.isFinite(juizoBest) && juizoBest >= 0 ? juizoBest : 0,
+    prestigeCount: Number.isFinite(prestige) && prestige >= 0 ? prestige : 0,
   };
 }
 
 function metricValue(entry, sort) {
   if (sort === 'achievements') return entry.achievements;
   if (sort === 'juizoBest') return entry.juizoBest;
+  if (sort === 'prestigeCount') return entry.prestigeCount;
   return entry.xp;
 }
 
 /**
- * Ordenação estável: métrica DESC, username ASC, userId ASC.
+ * Ordenação estável: métrica DESC, (prestige → juizo) DESC, username ASC, userId ASC.
  * @returns {Array<object & { rank: number }>}
  */
 export function rankLeaderboardEntries(entries, sort = 'xp') {
@@ -65,6 +87,10 @@ export function rankLeaderboardEntries(entries, sort = 'xp') {
   const sorted = [...(entries || [])].sort((a, b) => {
     const diff = metricValue(b, key) - metricValue(a, key);
     if (diff !== 0) return diff;
+    if (key === 'prestigeCount') {
+      const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
+      if (juizoDiff !== 0) return juizoDiff;
+    }
     const nameCmp = String(a.username || '').localeCompare(String(b.username || ''), 'pt-BR', {
       sensitivity: 'base',
     });
@@ -103,6 +129,7 @@ export function publicLeaderboardRow(row) {
     xp: row.xp,
     achievements: row.achievements,
     juizoBest: row.juizoBest,
+    prestigeCount: Math.max(0, Number(row.prestigeCount) || 0),
   };
 }
 
@@ -124,6 +151,7 @@ export function normalizeRpcLeaderboardRow(row) {
     xp: Math.max(0, Number(row.xp) || 0),
     achievements: Math.max(0, Number(row.achievements) || 0),
     juizoBest: Math.max(0, Number(row.juizoBest ?? row.juizo_best) || 0),
+    prestigeCount: Math.max(0, Number(row.prestigeCount ?? row.prestige_count) || 0),
   });
 }
 
@@ -187,16 +215,16 @@ export async function fetchLeaderboardPageRpc(supabase, opts = {}) {
 }
 
 /**
- * Monta placar a partir de users + mapa juizoBest (path legado / testes).
+ * Monta placar a partir de users + mapa despertar (path legado / testes).
  * @param {object[]} users
- * @param {Map<number, number>|Record<string, number>} juizoByUser
+ * @param {Map<number, number|object>|Record<string, number|object>} juizoByUser
  * @param {{ sort?: string, viewerUserId?: number, topN?: number }} [options]
  */
 export function assembleLeaderboard(users, juizoByUser, options = {}) {
   const juizoMap = juizoByUser instanceof Map
     ? juizoByUser
     : new Map(
-      Object.entries(juizoByUser || {}).map(([id, value]) => [Number(id), Number(value) || 0]),
+      Object.entries(juizoByUser || {}).map(([id, value]) => [Number(id), value]),
     );
   const entries = (users || []).map((user) => {
     const id = Number(user.id);

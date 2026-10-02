@@ -164,7 +164,7 @@ export async function handleLeaderboardGet(ctx) {
     if (ids.length) {
       const { data: states, error: statesError } = await supabase
         .from(DESPERTAR_STATES_TABLE)
-        .select('user_id, juizo_best_streak')
+        .select('user_id, juizo_best_streak, prestige_count')
         .in('user_id', ids);
       metricsBumpDb(1);
 
@@ -178,10 +178,10 @@ export async function handleLeaderboardGet(ctx) {
         }
       } else {
         for (const state of states || []) {
-          juizoByUser.set(
-            Number(state.user_id),
-            Math.max(0, Number.parseInt(state.juizo_best_streak, 10) || 0),
-          );
+          juizoByUser.set(Number(state.user_id), {
+            juizoBest: Math.max(0, Number.parseInt(state.juizo_best_streak, 10) || 0),
+            prestigeCount: Math.max(0, Number.parseInt(state.prestige_count, 10) || 0),
+          });
         }
       }
     }

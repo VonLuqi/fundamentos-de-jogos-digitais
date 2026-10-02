@@ -66,9 +66,11 @@ const pkg = read('package.json');
 
 staticAssert(rankingJs.includes("from './podium-vfx.js'"), 'ranking importa podium-vfx');
 staticAssert(rankingJs.includes('ranking-table__name'), 'ranking renderiza nome estilizado');
-staticAssert(rankingJs.includes('is-podium-glitch'), 'ranking marca top 1 com glitch');
-staticAssert(rankingJs.includes('applyPodiumNameGlitch'), 'ranking aplica glitch no nome');
+staticAssert(rankingJs.includes('is-podium-glitch'), 'ranking marca top 1 com glitch CSS');
+staticAssert(!rankingJs.includes('vfx.add'), 'ranking não aplica @vfx-js no pódio');
+staticAssert(!rankingJs.includes('applyPodiumNameGlitch'), 'sem applyPodiumNameGlitch WebGL');
 staticAssert(rankingCss.includes('ranking-table__name--podium-1'), 'CSS nome podium-1');
+staticAssert(rankingCss.includes('#7ed8ff'), 'CSS arco-íris no top 1');
 staticAssert(rankingCss.includes('podiumNameGlitchA'), 'CSS glitch keyframes');
 staticAssert(dashboardCss.includes('profile-panel__name.is-podium-glitch'), 'dashboard nome glitch');
 
@@ -99,5 +101,5 @@ if (errors.length) {
 
 console.log('podium-vfx-smoke OK');
 console.log('  · mapa 1→rainbow … 4→copper');
+console.log('  · arco-íris CSS (sem @vfx-js no nome)');
 console.log('  · ranking + dashboard classes');
-console.log('  · CSS is-podium-1..4');

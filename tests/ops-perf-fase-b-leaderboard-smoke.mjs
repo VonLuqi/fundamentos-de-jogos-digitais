@@ -77,8 +77,10 @@ assert(isLeaderboardRpcMissing({ code: 'PGRST202', message: 'Could not find' }),
     xp: 40,
     achievements: 3,
     juizoBest: 9,
+    prestigeCount: 4,
   });
   assert(row?.rank === 2 && row.userId === 7 && row.juizoBest === 9, 'normalize RPC row');
+  assert(row?.prestigeCount === 4, 'normalize prestigeCount');
 }
 
 {

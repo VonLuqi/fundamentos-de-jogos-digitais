@@ -425,7 +425,7 @@ BEGIN
   IF v_scope NOT IN ('turma', 'global') THEN
     v_scope := 'turma';
   END IF;
-  IF v_sort NOT IN ('xp', 'achievements', 'juizoBest') THEN
+  IF v_sort NOT IN ('xp', 'achievements', 'juizoBest', 'prestigeCount') THEN
     v_sort := 'xp';
   END IF;
 
@@ -445,7 +445,8 @@ BEGIN
       u.turma,
       COALESCE(u.xp, 0)::integer AS xp,
       COALESCE(cardinality(u.conquistas), 0)::integer AS achievements,
-      COALESCE(d.juizo_best_streak, 0)::integer AS juizo_best
+      COALESCE(d.juizo_best_streak, 0)::integer AS juizo_best,
+      COALESCE(d.prestige_count, 0)::integer AS prestige_count
     FROM public.users AS u
     LEFT JOIN public.despertar_states AS d ON d.user_id = u.id
     WHERE COALESCE(u.role, 'student') <> 'admin'
@@ -463,8 +464,10 @@ BEGIN
           CASE v_sort
             WHEN 'achievements' THEN b.achievements
             WHEN 'juizoBest' THEN b.juizo_best
+            WHEN 'prestigeCount' THEN b.prestige_count
             ELSE b.xp
           END DESC,
+          CASE WHEN v_sort = 'prestigeCount' THEN b.juizo_best ELSE 0 END DESC,
           b.username ASC NULLS LAST,
           b.user_id ASC
       )::integer AS rank
@@ -482,7 +485,8 @@ BEGIN
             'turma', r.turma,
             'xp', r.xp,
             'achievements', r.achievements,
-            'juizoBest', r.juizo_best
+            'juizoBest', r.juizo_best,
+            'prestigeCount', r.prestige_count
           )
           ORDER BY r.rank
         )
@@ -500,7 +504,8 @@ BEGIN
         'turma', r.turma,
         'xp', r.xp,
         'achievements', r.achievements,
-        'juizoBest', r.juizo_best
+        'juizoBest', r.juizo_best,
+        'prestigeCount', r.prestige_count
       )
       FROM ranked AS r
       WHERE p_viewer_id IS NOT NULL AND r.user_id = p_viewer_id
@@ -520,6 +525,9 @@ $$;
 REVOKE ALL ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) TO service_role;
 GRANT EXECUTE ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) TO postgres;
+
+COMMENT ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) IS
+  'Fase B / B5: placar paginado (xp|achievements|juizoBest|prestigeCount) com self+total.';
 
 -- ClassInd-dle (Aula 05 — Task 2): salas live + snapshot Realtime
 CREATE TABLE IF NOT EXISTS classind_rooms (

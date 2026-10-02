@@ -47,7 +47,7 @@ staticAssert(html.includes('PLACAR DO'), 'título Placar');
 staticAssert(html.includes('data-ranking-scope="turma"'), 'escopo turma');
 staticAssert(html.includes('data-ranking-scope="global"'), 'escopo global');
 staticAssert(html.includes('data-ranking-sort="juizoBest"'), 'sort juizoBest');
-staticAssert(!html.includes('data-nav-item="ranking"'), 'sem item nav extra (teto)');
+staticAssert(html.includes('data-nav-item="ranking"'), 'Placar na nav do ranking');
 
 staticAssert(dashboardHtml.includes('id="ranking-preview"'), 'CTA no Painel');
 staticAssert(dashboardHtml.includes('Ver o Placar'), 'copy Ver o Placar');
@@ -72,6 +72,7 @@ staticAssert(pkg.includes('ranking-smoke.mjs'), 'check inclui ranking-smoke');
 staticAssert(normalizeLeaderboardScope('GLOBAL') === 'global', 'scope normalize');
 staticAssert(normalizeLeaderboardScope('x') === 'turma', 'scope default turma');
 staticAssert(normalizeLeaderboardSort('juizoBest') === 'juizoBest', 'sort juizoBest');
+staticAssert(normalizeLeaderboardSort('prestigeCount') === 'prestigeCount', 'sort prestigeCount');
 staticAssert(normalizeLeaderboardSort('nope') === 'xp', 'sort default xp');
 staticAssert(LEADERBOARD_TOP === 50, 'top 50');
 
