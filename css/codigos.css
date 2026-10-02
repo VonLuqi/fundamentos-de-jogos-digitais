@@ -127,16 +127,32 @@
   padding: 0.7rem 0.85rem;
   font-family: var(--font-body);
   font-size: 1rem;
-  color: var(--hades-text);
+  color: var(--hades-gold-bright);
   background: linear-gradient(180deg, #0a080c, #14101a);
   border: 1px solid var(--hades-bronze);
   border-radius: 2px;
+  /* Evita o SO pintar lista clara com texto claro herdado do select. */
+  color-scheme: light;
 }
 
 .codes-field__select:focus {
   outline: none;
   border-color: var(--hades-gold);
   box-shadow: 0 0 0 1px rgba(207, 167, 89, 0.35);
+}
+
+/* Lista nativa do <select>: texto escuro em fundo claro (Windows/Chrome). */
+.codes-field__select option,
+.codes-field__select optgroup {
+  color: #1a1208;
+  background-color: #f2e6c9;
+  font-weight: 600;
+}
+
+.codes-field__select option:checked,
+.codes-field__select option:hover {
+  color: #1a1208;
+  background-color: #cfa759;
 }
 
 .codes-mint__form .btn-gold {
