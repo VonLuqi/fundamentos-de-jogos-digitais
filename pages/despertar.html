@@ -705,8 +705,50 @@
           Fechar
         </button>
       </header>
+      <div
+        class="despertar-loop-board-tabs"
+        role="tablist"
+        aria-label="Leaderboards do Despertar"
+      >
+        <button
+          type="button"
+          class="despertar-loop-board-tab"
+          role="tab"
+          id="loop-board-tab-juizo"
+          data-loop-board-sort="juizoBest"
+          aria-controls="loop-board-list"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Juízo
+        </button>
+        <button
+          type="button"
+          class="despertar-loop-board-tab is-active"
+          role="tab"
+          id="loop-board-tab-prestige"
+          data-loop-board-sort="prestigeCount"
+          aria-controls="loop-board-list"
+          aria-selected="true"
+          tabindex="0"
+        >
+          Catábases
+        </button>
+        <button
+          type="button"
+          class="despertar-loop-board-tab"
+          role="tab"
+          id="loop-board-tab-souls"
+          data-loop-board-sort="lifetimeSouls"
+          aria-controls="loop-board-list"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Almas
+        </button>
+      </div>
       <p class="despertar-loop-board__blurb" id="loop-board-blurb">
-        Turma · ordenado por Catábases — quem avançou mais no Loop (Juízo só desempatando).
+        Turma · Catábases — quem avançou mais no Loop.
       </p>
       <p class="despertar-empty" id="loop-board-status">Consultando o Domínio…</p>
       <ol class="despertar-loop-board-list" id="loop-board-list" hidden></ol>

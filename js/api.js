@@ -1272,7 +1272,7 @@ export async function listClassmates(token, { turma } = {}) {
 /**
  * Placar do Domínio (Task 20 + B5).
  * @param {string} token
- * @param {{ scope?: 'turma'|'global', sort?: 'xp'|'achievements'|'juizoBest'|'prestigeCount', turma?: string, limit?: number }} [options]
+ * @param {{ scope?: 'turma'|'global', sort?: 'xp'|'achievements'|'juizoBest'|'prestigeCount'|'lifetimeSouls', turma?: string, limit?: number }} [options]
  */
 export async function leaderboardGet(token, { scope = 'turma', sort = 'xp', turma, limit } = {}) {
   const body = {

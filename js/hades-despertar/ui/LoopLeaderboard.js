@@ -1,11 +1,18 @@
 /**
- * Placar do Loop — leaderboard in-game (turma · Catábases) ao lado do Códice.
+ * Placar do Loop — 3 leaderboards in-game (Juízo / Catábases / Almas).
  */
 
 import { leaderboardGet } from '../../api.js';
 import { applyPodiumClasses, podiumTierForRank } from '../../podium-vfx.js';
+import { formatSouls } from './NumberFormatter.js';
 
 export const LOOP_BOARD_LIMIT = 15;
+
+export const LOOP_BOARD_SORTS = Object.freeze([
+  { id: 'juizoBest', label: 'Juízo', blurb: 'Turma · recorde no Juízo — quem sustenta a série mais alta.' },
+  { id: 'prestigeCount', label: 'Catábases', blurb: 'Turma · Catábases — quem avançou mais no Loop.' },
+  { id: 'lifetimeSouls', label: 'Almas', blurb: 'Turma · almas totais — progresso acumulado no Acheron.' },
+]);
 
 const FOCUSABLE =
   'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
@@ -13,7 +20,8 @@ const FOCUSABLE =
 /**
  * @param {unknown} value
  */
-export function formatLoopBoardScore(value) {
+export function formatLoopBoardScore(value, sort = 'prestigeCount') {
+  if (sort === 'lifetimeSouls') return formatSouls(value ?? 0);
   const n = Number(value) || 0;
   return n.toLocaleString('pt-BR');
 }
@@ -21,19 +29,43 @@ export function formatLoopBoardScore(value) {
 /**
  * @param {object|null|undefined} self
  * @param {number|null|undefined} total
+ * @param {string} [sort]
  */
-export function describeLoopBoardSelf(self, total) {
+export function describeLoopBoardSelf(self, total, sort = 'prestigeCount') {
   if (!self || self.rank == null) return '';
   const podium = podiumTierForRank(self.rank);
   const note = podium ? ` · Pódio ${podium.label}` : '';
-  const totalLabel = total != null ? ` de ${formatLoopBoardScore(total)}` : '';
-  const catabases = formatLoopBoardScore(self.prestigeCount);
+  const totalLabel = total != null ? ` de ${Number(total).toLocaleString('pt-BR')}` : '';
+  if (sort === 'juizoBest') {
+    return `#${self.rank}${totalLabel} · recorde ${formatLoopBoardScore(self.juizoBest, sort)}${note}`;
+  }
+  if (sort === 'lifetimeSouls') {
+    return `#${self.rank}${totalLabel} · ${formatLoopBoardScore(self.lifetimeSouls, sort)} almas${note}`;
+  }
+  const catabases = formatLoopBoardScore(self.prestigeCount, 'prestigeCount');
   const label = Number(self.prestigeCount) === 1 ? 'catábase' : 'catábases';
   return `#${self.rank}${totalLabel} · ${catabases} ${label}${note}`;
 }
 
+function scoreForRow(row, sort) {
+  if (sort === 'juizoBest') return row.juizoBest;
+  if (sort === 'lifetimeSouls') return row.lifetimeSouls;
+  return row.prestigeCount;
+}
+
+function statusLabel(sort, turma, count) {
+  const metric = sort === 'juizoBest'
+    ? 'Juízo'
+    : sort === 'lifetimeSouls'
+      ? 'Almas'
+      : 'Catábases';
+  return turma
+    ? `Turma ${turma} · top ${count} por ${metric}`
+    : `Top ${count} por ${metric}`;
+}
+
 /**
- * Widget FAB + drawer do Placar do Loop.
+ * Widget FAB + drawer do Placar do Loop (3 abas).
  */
 export class LoopLeaderboard {
   /**
@@ -58,6 +90,9 @@ export class LoopLeaderboard {
     this.list = null;
     this.status = null;
     this.selfEl = null;
+    this.blurbEl = null;
+    this.tabButtons = [];
+    this.sort = 'prestigeCount';
     this._focusBefore = null;
     this._bound = false;
     this._loading = false;
@@ -79,6 +114,8 @@ export class LoopLeaderboard {
     this.list = this.root.getElementById('loop-board-list');
     this.status = this.root.getElementById('loop-board-status');
     this.selfEl = this.root.getElementById('loop-board-self');
+    this.blurbEl = this.root.getElementById('loop-board-blurb');
+    this.tabButtons = [...this.drawer.querySelectorAll('[data-loop-board-sort]')];
 
     this.button.addEventListener('click', () => {
       if (this.isOpen) this.close();
@@ -89,8 +126,26 @@ export class LoopLeaderboard {
       node.addEventListener('click', () => this.close());
     });
 
+    this.tabButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const next = btn.getAttribute('data-loop-board-sort');
+        if (!next || next === this.sort) return;
+        this.setSort(next);
+      });
+    });
+
+    this.#syncTabs();
+    this.#syncBlurb();
     this._bound = true;
     return this;
+  }
+
+  setSort(sort) {
+    const allowed = LOOP_BOARD_SORTS.some((item) => item.id === sort);
+    this.sort = allowed ? sort : 'prestigeCount';
+    this.#syncTabs();
+    this.#syncBlurb();
+    if (this.isOpen) void this.refresh();
   }
 
   open() {
@@ -129,6 +184,7 @@ export class LoopLeaderboard {
     if (!this.list || !this.status) return;
     const token = this.getToken();
     const requestId = ++this._requestId;
+    const sort = this.sort;
     this._loading = true;
     this.status.hidden = false;
     this.status.textContent = 'Consultando o Domínio…';
@@ -148,11 +204,11 @@ export class LoopLeaderboard {
     try {
       const payload = await this.fetchLeaderboard(token, {
         scope: 'turma',
-        sort: 'prestigeCount',
+        sort,
         limit: LOOP_BOARD_LIMIT,
       });
       if (requestId !== this._requestId) return;
-      this.#renderPayload(payload);
+      this.#renderPayload(payload, sort);
     } catch {
       if (requestId !== this._requestId) return;
       this.status.textContent = 'O Placar do Loop está inacessível no momento.';
@@ -162,10 +218,25 @@ export class LoopLeaderboard {
     }
   }
 
+  #syncTabs() {
+    this.tabButtons.forEach((btn) => {
+      const on = btn.getAttribute('data-loop-board-sort') === this.sort;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      btn.tabIndex = on ? 0 : -1;
+    });
+  }
+
+  #syncBlurb() {
+    const def = LOOP_BOARD_SORTS.find((item) => item.id === this.sort) || LOOP_BOARD_SORTS[1];
+    if (this.blurbEl) this.blurbEl.textContent = def.blurb;
+  }
+
   /**
    * @param {object|null|undefined} payload
+   * @param {string} sort
    */
-  #renderPayload(payload) {
+  #renderPayload(payload, sort) {
     const entries = Array.isArray(payload?.entries) ? payload.entries : [];
     const self = payload?.self || null;
     const total = payload?.total ?? entries.length;
@@ -177,9 +248,7 @@ export class LoopLeaderboard {
         this.status.textContent = 'Nenhuma alma neste escopo ainda.';
       } else {
         this.status.hidden = false;
-        this.status.textContent = turma
-          ? `Turma ${turma} · top ${entries.length} por Catábases`
-          : `Top ${entries.length} por Catábases`;
+        this.status.textContent = statusLabel(sort, turma, entries.length);
       }
     }
 
@@ -190,12 +259,12 @@ export class LoopLeaderboard {
     } else {
       this.list.hidden = false;
       for (const row of entries) {
-        this.list.append(this.#buildRow(row));
+        this.list.append(this.#buildRow(row, sort));
       }
     }
 
     if (this.selfEl) {
-      const line = describeLoopBoardSelf(self, total);
+      const line = describeLoopBoardSelf(self, total, sort);
       if (line) {
         this.selfEl.hidden = false;
         this.selfEl.textContent = `Tu: ${line}`;
@@ -209,8 +278,9 @@ export class LoopLeaderboard {
 
   /**
    * @param {object} row
+   * @param {string} sort
    */
-  #buildRow(row) {
+  #buildRow(row, sort) {
     const li = this.root.createElement('li');
     li.className = 'despertar-loop-board-row';
     applyPodiumClasses(li, row.rank);
@@ -228,8 +298,12 @@ export class LoopLeaderboard {
 
     const score = this.root.createElement('span');
     score.className = 'despertar-loop-board-row__score';
-    score.textContent = formatLoopBoardScore(row.prestigeCount);
-    score.title = 'Catábases';
+    score.textContent = formatLoopBoardScore(scoreForRow(row, sort), sort);
+    score.title = sort === 'juizoBest'
+      ? 'Recorde no Juízo'
+      : sort === 'lifetimeSouls'
+        ? 'Almas totais'
+        : 'Catábases';
 
     li.append(rank, name, score);
     return li;

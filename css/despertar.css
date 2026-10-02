@@ -2091,6 +2091,38 @@
   color: var(--hades-text-dim);
 }
 
+.despertar-loop-board-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.75rem;
+}
+
+.despertar-loop-board-tab {
+  appearance: none;
+  border: 1px solid color-mix(in srgb, var(--hades-gold) 40%, transparent);
+  background: rgba(18, 12, 20, 0.65);
+  color: var(--hades-text-dim);
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.65rem;
+  cursor: pointer;
+}
+
+.despertar-loop-board-tab.is-active,
+.despertar-loop-board-tab[aria-selected='true'] {
+  border-color: var(--hades-gold-bright);
+  color: var(--hades-gold-bright);
+  box-shadow: inset 0 0 12px rgba(227, 179, 79, 0.18);
+}
+
+.despertar-loop-board-tab:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
 .despertar-loop-board-list {
   list-style: none;
   margin: 0 0 1rem;

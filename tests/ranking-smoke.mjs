@@ -73,6 +73,7 @@ staticAssert(normalizeLeaderboardScope('GLOBAL') === 'global', 'scope normalize'
 staticAssert(normalizeLeaderboardScope('x') === 'turma', 'scope default turma');
 staticAssert(normalizeLeaderboardSort('juizoBest') === 'juizoBest', 'sort juizoBest');
 staticAssert(normalizeLeaderboardSort('prestigeCount') === 'prestigeCount', 'sort prestigeCount');
+staticAssert(normalizeLeaderboardSort('lifetimeSouls') === 'lifetimeSouls', 'sort lifetimeSouls');
 staticAssert(normalizeLeaderboardSort('nope') === 'xp', 'sort default xp');
 staticAssert(LEADERBOARD_TOP === 50, 'top 50');
 

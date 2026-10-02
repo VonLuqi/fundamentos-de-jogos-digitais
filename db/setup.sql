@@ -425,7 +425,7 @@ BEGIN
   IF v_scope NOT IN ('turma', 'global') THEN
     v_scope := 'turma';
   END IF;
-  IF v_sort NOT IN ('xp', 'achievements', 'juizoBest', 'prestigeCount') THEN
+  IF v_sort NOT IN ('xp', 'achievements', 'juizoBest', 'prestigeCount', 'lifetimeSouls') THEN
     v_sort := 'xp';
   END IF;
 
@@ -446,7 +446,8 @@ BEGIN
       COALESCE(u.xp, 0)::integer AS xp,
       COALESCE(cardinality(u.conquistas), 0)::integer AS achievements,
       COALESCE(d.juizo_best_streak, 0)::integer AS juizo_best,
-      COALESCE(d.prestige_count, 0)::integer AS prestige_count
+      COALESCE(d.prestige_count, 0)::integer AS prestige_count,
+      COALESCE(d.lifetime_souls, 0)::numeric AS lifetime_souls
     FROM public.users AS u
     LEFT JOIN public.despertar_states AS d ON d.user_id = u.id
     WHERE COALESCE(u.role, 'student') <> 'admin'
@@ -462,12 +463,20 @@ BEGIN
       ROW_NUMBER() OVER (
         ORDER BY
           CASE v_sort
-            WHEN 'achievements' THEN b.achievements
-            WHEN 'juizoBest' THEN b.juizo_best
-            WHEN 'prestigeCount' THEN b.prestige_count
-            ELSE b.xp
+            WHEN 'achievements' THEN b.achievements::numeric
+            WHEN 'juizoBest' THEN b.juizo_best::numeric
+            WHEN 'prestigeCount' THEN b.prestige_count::numeric
+            WHEN 'lifetimeSouls' THEN b.lifetime_souls
+            ELSE b.xp::numeric
           END DESC,
-          CASE WHEN v_sort = 'prestigeCount' THEN b.juizo_best ELSE 0 END DESC,
+          CASE
+            WHEN v_sort = 'lifetimeSouls' THEN b.prestige_count
+            ELSE 0
+          END DESC,
+          CASE
+            WHEN v_sort IN ('prestigeCount', 'lifetimeSouls') THEN b.juizo_best
+            ELSE 0
+          END DESC,
           b.username ASC NULLS LAST,
           b.user_id ASC
       )::integer AS rank
@@ -486,7 +495,8 @@ BEGIN
             'xp', r.xp,
             'achievements', r.achievements,
             'juizoBest', r.juizo_best,
-            'prestigeCount', r.prestige_count
+            'prestigeCount', r.prestige_count,
+            'lifetimeSouls', r.lifetime_souls
           )
           ORDER BY r.rank
         )
@@ -505,7 +515,8 @@ BEGIN
         'xp', r.xp,
         'achievements', r.achievements,
         'juizoBest', r.juizo_best,
-        'prestigeCount', r.prestige_count
+        'prestigeCount', r.prestige_count,
+        'lifetimeSouls', r.lifetime_souls
       )
       FROM ranked AS r
       WHERE p_viewer_id IS NOT NULL AND r.user_id = p_viewer_id
@@ -527,7 +538,7 @@ GRANT EXECUTE ON FUNCTION public.leaderboard_page(text, text, text, integer, int
 GRANT EXECUTE ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) TO postgres;
 
 COMMENT ON FUNCTION public.leaderboard_page(text, text, text, integer, integer) IS
-  'Fase B / B5: placar paginado (xp|achievements|juizoBest|prestigeCount) com self+total.';
+  'Placar paginado (xp|achievements|juizoBest|prestigeCount|lifetimeSouls) com self+total.';
 
 -- ClassInd-dle (Aula 05 — Task 2): salas live + snapshot Realtime
 CREATE TABLE IF NOT EXISTS classind_rooms (

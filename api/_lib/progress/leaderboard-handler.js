@@ -164,7 +164,7 @@ export async function handleLeaderboardGet(ctx) {
     if (ids.length) {
       const { data: states, error: statesError } = await supabase
         .from(DESPERTAR_STATES_TABLE)
-        .select('user_id, juizo_best_streak, prestige_count')
+        .select('user_id, juizo_best_streak, prestige_count, lifetime_souls')
         .in('user_id', ids);
       metricsBumpDb(1);
 
@@ -181,6 +181,7 @@ export async function handleLeaderboardGet(ctx) {
           juizoByUser.set(Number(state.user_id), {
             juizoBest: Math.max(0, Number.parseInt(state.juizo_best_streak, 10) || 0),
             prestigeCount: Math.max(0, Number.parseInt(state.prestige_count, 10) || 0),
+            lifetimeSouls: Math.max(0, Number(state.lifetime_souls) || 0),
           });
         }
       }

@@ -1,7 +1,7 @@
 /**
  * Placar do Domínio — ranking puro (Task 20 + Fase B / B5).
- * Métricas públicas: XP, #conquistas, juizoBest, prestigeCount.
- * Sem almas/SPS/óbolos.
+ * Métricas públicas: XP, #conquistas, juizoBest, prestigeCount, lifetimeSouls.
+ * Sem SPS / óbolos / carteira instantânea.
  * Path quente: RPC `leaderboard_page` (ORDER BY + LIMIT no SQL).
  */
 
@@ -9,7 +9,13 @@ import { metricsBumpDb } from './request-metrics.js';
 
 export const LEADERBOARD_TOP = 50;
 export const LEADERBOARD_SCOPES = Object.freeze(['turma', 'global']);
-export const LEADERBOARD_SORTS = Object.freeze(['xp', 'achievements', 'juizoBest', 'prestigeCount']);
+export const LEADERBOARD_SORTS = Object.freeze([
+  'xp',
+  'achievements',
+  'juizoBest',
+  'prestigeCount',
+  'lifetimeSouls',
+]);
 export const LEADERBOARD_PAGE_RPC = 'leaderboard_page';
 
 export function normalizeLeaderboardScope(raw) {
@@ -19,14 +25,7 @@ export function normalizeLeaderboardScope(raw) {
 
 export function normalizeLeaderboardSort(raw) {
   const value = String(raw || '').trim();
-  if (
-    value === 'achievements'
-    || value === 'juizoBest'
-    || value === 'prestigeCount'
-    || value === 'xp'
-  ) {
-    return value;
-  }
+  if (LEADERBOARD_SORTS.includes(value)) return value;
   return 'xp';
 }
 
@@ -41,19 +40,30 @@ export function achievementCount(conquistas) {
   return conquistas.length;
 }
 
+/** Almas totais (lifetime) — número finito ≥ 0. */
+export function normalizeLifetimeSouls(raw) {
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return 0;
+  return n;
+}
+
 /**
  * @param {object} user row users
- * @param {number|{ juizoBest?: number, prestigeCount?: number }} [juizoOrExtras]
+ * @param {number|{ juizoBest?: number, prestigeCount?: number, lifetimeSouls?: number }} [juizoOrExtras]
  * @param {number} [prestigeCount]
  */
 export function toLeaderboardEntry(user, juizoOrExtras = 0, prestigeCount = 0) {
   let juizoBest = 0;
   let prestige = prestigeCount;
+  let lifetimeSouls = 0;
   if (juizoOrExtras && typeof juizoOrExtras === 'object') {
     juizoBest = Number.parseInt(juizoOrExtras.juizoBest ?? juizoOrExtras.juizo_best, 10);
     prestige = Number.parseInt(
       juizoOrExtras.prestigeCount ?? juizoOrExtras.prestige_count ?? prestigeCount,
       10,
+    );
+    lifetimeSouls = normalizeLifetimeSouls(
+      juizoOrExtras.lifetimeSouls ?? juizoOrExtras.lifetime_souls,
     );
   } else {
     juizoBest = Number.parseInt(juizoOrExtras, 10);
@@ -68,6 +78,7 @@ export function toLeaderboardEntry(user, juizoOrExtras = 0, prestigeCount = 0) {
     achievements: achievementCount(user.conquistas),
     juizoBest: Number.isFinite(juizoBest) && juizoBest >= 0 ? juizoBest : 0,
     prestigeCount: Number.isFinite(prestige) && prestige >= 0 ? prestige : 0,
+    lifetimeSouls,
   };
 }
 
@@ -75,11 +86,12 @@ function metricValue(entry, sort) {
   if (sort === 'achievements') return entry.achievements;
   if (sort === 'juizoBest') return entry.juizoBest;
   if (sort === 'prestigeCount') return entry.prestigeCount;
+  if (sort === 'lifetimeSouls') return entry.lifetimeSouls;
   return entry.xp;
 }
 
 /**
- * Ordenação estável: métrica DESC, (prestige → juizo) DESC, username ASC, userId ASC.
+ * Ordenação estável: métrica DESC + desempates de progresso Despertar + username.
  * @returns {Array<object & { rank: number }>}
  */
 export function rankLeaderboardEntries(entries, sort = 'xp') {
@@ -87,7 +99,12 @@ export function rankLeaderboardEntries(entries, sort = 'xp') {
   const sorted = [...(entries || [])].sort((a, b) => {
     const diff = metricValue(b, key) - metricValue(a, key);
     if (diff !== 0) return diff;
-    if (key === 'prestigeCount') {
+    if (key === 'lifetimeSouls') {
+      const prestigeDiff = (Number(b.prestigeCount) || 0) - (Number(a.prestigeCount) || 0);
+      if (prestigeDiff !== 0) return prestigeDiff;
+      const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
+      if (juizoDiff !== 0) return juizoDiff;
+    } else if (key === 'prestigeCount') {
       const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
       if (juizoDiff !== 0) return juizoDiff;
     }
@@ -130,6 +147,7 @@ export function publicLeaderboardRow(row) {
     achievements: row.achievements,
     juizoBest: row.juizoBest,
     prestigeCount: Math.max(0, Number(row.prestigeCount) || 0),
+    lifetimeSouls: normalizeLifetimeSouls(row.lifetimeSouls),
   };
 }
 
@@ -152,6 +170,7 @@ export function normalizeRpcLeaderboardRow(row) {
     achievements: Math.max(0, Number(row.achievements) || 0),
     juizoBest: Math.max(0, Number(row.juizoBest ?? row.juizo_best) || 0),
     prestigeCount: Math.max(0, Number(row.prestigeCount ?? row.prestige_count) || 0),
+    lifetimeSouls: normalizeLifetimeSouls(row.lifetimeSouls ?? row.lifetime_souls),
   });
 }
 

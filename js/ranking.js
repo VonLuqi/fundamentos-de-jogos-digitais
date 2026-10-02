@@ -13,11 +13,14 @@ import {
   requireSession,
 } from './api.js';
 import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
+import { formatSouls } from './hades-despertar/ui/NumberFormatter.js';
 
 const SORT_LABELS = Object.freeze({
   xp: 'XP',
   achievements: 'Relíquias',
   juizoBest: 'Juízo',
+  prestigeCount: 'Catábases',
+  lifetimeSouls: 'Almas totais',
 });
 
 function setText(node, value) {
@@ -54,7 +57,7 @@ function renderRows(body, entries, selfId) {
   if (!entries.length) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 6;
+    td.colSpan = 8;
     td.textContent = 'Nenhuma alma neste escopo ainda.';
     tr.append(td);
     body.append(tr);
@@ -74,6 +77,8 @@ function renderRows(body, entries, selfId) {
       formatNumber(row.xp),
       formatNumber(row.achievements),
       formatNumber(row.juizoBest),
+      formatNumber(row.prestigeCount),
+      formatSouls(row.lifetimeSouls ?? 0),
     ];
     cells.forEach((value, index) => {
       const td = document.createElement('td');
@@ -121,7 +126,11 @@ function renderSelf(panel, lineEl, self, total, sort, inTop) {
     ? `${formatNumber(self.achievements)} relíquias`
     : sort === 'juizoBest'
       ? `recorde ${formatNumber(self.juizoBest)}`
-      : `${formatNumber(self.xp)} XP`;
+      : sort === 'prestigeCount'
+        ? `${formatNumber(self.prestigeCount)} catábases`
+        : sort === 'lifetimeSouls'
+          ? `${formatSouls(self.lifetimeSouls ?? 0)} almas`
+          : `${formatNumber(self.xp)} XP`;
   const podium = podiumTierForRank(self.rank);
   const note = podium
     ? `Pódio ${podium.label}.`

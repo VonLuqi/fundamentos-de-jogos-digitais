@@ -86,8 +86,9 @@
         </div>
 
         <p class="ranking-intro">
-          Ordenação por <strong>XP</strong>, <strong>relíquias</strong> ou <strong>recorde do Juízo</strong>.
-          Sem almas nem SPS — o Domínio não vaza a economia do Acheron.
+          Ordenação por <strong>XP</strong>, <strong>relíquias</strong>, <strong>Juízo</strong>,
+          <strong>Catábases</strong> ou <strong>almas totais</strong> do Despertar.
+          Sem SPS nem óbolos — o Domínio não vaza a taxa do Acheron.
         </p>
 
         <div class="ranking-controls" role="group" aria-label="Filtros do Placar">
@@ -99,6 +100,8 @@
             <button class="ranking-chip is-active" type="button" data-ranking-sort="xp" aria-pressed="true">XP</button>
             <button class="ranking-chip" type="button" data-ranking-sort="achievements" aria-pressed="false">Relíquias</button>
             <button class="ranking-chip" type="button" data-ranking-sort="juizoBest" aria-pressed="false">Juízo</button>
+            <button class="ranking-chip" type="button" data-ranking-sort="prestigeCount" aria-pressed="false">Catábases</button>
+            <button class="ranking-chip" type="button" data-ranking-sort="lifetimeSouls" aria-pressed="false">Almas</button>
           </div>
           <label class="ranking-turma" id="ranking-turma-wrap" hidden>
             <span class="ranking-turma__label">Turma</span>
@@ -118,10 +121,12 @@
                 <th scope="col">XP</th>
                 <th scope="col">Relíquias</th>
                 <th scope="col">Juízo</th>
+                <th scope="col">Catábases</th>
+                <th scope="col">Almas</th>
               </tr>
             </thead>
             <tbody id="ranking-body">
-              <tr><td colspan="6">Carregando…</td></tr>
+              <tr><td colspan="8">Carregando…</td></tr>
             </tbody>
           </table>
         </div>
