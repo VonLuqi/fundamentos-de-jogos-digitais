@@ -258,20 +258,12 @@ assert(
 
 const storeJs = read('api/_lib/store.js');
 assert(
-  /aula4:\s*'aula3'/.test(storeJs.replace(/\s+/g, ' ')),
-  'LESSON_PREREQUISITES deve mapear aula4 → aula3'
+  /export const LESSON_PREREQUISITES = \{\s*\};/.test(storeJs.replace(/\s+/g, ' ')),
+  'LESSON_PREREQUISITES deve estar vazio (pular aulas permitido)'
 );
 assert(
-  /aula5:\s*'aula4'/.test(storeJs.replace(/\s+/g, ' ')),
-  'LESSON_PREREQUISITES deve mapear aula5 → aula4'
-);
-assert(
-  /aula6:\s*'aula5'/.test(storeJs.replace(/\s+/g, ' ')),
-  'LESSON_PREREQUISITES deve mapear aula6 → aula5'
-);
-assert(
-  /aula7:\s*'aula6'/.test(storeJs.replace(/\s+/g, ' ')),
-  'LESSON_PREREQUISITES deve mapear aula7 → aula6'
+  storeJs.includes('return true'),
+  'hasUnlockedLesson deve liberar qualquer aula'
 );
 assert(
   storeJs.includes("id: 'aula4_concluida'"),

@@ -67,6 +67,7 @@
         <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
         <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
         <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="codigos" data-admin-only href="./codigos.html" hidden>Códigos de Acesso</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
         <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="./prova-admin.html" hidden>Prova Módulo 1</a>
       </nav>
@@ -115,9 +116,9 @@
         <section class="master-tools" id="master-tools" data-admin-only hidden aria-label="Ferramentas do Mestre">
           <p class="master-tools__label">Ferramentas do Mestre</p>
           <div class="master-tools__actions">
-            <button class="btn-gold btn-gold--pulse" type="button" id="btn-generate-codes">
-              Gerar Códigos de Acesso
-            </button>
+            <a class="btn-gold btn-gold--pulse" id="btn-generate-codes" href="./codigos.html">
+              Códigos de Acesso
+            </a>
             <button class="btn-gold btn-gold--ghost" type="button" id="btn-rotate-caronte" title="Legado — prefira Código de Recuperação no Espelho">
               Senha do Caronte (legado)
             </button>
@@ -356,8 +357,8 @@
       <article class="altar-block">
         <h3 class="block-title">Oferenda ao Estige <span class="block-title__sub">(Resgate de Código)</span></h3>
         <p class="altar-block__intro">
-          Ao concluir uma aula, o Mestre entrega um <strong>código de acesso</strong>.
-          Deposite-o na ranhura do altar para receber XP e conquistas.
+          O Mestre passa um <strong>código de 7 caracteres</strong> ao fim da aula.
+          Deposite-o na ranhura — o Estige concede XP e conquistas (cada código, uma vez por herói).
         </p>
 
         <!-- O wrapper recebe o Screen Shake quando o código é rejeitado -->
@@ -369,10 +370,12 @@
               type="text"
               id="altar-input"
               name="code"
-              placeholder="EX.: MDA2026"
+              placeholder="EX.: AB12XYZ"
               autocomplete="off"
               spellcheck="false"
               maxlength="24"
+              autocapitalize="characters"
+              inputmode="text"
             />
           </div>
           <button class="btn-offer" type="submit" id="btn-offer">

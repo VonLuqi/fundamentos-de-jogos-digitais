@@ -91,27 +91,18 @@ export const REDEEM_CODES = {
 };
 
 /* ============================================================
-   2.1 DESBLOQUEIO SEQUENCIAL DE AULAS
+   2.1 PULAR AULAS É PERMITIDO
    ============================================================
-   Mapeia cada aula à aula-pré-requisito. Um código de resgate só
-   pode ser aceito se `completedLessons` já contiver a aula anterior
-   — impede pular etapas mesmo manipulando a chamada à API.
+   Não há pré-requisito curricular no resgate. Quem falta a uma aula
+   simplesmente não ganha o XP/conquista dela — e recebe menos pontos
+   na matéria. O mapa abaixo fica vazio de propósito (histórico /
+   referência); `hasUnlockedLesson` sempre libera.
    ============================================================ */
-export const LESSON_PREREQUISITES = {
-  aula2: 'aula1',
-  aula3: 'aula2',
-  aula4: 'aula3',
-  aula5: 'aula4',
-  aula6: 'aula5',
-  aula7: 'aula6',
-};
+export const LESSON_PREREQUISITES = {};
 
-/** Retorna true se o usuário já cumpriu o pré-requisito da aula informada. */
-export function hasUnlockedLesson(user, lessonId) {
-  const prerequisite = LESSON_PREREQUISITES[lessonId];
-  if (!prerequisite) return true; // aula sem pré-requisito (ex.: aula1)
-  const completed = user?.completedLessons || user?.completed_lessons || [];
-  return Array.isArray(completed) && completed.includes(prerequisite);
+/** Sempre true: o aluno pode resgatar qualquer aula liberada pelo Mestre. */
+export function hasUnlockedLesson(_user, _lessonId) {
+  return true;
 }
 
 /* ============================================================

@@ -7,10 +7,8 @@ import {
   addMinutesIso,
   codeExpiresAt,
   getAchievementXp,
-  hasUnlockedLesson,
   insertCodeWithRetry,
   isCodeExpired,
-  LESSON_PREREQUISITES,
   levelForXp,
   mapAchievementDetails,
   metricsBumpDb,
@@ -77,18 +75,9 @@ if (!LESSON_CATALOG[rewardRow.lesson_id]) {
   return res.status(410).json({ ok: false, error: 'Código vinculado a uma aula desativada.' });
 }
 // O código é compartilhado pela turma: a única invalidação é o tempo.
+// Pular aulas é permitido — quem faltou simplesmente não resgata o XP dela.
 if (isCodeExpired(rewardRow)) {
   return res.status(410).json({ ok: false, error: 'Código expirado (validade de 20 minutos).' });
-}
-
-if (user.role !== 'admin' && !hasUnlockedLesson(user, rewardRow.lesson_id)) {
-  const required = LESSON_PREREQUISITES[rewardRow.lesson_id];
-  return res.status(403).json({
-    ok: false,
-    error: required
-      ? `Ainda falta concluir a aula anterior (${required}) na Trilha.`
-      : 'Ainda falta a aula anterior na Trilha.',
-  });
 }
 
 const redeemed = Array.isArray(user.redeemed_codes) ? [...user.redeemed_codes] : [];

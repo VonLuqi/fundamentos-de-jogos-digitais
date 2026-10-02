@@ -336,6 +336,7 @@ export const ROUTES = {
     return `${base}?u=${encodeURIComponent(username)}`;
   },
   souls: () => `${rootPath()}/pages/souls.html`,
+  codigos: () => `${rootPath()}/pages/codigos.html`,
   despertar: () => `${rootPath()}/pages/despertar.html`,
   ranking: () => `${rootPath()}/pages/ranking.html`,
   classindDle: () => `${rootPath()}/pages/classind-dle.html`,

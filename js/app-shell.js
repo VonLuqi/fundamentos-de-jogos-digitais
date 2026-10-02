@@ -38,6 +38,8 @@ function mapRouteToNavItem(route) {
   if (route === 'despertar') return 'despertar';
   if (route === 'classind-dle') return 'aulas';
   if (route === 'souls') return 'souls';
+  if (route === 'codigos') return 'codigos';
+  if (route === 'prova-admin') return 'prova-admin';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;
 }

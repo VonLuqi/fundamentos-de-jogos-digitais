@@ -9,7 +9,7 @@
  *      Game Feel: flash de tela, overlay de Level Up, barra de XP
  *      preenchendo com transição CSS e Screen Shake no erro.
  *   4. Adapta a interface para `role: "admin"` (coroa, aura e
- *      botão dourado "Gerar Códigos de Acesso").
+ *      ferramentas do Mestre, incl. link para Códigos de Acesso).
  * ============================================================
  */
 
@@ -42,14 +42,12 @@ import {
   ApiError,
   requireSession,
   redeemCode,
-  generateCode,
   rotateRecoveryCode,
   adminMailerStatus,
   adminProbeMailer,
   setAvatar,
   bindEmail,
   requestEmailVerification,
-  listCodes,
   logout,
   getSession,
   describeLevelProgress,
@@ -911,13 +909,33 @@ function initAltar() {
   const button = document.getElementById('btn-offer');
   if (!form || !input || !button) return;
 
+  const normalizeCodeInput = () => {
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const next = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (input.value !== next) {
+      input.value = next;
+      if (typeof start === 'number' && typeof end === 'number') {
+        const pos = Math.min(next.length, start);
+        input.setSelectionRange(pos, pos);
+      }
+    }
+  };
+
+  input.addEventListener('input', normalizeCodeInput);
+  input.addEventListener('paste', () => {
+    window.requestAnimationFrame(normalizeCodeInput);
+  });
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    normalizeCodeInput();
     const code = input.value.trim();
 
     if (!code) {
       setAltarFeedback('A ranhura do altar está vazia.', 'error');
       shakeAltar();
+      input.focus();
       return;
     }
 
@@ -949,9 +967,10 @@ function initAltar() {
         detailParts.push(`Nível ${after.levelLabel}`);
       }
 
+      const lessonName = result.awarded.lesson || 'Aula';
       showLevelUpOverlay(
         result.leveledUp ? 'LEVEL UP!' : 'Oferenda Aceita',
-        `${result.awarded.lesson} — ${detailParts.join(' • ')}`
+        `${lessonName} — ${detailParts.join(' • ')}`
       );
 
       renderProfile(currentUser);
@@ -962,12 +981,18 @@ function initAltar() {
       const albumHint = result.awarded.achievements.length > 0
         ? ' · Nova figurinha no Álbum de Relíquias.'
         : '';
-      setAltarFeedback(`Oferenda aceita: ${detailParts.join(' • ')}${albumHint}`, 'success');
+      setAltarFeedback(
+        `Oferenda aceita — ${lessonName}: ${detailParts.join(' • ')}${albumHint}`,
+        'success',
+      );
       input.value = '';
+      input.blur();
     } catch (error) {
       const message = error instanceof ApiError ? error.message : 'Falha ao contatar o Domínio.';
       setAltarFeedback(message, 'error');
       shakeAltar();
+      input.focus();
+      input.select();
     } finally {
       button.disabled = false;
       label.textContent = originalLabel;
@@ -1725,7 +1750,6 @@ function initAdminTools() {
     tools.setAttribute('aria-hidden', 'false');
   }
 
-  const btnCodes = document.getElementById('btn-generate-codes');
   const btnRotateCaronte = document.getElementById('btn-rotate-caronte');
   const btnProbeMailer = document.getElementById('btn-probe-mailer');
   const btnManageLessons = document.getElementById('btn-manage-lessons');
@@ -1929,109 +1953,6 @@ function initAdminTools() {
       btnResetDespertar.disabled = false;
       btnResetDespertar.textContent = previousLabel;
     }
-  });
-
-  btnCodes?.addEventListener('click', async () => {
-    const wrapper = document.createElement('div');
-
-    const help = document.createElement('p');
-    help.className = 'scroll-modal__note';
-    help.textContent = 'Escolha a aula para gerar um código único de 7 caracteres.';
-    wrapper.appendChild(help);
-
-    const lessons = LESSONS;
-    if (lessons.length === 0) {
-      const noLessons = document.createElement('p');
-      noLessons.className = 'scroll-modal__note';
-      noLessons.textContent = 'Não há aulas cadastradas no sistema. Cadastre as novas aulas para habilitar a geração de códigos.';
-      wrapper.appendChild(noLessons);
-    }
-
-    lessons.forEach((lesson) => {
-      const row = document.createElement('div');
-      row.className = 'code-row';
-
-      const left = document.createElement('span');
-      left.className = 'code-row__code';
-      left.textContent = `${lesson.number} ${lesson.title}`;
-
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'lesson-row__action';
-      button.textContent = 'Gerar';
-
-      button.addEventListener('click', async () => {
-        button.disabled = true;
-        const original = button.textContent;
-        button.textContent = 'Gerando...';
-        try {
-          const result = await generateCode(currentToken, lesson.id);
-          const { code } = result;
-
-          const codeBlock = document.createElement('div');
-          codeBlock.className = 'code-row';
-
-          const codeValue = document.createElement('span');
-          codeValue.className = 'code-row__code';
-          codeValue.textContent = code.code;
-
-          const codeMeta = document.createElement('span');
-          codeMeta.className = 'code-row__meta';
-          codeMeta.textContent = `${code.lessonTitle} — +${code.xp} XP • expira em 20 min`;
-
-          codeBlock.append(codeValue, codeMeta);
-          openScrollModal('Código Gerado', codeBlock);
-        } catch (error) {
-          const p = document.createElement('p');
-          p.textContent = error instanceof ApiError ? error.message : 'Falha ao gerar código.';
-          openScrollModal('Erro', p);
-        } finally {
-          button.disabled = false;
-          button.textContent = original;
-        }
-      });
-
-      row.append(left, button);
-      wrapper.appendChild(row);
-    });
-
-    try {
-      const { codes } = await listCodes(currentToken);
-      const historyTitle = document.createElement('p');
-      historyTitle.className = 'scroll-modal__note';
-      historyTitle.textContent = 'Histórico recente de códigos gerados:';
-      wrapper.appendChild(historyTitle);
-
-      codes.forEach((entry) => {
-        const row = document.createElement('div');
-        row.className = 'code-row';
-
-        const code = document.createElement('span');
-        code.className = 'code-row__code';
-        code.textContent = entry.code;
-
-        const meta = document.createElement('span');
-        meta.className = 'code-row__meta';
-        const status = entry.expired ? 'EXPIRADO' : 'ATIVO';
-        const usage = entry.used ? ' • já resgatado' : '';
-        meta.textContent = `${entry.lessonTitle} — +${entry.xp} XP • ${status}${usage}`;
-
-        row.append(code, meta);
-        wrapper.appendChild(row);
-      });
-    } catch {
-      const note = document.createElement('p');
-      note.className = 'scroll-modal__note';
-      note.textContent = 'Histórico indisponível no momento, mas você ainda pode gerar novos códigos.';
-      wrapper.appendChild(note);
-    }
-
-    const footerNote = document.createElement('p');
-    footerNote.className = 'scroll-modal__note';
-    footerNote.textContent = 'O código vale para a turma inteira e só deixa de funcionar quando expira (20 min). Cada aluno pode resgatá-lo uma única vez.';
-    wrapper.appendChild(footerNote);
-
-    openScrollModal('Gerar Código de Acesso', wrapper);
   });
 
   btnSouls?.addEventListener('click', async () => {

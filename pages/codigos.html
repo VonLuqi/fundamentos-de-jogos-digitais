@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Códigos de Acesso | Fundamentos de Jogos Digitais" />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Códigos de Acesso | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/codigos.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page codes-page" data-route="codigos" data-role-scope="admin">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div id="codes-app" class="app-shell" data-shell hidden>
+
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="codigos" data-admin-only href="./codigos.html" hidden>Códigos de Acesso</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="./prova-admin.html" hidden>Prova Módulo 1</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Ferramentas do Mestre</p>
+            <h1 class="app-shell__title" id="codes-page-title">CÓDIGOS DE <span class="accent">ACESSO</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <button class="btn-refresh" type="button" id="btn-codes-refresh" aria-label="Atualizar histórico">
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <main class="app-shell__content codes-main" aria-labelledby="codes-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <p class="codes-lead">
+          Gere o código da aula, mostre na sala e deixe a turma resgatar no Altar.
+          Vale para todos por <strong>20 minutos</strong> — cada aluno só uma vez.
+        </p>
+
+        <section class="codes-mint" aria-labelledby="codes-mint-title">
+          <header class="codes-section-head">
+            <h2 class="codes-section-title" id="codes-mint-title">Gerar código</h2>
+            <p class="codes-section-sub">Escolha a aula e emita a oferenda da turma.</p>
+          </header>
+
+          <form class="codes-mint__form" id="codes-generate-form">
+            <label class="codes-field" for="codes-lesson">
+              <span class="codes-field__label">Aula</span>
+              <select class="codes-field__select" id="codes-lesson" name="lessonId" required>
+                <option value="">Selecione…</option>
+              </select>
+            </label>
+            <button class="btn-gold btn-gold--pulse" type="submit" id="btn-generate-code">
+              Gerar
+            </button>
+          </form>
+
+          <div class="codes-active" id="codes-active" hidden>
+            <p class="codes-active__eyebrow" id="codes-active-eyebrow">Código ativo</p>
+            <p class="codes-active__value" id="codes-active-code" aria-live="polite">—</p>
+            <p class="codes-active__meta" id="codes-active-meta"></p>
+            <p class="codes-active__countdown" id="codes-active-countdown" role="timer" aria-live="polite"></p>
+            <div class="codes-active__actions">
+              <button class="btn-gold" type="button" id="btn-copy-active">Copiar código</button>
+              <button class="btn-gold btn-gold--ghost" type="button" id="btn-generate-another">
+                Gerar outro
+              </button>
+            </div>
+            <p class="codes-active__status" id="codes-copy-status" role="status" aria-live="polite"></p>
+          </div>
+
+          <p class="codes-hint" id="codes-mint-hint">
+            Se já houver um código ativo desta aula, ele aparece acima — sem precisar gerar de novo.
+          </p>
+        </section>
+
+        <section class="codes-history" aria-labelledby="codes-history-title">
+          <header class="codes-section-head">
+            <h2 class="codes-section-title" id="codes-history-title">Histórico</h2>
+            <p class="codes-section-sub">Últimos códigos emitidos — filtre para achar o da aula.</p>
+          </header>
+
+          <div class="codes-filters" role="group" aria-label="Filtrar histórico">
+            <button type="button" class="codes-filter is-active" data-filter="all" aria-pressed="true">Todos</button>
+            <button type="button" class="codes-filter" data-filter="active" aria-pressed="false">Ativos</button>
+            <button type="button" class="codes-filter" data-filter="expired" aria-pressed="false">Expirados</button>
+          </div>
+
+          <label class="codes-field codes-field--inline" for="codes-history-lesson">
+            <span class="codes-field__label">Aula</span>
+            <select class="codes-field__select" id="codes-history-lesson" name="historyLesson">
+              <option value="">Todas</option>
+            </select>
+          </label>
+
+          <ul class="codes-list" id="codes-list" aria-live="polite">
+            <li class="codes-list__empty">Carregando histórico…</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/codigos.js"></script>
+</body>
+</html>
