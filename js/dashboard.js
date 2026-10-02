@@ -318,6 +318,11 @@ function renderProfile(user) {
   if (usernameEl) usernameEl.textContent = `@${username}`;
   document.getElementById('profile-name').textContent = fullName;
 
+  const nameEl = document.getElementById('profile-name');
+  if (nameEl?.classList.contains('is-podium-glitch')) {
+    nameEl.dataset.glitch = fullName;
+  }
+
   const turmaEl = document.getElementById('profile-turma');
   if (turmaEl) {
     const turma = user.turma != null && String(user.turma).trim() !== ''
@@ -390,11 +395,21 @@ function applyAdminSkin(user) {
 function applyDashboardPodium(rank) {
   const panel = document.getElementById('profile-panel');
   const frame = document.getElementById('avatar-frame');
+  const nameEl = document.getElementById('profile-name');
   const summary = document.getElementById('ranking-preview-summary');
   const podium = podiumTierForRank(rank);
 
   applyPodiumClasses(panel, rank);
   applyPodiumClasses(frame, rank);
+
+  if (nameEl) {
+    nameEl.classList.toggle('is-podium-glitch', Boolean(podium && podium.rank === 1));
+    if (podium && podium.rank === 1) {
+      nameEl.dataset.glitch = nameEl.textContent || '';
+    } else if (nameEl.dataset) {
+      delete nameEl.dataset.glitch;
+    }
+  }
 
   if (!summary) return;
   if (podium) {

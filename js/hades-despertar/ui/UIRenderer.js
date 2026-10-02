@@ -47,6 +47,7 @@ import { WorldView } from './world/WorldView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
 import { CodexBook, describeCodex, describeCodexEntry } from './CodexBook.js';
+import { LoopLeaderboard } from './LoopLeaderboard.js';
 import {
   BANCADA_EMPTY_AVAILABLE,
   BANCADA_EMPTY_OWNED,
@@ -509,6 +510,7 @@ export class UIRenderer {
     this.onLetheFirstUnlock =
       typeof options.onLetheFirstUnlock === 'function' ? options.onLetheFirstUnlock : null;
     this.getUserId = typeof options.getUserId === 'function' ? options.getUserId : () => null;
+    this.getToken = typeof options.getToken === 'function' ? options.getToken : () => null;
     this._hud = null;
     this._cards = new Map();
     this._upgrades = new Map();
@@ -526,6 +528,8 @@ export class UIRenderer {
     this._pantheonOrderSig = '';
     /** @type {CodexBook|null} */
     this._codexBook = null;
+    /** @type {LoopLeaderboard|null} */
+    this._loopBoard = null;
     /** @type {{ activate: Function, getSelectedKey: Function, tabs: Element[] }|null} */
     this._pantheonSubTabs = null;
     this._pantheonSubKey = 'available';
@@ -573,6 +577,7 @@ export class UIRenderer {
     this.#mountLethe();
     this.#mountBancada();
     this.#mountCodexBook();
+    this.#mountLoopBoard();
     this._ticker = this.root.getElementById('despertar-ticker');
     if (this._ticker) bindMarquee(this._ticker);
     this._stats = this.root.getElementById('despertar-stats');
@@ -1934,7 +1939,17 @@ export class UIRenderer {
     this._codexBook = new CodexBook(this.root, {
       getUserId: () => this.getUserId(),
       getState: () => this.state,
+      onOpen: () => this._loopBoard?.close(),
     });
     this._codexBook.mount();
+  }
+
+  #mountLoopBoard() {
+    if (this._loopBoard) return;
+    this._loopBoard = new LoopLeaderboard(this.root, {
+      getToken: () => this.getToken(),
+      onOpen: () => this._codexBook?.close(),
+    });
+    this._loopBoard.mount();
   }
 }

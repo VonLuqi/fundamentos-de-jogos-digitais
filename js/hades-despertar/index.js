@@ -797,6 +797,7 @@ async function init() {
   const renderer = new UIRenderer(document, {
     state,
     getUserId: () => user?.id ?? null,
+    getToken: () => getSession()?.token ?? null,
     onBuy: (id, mode) => {
       const result = state.buyGenerator(id, mode);
       if (result?.ok) {

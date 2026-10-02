@@ -65,8 +65,12 @@ const dashboardHtml = read('pages/dashboard.html');
 const pkg = read('package.json');
 
 staticAssert(rankingJs.includes("from './podium-vfx.js'"), 'ranking importa podium-vfx');
-staticAssert(rankingJs.includes('applyPodiumClasses(tr'), 'ranking aplica nas linhas');
-staticAssert(rankingJs.includes('applyPodiumClasses(panel'), 'ranking aplica no self');
+staticAssert(rankingJs.includes('ranking-table__name'), 'ranking renderiza nome estilizado');
+staticAssert(rankingJs.includes('is-podium-glitch'), 'ranking marca top 1 com glitch');
+staticAssert(rankingJs.includes('applyPodiumNameGlitch'), 'ranking aplica glitch no nome');
+staticAssert(rankingCss.includes('ranking-table__name--podium-1'), 'CSS nome podium-1');
+staticAssert(rankingCss.includes('podiumNameGlitchA'), 'CSS glitch keyframes');
+staticAssert(dashboardCss.includes('profile-panel__name.is-podium-glitch'), 'dashboard nome glitch');
 
 staticAssert(dashboardJs.includes("from './podium-vfx.js'"), 'dashboard importa podium-vfx');
 staticAssert(dashboardJs.includes('leaderboardGet'), 'dashboard chama leaderboardGet');

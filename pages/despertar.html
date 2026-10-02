@@ -367,6 +367,20 @@
               </span>
               <span class="despertar-codex-book__badge" hidden>0</span>
             </button>
+            <button
+              type="button"
+              id="despertar-loop-board"
+              class="despertar-codex-book despertar-loop-board"
+              aria-label="Placar do Loop"
+              aria-expanded="false"
+              aria-controls="despertar-loop-board-drawer"
+            >
+              <span class="despertar-codex-book__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32" width="26" height="26" focusable="false">
+                  <path fill="currentColor" d="M7 26h18v2H7zm2-4h4v10H9zm6-6h4v16h-4zm6 3h4v13h-4zM8 8h4l2-4h4l2 4h4v2H8zm2.5 2h11a5.5 5.5 0 0 1-11 0z"/>
+                </svg>
+              </span>
+            </button>
             <div
               id="despertar-codex-tip"
               class="despertar-codex-tip"
@@ -663,6 +677,43 @@
       </header>
       <p class="despertar-empty" id="codex-drawer-empty">O Códice espera o primeiro clique.</p>
       <ol class="despertar-codex-list" id="codex-drawer-list" hidden></ol>
+    </aside>
+  </div>
+
+  <div
+    id="despertar-loop-board-drawer"
+    class="despertar-codex-drawer despertar-loop-board-drawer"
+    hidden
+    aria-hidden="true"
+  >
+    <div class="despertar-codex-drawer__backdrop" data-loop-board-close tabindex="-1"></div>
+    <aside
+      class="despertar-codex-drawer__panel"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loop-board-title"
+      tabindex="-1"
+    >
+      <header class="despertar-codex-drawer__head">
+        <h2 class="despertar-codex-drawer__title" id="loop-board-title">Placar do Loop</h2>
+        <button
+          type="button"
+          class="despertar-codex-drawer__close"
+          data-loop-board-close
+          aria-label="Fechar Placar do Loop"
+        >
+          Fechar
+        </button>
+      </header>
+      <p class="despertar-loop-board__blurb" id="loop-board-blurb">
+        Turma · ordenado pelo recorde no Juízo — quem sustenta a série mais alta.
+      </p>
+      <p class="despertar-empty" id="loop-board-status">Consultando o Domínio…</p>
+      <ol class="despertar-loop-board-list" id="loop-board-list" hidden></ol>
+      <p class="despertar-loop-board__self" id="loop-board-self" hidden></p>
+      <p class="despertar-loop-board__foot">
+        <a class="despertar-loop-board__link" href="./ranking.html">Ver o Placar completo</a>
+      </p>
     </aside>
   </div>
 

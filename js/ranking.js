@@ -48,6 +48,63 @@ function escapeCell(value) {
   return String(value ?? '');
 }
 
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+let podiumGlitchVfxPromise = null;
+let podiumGlitchVfxDisabled = false;
+const podiumGlitchBound = new WeakSet();
+
+async function loadPodiumGlitchVfx() {
+  if (podiumGlitchVfxDisabled || reducedMotionQuery.matches) return null;
+  if (!podiumGlitchVfxPromise) {
+    podiumGlitchVfxPromise = (async () => {
+      const candidates = [
+        'https://esm.sh/@vfx-js/core@1.1.0',
+        new URL('../node_modules/@vfx-js/core/lib/esm/index.js', import.meta.url).href,
+      ];
+      for (const specifier of candidates) {
+        try {
+          const mod = await import(specifier);
+          if (mod?.VFX) return new mod.VFX({ zIndex: 20 });
+        } catch {
+          // próximo candidato
+        }
+      }
+      return null;
+    })();
+  }
+  try {
+    return await podiumGlitchVfxPromise;
+  } catch {
+    podiumGlitchVfxDisabled = true;
+    return null;
+  }
+}
+
+/** Glitch WebGL só no nome do 1º — nunca na `<tr>`. */
+async function applyPodiumNameGlitch(root) {
+  const targets = Array.from(root?.querySelectorAll?.('.ranking-table__name.is-podium-glitch') || []);
+  if (!targets.length) return;
+  if (reducedMotionQuery.matches) {
+    targets.forEach((el) => el.classList.add('is-podium-glitch-css'));
+    return;
+  }
+  const vfx = await loadPodiumGlitchVfx();
+  if (!vfx) {
+    targets.forEach((el) => el.classList.add('is-podium-glitch-css'));
+    return;
+  }
+  targets.forEach((el) => {
+    if (podiumGlitchBound.has(el)) return;
+    try {
+      vfx.add(el, { shader: 'glitch', overflow: 6 });
+      podiumGlitchBound.add(el);
+      el.classList.add('is-podium-glitch-vfx');
+    } catch {
+      el.classList.add('is-podium-glitch-css');
+    }
+  });
+}
+
 function renderRows(body, entries, selfId) {
   if (!body) return;
   body.replaceChildren();
@@ -65,6 +122,7 @@ function renderRows(body, entries, selfId) {
     const tr = document.createElement('tr');
     if (Number(row.userId) === Number(selfId)) tr.classList.add('is-self');
     applyPodiumClasses(tr, row.rank);
+    const podium = podiumTierForRank(row.rank);
 
     const cells = [
       row.rank,
@@ -76,21 +134,36 @@ function renderRows(body, entries, selfId) {
     ];
     cells.forEach((value, index) => {
       const td = document.createElement('td');
-      td.textContent = escapeCell(value);
       if (index === 0) {
-        const podium = podiumTierForRank(row.rank);
+        td.textContent = escapeCell(value);
         if (podium) {
           td.className = 'ranking-table__rank';
           td.title = podium.label;
         }
-      }
-      if (index === 1 && row.username) {
-        td.title = `@${row.username}`;
+      } else if (index === 1) {
+        const name = escapeCell(value);
+        if (podium) {
+          const span = document.createElement('span');
+          span.className = `ranking-table__name ranking-table__name--podium-${podium.rank}`;
+          span.textContent = name;
+          if (podium.rank === 1) {
+            span.classList.add('is-podium-glitch');
+            span.dataset.glitch = name;
+          }
+          td.append(span);
+        } else {
+          td.textContent = name;
+        }
+        if (row.username) td.title = `@${row.username}`;
+      } else {
+        td.textContent = escapeCell(value);
       }
       tr.append(td);
     });
     body.append(tr);
   }
+
+  void applyPodiumNameGlitch(body);
 }
 
 function renderSelf(panel, lineEl, self, total, sort, inTop) {

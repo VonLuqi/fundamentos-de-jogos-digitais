@@ -1907,6 +1907,78 @@ img.achievement-card__art.has-art {
   animation: podiumRainbowBorderShift 4.2s linear infinite, podiumAuraRainbow 2.8s ease-in-out infinite;
 }
 
+/* Nome do perfil no pódio */
+.profile-panel.is-podium-4 .profile-panel__name {
+  color: var(--rarity-copper, #b57947);
+  text-shadow: 0 0 12px rgba(181, 121, 71, 0.45);
+  font-weight: 600;
+}
+
+.profile-panel.is-podium-3 .profile-panel__name {
+  color: var(--rarity-silver, #c7d2dc);
+  text-shadow: 0 0 12px rgba(199, 210, 220, 0.45);
+  font-weight: 600;
+}
+
+.profile-panel.is-podium-2 .profile-panel__name {
+  color: var(--rarity-gold, #e3b34f);
+  text-shadow: 0 0 14px rgba(227, 179, 79, 0.5);
+  font-weight: 600;
+}
+
+.profile-panel.is-podium-1 .profile-panel__name,
+.profile-panel__name.is-podium-glitch {
+  position: relative;
+  display: inline-block;
+  background: linear-gradient(90deg, #7ed8ff, #e3b34f, #c23548, #b57947, #7ed8ff);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+  animation: podiumRainbowText 3.2s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(126, 216, 255, 0.35));
+}
+
+.profile-panel__name.is-podium-glitch::before,
+.profile-panel__name.is-podium-glitch::after {
+  content: attr(data-glitch);
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.profile-panel__name.is-podium-glitch::before {
+  text-shadow: -1.5px 0 rgba(80, 255, 220, 0.85);
+  clip-path: inset(0 0 55% 0);
+  animation: podiumNameGlitchA 2.6s steps(2, end) infinite;
+}
+
+.profile-panel__name.is-podium-glitch::after {
+  text-shadow: 1.5px 0 rgba(255, 70, 120, 0.8);
+  clip-path: inset(45% 0 0 0);
+  animation: podiumNameGlitchB 2.1s steps(2, end) infinite;
+}
+
+@keyframes podiumRainbowText {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+
+@keyframes podiumNameGlitchA {
+  0%, 88%, 100% { transform: translate(-1.5px, 0); opacity: 0.55; }
+  90% { transform: translate(2px, -1px); opacity: 0.9; }
+  94% { transform: translate(-3px, 1px); opacity: 0.7; }
+}
+
+@keyframes podiumNameGlitchB {
+  0%, 84%, 100% { transform: translate(1.5px, 0); opacity: 0.5; }
+  86% { transform: translate(-2px, 1px); opacity: 0.85; }
+  92% { transform: translate(3px, -1px); opacity: 0.65; }
+}
+
 @keyframes podiumAuraCopper {
   0%, 100% { box-shadow: 0 0 12px rgba(181, 121, 71, 0.45), 0 0 24px rgba(181, 121, 71, 0.22), inset 0 0 18px rgba(0, 0, 0, 0.55); }
   50% { box-shadow: 0 0 20px rgba(181, 121, 71, 0.75), 0 0 42px rgba(181, 121, 71, 0.4), inset 0 0 18px rgba(0, 0, 0, 0.55); }

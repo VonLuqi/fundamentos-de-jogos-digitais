@@ -143,12 +143,14 @@ export class CodexBook {
    *   getUserId?: () => string|null|undefined,
    *   getState?: () => object|null|undefined,
    *   storage?: Storage|null,
+   *   onOpen?: () => void,
    * }} [options]
    */
   constructor(root, options = {}) {
     this.root = root || (typeof document !== 'undefined' ? document : null);
     this.getUserId = typeof options.getUserId === 'function' ? options.getUserId : () => null;
     this.getState = typeof options.getState === 'function' ? options.getState : () => null;
+    this.onOpen = typeof options.onOpen === 'function' ? options.onOpen : null;
     this.storage = options.storage !== undefined
       ? options.storage
       : (typeof localStorage !== 'undefined' ? localStorage : null);
@@ -257,6 +259,7 @@ export class CodexBook {
 
   open() {
     if (!this.drawer || this.isOpen) return;
+    this.onOpen?.();
     this.hideTip();
     const state = this.getState();
     this.#renderDrawerList(state);
