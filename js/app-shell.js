@@ -33,6 +33,7 @@ function mapRouteToNavItem(route) {
   if (route === 'companheiro') return 'salao';
   if (route === 'aulas') return 'aulas';
   if (route === 'conquistas') return 'conquistas';
+  if (route === 'ranking') return 'ranking';
   if (route === 'salao') return 'salao';
   if (route === 'grimorio' || route === 'grimorio-nota' || route === 'grimorio-editar') return 'grimorio';
   if (route === 'despertar') return 'despertar';

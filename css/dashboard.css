@@ -1875,15 +1875,14 @@ img.achievement-card__art.has-art {
   display: none !important;
 }
 
-/* Mini-barra Ferramentas do Mestre (topo do dashboard) */
+/* Ferramentas do Mestre — abas + painéis */
 .master-tools {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.85rem;
   margin: 0 0 1.25rem;
-  padding: 0.85rem 1.1rem;
+  padding: 0.85rem 1.1rem 1.05rem;
   max-width: 1320px;
   background: linear-gradient(180deg, rgba(74, 0, 0, 0.55), rgba(18, 12, 20, 0.92));
   border: 1px solid rgba(194, 53, 72, 0.55);
@@ -1903,20 +1902,77 @@ img.achievement-card__art.has-art {
   color: var(--hades-gold-bright);
 }
 
+.master-tools__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.master-tools__tab {
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-title);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+  background: transparent;
+  border: 1px solid var(--hades-gold-dark);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.master-tools__tab:hover {
+  border-color: var(--hades-gold);
+  background: rgba(207, 167, 89, 0.1);
+}
+
+.master-tools__tab.is-active {
+  color: #1a1208;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+  border-color: var(--hades-gold-dark);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.master-tools__tab:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
+.master-tools__panel {
+  display: none;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.15rem;
+}
+
+.master-tools__panel.is-active {
+  display: flex;
+}
+
+.master-tools__panel[hidden] {
+  display: none !important;
+}
+
+.master-tools__panel-lead {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+}
+
 .master-tools__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: flex-end;
 }
 
 .master-tools__mailer-status {
-  margin: 0.55rem 0 0;
+  margin: 0;
   font-family: var(--font-body, 'Crimson Text', Georgia, serif);
   font-size: 0.85rem;
   letter-spacing: 0.02em;
   color: rgba(232, 220, 196, 0.72);
-  text-align: right;
 }
 
 .master-tools__mailer-status.is-warn {
@@ -1924,8 +1980,7 @@ img.achievement-card__art.has-art {
 }
 
 .master-tools__pause {
-  flex: 1 1 100%;
-  margin-top: 0.35rem;
+  margin-top: 0.15rem;
   padding: 0.85rem 1rem;
   border: 1px solid rgba(0, 168, 150, 0.4);
   border-radius: 0.35rem;
@@ -3434,9 +3489,13 @@ img.achievement-card__art.has-art {
     position: static;
   }
 
-  .master-tools {
+  .master-tools__tabs {
     flex-direction: column;
-    align-items: stretch;
+  }
+
+  .master-tools__tab {
+    width: 100%;
+    text-align: left;
   }
 
   .master-tools__actions {

@@ -1735,6 +1735,76 @@ async function refreshMasterMailerStatus() {
   }
 }
 
+const MASTER_TAB_IDS = new Set(['codigos', 'despertar', 'aulas', 'relatorios', 'sistema']);
+
+function masterTabFromLocation() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('masterTab');
+    const id = String(raw || '').trim().toLowerCase();
+    if (MASTER_TAB_IDS.has(id)) return id;
+  } catch {
+    // ignore
+  }
+  return 'codigos';
+}
+
+function setMasterToolsTab(tabId, { syncUrl = true } = {}) {
+  const id = MASTER_TAB_IDS.has(tabId) ? tabId : 'codigos';
+  const root = document.getElementById('master-tools');
+  if (!root) return;
+
+  root.querySelectorAll('[data-master-tab]').forEach((tab) => {
+    const active = tab.dataset.masterTab === id;
+    tab.classList.toggle('is-active', active);
+    tab.setAttribute('aria-selected', String(active));
+    tab.tabIndex = active ? 0 : -1;
+  });
+
+  root.querySelectorAll('[data-master-panel]').forEach((panel) => {
+    const active = panel.dataset.masterPanel === id;
+    panel.classList.toggle('is-active', active);
+    panel.hidden = !active;
+  });
+
+  if (syncUrl) {
+    try {
+      const url = new URL(window.location.href);
+      if (id === 'codigos') url.searchParams.delete('masterTab');
+      else url.searchParams.set('masterTab', id);
+      window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function initMasterToolsTabs() {
+  const root = document.getElementById('master-tools');
+  if (!root) return;
+
+  setMasterToolsTab(masterTabFromLocation(), { syncUrl: false });
+
+  root.querySelectorAll('[data-master-tab]').forEach((tab) => {
+    tab.addEventListener('click', () => {
+      setMasterToolsTab(tab.dataset.masterTab || 'codigos');
+    });
+    tab.addEventListener('keydown', (event) => {
+      const tabs = [...root.querySelectorAll('[data-master-tab]')];
+      const index = tabs.indexOf(tab);
+      if (index < 0) return;
+      let next = -1;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') next = (index + 1) % tabs.length;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') next = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === 'Home') next = 0;
+      if (event.key === 'End') next = tabs.length - 1;
+      if (next < 0) return;
+      event.preventDefault();
+      tabs[next].focus();
+      setMasterToolsTab(tabs[next].dataset.masterTab || 'codigos');
+    });
+  });
+}
+
 function initAdminTools() {
   const tools = document.getElementById('master-tools');
   if (currentUser?.role !== 'admin') {
@@ -1749,6 +1819,8 @@ function initAdminTools() {
     tools.hidden = false;
     tools.setAttribute('aria-hidden', 'false');
   }
+
+  initMasterToolsTabs();
 
   const btnRotateCaronte = document.getElementById('btn-rotate-caronte');
   const btnProbeMailer = document.getElementById('btn-probe-mailer');
