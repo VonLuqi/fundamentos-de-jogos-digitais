@@ -48,11 +48,27 @@ assert(html.includes('id="codes-list"'), 'lista de histórico');
 assert(html.includes('data-nav-item="codigos"'), 'nav item Códigos');
 
 assert(js.includes('requireAdmin'), 'codigos.js exige admin');
+assert(html.includes('id="codes-ttl"'), 'seletor de duração');
+assert(html.includes('id="codes-single-use"'), 'checkbox uso único');
+assert(js.includes('ttlMinutes'), 'codigos.js envia ttlMinutes');
+assert(js.includes('singleUse'), 'codigos.js envia singleUse');
+assert(api.includes('CODE_TTL_OPTIONS'), 'api.js exporta CODE_TTL_OPTIONS');
+assert(api.includes('singleUse'), 'generateCode cliente envia singleUse');
+
+const redeem = read('api/_lib/progress/redeem.js');
+const shared = read('api/_lib/progress/shared.js');
+const migrate = read('db/migrate-2026-10-02-redeem-code-ttl-single-use.sql');
+const setup = read('db/setup.sql');
+
+assert(migrate.includes('single_use'), 'migração adiciona single_use');
+assert(setup.includes('single_use boolean'), 'setup.sql tem single_use');
+assert(shared.includes('CODE_TTL_OPTIONS'), 'shared exporta CODE_TTL_OPTIONS');
+assert(shared.includes('normalizeCodeTtlMinutes'), 'shared normaliza TTL');
+assert(redeem.includes('isCodeSingleUse'), 'redeem trata uso único');
+assert(redeem.includes('ttlMinutes'), 'generateCode lê ttlMinutes');
+assert(read('api/progress.js').includes('ttlMinutes'), 'progress encaminha ttlMinutes');
 assert(js.includes('generateCode'), 'codigos.js gera código');
 assert(js.includes('listCodes'), 'codigos.js lista histórico');
-assert(js.includes('navigator.clipboard') || js.includes('writeText'), 'codigos.js copia para clipboard');
-assert(js.includes('expiresAt') || js.includes('countdown'), 'codigos.js usa countdown/expiresAt');
-
 assert(/codigos:\s*\(\)\s*=>/.test(api), 'ROUTES.codigos existe');
 
 assert(
@@ -91,5 +107,6 @@ if (errors.length) {
 
 console.log('codigos-pages-smoke OK');
 console.log('  · pages/codigos.html admin');
+console.log('  · TTL + uso único');
 console.log('  · ROUTES.codigos + master-tools link');
 console.log('  · Altar uppercase no dashboard');

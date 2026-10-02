@@ -92,6 +92,8 @@ async function handleProgress(req, res) {
       scope: scopeBody,
       sort: sortBody,
       limit: limitBody,
+      ttlMinutes,
+      singleUse,
     } = req.body || {};
     metricsSetAction(action || 'n/a');
     const session = await loadValidSession(supabase, token);
@@ -145,6 +147,8 @@ async function handleProgress(req, res) {
       scopeBody,
       sortBody,
       limitBody,
+      ttlMinutes,
+      singleUse,
     };
 
     if (action === 'friendsList') return friends.friendsList(ctx);

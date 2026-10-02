@@ -8,6 +8,8 @@
 import { initAppShell } from './app-shell.js';
 import {
   ApiError,
+  CODE_TTL_DEFAULT,
+  CODE_TTL_OPTIONS,
   LESSONS,
   ROUTES,
   generateCode,
@@ -74,6 +76,22 @@ function populateLessonSelects() {
   }
 }
 
+function populateTtlSelect() {
+  const select = document.getElementById('codes-ttl');
+  if (!select) return;
+  select.innerHTML = CODE_TTL_OPTIONS.map((minutes) => {
+    const selected = minutes === CODE_TTL_DEFAULT ? ' selected' : '';
+    const label = minutes < 60
+      ? `${minutes} min`
+      : (minutes % 60 === 0 ? `${minutes / 60} h` : `${minutes} min`);
+    return `<option value="${minutes}"${selected}>${label}</option>`;
+  }).join('');
+}
+
+function modeLabel(entry) {
+  return entry?.singleUse ? 'uso único' : 'turma';
+}
+
 function formatDateTime(value) {
   if (!value) return '—';
   const date = new Date(value);
@@ -105,10 +123,17 @@ function isEntryExpired(entry) {
   return remainingMs(entry.expiresAt) <= 0;
 }
 
+function isEntryRedeemable(entry) {
+  if (entry?.redeemable === false) return false;
+  if (isEntryExpired(entry)) return false;
+  if (entry?.singleUse && entry?.used) return false;
+  return true;
+}
+
 function findActiveForLesson(lessonId) {
   if (!lessonId) return null;
   return allCodes.find((entry) => (
-    String(entry.lessonId) === String(lessonId) && !isEntryExpired(entry)
+    String(entry.lessonId) === String(lessonId) && isEntryRedeemable(entry)
   )) || null;
 }
 
@@ -172,10 +197,13 @@ function showActiveCode(entry, { eyebrow = 'Código ativo' } = {}) {
   panel.hidden = false;
   if (eyebrowEl) eyebrowEl.textContent = eyebrow;
   codeEl.textContent = entry.code;
-  const usedNote = entry.used
-    ? ' · já usado por aluno(s) — ainda válido para quem não resgatou'
-    : '';
-  metaEl.textContent = `${entry.lessonTitle || entry.lessonId} — +${entry.xp || 0} XP · válido para a turma${usedNote}`;
+  let usedNote = '';
+  if (entry.singleUse && entry.used) {
+    usedNote = ' · esgotado (uso único)';
+  } else if (entry.used && !entry.singleUse) {
+    usedNote = ' · já usado por aluno(s) — ainda válido para quem não resgatou';
+  }
+  metaEl.textContent = `${entry.lessonTitle || entry.lessonId} — +${entry.xp || 0} XP · ${modeLabel(entry)}${usedNote}`;
   setCopyStatus('');
   stopCountdown();
   updateCountdownDisplay(entry);
@@ -209,11 +237,17 @@ function filteredCodes() {
   const lessonId = lessonSelect?.value || '';
   return allCodes.filter((entry) => {
     if (lessonId && String(entry.lessonId) !== String(lessonId)) return false;
-    const expired = isEntryExpired(entry);
-    if (statusFilter === 'active') return !expired;
-    if (statusFilter === 'expired') return expired;
+    const redeemable = isEntryRedeemable(entry);
+    if (statusFilter === 'active') return redeemable;
+    if (statusFilter === 'expired') return !redeemable;
     return true;
   });
+}
+
+function statusBadge(entry) {
+  if (isEntryExpired(entry)) return { text: 'Expirado', kind: 'expired' };
+  if (entry.singleUse && entry.used) return { text: 'Esgotado', kind: 'expired' };
+  return { text: 'Ativo', kind: 'active' };
 }
 
 function renderHistory() {
@@ -233,9 +267,9 @@ function renderHistory() {
   }
 
   rows.forEach((entry) => {
-    const expired = isEntryExpired(entry);
+    const redeemable = isEntryRedeemable(entry);
     const li = document.createElement('li');
-    li.className = `codes-row ${expired ? 'is-expired' : 'is-active'}`;
+    li.className = `codes-row ${redeemable ? 'is-active' : 'is-expired'}`;
 
     const code = document.createElement('span');
     code.className = 'codes-row__code';
@@ -244,7 +278,7 @@ function renderHistory() {
     const actions = document.createElement('div');
     actions.className = 'codes-row__actions';
 
-    if (!expired) {
+    if (redeemable) {
       const copyBtn = document.createElement('button');
       copyBtn.type = 'button';
       copyBtn.className = 'codes-list__copy';
@@ -265,18 +299,21 @@ function renderHistory() {
 
     const meta = document.createElement('p');
     meta.className = 'codes-row__meta';
+    const badgeInfo = statusBadge(entry);
     const badge = document.createElement('span');
-    badge.className = `codes-row__badge ${expired ? 'is-expired' : 'is-active'}`;
-    badge.textContent = expired ? 'Expirado' : 'Ativo';
+    badge.className = `codes-row__badge is-${badgeInfo.kind}`;
+    badge.textContent = badgeInfo.text;
     meta.appendChild(badge);
 
-    let detail = `${entry.lessonTitle || entry.lessonId} — +${entry.xp || 0} XP`;
-    detail += expired
+    let detail = `${entry.lessonTitle || entry.lessonId} — +${entry.xp || 0} XP · ${modeLabel(entry)}`;
+    detail += isEntryExpired(entry)
       ? ` · expirou ${formatDateTime(entry.expiresAt)}`
       : ` · expira ${formatDateTime(entry.expiresAt)}`;
-    if (entry.used && !expired) {
+    if (entry.used && !entry.singleUse && redeemable) {
       detail += ' · já usado por aluno(s)';
-    } else if (entry.used && expired) {
+    } else if (entry.used && entry.singleUse) {
+      detail += ' · resgatado';
+    } else if (entry.used && isEntryExpired(entry)) {
       detail += ' · houve resgate';
     }
     meta.appendChild(document.createTextNode(` ${detail}`));
@@ -333,17 +370,29 @@ function bindMint() {
     }
     if (!currentToken || !submitBtn) return;
 
+    const ttlSelect = document.getElementById('codes-ttl');
+    const singleUseEl = document.getElementById('codes-single-use');
+    const ttlMinutes = Number(ttlSelect?.value) || CODE_TTL_DEFAULT;
+    const singleUse = Boolean(singleUseEl?.checked);
+
     clearApiWarning();
     const original = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = 'Gerando…';
     try {
-      const result = await generateCode(currentToken, lessonId);
+      const result = await generateCode(currentToken, lessonId, { ttlMinutes, singleUse });
       const code = result?.code;
       if (!code?.code) throw new Error('Resposta sem código.');
       await refreshCodes({ keepSelection: false });
-      showActiveCode(code, { eyebrow: 'Código gerado agora' });
-      setCopyStatus('Pronto para copiar e mostrar na sala.', 'ok');
+      showActiveCode(code, {
+        eyebrow: singleUse ? 'Código de uso único gerado' : 'Código gerado agora',
+      });
+      setCopyStatus(
+        singleUse
+          ? 'Uso único — só o primeiro resgate vale.'
+          : 'Pronto para copiar e mostrar na sala.',
+        'ok',
+      );
     } catch (error) {
       const message = error instanceof ApiError
         ? error.message
@@ -391,6 +440,7 @@ async function init() {
   });
 
   populateLessonSelects();
+  populateTtlSelect();
   bindFilters();
   bindMint();
 

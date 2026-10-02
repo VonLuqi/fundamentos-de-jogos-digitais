@@ -65,7 +65,10 @@ export const NOTES_TABLE = 'user_notes';
 export const NOTE_SHARES_TABLE = 'user_note_shares';
 export const NOTE_EVENTS_TABLE = 'user_note_events';
 export const NOTE_ROW_SELECT = 'id, user_id, title, body, pinned, tags, lesson_id, cloned_from_note_id, created_at, updated_at';
+/** TTL padrão (minutos) quando o Mestre não escolhe outra duração. */
 export const CODE_TTL_MINUTES = 20;
+/** Durações permitidas na geração (minutos). */
+export const CODE_TTL_OPTIONS = Object.freeze([5, 10, 20, 30, 45, 60, 90, 120]);
 export const FRIEND_LIMIT = 25;
 export const FRIEND_SEARCH_LIMIT = 8;
 export const NOTE_TITLE_MAX = 120;
@@ -767,6 +770,27 @@ export function addMinutesIso(isoDate, minutes) {
   return new Date(base.getTime() + minutes * 60 * 1000).toISOString();
 }
 
+/** Normaliza TTL escolhido pelo Mestre; default = CODE_TTL_MINUTES. */
+export function normalizeCodeTtlMinutes(raw) {
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return CODE_TTL_MINUTES;
+  const minutes = Math.round(n);
+  if (CODE_TTL_OPTIONS.includes(minutes)) return minutes;
+  return CODE_TTL_MINUTES;
+}
+
+export function isCodeSingleUse(row) {
+  return Boolean(row?.single_use ?? row?.singleUse);
+}
+
+/** Código ainda resgatável (não expirado e, se uso único, ainda não usado). */
+export function isCodeRedeemable(row, nowIso = new Date().toISOString()) {
+  if (!row) return false;
+  if (isCodeExpired(row, nowIso)) return false;
+  if (isCodeSingleUse(row) && row.redeemed_at) return false;
+  return true;
+}
+
 export function codeExpiresAt(row) {
   // Compatibilidade: se a coluna ainda não existir em um ambiente legado,
   // usamos created_at + 20 min como fallback lógico até a migração rodar.
@@ -782,6 +806,8 @@ export function normalizeCodes(rows) {
   return (rows || []).map((row) => {
     const expiresAt = codeExpiresAt(row);
     const expired = expiresAt <= nowIso;
+    const singleUse = isCodeSingleUse(row);
+    const used = Boolean(row.redeemed_at);
     return {
       code: row.code,
       lessonId: row.lesson_id,
@@ -791,8 +817,11 @@ export function normalizeCodes(rows) {
       expiresAt,
       redeemedAt: row.redeemed_at,
       redeemedBy: row.redeemed_by,
-      used: Boolean(row.redeemed_at),
+      singleUse,
+      used,
       expired,
+      /** Ainda pode ser resgatado por alguém. */
+      redeemable: !expired && !(singleUse && used),
     };
   });
 }
@@ -813,15 +842,25 @@ export function recalculateAchievements(userState) {
   return draft.conquistas;
 }
 
-export async function insertCodeWithRetry(payload, retries = 5) {
+/**
+ * @param {object} payload — campos da linha (lesson_id, …) sem code/created_at/expires_at
+ * @param {{ ttlMinutes?: number, singleUse?: boolean, retries?: number }} [options]
+ */
+export async function insertCodeWithRetry(payload, options = {}) {
+  const retries = Number(options.retries) > 0 ? Number(options.retries) : 5;
+  const ttlMinutes = normalizeCodeTtlMinutes(options.ttlMinutes);
+  const singleUse = Boolean(options.singleUse);
   let supportsExpiresColumn = true;
+  let supportsSingleUseColumn = true;
+
   for (let i = 0; i < retries; i += 1) {
     const code = generateCode(7);
     const createdAt = new Date().toISOString();
-    const expiresAt = addMinutesIso(createdAt, CODE_TTL_MINUTES);
-    const insertPayload = supportsExpiresColumn
-      ? { ...payload, code, created_at: createdAt, expires_at: expiresAt }
-      : { ...payload, code, created_at: createdAt };
+    const expiresAt = addMinutesIso(createdAt, ttlMinutes);
+
+    let insertPayload = { ...payload, code, created_at: createdAt };
+    if (supportsExpiresColumn) insertPayload.expires_at = expiresAt;
+    if (supportsSingleUseColumn) insertPayload.single_use = singleUse;
 
     const { data, error } = await supabase
       .from(CODES_TABLE)
@@ -829,11 +868,25 @@ export async function insertCodeWithRetry(payload, retries = 5) {
       .select('*')
       .single();
 
-    if (!error && data) return { code: data, error: null };
+    if (!error && data) return { code: data, error: null, ttlMinutes, singleUse };
 
-    // Coluna ainda não migrada em um ambiente antigo: refaz sem expires_at.
+    // Coluna ainda não migrada: refaz sem o campo ausente.
     if (supportsExpiresColumn && (error?.code === 'PGRST204' || /expires_at/i.test(error?.message || ''))) {
       supportsExpiresColumn = false;
+      i -= 1;
+      continue;
+    }
+    if (
+      supportsSingleUseColumn
+      && (error?.code === 'PGRST204' || /single_use/i.test(error?.message || ''))
+    ) {
+      if (singleUse) {
+        return {
+          code: null,
+          error: new Error('Coluna single_use ausente. Rode a migração de códigos.'),
+        };
+      }
+      supportsSingleUseColumn = false;
       i -= 1;
       continue;
     }

@@ -55,8 +55,8 @@ CREATE INDEX IF NOT EXISTS auth_rate_events_user_created_idx
   WHERE username_hash IS NOT NULL;
 
 -- Tabela de códigos de resgate (histórico)
--- O código é compartilhado pela turma: `redeemed_at`/`redeemed_by` registram apenas o
--- primeiro resgate (telemetria). A única trava de invalidação é `expires_at`.
+-- Por padrão o código é compartilhado pela turma até `expires_at`.
+-- Com `single_use = true`, o primeiro resgate esgota o código.
 CREATE TABLE IF NOT EXISTS redeem_codes (
   code text PRIMARY KEY,
   lesson_id text NOT NULL,
@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS redeem_codes (
   created_by integer REFERENCES users(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now(),
   expires_at timestamptz NOT NULL DEFAULT (now() + interval '20 minutes'),
+  single_use boolean NOT NULL DEFAULT false,
   redeemed_by integer REFERENCES users(id) ON DELETE SET NULL,
   redeemed_at timestamptz NULL,
   CONSTRAINT redeem_codes_code_len_chk CHECK (char_length(code) = 7),

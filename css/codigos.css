@@ -62,6 +62,44 @@
   margin-bottom: 1.25rem;
 }
 
+.codes-field--ttl {
+  flex: 0 1 9rem;
+}
+
+.codes-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  flex: 1 1 100%;
+  max-width: 36rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(92, 67, 34, 0.55);
+  background: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+.codes-check input {
+  margin-top: 0.2rem;
+  accent-color: var(--hades-gold);
+}
+
+.codes-check strong {
+  display: block;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.codes-check em {
+  display: block;
+  margin-top: 0.15rem;
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--hades-text-muted);
+}
+
 .codes-field {
   display: flex;
   flex-direction: column;

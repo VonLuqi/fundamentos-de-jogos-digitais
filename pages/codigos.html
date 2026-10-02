@@ -97,13 +97,13 @@
 
         <p class="codes-lead">
           Gere o código da aula, mostre na sala e deixe a turma resgatar no Altar.
-          Vale para todos por <strong>20 minutos</strong> — cada aluno só uma vez.
+          Escolha a <strong>duração</strong> e se o código é <strong>de turma</strong> ou <strong>uso único</strong>.
         </p>
 
         <section class="codes-mint" aria-labelledby="codes-mint-title">
           <header class="codes-section-head">
             <h2 class="codes-section-title" id="codes-mint-title">Gerar código</h2>
-            <p class="codes-section-sub">Escolha a aula e emita a oferenda da turma.</p>
+            <p class="codes-section-sub">Escolha a aula, a validade e o modo de uso.</p>
           </header>
 
           <form class="codes-mint__form" id="codes-generate-form">
@@ -113,6 +113,22 @@
                 <option value="">Selecione…</option>
               </select>
             </label>
+
+            <label class="codes-field codes-field--ttl" for="codes-ttl">
+              <span class="codes-field__label">Duração</span>
+              <select class="codes-field__select" id="codes-ttl" name="ttlMinutes">
+                <!-- preenchido por js/codigos.js -->
+              </select>
+            </label>
+
+            <label class="codes-check" for="codes-single-use">
+              <input type="checkbox" id="codes-single-use" name="singleUse" />
+              <span>
+                <strong>Uso único</strong>
+                <em>Só o primeiro aluno que resgatar recebe a oferenda.</em>
+              </span>
+            </label>
+
             <button class="btn-gold btn-gold--pulse" type="submit" id="btn-generate-code">
               Gerar
             </button>
@@ -133,7 +149,7 @@
           </div>
 
           <p class="codes-hint" id="codes-mint-hint">
-            Se já houver um código ativo desta aula, ele aparece acima — sem precisar gerar de novo.
+            Padrão: código de turma (todos resgatam até expirar). Marque uso único só quando for para um aluno.
           </p>
         </section>
 

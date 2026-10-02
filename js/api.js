@@ -712,10 +712,22 @@ export function listCodes(token) {
   });
 }
 
-export function generateCode(token, lessonId) {
+/** Durações permitidas (minutos) — alinhadas a api/_lib/progress/shared.js */
+export const CODE_TTL_OPTIONS = Object.freeze([5, 10, 20, 30, 45, 60, 90, 120]);
+export const CODE_TTL_DEFAULT = 20;
+
+export function generateCode(token, lessonId, options = {}) {
+  const ttlMinutes = options.ttlMinutes;
+  const singleUse = Boolean(options.singleUse);
   return request('/progress', {
     method: 'POST',
-    body: JSON.stringify({ token, action: 'generateCode', lessonId }),
+    body: JSON.stringify({
+      token,
+      action: 'generateCode',
+      lessonId,
+      ...(ttlMinutes != null ? { ttlMinutes } : {}),
+      singleUse,
+    }),
   });
 }
 
