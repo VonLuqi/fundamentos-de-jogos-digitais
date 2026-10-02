@@ -64,12 +64,14 @@ import {
   normalizeAchievementRarity,
   listFriends,
   listClassmates,
+  leaderboardGet,
   listNotes,
   provaAdminGetOverview,
   provaAdminSetExamOpen,
 } from './api.js';
 import { formatRate, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
 import { localDatetimeToIsoUtc } from './hades-despertar/ui/pauseVeil.js';
+import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
 
 /* ---------- Estado local de apresentação (espelho do servidor) ---------- */
 let currentUser = null;
@@ -382,6 +384,42 @@ function applyAdminSkin(user) {
 }
 
 /**
+ * Aplica VFX de pódio (turma · XP) no perfil e no preview do Placar.
+ * @param {number|null|undefined} rank
+ */
+function applyDashboardPodium(rank) {
+  const panel = document.getElementById('profile-panel');
+  const frame = document.getElementById('avatar-frame');
+  const summary = document.getElementById('ranking-preview-summary');
+  const podium = podiumTierForRank(rank);
+
+  applyPodiumClasses(panel, rank);
+  applyPodiumClasses(frame, rank);
+
+  if (!summary) return;
+  if (podium) {
+    summary.textContent = `#${podium.rank} na turma · ${podium.label} — o Domínio reconhece teu lugar no pódio.`;
+  } else if (rank != null && Number(rank) > 0) {
+    summary.textContent = `#${Number(rank)} na turma · XP — abre o Placar para ver o top completo.`;
+  } else {
+    summary.textContent = 'Turma e global · XP, relíquias e recorde do Juízo — sem vazar a economia do Acheron.';
+  }
+}
+
+async function refreshDashboardPodium(token) {
+  if (!token || currentUser?.role === 'admin') {
+    applyDashboardPodium(null);
+    return;
+  }
+  try {
+    const payload = await leaderboardGet(token, { scope: 'turma', sort: 'xp' });
+    applyDashboardPodium(payload?.self?.rank ?? null);
+  } catch {
+    applyDashboardPodium(null);
+  }
+}
+
+/**
  * Previews do trilho esquerdo (Salão + Grimório + O Despertar).
  * Contagem da turma completa chega na Task 4 (`classmatesList`).
  */
@@ -405,10 +443,11 @@ async function renderRailPreviews(token) {
   const despertarPreviewPromise = renderDespertarPreview(token);
   const rankingCta = document.getElementById('ranking-preview-cta');
   if (rankingCta) rankingCta.href = ROUTES.ranking();
+  const podiumPromise = refreshDashboardPodium(token);
 
   if (!token) {
     if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
-    await despertarPreviewPromise;
+    await Promise.all([despertarPreviewPromise, podiumPromise]);
     return;
   }
 
@@ -507,7 +546,7 @@ async function renderRailPreviews(token) {
     if (companionsEl) companionsEl.textContent = '— / 25';
   }
 
-  await despertarPreviewPromise;
+  await Promise.all([despertarPreviewPromise, podiumPromise]);
 }
 
 function formatProvaGateLabel(state) {

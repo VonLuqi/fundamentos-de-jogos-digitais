@@ -12,6 +12,7 @@ import {
   logout,
   requireSession,
 } from './api.js';
+import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
 
 const SORT_LABELS = Object.freeze({
   xp: 'XP',
@@ -63,6 +64,7 @@ function renderRows(body, entries, selfId) {
   for (const row of entries) {
     const tr = document.createElement('tr');
     if (Number(row.userId) === Number(selfId)) tr.classList.add('is-self');
+    applyPodiumClasses(tr, row.rank);
 
     const cells = [
       row.rank,
@@ -75,6 +77,13 @@ function renderRows(body, entries, selfId) {
     cells.forEach((value, index) => {
       const td = document.createElement('td');
       td.textContent = escapeCell(value);
+      if (index === 0) {
+        const podium = podiumTierForRank(row.rank);
+        if (podium) {
+          td.className = 'ranking-table__rank';
+          td.title = podium.label;
+        }
+      }
       if (index === 1 && row.username) {
         td.title = `@${row.username}`;
       }
@@ -88,18 +97,23 @@ function renderSelf(panel, lineEl, self, total, sort, inTop) {
   if (!panel || !lineEl) return;
   if (!self) {
     panel.hidden = true;
+    applyPodiumClasses(panel, null);
     return;
   }
   panel.hidden = false;
+  applyPodiumClasses(panel, self.rank);
   const sortLabel = SORT_LABELS[sort] || sort;
   const metric = sort === 'achievements'
     ? `${formatNumber(self.achievements)} relíquias`
     : sort === 'juizoBest'
       ? `recorde ${formatNumber(self.juizoBest)}`
       : `${formatNumber(self.xp)} XP`;
-  const note = inTop
-    ? 'Estás no top do Placar.'
-    : `Fora do top — ainda assim o Domínio registra tua posição.`;
+  const podium = podiumTierForRank(self.rank);
+  const note = podium
+    ? `Pódio ${podium.label}.`
+    : inTop
+      ? 'Estás no top do Placar.'
+      : 'Fora do top — ainda assim o Domínio registra tua posição.';
   setText(
     lineEl,
     `#${self.rank} de ${formatNumber(total)} · ${metric} · ${sortLabel}. ${note}`,
