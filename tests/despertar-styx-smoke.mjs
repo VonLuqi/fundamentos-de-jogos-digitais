@@ -142,7 +142,7 @@ await run('D2: cadeia Foice — um elo revelado por vez', () => {
     'danca_da_morte',
     'colheita_absoluta',
   ];
-  const state = new GameState({ souls: '10000000000', generators: { wandering_shade: 1 } });
+  const state = new GameState({ souls: '10000000000000', generators: { wandering_shade: 1 } });
 
   const countRevealedUnowned = () => FOICE.filter((id) => {
     const view = describeUpgradeCard(state, id);
@@ -285,7 +285,7 @@ await run('juramento ×2 no clique e no gerador', () => {
 
 await run('catch-up T1: qty 100 revela Eclipse ×5 e SPS sobe', () => {
   const state = new GameState({
-    souls: '500000',
+    souls: '500000000',
     generators: { wandering_shade: 100 },
     upgrades: ['umbras_despertas', 'cortejo_das_sombras', 'legiao_das_umbras', 'mare_de_sombras'],
   });
@@ -306,7 +306,7 @@ await run('catch-up T1: qty 100 revela Eclipse ×5 e SPS sobe', () => {
 
 await run('catch-up T4: qty 50 revela Código ×5 e SPS do Juiz sobe', () => {
   const state = new GameState({
-    souls: '60000000',
+    souls: '60000000000',
     generators: { tartarus_judge: 50 },
     upgrades: ['veredito_tartaro', 'lei_inquebravel', 'banco_dos_juizes'],
   });

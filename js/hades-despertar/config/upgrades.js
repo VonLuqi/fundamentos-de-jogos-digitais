@@ -62,7 +62,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'fio_da_foice',
     name: 'Fio da Foice',
-    cost: '250000',
+    cost: '250000000',
     kind: 'clickMult',
     factor: '2',
     requires: { upgradeId: 'colheita_eterna', minSouls: '0' },
@@ -70,7 +70,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'lamina_do_styx',
     name: 'Lâmina do Styx',
-    cost: '1250000',
+    cost: '1250000000',
     kind: 'clickMult',
     factor: '2',
     requires: { upgradeId: 'fio_da_foice', minSouls: '0' },
@@ -78,7 +78,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'ceifa_das_almas',
     name: 'Ceifa das Almas',
-    cost: '6250000',
+    cost: '6250000000',
     kind: 'clickMult',
     factor: '5',
     requires: { upgradeId: 'lamina_do_styx', minSouls: '0' },
@@ -86,7 +86,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'pacto_do_corte',
     name: 'Pacto do Corte',
-    cost: '31250000',
+    cost: '31250000000',
     kind: 'clickMult',
     factor: '5',
     requires: { upgradeId: 'ceifa_das_almas', minSouls: '0' },
@@ -94,7 +94,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'eco_da_foice',
     name: 'Eco da Foice',
-    cost: '100000000',
+    cost: '100000000000',
     kind: 'clickKSps',
     factor: '0.01',
     requires: { upgradeId: 'pacto_do_corte', minSouls: '0' },
@@ -102,7 +102,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'danca_da_morte',
     name: 'Dança da Morte',
-    cost: '500000000',
+    cost: '500000000000',
     kind: 'clickMult',
     factor: '2',
     requires: { upgradeId: 'eco_da_foice', minSouls: '0' },
@@ -110,7 +110,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'colheita_absoluta',
     name: 'Colheita Absoluta',
-    cost: '2500000000',
+    cost: '2500000000000',
     kind: 'clickMult',
     factor: '5',
     requires: { upgradeId: 'danca_da_morte', minSouls: '0' },
@@ -137,7 +137,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'legiao_das_umbras',
     name: 'Legião das Umbras',
-    cost: '5000',
+    cost: '5000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'wandering_shade',
@@ -146,7 +146,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'mare_de_sombras',
     name: 'Maré de Sombras',
-    cost: '50000',
+    cost: '50000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'wandering_shade',
@@ -155,7 +155,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'eclipse_do_acheron',
     name: 'Eclipse do Acheron',
-    cost: '500000',
+    cost: '500000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'wandering_shade',
@@ -164,7 +164,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'cortejo_infinito',
     name: 'Cortejo Infinito',
-    cost: '5000000',
+    cost: '5000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'wandering_shade',
@@ -173,7 +173,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'noite_sem_fim',
     name: 'Noite Sem Fim',
-    cost: '50000000',
+    cost: '50000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'wandering_shade',
@@ -201,7 +201,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'remadores_do_styx',
     name: 'Remadores do Styx',
-    cost: '50000',
+    cost: '50000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'charon_servants',
@@ -210,7 +210,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'armada_das_margens',
     name: 'Armada das Margens',
-    cost: '500000',
+    cost: '500000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'charon_servants',
@@ -219,7 +219,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'travessia_eterna',
     name: 'Travessia Eterna',
-    cost: '5000000',
+    cost: '5000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'charon_servants',
@@ -228,7 +228,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'porto_das_cem_barcas',
     name: 'Porto das Cem Barcas',
-    cost: '50000000',
+    cost: '50000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'charon_servants',
@@ -237,7 +237,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'mar_de_obolos',
     name: 'Mar de Óbolos',
-    cost: '500000000',
+    cost: '500000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'charon_servants',
@@ -265,7 +265,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'matilha_do_ade',
     name: 'Matilha do Ade',
-    cost: '550000',
+    cost: '550000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'cerberian_hound',
@@ -274,7 +274,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'guardiao_triplo',
     name: 'Guardião Triplo',
-    cost: '5500000',
+    cost: '5500000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'cerberian_hound',
@@ -283,7 +283,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'canil_do_tartaro',
     name: 'Canil do Tártaro',
-    cost: '55000000',
+    cost: '55000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'cerberian_hound',
@@ -292,7 +292,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'uivo_das_portas',
     name: 'Uivo das Portas',
-    cost: '550000000',
+    cost: '550000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'cerberian_hound',
@@ -301,7 +301,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'fome_sem_fim',
     name: 'Fome Sem Fim',
-    cost: '5500000000',
+    cost: '5500000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'cerberian_hound',
@@ -329,7 +329,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'banco_dos_juizes',
     name: 'Banco dos Juízes',
-    cost: '6000000',
+    cost: '6000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'tartarus_judge',
@@ -338,7 +338,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'codigo_das_profundezas',
     name: 'Código das Profundezas',
-    cost: '60000000',
+    cost: '60000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'tartarus_judge',
@@ -347,7 +347,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'sentenca_coletiva',
     name: 'Sentença Coletiva',
-    cost: '600000000',
+    cost: '600000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'tartarus_judge',
@@ -356,7 +356,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'colegio_infernus',
     name: 'Colégio Infernus',
-    cost: '3000000000',
+    cost: '3000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'tartarus_judge',
@@ -365,7 +365,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'lei_do_abismo',
     name: 'Lei do Abismo',
-    cost: '15000000000',
+    cost: '15000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'tartarus_judge',
@@ -393,7 +393,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'caldeiras_gemeas',
     name: 'Caldeiras Gêmeas',
-    cost: '65000000',
+    cost: '65000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'phlegethon_forge',
@@ -402,7 +402,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'rio_de_ferro',
     name: 'Rio de Ferro',
-    cost: '650000000',
+    cost: '650000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'phlegethon_forge',
@@ -411,7 +411,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'fundicao_eterna',
     name: 'Fundição Eterna',
-    cost: '6500000000',
+    cost: '6500000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'phlegethon_forge',
@@ -420,7 +420,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'cinzas_do_rio',
     name: 'Cinzas do Rio',
-    cost: '32500000000',
+    cost: '32500000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'phlegethon_forge',
@@ -429,7 +429,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'coracao_de_magma',
     name: 'Coração de Magma',
-    cost: '162500000000',
+    cost: '162500000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'phlegethon_forge',
@@ -457,7 +457,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'corte_obsidiana',
     name: 'Corte Obsidiana',
-    cost: '700000000',
+    cost: '700000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'obsidian_throne',
@@ -466,7 +466,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'dominio_ctoniano',
     name: 'Domínio Ctoniano',
-    cost: '7000000000',
+    cost: '7000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'obsidian_throne',
@@ -475,7 +475,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'imperio_sem_sol',
     name: 'Império Sem Sol',
-    cost: '70000000000',
+    cost: '70000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'obsidian_throne',
@@ -484,7 +484,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'trono_sem_fim',
     name: 'Trono Sem Fim',
-    cost: '350000000000',
+    cost: '350000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'obsidian_throne',
@@ -493,7 +493,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'noite_do_imperador',
     name: 'Noite do Imperador',
-    cost: '1750000000000',
+    cost: '1750000000000000',
     kind: 'generatorMult',
     factor: '5',
     generatorId: 'obsidian_throne',
@@ -502,7 +502,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'coroacao_imperador',
     name: 'Coroação do Imperador',
-    cost: '1000000',
+    cost: '1000000000',
     kind: 'allGeneratorsMult',
     factor: '2',
     requires: { minSouls: '0' },
@@ -510,7 +510,7 @@ export const UPGRADES = freezeAll([
   {
     id: 'rios_unificados',
     name: 'Rios Unificados',
-    cost: '100000000',
+    cost: '100000000000',
     kind: 'allGeneratorsMult',
     factor: '2',
     requires: { minSouls: '0' },
