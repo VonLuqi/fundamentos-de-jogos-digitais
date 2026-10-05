@@ -127,8 +127,8 @@ run('pickEcoDoStyxUpgrade: com 3 shades, ainda o mais barato', () => {
 
 run('GameState prestige aplica eco_do_styx', () => {
   const state = new GameState({
-    souls: '1000000000',
-    runSouls: '1000000000',
+    souls: '4000000000',
+    runSouls: '4000000000',
     talents: ['eco_do_styx', 'margem_generosa'],
   });
   const ritual = state.applyPrestige();
@@ -140,11 +140,11 @@ run('GameState prestige aplica eco_do_styx', () => {
 
 run('server applyPrestige aplica eco_do_styx', () => {
   const db = {
-    souls: '1000000000.00',
+    souls: '4000000000.00',
     obols: '0.00',
     mnemosyne: '0.00',
-    lifetime_souls: '1000000000.00',
-    run_souls: '1000000000.00',
+    lifetime_souls: '4000000000.00',
+    run_souls: '4000000000.00',
     prestige_count: 0,
     generators_state: { wandering_shade: 5 },
     upgrades_state: ['foice_afilada'],

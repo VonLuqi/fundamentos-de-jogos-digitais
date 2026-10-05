@@ -108,8 +108,8 @@ run('describeLethe inclui bloco de memória', () => {
 
 run('permanentes sobrevivem ao ritual (contagem)', () => {
   const state = new GameState({
-    souls: '1000000000',
-    runSouls: '1000000000',
+    souls: '4000000000',
+    runSouls: '4000000000',
     talents: ['olho_da_curva'],
     verdictPurchases: ['peso_das_faixas'],
   });

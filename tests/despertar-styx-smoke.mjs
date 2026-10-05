@@ -322,7 +322,7 @@ await run('catch-up T4: qty 50 revela Código ×5 e SPS do Juiz sobe', () => {
   assert.equal(cmp(state.sps(), '235000'), 0);
 });
 
-await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', () => {
+await run('Lethe: prévia em 1e8 bloqueia o ritual; 4e9 bebe e zera geradores', () => {
   const wall = new GameState({ runSouls: '100000000', souls: '100000000' });
   assert.equal(isLetheOpen(wall), true);
   const preview = describeLethe(wall);
@@ -331,8 +331,8 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', 
 
   const ripe = new GameState({
     souls: '0',
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { wandering_shade: 3, charon_servants: 1 },
     upgrades: ['foice_afilada'],
   });
@@ -350,15 +350,15 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', 
   assert.equal(cmp(ripe.mnemosyne, '0'), 0, '1 óbolo → 0 essência (2:1)');
   assert.equal(cmp(ripe.souls, '0'), 0);
   assert.equal(cmp(ripe.runSouls, '0'), 0);
-  assert.equal(cmp(ripe.lifetimeSouls, '1000000000'), 0);
+  assert.equal(cmp(ripe.lifetimeSouls, '4000000000'), 0);
   assert.equal(cmp(prestigeBonus(ripe.obols, ripe.talents), '1.05'), 0);
 });
 
 await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
-  // 4e9 → 2 óbolos → 1 essência (2:1)
+  // 16e9 → 2 óbolos → 1 essência (2:1)
   const state = new GameState({
-    runSouls: '4000000000',
-    lifetimeSouls: '4000000000',
+    runSouls: '16000000000',
+    lifetimeSouls: '16000000000',
     generators: { wandering_shade: 2 },
   });
   assert.equal(state.applyPrestige().ok, true);
@@ -374,7 +374,7 @@ await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
   assert.equal(describeTalentCard(state, 'memoria_das_sombras').canBuy, false);
 });
 
-await run('harness só em localhost com ?harness=1; concede 1e9', () => {
+await run('harness só em localhost com ?harness=1; concede 4e9', () => {
   assert.equal(harnessEnabled({ hostname: 'example.com', search: '?harness=1' }), false);
   assert.equal(harnessEnabled({ hostname: 'localhost', search: '' }), false);
   assert.equal(harnessEnabled({ hostname: 'localhost', search: '?harness=1' }), true);
@@ -382,7 +382,7 @@ await run('harness só em localhost com ?harness=1; concede 1e9', () => {
 
   const state = new GameState();
   assert.equal(applyHarnessGrant(state, { hostname: 'localhost', search: '?harness=1' }), true);
-  assert.equal(cmp(state.runSouls, '1000000000'), 0);
+  assert.equal(cmp(state.runSouls, '4000000000'), 0);
   assert.equal(state.canPrestige(), true);
   assert.equal(applyHarnessGrant(state, { hostname: 'localhost', search: '?harness=1' }), false);
 });

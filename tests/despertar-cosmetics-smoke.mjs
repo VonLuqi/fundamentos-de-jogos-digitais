@@ -249,8 +249,8 @@ run('selo vence blade Styx na mesma layer', () => {
 run('Lethe: Styx some; Bancada permanece', () => {
   const state = new GameState({
     souls: '100000',
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { charon_servants: 1, wandering_shade: 1 },
     upgrades: ['foice_afilada', 'moeda_no_barquinho'],
     verdictPurchases: ['selo_do_juiz'],

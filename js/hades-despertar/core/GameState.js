@@ -322,11 +322,11 @@ export class GameState {
   }
 
   prestigePreview() {
-    return formulaPrestigePreview(this.runSouls);
+    return formulaPrestigePreview(this.runSouls, this.prestigeCount);
   }
 
   canPrestige() {
-    return canPrestigeRun(this.runSouls);
+    return canPrestigeRun(this.runSouls, this.prestigeCount);
   }
 
   generatorUpgradeMult(id) {

@@ -134,16 +134,32 @@ await run('G4.1 lineSPS / shiny no total SPS', () => {
   eqMoney(sps, '3.8');
 });
 
-await run('Óbolos: runSouls 1e9 → 1; 9.99e8 → 0', () => {
-  assert.equal(obolsFromRunSouls('1000000000'), '1');
-  assert.equal(obolsFromRunSouls('999000000'), '0');
-  assert.equal(canPrestige('999000000'), false);
-  assert.equal(canPrestige('1000000000'), true);
-  assert.deepEqual(prestigePreview('1000000000'), {
+await run('Óbolos: runSouls 4e9 → 1; 1e9 → 0; Catábase divide o yield', () => {
+  assert.equal(obolsFromRunSouls('4000000000'), '1');
+  assert.equal(obolsFromRunSouls('1000000000'), '0');
+  assert.equal(obolsFromRunSouls('3999000000'), '0');
+  assert.equal(canPrestige('1000000000'), false);
+  assert.equal(canPrestige('4000000000'), true);
+  assert.deepEqual(prestigePreview('4000000000'), {
     obolsGain: '1',
     mnemosyneGain: '0',
     unlocked: true,
   });
+  // 16e9 → raw 2; prestigeCount 1 → floor(2/2)=1; count 2 → floor(2/3)=0
+  assert.equal(obolsFromRunSouls('16000000000', 0), '2');
+  assert.equal(obolsFromRunSouls('16000000000', 1), '1');
+  assert.equal(obolsFromRunSouls('16000000000', 2), '0');
+  assert.deepEqual(prestigePreview('16000000000', 0), {
+    obolsGain: '2',
+    mnemosyneGain: '1',
+    unlocked: true,
+  });
+  assert.deepEqual(prestigePreview('16000000000', 1), {
+    obolsGain: '1',
+    mnemosyneGain: '0',
+    unlocked: true,
+  });
+  assert.equal(canPrestige('16000000000', 2), false);
   assert.equal(mnemosyneFromObolsGain('10'), '5');
   assert.equal(mnemosyneFromObolsGain('7'), '3');
   assert.equal(mnemosyneFromObolsGain('2'), '1');

@@ -99,7 +99,7 @@ export function computeEligibleEduLogs(state = {}, { syncOk = false } = {}) {
   }
   const obols = state.obols ?? '0';
   const mnemosyne = state.mnemosyne ?? '0';
-  const ritualReady = canPrestige(runSouls);
+  const ritualReady = canPrestige(runSouls, prestigeCount);
   const letheOpen =
     prestigeCount >= 1
     || cmp(obols, '0') > 0

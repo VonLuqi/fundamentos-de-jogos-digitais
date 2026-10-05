@@ -159,8 +159,8 @@ await run('SPS HUD = 2 geradores + 1 juramento + 1 óbolo', () => {
 await run('Juramentos ×2 no alvo; resetam no Lethe', () => {
   const state = new GameState({
     souls: '1000',
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { wandering_shade: 1 },
   });
   assert.equal(state.buyUpgrade('umbras_despertas').ok, true);
@@ -174,11 +174,11 @@ await run('Juramentos ×2 no alvo; resetam no Lethe', () => {
 await run('Ritual só com obolsGain≥1; mantém óbolos/essência/talentos', () => {
   const poor = new GameState({ runSouls: '100000000' });
   assert.equal(poor.canPrestige(), false);
-  // 4e9 → 2 óbolos → 1 essência (2:1)
+  // 16e9 → 2 óbolos → 1 essência (2:1)
   const ripe = new GameState({
-    runSouls: '4000000000',
+    runSouls: '16000000000',
     souls: '0',
-    lifetimeSouls: '4000000000',
+    lifetimeSouls: '16000000000',
     generators: { wandering_shade: 2 },
     upgrades: ['foice_afilada'],
     talents: ['memoria_das_sombras'],

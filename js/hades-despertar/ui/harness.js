@@ -5,7 +5,7 @@
 
 import { cmp } from '../core/decimal.js';
 
-export const HARNESS_GRANT = '1000000000';
+export const HARNESS_GRANT = '4000000000';
 
 function isLocalHost(loc) {
   if (!loc) return false;

@@ -157,8 +157,8 @@ run('buyGenerator rola negativo / gold (RNG injetável)', () => {
 run('Lethe zera negativo e gold com geradores (Q12)', () => {
   const state = new GameState({
     souls: '0',
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { wandering_shade: 5 },
     shinyCounts: { wandering_shade: 2 },
     goldCounts: { wandering_shade: 1 },
@@ -256,8 +256,8 @@ run('applyPrestige (server) zera shinyCounts', () => {
     souls: '1000.00',
     obols: '0.00',
     mnemosyne: '0.00',
-    lifetime_souls: '1000000000.00',
-    run_souls: '1000000000.00',
+    lifetime_souls: '4000000000.00',
+    run_souls: '4000000000.00',
     prestige_count: 0,
     generators_state: { wandering_shade: 5 },
     shiny_counts: { wandering_shade: 3 },

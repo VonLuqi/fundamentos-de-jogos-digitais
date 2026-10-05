@@ -302,8 +302,8 @@ check('client lastSyncAt mais velho que DB → 409', () => {
 check('prestige com runSouls alto credita óbolos e zera geradores', () => {
   const db = blankRow({
     souls: '1000.00',
-    run_souls: '1000000000.00',
-    lifetime_souls: '1000000000.00',
+    run_souls: '4000000000.00',
+    lifetime_souls: '4000000000.00',
     generators_state: { wandering_shade: 5 },
     upgrades_state: ['foice_afilada'],
   });

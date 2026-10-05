@@ -349,11 +349,16 @@ export function clickPower({
   return add(flatPart, spsPart);
 }
 
-export function obolsFromRunSouls(runSouls) {
+export function obolsFromRunSouls(runSouls, prestigeCount = 0) {
   const p = toScaled(runSouls || '0');
   const q = toScaled(PRESTIGE_RUN_DIVISOR);
   if (p <= 0n || q <= 0n) return '0';
-  return floorSqrtRatio(p, q).toString();
+  const raw = floorSqrtRatio(p, q);
+  if (raw <= 0n) return '0';
+  // Dificuldade progressiva por Catábase: floor(raw / (1 + prestigeCount)).
+  const n = Math.max(0, Number.parseInt(prestigeCount, 10) || 0);
+  const denom = BigInt(1 + n);
+  return (raw / denom).toString();
 }
 
 export function mnemosyneFromObolsGain(obolsGain) {
@@ -363,12 +368,12 @@ export function mnemosyneFromObolsGain(obolsGain) {
   return (gain / 2n).toString();
 }
 
-export function canPrestige(runSouls) {
-  return cmp(obolsFromRunSouls(runSouls), '0') > 0;
+export function canPrestige(runSouls, prestigeCount = 0) {
+  return cmp(obolsFromRunSouls(runSouls, prestigeCount), '0') > 0;
 }
 
-export function prestigePreview(runSouls) {
-  const obolsGain = obolsFromRunSouls(runSouls);
+export function prestigePreview(runSouls, prestigeCount = 0) {
+  const obolsGain = obolsFromRunSouls(runSouls, prestigeCount);
   const unlocked = cmp(obolsGain, '0') > 0;
   return {
     obolsGain,

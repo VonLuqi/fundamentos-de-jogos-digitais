@@ -226,7 +226,7 @@ export function buildStateDto(rowOrCanonical, options = {}) {
     shinyCounts,
     goldCounts,
   }));
-  const preview = prestigePreview(state.runSouls);
+  const preview = prestigePreview(state.runSouls, state.prestigeCount);
 
   const dto = {
     souls: decimalString(state.souls),
@@ -602,7 +602,7 @@ export function validateSync(dbRow, clientState, now = new Date()) {
 export function applyPrestige(dbRow, now = new Date()) {
   const db = rowToCanonical(dbRow);
   const nowIso = (now instanceof Date ? now : new Date(now)).toISOString();
-  if (!canPrestige(db.runSouls)) {
+  if (!canPrestige(db.runSouls, db.prestigeCount)) {
     return {
       ok: false,
       status: 400,
@@ -611,7 +611,7 @@ export function applyPrestige(dbRow, now = new Date()) {
     };
   }
 
-  const preview = prestigePreview(db.runSouls);
+  const preview = prestigePreview(db.runSouls, db.prestigeCount);
   const effects = talentEffects(db.talents);
   const nextGenerators = normalizeGenerators({});
   if (effects.startingGenerators) {

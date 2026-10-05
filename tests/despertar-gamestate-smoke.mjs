@@ -116,8 +116,8 @@ await run('compra falha é no-op e carteira não fica negativa', () => {
 await run('snapshot DTO + prestígio local', () => {
   const state = new GameState({
     souls: '0',
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { wandering_shade: 3 },
     upgrades: ['foice_afilada'],
   });
@@ -134,11 +134,11 @@ await run('snapshot DTO + prestígio local', () => {
   eqMoney(state.souls, '0');
   eqMoney(state.runSouls, '0');
   eqMoney(state.obols, '1');
-  eqMoney(state.mnemosyne, '1');
+  eqMoney(state.mnemosyne, '0');
   assert.equal(state.prestigeCount, 1);
   assert.equal(state.upgrades.length, 0);
   assert.equal(Object.keys(state.quantities()).length, 0);
-  eqMoney(state.lifetimeSouls, '1000000000');
+  eqMoney(state.lifetimeSouls, '4000000000');
   assert.ok(state.eduLogsSeen.includes('log_prestige'));
 });
 

@@ -106,7 +106,7 @@ run('runSouls = 1e8 → log_lethe_unlock; segunda pass não re-dispara', () => {
 });
 
 run('canPrestige → log_lethe_ritual one-shot', () => {
-  const state = new GameState({ runSouls: '1000000000' });
+  const state = new GameState({ runSouls: '4000000000' });
   assert.equal(state.canPrestige(), true);
   state.unlockLogs();
   assert.ok(state.eduLogsSeen.includes('log_lethe_ritual'));
