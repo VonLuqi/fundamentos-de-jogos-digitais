@@ -58,8 +58,22 @@ const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 staticAssert(pkg.includes('despertar-formulas-smoke.mjs'), 'npm run check inclui este smoke');
 
 staticAssert(GENERATORS.length === 6, '6 geradores no catálogo');
-staticAssert(UPGRADES.length === 19, '19 juramentos no catálogo');
+staticAssert(UPGRADES.length === 56, '56 juramentos no catálogo');
 staticAssert(TALENTS.length === 13, '13 talentos no Panteão');
+
+const eclipse = UPGRADES.find((u) => u.id === 'eclipse_do_acheron');
+staticAssert(eclipse?.kind === 'generatorMult', 'T1 qty100 é generatorMult');
+staticAssert(eclipse?.factor === '5', 'T1 qty100 catch-up ×5');
+staticAssert(eclipse?.requires?.quantity === 100, 'T1 qty100 requer 100');
+const codigo = UPGRADES.find((u) => u.id === 'codigo_das_profundezas');
+staticAssert(codigo?.factor === '5', 'T4 qty50 catch-up ×5');
+staticAssert(codigo?.requires?.quantity === 50, 'T4 qty50 requer 50');
+const abismo = UPGRADES.find((u) => u.id === 'lei_do_abismo');
+staticAssert(abismo?.factor === '5', 'T4 qty200 ×5');
+staticAssert(abismo?.requires?.quantity === 200, 'T4 qty200 requer 200');
+const eco = UPGRADES.find((u) => u.id === 'eco_da_foice');
+staticAssert(eco?.kind === 'clickKSps', 'eco_da_foice é clickKSps');
+staticAssert(eco?.factor === '0.01', 'eco_da_foice 1% SPS');
 
 if (errors.length) {
   console.error('despertar-formulas-smoke (estático):');
@@ -220,6 +234,25 @@ await run('D1: meetsUpgradeRequirement upgradeId / allUpgradeIds', () => {
     }),
     true,
   );
+});
+
+await run('eco_da_foice: clickPower escala com SPS (kSps Styx)', () => {
+  // Aditivo: base×mult + kSps×SPS. mult 1 + SPS 1000 + eco 0.01 → 1 + 10 = 11
+  const power = clickPower({
+    sps: '1000',
+    upgrades: ['eco_da_foice'],
+  });
+  eqMoney(power, '11', '1 + 0.01×1000 = 11');
+
+  // foice ×2 + eco: 2 + 10 = 12 (não 22 multiplicativo)
+  eqMoney(
+    clickPower({ sps: '1000', upgrades: ['foice_afilada', 'eco_da_foice'] }),
+    '12',
+    'aditivo: 2 + 10, não 2×11',
+  );
+
+  // Sem eco, SPS alto não muda o clique
+  eqMoney(clickPower({ sps: '1000', upgrades: [] }), '1');
 });
 
 console.log(`\ndespertar-formulas-smoke: ${passed} passed, ${failed} failed`);

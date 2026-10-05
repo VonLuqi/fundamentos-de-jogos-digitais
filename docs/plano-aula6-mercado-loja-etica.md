@@ -818,12 +818,12 @@ Task 8  pontes docs M1 → M2 ✅
 
 ## Ponte — Aula 07 / Módulo 2
 
-> **Ementa oficial (2026-09-28):** Aula 07 = *Papéis na Indústria, Workflow e Versionamento Visual* + oficina **Minha Equipe, Meu Escopo** (equipes de 3 · quadro · projeto `LabirintoDeMoedas` · pasta compartilhada).  
+> **Ementa oficial (2026-10-05):** Aula 07 = *Papéis na Indústria, Workflow e Versionamento Visual* + oficina **individual ou dupla** (arte da moeda × programação da coleta · diário compartilhado · projeto `LabirintoDeMoedas` · 2 encontros).
 > Plano: [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md) · Playbook: [`playbook-liberar-aula7.md`](./playbook-liberar-aula7.md) · Página: `pages/aula7.html`.
 
-A loja ética desta Aula 06 **não** precisa ser integrada ao Labirinto na Aula 07. Integração loja↔fase / cosmético no Player / movimento jogável ficam para **08+** quando a ementa pedir.
+A loja ética desta Aula 06 **não** precisa ser integrada ao Labirinto na Aula 07. Integração loja↔fase / cosmético no Player fica para **08+** quando a ementa pedir. A Aula 07 fecha só o **loop mínimo de coleta**.
 
-**Fora da Aula 07:** Labirinto jogável completo · loja integrada · `Camera2D` / `AnimatedSprite2D` (ainda sem ementa oficial).
+**Fora da Aula 07:** loja integrada · cenário rico · `Camera2D` / `AnimatedSprite2D` (ainda sem ementa oficial).
 
 ---
 

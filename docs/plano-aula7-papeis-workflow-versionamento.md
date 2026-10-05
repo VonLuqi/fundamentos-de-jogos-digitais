@@ -4,17 +4,17 @@
 > **Tópico da ementa:** Papéis no desenvolvimento de jogos e Workflow de desenvolvimento  
 > **Módulo:** Módulo 2 — Introdução ao GDScript “Do Zero” (Aulas 6 a 10 · ~10h)  
 > **Predecessora:** Aula 06 (mercado + loja ética) · [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md)  
-> **Estado no repo:** **Task 0–8 ✅** (2026-09-28) — Aula 07 completa no repo (página, material, catálogo, conquistas, slides, playbook, smokes, pontes); pendente: liberar gate na turma + QA manual do playbook.  
-> **Duração prevista:** ~120 min (Fundamento teórico ~20 min · Prática Godot / equipe ~100 min)  
-> **Diferença-chave:** **aula de processo + kickoff do projeto integrador** — papéis de estúdio, anti–Scope Creep, divisão oficial em **equipes de 3**, quadro de tarefas e **versionamento visual** (pastas/cenas Godot na pasta compartilhada). GDScript avançado / Labirinto jogável completo **não** são o MVP desta aula.
+> **Estado no repo:** **Reforma individual/dupla + diário (2026-10-05)** — Task 0 reaberta e realinhada; página/API/slides/material/smokes atualizados; pendente: liberar gate na turma + QA manual do playbook.  
+> **Duração prevista:** **2 encontros** (~240 min parede · Fundamento ~30–40 min no E1 · Prática ~**200 min**)  
+> **Diferença-chave:** papéis de estúdio, anti–Scope Creep, **individual ou dupla** (arte da moeda × programação da coleta), **diário compartilhado**, versionamento visual e **loop mínimo de coleta** na Godot. Sem equipes de 3.
 
-Este documento é o **mapa de implementação** da Aula 07: conteúdo pedagógico, oficina de equipe + Godot (organização), página da aula, material baixável (quadro + guia de pastas), backend de progresso, conquistas e critérios de aceite.
+Este documento é o **mapa de implementação** da Aula 07: conteúdo pedagógico, oficina solo/dupla + Godot (coleta), página da aula, material baixável, backend de dupla/diário, conquistas e critérios de aceite.
 
 ---
 
 ## Objetivo pedagógico
 
-Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Arte, Áudio, Game Design, Produção), entender por que **workflow em etapas** evita o acúmulo descontrolado de ideias (**Scope Creep**), e **congelar** a formação das equipes do projeto integrador **“O Labirinto de Moedas 2D”** com um quadro simples de quem faz o quê — mais um hábito seguro de **salvar e organizar** cenas/arquivos Godot na pasta compartilhada.
+Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Arte, Áudio, Game Design, Produção), entender por que **workflow em etapas** evita o **Scope Creep**, e kickoff do integrador **“O Labirinto de Moedas 2D”** em **solo ou dupla** com ofícios concretos (arte da moeda × coleta), diário compartilhado e hábito de **não sobrescrever** cenas na pasta compartilhada.
 
 ### O que o aluno aprende
 
@@ -22,20 +22,20 @@ Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Ar
 - Relacionar cada papel a **entregáveis concretos** (código, sprites, SFX/música, GDD/regras, cronograma/escopo).
 - Definir **Scope Creep**: crescer o escopo sem cortar ou priorizar — e por que isso mata projetos de sala / indie.
 - Descrever um **workflow mínimo** em etapas (ideia → escopo fechado → produção por papel → integração → playtest).
-- Na Godot 4: organizar o projeto em **pastas e nomes canônicos**, salvar cenas com responsabilidade, e sincronizar com a **pasta compartilhada da equipe** sem sobrescrever o trabalho do colega (“versionamento visual”).
+- Na Godot 4: pastas canônicas, sprite da moeda, Player com movimento (M1) + coleta (`Area2D` / `body_entered`), e sync na pasta compartilhada sem sobrescrever (“versionamento visual”).
 
 ### O que o aluno faz
 
-- Lê/assiste o fundamento teórico (~20 min) na aba Fundamentos (ou slides).
-- Entra na oficina (~100 min): forma **equipe de 3**; preenche o **Quadro de Atribuição** (arte do cenário · moedas · movimentação básica do jogador); monta a **estrutura de pastas** do Labirinto no projeto Godot; copia/organiza na pasta compartilhada; registra papéis + cronograma curto nas anotações.
-- Finaliza o envio em `lesson_paragraphs`. No Grimório, a entrega aparece como nota de atividade (`activity:aula7`).
-- Eventualmente resgata o código da aula no Altar.
+- Lê o fundamento (~30–40 min no Encontro 1) na aba Fundamentos (ou slides densos).
+- Oficina (~200 min / 2 encontros): **solo** (os dois ofícios) ou **dupla** via convite na Oficina; quadro de ofícios; projeto `LabirintoDeMoedas`; MVP sprite + coleta; diário compartilhado.
+- Cada aluno finaliza o diário → snapshot em `lesson_paragraphs` (`activity:aula7`).
+- Resgata o código no Altar (fim do Encontro 2).
 
 ### Artefato gerado
 
-- **Quadro físico ou digital** de atribuição de papéis + **cronograma de tarefas** da equipe (template baixável + cópia nas anotações / foto ou link opcional).
-- Estrutura inicial do projeto **Labirinto de Moedas 2D** no FileSystem Godot (pastas + cenas-esqueleto acordadas).
-- Registro escrito na plataforma amarrando papéis ↔ escopo fechado ↔ como a equipe versiona arquivos.
+- Quadro de ofícios (solo/dupla) + lista fora do escopo.
+- MVP jogável: sprite + `moeda.tscn` + Player + coleta.
+- Diário de desenvolvimento (texto avaliado) amarrando ofícios ↔ cercado ↔ versionamento.
 
 ---
 
@@ -45,14 +45,14 @@ Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Ar
 | Aula | Título (ementa) | Foco GDScript / prática |
 | :---: | --- | --- |
 | **06** | Mercado, PI e Monetização Ética | UI Control + loja cosmética com moedas in-game |
-| **07** | Papéis, Workflow e Versionamento Visual | Equipes · quadro de papéis · pastas/cenas Godot · anti–Scope Creep *(esta aula)* |
+| **07** | Papéis, Workflow e Versionamento Visual | Solo/dupla · coleta · diário · pastas Godot · anti–Scope Creep *(esta aula)* |
 | **08** | *(a definir)* | Continuação Labirinto / GDScript |
 | **09** | *(a definir)* | … |
 | **10** | *(a definir)* | … |
 
 **Contrato de experiência (espelho Módulo 1 / Aula 06):** abas *I. Fundamentos · II. Oficina · III. Slides*; envio server-authoritative; XP via Altar; 1 conquista pública + secretas por aula; gate `published: false` até o Mestre liberar.
 
-> **Ponte Aula 06:** a loja ética da Aula 06 **não** precisa ser integrada ao Labirinto nesta aula. Integração loja↔fase / cosmético no Player fica para **08+** quando a ementa pedir. Aqui o foco é **equipe + escopo + pastas**.
+> **Ponte Aula 06:** a loja ética da Aula 06 **não** precisa ser integrada ao Labirinto nesta aula. Integração loja↔fase / cosmético no Player fica para **08+**. Aqui o foco é **ofícios + escopo + coleta mínima + pastas**.
 
 ---
 
@@ -78,7 +78,7 @@ Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Ar
 
 1. **Shell + abas:** `I. Fundamentos` · `II. Oficina` · `III. Slides`.
 2. **Tom Hades:** tokens, `hades-frame`, `triplet-grid`, `lesson-cta`, discovery overlay em `css/aula.css`.
-3. **Envio server-authoritative:** anotações + síntese → API avalia secretas; XP/conclusão via redeem no Altar.
+3. **Envio server-authoritative:** diário (solo ou compartilhado) → finalize per-user → API avalia secretas; XP/conclusão via redeem no Altar.
 4. **Grimório lê atividades:** `listMyLessonParagraphs` + notas virtuais (`activity:aula7`); sem `createNote` no finalize.
 5. **Conquistas:** 1 pública (`aula7_concluida`) + 3 secretas `hidden` + `meta.family: "aula7"` + `volatile: true`.
 6. **Pistas sem spoiler:** bloco curto na Oficina sem listar ids/nomes das secretas.
@@ -87,137 +87,67 @@ Fazer o aluno **enxergar o estúdio como sistema de papéis** (Programação, Ar
 
 ---
 
-## Task 0 — Perguntas e decisões — ✅ FECHADA
+## Task 0 — Perguntas e decisões — ✅ REABERTA E REFECHADA (2026-10-05)
 
-Decisões abaixo estão **congeladas** (2026-09-28). Implementação das Tasks 1+ pode seguir.
+Decisões abaixo **substituem** o congelamento de 2026-09-28 (equipes de 3 / stubs sem coleta / anotações+síntese).
 
 ### Produto / pedagogia
 
-1. **Escopo Godot nesta aula** → **(A) Pastas + cenas-esqueleto**  
-   - [x] **(A)** Só **estrutura de pastas + cenas-esqueleto vazias** (`cenas/player.tscn`, `cenas/moeda.tscn`, `cenas/cenario.tscn`) + README de nomes — **sem** exigir movimento/coleta jogável hoje  
-   - ( ) (B) Player com movimento mínimo — **adiado** (Aula 08+)  
-   - ( ) (C) Zero Godot — rejeitado (fere a ementa prática)
+1. **Escopo Godot nesta aula** → **Pastas + MVP de coleta**
+   - [x] Sprite + `cenas/moeda.tscn` (`Area2D`) + Player (movimento M1) + coleta (`body_entered`, some / conta 1)
+   - Cenário rico / loja Aula 06 / SFX ficam **fora**
 
-2. **Base do projeto do aluno** → **(A) Projeto novo do Labirinto**  
-   - [x] **(A)** **Projeto novo** `LabirintoDeMoedas/` — limpo para o integrador; loja da Aula 06 permanece no projeto antigo  
-   - ( ) (B) Continuar projeto Aulas 02–06 — plano B só se a turma insistir em um único `.godot`  
-   - ( ) (C) ZIP stub do curso — fora do MVP (material = README + árvore)
+2. **Base do projeto** → projeto novo `LabirintoDeMoedas/`
 
-3. **Formação de equipes** → **(A) Lista oficial do Mestre**  
-   - [x] **(A)** Mestre sorteia / lista oficial no início da oficina; **3 alunos fixos**; ímpar → dupla + “produtor itinerante” **ou** grupo de 4 com 2 na arte  
-   - ( ) (B) Escolha livre · ( ) (C) Sem equipe — rejeitados
+3. **Formação** → **individual ou dupla** (convite na Oficina; default solo)
+   - [x] Sem equipes de 3, sem lista oficial do Mestre, sem produtor itinerante
 
-4. **Mapeamento papéis estúdio → trio de sala** → **tabela aceita**
+4. **Mapeamento papéis estúdio → sala**
 
-   | Papel de estúdio (teoria) | No trio de sala (prática) | Entrega desta aula |
+   | Papel de estúdio | Na sala | Entrega (2 encontros) |
    | :--- | :--- | :--- |
-   | Arte | Aluno A — **Artista de cenário** | Pastas `sprites/` / `cenas/cenario.tscn` (placeholder ok; raiz `Node2D`) |
-   | Programação | Aluno B — **Programador do Player** | `cenas/player.tscn` (raiz `CharacterBody2D`, **sem** script de movimento obrigatório) |
-   | Game Design + “props” | Aluno C — **Designer de moedas / regras** | `cenas/moeda.tscn` (raiz `Area2D` ou `Node2D`) + anotar regra: quantas moedas / vitória |
-   | Áudio | *(compartilhado / stub)* | Pasta `audio/` vazia + 1 linha no quadro: “SFX depois” |
-   | Produção | **Rotativo do dia** (um dos três) | Dono do quadro + pasta compartilhada + cronograma |
+   | Arte | Arte da moeda (ou solo) | Sprite + `moeda.tscn` |
+   | Programação | Programação da coleta (ou solo) | Player + coleta |
+   | Design / Produção | Teoria + cercado no diário | Fora do escopo + sync |
+   | Áudio | Stub | `audio/` vazia |
 
-   - [x] Tabela aceita (raízes de cena congeladas acima)
+5. **Quadro** → `quadro-atribuicao.md` + resumo no diário
 
-5. **Formato do quadro (artefato)** → **(A) Template Markdown imprimível**  
-   - [x] **(A)** `assets/docs/aulas/aula07-equipe-labirinto/quadro-atribuicao.md` (+ PDF opcional na Task 2 se couber) + alunos colam resumo nas anotações  
-   - ( ) (B) Planilha Google/Canva · ( ) (C) Só texto livre — fora do MVP
+6. **Versionamento visual** → pasta compartilhada + ZIP datado (+ teaser Git)
 
-6. **“Versionamento visual” — profundidade** → **(A) Pasta compartilhada + convenções**  
-   - [x] **(A)** Pasta compartilhada (Drive / OneDrive / rede) + convenção de pastas + **não editar a mesma `.tscn` ao mesmo tempo** + ZIP datado de backup + checklist o que versionar / ignorar (`.godot/`)  
-   - ( ) (B) Git intro — **só teaser verbal** no slide/README (“existe Git; não é obrigatório hoje”)  
-   - ( ) (C) Só discurso — rejeitado
+7. **Contrato de escopo** → MVP = sprite + coleta; loja/combate/multiplayer fora
 
-7. **Contrato de escopo do Labirinto (anti–Scope Creep)** → **MVP aceito**
+8. **Material** → `aula07-equipe-labirinto/` (nome histórico da pasta)
 
-   | No escopo (MVP Labirinto) | Fora do escopo (até o Mestre liberar) |
-   | :--- | :--- |
-   | Player move em 4 direções (**Aula 08+**) | Combate, NPCs, diálogos |
-   | Moedas coletáveis + contador (**Aula 08+**) | Loja da Aula 06 integrada |
-   | Cenário tilemap ou sprites estáticos (**08+**) | Multiplayer, save cloud |
-   | 1 tela / 1 fase curta | Campanha, bosses, cutscenes |
-   | **Papéis + pastas + quadro + stubs** (**hoje**) | Áudio polido, particles, shaders |
+9. **Slides** → teoria densa + dupla/solo (`build-aula07-slides.py`)
 
-   - [x] MVP aceito como contrato citado na página/slides
+10. **Entrega** → diário único (`lesson_journals`) + finalize per-user → `lesson_paragraphs`
 
-8. **Material baixável** → **(A) README + quadro + árvore**  
-   - [x] **(A)** `aula07-equipe-labirinto/` com `README.md` + `quadro-atribuicao.md` + `estrutura-pastas.txt`  
-   - ( ) (B) ZIP stub Godot — fora do MVP  
-   - ( ) (C) Só quadro — rejeitado
+11. **Pré-requisito** → `aula6` concluída
 
-9. **Slides** → **Obrigatório**  
-   - [x] Template → `aula07_papeis_workflow_slides.pptx` + `.pdf`  
-   - [x] Script: `scripts/build-aula07-slides.py`
-
-10. **Campo de entrega** → **(A) Espelho aula1–aula6**  
-    - [x] **(A)** `config-notes` + `gdd-text` + finalizar  
-    - ( ) (B) Um textarea · ( ) (C) Upload de arquivo — fora do MVP (link/foto do quadro opcional **dentro** do texto)
-
-11. **Pré-requisito de liberação** → **(B) `aula6` concluída**  
-    - [x] **(B)** `LESSON_PREREQUISITES.aula7 → aula6`  
-    - Provação do Módulo 1 **não** bloqueia a trilha automaticamente na v1  
-    - ( ) (A) Sem prereq · ( ) (C) Exigir também Provação M1
-
-12. **Libertação na Trilha** → **Gate admin**  
-    - [x] Default `aula7: published false` até o Mestre liberar; **não** publicar no merge
+12. **Gate** → `published: false` até liberar; aberto nos **dois** encontros (sem `aula7b`)
 
 ### Conquistas
 
-13. **Pacote** → **(A) 1 pública + 3 secretas** (`meta.family: "aula7"`, secretas `volatile: true`)
-
-14. **Conquista pública** → congelada  
-
-    | Campo | Valor |
-    | :--- | :--- |
-    | Id | `aula7_concluida` |
-    | Nome | **Cartógrafo da Equipe** |
-    | Rarity | `stone` · xp card `0` (XP do redeem = **30**) |
-    | Trailhead | **não** |
-
-15. **Secretas** → **tríade aceita**
-
-| Id | Nome | Evidência no texto | Rarity / XP |
-| :--- | :--- | :--- | :--- |
-| `segredo_cinco_oficios` | Cinco Ofícios | Cita ≥2 papéis de estúdio (prog/arte/áudio/design/produção) com função | silver / 15 |
-| `segredo_cercado_do_escopo` | Cercado do Escopo | Menciona Scope Creep **ou** corta explicitamente algo fora do MVP | gold / 15 |
-| `segredo_pasta_sagrada` | Pasta Sagrada | Descreve pastas Godot / cena salva / pasta compartilhada / regra anti-sobrescrita | rainbow / 25 |
+13. 1 pública + 3 secretas (`meta.family: "aula7"`, volatile)
+14. Pública: `aula7_concluida` · **Cartógrafo da Dupla** · stone · redeem XP **30**
+15. Secretas: Cinco Ofícios · Cercado do Escopo · Pasta Sagrada (texto do **diário**)
 
 ### Técnico (plataforma)
 
-16. **Id da aula / módulo** → `aula7` / `modulo2`  
-17. **Código mock de redeem** → `EQUIPE2026`  
-18. **rewardXp** → **30** (espelho aula4–aula6)  
-19. **Regras secretas** → estender `api/_lib/lesson-secret-achievements.js` com bloco `aula7`  
-20. **Discovery UI** → reutilizar `js/lesson-discovery.js`  
-21. **Testes** → smoke `aula7-secretas-volateis` + `aula7-qa-smoke`; incluir em `npm run check`  
-22. **Códigos / Altar** → modelo atual (`redeem_codes` + TTL; multi-aluno)  
-23. **Playbook** → `docs/playbook-liberar-aula7.md` (Task 6)  
-24. **Persistência de equipe na plataforma** → **(A) Sem backend de times**  
-    - [x] **(A)** Quadro + anotações bastam na v1  
-    - ( ) (B) API de times — adiado  
-25. **Nome canônico do projeto Godot** → **`LabirintoDeMoedas`**  
-    - [x] Pasta/projeto: `LabirintoDeMoedas`  
-    - Pasta compartilhada sugerida: `LabirintoDeMoedas_<NomeEquipe>`
+16. Id: `aula7` / `modulo2`
+17. Mock redeem: `EQUIPE2026`
+18. rewardXp: **30**
+19. Secretas em `lesson-secret-achievements.js` (aliases arte da moeda / coleta)
+20. Discovery: `lesson-discovery.js`
+21. Testes: `aula7-qa-smoke` + `aula7-duo-smoke` + `aula7-secretas-volateis`
+22. Altar: modelo atual
+23. Playbook: roteiro **2 × ~120 min**
+24. Persistência: **`lesson_duos` + `lesson_journals`** (não `friendships`)
+25. Projeto: `LabirintoDeMoedas` · pasta sync `LabirintoDeMoedas_<Nome>`
 
-**Raízes de cena (contrato de sala)**
 
-| Cena | Tipo raiz |
-| :--- | :--- |
-| `cenas/player.tscn` | `CharacterBody2D` |
-| `cenas/moeda.tscn` | `Area2D` *(preferencial)* ou `Node2D` |
-| `cenas/cenario.tscn` | `Node2D` |
-
-**Checklist Task 0**
-
-- [x] Todas as decisões 1–25 marcadas / congeladas  
-- [x] Escopo Godot **(A)** e quadro **(A)** confirmados  
-- [x] Documento atualizado com “congelado em 2026-09-28”
-
-**Aceite Task 0:** decisões congeladas; Tasks 1+ desbloqueadas.
-
----
-
-## I. Fundamento teórico (~20 min)
+## I. Fundamento teórico (~30–40 min no Encontro 1)
 
 ### Roteiro de fala (professor / página)
 
@@ -261,13 +191,13 @@ Ideia → Escopo fechado (MVP) → Produção por papel → Integração → Pla
 
 ---
 
-## II. Prática — “Minha Equipe, Meu Escopo” (~100 min)
+## II. Prática — individual ou dupla + coleta (~200 min / 2 encontros)
 
 > Roteiro canônico da oficina. Página `aula7` e README baixável devem espelhar estes passos.
 
 ### Atividade
 
-1. Divisão oficial em **equipes de 3** para o projeto integrador **“O Labirinto de Moedas 2D”**.  
+1. Formação **solo ou dupla** para o projeto integrador **“O Labirinto de Moedas 2D”**.  
 2. Preencher o **Quadro de Atribuição** (quem: cenário · moedas · movimentação).  
 3. Introduzir **versionamento visual**: pastas Godot + pasta compartilhada da equipe.  
 4. Criar estrutura de pastas / cenas-esqueleto no projeto `LabirintoDeMoedas` (Task 0 = A).
@@ -279,16 +209,6 @@ Ideia → Escopo fechado (MVP) → Produção por papel → Integração → Pla
 - [ ] Aluno logado · aba **Oficina** da Aula 07.  
 - [ ] Material `aula07-equipe-labirinto/` aberto.  
 - [ ] Lista de equipes do Mestre (ou regra de formação) pronta.
-
-### O que NÃO fazer nesta aula
-
-| Evitar | Por quê |
-| :--- | :--- |
-| Implementar o Labirinto jogável completo | É o integrador das próximas aulas |
-| Integrar a loja da Aula 06 | Scope Creep clássico |
-| Dois alunos editando a mesma `.tscn` ao vivo na pasta sync | Conflito / arquivo corrompido |
-| Adicionar combate, NPCs, multiplayer | Fora do MVP |
-| Prometer Git obrigatório se a turma não tem CLI | Desvia os 100 min |
 
 ### Vocabulário mínimo (quadro / slide 30s)
 
@@ -308,7 +228,7 @@ Ideia → Escopo fechado (MVP) → Produção por papel → Integração → Pla
 
 | Bloco | Tempo | Atividade | Resultado visível |
 | :--- | :--- | :--- | :--- |
-| 0. Formação | 10 min | Equipes de 3 · nomes no quadro | Trio + produtor do dia |
+| 0. Formação | 15 min | Solo default ou convite + ofícios | Modo + chapéus |
 | 1. Quadro de papéis | 20 min | Preencher atribuições + “fora do escopo” | Quadro completo |
 | 2. Cronograma curto | 15 min | 3–5 tarefas com dono e “até quando” (próximas aulas) | Cronograma no artefato |
 | 3. Pastas Godot | 25 min | Criar projeto/pastas canônicas · cenas-esqueleto | FileSystem alinhado |
@@ -446,7 +366,7 @@ Regras de sala (escrever no quadro / slide):
 
 | Id | Nome | Desc (álbum) | hidden | rarity | Gatilho |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `aula7_concluida` | Cartógrafo da Equipe | Mapeou papéis, cercou o escopo e honrou a sétima trilha. | false | stone | `completed_lessons` inclui `aula7` |
+| `aula7_concluida` | Cartógrafo da Dupla | Escolheu ofícios, cercou o escopo e honrou a sétima trilha — solo ou em dupla. | false | stone | `completed_lessons` inclui `aula7` |
 
 ### Secretas (voláteis · família `aula7`)
 
@@ -461,7 +381,7 @@ Regras de sala (escrever no quadro / slide):
 
 ---
 
-## Template de anotações (Oficina)
+## Template do diário (Oficina)
 
 Placeholder sugerido para `config-notes`:
 
@@ -495,7 +415,7 @@ Placeholder da síntese (`gdd-text`):
 | 6 | Workflow em etapas | Ideia → MVP → produção → integração → playtest |
 | 7 | Scope Creep | Definição + sintomas |
 | 8 | Cercado do Labirinto | O que entra / o que fica fora |
-| 9 | Ponte prática | “Minha Equipe, Meu Escopo” |
+| 9 | Ponte prática | Individual ou dupla + coleta |
 | 10 | Trio de sala | Cenário · Moedas · Player |
 | 11 | Quadro + cronograma | Artefato do dia |
 | 12 | Pastas Godot | Árvore canônica |
@@ -539,7 +459,8 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 - [x] Fundamentos: cinco papéis · workflow · Scope Creep · ponte Labirinto  
 - [x] Oficina: formação · quadro · cronograma · pastas Godot · pasta compartilhada · checklist · template de anotações · pistas sem spoiler  
 - [x] CTA de download do material (`aula07-equipe-labirinto/` — conteúdo na Task 2)  
-- [x] Envio `config-notes` + `gdd-text` + finalize (`saveLessonParagraph('aula7', …)`)  
+- [x] Envio diário (`lesson_journals`) + finalize per-user → `lesson_paragraphs`  
+
 - [x] Discovery overlay via `js/lesson-discovery.js`
 
 **Aceite:** página carrega autenticada; três abas; finalize chama `saveLessonParagraph('aula7', …)`. Persistência no backend / gate na Trilha = Task 3.
@@ -585,7 +506,7 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 
 **Checklist**
 
-- [x] Regra pública `aula7_concluida` (**Cartógrafo da Equipe**) + arte stub WebP  
+- [x] Regra pública `aula7_concluida` (**Cartógrafo da Dupla**) + arte stub WebP  
 - [x] 3 secretas `hidden`, `meta.family: "aula7"`, `volatile: true`  
 - [x] Matchers em `lesson-secret-achievements.js` (ofícios · Scope Creep · pasta/sync)  
 - [x] Entradas em `assets/achievements/catalog.json` + `data/game-catalog.json`  
@@ -613,7 +534,7 @@ Legenda: `[ ]` pendente · `[~]` parcial · `[x]` feito
 
 Criar [`docs/playbook-liberar-aula7.md`](./playbook-liberar-aula7.md) com:
 
-#### Dia da aula (roteiro 120 min)
+#### Dia da aula (roteiro 2 × ~120 min)
 
 | Min | Bloco | Ação |
 | ---: | :--- | :--- |
@@ -632,7 +553,7 @@ Criar [`docs/playbook-liberar-aula7.md`](./playbook-liberar-aula7.md) com:
 - [x] QA pós-liberação  
 - [x] Dicas: conflito Drive, `.godot/`, ímpar na turma, Scope Creep na hora (“loja agora? não”)
 
-**Aceite:** Mestre conduz os 120 min só com o playbook.
+**Aceite:** Mestre conduz os 2 encontros só com o playbook.
 
 ---
 
@@ -697,7 +618,7 @@ Task 8  pontes docs M2 ✅
 
 | Risco | Mitigação |
 | :--- | :--- |
-| Turma ímpar / falta aluno | Dupla + produtor itinerante; ou grupo de 4 com 2 na arte |
+| Turma ímpar / falta aluno | Solo ou dupla na Oficina — sem trios |
 | Equipe perde tempo escolhendo tema | Nome do jogo já é **Labirinto de Moedas 2D** — não reinventar |
 | Scope Creep na hora (“vamos pôr a loja”) | Slide do cercado + lista FORA no quadro + fala do produtor |
 | Conflito na pasta Drive | Uma cena por aluno; ZIP datado; avisar no grupo antes de editar |

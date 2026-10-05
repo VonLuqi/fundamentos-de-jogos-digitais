@@ -30,7 +30,7 @@ for (const id of AULA7_IDS) {
 }
 
 // —— Cinco Ofícios (≥2 papéis) ——
-const oficiosBom = 'Na equipe: programação no player e artista no cenário; produção guarda o cronograma.';
+const oficiosBom = 'Na dupla: programação da coleta no player e arte da moeda no sprite.';
 const oficiosSoUm = 'Eu fiquei só com o papel de artista.';
 const oficiosFraco = 'Gostei de trabalhar em grupo.';
 assert.ok(matchesCincoOficios(normalizeForSecretCheck(oficiosBom)));
@@ -50,8 +50,8 @@ assert.ok(!matchesCercadoDoEscopo(normalizeForSecretCheck(cercadoFraco)));
 
 // —— Pasta Sagrada (≥2 entre pastas · .tscn · sync) ——
 const pastaBom = `
-Criamos pastas cenas/sprites no LabirintoDeMoedas com player.tscn.
-Pasta compartilhada no Drive: um dono por .tscn e ZIP de backup.
+Criamos pastas cenas/sprites no LabirintoDeMoedas com player.tscn e moeda.tscn.
+Projeto local (sem pasta sync); nomes canônicos nas .tscn. Sprite veio do LibreSprite.
 `;
 const pastaSoPasta = 'Temos uma pasta no projeto.';
 const pastaFraco = 'Salvei o arquivo no computador.';
@@ -62,11 +62,11 @@ assert.ok(
 );
 assert.ok(!matchesPastaSagrada(normalizeForSecretCheck(pastaFraco)));
 
-// —— Corpus combinado ——
+// —— Corpus combinado (diário) ——
 const quaseTudo = `
-Equipe de 3: programação (player), artista (cenário) e game design (moedas); produtor do dia cuida da produção.
+Dupla: programação da coleta (player) e arte da moeda (sprite); produção cuida do sync.
 Cortamos Scope Creep — loja, combate e multiplayer ficam fora do escopo.
-Projeto LabirintoDeMoedas com cenas/player.tscn e pasta compartilhada no Drive + ZIP backup.
+Projeto local LabirintoDeMoedas com cenas/moeda.tscn (sem pasta sync); sprite do LibreSprite.
 `;
 assert.deepEqual(idsOf(quaseTudo), [...AULA7_IDS].sort(), 'texto natural desbloqueia as 3');
 assert.deepEqual(idsOf(oficiosFraco), [], 'off-topic → zero');
@@ -99,7 +99,7 @@ for (const id of AULA7_IDS) {
 
 const publica = getAchievementById('aula7_concluida');
 assert.ok(publica, 'aula7_concluida no catálogo');
-assert.equal(publica.name, 'Cartógrafo da Equipe');
+assert.equal(publica.name, 'Cartógrafo da Dupla');
 assert.equal(publica.hidden, false);
 assert.equal(publica.rarity, 'stone');
 

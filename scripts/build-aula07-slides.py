@@ -23,6 +23,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "assets" / "docs" / "aulas" / "aula01_godot_slides.pptx"
 OUT_PPTX = ROOT / "assets" / "docs" / "aulas" / "aula07_papeis_workflow_slides.pptx"
 OUT_PDF = ROOT / "assets" / "docs" / "aulas" / "aula07_papeis_workflow_slides.pdf"
+IMG_DIR = ROOT / "assets" / "docs" / "aulas" / "aula07-equipe-labirinto"
+IMG_HYTALE = IMG_DIR / "hytale-scope.jpg"
+IMG_RIOT = IMG_DIR / "riot-games-logo.png"
 
 BG = RGBColor(0x0D, 0x0A, 0x10)
 PANEL = RGBColor(0x18, 0x12, 0x1A)
@@ -150,6 +153,18 @@ def add_panel(slide, left, top, width, height):
     return panel
 
 
+def add_slide_image(slide, path: Path, left, top, width=None, height=None):
+    if not path.exists():
+        print(f"AVISO: imagem ausente — {path}", file=sys.stderr)
+        return None
+    kwargs = {}
+    if width is not None:
+        kwargs["width"] = width
+    if height is not None:
+        kwargs["height"] = height
+    return slide.shapes.add_picture(str(path), left, top, **kwargs)
+
+
 def delete_all_slides(prs: Presentation):
     sldIdLst = prs.slides._sldIdLst
     for sldId in list(sldIdLst):
@@ -185,7 +200,7 @@ def build_deck() -> Presentation:
         [
             ("Aula 07: Papéis, Workflow e", {"size": 24, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 6}),
             ("Versionamento Visual", {"size": 24, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 16}),
-            ("Equipes · Labirinto de Moedas 2D · pastas Godot e pasta compartilhada", {"size": 14, "color": TEXT_DIM, "font": BODY_FONT}),
+            ("Individual ou dupla · arte da moeda × coleta · diário compartilhado", {"size": 14, "color": TEXT_DIM, "font": BODY_FONT}),
         ],
     )
     add_panel(s, Inches(0.7), Inches(3.7), Inches(4.6), Inches(0.9))
@@ -204,9 +219,9 @@ def build_deck() -> Presentation:
     add_num_badge(s, "01")
     add_title(s, "Onde estamos na trilha")
     steps = [
-        ("AULA 06", "Loja ética\n(GDScript UI)"),
-        ("AULA 07", "Equipe + escopo\n+ pastas"),
-        ("AULA 08+", "Construir o\nLabirinto"),
+        ("AULA 06", "Loja ética\n(2 encontros)"),
+        ("AULA 07", "Papéis + coleta\n(2 encontros)"),
+        ("AULA 08+", "Expandir o\nLabirinto"),
     ]
     for i, (k, v) in enumerate(steps):
         left = Inches(0.5 + i * 3.15)
@@ -228,87 +243,71 @@ def build_deck() -> Presentation:
     add_num_badge(s, "02")
     add_title(s, "Tópico da ementa")
     add_panel(s, Inches(0.55), Inches(1.4), Inches(8.9), Inches(2.8))
-    _, tf = add_textbox(s, Inches(0.9), Inches(1.9), Inches(8.2), Inches(2.0))
+    _, tf = add_textbox(s, Inches(0.9), Inches(1.7), Inches(8.2), Inches(2.3))
     write_lines(
         tf,
         [
             ("Papéis no desenvolvimento de jogos", {"size": 20, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 8}),
-            ("e Workflow de desenvolvimento", {"size": 20, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 14}),
-            ("Scope Creep · quadro de equipe · versionamento visual na Godot.", {"size": 14, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+            ("e Workflow de desenvolvimento", {"size": 20, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
+            ("Scope Creep · individual ou dupla · arte da moeda × coleta · diário compartilhado.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
         ],
     )
     add_footer(s, W, H)
 
-    # 4 — Cinco ofícios
+    # 4 — Cinco ofícios (denso)
     s = new_slide(prs)
     add_num_badge(s, "03")
-    add_title(s, "Cinco ofícios do estúdio")
+    add_title(s, "Cinco ofícios — entregável e falha típica")
     cards = [
-        ("GAME DESIGN", "O que é divertido?\nRegras · GDD · loops"),
-        ("PROGRAMAÇÃO", "Como funciona?\nScripts · cenas · bugs"),
-        ("ARTE", "O que se vê?\nSprites · tiles · UI"),
-        ("ÁUDIO", "O que se ouve?\nSFX · música · feedback"),
-        ("PRODUÇÃO", "Quando e até onde?\nCronograma · escopo"),
+        ("GAME DESIGN", "Entrega: regras / GDD\nFalha: “a gente vê\ndepois se é divertido”"),
+        ("PROGRAMAÇÃO", "Entrega: cena que\nfunciona\nFalha: script sem\ndono da .tscn"),
+        ("ARTE", "Entrega: sprite / cena\nvisível\nFalha: arte sem\nnome de arquivo"),
+        ("ÁUDIO", "Entrega: SFX/música\nFalha: “deixamos\nsilêncio para depois”"),
+        ("PRODUÇÃO", "Entrega: cercado +\nsync\nFalha: ninguém diz\nnão ao Scope Creep"),
     ]
     for i, (k, v) in enumerate(cards):
-        left = Inches(0.35 + i * 1.95)
-        add_panel(s, left, Inches(1.2), Inches(1.85), Inches(3.2))
-        _, tf = add_textbox(s, left + Inches(0.1), Inches(1.4), Inches(1.65), Inches(2.9))
+        left = Inches(0.3 + i * 1.96)
+        add_panel(s, left, Inches(1.15), Inches(1.88), Inches(3.35))
+        _, tf = add_textbox(s, left + Inches(0.08), Inches(1.3), Inches(1.72), Inches(3.05))
         lines = [
-            (k, {"size": 11, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
+            (k, {"size": 10, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 8}),
+        ]
+        for part in v.split("\n"):
+            lines.append((part, {"size": 10, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 2}))
+        write_lines(tf, lines)
+    add_footer(s, W, H)
+
+    # 5 — Workflow denso
+    s = new_slide(prs)
+    add_num_badge(s, "04")
+    add_title(s, "Workflow — o que entra e sai")
+    steps = [
+        ("IDEIA", "Entra: sonho\nSai: intenção\nclara"),
+        ("MVP", "Entra: lista\nSai: cercado\nfechado"),
+        ("PRODUÇÃO", "Entra: ofício\nSai: arquivo\ncom dono"),
+        ("INTEGRAÇÃO", "Entra: cenas\nSai: um projeto\nque abre"),
+        ("PLAYTEST", "Entra: build\nSai: corte ou\npróximo passo"),
+    ]
+    for i, (k, v) in enumerate(steps):
+        left = Inches(0.3 + i * 1.96)
+        add_panel(s, left, Inches(1.25), Inches(1.88), Inches(3.1))
+        _, tf = add_textbox(s, left + Inches(0.08), Inches(1.45), Inches(1.72), Inches(2.8))
+        lines = [
+            (k, {"size": 11, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 8}),
         ]
         for part in v.split("\n"):
             lines.append((part, {"size": 11, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 2}))
         write_lines(tf, lines)
     add_footer(s, W, H)
 
-    # 5 — Indie = muitos chapéus
-    s = new_slide(prs)
-    add_num_badge(s, "04")
-    add_title(s, "Indie = muitos chapéus")
-    add_panel(s, Inches(0.55), Inches(1.25), Inches(8.9), Inches(3.15))
-    _, tf = add_textbox(s, Inches(0.9), Inches(1.55), Inches(8.2), Inches(2.7))
-    write_lines(
-        tf,
-        [
-            ("A mesma pessoa veste vários ofícios.", {"size": 18, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 14}),
-            ("Mesmo assim: nomeie a dona(o) de cada entrega.", {"size": 15, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-            ("Sem dono no quadro, ninguém é responsável.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
-        ],
-    )
-    add_footer(s, W, H)
-
-    # 6 — Workflow em etapas
+    # 6 — Scope Creep denso
     s = new_slide(prs)
     add_num_badge(s, "05")
-    add_title(s, "Workflow em etapas")
-    steps = [
-        ("IDEIA", "Sonho\ninicial"),
-        ("MVP", "Escopo\nfechado"),
-        ("PRODUÇÃO", "Por\npapel"),
-        ("INTEGRAÇÃO", "Juntar\ncedo"),
-        ("PLAYTEST", "Cortar\nou seguir"),
-    ]
-    for i, (k, v) in enumerate(steps):
-        left = Inches(0.35 + i * 1.95)
-        add_panel(s, left, Inches(1.4), Inches(1.85), Inches(2.6))
-        _, tf = add_textbox(s, left + Inches(0.1), Inches(1.65), Inches(1.65), Inches(2.2))
-        lines = [
-            (k, {"size": 12, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-        ]
-        for part in v.split("\n"):
-            lines.append((part, {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 2}))
-        write_lines(tf, lines)
-    add_footer(s, W, H)
-
-    # 7 — Scope Creep
-    s = new_slide(prs)
-    add_num_badge(s, "06")
-    add_title(s, "Scope Creep — o monstro amigável")
+    add_title(s, "Scope Creep no Labirinto")
     cards = [
-        ("O QUE É", "O projeto cresce em ideias sem cortar tempo, pessoas ou features."),
-        ("SINTOMAS", "“Só mais um inimigo” · “e se tiver loja?” · “e se for online?”"),
-        ("ANTÍDOTO", "Lista do que está fora · produção guarda o cercado · dizer não."),
+        ("EXEMPLO RUIM", "“E se tiver inimigos, loja, boss e online?” — ideias boas no momento errado."),
+        ("MVP DESTA AULA", "E1: sprite LibreSprite · E2: Player + coleta. Só isso."),
+        ("ANTÍDOTO", "Lista FORA DO ESCOPO no diário · dizer não · loja Aula 06 fica fora."),
     ]
     for i, (k, v) in enumerate(cards):
         left = Inches(0.5 + i * 3.15)
@@ -317,84 +316,143 @@ def build_deck() -> Presentation:
         write_lines(
             tf,
             [
-                (k, {"size": 13, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
+                (k, {"size": 12, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
                 (v, {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER}),
             ],
         )
     add_footer(s, W, H)
 
-    # 8 — Cercado do Labirinto
+    # 7 — Caso Hytale (imagem + linha do tempo)
+    s = new_slide(prs)
+    add_num_badge(s, "06")
+    add_title(s, "Caso: Hytale — visão enorme")
+    add_slide_image(s, IMG_HYTALE, Inches(0.45), Inches(1.1), width=Inches(5.15))
+    add_panel(s, Inches(5.75), Inches(1.1), Inches(3.8), Inches(3.35))
+    _, tf = add_textbox(s, Inches(5.95), Inches(1.25), Inches(3.4), Inches(3.05))
+    write_lines(
+        tf,
+        [
+            ("LINHA DO TEMPO", {"size": 12, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 10}),
+            ("2018 — Trailer: sandbox + RPG + tools + multiplayer…", {"size": 11, "color": TEXT, "space_after": 6}),
+            ("2020 — Riot Games compra a Hypixel Studios.", {"size": 11, "color": TEXT, "space_after": 6}),
+            ("2021+ — Beta não chega; reboot de engine; ambição cresce.", {"size": 11, "color": TEXT, "space_after": 6}),
+            ("2025 — Projeto cancelado (depois reaberto com escopo cortado).", {"size": 11, "color": TEXT, "space_after": 10}),
+            ("Dinheiro e talento ≠ cercado fechado.", {"size": 11, "bold": True, "color": GOLD, "space_after": 0}),
+        ],
+    )
+    add_footer(s, W, H)
+
+    # 8 — Riot × lição para a sala
     s = new_slide(prs)
     add_num_badge(s, "07")
-    add_title(s, "Cercado do Labirinto")
-    add_panel(s, Inches(0.55), Inches(1.2), Inches(4.3), Inches(3.1))
-    _, tf = add_textbox(s, Inches(0.8), Inches(1.4), Inches(3.8), Inches(2.8))
+    add_title(s, "Riot × Hytale — lição de escopo")
+    add_panel(s, Inches(0.55), Inches(1.15), Inches(3.2), Inches(3.2))
+    add_slide_image(s, IMG_RIOT, Inches(0.95), Inches(1.85), width=Inches(2.4))
+    add_panel(s, Inches(3.95), Inches(1.15), Inches(5.5), Inches(3.2))
+    _, tf = add_textbox(s, Inches(4.2), Inches(1.35), Inches(5.05), Inches(2.85))
     write_lines(
         tf,
         [
-            ("ENTRA", {"size": 16, "bold": True, "color": GOLD, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-            ("Hoje: papéis + pastas + stubs", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 6}),
-            ("08+: player 4 dirs · moedas · 1 fase", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER}),
-        ],
-    )
-    add_panel(s, Inches(5.15), Inches(1.2), Inches(4.3), Inches(3.1))
-    _, tf = add_textbox(s, Inches(5.4), Inches(1.4), Inches(3.8), Inches(2.8))
-    write_lines(
-        tf,
-        [
-            ("FICA FORA", {"size": 16, "bold": True, "color": BLOOD, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-            ("Loja Aula 06 · combate · NPCs", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 6}),
-            ("Multiplayer · bosses · shaders", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER}),
+            ("O QUE ACONTECEU", {"size": 12, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 8}),
+            ("A visão era tão grande que cada “só mais isso” empurrava o jogo para longe do lançável.", {"size": 12, "color": TEXT, "space_after": 8}),
+            ("Até com backing da Riot, falta de MVP claro virou anos sem build pública estável.", {"size": 12, "color": TEXT, "space_after": 10}),
+            ("NA NOSSA SALA", {"size": 12, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 8}),
+            ("Labirinto = sprite + coleta. Loja, boss e online ficam FORA — senão viramos Hytale de 120 minutos.", {"size": 12, "color": TEXT, "space_after": 0}),
         ],
     )
     add_footer(s, W, H)
 
-    # 9 — Ponte prática
+    # 9 — Versionamento visual
     s = new_slide(prs)
     add_num_badge(s, "08")
-    add_title(s, "Ponte prática")
+    add_title(s, "Versionamento visual")
+    points = [
+        "Nome canônico de pasta/cena = contrato (moeda.tscn ≠ MoedaFinal2).",
+        "Projeto Godot só na máquina local — sem pasta sync / Drive.",
+        "PNG do LibreSprite entra em sprites/ no Encontro 2.",
+        "Sem dono de arquivo, alguém apaga o trabalho do outro sem perceber.",
+    ]
+    for i, text in enumerate(points):
+        top = Inches(1.15 + i * 0.7)
+        add_panel(s, Inches(0.55), top, Inches(8.9), Inches(0.58))
+        _, tf = add_textbox(s, Inches(0.85), top + Inches(0.1), Inches(8.4), Inches(0.4))
+        write_lines(tf, [(f"◆  {text}", {"size": 14, "color": TEXT})])
+    add_footer(s, W, H)
+
+    # 10 — Ponte prática
+    s = new_slide(prs)
+    add_num_badge(s, "09")
+    add_title(s, "Ponte prática — 2 encontros")
     add_panel(s, Inches(0.55), Inches(1.25), Inches(8.9), Inches(3.15))
-    _, tf = add_textbox(s, Inches(0.9), Inches(1.7), Inches(8.2), Inches(2.5))
+    _, tf = add_textbox(s, Inches(0.9), Inches(1.55), Inches(8.2), Inches(2.7))
     write_lines(
         tf,
         [
-            ("Minha Equipe, Meu Escopo", {"size": 20, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 16}),
-            ("Equipes de 3 · quadro · projeto LabirintoDeMoedas", {"size": 15, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-            ("Sem labirinto jogável completo hoje — só organização.", {"size": 14, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+            ("Oficina em dois encontros · individual ou dupla", {"size": 18, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 14}),
+            ("E1: teoria · convite · arte no LibreSprite", {"size": 14, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 8}),
+            ("E2: Godot local · coleta · diário · Altar", {"size": 14, "color": TEXT, "align": PP_ALIGN.CENTER}),
         ],
     )
     add_footer(s, W, H)
 
-    # 10 — Trio de sala
+    # 11 — Estúdio → sala (abertura da prática)
     s = new_slide(prs)
-    add_num_badge(s, "09")
-    add_title(s, "Trio de sala")
+    add_num_badge(s, "10")
+    add_title(s, "Estúdio → sala (dupla ou solo)")
+    add_panel(s, Inches(0.55), Inches(1.2), Inches(4.3), Inches(3.15))
+    _, tf = add_textbox(s, Inches(0.8), Inches(1.4), Inches(3.8), Inches(2.85))
+    write_lines(
+        tf,
+        [
+            ("DUPLA", {"size": 16, "bold": True, "color": GOLD, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
+            ("Arte da moeda ↔ LibreSprite + moeda.tscn", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 6}),
+            ("Programação ↔ Player + coleta", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 8}),
+            ("Convite na própria Oficina.", {"size": 12, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+        ],
+    )
+    add_panel(s, Inches(5.15), Inches(1.2), Inches(4.3), Inches(3.15))
+    _, tf = add_textbox(s, Inches(5.4), Inches(1.4), Inches(3.8), Inches(2.85))
+    write_lines(
+        tf,
+        [
+            ("INDIVIDUAL", {"size": 16, "bold": True, "color": GOLD, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
+            ("Você faz os dois ofícios", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 6}),
+            ("(arte no E1 · Godot no E2).", {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 8}),
+            ("Só 1 ou 2 pessoas — sem trio.", {"size": 12, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+        ],
+    )
+    add_footer(s, W, H)
+
+    # 12 — Ofícios da sala
+    s = new_slide(prs)
+    add_num_badge(s, "11")
+    add_title(s, "Ofícios da sala")
     cards = [
-        ("CENÁRIO", "Arte\ncenas/cenario.tscn\nNode2D"),
-        ("MOEDAS", "Game Design\ncenas/moeda.tscn\nArea2D"),
-        ("PLAYER", "Programação\ncenas/player.tscn\nCharacterBody2D"),
+        ("ARTE DA MOEDA", "E1: LibreSprite\nE2: moeda.tscn\n+ Area2D"),
+        ("PROGRAMAÇÃO", "E2: Player (M1)\nbody_entered\ncoleta / conta 1"),
+        ("SOLO", "Os dois ofícios\narte no E1\nGodot no E2"),
     ]
     for i, (k, v) in enumerate(cards):
         left = Inches(0.5 + i * 3.15)
         add_panel(s, left, Inches(1.3), Inches(3.0), Inches(2.8))
         _, tf = add_textbox(s, left + Inches(0.2), Inches(1.5), Inches(2.6), Inches(2.5))
         lines = [
-            (k, {"size": 14, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
+            (k, {"size": 13, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 10}),
         ]
         for part in v.split("\n"):
             lines.append((part, {"size": 12, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 2}))
         write_lines(tf, lines)
     add_footer(s, W, H)
 
-    # 11 — Quadro + cronograma
+    # 13 — Diário
     s = new_slide(prs)
-    add_num_badge(s, "10")
-    add_title(s, "Quadro + cronograma")
+    add_num_badge(s, "12")
+    add_title(s, "Diário compartilhado")
     points = [
-        "Equipe nomeada + produtor do dia.",
-        "Três entregas com responsável (cenário · moedas · player).",
-        "≥3 itens FORA DO ESCOPO (cercado).",
-        "≥3 tarefas no cronograma com dono e alvo (07 / 08+).",
+        "Substitui anotações + síntese — um texto só.",
+        "Em dupla: os dois editam o mesmo diário (autosave + sync).",
+        "Seções: ofícios · entregas · cercado · versionamento.",
+        "Cada aluno finaliza o próprio envio no Encontro 2.",
     ]
     for i, text in enumerate(points):
         top = Inches(1.15 + i * 0.7)
@@ -403,9 +461,9 @@ def build_deck() -> Presentation:
         write_lines(tf, [(f"◆  {text}", {"size": 15, "color": TEXT})])
     add_footer(s, W, H)
 
-    # 12 — Pastas Godot
+    # 14 — Pastas Godot
     s = new_slide(prs)
-    add_num_badge(s, "11")
+    add_num_badge(s, "13")
     add_title(s, "Pastas Godot (contrato)")
     add_panel(s, Inches(0.55), Inches(1.15), Inches(8.9), Inches(3.25))
     _, tf = add_textbox(s, Inches(0.9), Inches(1.35), Inches(8.2), Inches(2.9))
@@ -413,64 +471,62 @@ def build_deck() -> Presentation:
         tf,
         [
             ("LabirintoDeMoedas/", {"size": 14, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "space_after": 6}),
-            ("cenas/  player.tscn · moeda.tscn · cenario.tscn", {"size": 13, "color": TEXT, "space_after": 4}),
+            ("cenas/  player.tscn · moeda.tscn · cenario.tscn (stub)", {"size": 13, "color": TEXT, "space_after": 4}),
             ("sprites/ · audio/ · scripts/ · ui/", {"size": 13, "color": TEXT, "space_after": 10}),
-            ("Projeto NOVO · stubs só · sem movimento/coleta hoje.", {"size": 12, "color": TEXT_DIM}),
+            ("MVP: sprite + movimento M1 + coleta (Area2D).", {"size": 12, "color": TEXT_DIM}),
         ],
     )
     add_footer(s, W, H)
 
-    # 13 — Pasta compartilhada
-    s = new_slide(prs)
-    add_num_badge(s, "12")
-    add_title(s, "Pasta compartilhada")
-    checks = [
-        "Uma pasta: LabirintoDeMoedas_<NomeEquipe>.",
-        "Avisar no grupo antes de editar uma .tscn.",
-        "Um dono por cena nesta fase.",
-        "ZIP datado no fim: backup_AAAA-MM-DD_HHMM.zip.",
-        "Não sync obsessivo de .godot/ (cache local).",
-        "Git existe — só teaser; não é obrigatório hoje.",
-    ]
-    for i, text in enumerate(checks):
-        top = Inches(1.05 + i * 0.52)
-        add_panel(s, Inches(0.55), top, Inches(8.9), Inches(0.45))
-        _, tf = add_textbox(s, Inches(0.8), top + Inches(0.05), Inches(8.4), Inches(0.35))
-        write_lines(tf, [(f"◆  {text}", {"size": 12, "color": TEXT})])
-    add_footer(s, W, H)
-
-    # 14 — Checklist
-    s = new_slide(prs)
-    add_num_badge(s, "13")
-    add_title(s, "Checklist do artefato")
-    checks = [
-        "Equipe de 3 + produtor do dia.",
-        "Quadro: cenário · moedas · player com responsáveis.",
-        "≥3 itens fora do escopo + ≥3 tarefas no cronograma.",
-        "Projeto LabirintoDeMoedas + três cenas-esqueleto.",
-        "Pasta compartilhada ou ZIP de backup.",
-        "Anotações + síntese enviadas na página aula7.",
-    ]
-    for i, text in enumerate(checks):
-        top = Inches(1.05 + i * 0.52)
-        add_panel(s, Inches(0.55), top, Inches(8.9), Inches(0.45))
-        _, tf = add_textbox(s, Inches(0.8), top + Inches(0.05), Inches(8.4), Inches(0.35))
-        write_lines(tf, [(f"□  {text}", {"size": 12, "color": TEXT})])
-    add_footer(s, W, H)
-
-    # 15 — Fechamento
+    # 15 — Projeto local
     s = new_slide(prs)
     add_num_badge(s, "14")
+    add_title(s, "Projeto local (sem pasta sync)")
+    checks = [
+        "Godot só na máquina local — sem Drive/OneDrive no projeto.",
+        "PNG do LibreSprite → sprites/ no Encontro 2.",
+        "Na dupla: cada um na cena do seu ofício.",
+        "Nomes canônicos: player.tscn · moeda.tscn.",
+        "Pasta .godot/ é cache local — não versionar.",
+    ]
+    for i, text in enumerate(checks):
+        top = Inches(1.1 + i * 0.55)
+        add_panel(s, Inches(0.55), top, Inches(8.9), Inches(0.48))
+        _, tf = add_textbox(s, Inches(0.8), top + Inches(0.05), Inches(8.4), Inches(0.38))
+        write_lines(tf, [(f"◆  {text}", {"size": 13, "color": TEXT})])
+    add_footer(s, W, H)
+
+    # 16 — Checklist
+    s = new_slide(prs)
+    add_num_badge(s, "15")
+    add_title(s, "Checklist do artefato")
+    checks = [
+        "Solo ou dupla com ofícios definidos na Oficina.",
+        "E1: sprite LibreSprite · E2: moeda.tscn + coleta.",
+        "≥3 itens fora do escopo no diário.",
+        "Projeto Godot local (sem pasta sync).",
+        "Diário finalizado (envio individual) + Altar.",
+    ]
+    for i, text in enumerate(checks):
+        top = Inches(1.1 + i * 0.55)
+        add_panel(s, Inches(0.55), top, Inches(8.9), Inches(0.48))
+        _, tf = add_textbox(s, Inches(0.8), top + Inches(0.05), Inches(8.4), Inches(0.38))
+        write_lines(tf, [(f"□  {text}", {"size": 13, "color": TEXT})])
+    add_footer(s, W, H)
+
+    # 17 — Fechamento
+    s = new_slide(prs)
+    add_num_badge(s, "16")
     add_title(s, "Fechamento e Altar")
     add_panel(s, Inches(0.55), Inches(1.25), Inches(8.9), Inches(3.15))
     _, tf = add_textbox(s, Inches(0.9), Inches(1.55), Inches(8.2), Inches(2.7))
     write_lines(
         tf,
         [
-            ("FIM DA AULA 07: CARTÓGRAFO DA EQUIPE", {"size": 15, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
+            ("FIM DA AULA 07: CARTÓGRAFO DA DUPLA", {"size": 15, "bold": True, "color": GOLD_BRIGHT, "font": TITLE_FONT, "align": PP_ALIGN.CENTER, "space_after": 12}),
             ("Um labirinto pequeno e terminado ensina mais que um mundo aberto abandonado.", {"size": 13, "color": TEXT, "align": PP_ALIGN.CENTER, "space_after": 10}),
-            ("Envie as anotações. Leve o código ao Altar quando o Mestre liberar.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER, "space_after": 12}),
-            ("Próxima trilha: construir o Labirinto (Aula 08+).", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
+            ("Finalize o diário. Leve o código ao Altar quando o Mestre liberar.", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER, "space_after": 12}),
+            ("Próxima trilha: expandir o Labirinto (Aula 08+).", {"size": 13, "color": TEXT_DIM, "align": PP_ALIGN.CENTER}),
         ],
     )
     add_footer(s, W, H)

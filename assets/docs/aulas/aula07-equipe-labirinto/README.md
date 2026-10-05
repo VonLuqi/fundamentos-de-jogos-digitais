@@ -1,225 +1,170 @@
-# Aula 07 — Minha Equipe, Meu Escopo (Godot 4)
+# Aula 07 — Individual ou dupla + coleta (Godot 4)
 
 > **Página da aula:** `pages/aula7.html`  
 > **Quadro imprimível:** [`quadro-atribuicao.md`](./quadro-atribuicao.md)  
 > **Árvore canônica:** [`estrutura-pastas.txt`](./estrutura-pastas.txt)  
 > **Plano:** `docs/plano-aula7-papeis-workflow-versionamento.md`
 
-Passo a passo para formar a **equipe de 3** do projeto integrador **“O Labirinto de Moedas 2D”**, preencher o quadro de papéis, criar o projeto Godot **`LabirintoDeMoedas`** com pastas e cenas-esqueleto, e organizar a **pasta compartilhada** sem sobrescrever o trabalho do colega.
+Passo a passo para trabalhar **sozinho** (os dois ofícios) ou em **dupla** (arte da moeda × programação da coleta) no projeto integrador **“O Labirinto de Moedas 2D”**:
 
-Esta aula é de **processo + organização**. O labirinto jogável completo e a loja da Aula 06 **não** entram hoje.
+- **Encontro 1** — teoria + sprite no **LibreSprite**
+- **Encontro 2** — Godot **local** (sem pasta sync) + coleta + diário
+
+Cenário rico, áudio polido e loja da Aula 06 **não** entram.
 
 ---
 
 ## Fora do escopo (obrigatório lembrar)
 
-| Permitido hoje | Proibido hoje |
+| Permitido nos 2 encontros | Proibido |
 | :--- | :--- |
-| Equipe de 3 + quadro + cronograma | Labirinto jogável completo (movimento/coleta) |
-| Projeto novo `LabirintoDeMoedas` + stubs `.tscn` | Integrar a loja cosmética da Aula 06 |
-| Pasta compartilhada + ZIP datado | Dois alunos editando a mesma `.tscn` ao mesmo tempo |
-| Lista “fora do escopo” (≥3 itens) | Combate, NPCs, multiplayer, bosses |
-| Teaser verbal de que **existe** Git | Git obrigatório / aula de setup de CLI |
+| Solo (arte + programação) ou dupla (1 ofício cada) | Trios oficiais / papéis itinerantes |
+| E1: sprite no LibreSprite (PNG) | Cenário tilemap completo / boss |
+| E2: `moeda.tscn` + Player + coleta | Integrar a loja cosmética da Aula 06 |
+| Projeto Godot **local** (sem pasta sync) | Abrir o projeto em Drive/OneDrive |
+| Lista “fora do escopo” (≥3 itens) no diário | Combate, NPCs, multiplayer |
+| Teaser verbal de que **existe** Git | Git obrigatório / aula de CLI |
 
-**Scope Creep clássico:** “vamos pôr a loja agora”. Resposta da sala: **não** — fica no cercado “fora”.
+**Scope Creep clássico:** “vamos pôr inimigos e loja agora”. Resposta: **não** — fica no cercado “fora”.
 
 ---
 
 ## Checklist do artefato
 
-Ao final, a equipe deve ter:
+Ao final dos 2 encontros:
 
-- [ ] Equipe de 3 nomeada + **produtor do dia**
-- [ ] Quadro: cenário · moedas · player com responsáveis
-- [ ] ≥3 itens **fora do escopo**
-- [ ] Cronograma com ≥3 tarefas e donos
-- [ ] Projeto `LabirintoDeMoedas` + três cenas-esqueleto (`player` · `moeda` · `cenario`)
-- [ ] Pasta compartilhada ou ZIP de backup criado
-- [ ] Anotações + síntese enviadas na página da aula (`aula7`) — **cada aluno**, individualmente
+- [ ] Solo **ou** dupla com ofícios definidos na Oficina
+- [ ] Sprite LibreSprite (E1) + `cenas/moeda.tscn` (E2)
+- [ ] Player + coleta jogável (some a moeda / conta 1)
+- [ ] ≥3 itens **fora do escopo** no diário
+- [ ] Projeto Godot **local** com nomes canônicos (sem pasta sync)
+- [ ] Diário finalizado na página `aula7` — **cada aluno**, individualmente
 
-**Projeto canônico:** `LabirintoDeMoedas`  
-**Pasta sync sugerida:** `LabirintoDeMoedas_<NomeEquipe>`
+**Projeto canônico (local):** `LabirintoDeMoedas`  
+**Sem pasta sync** no Godot.
 
 ---
 
 ## Pré-requisitos
 
 - Godot **4.x** instalada e abrindo
-- Conta/pasta compartilhada da equipe (Drive, OneDrive, rede da escola, etc.)
-- Página da Aula 07 aberta na aba **Oficina** (anotações)
-- Lista oficial de equipes do Mestre
-- Quadro impresso ou digital: [`quadro-atribuicao.md`](./quadro-atribuicao.md)
-
-### O que NÃO fazer nesta aula
-
-| Evitar | Por quê |
-| :--- | :--- |
-| Implementar movimento 4 dirs / coleta de moedas | É o integrador das **próximas** aulas |
-| Integrar a loja da Aula 06 | Scope Creep; loja fica no projeto antigo |
-| Continuar o projeto das Aulas 02–06 como base | Task 0 = projeto **novo** limpo para o Labirinto |
-| Editar a mesma `.tscn` em paralelo na pasta sync | Conflito / arquivo corrompido |
-| Prometer Git como entrega obrigatória | Desvia os 100 min |
+- LibreSprite + Godot 4.x na máquina local
+- Página da Aula 07 aberta na aba **Oficina** (convite + diário)
+- Quadro: [`quadro-atribuicao.md`](./quadro-atribuicao.md)
 
 ### Vocabulário mínimo
 
 | Termo | Significado operacional |
 | :--- | :--- |
-| Papel | Responsabilidade nomeada sobre um entregável |
+| Ofício | Arte da moeda **ou** programação da coleta (solo = os dois) |
 | Workflow | Sequência de etapas do trabalho |
 | Scope Creep | Crescimento do escopo sem corte/prioridade |
-| MVP | Menor versão que ainda cumpre a meta do jogo |
-| Pasta compartilhada | Local único da equipe (sync) para o projeto |
-| Versionamento visual | Organização + backups + regras de quem edita o quê |
-| `.tscn` | Cena Godot — **não** editar em paralelo sem acordo |
-| `.godot/` | Cache local — não precisa ir para o Drive “no grito” |
+| MVP | Sprite LibreSprite + Player anda + coleta |
+| Projeto local | Godot na máquina — **sem** pasta sync |
+| Diário | Texto único (compartilhado na dupla) enviado no finalize |
+| `.tscn` | Cena Godot com nome canônico |
 
-### Cronograma sugerido (~100 min)
+### Cronograma sugerido (2 × ~120 min)
 
-| Bloco | Tempo | Atividade | Resultado visível |
+**Encontro 1**
+
+| Bloco | Tempo | Atividade | Resultado |
 | :--- | :--- | :--- | :--- |
-| 0. Formação | 10 min | Equipes de 3 · produtor do dia | Trio + nome da equipe |
-| 1. Quadro | 20 min | Atribuições + fora do escopo | Quadro completo |
-| 2. Cronograma | 15 min | 3–5 tarefas com dono | Cronograma no artefato |
-| 3. Pastas Godot | 25 min | Projeto + 3 stubs | FileSystem alinhado |
-| 4. Pasta sync | 15 min | Regras · ZIP backup | Pasta da equipe ok |
-| 5. Registro | 15 min | Anotações · finalizar | Entrega na plataforma |
+| Teoria | 30–40 min | Slides densos | Ofícios · workflow · Scope Creep |
+| Convite / solo | ~15 min | Oficina: solo ou convite + ofícios | Modo definido |
+| Arte LibreSprite | 55–65 min | Sprite da moeda + export PNG | PNG pronto |
+| Diário | resto | Seções 1–2 | Autosave |
 
-**Buffer:** se a formação atrasar, encurtar Bloco 2 (cronograma “3 linhas”) e proteger Blocos 1 + 3–4.
+**Encontro 2**
+
+| Bloco | Tempo | Atividade | Resultado |
+| :--- | :--- | :--- | :--- |
+| Checkpoint | ~10 min | Scope Creep no telão | Cercado fresco |
+| Godot local | 70–80 min | Pastas · import · moeda.tscn · coleta | MVP jogável |
+| Diário + finalize | 15–20 min | Seções 3–4 · cada um finaliza | Envio individual |
+| Demo + Altar | 5–10 min | 1 solo/dupla no telão | Lembrete Altar |
 
 ---
 
 ## Nomes de pastas e cenas são contrato
 
-Use **exatamente** os nomes abaixo. Maiúsculas/caminhos importam: `cenas/player.tscn` ≠ `Player.tscn` na raiz.
+Use **exatamente** os nomes abaixo.
 
 | Cena | Tipo raiz | Dono típico |
 | :--- | :--- | :--- |
-| `cenas/player.tscn` | `CharacterBody2D` | Programação |
-| `cenas/moeda.tscn` | `Area2D` *(preferencial)* ou `Node2D` | Game Design / moedas |
-| `cenas/cenario.tscn` | `Node2D` | Arte |
+| `cenas/player.tscn` | `CharacterBody2D` | Programação (ou solo) |
+| `cenas/moeda.tscn` | `Area2D` | Arte da moeda (ou solo) |
+| `cenas/cenario.tscn` | `Node2D` | Stub opcional (fora do MVP visual) |
 
 ---
 
-## Bloco 0 — Formação de equipes (10 min)
+## Ofícios da sala
 
-1. O Mestre anuncia a **lista oficial** de equipes (3 alunos fixos).
-2. Ímpar na turma: dupla + “produtor itinerante” **ou** grupo de 4 com 2 na arte.
-3. Escolham o **Produtor do dia** (dono do quadro e da pasta compartilhada).
-4. Registrem o nome da equipe no quadro (ex.: *Três Moedas*, *Styx Runners*).
+| Ofício | Chapéu | Entrega |
+| :--- | :--- | :--- |
+| Arte da moeda | Arte | **E1** LibreSprite (PNG) · **E2** `cenas/moeda.tscn` |
+| Programação da coleta | Programação | **E2** Player (M1) + `body_entered` · some / conta 1 |
+| Solo | Os dois | As duas entregas (arte no E1; Godot no E2) |
 
-**Checkpoint 0:** três nomes + produtor do dia preenchidos.
-
----
-
-## Bloco 1 — Quadro de atribuição (20 min)
-
-Abram [`quadro-atribuicao.md`](./quadro-atribuicao.md) (imprimir ou copiar para doc compartilhado) e preencham:
-
-```text
-Equipe: ____________________    Data: __________
-Produtor do dia: ____________________
-
-| Entrega              | Aluno responsável | Papel de estúdio (chapéu) | Feito nesta aula? |
-| Arte do cenário      |                   | Arte                      | pastas / cena stub |
-| Moedas (props+regra) |                   | Game Design (+ arte prop) | pastas / cena stub |
-| Movimentação Player  |                   | Programação               | pastas / cena stub |
-| Áudio (depois)       | (a definir)       | Áudio                     | só pasta vazia     |
-
-FORA DO ESCOPO (cercado) — listar ≥3 itens que NÃO faremos agora:
-1) …
-2) …
-3) …
-```
-
-**Checkpoint 1:** três entregas com dono + lista “fora do escopo” com ≥3 itens.
+Convite e escolha de ofício ficam na **Oficina** da página (não no Salão de Companheiros).
 
 ---
 
-## Bloco 2 — Cronograma de tarefas (15 min)
+## Bloco — Quadro de atribuição
 
-No mesmo artefato, 3–5 linhas:
+Abram [`quadro-atribuicao.md`](./quadro-atribuicao.md) e preencham ofícios + ≥3 itens fora do escopo. O resumo vai para o **diário**.
 
-| Tarefa | Dono | Alvo (aula / data) | Status |
-| :--- | :--- | :--- | :--- |
-| Stub `player.tscn` | … | Aula 07 | |
-| Stub `moeda.tscn` | … | Aula 07 | |
-| Stub `cenario.tscn` | … | Aula 07 | |
-| Movimento 4 dirs | … | Aula 08+ | |
-| Coleta + HUD moedas | … | Aula 08+ | |
-
-Mensagem: o cronograma **protege** o cercado — se algo novo aparecer, ou entra no fim da fila, ou **sai** outra coisa.
-
-**Checkpoint 2:** pelo menos 3 tarefas com dono.
+**Checkpoint:** ofícios claros + cercado com ≥3 itens.
 
 ---
 
-## Bloco 3 — Estrutura Godot (25 min)
+## Bloco — Encontro 1 (LibreSprite)
+
+1. Abrir o LibreSprite e desenhar o sprite da moeda (tamanho pequeno, legível em 2D).
+2. Exportar **PNG** (nome claro, ex.: `moeda.png`).
+3. Guardar o arquivo na máquina local — **não** montar pasta sync no Godot ainda (Godot é Encontro 2).
+4. Rascunhar no diário: ofícios + o que foi feito na arte.
+
+**Checkpoint E1:** PNG da moeda pronto + ofícios definidos na Oficina.
+
+---
+
+## Bloco — Encontro 2 (Godot local + coleta)
 
 Árvore canônica (também em [`estrutura-pastas.txt`](./estrutura-pastas.txt)):
 
 ```text
-LabirintoDeMoedas/
+LabirintoDeMoedas/          ← só na máquina local
 ├── project.godot
 ├── cenas/
-│   ├── player.tscn         ← dono: Programação · raiz CharacterBody2D
-│   ├── moeda.tscn          ← dono: Moedas / Design · raiz Area2D (ou Node2D)
-│   └── cenario.tscn        ← dono: Arte · raiz Node2D
-├── sprites/                ← arte (placeholders ok)
-├── audio/                  ← vazia por enquanto
-├── scripts/                ← .gd futuros (Aula 08+)
-└── ui/                     ← HUD depois (não obrigatório hoje)
+│   ├── player.tscn
+│   ├── moeda.tscn
+│   └── cenario.tscn        ← stub opcional
+├── sprites/                ← PNG do LibreSprite
+├── audio/
+├── scripts/
+└── ui/
 ```
 
 ### Passos
 
-1. Godot → **New Project** → nome/pasta **`LabirintoDeMoedas`** no caminho **local** da máquina (não crie direto dentro do Drive se a sync for lenta — copie depois).
-2. No **FileSystem**, botão direito na raiz → **New Folder** para: `cenas`, `sprites`, `audio`, `scripts`, `ui`.
-3. Cada aluno cria **só a cena do seu papel**:
-   - **Programação:** Scene → New Scene → **Other Node** → `CharacterBody2D` → renomeie a raiz para `Player` → salve `cenas/player.tscn`.
-   - **Moedas / Design:** New Scene → `Area2D` (ou `Node2D`) → raiz `Moeda` → salve `cenas/moeda.tscn`. Anote no quadro a regra provisória (ex.: “coletar 10 moedas = vitória”).
-   - **Arte:** New Scene → `Node2D` → raiz `Cenario` → salve `cenas/cenario.tscn`. Placeholder de sprite em `sprites/` é opcional.
-4. **Não** anexe script de movimento/coleta nesta aula.
-5. Confiram juntos no FileSystem se os três arquivos existem com os nomes canônicos.
+1. Godot → **New Project** → **`LabirintoDeMoedas`** em pasta **local** (nunca Drive/OneDrive).
+2. Pastas: `cenas`, `sprites`, `audio`, `scripts`, `ui`.
+3. Copiar o PNG do LibreSprite para `sprites/`.
+4. **Arte:** cena `Area2D` raiz `Moeda` → sprite → salve `cenas/moeda.tscn`.
+5. **Programação:** `CharacterBody2D` raiz `Player` → movimento M1 → `body_entered` → some a moeda / conta 1.
+6. Solo: faça os dois ofícios. Dupla: combinem a integração sem pasta sync.
 
-**Checkpoint 3:** as três `.tscn` existem; pastas `sprites/`, `audio/`, `scripts/` visíveis.
+**Checkpoint E2:** sprite visível + Player coleta pelo menos 1 moeda + diário finalizado.
 
 ---
 
-## Bloco 4 — Pasta compartilhada e versionamento visual (15 min)
+## Bloco — Diário na plataforma
 
-### Regras de sala
-
-1. **Uma** pasta da equipe no Drive/OneDrive/rede; nome: `LabirintoDeMoedas_<NomeEquipe>`.
-2. Antes de editar uma `.tscn`, **avise no grupo** (“estou na player.tscn”).
-3. Preferir: cada um edita **só a cena do seu papel** nesta fase.
-4. Ao fim da aula: **ZIP datado** `backup_AAAA-MM-DD_HHMM.zip` na pasta (rede de segurança).
-5. Não sincronizar obsessivamente a pasta `.godot/` — se der conflito de cache, apague `.godot` e reabra o projeto.
-6. Nunca “salvar por cima” o ZIP do colega sem renomear.
-
-### O que versionar / o que ignorar
-
-| Levar para a pasta sync | Pode ficar só local |
-| :--- | :--- |
-| `project.godot` | Pasta `.godot/` (cache) |
-| `cenas/*.tscn` (+ `.tscn.uid` se aparecer) | Arquivos temporários do SO |
-| `sprites/`, `audio/`, `scripts/`, `ui/` | ZIPs antigos sem data no nome |
-| Quadro (PDF/foto/MD) | — |
-| ZIP `backup_…` | — |
-
-### Teaser Git (não obrigatório)
-
-Existe controle de versão com **Git** (commits, histórico, branches). Nesta aula a prática é **pasta compartilhada + convenções**. Git pode voltar em aula futura se a ementa pedir.
-
-**Checkpoint 4:** pasta compartilhada tem o projeto (ou o ZIP) + quadro digital/foto.
-
----
-
-## Bloco 5 — Registro na plataforma (15 min)
-
-1. Cada aluno preenche as anotações na aba **Oficina** da `aula7` — **individual**, mesmo em equipe.
-2. Síntese (5–8 linhas): papéis do estúdio → como o trio evita Scope Creep → pastas/cenas + regra da pasta compartilhada.
-3. **Finalizar aula e enviar anotações**.
-4. Lembrar o **Altar** / código quando o Mestre liberar.
+1. Preencham o **Diário de desenvolvimento** na Oficina (seções guiadas).
+2. Em dupla: o mesmo texto sincroniza (autosave + polling).
+3. Cada aluno clica **Finalizar aula (meu envio)** no Encontro 2.
+4. Lembrar o **Altar** quando o Mestre liberar.
 
 ---
 
@@ -227,21 +172,21 @@ Existe controle de versão com **Git** (commits, histórico, branches). Nesta au
 
 | Problema | O que fazer |
 | :--- | :--- |
-| Drive apagou/alterou `.tscn` | Restaurar do ZIP datado; da próxima vez, um dono por cena |
-| Conflito em `.godot/` | Apagar a pasta `.godot` local e reabrir o projeto |
-| Alguém criou `Player.tscn` na raiz | Mover/renomear para `cenas/player.tscn` (contrato) |
-| Quer programar movimento “só um pouco” | Redirecionar: stubs bastam; movimento = Aula 08+ |
-| Quer puxar a loja da Aula 06 | Scope Creep — anotar em FORA DO ESCOPO |
-| Projeto criado direto no Drive e trava | Trabalhar local → copiar pasta / ZIP para o sync |
+| Projeto lento / arquivos “fantasma” | Saiu de pasta sync? Mova o projeto para disco local |
+| Conflito em `.godot/` | Apagar `.godot` local e reabrir |
+| Os dois escolheram o mesmo ofício | UI pede o outro chapéu — último save de papel vale |
+| Quer loja / boss / online | Scope Creep — diário, seção cercado |
+| Coleta não dispara | Conferir `Area2D`, collision layers e `body_entered` |
 
 ---
 
-## Contrato de escopo do Labirinto (referência)
+## Contrato de escopo
 
-| No escopo (MVP) | Fora (até o Mestre liberar) |
+| No escopo (MVP desta aula) | Fora |
 | :--- | :--- |
-| **Hoje:** papéis + pastas + quadro + stubs | Combate, NPCs, diálogos |
-| **08+:** player 4 dirs · moedas + contador · 1 fase | Loja Aula 06 · multiplayer · bosses · shaders |
+| LibreSprite (E1) + `moeda.tscn` + Player + coleta (E2) | Combate, NPCs, diálogos |
+| Pastas locais + diário | Loja Aula 06 · multiplayer · bosses · pasta sync |
+| Stub `cenario.tscn` ok | Cenário rico / tilemap completo |
 
 ---
 
@@ -249,10 +194,10 @@ Existe controle de versão com **Git** (commits, histórico, branches). Nesta au
 
 | Arquivo | Uso |
 | :--- | :--- |
-| [`README.md`](./README.md) | Este guia (Blocos 0–5) |
-| [`quadro-atribuicao.md`](./quadro-atribuicao.md) | Template imprimível do artefato |
-| [`estrutura-pastas.txt`](./estrutura-pastas.txt) | Árvore canônica só texto |
+| [`README.md`](./README.md) | Este guia |
+| [`quadro-atribuicao.md`](./quadro-atribuicao.md) | Template imprimível |
+| [`estrutura-pastas.txt`](./estrutura-pastas.txt) | Árvore canônica |
 
 ---
 
-*Material da Aula 07 · Módulo 2 · Labirinto de Moedas 2D — kickoff de equipe (2026-09-28).*
+*Material da Aula 07 · Módulo 2 · Labirinto de Moedas 2D — individual ou dupla + coleta (2026-10-05).*

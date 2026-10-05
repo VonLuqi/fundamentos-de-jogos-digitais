@@ -318,6 +318,10 @@ function upgradeBlurb(upgrade) {
     return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.`;
   }
   if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.`;
+  if (upgrade.kind === 'clickKSps') {
+    const pct = mul(upgrade.factor, '100');
+    return `O clique ganha ${pct}% das Almas / s.`;
+  }
   if (upgrade.kind === 'generatorMult') {
     const gen = getGenerator(upgrade.generatorId);
     return `${gen?.name ?? 'O gerador'} rende ×${upgrade.factor}.`;

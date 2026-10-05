@@ -44,6 +44,8 @@ staticAssert(html.includes('id="despertar-juizo-modal"'), 'modal Juízo no HTML'
 staticAssert(html.includes('data-juizo-choice="A"'), 'card campeão clicável (A)');
 staticAssert(html.includes('data-juizo-choice="B"'), 'card desafiante clicável (B)');
 staticAssert(html.includes('data-juizo-choice="tie"'), 'botão Empate');
+staticAssert(html.includes('data-juizo-action="confirm"'), 'botão Confirmar veredito');
+staticAssert(html.includes('Confirmar veredito'), 'rótulo Confirmar veredito');
 staticAssert(!html.includes('data-juizo-choice="higher"'), 'sem botão Maior');
 staticAssert(!html.includes('data-juizo-choice="lower"'), 'sem botão Menor');
 staticAssert(html.includes('despertar-juizo-modal__vs'), 'VS no stage');
@@ -73,9 +75,17 @@ staticAssert(pkg.includes('despertar-juizo-smoke.mjs'), 'check inclui este smoke
 staticAssert(isJuizoPoolReady(), `pool ready ≥30 (tem ${JUIZO_READY_POOL.length})`);
 
 const modalJs = read('js/hades-despertar/ui/JuizoModal.js');
-staticAssert(modalJs.includes("this.#guess('A')"), 'modal envia A (card campeão)');
-staticAssert(modalJs.includes("this.#guess('B')"), 'modal envia B (card desafiante)');
-staticAssert(modalJs.includes("this.#guess('tie')"), 'modal envia tie');
+staticAssert(modalJs.includes("#selectChoice('A')"), 'modal seleciona A (não envia no 1º clique)');
+staticAssert(modalJs.includes("#selectChoice('B')"), 'modal seleciona B');
+staticAssert(modalJs.includes("#selectChoice('tie')"), 'modal seleciona tie');
+staticAssert(modalJs.includes('#confirmPending'), 'modal confirma seleção');
+staticAssert(modalJs.includes("data-juizo-action=\"confirm\""), 'modal liga Confirmar');
+staticAssert(modalJs.includes('_pendingChoice'), 'modal guarda pendingChoice');
+staticAssert(modalJs.includes('is-selected'), 'modal marca is-selected');
+staticAssert(!modalJs.includes("this.#guess('A')"), '1º clique A não chama #guess direto');
+staticAssert(!modalJs.includes("this.#guess('B')"), '1º clique B não chama #guess direto');
+staticAssert(!modalJs.includes("this.#guess('tie')"), '1º clique tie não chama #guess direto');
+staticAssert(modalJs.includes('this.#guess(choice)'), 'confirm envia choice via #guess');
 staticAssert(!modalJs.includes("this.#guess('higher')"), 'modal sem higher');
 staticAssert(!modalJs.includes("this.#guess('lower')"), 'modal sem lower');
 staticAssert(!modalJs.includes('UI_TO_API_CHOICE'), 'sem map client-side (D3 no server)');

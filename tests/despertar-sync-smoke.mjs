@@ -225,6 +225,52 @@ check('compra T1 com souls suficientes no DB → ok', () => {
   assert.equal(t1.baseCost, '15');
 });
 
+check('compra cara no mesmo window: ganho plausível pós-SPS → aceita', () => {
+  // SPS pré-compra ≈ 0; pós-compra (20 cães) ≈ 160/s. Claimed 50k em 600s passa só com teto pós-compra.
+  const db = blankRow({
+    souls: '200000.00',
+    lifetime_souls: '200000.00',
+    run_souls: '200000.00',
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  });
+  const client = {
+    souls: '137312.06',
+    lifetimeSouls: '250000.00',
+    runSouls: '250000.00',
+    generators: { cerberian_hound: 20 },
+    upgrades: [],
+    talents: [],
+    eduLogsSeen: [],
+    milestones: {},
+    lastSyncAt: db.last_sync_at,
+  };
+  const result = validateSync(db, client, new Date('2026-09-22T12:10:00.000Z'));
+  assert.equal(result.ok, true, result.detail || result.error || JSON.stringify(result));
+  assert.equal(result.next.generators.cerberian_hound, 20);
+});
+
+check('overclaim absurdo mesmo com SPS pós-compra → 400', () => {
+  const db = blankRow({
+    souls: '200000.00',
+    lifetime_souls: '200000.00',
+    run_souls: '200000.00',
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  });
+  const result = validateSync(db, {
+    souls: '5000000.00',
+    lifetimeSouls: '5200000.00',
+    runSouls: '5200000.00',
+    generators: { cerberian_hound: 20 },
+    upgrades: [],
+    talents: [],
+    eduLogsSeen: [],
+    milestones: {},
+    lastSyncAt: db.last_sync_at,
+  }, new Date('2026-09-22T12:10:00.000Z'));
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 400);
+});
+
 check('id de gerador desconhecido → 400', () => {
   const db = blankRow({ souls: '100.00' });
   const result = validateSync(db, {

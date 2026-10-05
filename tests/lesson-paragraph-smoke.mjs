@@ -89,7 +89,7 @@ assert.deepEqual(roundtrip, {
   notes: 'Core Loop: andar e coletar.',
 });
 
-const aulas = ['js/aula1.js', 'js/aula2.js', 'js/aula3.js', 'js/aula4.js', 'js/aula5.js', 'js/aula6.js', 'js/aula7.js'];
+const aulas = ['js/aula1.js', 'js/aula2.js', 'js/aula3.js', 'js/aula4.js', 'js/aula5.js', 'js/aula6.js'];
 for (const rel of aulas) {
   const src = read(rel);
   assert.ok(
@@ -113,6 +113,12 @@ for (const rel of aulas) {
     `${rel} não deve redefinir splitLessonRecord`
   );
 }
+
+// Aula 07: diário único (lesson_journals) — sem compose/split de anotações+síntese
+const aula7 = read('js/aula7.js');
+assert.ok(!aula7.includes("from './lesson-paragraph.js'"), 'aula7.js não usa lesson-paragraph');
+assert.ok(aula7.includes('lessonJournalFinalize'), 'aula7.js finaliza via diário');
+assert.ok(!aula7.includes('function composeLessonRecord('), 'aula7.js não redefine compose');
 
 const pkg = read('package.json');
 assert.ok(pkg.includes('js/lesson-paragraph.js'), 'package.json check precisa de node --check no parser');

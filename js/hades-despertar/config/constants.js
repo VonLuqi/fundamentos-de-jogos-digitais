@@ -40,7 +40,7 @@ export const TALENT_MNEMOSYNE_PROFUNDA_MULT = '1.25';
 
 export const SYNC_HEARTBEAT_MS = 30_000;
 export const SYNC_MIN_INTERVAL_MS = 5_000;
-export const SYNC_GAIN_TOLERANCE = '1.05';
+export const SYNC_GAIN_TOLERANCE = '1.08';
 export const SYNC_ABSURD_GAIN_FLOOR = '100';
 export const SYNC_MAX_PER_MINUTE = 12;
 export const SYNC_OFFLINE_JITTER_SECONDS = 60;

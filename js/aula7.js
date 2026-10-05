@@ -1,6 +1,6 @@
 /**
- * Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual
- * Tabs, slides, envio de anotações/síntese e discovery compartilhado.
+ * Aula 07 — Papéis, Workflow e Versionamento Visual
+ * Dupla/solo + diário compartilhado (polling) + slides + discovery.
  */
 
 'use strict';
@@ -11,40 +11,43 @@ import {
   ApiError,
   requireSession,
   getSession,
-  getLessonParagraph,
   logout,
   ROUTES,
-  saveLessonParagraph,
   trackLessonView,
+  lessonDuoList,
+  lessonDuoRequest,
+  lessonDuoRespond,
+  lessonDuoLeave,
+  lessonDuoSetRole,
+  lessonJournalSave,
+  lessonJournalFinalize,
 } from './api.js';
 import {
   bindLessonDiscoveryLifecycle,
   enqueueDiscovery,
 } from './lesson-discovery.js';
-import {
-  composeLessonRecord,
-  normalizeNotes,
-  normalizeParagraph,
-  splitLessonRecord,
-} from './lesson-paragraph.js';
 
 const LESSON_ID = 'aula7';
 const PPTX_FILE = 'aula07_papeis_workflow_slides.pptx';
 const PDF_FILE = 'aula07_papeis_workflow_slides.pdf';
-const CONFIG_NOTES_TEMPLATE = [
-  '1) Nome da minha equipe e dos 3 integrantes: ...',
-  '2) Meu papel nesta aula (cenário / moedas / player) e o chapéu de estúdio equivalente: ...',
-  '3) Em uma frase: o que faz Produção (e quem é o produtor do dia): ...',
-  '4) Scope Creep — um exemplo que quase entraríamos e por que cortamos: ...',
-  '5) Três itens que estão FORA do escopo do Labirinto por enquanto: ...',
-  '6) Árvore de pastas / cenas que criamos (nomes): ...',
-  '7) Onde está a pasta compartilhada e a regra para não sobrescrever .tscn: ...',
-  '8) Próxima tarefa minha no cronograma (e até quando): ...',
-  '9) Observações / dúvidas: ...',
+const POLL_MS = 7000;
+const AUTOSAVE_MS = 2000;
+
+const JOURNAL_TEMPLATE = [
+  '1) Ofícios: (solo: eu nos dois · ou Arte = … / Programação = …)',
+  '2) Entregas: E1 LibreSprite (PNG) · E2 cenas/moeda.tscn · coleta (Area2D / body_entered): …',
+  '3) Fora do escopo (Scope Creep) — pelo menos 3 itens que NÃO faremos agora: …',
+  '4) Pastas locais Godot (sem pasta sync) + nomes canônicos das .tscn: …',
 ].join('\n');
 
 let currentUser = null;
 let currentToken = null;
+let journalRevision = 1;
+let journalDirty = false;
+let autosaveTimer = null;
+let pollTimer = null;
+let applyingRemote = false;
+let lastDuoMode = 'solo';
 
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
@@ -62,6 +65,9 @@ function initTabs() {
 
       panels.forEach((panel) => panel.classList.remove('is-active'));
       document.getElementById(target)?.classList.add('is-active');
+
+      if (target === 'oficina') startPolling();
+      else stopPolling();
     });
   });
 }
@@ -116,22 +122,11 @@ function initSlidesViewer() {
   pdfFallback.src = pdfRelativePath;
 }
 
-function setNotesStatus(message, kind = 'info') {
-  const status = document.getElementById('config-notes-status');
+function setJournalStatus(message, kind = 'info') {
+  const status = document.getElementById('journal-status');
   if (!status) return;
   status.className = `gdd-save-status is-${kind}`;
   status.textContent = message;
-}
-
-function setCompletionAvailability() {
-  const textarea = document.getElementById('gdd-text');
-  const notesArea = document.getElementById('config-notes');
-  const button = document.getElementById('btn-save-gdd');
-  if (!textarea || !notesArea || !button) return;
-
-  const hasSummary = normalizeParagraph(textarea.value).length > 0;
-  const hasNotes = normalizeNotes(notesArea.value).length > 0;
-  button.disabled = !(hasSummary && hasNotes);
 }
 
 function setSaveStatus(message, kind = 'info') {
@@ -141,102 +136,288 @@ function setSaveStatus(message, kind = 'info') {
   status.textContent = message;
 }
 
-async function initParagraphPersistence() {
-  const textarea = document.getElementById('gdd-text');
-  const notesArea = document.getElementById('config-notes');
-  const saveButton = document.getElementById('btn-save-gdd');
-  const templateButton = document.getElementById('btn-template-notes');
-  const copyButton = document.getElementById('btn-copy-notes');
-  if (!textarea || !notesArea || !saveButton || !currentToken) return;
+function setDuoStatus(message) {
+  const el = document.getElementById('duo-status');
+  if (el) el.textContent = message;
+}
 
-  textarea.addEventListener('input', () => {
-    setSaveStatus('Síntese alterada. Finalize e envie novamente.', 'info');
-    setCompletionAvailability();
-  });
+function setRoleStatus(message, kind = 'info') {
+  const status = document.getElementById('duo-role-status');
+  if (!status) return;
+  status.className = `gdd-save-status is-${kind}`;
+  status.textContent = message;
+}
 
-  notesArea.addEventListener('input', () => {
-    setSaveStatus('Anotações alteradas. Finalize e envie novamente.', 'info');
-    setNotesStatus('Anotações pendentes de envio.', 'info');
-    setCompletionAvailability();
-  });
+function partnerLabel(duo) {
+  const u = duo?.partner;
+  if (!u) return 'parceiro';
+  return u.username || u.fullName || 'parceiro';
+}
 
-  templateButton?.addEventListener('click', () => {
-    if (!normalizeNotes(notesArea.value)) {
-      notesArea.value = CONFIG_NOTES_TEMPLATE;
-    } else {
-      notesArea.value = `${notesArea.value.trim()}\n\n${CONFIG_NOTES_TEMPLATE}`;
-    }
-    setNotesStatus('Modelo inserido. Revise os campos e salve para enviar.', 'success');
-    setSaveStatus('Anotações atualizadas. Finalize e envie para registrar na aula.', 'info');
-    setCompletionAvailability();
-  });
+function roleLabel(role) {
+  if (role === 'arte') return 'Arte da moeda';
+  if (role === 'programacao') return 'Programação da coleta';
+  return 'ofício indefinido';
+}
 
-  copyButton?.addEventListener('click', async () => {
-    const notes = normalizeNotes(notesArea.value);
-    if (!notes) {
-      setNotesStatus('Preencha as anotações antes de copiar.', 'error');
-      return;
-    }
-
-    if (!navigator.clipboard?.writeText) {
-      setNotesStatus('Seu navegador não permite copiar automaticamente neste ambiente.', 'error');
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(notes);
-      setNotesStatus('Anotações copiadas.', 'success');
-    } catch {
-      setNotesStatus('Não foi possível copiar agora.', 'error');
-    }
-  });
-
-  try {
-    const { paragraph } = await getLessonParagraph(currentToken, LESSON_ID);
-    if (paragraph) {
-      const parsed = splitLessonRecord(paragraph);
-      textarea.value = parsed.summary;
-      notesArea.value = parsed.notes;
-      setSaveStatus('Registro e anotações carregados do banco.', 'success');
-      setNotesStatus(
-        parsed.notes
-          ? 'Anotações carregadas.'
-          : 'Registre equipe, papéis, Scope Creep e pastas Godot.',
-        'info'
-      );
-    } else {
-      setSaveStatus('Escreva a síntese e finalize para enviar ao professor.', 'info');
-      setNotesStatus('Registre equipe, papéis, escopo e a pasta compartilhada.', 'info');
-    }
-  } catch {
-    setSaveStatus('Não foi possível carregar o registro do banco agora.', 'error');
-    setNotesStatus('Se necessário, escreva e salve novamente ao final da aula.', 'error');
+function renderInviteList(listEl, entries, { incoming = false } = {}) {
+  if (!listEl) return;
+  listEl.replaceChildren();
+  if (!entries?.length) {
+    const li = document.createElement('li');
+    li.className = 'lesson-duo-list__empty';
+    li.textContent = incoming ? 'Nenhum convite recebido.' : 'Nenhum convite enviado.';
+    listEl.append(li);
+    return;
   }
-  setCompletionAvailability();
+  for (const entry of entries) {
+    const li = document.createElement('li');
+    li.className = 'lesson-duo-list__item';
+    const name = document.createElement('span');
+    name.textContent = partnerLabel(entry);
+    li.append(name);
+    if (incoming) {
+      const accept = document.createElement('button');
+      accept.type = 'button';
+      accept.className = 'lesson-cta';
+      accept.textContent = 'Aceitar';
+      accept.addEventListener('click', () => respondInvite('accept', entry.duoId));
+      const decline = document.createElement('button');
+      decline.type = 'button';
+      decline.className = 'lesson-cta lesson-cta--ghost';
+      decline.textContent = 'Recusar';
+      decline.addEventListener('click', () => respondInvite('decline', entry.duoId));
+      li.append(accept, decline);
+    } else {
+      const pending = document.createElement('span');
+      pending.className = 'lesson-duo-list__meta';
+      pending.textContent = 'pendente';
+      li.append(pending);
+    }
+    listEl.append(li);
+  }
+}
 
-  saveButton.addEventListener('click', async () => {
-    const summary = normalizeParagraph(textarea.value);
-    const notes = normalizeNotes(notesArea.value);
-    if (!summary) {
-      setSaveStatus('Escreva a síntese final antes de enviar.', 'error');
-      setCompletionAvailability();
+function applyJournalFromServer(journal, { force = false } = {}) {
+  const area = document.getElementById('lesson-journal');
+  if (!area || !journal) return;
+  const remoteRev = Number(journal.revision) || 1;
+  const remoteBody = String(journal.body || '');
+  if (!force && journalDirty && remoteRev <= journalRevision) return;
+  if (!force && journalDirty && remoteBody === area.value) {
+    journalRevision = remoteRev;
+    return;
+  }
+  if (!force && journalDirty && remoteRev > journalRevision && remoteBody !== area.value) {
+    applyingRemote = true;
+    area.value = remoteBody;
+    journalRevision = remoteRev;
+    journalDirty = false;
+    applyingRemote = false;
+    setJournalStatus('O parceiro atualizou — recarregamos o diário.', 'info');
+    return;
+  }
+  applyingRemote = true;
+  area.value = remoteBody;
+  journalRevision = remoteRev;
+  journalDirty = false;
+  applyingRemote = false;
+}
+
+function paintDuoState(payload) {
+  const roles = document.getElementById('duo-roles');
+  const leaveBtn = document.getElementById('duo-leave');
+  const inviteForm = document.getElementById('duo-invite-form');
+  const incoming = document.getElementById('duo-incoming');
+  const outgoing = document.getElementById('duo-outgoing');
+
+  renderInviteList(incoming, payload.incoming || [], { incoming: true });
+  renderInviteList(outgoing, payload.outgoing || [], { incoming: false });
+
+  const duo = payload.duo;
+  const hasPending = (payload.incoming?.length || 0) + (payload.outgoing?.length || 0) > 0;
+  lastDuoMode = duo?.status === 'accepted' ? 'duo' : 'solo';
+
+  if (leaveBtn) {
+    leaveBtn.hidden = !(duo?.status === 'accepted' || hasPending);
+  }
+
+  if (duo?.status === 'accepted') {
+    if (roles) roles.hidden = false;
+    if (inviteForm) inviteForm.hidden = true;
+    const mine = duo.myRole ? roleLabel(duo.myRole) : 'ainda sem ofício';
+    const theirs = duo.partnerRole ? roleLabel(duo.partnerRole) : 'aguardando';
+    setDuoStatus(
+      `Dupla com @${partnerLabel(duo)} · você: ${mine} · parceiro: ${theirs}`,
+    );
+    document.getElementById('duo-role-arte')?.classList.toggle('is-active', duo.myRole === 'arte');
+    document.getElementById('duo-role-prog')?.classList.toggle('is-active', duo.myRole === 'programacao');
+  } else {
+    if (roles) roles.hidden = true;
+    if (inviteForm) inviteForm.hidden = false;
+    if (hasPending) {
+      setDuoStatus('Convite em andamento — você ainda pode trabalhar solo até aceitar.');
+    } else {
+      setDuoStatus('Modo solo — os dois ofícios são seus.');
+    }
+  }
+
+  applyJournalFromServer(payload.journal);
+}
+
+async function refreshDuoState({ quiet = false } = {}) {
+  if (!currentToken) return;
+  try {
+    const payload = await lessonDuoList(currentToken, LESSON_ID);
+    paintDuoState(payload);
+    if (!quiet && payload.journal?.body) {
+      setJournalStatus('Diário sincronizado.', 'success');
+    }
+  } catch (error) {
+    if (!quiet) {
+      const message = error instanceof ApiError ? error.message : 'Falha ao sincronizar dupla/diário.';
+      setDuoStatus(message);
+    }
+  }
+}
+
+async function respondInvite(decision, duoId) {
+  if (!currentToken) return;
+  try {
+    await lessonDuoRespond(currentToken, LESSON_ID, { decision, duoId });
+    await refreshDuoState();
+    setRoleStatus(
+      decision === 'accept' ? 'Dupla formada — escolha seu ofício.' : 'Convite recusado.',
+      'success',
+    );
+  } catch (error) {
+    setRoleStatus(error instanceof ApiError ? error.message : 'Falha ao responder.', 'error');
+  }
+}
+
+function scheduleAutosave() {
+  if (autosaveTimer) window.clearTimeout(autosaveTimer);
+  autosaveTimer = window.setTimeout(() => {
+    saveJournal({ silent: true });
+  }, AUTOSAVE_MS);
+}
+
+async function saveJournal({ silent = false } = {}) {
+  const area = document.getElementById('lesson-journal');
+  if (!area || !currentToken || applyingRemote) return;
+  const body = area.value;
+  try {
+    const result = await lessonJournalSave(currentToken, LESSON_ID, {
+      body,
+      revision: journalRevision,
+    });
+    journalRevision = Number(result.journal?.revision) || journalRevision;
+    journalDirty = false;
+    if (!silent) setJournalStatus('Diário salvo.', 'success');
+    else setJournalStatus('Rascunho salvo.', 'success');
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 409 && error.payload?.journal) {
+      applyJournalFromServer(error.payload.journal, { force: true });
+      setJournalStatus(error.message || 'Conflito — diário recarregado.', 'info');
       return;
     }
+    if (!silent) {
+      setJournalStatus(error instanceof ApiError ? error.message : 'Falha ao salvar.', 'error');
+    }
+  }
+}
 
-    if (!notes) {
-      setNotesStatus('Preencha as anotações da oficina antes de enviar.', 'error');
-      setSaveStatus('As anotações são obrigatórias para envio nesta aula.', 'error');
-      setCompletionAvailability();
+function startPolling() {
+  stopPolling();
+  pollTimer = window.setInterval(() => {
+    if (document.visibilityState === 'hidden') return;
+    refreshDuoState({ quiet: true });
+  }, POLL_MS);
+}
+
+function stopPolling() {
+  if (pollTimer) {
+    window.clearInterval(pollTimer);
+    pollTimer = null;
+  }
+}
+
+function initDuoWidget() {
+  const form = document.getElementById('duo-invite-form');
+  const leaveBtn = document.getElementById('duo-leave');
+  const roleArte = document.getElementById('duo-role-arte');
+  const roleProg = document.getElementById('duo-role-prog');
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const input = document.getElementById('duo-invite-username');
+    const username = String(input?.value || '').trim();
+    if (!username) {
+      setRoleStatus('Informe o username do colega.', 'error');
       return;
     }
-
-    saveButton.disabled = true;
-    const previous = saveButton.textContent;
-    saveButton.textContent = 'Enviando...';
     try {
-      const payload = composeLessonRecord(summary, notes);
-      const result = await saveLessonParagraph(currentToken, LESSON_ID, payload);
-      setNotesStatus('Anotações enviadas com sucesso.', 'success');
+      await lessonDuoRequest(currentToken, LESSON_ID, username);
+      if (input) input.value = '';
+      await refreshDuoState();
+      setRoleStatus('Convite enviado.', 'success');
+    } catch (error) {
+      setRoleStatus(error instanceof ApiError ? error.message : 'Falha ao convidar.', 'error');
+    }
+  });
+
+  leaveBtn?.addEventListener('click', async () => {
+    try {
+      await lessonDuoLeave(currentToken, LESSON_ID);
+      await refreshDuoState();
+      setRoleStatus('Você voltou ao modo solo.', 'success');
+    } catch (error) {
+      setRoleStatus(error instanceof ApiError ? error.message : 'Falha ao sair.', 'error');
+    }
+  });
+
+  async function pickRole(role) {
+    try {
+      await lessonDuoSetRole(currentToken, LESSON_ID, role);
+      await refreshDuoState();
+      setRoleStatus(`Ofício definido: ${roleLabel(role)}.`, 'success');
+    } catch (error) {
+      setRoleStatus(error instanceof ApiError ? error.message : 'Falha ao definir ofício.', 'error');
+    }
+  }
+
+  roleArte?.addEventListener('click', () => pickRole('arte'));
+  roleProg?.addEventListener('click', () => pickRole('programacao'));
+}
+
+function initJournal() {
+  const area = document.getElementById('lesson-journal');
+  const templateBtn = document.getElementById('btn-template-journal');
+  const finalizeBtn = document.getElementById('btn-finalize-journal');
+  if (!area || !finalizeBtn || !currentToken) return;
+
+  area.addEventListener('input', () => {
+    if (applyingRemote) return;
+    journalDirty = true;
+    setJournalStatus('Alterações locais — salvando…', 'info');
+    scheduleAutosave();
+  });
+
+  templateBtn?.addEventListener('click', () => {
+    if (!area.value.trim()) area.value = JOURNAL_TEMPLATE;
+    else area.value = `${area.value.trim()}\n\n${JOURNAL_TEMPLATE}`;
+    journalDirty = true;
+    setJournalStatus('Modelo inserido.', 'success');
+    scheduleAutosave();
+  });
+
+  finalizeBtn.addEventListener('click', async () => {
+    finalizeBtn.disabled = true;
+    const previous = finalizeBtn.textContent;
+    finalizeBtn.textContent = 'Enviando…';
+    try {
+      if (journalDirty) await saveJournal({ silent: true });
+      const result = await lessonJournalFinalize(currentToken, LESSON_ID);
       if (result.awarded) {
         const { xp, achievements = [] } = result.awarded;
         const achievementNames = achievements
@@ -246,24 +427,22 @@ async function initParagraphPersistence() {
           ? ` Conquistas: ${achievementNames.join(', ')}.`
           : '';
         setSaveStatus(
-          `Aula finalizada. Anotações enviadas. +${xp} XP.${conquestText} A atividade aparece no seu Grimório (privada).`,
-          'success'
+          `Aula finalizada. Diário enviado. +${xp} XP.${conquestText} A atividade aparece no seu Grimório (privada).`,
+          'success',
         );
         enqueueDiscovery(achievements);
       } else {
         setSaveStatus(
-          'Aula finalizada e anotações enviadas. A atividade aparece no seu Grimório (privada).',
-          'success'
+          'Aula finalizada e diário enviado. A atividade aparece no seu Grimório (privada). Resgate o Altar no Painel.',
+          'success',
         );
       }
+      setJournalStatus('Finalização registrada.', 'success');
     } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Falha ao salvar o registro.';
-      setSaveStatus(message, 'error');
-      setNotesStatus('Falha ao enviar anotações. Tente novamente.', 'error');
+      setSaveStatus(error instanceof ApiError ? error.message : 'Falha ao finalizar.', 'error');
     } finally {
-      saveButton.disabled = false;
-      saveButton.textContent = previous;
-      setCompletionAvailability();
+      finalizeBtn.disabled = false;
+      finalizeBtn.textContent = previous;
     }
   });
 }
@@ -289,6 +468,7 @@ async function init() {
     route: 'aula7',
     role: currentUser.role === 'admin' ? 'admin' : 'student',
     onLogout: async () => {
+      stopPolling();
       await logout();
       window.location.href = ROUTES.auth();
     },
@@ -298,12 +478,25 @@ async function init() {
   const { initFromNoteBanner } = await import('./grimorio-from-note.js');
   initFromNoteBanner({ token: currentToken });
 
-  trackLessonView(currentToken, LESSON_ID).catch(() => {
-    // Não bloqueia a aula se telemetria de visualização falhar.
-  });
+  trackLessonView(currentToken, LESSON_ID).catch(() => {});
 
   initAdminExample();
-  await initParagraphPersistence();
+  initDuoWidget();
+  initJournal();
+  await refreshDuoState();
+
+  if (document.getElementById('oficina')?.classList.contains('is-active')) {
+    startPolling();
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible'
+      && document.getElementById('oficina')?.classList.contains('is-active')) {
+      refreshDuoState({ quiet: true });
+    }
+  });
+
+  void lastDuoMode;
 }
 
 init().catch((error) => {

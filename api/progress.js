@@ -17,6 +17,7 @@ import * as notes from './_lib/progress/notes.js';
 import * as underworld from './_lib/progress/underworld.js';
 import * as redeem from './_lib/progress/redeem.js';
 import * as lessons from './_lib/progress/lessons.js';
+import * as lessonDuos from './_lib/progress/lesson-duos.js';
 import * as admin from './_lib/progress/admin.js';
 
 /** Leituras leves permitidas no Painel enquanto o aluno ainda sela o e-mail. */
@@ -94,6 +95,9 @@ async function handleProgress(req, res) {
       limit: limitBody,
       ttlMinutes,
       singleUse,
+      duoId,
+      role,
+      revision,
     } = req.body || {};
     metricsSetAction(action || 'n/a');
     const session = await loadValidSession(supabase, token);
@@ -149,6 +153,9 @@ async function handleProgress(req, res) {
       limitBody,
       ttlMinutes,
       singleUse,
+      duoId,
+      role,
+      revision,
     };
 
     if (action === 'friendsList') return friends.friendsList(ctx);
@@ -182,6 +189,14 @@ async function handleProgress(req, res) {
     if (action === 'getLessonParagraph') return lessons.getLessonParagraph(ctx);
     if (action === 'listMyLessonParagraphs') return lessons.listMyLessonParagraphs(ctx);
     if (action === 'saveLessonParagraph') return lessons.saveLessonParagraph(ctx);
+    if (action === 'lessonDuoList') return lessonDuos.lessonDuoList(ctx);
+    if (action === 'lessonDuoRequest') return lessonDuos.lessonDuoRequest(ctx);
+    if (action === 'lessonDuoRespond') return lessonDuos.lessonDuoRespond(ctx);
+    if (action === 'lessonDuoLeave') return lessonDuos.lessonDuoLeave(ctx);
+    if (action === 'lessonDuoSetRole') return lessonDuos.lessonDuoSetRole(ctx);
+    if (action === 'lessonJournalGet') return lessonDuos.lessonJournalGet(ctx);
+    if (action === 'lessonJournalSave') return lessonDuos.lessonJournalSave(ctx);
+    if (action === 'lessonJournalFinalize') return lessonDuos.lessonJournalFinalize(ctx);
     if (action === 'lessonEventsBatch') return lessons.lessonEventsBatch(ctx);
     if (action === 'lessonView') return lessons.lessonView(ctx);
     if (action === 'setLessonGate') return lessons.setLessonGate(ctx);

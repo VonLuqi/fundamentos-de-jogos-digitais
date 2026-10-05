@@ -19,7 +19,7 @@ Alinhado a:
 | Aula | Título | Tópico da ementa | Prática |
 | :---: | --- | --- | --- |
 | **06** | Mercado, PI e Monetização Ética | Mercado brasileiro e internacional de jogos | Godot 4 · loja UI (`Control` / `Button` / `PanelContainer`) + moedas in-game |
-| **07** | Papéis, Workflow e Versionamento Visual | Papéis no desenvolvimento e workflow | Equipes de 3 · quadro · projeto `LabirintoDeMoedas` · pasta compartilhada |
+| **07** | Papéis, Workflow e Versionamento Visual | Papéis no desenvolvimento e workflow | Individual ou dupla · arte da moeda × coleta · diário · `LabirintoDeMoedas` |
 | **08** | *(a definir)* | — | Continuação Labirinto / GDScript |
 | **09** | *(a definir)* | — | … |
 | **10** | *(a definir)* | — | … |
@@ -76,7 +76,7 @@ Cena `ui/loja.tscn` (raiz `Control`):
 
 ### Objetivo
 
-Enxergar o estúdio como **sistema de papéis**, fechar o **cercado do escopo** (anti–Scope Creep) e kickoff do integrador **Labirinto de Moedas 2D** com equipes de 3, quadro de atribuição e versionamento visual (pastas Godot + pasta compartilhada).
+Enxergar o estúdio como **sistema de papéis**, fechar o **cercado do escopo** (anti–Scope Creep) e kickoff do integrador **Labirinto de Moedas 2D** em **individual ou dupla** (arte da moeda × programação da coleta), com diário compartilhado e versionamento visual.
 
 ### Conceitos-chave
 
@@ -88,26 +88,24 @@ Enxergar o estúdio como **sistema de papéis**, fechar o **cercado do escopo** 
 | **Versionamento visual** | Pastas canônicas · um dono por `.tscn` · ZIP datado |
 | **LabirintoDeMoedas** | Projeto novo do integrador (loja Aula 06 fica no projeto antigo) |
 
-### Fundamento teórico (~20 min)
+### Fundamento teórico (~30–40 min no Encontro 1)
 
-- Quem faz o quê num estúdio.
-- Workflow em etapas.
-- Scope Creep e o cercado do MVP.
+- Ofícios com entregável e falha típica de sala.
+- Workflow com o que entra/sai de cada fase.
+- Scope Creep no Labirinto; mapa estúdio → sala (dupla ou solo).
 
-### Oficina (~100 min)
+### Oficina (~200 min ao longo de 2 encontros)
 
-Atividade **Minha Equipe, Meu Escopo**:
+1. Solo (os dois ofícios) ou convite de dupla na Oficina.
+2. Quadro: Arte da moeda × Programação da coleta + ≥3 itens fora do escopo.
+3. Projeto `LabirintoDeMoedas` · sprite + `moeda.tscn` · Player + coleta (`Area2D` / `body_entered`).
+4. Pasta compartilhada + diário compartilhado (finalize individual).
 
-1. Equipes de 3 + produtor do dia.
-2. Quadro: cenário · moedas · player + ≥3 itens fora do escopo.
-3. Projeto `LabirintoDeMoedas` + stubs `player.tscn` / `moeda.tscn` / `cenario.tscn` (**sem** jogo jogável completo).
-4. Pasta compartilhada + regras anti-sobrescrita.
-
-**Artefato:** quadro de papéis + cronograma + estrutura de pastas versionada.
+**Artefato:** MVP sprite + coleta + diário + pastas versionadas.
 
 **Material:** `assets/docs/aulas/aula07-equipe-labirinto/` · slides `aula07_papeis_workflow_slides`.
 
-**Conquistas:** `aula7_concluida` (Cartógrafo da Equipe) + secretas Cinco Ofícios · Cercado do Escopo · Pasta Sagrada.
+**Conquistas:** `aula7_concluida` (Cartógrafo da Dupla) + secretas Cinco Ofícios · Cercado do Escopo · Pasta Sagrada.
 
 ---
 
@@ -118,7 +116,7 @@ Provação M1
         ↓
 Aula 06 — Mercado + loja ética (GDScript UI)
         ↓
-Aula 07 — Papéis + equipes + kickoff Labirinto
+Aula 07 — Papéis + dupla/solo + coleta Labirinto
         ↓
 Aula 08–10 — TBD (ementa)
 ```

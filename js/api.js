@@ -1313,6 +1313,75 @@ export function requestFriend(token, username) {
   }));
 }
 
+/** Dupla + diário da Aula 07 (por lessonId). */
+export function lessonDuoList(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonDuoList', lessonId }),
+  });
+}
+
+export function lessonDuoRequest(token, lessonId, username) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonDuoRequest', lessonId, username }),
+  });
+}
+
+export function lessonDuoRespond(token, lessonId, { decision, duoId } = {}) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'lessonDuoRespond',
+      lessonId,
+      decision,
+      duoId,
+    }),
+  });
+}
+
+export function lessonDuoLeave(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonDuoLeave', lessonId }),
+  });
+}
+
+export function lessonDuoSetRole(token, lessonId, role) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonDuoSetRole', lessonId, role }),
+  });
+}
+
+export function lessonJournalGet(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonJournalGet', lessonId }),
+  });
+}
+
+export function lessonJournalSave(token, lessonId, { body, revision } = {}) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'lessonJournalSave',
+      lessonId,
+      body,
+      revision,
+    }),
+  });
+}
+
+export function lessonJournalFinalize(token, lessonId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'lessonJournalFinalize', lessonId }),
+  });
+}
+
 export function respondFriend(token, { decision, friendshipId, friendUserId } = {}) {
   return request('/progress', {
     method: 'POST',
@@ -2014,7 +2083,7 @@ export const MODULES = [
         id: 'aula7',
         number: '07',
         title: 'Papéis na Indústria, Workflow e Versionamento Visual',
-        subtitle: 'Equipes · Labirinto de Moedas 2D · pastas Godot e pasta compartilhada',
+        subtitle: 'Individual ou dupla · arte da moeda × coleta · diário compartilhado',
         rewardXp: 30,
       },
     ],

@@ -151,8 +151,8 @@ assert(
   'MODULES.aula7 deve usar o título curricular novo'
 );
 assert(
-  apiJs.includes('Equipes · Labirinto de Moedas 2D · pastas Godot e pasta compartilhada'),
-  'MODULES.aula7 deve usar o subtitle de equipes / Labirinto'
+  apiJs.includes('Individual ou dupla · arte da moeda × coleta · diário compartilhado'),
+  'MODULES.aula7 deve usar o subtitle de dupla / coleta / diário'
 );
 assert(
   apiJs.includes('Introdução ao GDScript'),
@@ -546,8 +546,10 @@ assert(
   'aula7.html deve usar o título curricular de papéis / workflow'
 );
 assert(aula7Html.includes('discovery-overlay'), 'aula7.html precisa do discovery overlay');
-assert(aula7Html.includes('id="config-notes"'), 'aula7.html tem anotações da oficina');
-assert(aula7Html.includes('id="gdd-text"'), 'aula7.html tem síntese');
+assert(aula7Html.includes('id="lesson-journal"'), 'aula7.html tem diário da oficina');
+assert(aula7Html.includes('id="lesson-duo-panel"'), 'aula7.html tem widget de dupla');
+assert(!aula7Html.includes('id="config-notes"'), 'aula7.html sem anotações legadas');
+assert(!aula7Html.includes('id="gdd-text"'), 'aula7.html sem síntese legada');
 assert(
   aula7Html.includes('../css/aula.css'),
   'aula7.html deve reusar css/aula.css'
@@ -561,8 +563,8 @@ assert(
   'aula7.js deve usar lessonId aula7'
 );
 assert(
-  read('js/aula7.js').includes('saveLessonParagraph') && read('js/aula7.js').includes('composeLessonRecord'),
-  'aula7.js finaliza via saveLessonParagraph'
+  read('js/aula7.js').includes('lessonJournalFinalize') && read('js/aula7.js').includes('lessonJournalSave'),
+  'aula7.js finaliza via diário compartilhado'
 );
 assert(
   read('js/aula7.js').includes('lesson-discovery') || read('js/aula7.js').includes('enqueueDiscovery'),

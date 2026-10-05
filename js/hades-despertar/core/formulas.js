@@ -205,6 +205,16 @@ export function clickMultiplier(upgradeIds = []) {
   return mult;
 }
 
+/** Soma fatores Styx `clickKSps` (Eco da Foice etc.) — reseta no Lethe. */
+export function styxClickKSps(upgradeIds = []) {
+  let k = '0';
+  for (const id of upgradeIds || []) {
+    const upgrade = UPGRADE_BY_ID[id];
+    if (upgrade?.kind === 'clickKSps') k = add(k, upgrade.factor);
+  }
+  return k;
+}
+
 export function prestigeBonus(obols, talentIds = []) {
   const { mnemosyneMult } = talentEffects(talentIds);
   return add('1', mul(mul(obols || '0', OBOL_BONUS_PER), mnemosyneMult));
@@ -331,8 +341,11 @@ export function clickPower({
     : sps;
   const effects = economyEffects(talents, verdictPurchases);
   const clickMult = mul(clickMultiplier(upgrades), effects.clickVerdictMult);
-  const spsTerm = add('1', mul(effects.kSps, totalSps));
-  return mul(mul(add(CLICK_BASE, CLICK_FLAT_BASE), clickMult), spsTerm);
+  const kSps = add(effects.kSps, styxClickKSps(upgrades));
+  // Aditivo: base×mult + kSps×SPS (evita clickMult × %SPS explodir).
+  const flatPart = mul(add(CLICK_BASE, CLICK_FLAT_BASE), clickMult);
+  const spsPart = mul(kSps, totalSps);
+  return add(flatPart, spsPart);
 }
 
 export function obolsFromRunSouls(runSouls) {

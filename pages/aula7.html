@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual: equipes do Labirinto de Moedas 2D, quadro de papéis e pastas Godot." />
+  <meta name="description" content="Aula 07 — Papéis, Workflow e Versionamento: individual ou dupla (arte da moeda × coleta), diário compartilhado e Labirinto de Moedas 2D." />
   <meta name="theme-color" content="#0d0a10" />
   <title>Aula 07 — Papéis, Workflow e Versionamento | Fundamentos de Jogos Digitais</title>
 
@@ -103,7 +103,7 @@
             I. Fundamentos
           </button>
           <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
-            II. Oficina da Equipe
+            II. Oficina
           </button>
           <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
             III. Slides
@@ -116,10 +116,11 @@
         <p class="lesson-chip">Módulo 2 · Aulas 6 a 10 · 10h</p>
         <h2 class="lesson-title">Papéis no desenvolvimento e workflow</h2>
         <p>
-          A Aula 06 abriu o balcão ético. Agora o Submundo forma <strong>equipes</strong>:
+          A Aula 06 abriu o balcão ético. Agora o Submundo ensina <strong>papéis e workflow</strong>:
           quem faz o quê num estúdio, como organizar o trabalho em etapas e como
           <strong>fechar o cercado do escopo</strong> antes do projeto estourar.
-          O kickoff do integrador <strong>Labirinto de Moedas 2D</strong> começa aqui.
+          O kickoff do integrador <strong>Labirinto de Moedas 2D</strong> dura
+          <strong>dois encontros</strong> (~200 min de prática): individual ou em <strong>dupla</strong>.
         </p>
 
         <div class="triplet-grid">
@@ -151,7 +152,21 @@
         </p>
 
         <h2 class="lesson-title">Workflow em etapas (evitar caos)</h2>
-        <pre class="lesson-pre" aria-label="Fluxo de workflow">Ideia → Escopo fechado (MVP) → Produção por papel → Integração → Playtest → Corte ou próximo incremento</pre>
+        <div class="lesson-md" aria-label="Fluxo de workflow">
+          <ol class="lesson-flow">
+            <li class="lesson-flow__step">Ideia</li>
+            <li class="lesson-flow__arrow" aria-hidden="true">→</li>
+            <li class="lesson-flow__step">Escopo fechado (MVP)</li>
+            <li class="lesson-flow__arrow" aria-hidden="true">→</li>
+            <li class="lesson-flow__step">Produção por papel</li>
+            <li class="lesson-flow__arrow" aria-hidden="true">→</li>
+            <li class="lesson-flow__step">Integração</li>
+            <li class="lesson-flow__arrow" aria-hidden="true">→</li>
+            <li class="lesson-flow__step">Playtest</li>
+            <li class="lesson-flow__arrow" aria-hidden="true">→</li>
+            <li class="lesson-flow__step">Corte ou próximo incremento</li>
+          </ol>
+        </div>
         <ul class="lesson-list">
           <li>Sem <strong>escopo fechado</strong>, cada ideia nova empurra o prazo.</li>
           <li>Integração cedo vence “cada um no seu ZIP até a véspera”.</li>
@@ -174,56 +189,150 @@
           </article>
         </div>
 
-        <div class="quote-block">
-          <p>Um labirinto pequeno e terminado ensina mais que um mundo aberto abandonado. Hoje vocês escolhem papéis, fecham o cercado do escopo e aprendem a não apagar o trabalho do colega na pasta compartilhada.</p>
+        <h2 class="lesson-title">Caso: Hytale × Riot Games</h2>
+        <p>
+          Scope Creep não é só “erro de aluno”. Na indústria, visão enorme sem MVP claro
+          pode engolir anos — mesmo com dinheiro e estúdio grande.
+        </p>
+
+        <div class="lesson-case" aria-label="Caso Hytale">
+          <figure class="lesson-case__media">
+            <img
+              src="../assets/docs/aulas/aula07-equipe-labirinto/hytale-scope.jpg"
+              alt="Arte promocional de Hytale: personagens enfrentam um dragão de gelo num mundo voxel"
+              width="960"
+              height="540"
+              loading="lazy"
+            />
+          </figure>
+          <div class="lesson-case__body">
+            <h3>Linha do tempo</h3>
+            <ul class="lesson-list">
+              <li><strong>2018</strong> — Trailer: sandbox + RPG + tools + multiplayer…</li>
+              <li><strong>2020</strong> — Riot Games compra a Hypixel Studios.</li>
+              <li><strong>2021+</strong> — Beta não chega; reboot de engine; ambição cresce.</li>
+              <li><strong>2025</strong> — Projeto cancelado (depois reaberto com escopo cortado).</li>
+            </ul>
+            <p class="lesson-case__takeaway">
+              Dinheiro e talento <strong>não</strong> substituem cercado fechado.
+            </p>
+          </div>
         </div>
 
-        <h2 class="lesson-title">O foco desta aula</h2>
+        <div class="lesson-case" aria-label="Lição Riot Games para a sala">
+          <figure class="lesson-case__media lesson-case__media--logo">
+            <img
+              src="../assets/docs/aulas/aula07-equipe-labirinto/riot-games-logo.png"
+              alt="Logo da Riot Games"
+              width="480"
+              height="200"
+              loading="lazy"
+            />
+          </figure>
+          <div class="lesson-case__body">
+            <h3>Lição para o Labirinto</h3>
+            <ul class="lesson-list">
+              <li>Cada “só mais isso” empurrou o jogo para longe do lançável.</li>
+              <li>Até com backing da Riot, falta de MVP claro virou anos sem build pública estável.</li>
+              <li>Na sala: <strong>sprite + coleta</strong>. Loja, boss e online ficam <strong>fora</strong>.</li>
+            </ul>
+            <p class="lesson-case__takeaway">
+              Senão o Labirinto vira um Hytale de dois encontros — e ninguém entrega.
+            </p>
+          </div>
+        </div>
+
+        <div class="quote-block">
+          <p>Um labirinto pequeno e terminado ensina mais que um mundo aberto abandonado. Vocês escolhem ofícios (arte da moeda × programação da coleta), fecham o cercado do escopo e entregam um sprite + coleta mínima — sem pasta sync no Godot.</p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula (2 encontros)</h2>
         <p>
-          Formar equipes de <strong>3</strong>, preencher o quadro de atribuição
-          (cenário · moedas · player), criar o projeto Godot <code>LabirintoDeMoedas</code>
-          com pastas e cenas-esqueleto, e organizar a <strong>pasta compartilhada</strong>
-          da equipe — sem implementar o labirinto jogável completo.
+          Trabalhe <strong>sozinho</strong> (os dois ofícios) ou convide um colega na Oficina.
+          Na dupla: um faz a <strong>arte da moeda</strong>, o outro a <strong>programação da coleta</strong>.
         </p>
         <ul class="lesson-list">
-          <li>Nomear os cinco papéis de estúdio e o entregável de cada um.</li>
-          <li>Explicar Scope Creep e listar o que fica fora do MVP.</li>
-          <li>Entregar quadro + cronograma + estrutura de pastas versionada com segurança.</li>
+          <li><strong>Encontro 1</strong> — teoria + sprite da moeda no <strong>LibreSprite</strong>.</li>
+          <li><strong>Encontro 2</strong> — Godot: pastas, <code>moeda.tscn</code>, Player + coleta, e diário completo.</li>
+          <li>Sem pasta sync / Drive dentro do projeto Godot — trabalhem local e documentem no diário.</li>
         </ul>
       </article>
     </section>
 
-    <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+        <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
       <article class="hades-frame lesson-content">
-        <p class="lesson-chip">Atividade guiada · Minha Equipe, Meu Escopo</p>
-        <h2 class="lesson-title">Prática — equipes + Godot organizada</h2>
+        <p class="lesson-chip">Atividade guiada · 2 encontros · E1 arte · E2 coleta + diário</p>
+        <h2 class="lesson-title">Prática — individual ou dupla</h2>
         <p>
-          Divisão oficial em <strong>equipes de 3</strong> para o projeto integrador
-          <strong>“O Labirinto de Moedas 2D”</strong>. Vocês preenchem o quadro de papéis,
-          montam a árvore de pastas no Godot 4 e sincronizam na pasta compartilhada —
-          <strong>sem</strong> movimento jogável nem loja integrada nesta aula.
+          No projeto integrador <strong>“O Labirinto de Moedas 2D”</strong> você trabalha
+          <strong>sozinho</strong> (arte + programação) ou em <strong>dupla</strong>
+          (um ofício cada). Encontro 1 = teoria + sprite no LibreSprite.
+          Encontro 2 = Godot jogável + diário.
         </p>
 
         <div class="triplet-grid">
           <article class="triplet-card">
-            <h3>Trio de sala</h3>
-            <p>Arte do cenário · moedas (props + regra) · movimentação do Player — um dono por entrega.</p>
+            <h3>Encontro 1 — Arte</h3>
+            <p>Teoria + sprite da moeda no <strong>LibreSprite</strong> (PNG exportado). Chapéu: Arte.</p>
           </article>
           <article class="triplet-card">
-            <h3>Projeto canônico</h3>
-            <p><code>LabirintoDeMoedas</code> — projeto <strong>novo</strong> (loja da Aula 06 fica no projeto antigo).</p>
+            <h3>Encontro 2 — Coleta</h3>
+            <p>Godot local: <code>moeda.tscn</code> + Player (M1) + <code>Area2D</code> / <code>body_entered</code>.</p>
           </article>
           <article class="triplet-card">
-            <h3>Versionamento visual</h3>
-            <p>Pasta sync + uma cena por aluno + ZIP datado. Git é só teaser — não é obrigatório hoje.</p>
+            <h3>Diário</h3>
+            <p>Documentar ofícios, entregas, cercado e pastas — finalize no Encontro 2.</p>
           </article>
         </div>
+
+        <section class="lesson-duo-panel" id="lesson-duo-panel" aria-label="Dupla da aula">
+          <h3 class="lesson-subtitle">Formar dupla (ou trabalhar sozinho)</h3>
+          <p class="lesson-duo-panel__lead">
+            Default: <strong>solo</strong> — você faz os dois ofícios. Para formar dupla,
+            convide um colega da turma pelo username. O convite atualiza em alguns segundos.
+          </p>
+          <p id="duo-status" class="lesson-duo-status" aria-live="polite">Modo solo — os dois ofícios são seus.</p>
+          <div class="lesson-duo-roles" id="duo-roles" hidden>
+            <p class="lesson-duo-roles__label">Seu ofício nesta dupla:</p>
+            <div class="lesson-duo-roles__actions">
+              <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-role-arte" data-role="arte">Arte da moeda</button>
+              <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-role-prog" data-role="programacao">Programação da coleta</button>
+            </div>
+            <p id="duo-role-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+          <form class="lesson-duo-invite" id="duo-invite-form">
+            <label class="lesson-duo-invite__label" for="duo-invite-username">Username do colega</label>
+            <div class="lesson-duo-invite__row">
+              <input
+                type="text"
+                id="duo-invite-username"
+                class="lesson-duo-invite__input"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="ex.: sombra_da_turma"
+              />
+              <button type="submit" class="lesson-cta" id="duo-invite-submit">Convidar</button>
+            </div>
+          </form>
+          <div class="lesson-duo-lists">
+            <div>
+              <h4 class="lesson-duo-lists__title">Convites recebidos</h4>
+              <ul id="duo-incoming" class="lesson-duo-list"></ul>
+            </div>
+            <div>
+              <h4 class="lesson-duo-lists__title">Convites enviados</h4>
+              <ul id="duo-outgoing" class="lesson-duo-list"></ul>
+            </div>
+          </div>
+          <div class="gdd-actions">
+            <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-leave" hidden>Sair da dupla / cancelar convites</button>
+          </div>
+        </section>
 
         <div class="lesson-download-box">
           <p class="lesson-download-box__label">Material da atividade prática</p>
           <p>
-            Guia com Blocos 0–5, template do quadro de atribuição e árvore de pastas canônica.
-            Preferir preencher o quadro juntos e só então abrir a Godot.
+            Guia dos dois encontros, quadro Arte × Programação e árvore de pastas canônica.
           </p>
           <div class="slides-actions">
             <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/README.md" target="_blank" rel="noopener noreferrer">
@@ -238,171 +347,129 @@
           </div>
         </div>
 
-        <h3 class="lesson-subtitle">Cronograma da oficina (~100 min)</h3>
+        <h3 class="lesson-subtitle">Roteiro — Encontro 1 (~120 min)</h3>
         <ul class="lesson-list">
-          <li><strong>0. Formação (10 min)</strong> — equipes de 3 · produtor do dia · nome da equipe</li>
-          <li><strong>1. Quadro (20 min)</strong> — atribuições + lista “fora do escopo” (≥3)</li>
-          <li><strong>2. Cronograma (15 min)</strong> — 3–5 tarefas com dono e alvo</li>
-          <li><strong>3. Pastas Godot (25 min)</strong> — projeto <code>LabirintoDeMoedas</code> · 3 cenas-esqueleto</li>
-          <li><strong>4. Pasta compartilhada (15 min)</strong> — sync · regras · ZIP backup</li>
-          <li><strong>5. Registro (15 min)</strong> — anotações · síntese · finalizar</li>
+          <li><strong>Teoria + slides</strong> (~30–40 min) — ofícios, workflow, Scope Creep</li>
+          <li><strong>Convite / solo + ofícios</strong> (~15 min)</li>
+          <li><strong>Arte no LibreSprite</strong> (~55–65 min) — sprite da moeda + export PNG</li>
+          <li><strong>Diário</strong> — rascunho das seções 1–2 (ofícios + o que começamos)</li>
         </ul>
 
-        <h3 class="lesson-subtitle">0. Formação de equipes</h3>
-        <ol class="lesson-list">
-          <li>O Mestre anuncia a <strong>lista oficial</strong> de equipes (3 alunos fixos).</li>
-          <li>Ímpar na turma: dupla + produtor itinerante <strong>ou</strong> grupo de 4 com 2 na arte.</li>
-          <li>Escolham o <strong>Produtor do dia</strong> (dono do quadro e da pasta compartilhada).</li>
-          <li>Registrem o nome da equipe (ex.: Três Moedas, Styx Runners).</li>
-        </ol>
-        <p><strong>Checkpoint 0:</strong> três nomes + produtor do dia no quadro.</p>
-
-        <h3 class="lesson-subtitle">1. Quadro de atribuição</h3>
-        <p>Preencham o template (campos canônicos):</p>
-        <pre class="lesson-pre" aria-label="Campos do quadro de atribuição">Equipe: ____________________    Data: __________
-Produtor do dia: ____________________
-
-| Entrega              | Aluno | Chapéu de estúdio | Nesta aula        |
-| Arte do cenário      |       | Arte              | pastas / cenario  |
-| Moedas (props+regra) |       | Game Design       | pastas / moeda    |
-| Movimentação Player  |       | Programação       | pastas / player   |
-| Áudio (depois)       | —     | Áudio             | só pasta vazia    |
-
-FORA DO ESCOPO (≥3 itens que NÃO faremos agora):
-1) …
-2) …
-3) …</pre>
-        <p><strong>Checkpoint 1:</strong> três entregas com dono + ≥3 itens fora do escopo.</p>
-
-        <h3 class="lesson-subtitle">2. Cronograma curto</h3>
+        <h3 class="lesson-subtitle">Roteiro — Encontro 2 (~120 min)</h3>
         <ul class="lesson-list">
-          <li>Stub <code>player.tscn</code> · stub <code>moeda.tscn</code> · stub <code>cenario.tscn</code> → Aula 07</li>
-          <li>Movimento 4 direções · coleta + HUD → <strong>Aula 08+</strong></li>
-          <li>Se algo novo aparecer: entra no fim da fila <strong>ou</strong> sai outra coisa.</li>
-        </ul>
-        <p><strong>Checkpoint 2:</strong> pelo menos 3 tarefas com dono no artefato.</p>
-
-        <h3 class="lesson-subtitle">3. Estrutura Godot (nomes são contrato)</h3>
-        <pre class="lesson-pre" aria-label="Árvore de pastas do LabirintoDeMoedas">LabirintoDeMoedas/
-├── project.godot
-├── cenas/
-│   ├── player.tscn      ← Programação · raiz CharacterBody2D
-│   ├── moeda.tscn       ← Design · raiz Area2D (ou Node2D)
-│   └── cenario.tscn     ← Arte · raiz Node2D
-├── sprites/
-├── audio/               ← vazia (SFX depois)
-├── scripts/             ← .gd na Aula 08+
-└── ui/                  ← HUD depois</pre>
-        <ol class="lesson-list">
-          <li>Godot 4 → <strong>New Project</strong> → pasta <code>LabirintoDeMoedas</code>.</li>
-          <li>Crie as pastas no FileSystem.</li>
-          <li>Cada aluno cria <strong>só a cena do seu papel</strong> com a raiz correta e salva.</li>
-          <li><strong>Não</strong> implemente movimento nem coleta hoje.</li>
-        </ol>
-        <p><strong>Checkpoint 3:</strong> as três <code>.tscn</code> existem; pastas <code>sprites/</code>, <code>audio/</code>, <code>scripts/</code> visíveis.</p>
-
-        <h3 class="lesson-subtitle">4. Pasta compartilhada (versionamento visual)</h3>
-        <ol class="lesson-list">
-          <li>Uma pasta no Drive/OneDrive/rede: <code>LabirintoDeMoedas_&lt;NomeEquipe&gt;</code>.</li>
-          <li>Antes de editar uma <code>.tscn</code>, avise no grupo (“estou na player.tscn”).</li>
-          <li>Cada um edita <strong>só a cena do seu papel</strong> nesta fase.</li>
-          <li>Ao fim: ZIP datado <code>backup_AAAA-MM-DD_HHMM.zip</code> na pasta.</li>
-          <li>Não sync obsessivo de <code>.godot/</code> — se conflitar, apague e reabra o projeto.</li>
-          <li>Nunca salvar por cima do ZIP do colega sem renomear.</li>
-        </ol>
-        <p><strong>Checkpoint 4:</strong> pasta compartilhada tem o projeto (ou o ZIP) + quadro digital/foto.</p>
-
-        <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
-        <ul class="lesson-list">
-          <li>Implementar o Labirinto jogável completo (é o integrador das próximas aulas).</li>
-          <li>Integrar a loja da Aula 06 (Scope Creep).</li>
-          <li>Dois alunos editando a mesma <code>.tscn</code> ao vivo na pasta sync.</li>
-          <li>Combate, NPCs, multiplayer, Git obrigatório.</li>
+          <li><strong>Checkpoint + Scope Creep</strong> (~10 min)</li>
+          <li><strong>Godot local</strong> (~70–80 min) — pastas · importar sprite · <code>moeda.tscn</code> · Player + coleta</li>
+          <li><strong>Diário completo + finalizar</strong> (~15–20 min) — cada um finaliza o mesmo texto</li>
+          <li><strong>Demo + Altar</strong> (~5–10 min)</li>
         </ul>
 
-        <h3 class="lesson-subtitle">Contrato de escopo (MVP do Labirinto)</h3>
-        <div class="triplet-grid">
-          <article class="triplet-card">
-            <h3>Entra (depois / hoje)</h3>
-            <p>Hoje: papéis + pastas + stubs. Depois: player 4 dirs · moedas + contador · 1 fase curta.</p>
-          </article>
-          <article class="triplet-card">
-            <h3>Fica fora</h3>
-            <p>Combate · NPCs · loja Aula 06 · multiplayer · bosses · áudio polido · shaders.</p>
-          </article>
-          <article class="triplet-card">
-            <h3>Vocabulário</h3>
-            <p>Papel · workflow · Scope Creep · MVP · pasta compartilhada · <code>.tscn</code> · <code>.godot/</code>.</p>
-          </article>
+        <h3 class="lesson-subtitle">Ofícios e entregas</h3>
+        <div class="lesson-md" aria-label="Quadro de ofícios">
+          <div class="lesson-table-wrap">
+            <table class="lesson-table">
+              <thead>
+                <tr>
+                  <th scope="col">Ofício</th>
+                  <th scope="col">Entrega</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Ofício"><strong>Arte da moeda</strong></td>
+                  <td data-label="Entrega"><strong>E1:</strong> sprite no LibreSprite (PNG)<br /><strong>E2:</strong> <code>cenas/moeda.tscn</code></td>
+                </tr>
+                <tr>
+                  <td data-label="Ofício"><strong>Programação da coleta</strong></td>
+                  <td data-label="Entrega"><strong>E2:</strong> Player (M1) + <code>Area2D</code> / coleta</td>
+                </tr>
+                <tr>
+                  <td data-label="Ofício"><strong>Individual</strong></td>
+                  <td data-label="Entrega">As duas linhas acima (arte no E1; Godot no E2)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="lesson-md__note">
+            <strong>Fora do escopo (≥3):</strong> loja Aula 06 · combate · NPCs · multiplayer · SFX polido · cenário rico · pasta sync no Godot
+          </p>
         </div>
 
-        <h3 class="lesson-subtitle">Checklist do artefato</h3>
-        <ul class="lesson-list">
-          <li>Equipe de 3 nomeada + produtor do dia.</li>
-          <li>Quadro: cenário · moedas · player com responsáveis.</li>
-          <li>≥3 itens <strong>fora do escopo</strong>.</li>
-          <li>Cronograma com ≥3 tarefas e donos.</li>
-          <li>Projeto <code>LabirintoDeMoedas</code> + três cenas-esqueleto.</li>
-          <li>Pasta compartilhada ou ZIP de backup criado.</li>
-          <li>Anotações + síntese enviadas nesta página.</li>
-        </ul>
-
-        <div class="quote-block">
-          <p>Fechar o cercado do escopo e não apagar a cena do colega: isso também é fazer jogo.</p>
+        <h3 class="lesson-subtitle">Estrutura Godot — Encontro 2 (nomes são contrato)</h3>
+        <div class="lesson-md" aria-label="Árvore de pastas do LabirintoDeMoedas">
+          <p>Projeto <strong>local</strong> <code>LabirintoDeMoedas/</code> — sem pasta sync / Drive dentro do Godot.</p>
+          <ul class="lesson-tree">
+            <li><code>project.godot</code></li>
+            <li>
+              <code>cenas/</code>
+              <ul>
+                <li>
+                  <code>player.tscn</code>
+                  <span class="lesson-tree__meta">Programação · CharacterBody2D + movimento M1</span>
+                </li>
+                <li>
+                  <code>moeda.tscn</code>
+                  <span class="lesson-tree__meta">Arte importada + Area2D para coleta</span>
+                </li>
+                <li>
+                  <code>cenario.tscn</code>
+                  <span class="lesson-tree__meta">Opcional / stub Node2D</span>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <code>sprites/</code>
+              <span class="lesson-tree__meta">PNG da moeda (export do LibreSprite)</span>
+            </li>
+            <li><code>audio/</code> <span class="lesson-tree__meta">Vazia (SFX depois)</span></li>
+            <li><code>scripts/</code></li>
+            <li><code>ui/</code></li>
+          </ul>
         </div>
 
         <section class="quote-block" aria-label="Pistas secretas da aula 7">
-          <p><strong>Pistas secretas do Submundo:</strong> nomeie ofícios de um estúdio; diga o que vocês cortaram para não estourar o escopo; e descreva como a equipe guarda as cenas sem um apagar o outro. O altar reconhece quem cartografa o trabalho.</p>
+          <p><strong>Pistas secretas do Submundo:</strong> nomeie ofícios de um estúdio; diga o que vocês cortaram para não estourar o escopo; e descreva como organizam pastas e cenas no projeto local.</p>
         </section>
 
-        <section class="config-notes-box" id="aula-atividade" aria-label="Anotações da prática">
-          <h3 class="lesson-subtitle">Anotações da oficina</h3>
+        <section class="config-notes-box" id="aula-atividade" aria-label="Diário de desenvolvimento">
+          <h3 class="lesson-subtitle">Diário de desenvolvimento</h3>
           <p>
-            Registre equipe, papéis, Scope Creep, pastas Godot e a regra da pasta compartilhada.
-            Ao finalizar, a atividade fica no seu <strong>Grimório Pessoal</strong> (lida direto do registro da aula; privada, não compartilhada com colegas).
+            Um único diário substitui anotações + síntese. Em dupla, os dois escrevem o
+            <strong>mesmo texto</strong> (autosave). Cada aluno <strong>finaliza</strong>
+            individualmente no Encontro 2 — o snapshot vai ao Grimório (privado).
           </p>
+          <ol class="lesson-list">
+            <li>Ofícios (quem é arte / programação, ou “eu nos dois”)</li>
+            <li>O que entregamos (LibreSprite → sprite · <code>moeda.tscn</code> · coleta)</li>
+            <li>Cercado / o que ficou de fora (Scope Creep)</li>
+            <li>Como organizamos o projeto local (pastas, nomes, sem pasta sync)</li>
+          </ol>
           <textarea
-            id="config-notes"
+            id="lesson-journal"
             class="config-notes-text"
-            rows="14"
-            placeholder="1) Nome da minha equipe e dos 3 integrantes:&#10;2) Meu papel nesta aula (cenário / moedas / player) e o chapéu de estúdio equivalente:&#10;3) Em uma frase: o que faz Produção (e quem é o produtor do dia):&#10;4) Scope Creep — um exemplo que quase entraríamos e por que cortamos:&#10;5) Três itens que estão FORA do escopo do Labirinto por enquanto:&#10;6) Árvore de pastas / cenas que criamos (nomes):&#10;7) Onde está a pasta compartilhada e a regra para não sobrescrever .tscn:&#10;8) Próxima tarefa minha no cronograma (e até quando):&#10;9) Observações / dúvidas:"
+            rows="16"
+            placeholder="1) Ofícios: ...&#10;2) Entregas (LibreSprite / moeda.tscn / coleta): ...&#10;3) Fora do escopo (Scope Creep): ...&#10;4) Pastas locais Godot (sem pasta sync): ..."
           ></textarea>
+          <p id="journal-status" class="gdd-save-status" aria-live="polite"></p>
           <div class="gdd-actions">
-            <button type="button" id="btn-template-notes" class="lesson-cta lesson-cta--ghost">Inserir modelo de anotações</button>
-            <button type="button" id="btn-copy-notes" class="lesson-cta lesson-cta--ghost">Copiar anotações</button>
-            <p id="config-notes-status" class="gdd-save-status" aria-live="polite"></p>
+            <button type="button" id="btn-template-journal" class="lesson-cta lesson-cta--ghost">Inserir modelo do diário</button>
+            <button type="button" id="btn-finalize-journal" class="lesson-cta">Finalizar aula (meu envio)</button>
+            <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
           </div>
         </section>
 
-        <h3 class="lesson-subtitle">Artefato gerado</h3>
-        <p>
-          Quadro (físico ou digital) de atribuição de papéis + cronograma da equipe,
-          estrutura inicial do projeto <strong>Labirinto de Moedas 2D</strong> no FileSystem Godot,
-          e registro escrito amarrando papéis ↔ escopo fechado ↔ versionamento na pasta compartilhada.
-        </p>
         <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
           <h4 class="lesson-subtitle">Exemplo pronto</h4>
           <p class="gdd-example__text">
-            Equipe Três Moedas: Ana (cenário/Arte), Bruno (player/Programação), Caio (moedas/Design); produtor do dia = Caio.
-            Cortamos loja da Aula 06, combate e multiplayer — Scope Creep. Criamos LabirintoDeMoedas com
-            cenas/player.tscn (CharacterBody2D), moeda.tscn (Area2D), cenario.tscn (Node2D) + pastas sprites/audio/scripts.
-            Pasta no Drive LabirintoDeMoedas_TresMoedas: um dono por .tscn, aviso no grupo antes de editar, ZIP backup no fim.
+            Dupla: Ana (Arte da moeda) e Bruno (Programação da coleta). No E1 Ana fez o sprite no LibreSprite.
+            No E2 importamos o PNG em LabirintoDeMoedas/sprites/, criamos moeda.tscn (Area2D) e player.tscn
+            com coleta body_entered. Cortamos loja da Aula 06, combate e multiplayer. Projeto ficou só local —
+            sem pasta sync no Godot; nomes canônicos nas cenas.
           </p>
         </section>
-        <textarea
-          id="gdd-text"
-          class="gdd-text"
-          rows="8"
-          placeholder="Síntese final (5–8 linhas): amarre papéis do estúdio → como o trio evita Scope Creep → como organizam pastas/cenas na Godot e na pasta compartilhada para o Labirinto de Moedas 2D.&#10;Ex.: cinco ofícios · meu papel no trio · fora do escopo · LabirintoDeMoedas · regra anti-sobrescrita."
-        ></textarea>
-        <div class="gdd-actions">
-          <button type="button" id="btn-save-gdd" class="lesson-cta">Finalizar aula e enviar anotações</button>
-          <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
-        </div>
       </article>
     </section>
 
-    <section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+<section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
       <article class="hades-frame lesson-content">
         <h2 class="lesson-title">Slides da Aula 07</h2>
         <p>

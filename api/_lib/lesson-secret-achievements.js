@@ -886,11 +886,34 @@ export function matchesTempoRespeitado(normalizedText) {
 
 /** Cinco ofícios de estúdio (cada grupo = um papel). */
 const OFICIO_PROGRAMACAO = Object.freeze([
-  ['programacao', 'programação', 'programador', 'codigo', 'código', 'script', 'gdscript'],
+  [
+    'programacao',
+    'programação',
+    'programador',
+    'codigo',
+    'código',
+    'script',
+    'gdscript',
+    'programacao da coleta',
+    'programação da coleta',
+    'body_entered',
+    'coleta',
+  ],
 ]);
 
 const OFICIO_ARTE = Object.freeze([
-  ['artista', 'sprites', 'sprite', 'pixel art', 'arte do cenario', 'arte do cenário', 'papel de arte', 'oficio de arte', 'ofício de arte'],
+  [
+    'artista',
+    'sprites',
+    'sprite',
+    'pixel art',
+    'arte do cenario',
+    'arte do cenário',
+    'arte da moeda',
+    'papel de arte',
+    'oficio de arte',
+    'ofício de arte',
+  ],
 ]);
 
 const OFICIO_AUDIO = Object.freeze([
@@ -927,8 +950,29 @@ const CENA_TSCN_SIGNALS = Object.freeze([
 ]);
 
 const PASTA_SYNC_SIGNALS = Object.freeze([
-  ['pasta compartilhada', 'pasta sync', 'drive', 'onedrive', 'google drive'],
-  ['versionamento', 'backup', 'zip', 'nao sobrescrever', 'não sobrescrever', 'anti-sobrescrita'],
+  [
+    'pasta compartilhada',
+    'pasta sync',
+    'pasta da dupla',
+    'pasta da equipe',
+    'drive',
+    'onedrive',
+    'google drive',
+    'projeto local',
+    'godot local',
+    'sem pasta sync',
+    'libresprite',
+  ],
+  [
+    'versionamento',
+    'backup',
+    'zip',
+    'nao sobrescrever',
+    'não sobrescrever',
+    'anti-sobrescrita',
+    'nomes canonicos',
+    'nomes canônicos',
+  ],
 ]);
 
 export const AULA7_SECRET_THRESHOLDS = Object.freeze({

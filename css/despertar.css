@@ -2999,6 +2999,13 @@ button.despertar-juizo-card:disabled {
   animation: despertar-juizo-miss 0.45s ease;
 }
 
+.despertar-juizo-card.is-selected,
+.despertar-juizo-modal__choices [data-juizo-choice].is-selected {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 1px rgba(242, 213, 154, 0.55), inset 0 0 24px rgba(207, 167, 89, 0.18);
+}
+
 .despertar-juizo-modal__hud [data-juizo-hud].is-bump {
   animation: despertar-juizo-hit 0.42s ease;
   color: var(--hades-gold-bright);
@@ -3064,7 +3071,7 @@ button.despertar-juizo-card:disabled {
 
 .despertar-juizo-modal__choices {
   display: grid;
-  grid-template-columns: minmax(0, 12rem);
+  grid-template-columns: minmax(0, 12rem) minmax(0, 14rem);
   justify-content: center;
   gap: 0.5rem;
   margin-top: 0.95rem;
@@ -3074,6 +3081,11 @@ button.despertar-juizo-card:disabled {
 .despertar-juizo-modal__choices .despertar-ghost {
   width: 100%;
   min-height: 2.6rem;
+}
+
+.despertar-juizo-modal__choices .btn-gold:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .despertar-juizo-modal__stage--fail .despertar-juizo-card {

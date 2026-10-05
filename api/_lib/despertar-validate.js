@@ -524,24 +524,25 @@ export function validateSync(dbRow, clientState, now = new Date()) {
   }
 
   const dt = deltaSecondsBetween(db.lastSyncAt, nowDate, db.talents, db.verdictPurchases);
+  // Teto pós-compra: SPS/click do client já validado por computeSpend (evita falso positivo em ×10/×100).
   const sps = calculateTotalSPS({
-    generators: db.generators,
-    upgrades: db.upgrades,
+    generators: client.generators,
+    upgrades: client.upgrades,
     talents: db.talents,
     obols: db.obols,
     verdictPurchases: db.verdictPurchases,
-    shinyCounts: db.shinyCounts,
-    goldCounts: db.goldCounts,
+    shinyCounts: client.shinyCounts,
+    goldCounts: client.goldCounts,
   });
   const power = clickPower({
-    generators: db.generators,
-    upgrades: db.upgrades,
+    generators: client.generators,
+    upgrades: client.upgrades,
     talents: db.talents,
     obols: db.obols,
     sps,
     verdictPurchases: db.verdictPurchases,
-    shinyCounts: db.shinyCounts,
-    goldCounts: db.goldCounts,
+    shinyCounts: client.shinyCounts,
+    goldCounts: client.goldCounts,
   });
   const maxGain = theoreticalMaxGain({ sps, clickPower: power, deltaSeconds: dt });
 

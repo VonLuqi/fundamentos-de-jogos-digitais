@@ -79,7 +79,7 @@ staticAssert(TICK_FPS === 60, 'loop alvo 60 Hz');
 staticAssert(loopSrc.includes('panicUpdates') || loopSrc.includes('LOOP_PANIC'), 'panic no GameLoop');
 staticAssert(SYNC_HEARTBEAT_MS === 30_000, 'sync heartbeat 30 s');
 staticAssert(validateSrc.includes('validateSync'), 'validateSync autoritativo');
-staticAssert(apiSrc.includes('JUDGES_REFUSED') || apiSrc.includes('recus') || validateSrc.includes('teto') || validateSrc.includes('1.05'), 'anti-cheat no validate');
+staticAssert(apiSrc.includes('JUDGES_REFUSED') || apiSrc.includes('recus') || validateSrc.includes('teto') || validateSrc.includes('1.08') || validateSrc.includes('1.05'), 'anti-cheat no validate');
 staticAssert(html.includes('despertar-layout'), 'três colunas no markup');
 staticAssert(html.includes('despertar-codex-book') || html.includes('despertar-codex-drawer'), 'Códice na UI');
 staticAssert(EDU_LOG_IDS.length === 21, '21 logs do Códice');

@@ -304,8 +304,8 @@
     },
     {
       "id": "aula7_concluida",
-      "name": "Cartógrafo da Equipe",
-      "desc": "Mapeou papéis, cercou o escopo e honrou a sétima trilha.",
+      "name": "Cartógrafo da Dupla",
+      "desc": "Escolheu ofícios, cercou o escopo e honrou a sétima trilha — solo ou em dupla.",
       "icon": "🗺️",
       "art": "aula7_concluida.webp",
       "hidden": false,

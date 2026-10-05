@@ -274,7 +274,7 @@ Módulo 2 · Aula 06 — Mercado, PI e Monetização Ética
         (loja cosmética ética na Godot · GDScript “do zero”)
         ↓
 Módulo 2 · Aula 07 — Papéis, Workflow e Versionamento Visual
-        (equipes · Labirinto de Moedas 2D · pastas / pasta compartilhada)
+        (individual ou dupla · Labirinto de Moedas 2D · coleta / pasta compartilhada)
         ↓
 Aulas 08–10 (ementa a definir) · câmera / AnimatedSprite quando listados
 ```

@@ -134,8 +134,15 @@ await run('D2: cadeia Foice — um elo revelado por vez', () => {
     'pacto_das_margens',
     'ceifador_ctoniano',
     'colheita_eterna',
+    'fio_da_foice',
+    'lamina_do_styx',
+    'ceifa_das_almas',
+    'pacto_do_corte',
+    'eco_da_foice',
+    'danca_da_morte',
+    'colheita_absoluta',
   ];
-  const state = new GameState({ souls: '100000', generators: { wandering_shade: 1 } });
+  const state = new GameState({ souls: '10000000000', generators: { wandering_shade: 1 } });
 
   const countRevealedUnowned = () => FOICE.filter((id) => {
     const view = describeUpgradeCard(state, id);
@@ -145,25 +152,16 @@ await run('D2: cadeia Foice — um elo revelado por vez', () => {
   assert.deepEqual(countRevealedUnowned(), ['foice_afilada']);
   assert.equal(describeUpgradeCard(state, 'juramento_acheron').revealed, false);
   assert.equal(state.buyUpgrade('juramento_acheron').ok, false, 'não compra N+1 sem N');
+  assert.equal(describeUpgradeCard(state, 'eco_da_foice').revealed, false);
 
-  assert.equal(state.buyUpgrade('foice_afilada').ok, true);
-  assert.deepEqual(countRevealedUnowned(), ['juramento_acheron']);
-  assert.match(
-    describeUpgradeCard(state, 'juramento_acheron').requirement,
-    /Foice Afiada/,
-  );
-
-  assert.equal(state.buyUpgrade('juramento_acheron').ok, true);
-  assert.deepEqual(countRevealedUnowned(), ['pacto_das_margens']);
-
-  assert.equal(state.buyUpgrade('pacto_das_margens').ok, true);
-  assert.deepEqual(countRevealedUnowned(), ['ceifador_ctoniano']);
-
-  assert.equal(state.buyUpgrade('ceifador_ctoniano').ok, true);
-  assert.deepEqual(countRevealedUnowned(), ['colheita_eterna']);
-
-  assert.equal(state.buyUpgrade('colheita_eterna').ok, true);
+  for (let i = 0; i < FOICE.length; i += 1) {
+    const id = FOICE[i];
+    assert.deepEqual(countRevealedUnowned(), [id], `revela só ${id}`);
+    assert.equal(state.buyUpgrade(id).ok, true, `compra ${id}`);
+  }
   assert.deepEqual(countRevealedUnowned(), []);
+  assert.ok(state.upgrades.includes('eco_da_foice'));
+  assert.ok(state.upgrades.includes('colheita_absoluta'));
 });
 
 await run('D2: save mid-cadeia sem soft-lock (owned N+1 sem N)', () => {
@@ -283,6 +281,45 @@ await run('juramento ×2 no clique e no gerador', () => {
   const bought = genState.buyUpgrade('umbras_despertas');
   assert.equal(bought.ok, true);
   assert.equal(cmp(genState.sps(), '0.2'), 0);
+});
+
+await run('catch-up T1: qty 100 revela Eclipse ×5 e SPS sobe', () => {
+  const state = new GameState({
+    souls: '500000',
+    generators: { wandering_shade: 100 },
+    upgrades: ['umbras_despertas', 'cortejo_das_sombras', 'legiao_das_umbras', 'mare_de_sombras'],
+  });
+  // ×2×2×5×5 = ×100 sobre base 0.1 → 100 * 0.1 * 100 = 1000 SPS
+  assert.equal(cmp(state.sps(), '1000'), 0);
+
+  const card = describeUpgradeCard(state, 'eclipse_do_acheron');
+  assert.equal(card.revealed, true);
+  assert.equal(card.canBuy, true);
+  assert.equal(card.owned, false);
+
+  assert.equal(state.buyUpgrade('eclipse_do_acheron').ok, true);
+  // ×5 a mais → 5000 SPS
+  assert.equal(cmp(state.sps(), '5000'), 0);
+  assert.equal(describeUpgradeCard(state, 'eclipse_do_acheron').owned, true);
+  assert.equal(describeUpgradeCard(state, 'eclipse_do_acheron').canBuy, false);
+});
+
+await run('catch-up T4: qty 50 revela Código ×5 e SPS do Juiz sobe', () => {
+  const state = new GameState({
+    souls: '60000000',
+    generators: { tartarus_judge: 50 },
+    upgrades: ['veredito_tartaro', 'lei_inquebravel', 'banco_dos_juizes'],
+  });
+  // ×2×2×5 = ×20 sobre base 47 → 50 * 47 * 20 = 47000
+  assert.equal(cmp(state.sps(), '47000'), 0);
+
+  const card = describeUpgradeCard(state, 'codigo_das_profundezas');
+  assert.equal(card.revealed, true);
+  assert.equal(card.canBuy, true);
+
+  assert.equal(state.buyUpgrade('codigo_das_profundezas').ok, true);
+  // ×5 a mais → 235000
+  assert.equal(cmp(state.sps(), '235000'), 0);
 });
 
 await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', () => {

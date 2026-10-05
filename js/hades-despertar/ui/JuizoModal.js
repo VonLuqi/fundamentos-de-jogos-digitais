@@ -1,6 +1,6 @@
 /**
- * Modal do Juízo do Tartarus — F3: click-card + Empate; sucessor sempre desafiante.
- * GameLoop continua; Esc / Voltar abandonam sem revelar faixas.
+ * Modal do Juízo do Tartarus — F3: selecionar A/B/Empate → Confirmar; sucessor sempre desafiante.
+ * GameLoop continua; Esc limpa seleção ou abandona sem revelar faixas.
  * Choices canônicos: A | B | tie (aliases higher/lower ainda aceitos no server).
  */
 
@@ -75,6 +75,7 @@ export class JuizoModal {
     this.api = api;
     this.root = doc.getElementById('despertar-juizo-modal');
     this._busy = false;
+    this._pendingChoice = null;
     this._focusBefore = null;
     this._lastPair = null;
     this._onKey = (event) => this.#onKeyDown(event);
@@ -99,6 +100,7 @@ export class JuizoModal {
     this.revealA = this.root.querySelector('[data-juizo-reveal-a]');
     this.revealB = this.root.querySelector('[data-juizo-reveal-b]');
     this.btnTie = this.root.querySelector('[data-juizo-choice="tie"]');
+    this.btnConfirm = this.root.querySelector('[data-juizo-action="confirm"]');
     this.btnBack = this.root.querySelector('[data-juizo-action="back"]');
     this.btnRestart = this.root.querySelector('[data-juizo-action="restart"]');
     this.btnFailBack = this.root.querySelector('[data-juizo-action="fail-back"]');
@@ -106,9 +108,10 @@ export class JuizoModal {
     const eduHint = this.root.querySelector('[data-juizo-hint]');
     if (eduHint) eduHint.textContent = JUIZO_MODAL_EDU_HINT;
 
-    this.cardA?.root?.addEventListener('click', () => this.#guess('A'));
-    this.cardB?.root?.addEventListener('click', () => this.#guess('B'));
-    this.btnTie?.addEventListener('click', () => this.#guess('tie'));
+    this.cardA?.root?.addEventListener('click', () => this.#selectChoice('A'));
+    this.cardB?.root?.addEventListener('click', () => this.#selectChoice('B'));
+    this.btnTie?.addEventListener('click', () => this.#selectChoice('tie'));
+    this.btnConfirm?.addEventListener('click', () => this.#confirmPending());
     this.btnBack?.addEventListener('click', () => this.close({ abandon: true }));
     this.btnFailBack?.addEventListener('click', () => this.close({ abandon: false }));
     this.btnRestart?.addEventListener('click', () => this.open());
@@ -150,6 +153,7 @@ export class JuizoModal {
         /* fecha mesmo assim */
       }
     }
+    this.#clearPendingChoice();
     this.#clearConfetti();
     this.root.hidden = true;
     this.root.setAttribute('aria-hidden', 'true');
@@ -163,25 +167,34 @@ export class JuizoModal {
     if (!this.isOpen) return;
     if (event.key === 'Escape') {
       event.preventDefault();
+      if (this._pendingChoice && this.play && !this.play.hidden) {
+        this.#clearPendingChoice();
+        return;
+      }
       this.close({ abandon: true });
       return;
     }
 
     if (this.play && !this.play.hidden && !this._busy) {
       const key = event.key;
+      if (key === 'Enter') {
+        event.preventDefault();
+        this.#confirmPending();
+        return;
+      }
       if (key === 'ArrowLeft' || key === '1') {
         event.preventDefault();
-        this.#guess('A');
+        this.#selectChoice('A');
         return;
       }
       if (key === 'ArrowRight' || key === '2') {
         event.preventDefault();
-        this.#guess('B');
+        this.#selectChoice('B');
         return;
       }
       if (key === 'e' || key === 'E') {
         event.preventDefault();
-        this.#guess('tie');
+        this.#selectChoice('tie');
         return;
       }
     }
@@ -200,6 +213,50 @@ export class JuizoModal {
       event.preventDefault();
       first.focus();
     }
+  }
+
+  #choiceButtons() {
+    return [this.cardA?.root, this.cardB?.root, this.btnTie].filter(Boolean);
+  }
+
+  #clearPendingChoice() {
+    this._pendingChoice = null;
+    this.#choiceButtons().forEach((btn) => {
+      btn.classList.remove('is-selected');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+    if (this.btnConfirm) this.btnConfirm.disabled = true;
+  }
+
+  #selectChoice(choice) {
+    if (this._busy || !this.isOpen) return;
+    if (this.play?.hidden) return;
+    if (choice !== 'A' && choice !== 'B' && choice !== 'tie') return;
+
+    // Segundo clique/tecla na mesma escolha confirma.
+    if (this._pendingChoice === choice) {
+      this.#confirmPending();
+      return;
+    }
+
+    this._pendingChoice = choice;
+    this.#choiceButtons().forEach((btn) => {
+      const selected = btn.getAttribute('data-juizo-choice') === choice
+        || (choice === 'A' && btn === this.cardA?.root)
+        || (choice === 'B' && btn === this.cardB?.root);
+      btn.classList.toggle('is-selected', selected);
+      btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+    });
+    if (this.btnConfirm) {
+      this.btnConfirm.disabled = false;
+      this.btnConfirm.focus();
+    }
+  }
+
+  #confirmPending() {
+    if (!this._pendingChoice) return;
+    const choice = this._pendingChoice;
+    this.#guess(choice);
   }
 
   #renderHud(hud = {}, { bump = false } = {}) {
@@ -240,20 +297,19 @@ export class JuizoModal {
   }
 
   #clearCardFeel() {
-    this.cardA?.root?.classList.remove('is-hit', 'is-miss');
-    this.cardB?.root?.classList.remove('is-hit', 'is-miss');
+    this.cardA?.root?.classList.remove('is-hit', 'is-miss', 'is-selected');
+    this.cardB?.root?.classList.remove('is-hit', 'is-miss', 'is-selected');
     this.stage?.classList.remove('is-slide-in', 'is-shake');
     this.failStage?.classList.remove('is-shake', 'is-vignette');
-  }
-
-  #choiceButtons() {
-    return [this.cardA?.root, this.cardB?.root, this.btnTie].filter(Boolean);
   }
 
   #setChoicesDisabled(disabled) {
     this.#choiceButtons().forEach((btn) => {
       btn.disabled = Boolean(disabled);
     });
+    if (this.btnConfirm) {
+      this.btnConfirm.disabled = Boolean(disabled) || !this._pendingChoice;
+    }
   }
 
   #clearConfetti() {
@@ -288,6 +344,7 @@ export class JuizoModal {
     setHidden(this.reveal, true);
     this.reveal?.classList.remove('is-reveal');
     this._lastPair = result.pair || null;
+    this.#clearPendingChoice();
     this.#renderHud(result.hud, { bump: celebrate });
     this.#clearCardFeel();
     this.#paintCard(this.cardA, result.pair?.cardA, {
@@ -326,6 +383,7 @@ export class JuizoModal {
   #showFail(result) {
     setHidden(this.play, true);
     setHidden(this.fail, false);
+    this.#clearPendingChoice();
     this.#renderHud(result.hud);
     this.#clearCardFeel();
     this.#clearConfetti();

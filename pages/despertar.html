@@ -127,7 +127,8 @@
 
       <div data-juizo-view="play">
         <p class="despertar-juizo-modal__question">
-          Qual exige a faixa ClassInd <strong>mais alta</strong>? Clique no card — ou <strong>Empate</strong>.
+          Qual exige a faixa ClassInd <strong>mais alta</strong>?
+          Selecione o card ou <strong>Empate</strong>, depois <strong>Confirmar veredito</strong>.
         </p>
         <p class="despertar-juizo-modal__hint" data-juizo-hint>
           Campeão mostra a faixa. Desafiante esconde com ?. Acerto sobe a sequência; Vereditos só nos marcos do teu recorde.
@@ -138,7 +139,8 @@
             type="button"
             data-juizo-card="A"
             data-juizo-choice="A"
-            aria-label="Escolher o campeão como faixa mais alta"
+            aria-pressed="false"
+            aria-label="Selecionar o campeão como faixa mais alta"
           >
             <p class="despertar-juizo-card__role">Campeão</p>
             <img class="despertar-juizo-card__cover" data-juizo-cover="A" alt="" hidden />
@@ -152,7 +154,8 @@
             type="button"
             data-juizo-card="B"
             data-juizo-choice="B"
-            aria-label="Escolher o desafiante como faixa mais alta"
+            aria-pressed="false"
+            aria-label="Selecionar o desafiante como faixa mais alta"
           >
             <p class="despertar-juizo-card__role">Desafiante</p>
             <img class="despertar-juizo-card__cover" data-juizo-cover="B" alt="" hidden />
@@ -167,7 +170,8 @@
         </div>
         <div class="despertar-juizo-modal__confetti" data-juizo-confetti aria-hidden="true"></div>
         <div class="despertar-juizo-modal__choices" role="group" aria-label="Julgamento">
-          <button class="despertar-ghost" type="button" data-juizo-choice="tie">Empate</button>
+          <button class="despertar-ghost" type="button" data-juizo-choice="tie" aria-pressed="false">Empate</button>
+          <button class="btn-gold" type="button" data-juizo-action="confirm" disabled>Confirmar veredito</button>
         </div>
         <div class="despertar-juizo-modal__actions">
           <button class="despertar-ghost" type="button" data-juizo-action="back">Voltar ao Despertar</button>
