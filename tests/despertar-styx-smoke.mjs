@@ -340,14 +340,14 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', 
   const lethe = describeLethe(ripe);
   assert.equal(lethe.canDrink, true);
   assert.equal(lethe.preview.obolsGain, '1');
-  assert.equal(lethe.preview.mnemosyneGain, '1');
+  assert.equal(lethe.preview.mnemosyneGain, '0');
 
   const ritual = ripe.applyPrestige();
   assert.equal(ritual.ok, true);
   assert.equal(Object.keys(ripe.quantities()).length, 0);
   assert.equal(ripe.upgrades.length, 0);
   assert.equal(cmp(ripe.obols, '1'), 0);
-  assert.equal(cmp(ripe.mnemosyne, '1'), 0);
+  assert.equal(cmp(ripe.mnemosyne, '0'), 0, '1 óbolo → 0 essência (2:1)');
   assert.equal(cmp(ripe.souls, '0'), 0);
   assert.equal(cmp(ripe.runSouls, '0'), 0);
   assert.equal(cmp(ripe.lifetimeSouls, '1000000000'), 0);
@@ -355,9 +355,10 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 1e9 bebe e zera geradores', 
 });
 
 await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
+  // 4e9 → 2 óbolos → 1 essência (2:1)
   const state = new GameState({
-    runSouls: '1000000000',
-    lifetimeSouls: '1000000000',
+    runSouls: '4000000000',
+    lifetimeSouls: '4000000000',
     generators: { wandering_shade: 2 },
   });
   assert.equal(state.applyPrestige().ok, true);
@@ -367,7 +368,7 @@ await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
   assert.equal(sealed.ok, true);
   assert.equal(state.talents.includes('memoria_das_sombras'), true);
   assert.equal(cmp(state.mnemosyne, '0'), 0);
-  assert.equal(cmp(state.obols, '1'), 0);
+  assert.equal(cmp(state.obols, '2'), 0);
   assert.equal(Object.keys(state.quantities()).length, 0);
   assert.equal(describeTalentCard(state, 'memoria_das_sombras').owned, true);
   assert.equal(describeTalentCard(state, 'memoria_das_sombras').canBuy, false);

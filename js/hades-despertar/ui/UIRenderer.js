@@ -90,19 +90,19 @@ const PANTHEON_EMPTY = 'Mnemosyne ainda não bebeu tua memória.';
 export const NPC_UNIT_PRODUCTION_BLURB = 'produção desta unidade';
 
 const TALENT_BLURB = Object.freeze({
-  memoria_das_sombras: 'A próxima corrida começa com 100 almas.',
-  juramento_eterno: 'A memória de Mnemosyne rende 10% a mais no bônus.',
+  memoria_das_sombras: 'A próxima corrida começa com 5 000 almas.',
+  juramento_eterno: 'A memória de Mnemosyne rende 25% a mais no bônus.',
   noite_prolongada: 'A colheita na ausência vai até 12 h.',
   veu_eficiente: 'A ausência colhe 100% das Almas / s.',
   foice_ancestral: 'O clique ganha 1% das Almas / s — vale já nesta corrida.',
-  favor_de_caronte: 'Geradores custam 5% menos — vale já nesta corrida.',
-  mnemosyne_profunda: 'A essência rende 25% a mais no bônus.',
-  segundo_folego: 'A próxima corrida começa com 1 Sombra Vagante.',
-  margem_generosa: 'A próxima corrida começa com +250 almas.',
-  pacto_do_silencio: 'A colheita na ausência ganha +2 h de teto.',
+  favor_de_caronte: 'Geradores custam 15% menos — vale já nesta corrida.',
+  mnemosyne_profunda: 'A essência rende 50% a mais no bônus.',
+  segundo_folego: 'A próxima corrida começa com 5 Sombras Vagantes.',
+  margem_generosa: 'A próxima corrida começa com +25 000 almas.',
+  pacto_do_silencio: 'A colheita na ausência ganha +6 h de teto.',
   olho_da_curva: 'Amortização sempre visível no Mercado — sem números de SPS.',
   eco_do_styx: 'Após o Lethe, 1 Juramento Styx revelado começa selado.',
-  rebanho_despertado: 'A próxima corrida começa com 3 Sombras Vagantes.',
+  rebanho_despertado: 'A próxima corrida começa com 25 Sombras Vagantes.',
 });
 
 const TALENT_NEXT_RUN = Object.freeze(new Set([

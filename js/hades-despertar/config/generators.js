@@ -60,7 +60,7 @@ export const GENERATORS = freezeAll([
     name: 'Trono de Obsidiana',
     blurb: 'O assento do Imperador Ctoniano.',
     baseCost: '1400000',
-    baseRate: '1400',
+    baseRate: '3000',
     multiplier: COST_MULTIPLIER,
   },
 ]);

@@ -82,27 +82,27 @@ function eqMoney(actual, expected, message) {
 
 run('margem + memória soma startingSouls', () => {
   const both = talentEffects(['memoria_das_sombras', 'margem_generosa']);
-  eqMoney(both.startingSouls, '350');
+  eqMoney(both.startingSouls, '30000');
   const only = talentEffects(['margem_generosa']);
-  eqMoney(only.startingSouls, '250');
+  eqMoney(only.startingSouls, '25000');
 });
 
-run('rebanho max-rule com segundo_folego → 3 (não 4)', () => {
+run('rebanho max-rule com segundo_folego → 25 (não 30)', () => {
   const both = talentEffects(['segundo_folego', 'rebanho_despertado']);
-  assert.equal(both.startingGenerators.wandering_shade, 3);
+  assert.equal(both.startingGenerators.wandering_shade, 25);
   const only = talentEffects(['rebanho_despertado']);
-  assert.equal(only.startingGenerators.wandering_shade, 3);
+  assert.equal(only.startingGenerators.wandering_shade, 25);
   const folego = talentEffects(['segundo_folego']);
-  assert.equal(folego.startingGenerators.wandering_shade, 1);
+  assert.equal(folego.startingGenerators.wandering_shade, 5);
 });
 
-run('pacto_do_silencio +2 h (com e sem noite)', () => {
+run('pacto_do_silencio +6 h (com e sem noite)', () => {
   assert.equal(talentEffects([]).offlineHours, 8);
-  assert.equal(talentEffects(['pacto_do_silencio']).offlineHours, 10);
+  assert.equal(talentEffects(['pacto_do_silencio']).offlineHours, 14);
   assert.equal(talentEffects(['noite_prolongada']).offlineHours, 12);
-  assert.equal(talentEffects(['noite_prolongada', 'pacto_do_silencio']).offlineHours, 14);
+  assert.equal(talentEffects(['noite_prolongada', 'pacto_do_silencio']).offlineHours, 18);
   const eco = economyEffects(['pacto_do_silencio'], ['memoria_classind']);
-  assert.equal(eco.offlineHours, 10.5);
+  assert.equal(eco.offlineHours, 14.5);
 });
 
 run('olho_da_curva → richAmort', () => {
@@ -135,7 +135,7 @@ run('GameState prestige aplica eco_do_styx', () => {
   assert.equal(ritual.ok, true);
   assert.equal(ritual.ecoStyxId, 'foice_afilada');
   assert.deepEqual(state.upgrades, ['foice_afilada']);
-  eqMoney(state.souls, '250');
+  eqMoney(state.souls, '25000');
 });
 
 run('server applyPrestige aplica eco_do_styx', () => {
@@ -158,7 +158,7 @@ run('server applyPrestige aplica eco_do_styx', () => {
   const result = applyPrestige(db, new Date('2026-09-22T12:01:00.000Z'));
   assert.equal(result.ok, true);
   assert.deepEqual(result.next.upgrades, ['foice_afilada']);
-  assert.equal(result.next.generators.wandering_shade, 3);
+  assert.equal(result.next.generators.wandering_shade, 25);
 });
 
 run('server talentBuy aceita ids F1', () => {
@@ -181,13 +181,13 @@ run('server talentBuy aceita ids F1', () => {
   assert.ok(buy.next.talents.includes('olho_da_curva'));
 });
 
-run('offline teto com pacto (10 h)', () => {
+run('offline teto com pacto (14 h)', () => {
   const result = calculateOfflineProgress({
-    elapsedSeconds: 11 * 3600,
+    elapsedSeconds: 15 * 3600,
     sps: '1',
     talents: ['pacto_do_silencio'],
   });
-  assert.equal(result.effectiveSeconds, 10 * 3600);
+  assert.equal(result.effectiveSeconds, 14 * 3600);
 });
 
 console.log(`\ndespertar-talents-f1-smoke: ${passed} passed, ${failed} failed`);

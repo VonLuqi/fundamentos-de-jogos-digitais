@@ -141,10 +141,14 @@ await run('Óbolos: runSouls 1e9 → 1; 9.99e8 → 0', () => {
   assert.equal(canPrestige('1000000000'), true);
   assert.deepEqual(prestigePreview('1000000000'), {
     obolsGain: '1',
-    mnemosyneGain: '1',
+    mnemosyneGain: '0',
     unlocked: true,
   });
-  assert.equal(mnemosyneFromObolsGain('10'), '2');
+  assert.equal(mnemosyneFromObolsGain('10'), '5');
+  assert.equal(mnemosyneFromObolsGain('7'), '3');
+  assert.equal(mnemosyneFromObolsGain('2'), '1');
+  assert.equal(mnemosyneFromObolsGain('1'), '0');
+  assert.equal(mnemosyneFromObolsGain('0'), '0');
   eqMoney(prestigeBonus('1'), '1.05');
 });
 

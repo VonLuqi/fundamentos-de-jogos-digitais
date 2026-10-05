@@ -24,6 +24,7 @@ import {
   PRESTIGE_RUN_DIVISOR,
   GOLD_MULT,
   NEGATIVO_MULT,
+  STARTING_SHADE_FOLEGO,
   STARTING_SHADE_REBANHO,
   STARTING_SOULS_MARGIN,
   STARTING_SOULS_MEMORY,
@@ -90,9 +91,9 @@ export function talentEffects(talentIds = []) {
   if (owned.has('memoria_das_sombras')) startingSouls = add(startingSouls, STARTING_SOULS_MEMORY);
   if (owned.has('margem_generosa')) startingSouls = add(startingSouls, STARTING_SOULS_MARGIN);
 
-  // Max-rule: Rebanho (3) ⊇ Segundo Fôlego (1) — nunca 4.
+  // Max-rule: Rebanho ⊇ Segundo Fôlego — nunca soma.
   let shadeQty = 0;
-  if (owned.has('segundo_folego')) shadeQty = Math.max(shadeQty, 1);
+  if (owned.has('segundo_folego')) shadeQty = Math.max(shadeQty, STARTING_SHADE_FOLEGO);
   if (owned.has('rebanho_despertado')) shadeQty = Math.max(shadeQty, STARTING_SHADE_REBANHO);
   const startingGenerators = {};
   if (shadeQty > 0) startingGenerators.wandering_shade = shadeQty;
@@ -358,7 +359,8 @@ export function obolsFromRunSouls(runSouls) {
 export function mnemosyneFromObolsGain(obolsGain) {
   const gain = toBigIntFloor(obolsGain || '0');
   if (gain <= 0n) return '0';
-  return (1n + gain / 10n).toString();
+  // 2 óbolos desta corrida → 1 essência.
+  return (gain / 2n).toString();
 }
 
 export function canPrestige(runSouls) {

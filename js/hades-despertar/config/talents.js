@@ -16,13 +16,13 @@ export const TALENTS = freezeAll([
     id: 'memoria_das_sombras',
     name: 'Memória das Sombras',
     cost: '1',
-    effects: { startingSouls: '100' },
+    effects: { startingSouls: '5000' },
   },
   {
     id: 'juramento_eterno',
     name: 'Juramento Eterno',
     cost: '1',
-    effects: { mnemosyneMult: '1.10' },
+    effects: { mnemosyneMult: '1.25' },
   },
   {
     id: 'noite_prolongada',
@@ -46,32 +46,32 @@ export const TALENTS = freezeAll([
     id: 'favor_de_caronte',
     name: 'Favor de Caronte',
     cost: '3',
-    effects: { generatorCostMult: '0.95' },
+    effects: { generatorCostMult: '0.85' },
   },
   {
     id: 'mnemosyne_profunda',
     name: 'Mnemosyne Profunda',
     cost: '5',
-    effects: { mnemosyneMult: '1.25' },
+    effects: { mnemosyneMult: '1.50' },
   },
   {
     id: 'segundo_folego',
     name: 'Segundo Fôlego',
     cost: '5',
-    effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 1 },
+    effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 5 },
   },
   // --- Task F1 (0F P0) ---
   {
     id: 'margem_generosa',
     name: 'Margem Generosa',
     cost: '3',
-    effects: { startingSouls: '250' },
+    effects: { startingSouls: '25000' },
   },
   {
     id: 'pacto_do_silencio',
     name: 'Pacto do Silêncio',
     cost: '3',
-    effects: { offlineExtraHours: 2 },
+    effects: { offlineExtraHours: 6 },
   },
   {
     id: 'olho_da_curva',
@@ -89,7 +89,7 @@ export const TALENTS = freezeAll([
     id: 'rebanho_despertado',
     name: 'Rebanho',
     cost: '5',
-    effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 3 },
+    effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 25 },
   },
 ]);
 
