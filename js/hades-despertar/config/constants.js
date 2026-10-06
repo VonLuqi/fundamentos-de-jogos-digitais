@@ -39,6 +39,17 @@ export const STARTING_SHADE_REBANHO = 25;
 export const MNEMOSYNE_MULT_BASE = '1';
 export const TALENT_JURAMENTO_ETERNO_MULT = '1.25';
 export const TALENT_MNEMOSYNE_PROFUNDA_MULT = '1.50';
+/** Mnemosyne Tripla — terceiro patamar do bônus de prestígio. */
+export const TALENT_MNEMOSYNE_TRIPLA_MULT = '2';
+/** Matilha Cerberiana — Cães no início da corrida. */
+export const STARTING_HOUND_MATILHA = 3;
+/** Forja Despertada — 1 Forja de Phlegethon no início. */
+export const STARTING_FORGE_DESPERTADA = 1;
+/** Cálice da Memória — essência do Lethe ×3/2. */
+export const TALENT_CALICE_MNEMOSYNE_NUM = 3;
+export const TALENT_CALICE_MNEMOSYNE_DEN = 2;
+/** Eco Ressonante — Juramentos Styx grátis pós-Lethe. */
+export const ECO_STYX_RESSONANTE_COUNT = 2;
 
 export const SYNC_HEARTBEAT_MS = 30_000;
 export const SYNC_MIN_INTERVAL_MS = 5_000;

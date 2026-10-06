@@ -24,13 +24,19 @@ import {
   PRESTIGE_RUN_DIVISOR,
   GOLD_MULT,
   NEGATIVO_MULT,
+  STARTING_FORGE_DESPERTADA,
+  STARTING_HOUND_MATILHA,
   STARTING_SHADE_FOLEGO,
   STARTING_SHADE_REBANHO,
   STARTING_SOULS_MARGIN,
   STARTING_SOULS_MEMORY,
   SYNC_GAIN_TOLERANCE,
+  TALENT_CALICE_MNEMOSYNE_DEN,
+  TALENT_CALICE_MNEMOSYNE_NUM,
   TALENT_JURAMENTO_ETERNO_MULT,
   TALENT_MNEMOSYNE_PROFUNDA_MULT,
+  TALENT_MNEMOSYNE_TRIPLA_MULT,
+  ECO_STYX_RESSONANTE_COUNT,
 } from '../config/constants.js';
 import { GENERATOR_BY_ID, GENERATORS, getGenerator } from '../config/generators.js';
 import { UPGRADE_BY_ID, UPGRADES, getUpgrade } from '../config/upgrades.js';
@@ -86,6 +92,7 @@ export function talentEffects(talentIds = []) {
   let mnemosyneMult = MNEMOSYNE_MULT_BASE;
   if (owned.has('juramento_eterno')) mnemosyneMult = mul(mnemosyneMult, TALENT_JURAMENTO_ETERNO_MULT);
   if (owned.has('mnemosyne_profunda')) mnemosyneMult = mul(mnemosyneMult, TALENT_MNEMOSYNE_PROFUNDA_MULT);
+  if (owned.has('mnemosyne_tripla')) mnemosyneMult = mul(mnemosyneMult, TALENT_MNEMOSYNE_TRIPLA_MULT);
 
   let startingSouls = '0';
   if (owned.has('memoria_das_sombras')) startingSouls = add(startingSouls, STARTING_SOULS_MEMORY);
@@ -97,11 +104,30 @@ export function talentEffects(talentIds = []) {
   if (owned.has('rebanho_despertado')) shadeQty = Math.max(shadeQty, STARTING_SHADE_REBANHO);
   const startingGenerators = {};
   if (shadeQty > 0) startingGenerators.wandering_shade = shadeQty;
+  if (owned.has('matilha_cerberiana')) {
+    startingGenerators.cerberian_hound = Math.max(
+      Number(startingGenerators.cerberian_hound) || 0,
+      STARTING_HOUND_MATILHA,
+    );
+  }
+  if (owned.has('forja_despertada')) {
+    startingGenerators.phlegethon_forge = Math.max(
+      Number(startingGenerators.phlegethon_forge) || 0,
+      STARTING_FORGE_DESPERTADA,
+    );
+  }
 
   let offlineHours = owned.has('noite_prolongada')
     ? OFFLINE_MAX_HOURS_TALENT
     : OFFLINE_MAX_HOURS_BASE;
   if (owned.has('pacto_do_silencio')) offlineHours += OFFLINE_EXTRA_HOURS_SILENCIO;
+
+  // Eco Ressonante ⊇ Eco do Styx (max-rule no contador).
+  let softPrestigeStyxCount = 0;
+  if (owned.has('eco_do_styx')) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 1);
+  if (owned.has('eco_ressonante')) {
+    softPrestigeStyxCount = Math.max(softPrestigeStyxCount, ECO_STYX_RESSONANTE_COUNT);
+  }
 
   return {
     startingSouls,
@@ -112,7 +138,9 @@ export function talentEffects(talentIds = []) {
     generatorCostMult: owned.has('favor_de_caronte') ? GENERATOR_COST_MULT_CHARON : GENERATOR_COST_MULT_BASE,
     startingGenerators,
     richAmort: owned.has('olho_da_curva'),
-    softPrestigeStyx: owned.has('eco_do_styx'),
+    softPrestigeStyx: softPrestigeStyxCount > 0,
+    softPrestigeStyxCount,
+    mnemosyneGainBoost: owned.has('calice_da_memoria'),
   };
 }
 
@@ -140,6 +168,24 @@ export function pickEcoDoStyxUpgrade({
     if (costCmp < 0 || (costCmp === 0 && upgrade.id < best.id)) best = upgrade;
   }
   return best?.id ?? null;
+}
+
+/** Eco Ressonante: N juramentos revelados, cada um o mais barato ainda elegível. */
+export function pickEcoDoStyxUpgrades(count, ctx = {}) {
+  const n = Math.max(0, Number.parseInt(count, 10) || 0);
+  const picked = [];
+  const upgrades = [...(Array.isArray(ctx.upgrades) ? ctx.upgrades : [])];
+  for (let i = 0; i < n; i += 1) {
+    const id = pickEcoDoStyxUpgrade({
+      souls: ctx.souls,
+      generators: ctx.generators,
+      upgrades,
+    });
+    if (!id) break;
+    picked.push(id);
+    upgrades.push(id);
+  }
+  return picked;
 }
 
 /** Efeitos da Bancada (Vereditos) — permanentes, fora do Panteão. */
@@ -361,23 +407,28 @@ export function obolsFromRunSouls(runSouls, prestigeCount = 0) {
   return (raw / denom).toString();
 }
 
-export function mnemosyneFromObolsGain(obolsGain) {
-  const gain = toBigIntFloor(obolsGain || '0');
-  if (gain <= 0n) return '0';
+export function mnemosyneFromObolsGain(obolsGain, talents = []) {
+  const baseObols = toBigIntFloor(obolsGain || '0');
+  if (baseObols <= 0n) return '0';
   // 2 óbolos desta corrida → 1 essência.
-  return (gain / 2n).toString();
+  let gain = baseObols / 2n;
+  const owned = new Set((talents || []).filter((id) => TALENT_BY_ID[id]));
+  if (owned.has('calice_da_memoria') && gain > 0n) {
+    gain = (gain * BigInt(TALENT_CALICE_MNEMOSYNE_NUM)) / BigInt(TALENT_CALICE_MNEMOSYNE_DEN);
+  }
+  return gain.toString();
 }
 
 export function canPrestige(runSouls, prestigeCount = 0) {
   return cmp(obolsFromRunSouls(runSouls, prestigeCount), '0') > 0;
 }
 
-export function prestigePreview(runSouls, prestigeCount = 0) {
+export function prestigePreview(runSouls, prestigeCount = 0, talents = []) {
   const obolsGain = obolsFromRunSouls(runSouls, prestigeCount);
   const unlocked = cmp(obolsGain, '0') > 0;
   return {
     obolsGain,
-    mnemosyneGain: unlocked ? mnemosyneFromObolsGain(obolsGain) : '0',
+    mnemosyneGain: unlocked ? mnemosyneFromObolsGain(obolsGain, talents) : '0',
     unlocked,
   };
 }

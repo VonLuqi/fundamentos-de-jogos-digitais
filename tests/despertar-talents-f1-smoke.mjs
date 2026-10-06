@@ -12,7 +12,11 @@ import { cmp } from '../js/hades-despertar/core/decimal.js';
 import {
   calculateOfflineProgress,
   economyEffects,
+  mnemosyneFromObolsGain,
   pickEcoDoStyxUpgrade,
+  pickEcoDoStyxUpgrades,
+  prestigeBonus,
+  prestigePreview,
   talentEffects,
 } from '../js/hades-despertar/core/formulas.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
@@ -33,7 +37,7 @@ const F1_IDS = [
   'rebanho_despertado',
 ];
 
-staticAssert(TALENTS.length === 13, '13 talentos após F1');
+staticAssert(TALENTS.length === 18, '18 talentos após sinks caros');
 for (const id of F1_IDS) {
   staticAssert(isKnownTalentId(id), `talento F1 conhecido: ${id}`);
   staticAssert(TALENT_IDS.includes(id), `TALENT_IDS inclui ${id}`);
@@ -46,13 +50,17 @@ const uiSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 
 staticAssert(formulasSrc.includes('pickEcoDoStyxUpgrade'), 'pickEcoDoStyxUpgrade export');
+staticAssert(formulasSrc.includes('pickEcoDoStyxUpgrades'), 'pickEcoDoStyxUpgrades export');
 staticAssert(formulasSrc.includes('STARTING_SOULS_MARGIN'), 'margen starting');
 staticAssert(formulasSrc.includes('OFFLINE_EXTRA_HOURS_SILENCIO'), 'silêncio offline');
 staticAssert(formulasSrc.includes('richAmort'), 'olho_da_curva flag');
-staticAssert(stateSrc.includes('pickEcoDoStyxUpgrade'), 'cliente aplica eco');
-staticAssert(validateSrc.includes('pickEcoDoStyxUpgrade'), 'server aplica eco');
+staticAssert(formulasSrc.includes('mnemosyne_tripla'), 'mnemosyne_tripla no talentEffects');
+staticAssert(formulasSrc.includes('calice_da_memoria'), 'cálice no yield');
+staticAssert(stateSrc.includes('pickEcoDoStyxUpgrades'), 'cliente aplica eco N');
+staticAssert(validateSrc.includes('pickEcoDoStyxUpgrades'), 'server aplica eco N');
 staticAssert(uiSrc.includes('olho_da_curva'), 'blurb UI');
 staticAssert(uiSrc.includes('richAmort'), 'UI usa richAmort');
+staticAssert(uiSrc.includes('forja_despertada'), 'blurb forja');
 staticAssert(pkg.includes('despertar-talents-f1-smoke.mjs'), 'npm check inclui F1 smoke');
 
 if (errors.length) {
@@ -188,6 +196,80 @@ run('offline teto com pacto (14 h)', () => {
     talents: ['pacto_do_silencio'],
   });
   assert.equal(result.effectiveSeconds, 14 * 3600);
+});
+
+run('sinks caros: matilha + forja + tripla + cálice + eco ressonante', () => {
+  const ids = [
+    'matilha_cerberiana',
+    'eco_ressonante',
+    'calice_da_memoria',
+    'mnemosyne_tripla',
+    'forja_despertada',
+  ];
+  for (const id of ids) {
+    assert.equal(isKnownTalentId(id), true, id);
+  }
+  const effects = talentEffects(ids);
+  assert.equal(effects.startingGenerators.cerberian_hound, 3);
+  assert.equal(effects.startingGenerators.phlegethon_forge, 1);
+  assert.equal(effects.softPrestigeStyxCount, 2);
+  assert.equal(effects.mnemosyneGainBoost, true);
+  // 1 × 2.0 (só tripla) = 2
+  eqMoney(effects.mnemosyneMult, '2');
+  // Com os três mults: 1.25 × 1.50 × 2 = 3.75
+  const stacked = talentEffects(['juramento_eterno', 'mnemosyne_profunda', 'mnemosyne_tripla']);
+  eqMoney(stacked.mnemosyneMult, '3.75');
+  eqMoney(prestigeBonus('1', ['mnemosyne_tripla']), '1.10');
+
+  assert.equal(mnemosyneFromObolsGain('10'), '5');
+  assert.equal(mnemosyneFromObolsGain('10', ['calice_da_memoria']), '7');
+  assert.deepEqual(prestigePreview('16000000000', 0, ['calice_da_memoria']), {
+    obolsGain: '2',
+    mnemosyneGain: '1', // floor(1 * 1.5) = 1
+    unlocked: true,
+  });
+  // 4 óbolos → 2 essência base → 3 com cálice
+  assert.equal(mnemosyneFromObolsGain('4', ['calice_da_memoria']), '3');
+
+  const ecos = pickEcoDoStyxUpgrades(2, { souls: '0', generators: {}, upgrades: [] });
+  assert.equal(ecos.length, 2);
+  assert.equal(ecos[0], 'foice_afilada');
+  assert.notEqual(ecos[1], ecos[0]);
+
+  const state = new GameState({
+    souls: '16000000000',
+    runSouls: '16000000000',
+    talents: ['eco_ressonante', 'matilha_cerberiana', 'forja_despertada', 'calice_da_memoria'],
+  });
+  const ritual = state.applyPrestige();
+  assert.equal(ritual.ok, true);
+  assert.equal(ritual.ecoStyxIds.length, 2);
+  assert.equal(state.upgrades.length, 2);
+  assert.equal(state.quantities().cerberian_hound, 3);
+  assert.equal(state.quantities().phlegethon_forge, 1);
+  // 2 óbolos → 1 essência ×1.5 = 1
+  eqMoney(state.mnemosyne, '1');
+});
+
+run('server talentBuy aceita sinks caros', () => {
+  const db = {
+    souls: '0.00',
+    obols: '0.00',
+    mnemosyne: '40.00',
+    lifetime_souls: '0.00',
+    run_souls: '0.00',
+    prestige_count: 0,
+    generators_state: {},
+    upgrades_state: [],
+    talents_state: [],
+    edu_logs_seen: [],
+    milestones: {},
+    last_sync_at: '2026-09-22T12:00:00.000Z',
+  };
+  const buy = applyTalentBuy(db, 'mnemosyne_tripla', new Date('2026-09-22T12:01:00.000Z'));
+  assert.equal(buy.ok, true);
+  assert.ok(buy.next.talents.includes('mnemosyne_tripla'));
+  eqMoney(buy.next.mnemosyne, '32');
 });
 
 console.log(`\ndespertar-talents-f1-smoke: ${passed} passed, ${failed} failed`);

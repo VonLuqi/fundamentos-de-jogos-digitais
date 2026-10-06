@@ -71,7 +71,7 @@ staticAssert(html.includes('id="despertar-reap"'), 'altar Ceifar');
 staticAssert(GENERATORS.length === 6, '6 geradores T1–T6');
 staticAssert(COST_MULTIPLIER === '1.15', 'curva 1.15');
 staticAssert(UPGRADES.length >= 1, 'juramentos Styx');
-staticAssert(TALENTS.length === 13, '13 talentos do Panteão');
+staticAssert(TALENTS.length === 18, '18 talentos do Panteão');
 staticAssert(OFFLINE_MAX_HOURS_BASE === 8, 'offline base 8 h');
 staticAssert(OFFLINE_MAX_HOURS_TALENT === 12, 'offline talento 12 h');
 staticAssert(cmp(OFFLINE_EFFICIENCY_BASE, '0.80') === 0, 'eficiência offline 80%');

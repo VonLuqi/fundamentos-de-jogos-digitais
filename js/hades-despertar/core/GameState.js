@@ -37,7 +37,7 @@ import {
   generatorUpgradeMult,
   meetsUpgradeRequirement,
   prestigePreview as formulaPrestigePreview,
-  pickEcoDoStyxUpgrade,
+  pickEcoDoStyxUpgrades,
   talentEffects,
 } from './formulas.js';
 
@@ -322,7 +322,7 @@ export class GameState {
   }
 
   prestigePreview() {
-    return formulaPrestigePreview(this.runSouls, this.prestigeCount);
+    return formulaPrestigePreview(this.runSouls, this.prestigeCount, this.talents);
   }
 
   canPrestige() {
@@ -513,23 +513,24 @@ export class GameState {
     this._shinyCounts = {};
     this._goldCounts = {};
 
-    // F-D3: Eco do Styx — 1 juramento revelado elegível (pós starting).
+    // Eco do Styx / Eco Ressonante — N juramentos revelados elegíveis (pós starting).
     let ecoStyxId = null;
-    if (effects.softPrestigeStyx) {
-      ecoStyxId = pickEcoDoStyxUpgrade({
+    let ecoStyxIds = [];
+    const ecoCount = Number(effects.softPrestigeStyxCount) || 0;
+    if (ecoCount > 0) {
+      ecoStyxIds = pickEcoDoStyxUpgrades(ecoCount, {
         souls: this.souls,
         generators: this.quantities(),
         upgrades: this.upgrades,
-      });
-      if (ecoStyxId && isKnownUpgradeId(ecoStyxId)) {
-        this.upgrades = [ecoStyxId];
-      }
+      }).filter((id) => isKnownUpgradeId(id));
+      ecoStyxId = ecoStyxIds[0] || null;
+      if (ecoStyxIds.length) this.upgrades = ecoStyxIds;
     }
 
     this.unlockLogs();
     this.#bumpSyncEpoch();
     this.#bump();
-    return { ok: true, ...preview, ecoStyxId };
+    return { ok: true, ...preview, ecoStyxId, ecoStyxIds };
   }
 
   applyOffline(elapsedSeconds) {

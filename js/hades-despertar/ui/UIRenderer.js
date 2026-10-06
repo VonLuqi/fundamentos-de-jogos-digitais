@@ -103,6 +103,11 @@ const TALENT_BLURB = Object.freeze({
   olho_da_curva: 'Amortização sempre visível no Mercado — sem números de SPS.',
   eco_do_styx: 'Após o Lethe, 1 Juramento Styx revelado começa selado.',
   rebanho_despertado: 'A próxima corrida começa com 25 Sombras Vagantes.',
+  matilha_cerberiana: 'A próxima corrida começa com 3 Cães Cerberianos.',
+  eco_ressonante: 'Após o Lethe, 2 Juramentos Styx revelados começam selados.',
+  calice_da_memoria: 'O Ritual do Lethe rende 50% a mais de Essência.',
+  mnemosyne_tripla: 'A memória de Mnemosyne rende o dobro no bônus de Óbolos.',
+  forja_despertada: 'A próxima corrida começa com 1 Forja de Phlegethon.',
 });
 
 const TALENT_NEXT_RUN = Object.freeze(new Set([
@@ -111,6 +116,9 @@ const TALENT_NEXT_RUN = Object.freeze(new Set([
   'margem_generosa',
   'rebanho_despertado',
   'eco_do_styx',
+  'matilha_cerberiana',
+  'eco_ressonante',
+  'forja_despertada',
 ]));
 
 function setText(node, value) {

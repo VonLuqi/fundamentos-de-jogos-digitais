@@ -91,6 +91,37 @@ export const TALENTS = freezeAll([
     cost: '5',
     effects: { startingGeneratorId: 'wandering_shade', startingGeneratorQty: 25 },
   },
+  // --- Panteão caro (sinks de essência) ---
+  {
+    id: 'matilha_cerberiana',
+    name: 'Matilha Cerberiana',
+    cost: '6',
+    effects: { startingGeneratorId: 'cerberian_hound', startingGeneratorQty: 3 },
+  },
+  {
+    id: 'eco_ressonante',
+    name: 'Eco Ressonante',
+    cost: '6',
+    effects: { softPrestigeStyxCount: 2 },
+  },
+  {
+    id: 'calice_da_memoria',
+    name: 'Cálice da Memória',
+    cost: '7',
+    effects: { mnemosyneGainMult: '1.5' },
+  },
+  {
+    id: 'mnemosyne_tripla',
+    name: 'Mnemosyne Tripla',
+    cost: '8',
+    effects: { mnemosyneMult: '2' },
+  },
+  {
+    id: 'forja_despertada',
+    name: 'Forja Despertada',
+    cost: '10',
+    effects: { startingGeneratorId: 'phlegethon_forge', startingGeneratorQty: 1 },
+  },
 ]);
 
 export const TALENT_IDS = Object.freeze(TALENTS.map((item) => item.id));

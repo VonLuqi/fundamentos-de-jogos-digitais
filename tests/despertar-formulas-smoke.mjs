@@ -59,7 +59,7 @@ staticAssert(pkg.includes('despertar-formulas-smoke.mjs'), 'npm run check inclui
 
 staticAssert(GENERATORS.length === 6, '6 geradores no catálogo');
 staticAssert(UPGRADES.length === 56, '56 juramentos no catálogo');
-staticAssert(TALENTS.length === 13, '13 talentos no Panteão');
+staticAssert(TALENTS.length === 18, '18 talentos no Panteão');
 
 const eclipse = UPGRADES.find((u) => u.id === 'eclipse_do_acheron');
 staticAssert(eclipse?.kind === 'generatorMult', 'T1 qty100 é generatorMult');

@@ -26,7 +26,7 @@ import {
   generatorBatchCost,
   meetsUpgradeRequirement,
   prestigePreview,
-  pickEcoDoStyxUpgrade,
+  pickEcoDoStyxUpgrades,
   talentEffects,
   theoreticalMaxGain,
   unknownCatalogIds,
@@ -226,7 +226,7 @@ export function buildStateDto(rowOrCanonical, options = {}) {
     shinyCounts,
     goldCounts,
   }));
-  const preview = prestigePreview(state.runSouls, state.prestigeCount);
+  const preview = prestigePreview(state.runSouls, state.prestigeCount, state.talents);
 
   const dto = {
     souls: decimalString(state.souls),
@@ -611,7 +611,7 @@ export function applyPrestige(dbRow, now = new Date()) {
     };
   }
 
-  const preview = prestigePreview(db.runSouls, db.prestigeCount);
+  const preview = prestigePreview(db.runSouls, db.prestigeCount, db.talents);
   const effects = talentEffects(db.talents);
   const nextGenerators = normalizeGenerators({});
   if (effects.startingGenerators) {
@@ -622,15 +622,15 @@ export function applyPrestige(dbRow, now = new Date()) {
 
   const startingSouls = money(effects.startingSouls || '0');
 
-  // F-D3: Eco do Styx — após starting; 1 juramento grátis revelado elegível.
+  // Eco do Styx / Eco Ressonante — N juramentos grátis revelados elegíveis.
   let nextUpgrades = [];
-  if (effects.softPrestigeStyx) {
-    const ecoId = pickEcoDoStyxUpgrade({
+  const ecoCount = Number(effects.softPrestigeStyxCount) || 0;
+  if (ecoCount > 0) {
+    nextUpgrades = pickEcoDoStyxUpgrades(ecoCount, {
       souls: startingSouls,
       generators: nextGenerators,
       upgrades: [],
-    });
-    if (ecoId && UPGRADE_BY_ID[ecoId]) nextUpgrades = [ecoId];
+    }).filter((id) => UPGRADE_BY_ID[id]);
   }
 
   const next = {
