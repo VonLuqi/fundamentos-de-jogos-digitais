@@ -21,7 +21,9 @@ const FOCUSABLE =
  * @param {unknown} value
  */
 export function formatLoopBoardScore(value, sort = 'prestigeCount') {
-  if (sort === 'lifetimeSouls') return formatSouls(value ?? 0);
+  if (sort === 'lifetimeSouls') {
+    return formatSouls(value == null || value === '' ? '0' : String(value));
+  }
   const n = Number(value) || 0;
   return n.toLocaleString('pt-BR');
 }

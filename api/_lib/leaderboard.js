@@ -6,6 +6,7 @@
  */
 
 import { metricsBumpDb } from './request-metrics.js';
+import { cmp } from '../../js/hades-despertar/core/decimal.js';
 
 export const LEADERBOARD_TOP = 50;
 export const LEADERBOARD_SCOPES = Object.freeze(['turma', 'global']);
@@ -40,22 +41,37 @@ export function achievementCount(conquistas) {
   return conquistas.length;
 }
 
-/** Almas totais (lifetime) — número finito ≥ 0. */
+/**
+ * Almas totais (lifetime) como string decimal — NUMERIC(38,2) / idle scale.
+ * Nunca devolver Number (MAX_SAFE_INTEGER quebra formatSouls no placar Almas).
+ */
 export function normalizeLifetimeSouls(raw) {
-  const n = Number(raw);
-  if (!Number.isFinite(n) || n < 0) return 0;
-  return n;
+  if (raw == null || raw === '') return '0';
+  if (typeof raw === 'bigint') {
+    return raw < 0n ? '0' : raw.toString();
+  }
+  if (typeof raw === 'number') {
+    if (!Number.isFinite(raw) || raw < 0) return '0';
+    if (Math.abs(raw) > Number.MAX_SAFE_INTEGER) {
+      // Já veio como Number corrompido — ainda formata sem throw no client.
+      return Math.trunc(raw).toLocaleString('en-US', { useGrouping: false });
+    }
+    return String(raw);
+  }
+  const s = String(raw).trim();
+  if (!/^\d+(\.\d+)?$/.test(s)) return '0';
+  return s;
 }
 
 /**
  * @param {object} user row users
- * @param {number|{ juizoBest?: number, prestigeCount?: number, lifetimeSouls?: number }} [juizoOrExtras]
+ * @param {number|{ juizoBest?: number, prestigeCount?: number, lifetimeSouls?: number|string }} [juizoOrExtras]
  * @param {number} [prestigeCount]
  */
 export function toLeaderboardEntry(user, juizoOrExtras = 0, prestigeCount = 0) {
   let juizoBest = 0;
   let prestige = prestigeCount;
-  let lifetimeSouls = 0;
+  let lifetimeSouls = '0';
   if (juizoOrExtras && typeof juizoOrExtras === 'object') {
     juizoBest = Number.parseInt(juizoOrExtras.juizoBest ?? juizoOrExtras.juizo_best, 10);
     prestige = Number.parseInt(
@@ -97,16 +113,23 @@ function metricValue(entry, sort) {
 export function rankLeaderboardEntries(entries, sort = 'xp') {
   const key = normalizeLeaderboardSort(sort);
   const sorted = [...(entries || [])].sort((a, b) => {
-    const diff = metricValue(b, key) - metricValue(a, key);
-    if (diff !== 0) return diff;
     if (key === 'lifetimeSouls') {
+      const soulsDiff = cmp(
+        normalizeLifetimeSouls(b.lifetimeSouls),
+        normalizeLifetimeSouls(a.lifetimeSouls),
+      );
+      if (soulsDiff !== 0) return soulsDiff;
       const prestigeDiff = (Number(b.prestigeCount) || 0) - (Number(a.prestigeCount) || 0);
       if (prestigeDiff !== 0) return prestigeDiff;
       const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
       if (juizoDiff !== 0) return juizoDiff;
-    } else if (key === 'prestigeCount') {
-      const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
-      if (juizoDiff !== 0) return juizoDiff;
+    } else {
+      const diff = metricValue(b, key) - metricValue(a, key);
+      if (diff !== 0) return diff;
+      if (key === 'prestigeCount') {
+        const juizoDiff = (Number(b.juizoBest) || 0) - (Number(a.juizoBest) || 0);
+        if (juizoDiff !== 0) return juizoDiff;
+      }
     }
     const nameCmp = String(a.username || '').localeCompare(String(b.username || ''), 'pt-BR', {
       sensitivity: 'base',

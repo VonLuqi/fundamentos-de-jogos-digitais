@@ -95,6 +95,25 @@ staticAssert(
   ], 'lifetimeSouls');
   staticAssert(ranked[0].username === 'c', 'almas empatadas → prestige/juizo desempata');
   staticAssert(formatLoopBoardScore(1200, 'prestigeCount') === (1200).toLocaleString('pt-BR'), 'format int');
+  staticAssert(typeof ranked[0].lifetimeSouls === 'string', 'lifetimeSouls DTO é string');
+  // Idle-scale: Number > MAX_SAFE_INTEGER quebrava formatSouls → "inacessível".
+  const huge = '9007199254740993000.00';
+  staticAssert(
+    (() => {
+      try {
+        const label = formatLoopBoardScore(huge, 'lifetimeSouls');
+        return typeof label === 'string' && label.length > 0 && !/e\+/i.test(label);
+      } catch {
+        return false;
+      }
+    })(),
+    'almas grandes formatam sem throw',
+  );
+  const byHuge = rankLeaderboardEntries([
+    toLeaderboardEntry({ id: 1, username: 'small', full_name: 'S', turma: 'TCG01', xp: 1, conquistas: [] }, { lifetimeSouls: '100' }),
+    toLeaderboardEntry({ id: 2, username: 'big', full_name: 'B', turma: 'TCG01', xp: 1, conquistas: [] }, { lifetimeSouls: huge }),
+  ], 'lifetimeSouls');
+  staticAssert(byHuge[0].username === 'big', 'sort string decimal acima de MAX_SAFE_INTEGER');
 }
 
 if (errors.length) {

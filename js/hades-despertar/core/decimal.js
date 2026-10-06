@@ -20,7 +20,8 @@ export function toScaled(value) {
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) fail(value);
     if (Math.abs(value) > Number.MAX_SAFE_INTEGER) {
-      throw new Error('Use string decimal para números grandes.');
+      // Number já perdeu precisão; ainda assim formata (placar Almas / JSON).
+      return toScaled(Math.trunc(value).toLocaleString('en-US', { useGrouping: false }));
     }
     return toScaled(String(value));
   }

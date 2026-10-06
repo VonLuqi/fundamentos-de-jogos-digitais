@@ -78,7 +78,7 @@ function renderRows(body, entries, selfId) {
       formatNumber(row.achievements),
       formatNumber(row.juizoBest),
       formatNumber(row.prestigeCount),
-      formatSouls(row.lifetimeSouls ?? 0),
+      formatSouls(row.lifetimeSouls == null || row.lifetimeSouls === '' ? '0' : String(row.lifetimeSouls)),
     ];
     cells.forEach((value, index) => {
       const td = document.createElement('td');
@@ -129,7 +129,7 @@ function renderSelf(panel, lineEl, self, total, sort, inTop) {
       : sort === 'prestigeCount'
         ? `${formatNumber(self.prestigeCount)} catábases`
         : sort === 'lifetimeSouls'
-          ? `${formatSouls(self.lifetimeSouls ?? 0)} almas`
+          ? `${formatSouls(self.lifetimeSouls == null || self.lifetimeSouls === '' ? '0' : String(self.lifetimeSouls))} almas`
           : `${formatNumber(self.xp)} XP`;
   const podium = podiumTierForRank(self.rank);
   const note = podium
