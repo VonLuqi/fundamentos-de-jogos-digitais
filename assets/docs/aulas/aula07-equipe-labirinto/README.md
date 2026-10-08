@@ -1,7 +1,7 @@
 # Aula 07 — Individual ou dupla + coleta (Godot 4)
 
 > **Página da aula:** `pages/aula7.html`  
-> **Scripts-espelho:** [`moeda-exemplo.gd`](./moeda-exemplo.gd) · [`player-exemplo.gd`](./player-exemplo.gd)  
+> **Script-espelho:** [`moeda-exemplo.gd`](./moeda-exemplo.gd) (referência — preferir construir por etapas na sala)  
 > **Quadro imprimível:** [`quadro-atribuicao.md`](./quadro-atribuicao.md)  
 > **Árvore canônica:** [`estrutura-pastas.txt`](./estrutura-pastas.txt)  
 > **Plano:** `docs/plano-aula7-papeis-workflow-versionamento.md`
@@ -11,7 +11,7 @@ Passo a passo para trabalhar **sozinho** (os dois ofícios) ou em **dupla** (art
 - **Encontro 1** — teoria + sprite no **LibreSprite**
 - **Encontro 2** — Godot **local** (sem pasta sync) + coleta + diário
 
-Cenário rico, áudio polido e loja da Aula 06 **não** entram.
+O **movimento do Player já existe** (Aula 02 / `player.gd` com `move_and_slide`). Nesta aula você **reusa** esse script e só **acrescenta** a coleta. Cenário rico, áudio polido e loja da Aula 06 **não** entram.
 
 ---
 
@@ -21,9 +21,9 @@ Cenário rico, áudio polido e loja da Aula 06 **não** entram.
 | :--- | :--- |
 | Solo (arte + programação) ou dupla (1 ofício cada) | Trios oficiais / papéis itinerantes |
 | E1: sprite no LibreSprite (PNG) | Cenário tilemap completo / boss |
-| E2: `moeda.tscn` + Player + coleta | Integrar a loja cosmética da Aula 06 |
-| Projeto Godot **local** (sem pasta sync) | Abrir o projeto em Drive/OneDrive |
-| Lista “fora do escopo” (≥3 itens) no diário | Combate, NPCs, multiplayer |
+| E2: `moeda.tscn` + coleta no Player existente | Reescrever o movimento do Player do zero |
+| Projeto Godot **local** (sem pasta sync) | Integrar a loja cosmética da Aula 06 |
+| Lista “fora do escopo” (≥3 itens) no diário | Combate, NPCs, multiplayer · pasta sync no Godot |
 | Teaser verbal de que **existe** Git | Git obrigatório / aula de CLI |
 
 **Scope Creep clássico:** “vamos pôr inimigos e loja agora”. Resposta: **não** — fica no cercado “fora”.
@@ -36,7 +36,7 @@ Ao final dos 2 encontros:
 
 - [ ] Solo **ou** dupla com ofícios definidos na Oficina
 - [ ] Sprite LibreSprite (E1) + `cenas/moeda.tscn` (E2)
-- [ ] Player + coleta jogável (some a moeda / conta 1)
+- [ ] Player (movimento já pronto) + coleta jogável (some a moeda / conta 1)
 - [ ] ≥3 itens **fora do escopo** no diário
 - [ ] Projeto Godot **local** com nomes canônicos (sem pasta sync)
 - [ ] Diário finalizado na página `aula7` — **cada aluno**, individualmente
@@ -50,9 +50,18 @@ Ao final dos 2 encontros:
 
 - Godot **4.x** instalada e abrindo
 - LibreSprite + Godot 4.x na máquina local
+- `player.gd` da **Aula 02** (movimento básico com Input Map `ir_*`) — copie a cena/script para o Labirinto
 - Página da Aula 07 aberta na aba **Oficina** (convite + diário)
 - Quadro: [`quadro-atribuicao.md`](./quadro-atribuicao.md)
-- Lembrar o movimento da **Aula 02** (`CharacterBody2D` + Input Map `ir_*`)
+
+### O que NÃO fazer nesta aula
+
+| Evitar | Por quê |
+| :--- | :--- |
+| Apagar / reescrever o `player.gd` de movimento | Já está pronto no Módulo 1 — só acrescente coleta |
+| Integrar a loja da Aula 06 | Fora do escopo (Scope Creep) |
+| Copiar o script da moeda sem conectar o sinal | Sem `body_entered` conectado, nada dispara |
+| Usar `StaticBody2D` / `RigidBody2D` na moeda | Moeda é **detecção** → raiz `Area2D` |
 
 ### Vocabulário mínimo
 
@@ -84,7 +93,9 @@ Ao final dos 2 encontros:
 | Bloco | Tempo | Atividade | Resultado |
 | :--- | :--- | :--- | :--- |
 | Checkpoint | ~10 min | Scope Creep no telão | Cercado fresco |
-| Godot local | 70–80 min | Pastas · import · moeda · Player · coleta | MVP jogável |
+| Setup + arte moeda | ~20 min | Pastas · PNG · `moeda.tscn` | Sprite na cena |
+| Player + coleta | ~35 min | Trazer Player · trechos no `player.gd` · `moeda.gd` | Conta 1 |
+| Integração + Play | ~15 min | `cenario.tscn` · F5 | MVP jogável |
 | Diário + finalize | 15–20 min | Seções 3–4 · cada um finaliza | Envio individual |
 | Demo + Altar | 5–10 min | 1 solo/dupla no telão | Lembrete Altar |
 
@@ -96,11 +107,11 @@ Use **exatamente** os nomes abaixo.
 
 | Cena / script | Tipo raiz | Dono típico |
 | :--- | :--- | :--- |
-| `cenas/player.tscn` | `CharacterBody2D` | Programação (ou solo) |
+| `cenas/player.tscn` | `CharacterBody2D` | Programação (ou solo) — reusa Aula 02 |
 | `cenas/moeda.tscn` | `Area2D` | Arte da moeda (ou solo) |
 | `cenas/cenario.tscn` | `Node2D` | Integração (instâncias Player + Moeda) |
-| `scripts/player.gd` | — | Programação |
-| `scripts/moeda.gd` | — | Programação (arte monta a cena) |
+| `scripts/player.gd` | — | Já existe (movimento) — só acrescentar coleta |
+| `scripts/moeda.gd` | — | Novo nesta aula |
 | `sprites/moeda.png` | PNG | Arte (export LibreSprite) |
 
 ---
@@ -110,7 +121,7 @@ Use **exatamente** os nomes abaixo.
 | Ofício | Chapéu | Entrega |
 | :--- | :--- | :--- |
 | Arte da moeda | Arte | **E1** LibreSprite (PNG) · **E2** `cenas/moeda.tscn` |
-| Programação da coleta | Programação | **E2** Player (M1) + `body_entered` · some / conta 1 |
+| Programação da coleta | Programação | **E2** Player (já anda) + `body_entered` · some / conta 1 |
 | Solo | Os dois | As duas entregas (arte no E1; Godot no E2) |
 
 Convite e escolha de ofício ficam na **Oficina** da página (não no Salão de Companheiros).
@@ -144,22 +155,17 @@ Abram [`quadro-atribuicao.md`](./quadro-atribuicao.md) e preencham ofícios + �
 LabirintoDeMoedas/          ← só na máquina local
 ├── project.godot
 ├── cenas/
-│   ├── player.tscn
+│   ├── player.tscn         ← trazida da Aula 02 (já anda)
 │   ├── moeda.tscn
-│   └── cenario.tscn        ← cena de Play (integração)
+│   └── cenario.tscn
 ├── sprites/
-│   └── moeda.png           ← PNG do LibreSprite
+│   └── moeda.png
 ├── audio/
 ├── scripts/
-│   ├── player.gd
-│   └── moeda.gd
+│   ├── player.gd           ← movimento já pronto · acrescente coleta
+│   └── moeda.gd            ← novo
 └── ui/
 ```
-
-Scripts-espelho (referência — preferir digitar por etapas):
-
-- [`player-exemplo.gd`](./player-exemplo.gd) → copiar lógica para `scripts/player.gd`
-- [`moeda-exemplo.gd`](./moeda-exemplo.gd) → copiar lógica para `scripts/moeda.gd`
 
 ---
 
@@ -167,10 +173,13 @@ Scripts-espelho (referência — preferir digitar por etapas):
 
 1. Godot → **New Project** → nome/pasta **`LabirintoDeMoedas`** em disco **local** (nunca Drive/OneDrive).
 2. No **FileSystem**, botão direito na raiz → **New Folder** → criar: `cenas`, `sprites`, `audio`, `scripts`, `ui`.
-3. Copiar o PNG do LibreSprite para a pasta `sprites/` do projeto (pelo Explorer/Finder **ou** arrastando para o FileSystem).
-4. Confirme no FileSystem: `sprites/moeda.png` aparece (a Godot importa sozinha).
+3. Copiar o PNG do LibreSprite para `sprites/` (Explorer/Finder **ou** arrastar no FileSystem).
+4. Copiar do projeto antigo (Aulas 02–04):
+   - cena do Player → `cenas/player.tscn`
+   - script → `scripts/player.gd` (ou o caminho que você já usava — ajuste o Attach Script se precisar)
+5. Confirme: `sprites/moeda.png` + Player andando com F6.
 
-**Checkpoint:** pastas canônicas + PNG visível no FileSystem.
+**Checkpoint:** pastas canônicas + PNG + Player já se move (não mexa no `move_and_slide` agora).
 
 ---
 
@@ -184,51 +193,62 @@ Moeda (Area2D)
 └── CollisionShape2D
 ```
 
-Passos:
-
 1. **Scene → New Scene** → **Other Node** → busque **`Area2D`** → Create.
 2. Renomeie a raiz para `Moeda`.
 3. Com `Moeda` selecionada: **Add Child Node** → `Sprite2D`.
 4. No Inspector do `Sprite2D`: **Texture** → arraste `sprites/moeda.png` (ou Load).
 5. Com `Moeda` selecionada: **Add Child Node** → `CollisionShape2D`.
 6. No Inspector do `CollisionShape2D`: **Shape** → **New CircleShape2D** (ou RectangleShape2D).
-7. Ajuste o círculo/retângulo para **cobrir** o sprite (viewport 2D — alças azuis).
+7. Ajuste o shape para **cobrir** o sprite (alças azuis no viewport).
 8. **Salve** como `cenas/moeda.tscn` (Ctrl+S).
 
-Ainda **sem** script — a arte entrega a cena montada com o PNG.
+Ainda **sem** script — a arte entrega a cena com o PNG.
 
 **Checkpoint arte:** F6 na `moeda.tscn` mostra o sprite; shape cobrindo a moeda.
 
 ---
 
-### Bloco E2.2 — Programação: cena `player.tscn` + movimento M1 (~20 min)
+### Bloco E2.2 — Acrescentar coleta no `player.gd` (~10 min)
 
-Hierarquia **exata** (eco Aula 02):
+Abra o **`player.gd` que você já tem** (movimento da Aula 02). **Não apague** o `_physics_process` / `move_and_slide`.
 
-```text
-Player (CharacterBody2D)
-├── Sprite2D
-└── CollisionShape2D
+#### 2.1 Contador
+
+Logo abaixo das variáveis que já existem (ex.: `speed`), acrescente:
+
+```gdscript
+## Contador da Aula 07 — coleta mínima.
+var moedas: int = 0
 ```
 
-#### Input Map (se o projeto for novo)
+#### 2.2 Grupo `player`
 
-1. **Project → Project Settings → Input Map**.
-2. Crie as ações (iguais à Aula 02):
-   - `ir_cima` · `ir_baixo` · `ir_esquerda` · `ir_direita`
-3. Associe WASD e/ou setas.
+Se já existir `func _ready()`, acrescente **só** esta linha dentro dela:
 
-#### Cena
+```gdscript
+	add_to_group("player")
+```
 
-1. **Scene → New Scene** → **CharacterBody2D** como raiz → renomeie para `Player`.
-2. Filhos: `Sprite2D` + `CollisionShape2D` (shape que cubra o personagem).
-3. Textura do Player: placeholder da Godot **ou** sprite antigo do Módulo 1 — o foco da aula é a **moeda**.
-4. **Salve** como `cenas/player.tscn`.
+Se **não** existir `_ready()`, cole o bloco inteiro:
 
-#### Script `scripts/player.gd`
+```gdscript
+func _ready() -> void:
+	add_to_group("player")
+```
 
-1. Selecione a raiz `Player` → **Attach Script** → caminho `scripts/player.gd`.
-2. Substitua o conteúdo por algo equivalente a [`player-exemplo.gd`](./player-exemplo.gd):
+#### 2.3 Função chamada pela moeda
+
+No **final** do arquivo (depois do movimento), cole:
+
+```gdscript
+func coletar_moeda() -> void:
+	moedas += 1
+	print("Moedas: %d" % moedas)
+```
+
+**Checkpoint:** o Player ainda anda igual. Você só adicionou `moedas`, grupo e `coletar_moeda`.
+
+> Exemplo: se o seu `player.gd` da Aula 02 era só movimento, ele fica assim no fim:
 
 ```gdscript
 extends CharacterBody2D
@@ -249,17 +269,19 @@ func coletar_moeda() -> void:
 	print("Moedas: %d" % moedas)
 ```
 
-3. (Opcional) No Inspector: **Node → Groups** → confirme o grupo `player` (o `_ready` também adiciona).
-
-**Checkpoint programação (movimento):** F6 em `player.tscn` — anda nas 4 direções.
-
 ---
 
-### Bloco E2.3 — Script da moeda + sinal `body_entered` (~15 min)
+### Bloco E2.3 — Script da moeda + sinal (por etapas) (~15 min)
+
+#### 3.1 Anexar script
 
 1. Abra `cenas/moeda.tscn`.
-2. Selecione a raiz `Moeda` → **Attach Script** → caminho `scripts/moeda.gd`.
-3. Conteúdo equivalente a [`moeda-exemplo.gd`](./moeda-exemplo.gd):
+2. Selecione a raiz `Moeda`.
+3. Inspector → **Attach Script**.
+4. Language: **GDScript** · Path: `scripts/moeda.gd` · Template: Empty / default.
+5. Create.
+
+#### 3.2 Código da moeda (copie)
 
 ```gdscript
 extends Area2D
@@ -272,32 +294,54 @@ func _on_body_entered(body: Node2D) -> void:
 	queue_free()
 ```
 
-4. Com `Moeda` selecionada, aba **Node** (ao lado do Inspector) → **Signals**.
-5. Clique duas vezes em **`body_entered`** → Connect → receptor = nó `Moeda` → método `_on_body_entered` → **Connect**.
-6. Salve a cena.
+#### 3.3 Conectar o sinal (Forma A — editor, padrão de sala)
 
-Ícone de “sinal” / wifi deve aparecer ao lado de `Moeda` na árvore.
+1. Selecione a raiz `Moeda`.
+2. Aba **Node** (ao lado do Inspector) → **Signals**.
+3. Duplo clique em **`body_entered`**.
+4. Receptor: nó `Moeda` · método `_on_body_entered` → **Connect**.
+5. Salve a cena.
 
-**Checkpoint:** script anexado + sinal conectado (sem Play ainda).
+Ícone de sinal / wifi deve aparecer ao lado de `Moeda` na árvore.
+
+**Forma B — código (alternativa):** se preferir conectar no script:
+
+```gdscript
+extends Area2D
+
+func _ready() -> void:
+	body_entered.connect(_on_body_entered)
+
+func _on_body_entered(body: Node2D) -> void:
+	if not body.is_in_group("player"):
+		return
+	if body.has_method("coletar_moeda"):
+		body.coletar_moeda()
+	queue_free()
+```
+
+O arquivo [`moeda-exemplo.gd`](./moeda-exemplo.gd) traz o script completo — use **só se travar**; o objetivo é entender o sinal e o `queue_free`.
+
+**Checkpoint:** script anexado + sinal conectado (ainda sem Play da fase).
 
 ---
 
-### Bloco E2.4 — Integração: `cenario.tscn` + Play (~15–20 min)
+### Bloco E2.4 — Integração: `cenario.tscn` + Play (~15 min)
 
 1. **Scene → New Scene** → **Other Node** → `Node2D` → renomeie para `Cenario`.
 2. **Salve** como `cenas/cenario.tscn`.
-3. Arraste `cenas/player.tscn` do FileSystem para a cena (vira instância).
-4. Arraste `cenas/moeda.tscn` **duas ou três vezes** (várias moedas) e posicione longe do Player.
+3. Arraste `cenas/player.tscn` do FileSystem para a cena (instância).
+4. Arraste `cenas/moeda.tscn` **duas ou três vezes** e posicione longe do Player.
 5. **Project → Project Settings → Application → Run → Main Scene** → `cenas/cenario.tscn`.
 6. **Play** (F5).
 
-O que deve acontecer:
+| Teste | Esperado |
+| :--- | :--- |
+| Andar (WASD / setas) | Player se move como na Aula 02 |
+| Tocar uma moeda | Moeda some |
+| Painel **Output** | `Moedas: 1`, depois `2`, … |
 
-- Player anda (WASD / setas).
-- Ao tocar uma moeda → ela **some** (`queue_free`).
-- No painel **Output**: `Moedas: 1`, depois `2`, …
-
-**Checkpoint E2:** sprite visível + Player coleta pelo menos 1 moeda + contador no Output.
+**Checkpoint E2:** sprite da arte + Player coleta pelo menos 1 moeda + contador no Output.
 
 ---
 
@@ -318,11 +362,11 @@ O que deve acontecer:
 | Conflito em `.godot/` | Apagar `.godot` local e reabrir |
 | Os dois escolheram o mesmo ofício | UI pede o outro chapéu — último save de papel vale |
 | Quer loja / boss / online | Scope Creep — diário, seção cercado |
-| Coleta não dispara | `Area2D` + `CollisionShape2D` com shape · Monitoring ligado · sinal `body_entered` conectado |
-| Moeda some com qualquer coisa | Confira `is_in_group("player")` no script e o grupo no Player |
-| Player não anda | Input Map `ir_*` · script na raiz `CharacterBody2D` · F5 na cena de integração |
+| Coleta não dispara | Shape na moeda · Monitoring ligado · sinal `body_entered` conectado |
+| Moeda some com qualquer coisa | `is_in_group("player")` + `add_to_group("player")` no Player |
+| Player parou de andar | Você apagou o `_physics_process`? Restaure o movimento da Aula 02 |
 | Contador não sobe | `coletar_moeda` no Player · Output aberto (Editor → Output) |
-| PNG “sumiu” / pixel borrado | Import → Filter **Off** (Nearest), eco Aula 03 |
+| PNG borrado | Import → Filter **Off** (Nearest), eco Aula 03 |
 
 ---
 
@@ -330,10 +374,10 @@ O que deve acontecer:
 
 | No escopo (MVP desta aula) | Fora |
 | :--- | :--- |
-| LibreSprite (E1) + `moeda.tscn` + Player + coleta (E2) | Combate, NPCs, diálogos |
+| LibreSprite (E1) + `moeda.tscn` + coleta no Player existente (E2) | Reescrever movimento · combate · NPCs |
 | Pastas locais + diário | Loja Aula 06 · multiplayer · bosses · pasta sync |
-| Stub/`cenario.tscn` com instâncias | Cenário rico / tilemap completo |
-| Contador no Output (`print`) | HUD polido / loja / SFX |
+| `cenario.tscn` com instâncias | Cenário rico / tilemap completo |
+| Contador no Output (`print`) | HUD polido / SFX |
 
 ---
 
@@ -341,9 +385,8 @@ O que deve acontecer:
 
 | Arquivo | Uso |
 | :--- | :--- |
-| [`README.md`](./README.md) | Este guia (passo a passo) |
-| [`moeda-exemplo.gd`](./moeda-exemplo.gd) | Script-espelho da coleta |
-| [`player-exemplo.gd`](./player-exemplo.gd) | Script-espelho do movimento + contador |
+| [`README.md`](./README.md) | Este guia (código no passo a passo) |
+| [`moeda-exemplo.gd`](./moeda-exemplo.gd) | Espelho opcional se travar |
 | [`quadro-atribuicao.md`](./quadro-atribuicao.md) | Template imprimível |
 | [`estrutura-pastas.txt`](./estrutura-pastas.txt) | Árvore canônica |
 

@@ -1,20 +1,20 @@
 LabirintoDeMoedas/                 # projeto Godot 4 LOCAL (Encontro 2)
 ├── project.godot
 ├── cenas/
-│   ├── player.tscn               # Programação · CharacterBody2D + movimento M1
-│   ├── moeda.tscn                # Arte importada · Area2D + sprite · coleta
+│   ├── player.tscn               # trazido da Aula 02 · CharacterBody2D (já anda)
+│   ├── moeda.tscn                # Arte · Area2D + sprite · coleta
 │   └── cenario.tscn              # Integração · Node2D + instâncias Player/Moeda
 ├── sprites/
 │   └── moeda.png                 # PNG da moeda (export LibreSprite — Encontro 1)
 ├── audio/                        # vazia — “SFX depois”
 ├── scripts/
-│   ├── player.gd                 # movimento + coletar_moeda() · ver player-exemplo.gd
-│   └── moeda.gd                  # body_entered → some + conta · ver moeda-exemplo.gd
+│   ├── player.gd                 # movimento já pronto · acrescente coletar_moeda()
+│   └── moeda.gd                  # body_entered → some + conta · código no README
 └── ui/
 
-# Scripts-espelho (material da aula, fora do projeto Godot):
-#   assets/docs/aulas/aula07-equipe-labirinto/player-exemplo.gd
+# Script-espelho opcional (se travar):
 #   assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd
+# Código da coleta no Player e na Moeda está no README (copiar por etapas).
 
 # SEM pasta sync / Drive / OneDrive DENTRO do projeto Godot.
 # Trabalhe local na máquina. Backup opcional: ZIP fora do projeto.

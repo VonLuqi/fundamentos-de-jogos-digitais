@@ -81,8 +81,8 @@ Finalize + Altar no **fim do Encontro 2** (o diário pode rascunhar no E1 via au
 
 ## 5. Material de apoio
 
-- README oficina: [`assets/docs/aulas/aula07-equipe-labirinto/README.md`](../assets/docs/aulas/aula07-equipe-labirinto/README.md) (passo a passo Godot E2 + arte)
-- Scripts-espelho: [`player-exemplo.gd`](../assets/docs/aulas/aula07-equipe-labirinto/player-exemplo.gd) · [`moeda-exemplo.gd`](../assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd)
+- README oficina: [`assets/docs/aulas/aula07-equipe-labirinto/README.md`](../assets/docs/aulas/aula07-equipe-labirinto/README.md) (código no passo a passo · reusa `player.gd` da Aula 02)
+- Script-espelho (opcional): [`moeda-exemplo.gd`](../assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd)
 - Quadro: [`quadro-atribuicao.md`](../assets/docs/aulas/aula07-equipe-labirinto/quadro-atribuicao.md)
 - Árvore: [`estrutura-pastas.txt`](../assets/docs/aulas/aula07-equipe-labirinto/estrutura-pastas.txt)
 - Slides: `aula07_papeis_workflow_slides.{pptx,pdf}` (`python scripts/build-aula07-slides.py`)

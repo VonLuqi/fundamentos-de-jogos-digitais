@@ -453,9 +453,43 @@ function initAdminExample() {
   example.hidden = currentUser?.role !== 'admin';
 }
 
+function setCopyCodeStatus(targetId, message, kind = 'info') {
+  const status = document.querySelector(`[data-copy-status-for="${targetId}"]`);
+  if (!status) return;
+  status.className = `lesson-code-block__status is-${kind}`;
+  status.textContent = message;
+}
+
+function initCopyCodeBlocks() {
+  document.querySelectorAll('.lesson-copy-code').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const targetId = button.getAttribute('data-copy-target');
+      const pre = targetId ? document.getElementById(targetId) : null;
+      const text = pre?.textContent?.trim() ?? '';
+      if (!text) {
+        setCopyCodeStatus(targetId, 'Código indisponível para copiar.', 'error');
+        return;
+      }
+
+      if (!navigator.clipboard?.writeText) {
+        setCopyCodeStatus(targetId, 'Seu navegador não permite copiar automaticamente neste ambiente.', 'error');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(`${text}\n`);
+        setCopyCodeStatus(targetId, 'Código copiado.', 'success');
+      } catch {
+        setCopyCodeStatus(targetId, 'Não foi possível copiar agora.', 'error');
+      }
+    });
+  });
+}
+
 async function init() {
   initTabs();
   initSlidesViewer();
+  initCopyCodeBlocks();
   bindLessonDiscoveryLifecycle();
 
   const result = await requireSession();

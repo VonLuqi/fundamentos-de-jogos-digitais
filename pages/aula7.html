@@ -332,15 +332,12 @@
         <div class="lesson-download-box">
           <p class="lesson-download-box__label">Material da atividade prática</p>
           <p>
-            Guia dos dois encontros (passo a passo Godot + arte), scripts-espelho da coleta,
-            quadro Arte × Programação e árvore de pastas canônica.
+            Guia dos dois encontros com código no passo a passo (como a Aula 06),
+            espelho opcional da moeda, quadro Arte × Programação e árvore de pastas.
           </p>
           <div class="slides-actions">
             <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/README.md" target="_blank" rel="noopener noreferrer">
               Abrir guia da oficina (README)
-            </a>
-            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/player-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
-              Baixar player-exemplo.gd
             </a>
             <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
               Baixar moeda-exemplo.gd
@@ -387,7 +384,7 @@
                 </tr>
                 <tr>
                   <td data-label="Ofício"><strong>Programação da coleta</strong></td>
-                  <td data-label="Entrega"><strong>E2:</strong> Player (M1) + <code>Area2D</code> / coleta</td>
+                  <td data-label="Entrega"><strong>E2:</strong> Player (já anda) + <code>Area2D</code> / coleta</td>
                 </tr>
                 <tr>
                   <td data-label="Ofício"><strong>Individual</strong></td>
@@ -411,15 +408,15 @@
               <ul>
                 <li>
                   <code>player.tscn</code>
-                  <span class="lesson-tree__meta">Programação · CharacterBody2D + movimento M1</span>
+                  <span class="lesson-tree__meta">Trazer da Aula 02 — já anda</span>
                 </li>
                 <li>
                   <code>moeda.tscn</code>
-                  <span class="lesson-tree__meta">Arte importada + Area2D para coleta</span>
+                  <span class="lesson-tree__meta">Area2D + sprite do LibreSprite</span>
                 </li>
                 <li>
                   <code>cenario.tscn</code>
-                  <span class="lesson-tree__meta">Opcional / stub Node2D</span>
+                  <span class="lesson-tree__meta">Node2D · instâncias Player + Moeda</span>
                 </li>
               </ul>
             </li>
@@ -428,10 +425,117 @@
               <span class="lesson-tree__meta">PNG da moeda (export do LibreSprite)</span>
             </li>
             <li><code>audio/</code> <span class="lesson-tree__meta">Vazia (SFX depois)</span></li>
-            <li><code>scripts/</code></li>
+            <li>
+              <code>scripts/</code>
+              <ul>
+                <li><code>player.gd</code> <span class="lesson-tree__meta">Movimento já pronto · acrescente coleta</span></li>
+                <li><code>moeda.gd</code> <span class="lesson-tree__meta">Novo · body_entered</span></li>
+              </ul>
+            </li>
             <li><code>ui/</code></li>
           </ul>
         </div>
+
+        <h3 class="lesson-subtitle">1. Pastas + importar a arte</h3>
+        <ol class="lesson-list">
+          <li>Godot → <strong>New Project</strong> → pasta local <code>LabirintoDeMoedas</code> (nunca Drive/OneDrive).</li>
+          <li>Crie as pastas: <code>cenas</code>, <code>sprites</code>, <code>audio</code>, <code>scripts</code>, <code>ui</code>.</li>
+          <li>Copie o PNG do LibreSprite para <code>sprites/moeda.png</code>.</li>
+          <li>Traga <code>player.tscn</code> + <code>player.gd</code> da Aula 02 (movimento já funciona — <strong>não reescreva</strong>).</li>
+        </ol>
+        <p><strong>Checkpoint 1:</strong> PNG no FileSystem + Player anda com F6.</p>
+
+        <h3 class="lesson-subtitle">2. Cena <code>moeda.tscn</code> (arte)</h3>
+        <pre class="lesson-pre" aria-label="Hierarquia da moeda">Moeda (Area2D) ← script moeda.gd
+├── Sprite2D          ← Texture = sprites/moeda.png
+└── CollisionShape2D  ← CircleShape2D cobrindo o sprite</pre>
+        <ol class="lesson-list">
+          <li><strong>Scene → New Scene</strong> → Other Node → <code>Area2D</code> → renomeie para <code>Moeda</code>.</li>
+          <li>Filhos: <code>Sprite2D</code> (textura = PNG) + <code>CollisionShape2D</code> (shape cobrindo a moeda).</li>
+          <li>Salve como <code>cenas/moeda.tscn</code>.</li>
+        </ol>
+        <p><strong>Checkpoint 2:</strong> F6 na moeda mostra o sprite da arte.</p>
+
+        <h3 class="lesson-subtitle">3. Acrescentar coleta no <code>player.gd</code></h3>
+        <ol class="lesson-list">
+          <li>Abra o <code>player.gd</code> que <strong>já tem</strong> o movimento — <strong>não apague</strong> o <code>_physics_process</code>.</li>
+          <li>Acrescente <code>var moedas</code>, <code>add_to_group("player")</code> no <code>_ready</code>, e a função <code>coletar_moeda</code>.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Bloco 3 (cole no final do player.gd)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="moeda-bloco-player" aria-describedby="moeda-bloco-player-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="moeda-bloco-player-hint" class="lesson-code-block__hint">
+            Cole <strong>no final</strong> do seu <code>player.gd</code> (depois do movimento).
+            Se já existir <code>_ready</code>, acrescente só a linha <code>add_to_group("player")</code> dentro dele
+            e a variável <code>moedas</code> no topo — não duplique <code>_ready</code>.
+          </p>
+          <pre id="moeda-bloco-player" class="lesson-pre" aria-label="Código do bloco 3 — coleta no player">## --- Aula 07: coleta (acrescente no player.gd que já anda) ---
+var moedas: int = 0
+
+
+func _ready() -&gt; void:
+	add_to_group("player")
+
+
+func coletar_moeda() -&gt; void:
+	moedas += 1
+	print("Moedas: %d" % moedas)</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="moeda-bloco-player" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 3:</strong> Player ainda anda igual; Output ainda sem “Moedas” até a moeda existir.</p>
+
+        <h3 class="lesson-subtitle">4. Script <code>moeda.gd</code> + sinal <code>body_entered</code></h3>
+        <ol class="lesson-list">
+          <li>Selecione a raiz <code>Moeda</code> → Attach Script → <code>scripts/moeda.gd</code>.</li>
+          <li>Cole o código do bloco abaixo.</li>
+          <li>
+            <strong>Padrão de sala (Forma A):</strong> aba <strong>Node → Signals</strong> →
+            <code>body_entered</code> → Connect no nó <code>Moeda</code> → método <code>_on_body_entered</code>.
+          </li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Bloco 4 (cole em scripts/moeda.gd)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="moeda-bloco-coleta" aria-describedby="moeda-bloco-coleta-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="moeda-bloco-coleta-hint" class="lesson-code-block__hint">
+            Cole em <code>scripts/moeda.gd</code>. Depois conecte o sinal <code>body_entered</code>
+            (aba Node → Signals) para <code>_on_body_entered</code>.
+          </p>
+          <pre id="moeda-bloco-coleta" class="lesson-pre" aria-label="Código do bloco 4 — script da moeda">extends Area2D
+
+
+func _on_body_entered(body: Node2D) -&gt; void:
+	if not body.is_in_group("player"):
+		return
+	if body.has_method("coletar_moeda"):
+		body.coletar_moeda()
+	queue_free()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="moeda-bloco-coleta" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 4:</strong> ícone de sinal ao lado de <code>Moeda</code> na árvore.</p>
+
+        <h3 class="lesson-subtitle">5. Integração <code>cenario.tscn</code> + Play</h3>
+        <ol class="lesson-list">
+          <li>Nova cena <code>Node2D</code> → renomeie <code>Cenario</code> → salve <code>cenas/cenario.tscn</code>.</li>
+          <li>Arraste <code>player.tscn</code> e duas/três <code>moeda.tscn</code> para a cena.</li>
+          <li>Main Scene = <code>cenas/cenario.tscn</code> → <strong>F5</strong>.</li>
+        </ol>
+        <p><strong>Checkpoint 5:</strong> tocar a moeda → ela some · Output mostra <code>Moedas: 1</code>.</p>
+
+        <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
+        <ul class="lesson-list">
+          <li>Reescrever o movimento do Player do zero (já está na Aula 02).</li>
+          <li>Integrar a loja da Aula 06 no Labirinto.</li>
+          <li>Usar <code>StaticBody2D</code> / <code>RigidBody2D</code> na moeda — raiz é <code>Area2D</code>.</li>
+          <li>Abrir o projeto em pasta sync (Drive / OneDrive).</li>
+        </ul>
 
         <section class="quote-block" aria-label="Pistas secretas da aula 7">
           <p><strong>Pistas secretas do Submundo:</strong> nomeie ofícios de um estúdio; diga o que vocês cortaram para não estourar o escopo; e descreva como organizam pastas e cenas no projeto local.</p>
