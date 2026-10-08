@@ -174,12 +174,21 @@ assert.ok(
 assert.ok(exists('assets/docs/aulas/aula07-equipe-labirinto/README.md'), 'README oficina');
 assert.ok(exists('assets/docs/aulas/aula07-equipe-labirinto/quadro-atribuicao.md'), 'quadro');
 assert.ok(exists('assets/docs/aulas/aula07-equipe-labirinto/estrutura-pastas.txt'), 'estrutura-pastas');
+assert.ok(exists('assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd'), 'script-espelho moeda');
+assert.ok(exists('assets/docs/aulas/aula07-equipe-labirinto/player-exemplo.gd'), 'script-espelho player');
 const readme = read('assets/docs/aulas/aula07-equipe-labirinto/README.md');
 assert.ok(/Scope Creep|fora do escopo/i.test(readme), 'README cita Scope Creep / fora do escopo');
 assert.ok(/LabirintoDeMoedas|player\.tscn|moeda\.tscn/i.test(readme), 'README com nomes canônicos');
 assert.ok(/loja.*Aula 06|integrar a loja/i.test(readme), 'README marca loja como fora');
 assert.ok(/individual ou dupla|Arte da moeda|coleta/i.test(readme), 'README alinhado à dupla/coleta');
 assert.ok(!/lista oficial do Mestre|produtor do dia/i.test(readme), 'README sem formação antiga de trio');
+assert.ok(/body_entered|coletar_moeda|Area2D/i.test(readme), 'README com passo a passo da coleta');
+assert.ok(readme.includes('moeda-exemplo.gd') && readme.includes('player-exemplo.gd'), 'README aponta scripts-espelho');
+const moedaGd = read('assets/docs/aulas/aula07-equipe-labirinto/moeda-exemplo.gd');
+const playerGd = read('assets/docs/aulas/aula07-equipe-labirinto/player-exemplo.gd');
+assert.ok(/extends Area2D/.test(moedaGd) && /body_entered|queue_free/.test(moedaGd), 'moeda.gd coleta mínima');
+assert.ok(/extends CharacterBody2D/.test(playerGd) && /coletar_moeda|move_and_slide/.test(playerGd), 'player.gd movimento+coleta');
+assert.ok(aula7Html.includes('moeda-exemplo.gd') && aula7Html.includes('player-exemplo.gd'), 'página linka scripts-espelho');
 
 // —— Slides ——
 assert.ok(exists('assets/docs/aulas/aula07_papeis_workflow_slides.pptx'), 'PPTX presente');
