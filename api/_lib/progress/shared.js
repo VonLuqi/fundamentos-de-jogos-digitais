@@ -162,6 +162,11 @@ export const LESSON_CATALOG = {
     lessonTitle: 'Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual',
     xp: 30,
   },
+  aula8: {
+    lessonId: 'aula8',
+    lessonTitle: 'Aula 08 — Perfis de Jogadores e o Modelo Quantic Foundry',
+    xp: 30,
+  },
 };
 
 /** Gates por aula/módulo: objeto { gateKey: defaultReleased }. `published` controla liberação. */
@@ -173,6 +178,7 @@ export const LESSON_GATES = {
   aula5: { published: false },
   aula6: { published: false },
   aula7: { published: false },
+  aula8: { published: false },
   /** Módulo transversal O Despertar — default selado até o Mestre abrir o Acheron. */
   despertar: { published: false, classroom_pause: false },
 };
@@ -221,6 +227,10 @@ export const ACHIEVEMENT_RULES = [
   {
     id: 'aula7_concluida',
     test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula7'),
+  },
+  {
+    id: 'aula8_concluida',
+    test: (state) => Array.isArray(state.completed_lessons) && state.completed_lessons.includes('aula8'),
   },
 ];
 

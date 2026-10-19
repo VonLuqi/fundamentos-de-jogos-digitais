@@ -2086,6 +2086,13 @@ export const MODULES = [
         subtitle: 'Individual ou dupla · arte da moeda × coleta · diário compartilhado',
         rewardXp: 30,
       },
+      {
+        id: 'aula8',
+        number: '08',
+        title: 'Perfis de Jogadores e o Modelo Quantic Foundry',
+        subtitle: 'Individual ou dupla · Design do perfil × mecânicas · Labirinto direcionado',
+        rewardXp: 30,
+      },
     ],
   },
 ];

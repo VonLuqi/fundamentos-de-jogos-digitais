@@ -1023,6 +1023,110 @@ export function matchesPastaSagrada(normalizedText) {
   return hits >= AULA7_SECRET_THRESHOLDS.pastaMin;
 }
 
+/** —— Aula 08: Quantic Foundry / perfil → mecânica —— */
+const QUANTIC_MODEL_SIGNALS = Object.freeze([
+  [
+    'quantic foundry',
+    'quanticfoundry',
+    'modelo quantic',
+    'motivacao',
+    'motivação',
+    'motivacoes',
+    'motivações',
+    'perfil psicometrico',
+    'perfil psicométrico',
+    'cluster',
+    'clusters',
+  ],
+]);
+
+const QUANTIC_MOTIVATION_NAMES = Object.freeze([
+  [
+    'destruicao',
+    'destruição',
+    'desafio',
+    'descoberta',
+    'completion',
+    'excitement',
+    'achievement',
+    'immersion',
+    'imersao',
+    'imersão',
+    'mastery',
+  ],
+]);
+
+const PERFIL_SIGNALS = Object.freeze([
+  ['perfil', 'publico-alvo', 'público-alvo', 'jogador alvo', 'atrair'],
+]);
+
+const MECANICA_SIGNALS = Object.freeze([
+  [
+    'mecanica',
+    'mecânica',
+    'mecanicas',
+    'mecânicas',
+    'area secreta',
+    'área secreta',
+    'obstaculo',
+    'obstáculo',
+    'moeda brilhante',
+    'level design',
+    'design de nivel',
+    'design de nível',
+  ],
+]);
+
+const TRILHA_CONQUISTA_SIGNALS = Object.freeze([
+  [
+    'conquista',
+    'area secreta',
+    'área secreta',
+    'moeda brilhante',
+    'moeda dificil',
+    'moeda difícil',
+    'segredo no mapa',
+  ],
+]);
+
+const TRILHA_ACAO_SIGNALS = Object.freeze([
+  [
+    'acao',
+    'ação',
+    'obstaculo movel',
+    'obstáculo móvel',
+    'obstaculo',
+    'obstáculo',
+    'vai-e-volta',
+    'timing',
+  ],
+]);
+
+export const AULA8_SECRET_THRESHOLDS = Object.freeze({
+  quanticMinGroups: 1,
+  perfilMecanicaMin: 2,
+});
+
+/** Cita o modelo Quantic Foundry ou motivações nomeadas. */
+export function matchesModeloQuantic(normalizedText) {
+  if (coverageAtLeast(normalizedText, QUANTIC_MODEL_SIGNALS, 1)) return true;
+  return coverageAtLeast(normalizedText, QUANTIC_MOTIVATION_NAMES, 1);
+}
+
+/** Liga perfil-alvo a mecânica de nível. */
+export function matchesPerfilMecanica(normalizedText) {
+  let hits = 0;
+  if (coverageAtLeast(normalizedText, PERFIL_SIGNALS, 1)) hits += 1;
+  if (coverageAtLeast(normalizedText, MECANICA_SIGNALS, 1)) hits += 1;
+  return hits >= AULA8_SECRET_THRESHOLDS.perfilMecanicaMin;
+}
+
+/** Menciona a trilha Conquista (segredo/moeda) ou Ação (obstáculo). */
+export function matchesTrilhaLabirinto(normalizedText) {
+  if (coverageAtLeast(normalizedText, TRILHA_CONQUISTA_SIGNALS, 1)) return true;
+  return coverageAtLeast(normalizedText, TRILHA_ACAO_SIGNALS, 1);
+}
+
 const LESSON_SECRET_RULES = Object.freeze({
   aula1: Object.freeze([
     {
@@ -1120,6 +1224,20 @@ const LESSON_SECRET_RULES = Object.freeze({
     {
       id: 'segredo_pasta_sagrada',
       test: (ctx) => matchesPastaSagrada(ctx.normalizedText),
+    },
+  ]),
+  aula8: Object.freeze([
+    {
+      id: 'segredo_modelo_quantic',
+      test: (ctx) => matchesModeloQuantic(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_perfil_mecanica',
+      test: (ctx) => matchesPerfilMecanica(ctx.normalizedText),
+    },
+    {
+      id: 'segredo_trilha_labirinto',
+      test: (ctx) => matchesTrilhaLabirinto(ctx.normalizedText),
     },
   ]),
 });

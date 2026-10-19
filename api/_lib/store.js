@@ -88,6 +88,12 @@ export const REDEEM_CODES = {
     xp: 30,
     achievement: 'aula7_concluida',
   },
+  PERFIL2026: {
+    lessonId: 'aula8',
+    lessonTitle: 'Aula 08 — Perfis de Jogadores e o Modelo Quantic Foundry',
+    xp: 30,
+    achievement: 'aula8_concluida',
+  },
 };
 
 /* ============================================================
@@ -126,6 +132,7 @@ export const ACHIEVEMENT_RULES = [
   { id: 'aula5_concluida', test: (u) => u.completedLessons.includes('aula5') },
   { id: 'aula6_concluida', test: (u) => u.completedLessons.includes('aula6') },
   { id: 'aula7_concluida', test: (u) => u.completedLessons.includes('aula7') },
+  { id: 'aula8_concluida', test: (u) => u.completedLessons.includes('aula8') },
 ];
 
 /* ============================================================

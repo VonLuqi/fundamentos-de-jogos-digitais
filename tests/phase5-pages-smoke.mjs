@@ -56,6 +56,7 @@ const shellPages = [
   'pages/aula5.html',
   'pages/aula6.html',
   'pages/aula7.html',
+  'pages/aula8.html',
 ];
 
 shellPages.forEach((rel) => {

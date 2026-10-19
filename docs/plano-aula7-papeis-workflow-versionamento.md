@@ -628,16 +628,13 @@ Task 8  pontes docs M2 ✅
 
 ---
 
-## Ponte — Aula 08 (placeholder)
+## Ponte — Aula 08
 
-> Quando a ementa da Aula 08 estiver disponível, substituir este bloco.
+**Ementa oficial:** Perfis de Jogadores e o Modelo Quantic Foundry.
 
-Sugestões compatíveis com o que a Aula 07 deixa pronto (não oficiais):
+Continuar `LabirintoDeMoedas` com design direcionado (trilha Conquista **ou** Ação), solo/dupla (Design do perfil × Programação das mecânicas), diário compartilhado.
 
-- Movimentação 4 direções do Player no projeto Labirinto.  
-- `Area2D` de moeda + contador no HUD.  
-- Primeiro tilemap / cenário jogável.  
-- Ou o tópico oficial da ementa (prioridade absoluta).
+Plano: [`plano-aula8-perfis-quantic-foundry.md`](./plano-aula8-perfis-quantic-foundry.md) · playbook: [`playbook-liberar-aula8.md`](./playbook-liberar-aula8.md).
 
 ---
 

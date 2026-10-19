@@ -4,12 +4,13 @@
 **Aulas:** 06 a 10 · ~10h  
 **Papel do módulo:** primeiro contato estruturado com **GDScript**, UI/economia ética e **processo de equipe** na Godot 4, depois das fundações culturais e de classificação do Módulo 1.
 
-Este arquivo reúne a **visão do módulo** e o conteúdo pedagógico das Aulas **06–07** (08–10: TBD quando a ementa oficial as listar).
+Este arquivo reúne a **visão do módulo** e o conteúdo pedagógico das Aulas **06–08** (09–10: TBD quando a ementa oficial as listar).
 
 Alinhado a:
 
 - Aula 06: `pages/aula6.html` · [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md) · [`playbook-liberar-aula6.md`](./playbook-liberar-aula6.md)
 - Aula 07: `pages/aula7.html` · [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md) · [`playbook-liberar-aula7.md`](./playbook-liberar-aula7.md)
+- Aula 08: `pages/aula8.html` · [`plano-aula8-perfis-quantic-foundry.md`](./plano-aula8-perfis-quantic-foundry.md) · [`playbook-liberar-aula8.md`](./playbook-liberar-aula8.md)
 
 ---
 
@@ -20,15 +21,15 @@ Alinhado a:
 | :---: | --- | --- | --- |
 | **06** | Mercado, PI e Monetização Ética | Mercado brasileiro e internacional de jogos | Godot 4 · loja UI (`Control` / `Button` / `PanelContainer`) + moedas in-game |
 | **07** | Papéis, Workflow e Versionamento Visual | Papéis no desenvolvimento e workflow | Individual ou dupla · arte da moeda × coleta · diário · `LabirintoDeMoedas` |
-| **08** | *(a definir)* | — | Continuação Labirinto / GDScript |
+| **08** | Perfis de Jogadores e o Modelo Quantic Foundry | Perfis psicológicos de jogadores | Individual ou dupla · Design × mecânicas · Conquista **ou** Ação no Labirinto |
 | **09** | *(a definir)* | — | … |
 | **10** | *(a definir)* | — | … |
 
 **Contrato de experiência (espelho Módulo 1):** abas *I. Fundamentos · II. Oficina · III. Slides*; envio server-authoritative; XP via Altar; 1 conquista pública + secretas por aula; gate `published: false` até o Mestre liberar.
 
-**Pré-requisitos:** Aula 06 → `aula5`; Aula 07 → `aula6`. A Provação do Módulo 1 não bloqueia a trilha automaticamente na v1.
+**Pré-requisitos:** Aula 06 → `aula5`; Aula 07 → `aula6`; Aula 08 → `aula7`. A Provação do Módulo 1 não bloqueia a trilha automaticamente na v1.
 
-> **Nota:** `Camera2D` / `AnimatedSprite2D` **não** são conteúdo oficial da Aula 06 **nem** da Aula 07. Ficam para aulas posteriores **se** a ementa as listar.
+> **Nota:** `Camera2D` / `AnimatedSprite2D` **não** são conteúdo oficial da Aula 06 **nem** da Aula 07. A **Aula 08** introduz `Camera2D` follow no Player (Encontro 1) para level design no Labirinto. `AnimatedSprite2D` permanece para aulas posteriores **se** a ementa listar.
 
 ---
 
@@ -109,6 +110,36 @@ Enxergar o estúdio como **sistema de papéis**, fechar o **cercado do escopo** 
 
 ---
 
+## Aula 08 — Perfis de Jogadores e o Modelo Quantic Foundry
+
+### Objetivo
+
+Ligar **motivações Quantic Foundry** a **mecânicas de nível** no Labirinto: escolher um perfil-alvo e implementar a trilha **Conquista** (segredo + moeda brilhante) **ou** **Ação** (obstáculo móvel).
+
+### Conceitos-chave
+
+| Conceito | Leitura operacional |
+| --- | --- |
+| **Quantic Foundry** | Modelo psicométrico com 6 clusters de motivação |
+| **Design direcionado** | Perfil escolhido → decisões de level design |
+| **Camera2D** | Filha do Player · vista acompanha o level design (E1) |
+| **Trilha Conquista** | Área secreta + moeda brilhante difícil |
+| **Trilha Ação** | Obstáculo móvel (vai-e-volta) com timing |
+
+### Oficina (~200 min / 2 encontros)
+
+1. Solo ou dupla (Design do perfil × Programação das mecânicas).
+2. E1: `Camera2D` no Player · escolher **uma** trilha e esqueleto no `LabirintoDeMoedas`.
+3. E2: implementar mecânica · diário + finalize · Altar.
+
+**Artefato:** nível adaptado ao público-alvo + diário.
+
+**Material:** `assets/docs/aulas/aula08-perfil-quantic/` · slides `aula08_quantic_foundry_slides`.
+
+**Conquistas:** `aula8_concluida` (Cartógrafo do Perfil) + secretas Oráculo Quantic · Design Direcionado · Trilha do Labirinto.
+
+---
+
 ## Progressão (esboço)
 
 ```
@@ -118,7 +149,9 @@ Aula 06 — Mercado + loja ética (GDScript UI)
         ↓
 Aula 07 — Papéis + dupla/solo + coleta Labirinto
         ↓
-Aula 08–10 — TBD (ementa)
+Aula 08 — Quantic Foundry + Labirinto direcionado
+        ↓
+Aula 09–10 — TBD (ementa)
 ```
 
 ---
@@ -129,13 +162,16 @@ Aula 08–10 — TBD (ementa)
 | --- | --- |
 | Página 06 | `pages/aula6.html` |
 | Página 07 | `pages/aula7.html` |
+| Página 08 | `pages/aula8.html` |
 | Plano 06 | [`plano-aula6-mercado-loja-etica.md`](./plano-aula6-mercado-loja-etica.md) |
 | Plano 07 | [`plano-aula7-papeis-workflow-versionamento.md`](./plano-aula7-papeis-workflow-versionamento.md) |
+| Plano 08 | [`plano-aula8-perfis-quantic-foundry.md`](./plano-aula8-perfis-quantic-foundry.md) |
 | Playbook 06 | [`playbook-liberar-aula6.md`](./playbook-liberar-aula6.md) |
 | Playbook 07 | [`playbook-liberar-aula7.md`](./playbook-liberar-aula7.md) |
+| Playbook 08 | [`playbook-liberar-aula8.md`](./playbook-liberar-aula8.md) |
 | Catálogo | `js/api.js` → `MODULES.modulo2` |
 | Conteúdo M1 (ponte) | [`conteudo-modulo1-fundacoes-cultura-interface.md`](./conteudo-modulo1-fundacoes-cultura-interface.md) |
 
 ---
 
-*Esboço do Módulo 2 — Aulas 06–07 preenchidas; Aulas 08–10 TBD (2026-09-28).*
+*Esboço do Módulo 2 — Aulas 06–08 preenchidas; Aulas 09–10 TBD.*

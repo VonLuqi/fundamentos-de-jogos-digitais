@@ -43,6 +43,7 @@ const shellPages = [
   'pages/aula5.html',
   'pages/aula6.html',
   'pages/aula7.html',
+  'pages/aula8.html',
   'pages/classind-dle.html',
   'pages/despertar.html',
   'pages/ranking.html',

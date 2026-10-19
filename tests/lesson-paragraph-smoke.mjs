@@ -120,6 +120,11 @@ assert.ok(!aula7.includes("from './lesson-paragraph.js'"), 'aula7.js não usa le
 assert.ok(aula7.includes('lessonJournalFinalize'), 'aula7.js finaliza via diário');
 assert.ok(!aula7.includes('function composeLessonRecord('), 'aula7.js não redefine compose');
 
+const aula8 = read('js/aula8.js');
+assert.ok(!aula8.includes("from './lesson-paragraph.js'"), 'aula8.js não usa lesson-paragraph');
+assert.ok(aula8.includes('lessonJournalFinalize'), 'aula8.js finaliza via diário');
+assert.ok(!aula8.includes('function composeLessonRecord('), 'aula8.js não redefine compose');
+
 const pkg = read('package.json');
 assert.ok(pkg.includes('js/lesson-paragraph.js'), 'package.json check precisa de node --check no parser');
 assert.ok(pkg.includes('tests/lesson-paragraph-smoke.mjs'), 'package.json check precisa deste smoke');

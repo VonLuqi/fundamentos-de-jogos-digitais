@@ -77,7 +77,8 @@ for (const action of DUO_ACTIONS) {
 }
 
 const duosJs = read('api/_lib/progress/lesson-duos.js');
-assert.ok(duosJs.includes("DUO_LESSON_IDS = new Set(['aula7'])"), 'só aula7');
+assert.ok(/DUO_LESSON_IDS = new Set\(\[[^\]]*['"]aula7['"]/.test(duosJs), 'aula7 em DUO_LESSON_IDS');
+assert.ok(duosJs.includes("'aula8'") || duosJs.includes('"aula8"'), 'aula8 também em DUO_LESSON_IDS');
 assert.ok(duosJs.includes('LESSON_DUOS_TABLE'), 'usa lesson_duos');
 assert.ok(duosJs.includes('LESSON_JOURNALS_TABLE'), 'usa lesson_journals');
 assert.ok(!duosJs.includes('FRIENDSHIPS_TABLE'), 'não usa friendships');

@@ -33,6 +33,7 @@ const LESSON_XP = Object.freeze({
   aula5: 30,
   aula6: 30,
   aula7: 30,
+  aula8: 30,
 });
 
 /** Contas de laboratório que não devem aparecer no placar. */

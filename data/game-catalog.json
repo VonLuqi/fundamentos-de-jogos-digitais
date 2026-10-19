@@ -350,6 +350,53 @@
       "meta": { "family": "aula7", "kind": "content", "volatile": true }
     },
     {
+      "id": "aula8_concluida",
+      "name": "Cartógrafo do Perfil",
+      "desc": "Escolheu um perfil Quantic Foundry, adaptou o Labirinto e honrou a oitava trilha — solo ou em dupla.",
+      "icon": "🎯",
+      "art": "aula8_concluida.webp",
+      "hidden": false,
+      "difficulty": "trivial",
+      "rarity": "stone",
+      "xp": 0
+    },
+    {
+      "id": "segredo_modelo_quantic",
+      "name": "Oráculo Quantic",
+      "desc": "Nomeou o modelo Quantic Foundry ou motivações de jogadores.",
+      "icon": "🔮",
+      "art": "segredo_modelo_quantic.webp",
+      "hidden": true,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 15,
+      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_perfil_mecanica",
+      "name": "Design Direcionado",
+      "desc": "Ligou o perfil-alvo às mecânicas do nível.",
+      "icon": "🧭",
+      "art": "segredo_perfil_mecanica.webp",
+      "hidden": true,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 15,
+      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+    },
+    {
+      "id": "segredo_trilha_labirinto",
+      "name": "Trilha do Labirinto",
+      "desc": "Descreveu a trilha Conquista (segredo/moeda) ou Ação (obstáculo móvel).",
+      "icon": "🏛️",
+      "art": "segredo_trilha_labirinto.webp",
+      "hidden": true,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 25,
+      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+    },
+    {
       "id": "soberano_do_submundo",
       "name": "Soberano do Submundo",
       "desc": "Superou as 8 provações lendárias do submundo: decifrou o Tártaro, escutou Asfódelos, revelou os segredos de Hécate, interceptou os Elísios, dominou o Jardim de Perséfone, localizou o portal no Observatório, inverteu o espelho de Cócito e selou o pacto no Rio Estige. Mestre absoluto da investigação web, ARG e engenharia de software.",

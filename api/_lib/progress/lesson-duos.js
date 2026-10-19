@@ -20,8 +20,12 @@ import {
   toFriendCard,
 } from './shared.js';
 
-const DUO_LESSON_IDS = new Set(['aula7']);
-const ROLES = new Set(['arte', 'programacao']);
+const DUO_LESSON_IDS = new Set(['aula7', 'aula8']);
+/** Ofícios por aula — pares mutuamente exclusivos. */
+const ROLES_BY_LESSON = Object.freeze({
+  aula7: Object.freeze(['arte', 'programacao']),
+  aula8: Object.freeze(['design', 'programacao']),
+});
 const JOURNAL_BODY_MAX = 12000;
 const DUO_SELECT =
   'id, lesson_id, requester_id, addressee_id, status, requester_role, addressee_role, created_at, updated_at';
@@ -47,15 +51,25 @@ function normalizeLessonId(raw) {
   return id;
 }
 
-function oppositeRole(role) {
-  if (role === 'arte') return 'programacao';
-  if (role === 'programacao') return 'arte';
+function rolesForLesson(lessonId) {
+  const id = String(lessonId || '');
+  return ROLES_BY_LESSON[id] || null;
+}
+
+function oppositeRole(role, lessonId = 'aula7') {
+  const pair = rolesForLesson(lessonId);
+  if (!pair) return null;
+  const picked = String(role || '').trim().toLowerCase();
+  if (picked === pair[0]) return pair[1];
+  if (picked === pair[1]) return pair[0];
   return null;
 }
 
-function normalizeRole(raw) {
+function normalizeRole(raw, lessonId = 'aula7') {
   const role = String(raw || '').trim().toLowerCase();
-  return ROLES.has(role) ? role : null;
+  const pair = rolesForLesson(lessonId);
+  if (!pair) return null;
+  return pair.includes(role) ? role : null;
 }
 
 function cardFromUser(user) {
@@ -486,9 +500,10 @@ export async function lessonDuoSetRole(ctx) {
   try {
     const id = normalizeLessonId(lessonId);
     if (!id) return res.status(400).json({ ok: false, error: 'Aula inválida para dupla.' });
-    const picked = normalizeRole(role);
+    const picked = normalizeRole(role, id);
     if (!picked) {
-      return res.status(400).json({ ok: false, error: 'Ofício inválido (arte ou programacao).' });
+      const allowed = (rolesForLesson(id) || []).join(' ou ');
+      return res.status(400).json({ ok: false, error: `Ofício inválido (${allowed}).` });
     }
 
     const duo = await findAcceptedDuo(supabase, id, userId);
@@ -497,7 +512,7 @@ export async function lessonDuoSetRole(ctx) {
     }
 
     const iAmRequester = sameUserId(duo.requester_id, userId);
-    const partnerRole = oppositeRole(picked);
+    const partnerRole = oppositeRole(picked, id);
     const patch = {
       updated_at: new Date().toISOString(),
       requester_role: iAmRequester ? picked : partnerRole,
@@ -643,7 +658,7 @@ export async function lessonJournalFinalize(ctx) {
       if (!myRole) {
         return res.status(400).json({
           ok: false,
-          error: 'Escolha seu ofício (arte ou programação) antes de finalizar.',
+          error: 'Escolha seu ofício antes de finalizar.',
         });
       }
     }
@@ -722,5 +737,7 @@ export const __test = {
   oppositeRole,
   normalizeRole,
   normalizeLessonId,
+  rolesForLesson,
+  DUO_LESSON_IDS,
   JOURNAL_BODY_MAX,
 };

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Aula 08 — Perfis de Jogadores e Quantic Foundry: individual ou dupla (Design do perfil × mecânicas), Labirinto direcionado." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Aula 08 — Perfis e Quantic Foundry | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css" />
+  <link rel="stylesheet" href="../css/app-shell.css" />
+  <link rel="stylesheet" href="../css/aula.css" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page" data-route="aula8" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="discovery-flash" id="discovery-flash" aria-hidden="true"></div>
+  <div class="discovery-secret-burst" id="discovery-secret-burst" role="status" aria-live="polite" hidden>
+    Conquista secreta desbloqueada
+  </div>
+  <div class="discovery-overlay" id="discovery-overlay" role="status" aria-live="polite" hidden>
+    <div class="discovery-card" id="discovery-card">
+      <h2 class="discovery-card__title" id="discovery-title">Conquista Descoberta</h2>
+      <ul class="discovery-card__list" id="discovery-list"></ul>
+    </div>
+  </div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="inicio" href="../index.html">Inicio</a>
+        <a class="app-shell__link" data-nav-item="dashboard" href="./dashboard.html">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="./aulas.html">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="./conquistas.html">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="ranking" href="./ranking.html">Placar do Domínio</a>
+        <a class="app-shell__link" data-nav-item="salao" href="./salao-espiritual.html">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="./grimorio.html">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="./despertar.html" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="./souls.html" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Módulo 2 · Introdução ao GDScript “Do Zero”</p>
+            <h1 class="app-shell__title" id="lesson-page-title">AULA 08: PERFIS E <span class="accent">QUANTIC FOUNDRY</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Aula 08</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider" aria-hidden="true">
+        <span class="ornate-divider__line"></span>
+        <span class="ornate-divider__gem">◆</span>
+        <span class="ornate-divider__line"></span>
+      </div>
+
+      <div class="app-shell__content lesson-shell__content">
+        <nav class="tabs" role="tablist" aria-label="Navegação por abas da aula">
+          <button class="tab is-active" type="button" id="tab-fundamentos" data-tab="fundamentos" role="tab" aria-selected="true" aria-controls="fundamentos">
+            I. Fundamentos
+          </button>
+          <button class="tab" type="button" id="tab-oficina" data-tab="oficina" role="tab" aria-selected="false" aria-controls="oficina">
+            II. Oficina
+          </button>
+          <button class="tab" type="button" id="tab-slides" data-tab="slides" role="tab" aria-selected="false" aria-controls="slides">
+            III. Slides
+          </button>
+        </nav>
+
+        <main class="lesson-main" aria-labelledby="lesson-page-title">
+    <section id="fundamentos" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-fundamentos">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Módulo 2 · Aulas 6 a 10 · 10h</p>
+        <h2 class="lesson-title">Perfis psicológicos de jogadores</h2>
+        <p>
+          A Aula 07 entregou o <strong>Labirinto de Moedas</strong> com coleta mínima.
+          Agora o Submundo pergunta: <strong>para quem</strong> esse labirinto é divertido?
+          O modelo psicométrico da <strong>Quantic Foundry</strong> descreve motivações de jogadores —
+          e hoje vocês adaptam o nível para atrair <strong>um</strong> perfil.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Por que jogamos?</h3>
+            <p>Nem todo jogador busca a mesma recompensa — ação, conquista, história ou descoberta puxam públicos diferentes.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Quantic Foundry</h3>
+            <p>Seis clusters de motivação (Action, Social, Mastery, Achievement, Immersion, Creativity) medidos empiricamente.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Design direcionado</h3>
+            <p>Escolher o perfil-alvo e configurar mecânicas no Labirinto — não só “tema” ou arte.</p>
+          </article>
+        </div>
+
+        <h2 class="lesson-title">Seis clusters (visão rápida)</h2>
+        <ul class="lesson-list">
+          <li><strong>Action</strong> — Destruição, Excitement: impacto imediato, caos controlado, adrenalina.</li>
+          <li><strong>Social</strong> — Competition, Community: outros jogadores importam.</li>
+          <li><strong>Mastery</strong> — Challenge, Strategy: superar dificuldade e planejar.</li>
+          <li><strong>Achievement</strong> — Completion, Power: completar 100%, poder, colecionar.</li>
+          <li><strong>Immersion</strong> — Fantasy, Story: mundo, personagem, narrativa.</li>
+          <li><strong>Creativity</strong> — Design, Discovery: criar e explorar o que está escondido.</li>
+        </ul>
+
+        <h2 class="lesson-title">Destruição / Desafio × Descoberta</h2>
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Ação e desafio</h3>
+            <p><strong>Destruição</strong> e <strong>Desafio</strong> apelam a quem quer tensão, timing e impacto — obstáculos que se movem, riscos, ritmo.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Descoberta</h3>
+            <p><strong>Descoberta</strong> apela a exploradores — caminhos laterais, segredos, recompensas escondidas.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Ponte Godot</h3>
+            <p>Na sala: trilha <strong>Ação</strong> (obstáculo móvel) ou trilha <strong>Conquista</strong> (área secreta + moeda brilhante difícil).</p>
+          </article>
+        </div>
+
+        <div class="quote-block">
+          <p>
+            Um labirinto genérico agrada a ninguém de verdade. Escolham um perfil Quantic Foundry,
+            fechem o cercado (uma trilha só) e deixem a mecânica falar pelo público-alvo.
+          </p>
+        </div>
+
+        <h2 class="lesson-title">O foco desta aula (2 encontros)</h2>
+        <p>
+          Trabalhe <strong>sozinho</strong> (os dois ofícios) ou convide um colega na Oficina.
+          Na dupla: um faz o <strong>Design do perfil</strong>, o outro a <strong>Programação das mecânicas</strong>.
+        </p>
+        <ul class="lesson-list">
+          <li><strong>Encontro 1</strong> — teoria Quantic Foundry + <code>Camera2D</code> no Player + escolher trilha + esqueleto no Labirinto.</li>
+          <li><strong>Encontro 2</strong> — implementar mecânica, playtest, diário completo e Altar.</li>
+          <li>Continuar o projeto <code>LabirintoDeMoedas</code> — sem pasta sync / Drive no Godot.</li>
+        </ul>
+      </article>
+    </section>
+
+        <section id="oficina" class="tab-panel" role="tabpanel" aria-labelledby="tab-oficina">
+      <article class="hades-frame lesson-content">
+        <p class="lesson-chip">Atividade guiada · 2 encontros · E1 perfil · E2 mecânicas + diário</p>
+        <h2 class="lesson-title">Prática — design direcionado</h2>
+        <p>
+          No <strong>Labirinto de Moedas 2D</strong> você trabalha <strong>sozinho</strong> ou em <strong>dupla</strong>.
+          Escolham <strong>uma</strong> trilha: Conquista <strong>ou</strong> Ação.
+        </p>
+
+        <div class="triplet-grid">
+          <article class="triplet-card">
+            <h3>Encontro 1 — Perfil + câmera</h3>
+            <p>Teoria + <code>Camera2D</code> follow + ofícios + trilha Quantic → esqueleto na cena.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Encontro 2 — Mecânica</h3>
+            <p>Scripts + playtest: segredo/moeda brilhante <strong>ou</strong> obstáculo móvel.</p>
+          </article>
+          <article class="triplet-card">
+            <h3>Diário</h3>
+            <p>Justificar perfil ↔ mecânica — finalize no Encontro 2.</p>
+          </article>
+        </div>
+
+        <section class="lesson-duo-panel" id="lesson-duo-panel" aria-label="Dupla da aula">
+          <h3 class="lesson-subtitle">Formar dupla (ou trabalhar sozinho)</h3>
+          <p class="lesson-duo-panel__lead">
+            Default: <strong>solo</strong> — você faz os dois ofícios. Para formar dupla,
+            convide um colega da turma pelo username.
+          </p>
+          <p id="duo-status" class="lesson-duo-status" aria-live="polite">Modo solo — os dois ofícios são seus.</p>
+          <div class="lesson-duo-roles" id="duo-roles" hidden>
+            <p class="lesson-duo-roles__label">Seu ofício nesta dupla:</p>
+            <div class="lesson-duo-roles__actions">
+              <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-role-design" data-role="design">Design do perfil</button>
+              <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-role-prog" data-role="programacao">Programação das mecânicas</button>
+            </div>
+            <p id="duo-role-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+          <form class="lesson-duo-invite" id="duo-invite-form">
+            <label class="lesson-duo-invite__label" for="duo-invite-username">Username do colega</label>
+            <div class="lesson-duo-invite__row">
+              <input
+                type="text"
+                id="duo-invite-username"
+                class="lesson-duo-invite__input"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="ex.: sombra_da_turma"
+              />
+              <button type="submit" class="lesson-cta" id="duo-invite-submit">Convidar</button>
+            </div>
+          </form>
+          <div class="lesson-duo-lists">
+            <div>
+              <h4 class="lesson-duo-lists__title">Convites recebidos</h4>
+              <ul id="duo-incoming" class="lesson-duo-list"></ul>
+            </div>
+            <div>
+              <h4 class="lesson-duo-lists__title">Convites enviados</h4>
+              <ul id="duo-outgoing" class="lesson-duo-list"></ul>
+            </div>
+          </div>
+          <div class="gdd-actions">
+            <button type="button" class="lesson-cta lesson-cta--ghost" id="duo-leave" hidden>Sair da dupla / cancelar convites</button>
+          </div>
+        </section>
+
+        <div class="lesson-download-box">
+          <p class="lesson-download-box__label">Material da atividade prática</p>
+          <p>
+            Guia dos dois encontros, <strong>folha de planejamento da Fase 1</strong> (imprimir uma por aluno),
+            scripts-espelho, quadro de ofícios e árvore do Labirinto.
+          </p>
+          <div class="slides-actions">
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/README.md" target="_blank" rel="noopener noreferrer">
+              Abrir guia da oficina (README)
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/folha-fase1.pdf" target="_blank" rel="noopener noreferrer">
+              Baixar folha Fase 1 (PDF)
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/folha-fase1.md" target="_blank" rel="noopener noreferrer">
+              Abrir folha Fase 1 (Markdown)
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/camera-player-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
+              Baixar camera-player-exemplo.gd
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/moeda-brilhante-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
+              Baixar moeda-brilhante-exemplo.gd
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/obstaculo-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
+              Baixar obstaculo-exemplo.gd
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/quadro-atribuicao.md" target="_blank" rel="noopener noreferrer">
+              Abrir quadro de atribuição
+            </a>
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/estrutura-pastas.txt" target="_blank" rel="noopener noreferrer" download>
+              Baixar estrutura-pastas.txt
+            </a>
+          </div>
+        </div>
+
+        <h3 class="lesson-subtitle">Roteiro — Encontro 1 (~120 min)</h3>
+        <ul class="lesson-list">
+          <li><strong>Teoria Quantic Foundry</strong> (~20–25 min)</li>
+          <li><strong>Convite / ofícios + escolher trilha</strong> (~15 min)</li>
+          <li><strong>Design direcionado</strong> (~25 min) — <strong>folha Fase 1</strong> (plataformas + moedas) · uma por aluno</li>
+          <li><strong>Godot</strong> — <code>Camera2D</code> no Player + montar o esboço no Labirinto</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">Roteiro — Encontro 2 (~120 min)</h3>
+        <ul class="lesson-list">
+          <li><strong>Checkpoint</strong> (~10 min) — uma trilha só</li>
+          <li><strong>Implementação + playtest</strong> (~80 min)</li>
+          <li><strong>Diário + finalizar</strong> (~15–20 min)</li>
+          <li><strong>Demo + Altar</strong> (~5–10 min)</li>
+        </ul>
+
+        <h3 class="lesson-subtitle">Ofícios e trilhas</h3>
+        <div class="lesson-md" aria-label="Quadro de ofícios">
+          <div class="lesson-table-wrap">
+            <table class="lesson-table">
+              <thead>
+                <tr>
+                  <th scope="col">Ofício / trilha</th>
+                  <th scope="col">Entrega</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Ofício"><strong>Design do perfil</strong></td>
+                  <td data-label="Entrega">Escolher perfil QF · <strong>folha Fase 1</strong> · diário</td>
+                </tr>
+                <tr>
+                  <td data-label="Ofício"><strong>Programação das mecânicas</strong></td>
+                  <td data-label="Entrega">Scripts da trilha escolhida + playtest</td>
+                </tr>
+                <tr>
+                  <td data-label="Ofício"><strong>Trilha Conquista</strong></td>
+                  <td data-label="Entrega">Área secreta + moeda brilhante difícil de alcançar</td>
+                </tr>
+                <tr>
+                  <td data-label="Ofício"><strong>Trilha Ação</strong></td>
+                  <td data-label="Entrega">Obstáculo móvel (vai-e-volta) com timing</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="lesson-md__note">
+            <strong>Fora do escopo (≥3):</strong> loja Aula 06 · combate/HP · NPCs · story completo · multiplayer · pasta sync
+          </p>
+        </div>
+
+        <h3 class="lesson-subtitle">Design direcionado — folha da Fase 1</h3>
+        <p>
+          O Mestre entrega <strong>uma folha impressa por aluno</strong>
+          (<a href="../assets/docs/aulas/aula08-perfil-quantic/folha-fase1.pdf" target="_blank" rel="noopener noreferrer"><code>folha-fase1.pdf</code></a>).
+          Cada um planeja a <strong>Fase 1</strong> no papel <em>antes</em> de montar na Godot.
+        </p>
+        <ul class="lesson-list">
+          <li>Marcar perfil Quantic Foundry + trilha (Conquista <strong>ou</strong> Ação).</li>
+          <li>No mapa em grade: desenhar <strong>plataformas</strong> (<code>P</code>) e locais das <strong>moedas</strong> (<code>M</code> / <code>★</code>).</li>
+          <li>Marcar segredo (<code>S</code>) ou obstáculo (<code>O</code>) conforme a trilha.</li>
+          <li>Listar ≥3 itens fora do escopo.</li>
+          <li>Em dupla: podem combinar o layout, mas <strong>cada um preenche a própria folha</strong>.</li>
+        </ul>
+        <p><strong>Checkpoint folha:</strong> mapa com plataformas + moedas · trilha marcada · só então abrir a Godot.</p>
+
+        <h3 class="lesson-subtitle">1. Continuar o Labirinto</h3>
+        <ol class="lesson-list">
+          <li>Abra o projeto local <code>LabirintoDeMoedas</code> da Aula 07 (nunca Drive/OneDrive).</li>
+          <li>Confirme: Player anda + moedas coletam.</li>
+          <li>Antes das trilhas: coloque a <strong>câmera</strong> (passo 2) — senão o level design “some” fora da tela.</li>
+        </ol>
+        <p><strong>Checkpoint 1:</strong> projeto abre · coleta da Aula 07 ainda funciona.</p>
+
+        <h3 class="lesson-subtitle">2. Câmera que segue o Player (Encontro 1)</h3>
+        <p>
+          Com o mapa maior (segredos, gaps, obstáculos), a vista fixa da Aula 07 não basta.
+          A <code>Camera2D</code> filha do Player acompanha o personagem para vocês desenharem o nível.
+        </p>
+        <pre class="lesson-pre" aria-label="Hierarquia Player com Camera2D">Player (CharacterBody2D)
+├── Sprite2D
+├── CollisionShape2D
+└── Camera2D          ← novo nesta aula · Enabled / Current</pre>
+        <ol class="lesson-list">
+          <li>Abra <code>cenas/player.tscn</code>.</li>
+          <li>Com a raiz <code>Player</code> selecionada: <strong>Add Child Node</strong> → <code>Camera2D</code>.</li>
+          <li>No Inspector da <code>Camera2D</code>: marque <strong>Enabled</strong> (e <strong>Current</strong>, se aparecer na sua versão).</li>
+          <li>Opcional: <strong>Position Smoothing → Enabled</strong> para a câmera “deslizar” um pouco.</li>
+          <li>(Opcional) Anexe o script do bloco abaixo se a câmera não ativar sozinha.</li>
+          <li><strong>F5</strong> no <code>cenario.tscn</code>: ao andar, a vista segue o Player.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Câmera (cole em scripts/camera_player.gd se precisar)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="aula8-bloco-camera" aria-describedby="aula8-bloco-camera-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="aula8-bloco-camera-hint" class="lesson-code-block__hint">
+            Só use se a câmera não ficar ativa só pelo Inspector.
+            Anexe à <code>Camera2D</code> filha do <code>Player</code>.
+          </p>
+          <pre id="aula8-bloco-camera" class="lesson-pre" aria-label="Código Camera2D follow">extends Camera2D
+## Aula 08 — câmera segue o Player (filha do CharacterBody2D)
+
+
+func _ready() -&gt; void:
+	make_current()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-camera" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 2:</strong> F5 — ao andar, a câmera acompanha · o mapa “abre” para o level design.</p>
+
+        <h3 class="lesson-subtitle">3. Trilha Conquista — área secreta + moeda brilhante</h3>
+        <ol class="lesson-list">
+          <li>Em <code>cenario.tscn</code>, adicione um desvio / gap / altura com uma moeda difícil de alcançar.</li>
+          <li>Na moeda especial: anexe o script de brilho (bloco abaixo) ou use <code>moeda-brilhante-exemplo.gd</code>.</li>
+          <li>Opcional: <code>Area2D</code> <code>ZonaSecreta</code> com <code>body_entered</code> → <code>print("Segredo encontrado!")</code>.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Trilha Conquista (cole na moeda especial)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="aula8-bloco-conquista" aria-describedby="aula8-bloco-conquista-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="aula8-bloco-conquista-hint" class="lesson-code-block__hint">
+            Anexe à raiz <code>Area2D</code> da moeda difícil (além do <code>moeda.gd</code> de coleta da Aula 07,
+            ou combine: brilho + <code>queue_free</code> no mesmo script).
+          </p>
+          <pre id="aula8-bloco-conquista" class="lesson-pre" aria-label="Código trilha Conquista — moeda brilhante">extends Area2D
+## Aula 08 — moeda brilhante (trilha Conquista)
+## Coleta: reusa a lógica da Aula 07 + pulso visual.
+
+@export var pulse_speed: float = 4.0
+@export var pulse_amount: float = 0.15
+
+var _base_scale: Vector2 = Vector2.ONE
+
+
+func _ready() -&gt; void:
+	_base_scale = scale
+
+
+func _process(delta: float) -&gt; void:
+	var t := sin(Time.get_ticks_msec() * 0.001 * pulse_speed)
+	var s := 1.0 + t * pulse_amount
+	scale = _base_scale * s
+	modulate = Color(1.0, 1.0, 0.7 + t * 0.3, 1.0)
+
+
+func _on_body_entered(body: Node2D) -&gt; void:
+	if not body.is_in_group("player"):
+		return
+	if body.has_method("coletar_moeda"):
+		body.coletar_moeda()
+	queue_free()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-conquista" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint Conquista:</strong> moeda pulsa · difícil de pegar · some ao coletar.</p>
+
+        <h3 class="lesson-subtitle">4. Trilha Ação — obstáculo móvel</h3>
+        <ol class="lesson-list">
+          <li>Em <code>cenario.tscn</code>, crie <code>Obstaculo</code> (<code>AnimatableBody2D</code> ou <code>CharacterBody2D</code>) + <code>Sprite2D</code> + <code>CollisionShape2D</code>.</li>
+          <li>Anexe o script do bloco abaixo (movimento vai-e-volta).</li>
+          <li>Posicione no caminho do Player — timing obrigatório para passar.</li>
+        </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Trilha Ação (cole em scripts/obstaculo.gd)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="aula8-bloco-acao" aria-describedby="aula8-bloco-acao-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="aula8-bloco-acao-hint" class="lesson-code-block__hint">
+            Cole em <code>scripts/obstaculo.gd</code> anexado ao nó <code>Obstaculo</code>.
+            Ajuste <code>distance</code> e <code>speed</code> no Inspector.
+          </p>
+          <pre id="aula8-bloco-acao" class="lesson-pre" aria-label="Código trilha Ação — obstáculo móvel">extends AnimatableBody2D
+## Aula 08 — obstáculo móvel (trilha Ação)
+## Movimento ping-pong no eixo X (mude para Y se preferir).
+
+@export var distance: float = 120.0
+@export var speed: float = 80.0
+
+var _origin: Vector2
+var _dir: float = 1.0
+
+
+func _ready() -&gt; void:
+	_origin = global_position
+
+
+func _physics_process(delta: float) -&gt; void:
+	global_position.x += _dir * speed * delta
+	if absf(global_position.x - _origin.x) &gt;= distance:
+		_dir *= -1.0
+		global_position.x = _origin.x + _dir * distance</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-acao" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint Ação:</strong> obstáculo vai e volta · Player precisa de timing para cruzar.</p>
+
+        <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
+        <ul class="lesson-list">
+          <li>Implementar as duas trilhas (escolham <strong>uma</strong>).</li>
+          <li>Integrar a loja da Aula 06 ou sistema de vidas completo.</li>
+          <li>Abrir o projeto em pasta sync (Drive / OneDrive).</li>
+        </ul>
+
+        <section class="quote-block" aria-label="Pistas secretas da aula 8">
+          <p><strong>Pistas secretas do Submundo:</strong> nomeie o modelo Quantic Foundry ou uma motivação; diga como o perfil escolhido virou mecânica; e descreva a trilha Conquista (segredo/moeda) ou Ação (obstáculo).</p>
+        </section>
+
+        <section class="config-notes-box" id="aula-atividade" aria-label="Diário de desenvolvimento">
+          <h3 class="lesson-subtitle">Diário de desenvolvimento</h3>
+          <p>
+            Um único diário. Em dupla, os dois escrevem o <strong>mesmo texto</strong> (autosave).
+            Cada aluno <strong>finaliza</strong> individualmente no Encontro 2.
+          </p>
+          <ol class="lesson-list">
+            <li>Ofícios (Design / Programação, ou “eu nos dois”)</li>
+            <li>Perfil Quantic Foundry + motivações</li>
+            <li>Mecânicas da trilha + o que ficou de fora</li>
+            <li>Playtest — o que o perfil-alvo sente</li>
+          </ol>
+          <textarea
+            id="lesson-journal"
+            class="config-notes-text"
+            rows="16"
+            placeholder="1) Ofícios: ...&#10;2) Perfil Quantic Foundry: ...&#10;3) Mecânicas (Conquista ou Ação) + fora do escopo: ...&#10;4) Playtest: ..."
+          ></textarea>
+          <p id="journal-status" class="gdd-save-status" aria-live="polite"></p>
+          <div class="gdd-actions">
+            <button type="button" id="btn-template-journal" class="lesson-cta lesson-cta--ghost">Inserir modelo do diário</button>
+            <button type="button" id="btn-finalize-journal" class="lesson-cta">Finalizar aula (meu envio)</button>
+            <p id="gdd-save-status" class="gdd-save-status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section class="gdd-example" id="gdd-example" aria-label="Exemplo pronto para o professor" hidden>
+          <h4 class="lesson-subtitle">Exemplo pronto</h4>
+          <p class="gdd-example__text">
+            Dupla: Ana (Design do perfil) e Bruno (Programação). Escolhemos Achievement / Descoberta —
+            trilha Conquista. No LabirintoDeMoedas colocamos uma área secreta atrás de um gap e uma
+            moeda brilhante (pulse + coleta). Cortamos loja da Aula 06, combate e multiplayer.
+            No playtest, o perfil de conquista “caça” o segredo; quem só quer correr reto perde a moeda.
+          </p>
+        </section>
+      </article>
+    </section>
+
+<section id="slides" class="tab-panel" role="tabpanel" aria-labelledby="tab-slides">
+      <article class="hades-frame lesson-content">
+        <h2 class="lesson-title">Slides da Aula 08</h2>
+        <p>
+          Visualização online do material e download dos arquivos da aula sobre Quantic Foundry,
+          perfis de jogadores e design direcionado no Labirinto.
+        </p>
+
+        <div class="slides-actions">
+          <a id="download-pptx" class="lesson-cta" href="#" download>Baixar PPTX</a>
+          <a id="download-pdf" class="lesson-cta lesson-cta--ghost" href="#" download>Baixar PDF</a>
+        </div>
+        <p id="slides-viewer-status" class="slides-viewer-status" aria-live="polite"></p>
+
+        <div id="slides-fallback-panel" class="slides-fallback-panel" hidden>
+          <p>No ambiente local, o visualizador embutido pode não carregar. Abra por aqui:</p>
+          <div class="slides-actions">
+            <a id="open-pptx" class="lesson-cta" href="#" target="_blank" rel="noopener noreferrer">Abrir PPTX em nova guia</a>
+            <a id="open-pdf" class="lesson-cta lesson-cta--ghost" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF em nova guia</a>
+          </div>
+        </div>
+
+        <div class="slides-web" id="slides-web">
+          <iframe id="pptx-online-viewer" class="slides-viewer" title="Visualizador online do PPTX da Aula 08" loading="lazy"></iframe>
+          <iframe id="pdf-fallback-viewer" class="slides-viewer" title="Fallback PDF da Aula 08" loading="lazy"></iframe>
+        </div>
+      </article>
+    </section>
+        </main>
+
+        <footer class="lesson-footer">
+          <p>&copy; 2026 FUNDAMENTOS DE JOGOS DIGITAIS <span class="accent">·</span> Módulo 2 · Aula 08</p>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="../js/aula8.js"></script>
+</body>
+</html>
