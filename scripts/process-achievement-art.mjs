@@ -23,6 +23,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const ACHIEVEMENTS_DIR = path.join(ROOT, 'assets', 'achievements');
 const TARGET_SIZE = 512;
+const FULL_ART_TARGET_SIZE = 1024;
 
 function colorDist(r1, g1, b1, r2, g2, b2) {
   const dr = r1 - r2;
@@ -318,9 +319,15 @@ export async function processAchievementImage({ inputPath, achievementId, fullAr
 
   if (fullArt || achievementId === 'soberano_do_submundo') {
     await sharp(inputPath)
-      .resize(TARGET_SIZE, TARGET_SIZE, { fit: 'cover', position: 'center' })
+      .resize(FULL_ART_TARGET_SIZE, FULL_ART_TARGET_SIZE, {
+        fit: 'cover',
+        position: 'center',
+        kernel: sharp.kernel.lanczos3,
+      })
       .removeAlpha()
-      .webp({ quality: 92 })
+      .median(1)
+      .sharpen({ sigma: 0.75, m1: 0.8, m2: 1.5 })
+      .webp({ quality: 97, smartSubsample: true })
       .toFile(outPath);
     return { outPath, mode: 'full-art' };
   }

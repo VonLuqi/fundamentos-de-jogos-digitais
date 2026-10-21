@@ -7,7 +7,7 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js?v=20261021f';
+import { initAppShell } from './app-shell.js?v=20261021g';
 import {
   ApiError,
   ROUTES,
@@ -18,7 +18,7 @@ import {
   logout,
   requireSession,
   fetchFriendProfile,
-} from './api.js?v=20261021f';
+} from './api.js?v=20261021g';
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
@@ -31,7 +31,7 @@ import {
   setRainbowVfxSuspended,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js?v=20261021f';
+} from './achievements-ui.js?v=20261021g';
 
 const COMPANIONS_FLASH_KEY = 'companionsFlash';
 

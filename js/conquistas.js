@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js?v=20261021f';
+import { initAppShell } from './app-shell.js?v=20261021g';
 import {
   ApiError,
   ROUTES,
@@ -13,7 +13,7 @@ import {
   normalizeAchievementRarity,
   requireSession,
   getSession,
-} from './api.js?v=20261021f';
+} from './api.js?v=20261021g';
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
@@ -25,7 +25,7 @@ import {
   renderAchievementsList,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js?v=20261021f';
+} from './achievements-ui.js?v=20261021g';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',

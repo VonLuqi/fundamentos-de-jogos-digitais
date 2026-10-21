@@ -337,6 +337,8 @@ body.is-relic-modal-open {
   margin: 0;
   object-fit: cover;
   object-position: center;
+  animation: none;
+  filter: none;
 }
 .achievement-slot[data-rarity='unique'] .achievement-slot__name,
 .achievement-slot[data-rarity='unique'] .achievement-slot__rarity {
@@ -1031,7 +1033,7 @@ img.achievement-slot__art.has-art {
   background-position: 22% 0, 48% 0, 74% 0, 50% 0, 50% 50%;
   filter: blur(0.4px);
   mix-blend-mode: screen;
-  opacity: 0.72;
+  opacity: 0.24;
   -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
   animation: uniqueBloodFall 4.8s linear infinite;
@@ -1542,17 +1544,23 @@ img.achievement-slot__art.has-art {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 38%;
   animation: none;
   filter: none;
+}
+
+.relic-inspector__panel[data-rarity='unique'] .relic-inspector__desc {
+  margin-top: auto;
 }
 
 .relic-inspector__panel[data-rarity='unique'] .relic-inspector__desc,
 .relic-inspector__panel[data-rarity='unique'] .relic-inspector__meta {
   position: relative;
   z-index: 2;
-  padding: 0.6rem 0.8rem;
-  background: rgba(8, 4, 6, 0.74);
+  padding: 0.65rem 0.85rem;
+  background: rgba(8, 4, 6, 0.84);
+  backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(242, 213, 154, 0.22);
 }
 
 .relic-inspector__rarity-bar {

@@ -79,7 +79,7 @@ export async function ensureAchievementArtCatalogLoaded() {
   return achievementArtCatalogPromise;
 }
 
-const ACHIEVEMENT_ART_CACHE_VER = '20261021f';
+const ACHIEVEMENT_ART_CACHE_VER = '20261021g';
 
 /**
  * URL da arte WebP se o id estiver no catálogo; senão `null` (usar emoji).
