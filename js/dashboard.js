@@ -567,8 +567,17 @@ async function renderRailPreviews(token) {
 }
 
 function formatProvaGateLabel(state) {
-  if (state === 'TCG01' || state === 'TCG02') return `Só ${state}`;
-  return 'Fechada';
+  const s = String(state || 'closed').trim();
+  const labels = {
+    closed: 'Portão Selado',
+    TCG01: 'Aberta · Só TCG01',
+    TCG02: 'Aberta · Só TCG02',
+    open_turma_1: 'Aberta · Só TCG01',
+    open_turma_2: 'Aberta · Só TCG02',
+    open_all: 'Aberta · Todas as Turmas',
+    open_allowlist: 'Aberta · Lista Especial',
+  };
+  return labels[s] || `Aberta · ${s}`;
 }
 
 /**
@@ -1919,7 +1928,7 @@ function syncInlineProvaButtons(gateState) {
   if (statusEl) {
     statusEl.textContent = state === 'closed'
       ? 'Portão Selado (Nenhuma turma liberada)'
-      : `Portão Aberto · Exclusivo ${state}`;
+      : formatProvaGateLabel(state);
   }
   document.querySelectorAll('[data-inline-prova-mode]').forEach((btn) => {
     const mode = btn.getAttribute('data-inline-prova-mode');
@@ -2174,10 +2183,10 @@ function renderAdminOverview(overview) {
   const provaGateEl = document.getElementById('kpi-prova-gate');
   const provaCountsEl = document.getElementById('kpi-prova-counts');
   if (provaBadgeEl) {
-    provaBadgeEl.textContent = gateState === 'closed' ? 'Fechada' : gateState;
+    provaBadgeEl.textContent = gateState === 'closed' ? 'Fechada' : 'Aberta';
   }
   if (provaGateEl) {
-    provaGateEl.textContent = gateState === 'closed' ? 'Portão Selado' : `Aberta · ${gateState}`;
+    provaGateEl.textContent = formatProvaGateLabel(gateState);
   }
   if (provaCountsEl) {
     provaCountsEl.textContent = `${provaCounts.inProgress ?? 0} em curso · ${provaCounts.awaitingGrade ?? 0} p/ nota · ${provaCounts.openContests ?? 0} recursos`;
