@@ -54,9 +54,16 @@ final class Mailer
 
     public static function mailFrom(): string
     {
+        $transport = strtolower(trim((string) Env::get('MAIL_TRANSPORT', 'native')));
         $raw = trim((string) Env::get('MAIL_FROM', ''));
         if ($raw !== '') {
+            if ($transport === 'native' && preg_match('/@gmail\.com>?$/i', $raw)) {
+                return 'Fundamentos de Jogos Digitais <noreply@vonluqi.com>';
+            }
             return self::displayFrom($raw);
+        }
+        if ($transport === 'native') {
+            return 'Fundamentos de Jogos Digitais <noreply@vonluqi.com>';
         }
         $smtp = self::smtpConfig();
         if ($smtp !== null) {
@@ -84,13 +91,14 @@ final class Mailer
      */
     public static function getStatus(): array
     {
-        $hasResend = trim((string) Env::get('RESEND_API_KEY', '')) !== '';
-        $hasSmtp = self::smtpConfig() !== null;
-        $hasNative = function_exists('mail') && strtolower(trim((string) Env::get('MAIL_TRANSPORT', 'native'))) === 'native';
+        $transport = strtolower(trim((string) Env::get('MAIL_TRANSPORT', 'native')));
+        $hasNative = function_exists('mail') && $transport === 'native';
+        $hasResend = !$hasNative && trim((string) Env::get('RESEND_API_KEY', '')) !== '';
+        $hasSmtp = !$hasNative && self::smtpConfig() !== null;
         $appBaseUrlSet = trim((string) Env::get('APP_BASE_URL', '')) !== '';
         $fromPreview = self::mailFrom();
         $resendFromPreview = self::resendFrom();
-        $usingTestingFrom = (bool) preg_match('/(?:@resend\.dev>?$|onboarding@resend\.dev)/i', $resendFromPreview);
+        $usingTestingFrom = !$hasNative && (bool) preg_match('/(?:@resend\.dev>?$|onboarding@resend\.dev)/i', $resendFromPreview);
 
         $primary = 'none';
         if ($hasNative) {

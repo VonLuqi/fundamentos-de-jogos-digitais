@@ -447,7 +447,7 @@ final class AuthController
                 }
 
                 $adminEmail = AuthEmailService::normalizeEmail($admin['email'] ?? '');
-                $envAdminEmail = AuthEmailService::normalizeEmail(\App\Core\Env::get('ADMIN_EMAIL', ''));
+                $envAdminEmail = AuthEmailService::normalizeEmail(\App\Core\Env::get('ADMIN_EMAIL', 'vonluqi@gmail.com'));
                 $recipient = AuthEmailService::isValidEmail($override)
                     ? $override
                     : (AuthEmailService::isValidEmail($adminEmail)
