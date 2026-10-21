@@ -1,0 +1,65 @@
+name: Deploy to HostGator (FTP)
+
+on:
+  push:
+    branches:
+      - feat/hostgator-php-mysql
+      - main
+  workflow_dispatch: {}
+
+concurrency:
+  group: hostgator-ftp-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Validate & Deploy via FTP to HostGator
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Lint PHP Backend Files
+        run: |
+          find backend -name "*.php" -print0 | xargs -0 -n1 php -l
+
+      - name: Deploy files to HostGator via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR || './projects/public/fundamentos-de-jogos-digitais/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.cursor/**
+            **/.github/**
+            **/node_modules/**
+            **/tests/**
+            **/scripts/**
+            **/db/**
+            **/docs/**
+            **/api/**
+            .env
+            .env.*
+            **/.env
+            **/.env.*
+            backend/storage/**
+            *.md
+            *.mjs
+            *.sql
+            package.json
+            package-lock.json
+            vercel.json
+            middleware.js
+            migrate-passwords.js

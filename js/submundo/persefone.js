@@ -2,6 +2,15 @@
 
 const NEXT = '/submundo/observatorio-sombras';
 const EXPECTED = 'POMEGRANATE_6_SEEDS';
+
+function resolveSubmundoPath(nextPath) {
+  const p = String(window.location?.pathname || '');
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+  }
+  return nextPath;
+}
 const ROLE_COOKIE = 'underworld_role';
 const SEEDS_KEY = 'pomegranate_seeds';
 
@@ -83,5 +92,5 @@ form?.addEventListener('submit', (event) => {
     statusEl.dataset.tone = 'ok';
     statusEl.textContent = 'As romãs abrem o caminho…';
   }
-  window.location.assign(NEXT);
+  window.location.assign(resolveSubmundoPath(NEXT));
 });

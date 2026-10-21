@@ -17,6 +17,15 @@ function setHidden(el, hidden) {
   if (el) el.hidden = Boolean(hidden);
 }
 
+function resolveAssetUrl(url) {
+  const s = String(url || '');
+  if (!s.startsWith('/')) return s;
+  const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
+  const idx = p.indexOf('/pages/');
+  const base = idx > 0 ? p.slice(0, idx) : '';
+  return base && !s.startsWith(`${base}/`) ? `${base}${s}` : s;
+}
+
 /** Troca capa quebrada/404 pelo stub "no image" (uma vez). */
 function bindJuizoCoverFallback(img) {
   if (!img || img.dataset.juizoCoverFallbackBound === '1') return;
@@ -25,7 +34,7 @@ function bindJuizoCoverFallback(img) {
     if (img.dataset.juizoCoverFallback === '1') return;
     img.dataset.juizoCoverFallback = '1';
     img.alt = img.alt || 'no image';
-    img.src = JUIZO_COVER_FALLBACK_URL;
+    img.src = resolveAssetUrl(JUIZO_COVER_FALLBACK_URL);
   });
 }
 
@@ -276,7 +285,7 @@ export class JuizoModal {
       bindJuizoCoverFallback(nodes.cover);
       nodes.cover.alt = card.title || '';
       delete nodes.cover.dataset.juizoCoverFallback;
-      const src = card.coverUrl || card.cover || JUIZO_COVER_FALLBACK_URL;
+      const src = resolveAssetUrl(card.coverUrl || card.cover || JUIZO_COVER_FALLBACK_URL);
       nodes.cover.src = src;
       nodes.cover.hidden = !src;
     }

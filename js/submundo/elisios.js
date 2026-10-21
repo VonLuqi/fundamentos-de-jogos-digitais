@@ -5,6 +5,15 @@ import { ApiError, getSession, underworldJudgment } from '../api.js';
 const NEXT = '/submundo/persefone-jardim';
 const EXPECTED = 'key_elestial_hades';
 
+function resolveSubmundoPath(nextPath) {
+  const p = String(window.location?.pathname || '');
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+  }
+  return nextPath;
+}
+
 const judgeBtn = document.getElementById('elisios-judge');
 const statusEl = document.getElementById('elisios-status');
 const form = document.getElementById('elisios-form');
@@ -53,5 +62,5 @@ form?.addEventListener('submit', (event) => {
     statusEl.dataset.tone = 'ok';
     statusEl.textContent = 'Os juízes se calam. O jardim chama…';
   }
-  window.location.assign(NEXT);
+  window.location.assign(resolveSubmundoPath(NEXT));
 });

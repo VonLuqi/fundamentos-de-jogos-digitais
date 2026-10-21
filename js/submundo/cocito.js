@@ -3,6 +3,15 @@
 const NEXT = '/submundo/estige-obolo';
 const EXPECTED = 'COCYTUS_REFLECTION_404';
 
+function resolveSubmundoPath(nextPath) {
+  const p = String(window.location?.pathname || '');
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+  }
+  return nextPath;
+}
+
 const canvas = document.getElementById('cocito-mirror');
 const form = document.getElementById('cocito-form');
 const statusEl = document.getElementById('cocito-status');
@@ -75,5 +84,5 @@ form?.addEventListener('submit', (event) => {
     statusEl.dataset.tone = 'ok';
     statusEl.textContent = 'A runa emerge. O Estige chama…';
   }
-  window.location.assign(NEXT);
+  window.location.assign(resolveSubmundoPath(NEXT));
 });

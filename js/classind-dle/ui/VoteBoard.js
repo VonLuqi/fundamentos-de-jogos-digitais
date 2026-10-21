@@ -8,6 +8,15 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+function resolveAssetUrl(url) {
+  const s = String(url || '');
+  if (!s.startsWith('/')) return s;
+  const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
+  const idx = p.indexOf('/pages/');
+  const base = idx > 0 ? p.slice(0, idx) : '';
+  return base && !s.startsWith(`${base}/`) ? `${base}${s}` : s;
+}
+
 function sideCard(sideKey, side, {
   tally,
   myVote,
@@ -27,7 +36,7 @@ function sideCard(sideKey, side, {
   ].filter(Boolean).join(' ');
 
   const media = side?.imageUrl
-    ? `<img src="${escapeHtml(side.imageUrl)}" alt="" loading="lazy" />`
+    ? `<img src="${escapeHtml(resolveAssetUrl(side.imageUrl))}" alt="" loading="lazy" />`
     : `<span class="classind-card__placeholder">${escapeHtml(sideKey)}</span>`;
 
   const voteDisabled = !canVote || Boolean(myVote);

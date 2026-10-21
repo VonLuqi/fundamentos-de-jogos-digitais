@@ -1,0 +1,99 @@
+# =============================================================================
+# FUNDAMENTOS DE JOGOS DIGITAIS — Apache .htaccess (HostGator cPanel)
+# Compatível tanto em raiz de domínio quanto em subdiretório:
+#   https://projects.vonluqi.com/fundamentos-de-jogos-digitais
+#   (/projects/public/fundamentos-de-jogos-digitais no cPanel)
+# =============================================================================
+
+Options -Indexes -MultiViews
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Preserva cabeçalho Authorization em ambientes FastCGI / FPM da HostGator
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # ---------------------------------------------------------------------------
+  # 1. Bloqueio de pastas e arquivos sensíveis (segurança)
+  # ---------------------------------------------------------------------------
+  RewriteRule ^(?:db|scripts|tests|docs|node_modules|\.git|\.cursor|\.github)(?:/|$) - [F,L,NC]
+  RewriteRule ^backend/(?:src|storage)(?:/|$) - [F,L,NC]
+  RewriteRule ^api/.*\.js$ - [F,L,NC]
+  RewriteRule ^(?:middleware\.js|local-server\.mjs|migrate-passwords\.js|package(?:-lock)?\.json|vercel\.json)$ - [F,L,NC]
+
+  # ---------------------------------------------------------------------------
+  # 2. Rotas da API (/api/* -> backend/index.php)
+  # ---------------------------------------------------------------------------
+  RewriteRule ^api/?$ backend/index.php?_route= [QSA,L]
+  RewriteRule ^api/(.*)$ backend/index.php?_route=$1 [QSA,L]
+
+  # ---------------------------------------------------------------------------
+  # 3. Rewrites do ARG do Submundo (espelho exato do vercel.json)
+  #    Em subdiretório (ex.: /fundamentos-de-jogos-digitais/submundo/tartaro-oculto),
+  #    garante barra final para que os caminhos relativos ../../ do HTML resolvam
+  #    para a raiz do projeto.
+  # ---------------------------------------------------------------------------
+  RewriteCond %{REQUEST_URI} ^/.+/submundo/[^/]+$
+  RewriteRule ^(submundo/(?:tartaro-oculto|asfodelos-sussurros|hecate-encruzilhada|elisios-julgamento|persefone-jardim|persefone-estacoes|observatorio-sombras|observatorio-oculto|cocito-espelho|estige-obolo))$ $1/ [R=302,L]
+
+  RewriteRule ^submundo/tartaro-oculto/?$ pages/submundo/tartaro-oculto.html [L]
+  RewriteRule ^submundo/asfodelos-sussurros/?$ pages/submundo/asfodelos-sussurros.html [L]
+  RewriteRule ^submundo/hecate-encruzilhada/?$ pages/submundo/hecate-encruzilhada.html [L]
+  RewriteRule ^submundo/elisios-julgamento/?$ pages/submundo/elisios-julgamento.html [L]
+  RewriteRule ^submundo/persefone-jardim/?$ pages/submundo/persefone-jardim.html [L]
+  RewriteRule ^submundo/persefone-estacoes/?$ pages/submundo/persefone-jardim.html [L]
+  RewriteRule ^submundo/observatorio-sombras/?$ pages/submundo/observatorio-sombras.html [L]
+  RewriteRule ^submundo/observatorio-oculto/?$ pages/submundo/observatorio-sombras.html [L]
+  RewriteRule ^submundo/cocito-espelho/?$ pages/submundo/cocito-espelho.html [L]
+  RewriteRule ^submundo/estige-obolo/?$ pages/submundo/estige-obolo.html [L]
+</IfModule>
+
+# Bloqueia leitura direta de arquivos ocultos (.env, .env.local, .git, etc.)
+<FilesMatch "^\.">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Bloqueia arquivos SQL, Markdown e configurações internas
+<FilesMatch "\.(sql|md|mjs|lock)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Tipos MIME modernos (WebP, WAV, ES Modules, JSON)
+<IfModule mod_mime.c>
+  AddType image/webp .webp
+  AddType audio/wav .wav
+  AddType application/javascript .js .mjs
+  AddType application/json .json
+</IfModule>
+
+# Cabeçalhos de Cache e Segurança (compatíveis com raiz ou subdiretório)
+<IfModule mod_headers.c>
+  # Desativa indexação nas salas secretas do Submundo
+  <If "%{REQUEST_URI} =~ m#(?:^|/)(?:pages/)?submundo/#">
+    Header set X-Robots-Tag "noindex, nofollow"
+  </If>
+
+  # Cache longo para assets estáticos
+  <If "%{REQUEST_URI} =~ m#(?:^|/)assets/#">
+    Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+  </If>
+
+  # Cache curto para catálogos de dados
+  <If "%{REQUEST_URI} =~ m#(?:^|/)data/#">
+    Header set Cache-Control "public, max-age=60, stale-while-revalidate=300"
+  </If>
+</IfModule>

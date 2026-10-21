@@ -52,6 +52,8 @@ coverage/
 .vercel
 .env*
 !.env.example
+!.env.hostgator.example
+db/mysql/hostgator-full-import.sql
 
 # ==================== Load / stress tokens ====================
 docs/load-results/raw/

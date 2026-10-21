@@ -3,6 +3,15 @@
 const NEXT = '/submundo/elisios-julgamento';
 const EXPECTED = 'HECATE_TORCH_KEY_777';
 
+function resolveSubmundoPath(nextPath) {
+  const p = String(window.location?.pathname || '');
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+  }
+  return nextPath;
+}
+
 const form = document.getElementById('hecate-form');
 const statusEl = document.getElementById('hecate-status');
 
@@ -23,5 +32,5 @@ form?.addEventListener('submit', (event) => {
     statusEl.dataset.tone = 'ok';
     statusEl.textContent = 'As três vias se alinham…';
   }
-  window.location.assign(NEXT);
+  window.location.assign(resolveSubmundoPath(NEXT));
 });

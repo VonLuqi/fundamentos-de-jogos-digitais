@@ -14,6 +14,17 @@ const GATE_DESTINATION = '/submundo/tartaro-oculto';
 const GATE_STORAGE_KEY = 'underworld_gate_ok';
 const ACCEPTED_PASSES = new Set(['tartaro oculto', 'tartaro-oculto']);
 
+function resolveSubmundoPath(nextPath) {
+  const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx > 0) {
+      return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+    }
+  }
+  return nextPath;
+}
+
 const IDLE_LABEL = '░';
 const IDLE_VARIANTS = ['░', '▒', '·', '∶', '╎', '¦'];
 const CORRUPT_GLYPHS = '█▓▒░¤†‡∆◊║│¦';
@@ -204,7 +215,7 @@ async function handleGateSubmit(event) {
   if (submitBtn) submitBtn.disabled = true;
   form?.classList.add('is-success');
   await playSuccessRift();
-  window.location.assign(GATE_DESTINATION);
+  window.location.assign(resolveSubmundoPath(GATE_DESTINATION));
 }
 
 /** Inicializa o portão glitch do Salão. */

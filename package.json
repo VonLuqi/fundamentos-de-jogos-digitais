@@ -12,6 +12,7 @@
     "dev": "node local-server.mjs",
     "start": "node local-server.mjs",
     "db:migrate": "node scripts/apply-migrations.mjs",
+    "db:export-mysql": "node scripts/export-supabase-to-mysql.mjs",
     "load:seed": "node scripts/seed-load-users.mjs --count 30",
     "load:c1": "k6 run -e BASE_URL=http://localhost:3000 -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json tests/load/c1-login-boot.js",
     "load:c3": "k6 run -e BASE_URL=http://localhost:3000 -e LOAD_TOKENS_FILE=../../../docs/load-results/raw/turma-tokens.json tests/load/c3-despertar-sync.js",

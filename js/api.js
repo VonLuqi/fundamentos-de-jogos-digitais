@@ -301,11 +301,28 @@ export async function loadAvatarImage(imgEl, index) {
    ============================================================ */
 const API_BASE = '/api';
 
+/**
+ * Prefixo do site quando hospedado em subdiretório (ex.: `/fundamentos-de-jogos-digitais`).
+ * Na raiz do domínio (Vercel / localhost), retorna `''`.
+ */
+export function siteBasePath() {
+  if (typeof window === 'undefined' || !window.location?.pathname) return '';
+  const p = String(window.location.pathname);
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx !== -1) return p.slice(0, idx);
+  }
+  return p.replace(/\/index\.html$/i, '').replace(/\/+$/, '');
+}
+
 /** Caminho relativo até a raiz do site, a partir da página atual. */
 export function rootPath() {
-  const pathname = String(window.location?.pathname || '/');
+  const rawPathname = String(window.location?.pathname || '/');
+  const pathname = rawPathname.replace(/\/+$/, '') || '/';
   // Arquivo direto: /pages/submundo/estige-obolo.html
   if (pathname.includes('/pages/submundo/')) return '../..';
+  // URL limpa do ARG com barra final (ex. subdiretório Apache): /submundo/estige-obolo/
+  if (/(^|\/)submundo\/[^/]+\/$/.test(rawPathname)) return '../..';
   // URL limpa do ARG: /submundo/estige-obolo
   if (/(^|\/)submundo(\/|$)/.test(pathname)) return '..';
   if (pathname.includes('/pages/')) return '..';
@@ -379,7 +396,8 @@ export function clearSession() {
    3. TRANSPORTE HTTP
    ============================================================ */
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const apiUrl = `${siteBasePath()}${API_BASE}${path}`;
+  const response = await fetch(apiUrl, {
     headers: { 'Content-Type': 'application/json' },
     ...options,
   });
