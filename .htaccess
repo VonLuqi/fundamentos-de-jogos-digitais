@@ -91,14 +91,14 @@ DirectoryIndex index.html index.php
     Header set X-Robots-Tag "noindex, nofollow"
   </If>
 
-  # Cache longo para assets estáticos
+  # Cache longo para assets estáticos (somente em respostas 2xx de sucesso, nunca em 404)
   <If "%{REQUEST_URI} =~ m#(?:^|/)assets/#">
-    Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+    Header onsuccess set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
   </If>
 
   # Cache curto para catálogos de dados
   <If "%{REQUEST_URI} =~ m#(?:^|/)data/#">
-    Header set Cache-Control "public, max-age=60, stale-while-revalidate=300"
+    Header onsuccess set Cache-Control "public, max-age=60, stale-while-revalidate=300"
   </If>
 
   # HTML, CSS e JS de aplicação revalidam sempre (evita módulos ES cacheados em versões diferentes)

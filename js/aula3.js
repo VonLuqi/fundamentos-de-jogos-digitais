@@ -87,8 +87,8 @@ function initSlidesViewer() {
 
   const encodedPptx = encodeURIComponent(PPTX_FILE);
   const encodedPdf = encodeURIComponent(PDF_FILE);
-  const pptxRelativePath = `../assets/docs/aulas/${encodedPptx}`;
-  const pdfRelativePath = `../assets/docs/aulas/${encodedPdf}`;
+  const pptxRelativePath = `../assets/docs/aulas/${encodedPptx}?v=20261021h`;
+  const pdfRelativePath = `../assets/docs/aulas/${encodedPdf}?v=20261021h`;
 
   downloadPptx.href = pptxRelativePath;
   downloadPdf.href = pdfRelativePath;
