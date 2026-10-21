@@ -213,31 +213,51 @@ function enhanceSubmissionFlow() {
   window.setTimeout(syncPills, 1200);
 }
 
-function enhanceCodeBlocks() {
+function setCopyButtonFeedback(button, label, stateClass) {
+  if (!button.dataset.originalLabel) {
+    button.dataset.originalLabel = button.textContent.trim() || 'Copiar código';
+  }
+  if (button._copyResetTimer) {
+    window.clearTimeout(button._copyResetTimer);
+  }
+
+  button.classList.remove('is-copied', 'is-copy-error');
+  if (stateClass) {
+    button.classList.add(stateClass);
+  }
+  button.textContent = label;
+
+  button._copyResetTimer = window.setTimeout(() => {
+    button.classList.remove('is-copied', 'is-copy-error');
+    button.textContent = button.dataset.originalLabel || 'Copiar código';
+  }, 2200);
+}
+
+export function enhanceCodeBlocks() {
   document.querySelectorAll('.lesson-copy-code[data-copy-target]').forEach((button) => {
     if (button.dataset.uxCopyBound === 'true') return;
     button.dataset.uxCopyBound = 'true';
+    button.dataset.originalLabel = button.textContent.trim() || 'Copiar código';
 
     button.addEventListener('click', async () => {
       const targetId = button.getAttribute('data-copy-target');
       const pre = targetId ? document.getElementById(targetId) : null;
-      const status = targetId
-        ? document.querySelector(`[data-copy-status-for="${targetId}"]`)
-        : null;
       const text = pre?.textContent?.trim() ?? '';
-      if (!text || !navigator.clipboard?.writeText) return;
+      if (!text) {
+        setCopyButtonFeedback(button, '✕ Código indisponível', 'is-copy-error');
+        return;
+      }
+
+      if (!navigator.clipboard?.writeText) {
+        setCopyButtonFeedback(button, '✕ Copie manualmente', 'is-copy-error');
+        return;
+      }
 
       try {
         await navigator.clipboard.writeText(`${text}\n`);
-        if (status) {
-          status.className = 'lesson-code-block__status is-success';
-          status.textContent = '✓ Código GDScript copiado!';
-        }
+        setCopyButtonFeedback(button, '✓ Código copiado!', 'is-copied');
       } catch {
-        if (status) {
-          status.className = 'lesson-code-block__status is-error';
-          status.textContent = 'Não foi possível copiar automaticamente.';
-        }
+        setCopyButtonFeedback(button, '✕ Erro ao copiar', 'is-copy-error');
       }
     });
   });

@@ -1008,22 +1008,34 @@ ol.lesson-list > li::before {
 }
 
 .lesson-code-block .lesson-pre {
-  margin: 0 0 0.45rem;
+  margin: 0;
 }
 
 .lesson-code-block__status {
-  min-height: 1.2em;
-  margin: 0 0 0.25rem;
-  font-size: 0.82rem;
-  color: var(--hades-text-dim);
+  display: none;
 }
 
-.lesson-code-block__status.is-success {
-  color: var(--hades-gold-bright);
+.lesson-copy-code {
+  min-width: 11.5rem;
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-.lesson-code-block__status.is-error {
-  color: #e8a0a0;
+.lesson-copy-code.is-copied {
+  border-color: rgba(114, 213, 114, 0.78);
+  background: linear-gradient(180deg, rgba(46, 125, 50, 0.36), rgba(22, 68, 28, 0.48));
+  color: #c8f7d2;
+  box-shadow: 0 0 14px rgba(102, 187, 106, 0.28);
+}
+
+.lesson-copy-code.is-copy-error {
+  border-color: rgba(232, 93, 117, 0.78);
+  background: rgba(183, 28, 43, 0.28);
+  color: #ffc2cb;
 }
 
 .triplet-grid {
