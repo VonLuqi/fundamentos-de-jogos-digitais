@@ -482,30 +482,244 @@ final class FriendsNotesService
     // -------------------------------------------------------------------------
 
     /**
-     * @param array<string, mixed> $noteRow
-     * @param array<string, mixed>|null $ownerCard
-     * @param array<int, array<string, mixed>> $sharedWith
+     * @return array<int, string>
+     */
+    private static function normalizeNoteTags(mixed $raw): array
+    {
+        if (is_string($raw)) {
+            $decoded = json_decode($raw, true);
+            $raw = is_array($decoded) ? $decoded : [];
+        }
+        if (!is_array($raw)) {
+            return [];
+        }
+        $seen = [];
+        $out = [];
+        foreach ($raw as $entry) {
+            if (!is_string($entry)) {
+                continue;
+            }
+            $tag = mb_substr(trim($entry), 0, 32, 'UTF-8');
+            if ($tag === '') {
+                continue;
+            }
+            $key = mb_strtolower($tag, 'UTF-8');
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $out[] = $tag;
+            if (count($out) >= 8) {
+                break;
+            }
+        }
+        return $out;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     * @param array<string, mixed> $shareMeta
      * @return array<string, mixed>
      */
-    private static function toNoteDto(array $noteRow, ?array $ownerCard = null, array $sharedWith = []): array
+    private static function toNoteSummary(array $row, array $shareMeta = []): array
     {
-        $lessonId = !empty($noteRow['lesson_id']) ? (string) $noteRow['lesson_id'] : null;
-        $lesson = ($lessonId && isset(GameCatalog::LESSON_CATALOG[$lessonId])) ? GameCatalog::LESSON_CATALOG[$lessonId] : null;
+        $tags = self::normalizeNoteTags($row['tags'] ?? []);
         return [
-            'id' => (int) $noteRow['id'],
-            'userId' => (int) $noteRow['user_id'],
-            'lessonId' => $lessonId,
-            'lessonTitle' => $lesson ? $lesson['lessonTitle'] : null,
-            'title' => (string) ($noteRow['title'] ?? ''),
-            'body' => (string) ($noteRow['body'] ?? ''),
-            'createdAt' => Database::sqlToIso($noteRow['created_at'] ?? null),
-            'updatedAt' => Database::sqlToIso($noteRow['updated_at'] ?? null),
-            'owner' => $ownerCard ? ProgressShared::toFriendCard($ownerCard) : null,
-            'sharedWith' => $sharedWith,
+            'id' => (int) $row['id'],
+            'title' => (string) ($row['title'] ?? ''),
+            'pinned' => !empty($row['pinned']),
+            'tags' => $tags,
+            'lessonId' => !empty($row['lesson_id']) ? (string) $row['lesson_id'] : null,
+            'clonedFromNoteId' => !empty($row['cloned_from_note_id']) ? (int) $row['cloned_from_note_id'] : null,
+            'createdAt' => Database::sqlToIso($row['created_at'] ?? null),
+            'updatedAt' => Database::sqlToIso($row['updated_at'] ?? null),
+            'sharedWithCount' => (int) ($shareMeta['sharedWithCount'] ?? 0),
+            'sharedWithUsernames' => is_array($shareMeta['sharedWithUsernames'] ?? null)
+                ? array_values($shareMeta['sharedWithUsernames'])
+                : [],
+            'unreadEventsCount' => (int) ($shareMeta['unreadEventsCount'] ?? 0),
         ];
     }
 
-    private static function sanitizeLessonScope(mixed $rawLessonId): ?string
+    /**
+     * @param array<string, mixed> $row
+     * @param array<int, array<string, mixed>> $sharedWith
+     * @param array<string, mixed> $extras
+     * @return array<string, mixed>
+     */
+    private static function toNoteDetail(array $row, array $sharedWith = [], array $extras = []): array
+    {
+        $usernames = [];
+        foreach ($sharedWith as $u) {
+            if (!empty($u['username'])) {
+                $usernames[] = (string) $u['username'];
+            }
+        }
+        $summary = self::toNoteSummary($row, [
+            'sharedWithCount' => count($sharedWith),
+            'sharedWithUsernames' => $usernames,
+            'unreadEventsCount' => (int) ($extras['unreadEventsCount'] ?? 0),
+        ]);
+        return array_merge($summary, [
+            'body' => (string) ($row['body'] ?? ''),
+            'userId' => (int) $row['user_id'],
+            'sharedWith' => $sharedWith,
+            'clonedFrom' => $extras['clonedFrom'] ?? null,
+            'events' => is_array($extras['events'] ?? null) ? $extras['events'] : [],
+        ]);
+    }
+
+    /**
+     * @param array<int, int> $noteIds
+     * @return array<int, array<int, array<string, mixed>>>
+     */
+    private static function fetchSharesForNotes(array $noteIds): array
+    {
+        $unique = array_values(array_unique(array_filter(array_map('intval', $noteIds), static fn(int $id): bool => $id > 0)));
+        if ($unique === []) {
+            return [];
+        }
+        $pdo = Database::pdo();
+        $placeholders = implode(', ', array_fill(0, count($unique), '?'));
+        $stmt = $pdo->prepare(
+            "SELECT `note_id`, `shared_with_user_id` FROM `user_note_shares` WHERE `note_id` IN ({$placeholders})"
+        );
+        $stmt->execute($unique);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $userIds = array_map(static fn(array $r): int => (int) $r['shared_with_user_id'], $rows);
+        $usersById = ProgressShared::fetchUsersByIds($userIds);
+
+        $byNote = [];
+        foreach ($rows as $r) {
+            $nid = (int) $r['note_id'];
+            $uid = (int) $r['shared_with_user_id'];
+            if (!isset($byNote[$nid])) {
+                $byNote[$nid] = [];
+            }
+            if (isset($usersById[$uid])) {
+                $u = $usersById[$uid];
+                $byNote[$nid][] = [
+                    'userId' => (int) $u['id'],
+                    'username' => (string) $u['username'],
+                    'fullName' => (string) ($u['full_name'] ?: $u['username']),
+                ];
+            }
+        }
+        return $byNote;
+    }
+
+    /**
+     * @param array<int, int> $noteIds
+     * @return array<int, int>
+     */
+    private static function countUnreadNoteEvents(array $noteIds): array
+    {
+        $unique = array_values(array_unique(array_filter(array_map('intval', $noteIds), static fn(int $id): bool => $id > 0)));
+        if ($unique === []) {
+            return [];
+        }
+        $pdo = Database::pdo();
+        $placeholders = implode(', ', array_fill(0, count($unique), '?'));
+        $stmt = $pdo->prepare(
+            "SELECT `note_id` FROM `user_note_events` WHERE `note_id` IN ({$placeholders}) AND `read_at` IS NULL"
+        );
+        $stmt->execute($unique);
+        $counts = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+            $nid = (int) $r['note_id'];
+            $counts[$nid] = ($counts[$nid] ?? 0) + 1;
+        }
+        return $counts;
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function fetchNoteEventsForOwner(int $noteId, int $limit = 20): array
+    {
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare(
+            'SELECT `id`, `note_id`, `actor_user_id`, `kind`, `created_at`, `read_at`
+             FROM `user_note_events`
+             WHERE `note_id` = :nid
+             ORDER BY `created_at` DESC
+             LIMIT ' . max(1, min(100, $limit))
+        );
+        $stmt->execute([':nid' => $noteId]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $actorIds = array_map(static fn(array $r): int => (int) $r['actor_user_id'], $rows);
+        $actors = ProgressShared::fetchUsersByIds($actorIds);
+
+        $out = [];
+        foreach ($rows as $r) {
+            $aid = (int) $r['actor_user_id'];
+            $actor = $actors[$aid] ?? null;
+            $out[] = [
+                'id' => (int) $r['id'],
+                'kind' => (string) $r['kind'],
+                'createdAt' => Database::sqlToIso($r['created_at'] ?? null),
+                'readAt' => Database::sqlToIso($r['read_at'] ?? null),
+                'actor' => $actor ? [
+                    'userId' => (int) $actor['id'],
+                    'username' => (string) $actor['username'],
+                    'fullName' => (string) ($actor['full_name'] ?: $actor['username']),
+                ] : null,
+            ];
+        }
+        return $out;
+    }
+
+    private static function insertNoteEvent(int $noteId, int $actorUserId, string $kind): void
+    {
+        try {
+            $pdo = Database::pdo();
+            $stmt = $pdo->prepare(
+                'INSERT INTO `user_note_events` (`note_id`, `actor_user_id`, `kind`, `created_at`)
+                 VALUES (:nid, :aid, :kind, :ca)'
+            );
+            $stmt->execute([
+                ':nid' => $noteId,
+                ':aid' => $actorUserId,
+                ':kind' => $kind,
+                ':ca' => Database::nowSql(),
+            ]);
+        } catch (\Throwable) {
+            // Best-effort
+        }
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private static function resolveClonedFrom(mixed $clonedFromNoteId): ?array
+    {
+        $id = is_numeric($clonedFromNoteId) ? (int) $clonedFromNoteId : 0;
+        if ($id <= 0) {
+            return null;
+        }
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare('SELECT `id`, `user_id`, `title` FROM `user_notes` WHERE `id` = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+        $owners = ProgressShared::fetchUsersByIds([(int) $row['user_id']]);
+        $owner = $owners[(int) $row['user_id']] ?? null;
+        return [
+            'noteId' => (int) $row['id'],
+            'title' => (string) $row['title'],
+            'owner' => $owner ? [
+                'userId' => (int) $owner['id'],
+                'username' => (string) $owner['username'],
+                'fullName' => (string) ($owner['full_name'] ?: $owner['username']),
+            ] : null,
+        ];
+    }
+
+    private static function sanitizeLessonScope(mixed $rawLessonId, ?string $allowExisting = null): ?string
     {
         if ($rawLessonId === null || $rawLessonId === '' || $rawLessonId === 'general') {
             return null;
@@ -513,6 +727,9 @@ final class FriendsNotesService
         $id = trim((string) $rawLessonId);
         if (!isset(GameCatalog::LESSON_CATALOG[$id])) {
             return '__invalid__';
+        }
+        if ($allowExisting !== null && $id === $allowExisting) {
+            return $id;
         }
         if (!ProgressShared::isLessonPublishedForNotes($id)) {
             return '__unpublished__';
@@ -526,7 +743,7 @@ final class FriendsNotesService
     private static function gatherGrimoireStats(int $userId): array
     {
         $pdo = Database::pdo();
-        $nStmt = $pdo->prepare('SELECT `id`, `lesson_id`, `body` FROM `user_notes` WHERE `user_id` = :uid');
+        $nStmt = $pdo->prepare('SELECT `id`, `lesson_id`, `body`, `cloned_from_note_id` FROM `user_notes` WHERE `user_id` = :uid');
         $nStmt->execute([':uid' => $userId]);
         $noteRows = $nStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -546,18 +763,19 @@ final class FriendsNotesService
         }
 
         $sharedNotesCount = 0;
+        $clonesReceivedCount = 0;
         if ($noteIds !== []) {
             $placeholders = implode(', ', array_fill(0, count($noteIds), '?'));
             $sStmt = $pdo->prepare("SELECT DISTINCT `note_id` FROM `user_note_shares` WHERE `note_id` IN ({$placeholders})");
             $sStmt->execute($noteIds);
             $sharedNotesCount = count($sStmt->fetchAll(PDO::FETCH_ASSOC));
-        }
 
-        $eStmt = $pdo->prepare(
-            'SELECT COUNT(*) FROM `user_note_events` WHERE `owner_id` = :uid AND `event_type` = \'cloned\''
-        );
-        $eStmt->execute([':uid' => $userId]);
-        $clonesReceivedCount = (int) $eStmt->fetchColumn();
+            $eStmt = $pdo->prepare(
+                "SELECT COUNT(*) FROM `user_note_events` WHERE `note_id` IN ({$placeholders}) AND `kind` = 'cloned_by'"
+            );
+            $eStmt->execute($noteIds);
+            $clonesReceivedCount = (int) $eStmt->fetchColumn();
+        }
 
         return [
             'totalNotes' => count($noteRows),
@@ -587,159 +805,77 @@ final class FriendsNotesService
      */
     public static function notesList(array $user, int $userId, array $body): never
     {
-        $lessonFilter = array_key_exists('lessonId', $body) ? $body['lessonId'] : '__all__';
+        $includeShared = !empty($body['includeShared']);
         $pdo = Database::pdo();
 
-        if ($lessonFilter === null || $lessonFilter === 'general') {
-            $stmt = $pdo->prepare(
-                'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                 FROM `user_notes`
-                 WHERE `user_id` = :uid AND `lesson_id` IS NULL
-                 ORDER BY `updated_at` DESC'
-            );
-            $stmt->execute([':uid' => $userId]);
-        } elseif ($lessonFilter !== '__all__' && is_string($lessonFilter) && trim($lessonFilter) !== '') {
-            $stmt = $pdo->prepare(
-                'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                 FROM `user_notes`
-                 WHERE `user_id` = :uid AND `lesson_id` = :lid
-                 ORDER BY `updated_at` DESC'
-            );
-            $stmt->execute([':uid' => $userId, ':lid' => trim($lessonFilter)]);
-        } else {
-            $stmt = $pdo->prepare(
-                'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                 FROM `user_notes`
-                 WHERE `user_id` = :uid
-                 ORDER BY `updated_at` DESC'
-            );
-            $stmt->execute([':uid' => $userId]);
-        }
-        $myRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $myNoteIds = array_map(static fn(array $n): int => (int) $n['id'], $myRows);
-        $myShareRows = [];
-        if ($myNoteIds !== []) {
-            $placeholders = implode(', ', array_fill(0, count($myNoteIds), '?'));
-            $shStmt = $pdo->prepare(
-                "SELECT `note_id`, `recipient_id`, `created_at` FROM `user_note_shares` WHERE `note_id` IN ({$placeholders})"
-            );
-            $shStmt->execute($myNoteIds);
-            $myShareRows = $shStmt->fetchAll(PDO::FETCH_ASSOC);
-        }
-
-        $incStmt = $pdo->prepare(
-            'SELECT `note_id`, `recipient_id`, `created_at`
-             FROM `user_note_shares`
-             WHERE `recipient_id` = :uid
-             ORDER BY `created_at` DESC'
+        $stmt = $pdo->prepare(
+            'SELECT `id`, `user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `cloned_from_note_id`, `created_at`, `updated_at`
+             FROM `user_notes`
+             WHERE `user_id` = :uid
+             ORDER BY `pinned` DESC, `updated_at` DESC'
         );
-        $incStmt->execute([':uid' => $userId]);
-        $incomingShareRows = $incStmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([':uid' => $userId]);
+        $ownRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $sharedNoteRows = [];
-        if ($incomingShareRows !== []) {
-            $incNoteIds = array_map(static fn(array $s): int => (int) $s['note_id'], $incomingShareRows);
-            $placeholders = implode(', ', array_fill(0, count($incNoteIds), '?'));
-            if ($lessonFilter === null || $lessonFilter === 'general') {
+        $ownIds = array_map(static fn(array $r): int => (int) $r['id'], $ownRows);
+        $sharesByNote = self::fetchSharesForNotes($ownIds);
+        $unreadByNote = self::countUnreadNoteEvents($ownIds);
+
+        $notes = [];
+        foreach ($ownRows as $row) {
+            $nid = (int) $row['id'];
+            $sharedWith = $sharesByNote[$nid] ?? [];
+            $notes[] = self::toNoteSummary($row, [
+                'sharedWithCount' => count($sharedWith),
+                'sharedWithUsernames' => array_map(static fn(array $u): string => (string) $u['username'], $sharedWith),
+                'unreadEventsCount' => $unreadByNote[$nid] ?? 0,
+            ]);
+        }
+
+        $sharedWithMe = [];
+        if ($includeShared) {
+            $shStmt = $pdo->prepare(
+                'SELECT `note_id` FROM `user_note_shares` WHERE `shared_with_user_id` = :uid'
+            );
+            $shStmt->execute([':uid' => $userId]);
+            $sharedIds = array_map(static fn(array $r): int => (int) $r['note_id'], $shStmt->fetchAll(PDO::FETCH_ASSOC));
+
+            if ($sharedIds !== []) {
+                $placeholders = implode(', ', array_fill(0, count($sharedIds), '?'));
                 $snStmt = $pdo->prepare(
-                    "SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                     FROM `user_notes`
-                     WHERE `id` IN ({$placeholders}) AND `lesson_id` IS NULL
-                     ORDER BY `updated_at` DESC"
-                );
-                $snStmt->execute($incNoteIds);
-            } elseif ($lessonFilter !== '__all__' && is_string($lessonFilter) && trim($lessonFilter) !== '') {
-                $snStmt = $pdo->prepare(
-                    "SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                     FROM `user_notes`
-                     WHERE `id` IN ({$placeholders}) AND `lesson_id` = ?
-                     ORDER BY `updated_at` DESC"
-                );
-                $snStmt->execute(array_merge($incNoteIds, [trim($lessonFilter)]));
-            } else {
-                $snStmt = $pdo->prepare(
-                    "SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
+                    "SELECT `id`, `user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `cloned_from_note_id`, `created_at`, `updated_at`
                      FROM `user_notes`
                      WHERE `id` IN ({$placeholders})
                      ORDER BY `updated_at` DESC"
                 );
-                $snStmt->execute($incNoteIds);
+                $snStmt->execute($sharedIds);
+                $sharedNotes = $snStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $owners = ProgressShared::fetchUsersByIds(array_map(static fn(array $r): int => (int) $r['user_id'], $sharedNotes));
+                foreach ($sharedNotes as $row) {
+                    $oid = (int) $row['user_id'];
+                    $owner = $owners[$oid] ?? null;
+                    $sharedWithMe[] = array_merge(self::toNoteSummary($row), [
+                        'owner' => $owner ? [
+                            'userId' => (int) $owner['id'],
+                            'username' => (string) $owner['username'],
+                            'fullName' => (string) ($owner['full_name'] ?: $owner['username']),
+                        ] : null,
+                    ]);
+                }
             }
-            $sharedNoteRows = $snStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        $evStmt = $pdo->prepare(
-            'SELECT `id`, `note_id`, `note_title`, `owner_id`, `actor_id`, `event_type`, `acknowledged_at`, `created_at`
-             FROM `user_note_events`
-             WHERE `owner_id` = :uid AND `acknowledged_at` IS NULL
-             ORDER BY `created_at` DESC
-             LIMIT 30'
-        );
-        $evStmt->execute([':uid' => $userId]);
-        $eventRows = $evStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $relatedUserIds = [];
-        foreach ($myShareRows as $s) {
-            $relatedUserIds[] = (int) $s['recipient_id'];
-        }
-        foreach ($sharedNoteRows as $n) {
-            $relatedUserIds[] = (int) $n['user_id'];
-        }
-        foreach ($eventRows as $ev) {
-            $relatedUserIds[] = (int) $ev['actor_id'];
-        }
-        $usersById = ProgressShared::fetchUsersByIds($relatedUserIds);
-
-        $sharesByNoteId = [];
-        foreach ($myShareRows as $s) {
-            $recId = (int) $s['recipient_id'];
-            $rec = $usersById[$recId] ?? null;
-            if (!$rec) {
-                continue;
-            }
-            $nid = (int) $s['note_id'];
-            $sharesByNoteId[$nid][] = array_merge(ProgressShared::toFriendCard($rec), [
-                'sharedAt' => Database::sqlToIso($s['created_at'] ?? null),
-            ]);
-        }
-
-        $myNotes = [];
-        foreach ($myRows as $n) {
-            $nid = (int) $n['id'];
-            $myNotes[] = self::toNoteDto($n, $user, $sharesByNoteId[$nid] ?? []);
-        }
-
-        $sharedWithMe = [];
-        foreach ($sharedNoteRows as $n) {
-            $ownerId = (int) $n['user_id'];
-            $sharedWithMe[] = self::toNoteDto($n, $usersById[$ownerId] ?? null, []);
-        }
-
-        $pendingEvents = [];
-        foreach ($eventRows as $ev) {
-            $actorId = (int) $ev['actor_id'];
-            $actor = $usersById[$actorId] ?? null;
-            $pendingEvents[] = [
-                'id' => (int) $ev['id'],
-                'noteId' => isset($ev['note_id']) ? (int) $ev['note_id'] : null,
-                'noteTitle' => (string) ($ev['note_title'] ?? ''),
-                'eventType' => (string) ($ev['event_type'] ?? ''),
-                'createdAt' => Database::sqlToIso($ev['created_at'] ?? null),
-                'actor' => $actor ? ProgressShared::toFriendCard($actor) : null,
-            ];
-        }
-
+        $count = count($notes);
         Http::json(200, [
             'ok' => true,
-            'myNotes' => $myNotes,
+            'count' => $count,
+            'softWarning' => $count >= ProgressShared::NOTE_SOFT_WARN_COUNT,
+            'softWarningMessage' => $count >= ProgressShared::NOTE_SOFT_WARN_COUNT
+                ? "O Grimório engrossa… ({$count} inscrições)."
+                : null,
+            'notes' => $notes,
             'sharedWithMe' => $sharedWithMe,
-            'pendingEvents' => $pendingEvents,
-            'softWarnCount' => ProgressShared::NOTE_SOFT_WARN_COUNT,
-            'limits' => [
-                'titleMax' => ProgressShared::NOTE_TITLE_MAX,
-                'bodyMax' => ProgressShared::NOTE_BODY_MAX,
-            ],
         ]);
     }
 
@@ -749,67 +885,85 @@ final class FriendsNotesService
      */
     public static function noteGet(array $user, int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        if ($noteId <= 0) {
-            Http::error(400, 'Nota inválida.');
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
-            'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
+            'SELECT `id`, `user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `cloned_from_note_id`, `created_at`, `updated_at`
              FROM `user_notes` WHERE `id` = :id LIMIT 1'
         );
-        $stmt->execute([':id' => $noteId]);
-        $note = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$note) {
-            Http::error(404, 'Nota não encontrada.');
+        if (!$row) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
-        $ownerId = (int) $note['user_id'];
+        $ownerId = (int) $row['user_id'];
         $isOwner = $ownerId === $userId;
         $isAdmin = ($user['role'] ?? '') === 'admin';
-        $isRecipient = false;
+        $isSharedViewer = false;
 
-        if (!$isOwner && !$isAdmin) {
+        if (!$isOwner) {
             $shStmt = $pdo->prepare(
-                'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `recipient_id` = :uid LIMIT 1'
+                'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid LIMIT 1'
             );
-            $shStmt->execute([':nid' => $noteId, ':uid' => $userId]);
-            $isRecipient = (bool) $shStmt->fetch(PDO::FETCH_ASSOC);
+            $shStmt->execute([':nid' => $id, ':uid' => $userId]);
+            $isSharedViewer = (bool) $shStmt->fetch(PDO::FETCH_ASSOC);
         }
 
-        if (!$isOwner && !$isAdmin && !$isRecipient) {
-            Http::error(403, 'Este pergaminho não foi compartilhado com você.');
+        if (!$isOwner && !$isAdmin && !$isSharedViewer) {
+            Http::error(403, 'Esta inscrição não foi revelada a você.');
         }
 
-        $usersById = ProgressShared::fetchUsersByIds([$ownerId]);
-        $sharedWith = [];
-        if ($isOwner || $isAdmin) {
-            $shStmt = $pdo->prepare(
-                'SELECT `recipient_id`, `created_at` FROM `user_note_shares` WHERE `note_id` = :nid'
-            );
-            $shStmt->execute([':nid' => $noteId]);
-            $shRows = $shStmt->fetchAll(PDO::FETCH_ASSOC);
-            $recMap = ProgressShared::fetchUsersByIds(array_map(static fn(array $s): int => (int) $s['recipient_id'], $shRows));
-            foreach ($shRows as $s) {
-                $rid = (int) $s['recipient_id'];
-                if (isset($recMap[$rid])) {
-                    $sharedWith[] = array_merge(ProgressShared::toFriendCard($recMap[$rid]), [
-                        'sharedAt' => Database::sqlToIso($s['created_at'] ?? null),
-                    ]);
+        $sharesByNote = self::fetchSharesForNotes([$id]);
+        $sharedWith = $sharesByNote[$id] ?? [];
+        $canEdit = $isOwner;
+        $canClone = $isSharedViewer && !$isOwner;
+        $canRefuse = $isSharedViewer && !$isOwner;
+
+        $events = [];
+        $unreadEventsCount = 0;
+        if ($isOwner) {
+            $events = self::fetchNoteEventsForOwner($id);
+            foreach ($events as $ev) {
+                if (empty($ev['readAt'])) {
+                    $unreadEventsCount++;
                 }
+            }
+        }
+
+        $clonedFrom = self::resolveClonedFrom($row['cloned_from_note_id'] ?? null);
+
+        $owner = null;
+        if (!$isOwner) {
+            $owners = ProgressShared::fetchUsersByIds([$ownerId]);
+            $ownerRow = $owners[$ownerId] ?? null;
+            if ($ownerRow) {
+                $owner = [
+                    'userId' => (int) $ownerRow['id'],
+                    'username' => (string) $ownerRow['username'],
+                    'fullName' => (string) ($ownerRow['full_name'] ?: $ownerRow['username']),
+                ];
             }
         }
 
         Http::json(200, [
             'ok' => true,
-            'note' => self::toNoteDto($note, $usersById[$ownerId] ?? null, $sharedWith),
-            'permissions' => [
-                'canEdit' => $isOwner,
-                'canShare' => $isOwner,
-                'isAdminView' => $isAdmin && !$isOwner,
-            ],
+            'canEdit' => $canEdit,
+            'canClone' => $canClone,
+            'canRefuse' => $canRefuse,
+            'readOnly' => !$canEdit,
+            'note' => array_merge(self::toNoteDetail($row, $sharedWith, [
+                'clonedFrom' => $clonedFrom,
+                'events' => $events,
+                'unreadEventsCount' => $unreadEventsCount,
+            ]), [
+                'owner' => $owner,
+            ]),
         ]);
     }
 
@@ -819,63 +973,77 @@ final class FriendsNotesService
      */
     public static function noteCreate(array $user, int $userId, array $body): never
     {
+        $cleanTitle = trim((string) ($body['title'] ?? ''));
+        $cleanBody = (string) ($body['body'] ?? '');
+        if ($cleanTitle === '') {
+            Http::error(400, 'Toda inscrição precisa de um título.');
+        }
+        if (mb_strlen($cleanTitle, 'UTF-8') > ProgressShared::NOTE_TITLE_MAX) {
+            Http::error(400, 'O título ultrapassou o limite do pergaminho (' . ProgressShared::NOTE_TITLE_MAX . ').');
+        }
+        if (mb_strlen($cleanBody, 'UTF-8') > ProgressShared::NOTE_BODY_MAX) {
+            Http::error(400, 'A inscrição é longa demais para este Grimório (' . ProgressShared::NOTE_BODY_MAX . ').');
+        }
+
         $scope = self::sanitizeLessonScope($body['lessonId'] ?? null);
         if ($scope === '__invalid__') {
-            Http::error(400, 'Aula inválida para vincular a nota.');
+            Http::error(400, 'Aula desconhecida na Trilha.');
         }
         if ($scope === '__unpublished__') {
-            Http::error(403, 'Esta aula ainda está selada pelo Mestre; só é possível anotar em aulas liberadas ou em Notas Gerais.');
+            Http::error(400, 'Esta aula ainda não foi liberada na Trilha.');
         }
 
-        $rawTitle = isset($body['title']) && is_string($body['title']) ? trim($body['title']) : '';
-        $rawBody = isset($body['body']) && is_string($body['body']) ? $body['body'] : '';
-
-        if (mb_strlen($rawTitle, 'UTF-8') > ProgressShared::NOTE_TITLE_MAX) {
-            Http::error(400, 'Título excede ' . ProgressShared::NOTE_TITLE_MAX . ' caracteres.');
-        }
-        if (mb_strlen($rawBody, 'UTF-8') > ProgressShared::NOTE_BODY_MAX) {
-            Http::error(400, 'Texto excede ' . ProgressShared::NOTE_BODY_MAX . ' caracteres.');
-        }
-        if ($rawTitle === '' && trim($rawBody) === '') {
-            Http::error(400, 'Escreva um título ou conteúdo antes de guardar.');
-        }
-
-        $title = $rawTitle !== '' ? $rawTitle : 'Pergaminho sem título';
+        $pinned = !empty($body['pinned']) ? 1 : 0;
+        $tags = self::normalizeNoteTags($body['tags'] ?? []);
         $nowSql = Database::nowSql();
 
         $pdo = Database::pdo();
         $ins = $pdo->prepare(
-            'INSERT INTO `user_notes` (`user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`)
-             VALUES (:uid, :lid, :title, :body, :ca, :ua)'
+            'INSERT INTO `user_notes` (`user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `created_at`, `updated_at`)
+             VALUES (:uid, :title, :body, :pinned, :tags, :lid, :ca, :ua)'
         );
         $ins->execute([
             ':uid' => $userId,
+            ':title' => $cleanTitle,
+            ':body' => $cleanBody,
+            ':pinned' => $pinned,
+            ':tags' => Database::encodeJsonArray($tags),
             ':lid' => $scope,
-            ':title' => $title,
-            ':body' => $rawBody,
             ':ca' => $nowSql,
             ':ua' => $nowSql,
         ]);
         $newId = (int) $pdo->lastInsertId();
 
-        $inserted = [
+        $created = [
             'id' => $newId,
             'user_id' => $userId,
+            'title' => $cleanTitle,
+            'body' => $cleanBody,
+            'pinned' => (bool) $pinned,
+            'tags' => $tags,
             'lesson_id' => $scope,
-            'title' => $title,
-            'body' => $rawBody,
+            'cloned_from_note_id' => null,
             'created_at' => $nowSql,
             'updated_at' => $nowSql,
         ];
+
+        $cntStmt = $pdo->prepare('SELECT COUNT(*) FROM `user_notes` WHERE `user_id` = :uid');
+        $cntStmt->execute([':uid' => $userId]);
+        $count = (int) $cntStmt->fetchColumn();
 
         $grimoire = self::evaluateAndAwardGrimoire($user);
 
         Http::json(201, [
             'ok' => true,
-            'note' => self::toNoteDto($inserted, $grimoire['user'], []),
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'count' => $count,
+            'softWarning' => $count >= ProgressShared::NOTE_SOFT_WARN_COUNT,
+            'softWarningMessage' => $count >= ProgressShared::NOTE_SOFT_WARN_COUNT
+                ? "O Grimório engrossa… ({$count} inscrições)."
+                : null,
+            'note' => self::toNoteDetail($created, []),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
+            'user' => GameCatalog::sanitizeUser($grimoire['user']),
         ]);
     }
 
@@ -885,81 +1053,93 @@ final class FriendsNotesService
      */
     public static function noteUpdate(array $user, int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        if ($noteId <= 0) {
-            Http::error(400, 'Nota inválida.');
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare('SELECT * FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $stmt->execute([':id' => $noteId]);
+        $stmt->execute([':id' => $id]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$existing) {
-            Http::error(404, 'Nota não encontrada.');
-        }
-        if ((int) $existing['user_id'] !== $userId) {
-            Http::error(403, 'Apenas o autor pode editar este pergaminho.');
+        if (!$existing || (int) $existing['user_id'] !== $userId) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
-        $lessonScope = $existing['lesson_id'];
+        $nextTitle = (string) $existing['title'];
+        if (array_key_exists('title', $body)) {
+            $cleanTitle = trim((string) ($body['title'] ?? ''));
+            if ($cleanTitle === '') {
+                Http::error(400, 'Toda inscrição precisa de um título.');
+            }
+            if (mb_strlen($cleanTitle, 'UTF-8') > ProgressShared::NOTE_TITLE_MAX) {
+                Http::error(400, 'O título ultrapassou o limite do pergaminho (' . ProgressShared::NOTE_TITLE_MAX . ').');
+            }
+            $nextTitle = $cleanTitle;
+        }
+
+        $nextBody = (string) ($existing['body'] ?? '');
+        if (array_key_exists('body', $body)) {
+            $cleanBody = (string) ($body['body'] ?? '');
+            if (mb_strlen($cleanBody, 'UTF-8') > ProgressShared::NOTE_BODY_MAX) {
+                Http::error(400, 'A inscrição é longa demais para este Grimório (' . ProgressShared::NOTE_BODY_MAX . ').');
+            }
+            $nextBody = $cleanBody;
+        }
+
+        $nextPinned = array_key_exists('pinned', $body) ? (!empty($body['pinned']) ? 1 : 0) : (!empty($existing['pinned']) ? 1 : 0);
+        $nextTags = array_key_exists('tags', $body)
+            ? self::normalizeNoteTags($body['tags'])
+            : self::normalizeNoteTags($existing['tags'] ?? []);
+
+        $nextLesson = $existing['lesson_id'];
         if (array_key_exists('lessonId', $body)) {
-            $scope = self::sanitizeLessonScope($body['lessonId']);
+            $scope = self::sanitizeLessonScope($body['lessonId'], $existing['lesson_id'] ? (string) $existing['lesson_id'] : null);
             if ($scope === '__invalid__') {
-                Http::error(400, 'Aula inválida para vincular a nota.');
+                Http::error(400, 'Aula desconhecida na Trilha.');
             }
-            if ($scope === '__unpublished__' && $scope !== $existing['lesson_id']) {
-                Http::error(403, 'Esta aula ainda está selada pelo Mestre; só é possível vincular a aulas liberadas ou a Notas Gerais.');
+            if ($scope === '__unpublished__') {
+                Http::error(400, 'Esta aula ainda não foi liberada na Trilha.');
             }
-            $lessonScope = ($scope === '__unpublished__') ? $existing['lesson_id'] : $scope;
-        }
-
-        $nextTitle = array_key_exists('title', $body) && is_string($body['title'])
-            ? (trim($body['title']) !== '' ? trim($body['title']) : 'Pergaminho sem título')
-            : (string) $existing['title'];
-        $nextBody = array_key_exists('body', $body) && is_string($body['body'])
-            ? $body['body']
-            : (string) $existing['body'];
-
-        if (mb_strlen($nextTitle, 'UTF-8') > ProgressShared::NOTE_TITLE_MAX) {
-            Http::error(400, 'Título excede ' . ProgressShared::NOTE_TITLE_MAX . ' caracteres.');
-        }
-        if (mb_strlen($nextBody, 'UTF-8') > ProgressShared::NOTE_BODY_MAX) {
-            Http::error(400, 'Texto excede ' . ProgressShared::NOTE_BODY_MAX . ' caracteres.');
+            $nextLesson = $scope;
         }
 
         $nowSql = Database::nowSql();
         $upd = $pdo->prepare(
             'UPDATE `user_notes`
-             SET `title` = :title, `body` = :body, `lesson_id` = :lid, `updated_at` = :ua
+             SET `title` = :title, `body` = :body, `pinned` = :pinned, `tags` = :tags, `lesson_id` = :lid, `updated_at` = :ua
              WHERE `id` = :id'
         );
         $upd->execute([
             ':title' => $nextTitle,
             ':body' => $nextBody,
-            ':lid' => $lessonScope,
+            ':pinned' => $nextPinned,
+            ':tags' => Database::encodeJsonArray($nextTags),
+            ':lid' => $nextLesson,
             ':ua' => $nowSql,
-            ':id' => $noteId,
+            ':id' => $id,
         ]);
 
-        $updatedRow = [
-            'id' => $noteId,
-            'user_id' => $userId,
-            'lesson_id' => $lessonScope,
+        $updatedRow = array_merge($existing, [
             'title' => $nextTitle,
             'body' => $nextBody,
-            'created_at' => $existing['created_at'],
+            'pinned' => (bool) $nextPinned,
+            'tags' => $nextTags,
+            'lesson_id' => $nextLesson,
             'updated_at' => $nowSql,
-        ];
+        ]);
 
+        $sharesByNote = self::fetchSharesForNotes([$id]);
+        $sharedWith = $sharesByNote[$id] ?? [];
         $grimoire = self::evaluateAndAwardGrimoire($user);
 
         Http::json(200, [
             'ok' => true,
-            'note' => self::toNoteDto($updatedRow, $grimoire['user'], []),
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'note' => self::toNoteDetail($updatedRow, $sharedWith),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
+            'user' => GameCatalog::sanitizeUser($grimoire['user']),
         ]);
     }
 
@@ -968,27 +1148,24 @@ final class FriendsNotesService
      */
     public static function noteDelete(int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        if ($noteId <= 0) {
-            Http::error(400, 'Nota inválida.');
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare('SELECT `id`, `user_id` FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $stmt->execute([':id' => $noteId]);
+        $stmt->execute([':id' => $id]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$existing) {
-            Http::error(404, 'Nota não encontrada.');
-        }
-        if ((int) $existing['user_id'] !== $userId) {
-            Http::error(403, 'Apenas o autor pode queimar este pergaminho.');
+        if (!$existing || (int) $existing['user_id'] !== $userId) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
         $del = $pdo->prepare('DELETE FROM `user_notes` WHERE `id` = :id');
-        $del->execute([':id' => $noteId]);
+        $del->execute([':id' => $id]);
 
-        Http::json(200, ['ok' => true, 'deletedNoteId' => $noteId]);
+        Http::json(200, ['ok' => true, 'deleted' => true, 'noteId' => $id]);
     }
 
     /**
@@ -997,51 +1174,52 @@ final class FriendsNotesService
      */
     public static function noteShare(array $user, int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : 0;
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        $rawTarget = $body['sharedWithUserId'] ?? $body['friendUserId'] ?? null;
+        $targetId = is_numeric($rawTarget) ? (int) $rawTarget : 0;
 
-        if ($noteId <= 0 || $friendUserId <= 0) {
-            Http::error(400, 'Parâmetros inválidos.');
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
+        }
+        if ($targetId <= 0) {
+            Http::error(400, 'Informe o companheiro.');
+        }
+        if ($targetId === $userId) {
+            Http::error(400, 'Não se revela inscrição a si mesmo.');
         }
 
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT `id`, `user_id` FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $stmt->execute([':id' => $noteId]);
-        $note = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare('SELECT * FROM `user_notes` WHERE `id` = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$note) {
-            Http::error(404, 'Nota não encontrada.');
-        }
-        if ((int) $note['user_id'] !== $userId) {
-            Http::error(403, 'Apenas o autor pode compartilhar esta nota.');
+        if (!$existing || (int) $existing['user_id'] !== $userId) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
-        $bond = ProgressShared::findFriendshipBetween($userId, $friendUserId);
+        $bond = ProgressShared::findFriendshipBetween($userId, $targetId);
         if (!$bond || ($bond['status'] ?? '') !== 'accepted') {
-            Http::error(403, 'Você só pode compartilhar notas com Companheiros selados.');
+            Http::error(403, 'Só é possível revelar a quem está ao seu lado.');
         }
 
         $nowSql = Database::nowSql();
-        $nowIso = Database::nowIso();
         $ups = $pdo->prepare(
-            'INSERT INTO `user_note_shares` (`note_id`, `recipient_id`, `created_at`)
-             VALUES (:nid, :rid, :ca)
+            'INSERT INTO `user_note_shares` (`note_id`, `shared_with_user_id`, `created_at`)
+             VALUES (:nid, :uid, :ca)
              ON DUPLICATE KEY UPDATE `created_at` = VALUES(`created_at`)'
         );
-        $ups->execute([':nid' => $noteId, ':rid' => $friendUserId, ':ca' => $nowSql]);
+        $ups->execute([':nid' => $id, ':uid' => $targetId, ':ca' => $nowSql]);
 
-        $grimoire = self::evaluateAndAwardGrimoire($user, ['grimorio_partilha']);
-        $friendsMap = ProgressShared::fetchUsersByIds([$friendUserId]);
-        $friend = $friendsMap[$friendUserId] ?? null;
+        $sharesByNote = self::fetchSharesForNotes([$id]);
+        $sharedWith = $sharesByNote[$id] ?? [];
+        $grimoire = self::evaluateAndAwardGrimoire($user);
 
         Http::json(200, [
             'ok' => true,
-            'sharedWith' => $friend
-                ? array_merge(ProgressShared::toFriendCard($friend), ['sharedAt' => $nowIso])
-                : null,
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'note' => self::toNoteDetail($existing, $sharedWith),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
+            'user' => GameCatalog::sanitizeUser($grimoire['user']),
         ]);
     }
 
@@ -1050,31 +1228,34 @@ final class FriendsNotesService
      */
     public static function noteUnshare(int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : 0;
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        $rawTarget = $body['sharedWithUserId'] ?? $body['friendUserId'] ?? null;
+        $targetId = is_numeric($rawTarget) ? (int) $rawTarget : 0;
 
-        if ($noteId <= 0 || $friendUserId <= 0) {
-            Http::error(400, 'Parâmetros inválidos.');
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
+        }
+        if ($targetId <= 0) {
+            Http::error(400, 'Informe o companheiro.');
         }
 
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT `id`, `user_id` FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $stmt->execute([':id' => $noteId]);
-        $note = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $pdo->prepare('SELECT * FROM `user_notes` WHERE `id` = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$note) {
-            Http::error(404, 'Nota não encontrada.');
-        }
-        $isOwner = (int) $note['user_id'] === $userId;
-        $isRecipientSelf = $friendUserId === $userId;
-        if (!$isOwner && !$isRecipientSelf) {
-            Http::error(403, 'Operação não permitida.');
+        if (!$existing || (int) $existing['user_id'] !== $userId) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
-        $del = $pdo->prepare('DELETE FROM `user_note_shares` WHERE `note_id` = :nid AND `recipient_id` = :rid');
-        $del->execute([':nid' => $noteId, ':rid' => $friendUserId]);
+        $del = $pdo->prepare('DELETE FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid');
+        $del->execute([':nid' => $id, ':uid' => $targetId]);
 
-        Http::json(200, ['ok' => true, 'noteId' => $noteId, 'friendUserId' => $friendUserId]);
+        $sharesByNote = self::fetchSharesForNotes([$id]);
+        Http::json(200, [
+            'ok' => true,
+            'note' => self::toNoteDetail($existing, $sharesByNote[$id] ?? []),
+        ]);
     }
 
     /**
@@ -1083,91 +1264,80 @@ final class FriendsNotesService
      */
     public static function noteClone(array $user, int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        if ($noteId <= 0) {
-            Http::error(400, 'Nota inválida.');
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
         $pdo = Database::pdo();
-        $shStmt = $pdo->prepare(
-            'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `recipient_id` = :uid LIMIT 1'
-        );
-        $shStmt->execute([':nid' => $noteId, ':uid' => $userId]);
-        if (!$shStmt->fetch(PDO::FETCH_ASSOC)) {
-            Http::error(403, 'Este pergaminho não foi compartilhado com você.');
-        }
-
         $nStmt = $pdo->prepare('SELECT * FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $nStmt->execute([':id' => $noteId]);
-        $sourceNote = $nStmt->fetch(PDO::FETCH_ASSOC);
+        $nStmt->execute([':id' => $id]);
+        $source = $nStmt->fetch(PDO::FETCH_ASSOC);
 
-        if (!$sourceNote) {
-            Http::error(404, 'Pergaminho original não encontrado.');
+        if (!$source) {
+            Http::error(404, 'Inscrição não encontrada.');
+        }
+        if ((int) $source['user_id'] === $userId) {
+            Http::error(400, 'Essa inscrição já é sua.');
         }
 
-        $ownerId = (int) $sourceNote['user_id'];
-        $ownersMap = ProgressShared::fetchUsersByIds([$ownerId]);
-        $ownerRow = $ownersMap[$ownerId] ?? null;
-        $ownerLabel = $ownerRow ? '@' . $ownerRow['username'] : 'um Companheiro';
+        $shStmt = $pdo->prepare(
+            'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid LIMIT 1'
+        );
+        $shStmt->execute([':nid' => $id, ':uid' => $userId]);
+        if (!$shStmt->fetch(PDO::FETCH_ASSOC)) {
+            Http::error(403, 'Esta inscrição não foi revelada a você.');
+        }
 
-        $prefix = "[Cópia de {$ownerLabel}] ";
-        $rawClonedTitle = $prefix . ($sourceNote['title'] ?: 'Pergaminho');
-        $clonedTitle = mb_substr($rawClonedTitle, 0, ProgressShared::NOTE_TITLE_MAX, 'UTF-8');
-        $clonedBody = mb_substr((string) ($sourceNote['body'] ?? ''), 0, ProgressShared::NOTE_BODY_MAX, 'UTF-8');
-        $clonedScope = (!empty($sourceNote['lesson_id']) && ProgressShared::isLessonPublishedForNotes((string) $sourceNote['lesson_id']))
-            ? (string) $sourceNote['lesson_id']
+        $clonedScope = (!empty($source['lesson_id']) && ProgressShared::isLessonPublishedForNotes((string) $source['lesson_id']))
+            ? (string) $source['lesson_id']
             : null;
-
+        $tags = self::normalizeNoteTags($source['tags'] ?? []);
         $nowSql = Database::nowSql();
+
         $ins = $pdo->prepare(
-            'INSERT INTO `user_notes` (`user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`)
-             VALUES (:uid, :lid, :title, :body, :ca, :ua)'
+            'INSERT INTO `user_notes` (`user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `cloned_from_note_id`, `created_at`, `updated_at`)
+             VALUES (:uid, :title, :body, 0, :tags, :lid, :cfid, :ca, :ua)'
         );
         $ins->execute([
             ':uid' => $userId,
+            ':title' => (string) $source['title'],
+            ':body' => (string) ($source['body'] ?? ''),
+            ':tags' => Database::encodeJsonArray($tags),
             ':lid' => $clonedScope,
-            ':title' => $clonedTitle,
-            ':body' => $clonedBody,
+            ':cfid' => (int) $source['id'],
             ':ca' => $nowSql,
             ':ua' => $nowSql,
         ]);
         $clonedId = (int) $pdo->lastInsertId();
 
-        $clonedNote = [
+        $created = [
             'id' => $clonedId,
             'user_id' => $userId,
+            'title' => (string) $source['title'],
+            'body' => (string) ($source['body'] ?? ''),
+            'pinned' => false,
+            'tags' => $tags,
             'lesson_id' => $clonedScope,
-            'title' => $clonedTitle,
-            'body' => $clonedBody,
+            'cloned_from_note_id' => (int) $source['id'],
             'created_at' => $nowSql,
             'updated_at' => $nowSql,
         ];
 
-        $evIns = $pdo->prepare(
-            'INSERT INTO `user_note_events` (`note_id`, `note_title`, `owner_id`, `actor_id`, `event_type`, `created_at`)
-             VALUES (:nid, :ntitle, :oid, :aid, \'cloned\', :ca)'
-        );
-        $evIns->execute([
-            ':nid' => (int) $sourceNote['id'],
-            ':ntitle' => mb_substr((string) ($sourceNote['title'] ?: 'Pergaminho'), 0, ProgressShared::NOTE_TITLE_MAX, 'UTF-8'),
-            ':oid' => $ownerId,
-            ':aid' => $userId,
-            ':ca' => $nowSql,
-        ]);
+        $del = $pdo->prepare('DELETE FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid');
+        $del->execute([':nid' => $id, ':uid' => $userId]);
 
-        $ownerUser = ProgressShared::loadUserById($ownerId);
-        if ($ownerUser) {
-            self::evaluateAndAwardGrimoire($ownerUser, ['grimorio_eco_compartilhado']);
-        }
+        self::insertNoteEvent($id, $userId, 'cloned_by');
 
-        $myGrimoire = self::evaluateAndAwardGrimoire($user, ['grimorio_escriba_aprendiz']);
+        $clonedFrom = self::resolveClonedFrom((int) $source['id']);
+        $grimoire = self::evaluateAndAwardGrimoire($user, ['eco_do_grimorio']);
 
         Http::json(201, [
             'ok' => true,
-            'note' => self::toNoteDto($clonedNote, $myGrimoire['user'], []),
-            'user' => GameCatalog::sanitizeUser($myGrimoire['user']),
-            'awarded' => $myGrimoire['awarded'],
-            'leveledUp' => $myGrimoire['leveledUp'],
+            'note' => self::toNoteDetail($created, [], ['clonedFrom' => $clonedFrom]),
+            'awarded' => $grimoire['awarded'],
+            'leveledUp' => $grimoire['leveledUp'],
+            'user' => GameCatalog::sanitizeUser($grimoire['user']),
         ]);
     }
 
@@ -1176,42 +1346,37 @@ final class FriendsNotesService
      */
     public static function noteRefuseShare(int $userId, array $body): never
     {
-        $noteId = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
-        if ($noteId <= 0) {
-            Http::error(400, 'Nota inválida.');
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
         $pdo = Database::pdo();
+        $nStmt = $pdo->prepare('SELECT `id`, `user_id` FROM `user_notes` WHERE `id` = :id LIMIT 1');
+        $nStmt->execute([':id' => $id]);
+        $source = $nStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$source) {
+            Http::error(404, 'Inscrição não encontrada.');
+        }
+        if ((int) $source['user_id'] === $userId) {
+            Http::error(400, 'Use Velar novamente para remover companheiros.');
+        }
+
         $shStmt = $pdo->prepare(
-            'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `recipient_id` = :uid LIMIT 1'
+            'SELECT `note_id` FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid LIMIT 1'
         );
-        $shStmt->execute([':nid' => $noteId, ':uid' => $userId]);
+        $shStmt->execute([':nid' => $id, ':uid' => $userId]);
         if (!$shStmt->fetch(PDO::FETCH_ASSOC)) {
-            Http::error(404, 'Compartilhamento não encontrado.');
+            Http::error(403, 'Esta inscrição não foi revelada a você.');
         }
 
-        $nStmt = $pdo->prepare('SELECT `id`, `user_id`, `title` FROM `user_notes` WHERE `id` = :id LIMIT 1');
-        $nStmt->execute([':id' => $noteId]);
-        $sourceNote = $nStmt->fetch(PDO::FETCH_ASSOC);
+        $del = $pdo->prepare('DELETE FROM `user_note_shares` WHERE `note_id` = :nid AND `shared_with_user_id` = :uid');
+        $del->execute([':nid' => $id, ':uid' => $userId]);
 
-        $del = $pdo->prepare('DELETE FROM `user_note_shares` WHERE `note_id` = :nid AND `recipient_id` = :uid');
-        $del->execute([':nid' => $noteId, ':uid' => $userId]);
+        self::insertNoteEvent($id, $userId, 'veiled_by_recipient');
 
-        if ($sourceNote && (int) $sourceNote['user_id'] !== $userId) {
-            $evIns = $pdo->prepare(
-                'INSERT INTO `user_note_events` (`note_id`, `note_title`, `owner_id`, `actor_id`, `event_type`, `created_at`)
-                 VALUES (:nid, :ntitle, :oid, :aid, \'refused\', :ca)'
-            );
-            $evIns->execute([
-                ':nid' => (int) $sourceNote['id'],
-                ':ntitle' => mb_substr((string) ($sourceNote['title'] ?: 'Pergaminho'), 0, ProgressShared::NOTE_TITLE_MAX, 'UTF-8'),
-                ':oid' => (int) $sourceNote['user_id'],
-                ':aid' => $userId,
-                ':ca' => Database::nowSql(),
-            ]);
-        }
-
-        Http::json(200, ['ok' => true, 'refusedNoteId' => $noteId]);
+        Http::json(200, ['ok' => true, 'refused' => true, 'noteId' => $id]);
     }
 
     /**
@@ -1219,36 +1384,28 @@ final class FriendsNotesService
      */
     public static function noteEventsAck(int $userId, array $body): never
     {
-        $rawIds = is_array($body['eventIds'] ?? null) ? $body['eventIds'] : [];
-        $ids = [];
-        foreach ($rawIds as $x) {
-            $n = (int) $x;
-            if ($n > 0) {
-                $ids[] = $n;
-            }
+        $id = is_numeric($body['noteId'] ?? null) ? (int) $body['noteId'] : 0;
+        if ($id <= 0) {
+            Http::error(400, 'noteId inválido.');
         }
 
-        $nowSql = Database::nowSql();
         $pdo = Database::pdo();
-        if ($ids !== []) {
-            $placeholders = implode(', ', array_fill(0, count($ids), '?'));
-            $params = array_merge([$nowSql, $userId], $ids);
-            $upd = $pdo->prepare(
-                "UPDATE `user_note_events`
-                 SET `acknowledged_at` = ?
-                 WHERE `owner_id` = ? AND `id` IN ({$placeholders})"
-            );
-            $upd->execute($params);
-        } else {
-            $upd = $pdo->prepare(
-                'UPDATE `user_note_events`
-                 SET `acknowledged_at` = :now
-                 WHERE `owner_id` = :uid AND `acknowledged_at` IS NULL'
-            );
-            $upd->execute([':now' => $nowSql, ':uid' => $userId]);
+        $stmt = $pdo->prepare('SELECT `id`, `user_id` FROM `user_notes` WHERE `id` = :id LIMIT 1');
+        $stmt->execute([':id' => $id]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$existing || (int) $existing['user_id'] !== $userId) {
+            Http::error(404, 'Inscrição não encontrada.');
         }
 
-        Http::json(200, ['ok' => true]);
+        $upd = $pdo->prepare(
+            'UPDATE `user_note_events`
+             SET `read_at` = :now
+             WHERE `note_id` = :nid AND `read_at` IS NULL'
+        );
+        $upd->execute([':now' => Database::nowSql(), ':nid' => $id]);
+
+        Http::json(200, ['ok' => true, 'acknowledged' => true]);
     }
 
     /**
@@ -1259,48 +1416,41 @@ final class FriendsNotesService
     {
         ProgressShared::requireAdmin($user);
 
-        $filterUserId = is_numeric($body['targetUserId'] ?? null) ? (int) $body['targetUserId'] : null;
-        $filterLessonId = isset($body['lessonId']) && is_string($body['lessonId']) && trim($body['lessonId']) !== ''
-            ? trim($body['lessonId'])
-            : null;
-        $rawSearch = isset($body['query']) && is_string($body['query']) ? trim($body['query']) : '';
-        $cleanSearch = preg_replace('/[%_\\\\]/', '', $rawSearch) ?? '';
-
-        $sql = 'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at` FROM `user_notes` WHERE 1=1';
-        $params = [];
-
-        if ($filterUserId && $filterUserId > 0) {
-            $sql .= ' AND `user_id` = :uid';
-            $params[':uid'] = $filterUserId;
-        }
-        if ($filterLessonId === 'general') {
-            $sql .= ' AND `lesson_id` IS NULL';
-        } elseif ($filterLessonId) {
-            $sql .= ' AND `lesson_id` = :lid';
-            $params[':lid'] = $filterLessonId;
-        }
-        if (mb_strlen($cleanSearch, 'UTF-8') >= 2) {
-            $sql .= ' AND (`title` LIKE :q1 OR `body` LIKE :q2)';
-            $params[':q1'] = '%' . $cleanSearch . '%';
-            $params[':q2'] = '%' . $cleanSearch . '%';
-        }
-        $sql .= ' ORDER BY `updated_at` DESC LIMIT 200';
-
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
+        $stmt = $pdo->query('SELECT `user_id`, `title`, `tags` FROM `user_notes`');
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $ownerIds = array_map(static fn(array $r): int => (int) $r['user_id'], $rows);
-        $usersById = ProgressShared::fetchUsersByIds($ownerIds);
-
-        $notes = [];
-        foreach ($rows as $r) {
-            $oid = (int) $r['user_id'];
-            $notes[] = self::toNoteDto($r, $usersById[$oid] ?? null, []);
+        $counts = [];
+        $notesByUser = [];
+        foreach ($rows as $row) {
+            $uid = (int) $row['user_id'];
+            $counts[$uid] = ($counts[$uid] ?? 0) + 1;
+            $notesByUser[$uid][] = [
+                'title' => (string) ($row['title'] ?? ''),
+                'tags' => self::normalizeNoteTags($row['tags'] ?? []),
+            ];
         }
 
-        Http::json(200, ['ok' => true, 'notes' => $notes]);
+        $usersById = ProgressShared::fetchUsersByIds(array_keys($counts));
+        $owners = [];
+        foreach ($counts as $uid => $notesCount) {
+            $owner = $usersById[$uid] ?? null;
+            if (!$owner || ($owner['role'] ?? '') === 'admin') {
+                continue;
+            }
+            $owners[] = [
+                'userId' => $uid,
+                'username' => (string) $owner['username'],
+                'fullName' => (string) ($owner['full_name'] ?: $owner['username']),
+                'turma' => $owner['turma'] ?? null,
+                'notesCount' => $notesCount,
+                'notes' => $notesByUser[$uid] ?? [],
+            ];
+        }
+
+        usort($owners, static fn(array $a, array $b): int => $b['notesCount'] <=> $a['notesCount']);
+
+        Http::json(200, ['ok' => true, 'owners' => $owners]);
     }
 
     /**
@@ -1310,29 +1460,33 @@ final class FriendsNotesService
     public static function notesListForUser(array $user, array $body): never
     {
         ProgressShared::requireAdmin($user);
-        $targetUserId = is_numeric($body['targetUserId'] ?? null) ? (int) $body['targetUserId'] : 0;
-        if ($targetUserId <= 0) {
+        $rawTarget = $body['targetUserId'] ?? $body['friendUserId'] ?? null;
+        $ownerId = is_numeric($rawTarget) ? (int) $rawTarget : 0;
+        if ($ownerId <= 0) {
             Http::error(400, 'Informe targetUserId.');
         }
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
-            'SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
+            'SELECT `id`, `user_id`, `title`, `body`, `pinned`, `tags`, `lesson_id`, `cloned_from_note_id`, `created_at`, `updated_at`
              FROM `user_notes`
              WHERE `user_id` = :uid
-             ORDER BY `updated_at` DESC'
+             ORDER BY `pinned` DESC, `updated_at` DESC'
         );
-        $stmt->execute([':uid' => $targetUserId]);
-        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([':uid' => $ownerId]);
+        $ownRows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $usersById = ProgressShared::fetchUsersByIds([$targetUserId]);
-        $owner = $usersById[$targetUserId] ?? null;
-
+        $sharesByNote = self::fetchSharesForNotes(array_map(static fn(array $r): int => (int) $r['id'], $ownRows));
         $notes = [];
-        foreach ($rows as $r) {
-            $notes[] = self::toNoteDto($r, $owner, []);
+        foreach ($ownRows as $row) {
+            $nid = (int) $row['id'];
+            $sharedWith = $sharesByNote[$nid] ?? [];
+            $notes[] = self::toNoteSummary($row, [
+                'sharedWithCount' => count($sharedWith),
+                'sharedWithUsernames' => array_map(static fn(array $u): string => (string) $u['username'], $sharedWith),
+            ]);
         }
 
-        Http::json(200, ['ok' => true, 'notes' => $notes]);
+        Http::json(200, ['ok' => true, 'userId' => $ownerId, 'notes' => $notes, 'count' => count($notes)]);
     }
 }

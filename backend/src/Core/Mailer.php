@@ -196,25 +196,26 @@ final class Mailer
         $htmlBody = $html !== '' ? $html : nl2br(htmlspecialchars($plainBody, ENT_QUOTES, 'UTF-8'));
 
         $headers = [
-            "From: {$fromHeader}",
-            "Reply-To: {$envelopeFrom}",
-            "Return-Path: <{$envelopeFrom}>",
-            "Message-ID: {$msgId}",
-            'MIME-Version: 1.0',
-            "Content-Type: multipart/alternative; boundary=\"{$boundary}\"",
+            'From' => $fromHeader,
+            'Reply-To' => $envelopeFrom,
+            'Return-Path' => "<{$envelopeFrom}>",
+            'Message-ID' => $msgId,
+            'MIME-Version' => '1.0',
+            'Content-Type' => "multipart/alternative; boundary=\"{$boundary}\"",
         ];
 
-        $body = "--{$boundary}\r\n"
-            . "Content-Type: text/plain; charset=UTF-8\r\n"
-            . "Content-Transfer-Encoding: base64\r\n\r\n"
-            . chunk_split(base64_encode($plainBody)) . "\r\n"
-            . "--{$boundary}\r\n"
-            . "Content-Type: text/html; charset=UTF-8\r\n"
-            . "Content-Transfer-Encoding: base64\r\n\r\n"
-            . chunk_split(base64_encode($htmlBody)) . "\r\n"
+        $eol = "\r\n";
+        $body = "--{$boundary}{$eol}"
+            . "Content-Type: text/plain; charset=UTF-8{$eol}"
+            . "Content-Transfer-Encoding: base64{$eol}{$eol}"
+            . chunk_split(base64_encode($plainBody), 76, $eol) . $eol
+            . "--{$boundary}{$eol}"
+            . "Content-Type: text/html; charset=UTF-8{$eol}"
+            . "Content-Transfer-Encoding: base64{$eol}{$eol}"
+            . chunk_split(base64_encode($htmlBody), 76, $eol) . $eol
             . "--{$boundary}--";
 
-        $sent = @mail($recipient, $encodedSubject, $body, implode("\r\n", $headers), "-f{$envelopeFrom}");
+        $sent = @mail($recipient, $encodedSubject, $body, $headers, "-f{$envelopeFrom}");
         if (!$sent) {
             return ['ok' => false, 'reason' => 'native_mail_failed'];
         }

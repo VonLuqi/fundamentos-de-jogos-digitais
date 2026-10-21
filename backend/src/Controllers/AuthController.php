@@ -435,15 +435,29 @@ final class AuthController
                 }
 
                 $status = Mailer::getStatus();
-                $override = AuthEmailService::normalizeEmail($body['to'] ?? $body['email'] ?? '');
+                $rawOverride = trim((string) ($body['to'] ?? $body['email'] ?? ''));
+                $override = AuthEmailService::normalizeEmail($rawOverride);
+                if ($rawOverride !== '' && !AuthEmailService::isValidEmail($override)) {
+                    Http::json(400, [
+                        'ok' => false,
+                        'reason' => 'e-mail inválido',
+                        'error' => 'E-mail de destino inválido. Informe um endereço completo (ex.: voce@dominio.com).',
+                        'status' => $status,
+                    ]);
+                }
+
                 $adminEmail = AuthEmailService::normalizeEmail($admin['email'] ?? '');
+                $envAdminEmail = AuthEmailService::normalizeEmail(\App\Core\Env::get('ADMIN_EMAIL', ''));
                 $recipient = AuthEmailService::isValidEmail($override)
                     ? $override
-                    : (AuthEmailService::isValidEmail($adminEmail) ? $adminEmail : '');
+                    : (AuthEmailService::isValidEmail($adminEmail)
+                        ? $adminEmail
+                        : (AuthEmailService::isValidEmail($envAdminEmail) ? $envAdminEmail : ''));
 
                 if ($recipient === '') {
                     Http::json(400, [
                         'ok' => false,
+                        'reason' => 'sem destinatário',
                         'error' => 'Informe um e-mail de destino (to) ou vincule um e-mail na conta do Mestre.',
                         'status' => $status,
                     ]);

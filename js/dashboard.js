@@ -1764,9 +1764,13 @@ function renderMasterMailerStatus(status, probe = null) {
 
   const bits = [];
   bits.push(status.ready ? `Canal: ${status.primary}` : 'Canal: nenhum provedor');
+  if (status.hasNative && status.fromPreview) {
+    const match = String(status.fromPreview).match(/<([^>]+)>/);
+    bits.push(match ? match[1] : status.fromPreview);
+  }
   if (status.hasResend) bits.push('Resend');
   if (status.hasSmtp) bits.push('SMTP');
-  if (status.usingTestingFrom) bits.push('remetente de teste');
+  if (status.usingTestingFrom && !status.hasNative) bits.push('remetente de teste');
   if (!status.appBaseUrlSet) bits.push('APP_BASE_URL ausente');
   if (probe) {
     bits.push(probe.probeOk
@@ -1776,7 +1780,7 @@ function renderMasterMailerStatus(status, probe = null) {
 
   el.textContent = bits.join(' · ');
   el.hidden = false;
-  el.classList.toggle('is-warn', !status.ready || Boolean(status.usingTestingFrom && !status.hasSmtp) || (probe && !probe.probeOk));
+  el.classList.toggle('is-warn', !status.ready || Boolean(status.usingTestingFrom && !status.hasSmtp && !status.hasNative) || (probe && !probe.probeOk));
 }
 
 async function refreshMasterMailerStatus() {
@@ -1943,16 +1947,16 @@ function initAdminTools() {
   btnProbeMailer?.addEventListener('click', async () => {
     if (!currentToken) return;
 
-    const defaultTo = String(currentUser?.email || '').trim();
+    const defaultTo = String(currentUser?.email || 'vonluqi@gmail.com').trim();
     const prompted = window.prompt(
       'Para qual e-mail enviar a sonda do Mensageiro?\n\n'
-      + 'Use um endereço que você controle. Se o canal estiver certo, a mensagem chega em poucos minutos (e no spam).',
+      + 'Use um endereço completo (ex.: voce@dominio.com) que você controle. Se o canal estiver certo, a mensagem chega em poucos minutos (verifique também o spam).',
       defaultTo,
     );
     if (prompted === null) return;
     const to = String(prompted || '').trim();
-    if (!to) {
-      showApiWarning('Informe um e-mail de destino para a sonda.');
+    if (!to || !to.includes('@')) {
+      showApiWarning('Informe um e-mail de destino válido (ex.: voce@dominio.com) para a sonda.');
       return;
     }
 
@@ -1981,7 +1985,7 @@ function initAdminTools() {
         );
       } else {
         const reason = result?.reason || 'desconhecido';
-        const hint = result?.status?.hint || 'Revise RESEND_API_KEY / SMTP_* / APP_BASE_URL na Vercel.';
+        const hint = result?.status?.hint || 'Revise MAIL_TRANSPORT / MAIL_FROM no servidor.';
         showApiWarning(`Mensageiro não partiu (${reason}). ${hint}`);
       }
     } catch (error) {
@@ -1990,7 +1994,7 @@ function initAdminTools() {
         renderMasterMailerStatus(payload.status, {
           probeOk: false,
           provider: payload.provider || null,
-          reason: payload.reason || null,
+          reason: payload.reason || (error instanceof ApiError ? error.message : null),
           to: payload.to || to,
         });
       } else {
