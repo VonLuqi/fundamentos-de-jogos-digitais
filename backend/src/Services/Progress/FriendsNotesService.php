@@ -17,6 +17,14 @@ final class FriendsNotesService
     // Amizades e Espelho da Turma
     // -------------------------------------------------------------------------
 
+    private static function normalizeUsernameQuery(mixed $raw): string
+    {
+        if (!is_string($raw)) {
+            return '';
+        }
+        return ltrim(strtolower(trim($raw)), '@');
+    }
+
     public static function friendsList(int $userId): never
     {
         $pdo = Database::pdo();
@@ -35,7 +43,7 @@ final class FriendsNotesService
         }
         $usersById = ProgressShared::fetchUsersByIds($otherIds);
 
-        $friends = [];
+        $accepted = [];
         $incoming = [];
         $outgoing = [];
 
@@ -45,12 +53,19 @@ final class FriendsNotesService
             if (!$other) {
                 continue;
             }
-            $entry = array_merge(ProgressShared::toFriendCard($other), [
+            $createdAtIso = Database::sqlToIso($r['created_at'] ?? null);
+            $updatedAtIso = Database::sqlToIso($r['updated_at'] ?? $r['created_at'] ?? null);
+            $card = ProgressShared::toFriendCard($other);
+            $entry = array_merge($card, [
                 'friendshipId' => (int) $r['id'],
-                'since' => Database::sqlToIso($r['updated_at'] ?? $r['created_at'] ?? null),
+                'status' => (string) $r['status'],
+                'createdAt' => $createdAtIso,
+                'updatedAt' => $updatedAtIso,
+                'since' => $updatedAtIso,
+                'user' => $card,
             ]);
             if ($r['status'] === 'accepted') {
-                $friends[] = $entry;
+                $accepted[] = $entry;
             } elseif ($r['status'] === 'pending') {
                 if ((int) $r['addressee_id'] === $userId) {
                     $incoming[] = $entry;
@@ -63,8 +78,9 @@ final class FriendsNotesService
         Http::json(200, [
             'ok' => true,
             'limit' => ProgressShared::FRIEND_LIMIT,
-            'count' => count($friends),
-            'friends' => $friends,
+            'count' => count($accepted),
+            'accepted' => $accepted,
+            'friends' => $accepted,
             'incoming' => $incoming,
             'outgoing' => $outgoing,
         ]);
@@ -77,31 +93,66 @@ final class FriendsNotesService
     public static function classmatesList(array $user, int $userId, array $body): never
     {
         $isAdmin = ($user['role'] ?? '') === 'admin';
-        $userTurma = !empty($user['turma']) ? (string) $user['turma'] : null;
-
-        if (!$isAdmin && !$userTurma) {
-            Http::json(200, ['ok' => true, 'turma' => null, 'members' => []]);
-        }
-
-        $requestedTurma = isset($body['turma']) && is_string($body['turma']) ? strtoupper(trim($body['turma'])) : '';
-        $filterTurma = $isAdmin
-            ? (in_array($requestedTurma, ProgressShared::VALID_TURMAS, true) ? $requestedTurma : null)
-            : $userTurma;
+        $ownTurma = !empty($user['turma']) ? trim((string) $user['turma']) : '';
 
         $pdo = Database::pdo();
+        $tStmt = $pdo->query(
+            'SELECT DISTINCT `turma` FROM `users`
+             WHERE `role` = \'student\' AND `turma` IS NOT NULL AND `turma` <> \'\'
+             ORDER BY `turma` ASC'
+        );
+        $turmasDisponiveis = [];
+        if ($tStmt) {
+            foreach ($tStmt->fetchAll(PDO::FETCH_COLUMN) as $tVal) {
+                $tClean = trim((string) $tVal);
+                if ($tClean !== '') {
+                    $turmasDisponiveis[] = $tClean;
+                }
+            }
+        }
+
+        $filterTurma = null;
+        if ($isAdmin) {
+            $requested = isset($body['turma']) && is_string($body['turma']) ? strtoupper(trim($body['turma'])) : '';
+            if ($requested !== '' && $requested !== '*' && strtolower($requested) !== 'all') {
+                $filterTurma = $requested;
+            }
+        } else {
+            if ($ownTurma === '') {
+                Http::json(200, [
+                    'ok' => true,
+                    'turma' => null,
+                    'adminView' => false,
+                    'turmasDisponiveis' => [],
+                    'count' => 0,
+                    'classmates' => [],
+                    'members' => [],
+                ]);
+            }
+            $filterTurma = $ownTurma;
+        }
+
+        $limit = ($isAdmin && !$filterTurma) ? 300 : 100;
         if ($filterTurma) {
             $stmt = $pdo->prepare(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
-                 FROM `users` WHERE `role` = \'student\' AND `turma` = :t LIMIT 200'
+                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                 FROM `users`
+                 WHERE `role` = 'student' AND `id` <> :uid AND `turma` = :t
+                 ORDER BY `username` ASC
+                 LIMIT {$limit}"
             );
-            $stmt->execute([':t' => $filterTurma]);
+            $stmt->execute([':uid' => $userId, ':t' => $filterTurma]);
         } else {
-            $stmt = $pdo->query(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
-                 FROM `users` WHERE `role` = \'student\' LIMIT 200'
+            $stmt = $pdo->prepare(
+                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                 FROM `users`
+                 WHERE `role` = 'student' AND `id` <> :uid
+                 ORDER BY `username` ASC
+                 LIMIT {$limit}"
             );
+            $stmt->execute([':uid' => $userId]);
         }
-        $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $fStmt = $pdo->prepare(
             'SELECT `id`, `requester_id`, `addressee_id`, `status`
@@ -115,32 +166,28 @@ final class FriendsNotesService
             $bondByOtherId[$otherId] = $b;
         }
 
-        $members = [];
+        $classmates = [];
         foreach ($rows as $r) {
             $rid = (int) $r['id'];
             if ($rid === $userId) {
                 continue;
             }
             $bond = $bondByOtherId[$rid] ?? null;
-            $members[] = ProgressShared::toClassmateCard(
+            $classmates[] = ProgressShared::toClassmateCard(
                 $r,
                 ProgressShared::resolveBondStatus($bond, $userId),
                 $bond ? (int) $bond['id'] : null
             );
         }
 
-        usort($members, static function (array $a, array $b): int {
-            $xpDiff = ((int) ($b['xp'] ?? 0)) <=> ((int) ($a['xp'] ?? 0));
-            if ($xpDiff !== 0) {
-                return $xpDiff;
-            }
-            return strcasecmp((string) ($a['fullName'] ?? ''), (string) ($b['fullName'] ?? ''));
-        });
-
         Http::json(200, [
             'ok' => true,
             'turma' => $filterTurma,
-            'members' => $members,
+            'adminView' => $isAdmin,
+            'turmasDisponiveis' => $turmasDisponiveis,
+            'count' => count($classmates),
+            'classmates' => $classmates,
+            'members' => $classmates,
         ]);
     }
 
@@ -149,9 +196,9 @@ final class FriendsNotesService
      */
     public static function friendSearch(int $userId, array $body): never
     {
-        $rawQuery = isset($body['query']) && is_string($body['query']) ? trim($body['query']) : '';
-        $clean = preg_replace('/[%_\\\\]/', '', $rawQuery) ?? '';
-        if (mb_strlen($clean, 'UTF-8') < 2) {
+        $rawQuery = self::normalizeUsernameQuery($body['query'] ?? $body['username'] ?? '');
+        $escaped = preg_replace('/[%_\\\\]/', '', $rawQuery) ?? '';
+        if ($escaped === '') {
             Http::json(200, ['ok' => true, 'results' => []]);
         }
 
@@ -160,9 +207,10 @@ final class FriendsNotesService
             'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
              FROM `users`
              WHERE (`username` LIKE :q1 OR `full_name` LIKE :q2) AND `id` <> :uid
+             ORDER BY `username` ASC
              LIMIT :lim'
         );
-        $like = '%' . $clean . '%';
+        $like = '%' . $escaped . '%';
         $stmt->bindValue(':q1', $like, PDO::PARAM_STR);
         $stmt->bindValue(':q2', $like, PDO::PARAM_STR);
         $stmt->bindValue(':uid', $userId, PDO::PARAM_INT);
@@ -179,10 +227,12 @@ final class FriendsNotesService
         $bondByOtherId = [];
         foreach ($fStmt->fetchAll(PDO::FETCH_ASSOC) as $b) {
             $otherId = ((int) $b['requester_id'] === $userId) ? (int) $b['addressee_id'] : (int) $b['requester_id'];
+            $relation = ProgressShared::resolveBondStatus($b, $userId);
             $bondByOtherId[$otherId] = [
                 'friendshipId' => (int) $b['id'],
                 'status' => (string) $b['status'],
                 'direction' => ((int) $b['requester_id'] === $userId) ? 'outgoing' : 'incoming',
+                'relation' => $relation,
             ];
         }
 
@@ -191,6 +241,7 @@ final class FriendsNotesService
             $cid = (int) $c['id'];
             $bond = $bondByOtherId[$cid] ?? null;
             $results[] = array_merge(ProgressShared::toFriendCard($c), [
+                'relation' => $bond ? $bond['relation'] : 'none',
                 'friendshipStatus' => $bond ? $bond['status'] : null,
                 'friendshipDirection' => $bond ? $bond['direction'] : null,
                 'friendshipId' => $bond ? $bond['friendshipId'] : null,
@@ -206,7 +257,7 @@ final class FriendsNotesService
     public static function friendRequest(int $userId, array $body): never
     {
         $targetId = is_numeric($body['targetUserId'] ?? null) ? (int) $body['targetUserId'] : null;
-        $targetUsername = isset($body['username']) && is_string($body['username']) ? strtolower(trim($body['username'])) : '';
+        $targetUsername = self::normalizeUsernameQuery($body['username'] ?? '');
 
         $pdo = Database::pdo();
         $target = null;
@@ -224,32 +275,34 @@ final class FriendsNotesService
             );
             $stmt->execute([':u' => $targetUsername]);
             $target = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } else {
+            Http::error(400, 'Username ausente.');
         }
 
         if (!$target) {
-            Http::error(404, 'Alma não encontrada.');
+            Http::error(404, 'Nenhuma alma com esse username.');
         }
         $tId = (int) $target['id'];
         if ($tId === $userId) {
-            Http::error(400, 'Não é possível invocar a própria sombra como companheira.');
+            Http::error(400, 'Não se oferece vínculo a si mesmo.');
         }
 
         $existing = ProgressShared::findFriendshipBetween($userId, $tId);
         if ($existing) {
             if ($existing['status'] === 'accepted') {
-                Http::error(409, 'Vocês já são Companheiros selados.');
+                Http::error(409, 'Este vínculo já foi selado.');
             }
             if ((int) $existing['requester_id'] === $userId) {
-                Http::error(409, 'Pacto já enviado — aguarde a resposta.');
+                Http::error(409, 'Este convite já está em viagem.');
             }
 
             $myCount = ProgressShared::countAcceptedFriends($userId);
             $theirCount = ProgressShared::countAcceptedFriends($tId);
             if ($myCount >= ProgressShared::FRIEND_LIMIT) {
-                Http::error(409, 'Você atingiu o limite de ' . ProgressShared::FRIEND_LIMIT . ' Companheiros.');
+                Http::error(409, 'Sua companhia já está completa (' . ProgressShared::FRIEND_LIMIT . '). Rompa um vínculo para oferecer outro.');
             }
             if ($theirCount >= ProgressShared::FRIEND_LIMIT) {
-                Http::error(409, 'Esta alma já atingiu o limite de Companheiros.');
+                Http::error(409, 'A companhia deste aluno já está completa.');
             }
 
             $nowSql = Database::nowSql();
@@ -257,10 +310,21 @@ final class FriendsNotesService
             $upd = $pdo->prepare('UPDATE `friendships` SET `status` = \'accepted\', `updated_at` = :now WHERE `id` = :id');
             $upd->execute([':now' => $nowSql, ':id' => $existing['id']]);
 
+            $card = ProgressShared::toFriendCard($target);
+            $friendshipDto = [
+                'friendshipId' => (int) $existing['id'],
+                'status' => 'accepted',
+                'createdAt' => $existing['created_at'] ?? $nowIso,
+                'updatedAt' => $nowIso,
+                'since' => $nowIso,
+                'user' => $card,
+            ];
+
             Http::json(200, [
                 'ok' => true,
                 'autoAccepted' => true,
-                'friend' => array_merge(ProgressShared::toFriendCard($target), [
+                'friendship' => $friendshipDto,
+                'friend' => array_merge($card, [
                     'friendshipId' => (int) $existing['id'],
                     'since' => $nowIso,
                 ]),
@@ -269,7 +333,11 @@ final class FriendsNotesService
 
         $myCount = ProgressShared::countAcceptedFriends($userId);
         if ($myCount >= ProgressShared::FRIEND_LIMIT) {
-            Http::error(409, 'Você atingiu o limite de ' . ProgressShared::FRIEND_LIMIT . ' Companheiros.');
+            Http::error(409, 'Sua companhia já está completa (' . ProgressShared::FRIEND_LIMIT . '). Rompa um vínculo para oferecer outro.');
+        }
+        $theirCount = ProgressShared::countAcceptedFriends($tId);
+        if ($theirCount >= ProgressShared::FRIEND_LIMIT) {
+            Http::error(409, 'A companhia deste aluno já está completa.');
         }
 
         $nowSql = Database::nowSql();
@@ -281,10 +349,21 @@ final class FriendsNotesService
         $ins->execute([':req' => $userId, ':addr' => $tId, ':ca' => $nowSql, ':ua' => $nowSql]);
         $fid = (int) $pdo->lastInsertId();
 
+        $card = ProgressShared::toFriendCard($target);
+        $friendshipDto = [
+            'friendshipId' => $fid,
+            'status' => 'pending',
+            'createdAt' => $nowIso,
+            'updatedAt' => $nowIso,
+            'since' => $nowIso,
+            'user' => $card,
+        ];
+
         Http::json(201, [
             'ok' => true,
             'autoAccepted' => false,
-            'request' => array_merge(ProgressShared::toFriendCard($target), [
+            'friendship' => $friendshipDto,
+            'request' => array_merge($card, [
                 'friendshipId' => $fid,
                 'since' => $nowIso,
             ]),
@@ -297,30 +376,33 @@ final class FriendsNotesService
     public static function friendRespond(int $userId, array $body): never
     {
         $friendshipId = is_numeric($body['friendshipId'] ?? null) ? (int) $body['friendshipId'] : 0;
+        $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : 0;
         $decision = isset($body['decision']) && is_string($body['decision']) ? strtolower(trim($body['decision'])) : '';
 
-        if ($friendshipId <= 0 || !in_array($decision, ['accept', 'decline'], true)) {
-            Http::error(400, 'Parâmetros inválidos.');
+        if (!in_array($decision, ['accept', 'decline'], true)) {
+            Http::error(400, 'Decisão inválida. Use accept ou decline.');
         }
 
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare('SELECT * FROM `friendships` WHERE `id` = :id LIMIT 1');
-        $stmt->execute([':id' => $friendshipId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$row) {
-            Http::error(404, 'Pedido de amizade não encontrado.');
-        }
-        if ((int) $row['addressee_id'] !== $userId) {
-            Http::error(403, 'Apenas o destinatário pode responder este pedido.');
-        }
-        if ($row['status'] !== 'pending') {
-            Http::error(409, 'Este pedido já foi processado.');
+        $row = null;
+        if ($friendshipId > 0) {
+            $stmt = $pdo->prepare('SELECT * FROM `friendships` WHERE `id` = :id LIMIT 1');
+            $stmt->execute([':id' => $friendshipId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } elseif ($friendUserId > 0) {
+            $row = ProgressShared::findFriendshipBetween($userId, $friendUserId);
+        } else {
+            Http::error(400, 'Informe friendshipId ou friendUserId.');
         }
 
+        if (!$row || ($row['status'] ?? '') !== 'pending' || (int) $row['addressee_id'] !== $userId) {
+            Http::error(404, 'Convite pendente não encontrado.');
+        }
+
+        $rowId = (int) $row['id'];
         if ($decision === 'decline') {
             $del = $pdo->prepare('DELETE FROM `friendships` WHERE `id` = :id');
-            $del->execute([':id' => $friendshipId]);
+            $del->execute([':id' => $rowId]);
             Http::json(200, ['ok' => true, 'decision' => 'decline']);
         }
 
@@ -328,25 +410,33 @@ final class FriendsNotesService
         $myCount = ProgressShared::countAcceptedFriends($userId);
         $theirCount = ProgressShared::countAcceptedFriends($reqId);
         if ($myCount >= ProgressShared::FRIEND_LIMIT) {
-            Http::error(409, 'Você atingiu o limite de ' . ProgressShared::FRIEND_LIMIT . ' Companheiros.');
+            Http::error(409, 'Sua companhia já está completa (' . ProgressShared::FRIEND_LIMIT . '). Rompa um vínculo para oferecer outro.');
         }
         if ($theirCount >= ProgressShared::FRIEND_LIMIT) {
-            Http::error(409, 'O remetente já atingiu o limite de Companheiros.');
+            Http::error(409, 'A companhia deste aluno já está completa.');
         }
 
         $nowSql = Database::nowSql();
         $nowIso = Database::nowIso();
         $upd = $pdo->prepare('UPDATE `friendships` SET `status` = \'accepted\', `updated_at` = :now WHERE `id` = :id');
-        $upd->execute([':now' => $nowSql, ':id' => $friendshipId]);
+        $upd->execute([':now' => $nowSql, ':id' => $rowId]);
 
         $others = ProgressShared::fetchUsersByIds([$reqId]);
         $other = $others[$reqId] ?? null;
+        $card = $other ? ProgressShared::toFriendCard($other) : null;
 
         Http::json(200, [
             'ok' => true,
             'decision' => 'accept',
-            'friend' => $other
-                ? array_merge(ProgressShared::toFriendCard($other), ['friendshipId' => $friendshipId, 'since' => $nowIso])
+            'friendship' => [
+                'friendshipId' => $rowId,
+                'status' => 'accepted',
+                'createdAt' => Database::sqlToIso($row['created_at'] ?? null) ?? $nowIso,
+                'updatedAt' => $nowIso,
+                'user' => $card,
+            ],
+            'friend' => $card
+                ? array_merge($card, ['friendshipId' => $rowId, 'since' => $nowIso])
                 : null,
         ]);
     }
@@ -356,39 +446,58 @@ final class FriendsNotesService
      */
     public static function friendRemove(int $userId, array $body): never
     {
-        $friendshipId = is_numeric($body['friendshipId'] ?? null) ? (int) $body['friendshipId'] : null;
-        $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : null;
+        $friendshipId = is_numeric($body['friendshipId'] ?? null) ? (int) $body['friendshipId'] : 0;
+        $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : 0;
+        $targetUsername = self::normalizeUsernameQuery($body['username'] ?? '');
 
         $pdo = Database::pdo();
         $row = null;
-        if ($friendshipId && $friendshipId > 0) {
+        if ($friendshipId > 0) {
             $stmt = $pdo->prepare('SELECT * FROM `friendships` WHERE `id` = :id LIMIT 1');
             $stmt->execute([':id' => $friendshipId]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-        } elseif ($friendUserId && $friendUserId > 0) {
+        } elseif ($friendUserId > 0) {
             $row = ProgressShared::findFriendshipBetween($userId, $friendUserId);
+        } elseif ($targetUsername !== '') {
+            $uStmt = $pdo->prepare('SELECT `id` FROM `users` WHERE LOWER(`username`) = :u LIMIT 1');
+            $uStmt->execute([':u' => $targetUsername]);
+            $tUser = $uStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$tUser) {
+                Http::error(404, 'Vínculo não encontrado.');
+            }
+            $row = ProgressShared::findFriendshipBetween($userId, (int) $tUser['id']);
+        } else {
+            Http::error(400, 'Informe friendshipId, friendUserId ou username.');
         }
 
         if (!$row) {
             Http::error(404, 'Vínculo não encontrado.');
         }
         if ((int) $row['requester_id'] !== $userId && (int) $row['addressee_id'] !== $userId) {
-            Http::error(403, 'Operação não permitida.');
+            Http::error(403, 'Sem permissão para este vínculo.');
+        }
+        if (($row['status'] ?? '') === 'pending' && (int) $row['requester_id'] !== $userId) {
+            Http::error(403, 'Use friendRespond para aceitar ou recusar este convite.');
         }
 
         $otherId = ((int) $row['requester_id'] === $userId) ? (int) $row['addressee_id'] : (int) $row['requester_id'];
 
         $delShares = $pdo->prepare(
             'DELETE FROM `user_note_shares`
-             WHERE (`recipient_id` = :u1 AND `note_id` IN (SELECT `id` FROM `user_notes` WHERE `user_id` = :o1))
-                OR (`recipient_id` = :o2 AND `note_id` IN (SELECT `id` FROM `user_notes` WHERE `user_id` = :u2))'
+             WHERE (`shared_with_user_id` = :u1 AND `note_id` IN (SELECT `id` FROM `user_notes` WHERE `user_id` = :o1))
+                OR (`shared_with_user_id` = :o2 AND `note_id` IN (SELECT `id` FROM `user_notes` WHERE `user_id` = :u2))'
         );
         $delShares->execute([':u1' => $userId, ':o1' => $otherId, ':o2' => $otherId, ':u2' => $userId]);
 
         $delFriend = $pdo->prepare('DELETE FROM `friendships` WHERE `id` = :id');
         $delFriend->execute([':id' => $row['id']]);
 
-        Http::json(200, ['ok' => true, 'removedFriendUserId' => $otherId]);
+        Http::json(200, [
+            'ok' => true,
+            'removed' => true,
+            'friendshipId' => (int) $row['id'],
+            'removedFriendUserId' => $otherId,
+        ]);
     }
 
     /**
@@ -397,83 +506,89 @@ final class FriendsNotesService
      */
     public static function friendProfile(array $user, int $userId, array $body): never
     {
+        $targetUsername = self::normalizeUsernameQuery($body['username'] ?? '');
         $friendUserId = is_numeric($body['friendUserId'] ?? null) ? (int) $body['friendUserId'] : 0;
-        if ($friendUserId <= 0) {
-            Http::error(400, 'Companheiro inválido.');
-        }
 
         $pdo = Database::pdo();
-        $stmt = $pdo->prepare(
-            'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
-             FROM `users` WHERE `id` = :id LIMIT 1'
-        );
-        $stmt->execute([':id' => $friendUserId]);
-        $target = $stmt->fetch(PDO::FETCH_ASSOC);
+        $target = null;
+        if ($targetUsername !== '') {
+            $stmt = $pdo->prepare(
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
+                 FROM `users` WHERE LOWER(`username`) = :u LIMIT 1'
+            );
+            $stmt->execute([':u' => $targetUsername]);
+            $target = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } elseif ($friendUserId > 0) {
+            $stmt = $pdo->prepare(
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
+                 FROM `users` WHERE `id` = :id LIMIT 1'
+            );
+            $stmt->execute([':id' => $friendUserId]);
+            $target = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        } else {
+            Http::error(400, 'Informe username ou friendUserId.');
+        }
 
         if (!$target) {
-            Http::error(404, 'Alma não encontrada.');
+            Http::error(404, 'Companheiro não encontrado.');
         }
-        $target['id'] = (int) $target['id'];
+        $targetId = (int) $target['id'];
+        if ($targetId === $userId) {
+            Http::error(400, 'Não é possível espelhar a si mesmo.');
+        }
+
+        $target['id'] = $targetId;
         $target['xp'] = (int) ($target['xp'] ?? 0);
         $target['avatar_index'] = (int) ($target['avatar_index'] ?? 0);
         $target['conquistas'] = Database::decodeJsonArray($target['conquistas'] ?? null);
         $target['completed_lessons'] = Database::decodeJsonArray($target['completed_lessons'] ?? null);
 
-        $isSelf = $friendUserId === $userId;
-        $isAdmin = ($user['role'] ?? '') === 'admin';
-        $bond = $isSelf ? null : ProgressShared::findFriendshipBetween($userId, $friendUserId);
-        $isAcceptedFriend = $bond && ($bond['status'] ?? '') === 'accepted';
-        $sameTurma = !empty($user['turma']) && !empty($target['turma']) && $user['turma'] === $target['turma'];
-
-        if (!$isSelf && !$isAdmin && !$isAcceptedFriend && !$sameTurma) {
-            Http::error(403, 'Apenas Companheiros selados ou colegas de turma podem contemplar este espelho.');
-        }
-
-        $bondStatus = $isSelf ? 'self' : ProgressShared::resolveBondStatus($bond, $userId);
+        $bond = ProgressShared::findFriendshipBetween($userId, $targetId);
+        $bondStatus = ProgressShared::resolveBondStatus($bond, $userId);
         $friendshipId = $bond ? (int) $bond['id'] : null;
 
-        if (!$isSelf && !$isAdmin && !$isAcceptedFriend && $sameTurma) {
+        if ($bondStatus === 'accepted') {
             Http::json(200, [
                 'ok' => true,
+                'bondStatus' => $bondStatus,
+                'includeAchievements' => true,
+                'profile' => array_merge(ProgressShared::toPublicFriendProfile($target), [
+                    'bondStatus' => $bondStatus,
+                    'friendshipId' => $friendshipId,
+                ]),
+            ]);
+        }
+
+        $canTurmaMirror = ($target['role'] ?? '') !== 'admin'
+            && ($user['role'] ?? '') !== 'admin'
+            && !empty($user['turma'])
+            && !empty($target['turma'])
+            && strcasecmp((string) $user['turma'], (string) $target['turma']) === 0;
+
+        if ($canTurmaMirror) {
+            Http::json(200, [
+                'ok' => true,
+                'bondStatus' => $bondStatus,
+                'includeAchievements' => false,
                 'profile' => array_merge(ProgressShared::toTurmaMirrorProfile($target), [
                     'bondStatus' => $bondStatus,
                     'friendshipId' => $friendshipId,
                 ]),
-                'sharedNotes' => [],
             ]);
         }
 
-        $sStmt = $pdo->prepare(
-            'SELECT `note_id`, `created_at` FROM `user_note_shares`
-             WHERE `recipient_id` = :uid ORDER BY `created_at` DESC'
-        );
-        $sStmt->execute([':uid' => $userId]);
-        $shares = $sStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $sharedNotes = [];
-        if ($shares !== []) {
-            $noteIds = array_map(static fn(array $s): int => (int) $s['note_id'], $shares);
-            $placeholders = implode(', ', array_fill(0, count($noteIds), '?'));
-            $params = array_merge([$friendUserId], $noteIds);
-            $nStmt = $pdo->prepare(
-                "SELECT `id`, `user_id`, `lesson_id`, `title`, `body`, `created_at`, `updated_at`
-                 FROM `user_notes`
-                 WHERE `user_id` = ? AND `id` IN ({$placeholders})
-                 ORDER BY `updated_at` DESC"
-            );
-            $nStmt->execute($params);
-            foreach ($nStmt->fetchAll(PDO::FETCH_ASSOC) as $n) {
-                $sharedNotes[] = self::toNoteDto($n, $target, []);
-            }
+        if ($bondStatus === 'outgoing' || $bondStatus === 'incoming') {
+            Http::json(403, [
+                'ok' => false,
+                'error' => 'É preciso um vínculo para contemplar este espelho.',
+                'bondStatus' => $bondStatus,
+            ]);
         }
 
-        Http::json(200, [
-            'ok' => true,
-            'profile' => array_merge(ProgressShared::toPublicFriendProfile($target), [
-                'bondStatus' => $bondStatus,
-                'friendshipId' => $friendshipId,
-            ]),
-            'sharedNotes' => $sharedNotes,
+        Http::json(403, [
+            'ok' => false,
+            'error' => 'Este espelho não se abre a estranhos da jornada.',
+            'bondStatus' => 'none',
         ]);
     }
 
@@ -737,66 +852,26 @@ final class FriendsNotesService
         return $id;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    private static function gatherGrimoireStats(int $userId): array
+    private static function countOriginalUserNotes(int $userId): int
     {
         $pdo = Database::pdo();
-        $nStmt = $pdo->prepare('SELECT `id`, `lesson_id`, `body`, `cloned_from_note_id` FROM `user_notes` WHERE `user_id` = :uid');
-        $nStmt->execute([':uid' => $userId]);
-        $noteRows = $nStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        $noteIds = [];
-        $distinctLessons = [];
-        $maxBodyLength = 0;
-
-        foreach ($noteRows as $n) {
-            $noteIds[] = (int) $n['id'];
-            if (!empty($n['lesson_id'])) {
-                $distinctLessons[(string) $n['lesson_id']] = true;
-            }
-            $len = mb_strlen((string) ($n['body'] ?? ''), 'UTF-8');
-            if ($len > $maxBodyLength) {
-                $maxBodyLength = $len;
-            }
-        }
-
-        $sharedNotesCount = 0;
-        $clonesReceivedCount = 0;
-        if ($noteIds !== []) {
-            $placeholders = implode(', ', array_fill(0, count($noteIds), '?'));
-            $sStmt = $pdo->prepare("SELECT DISTINCT `note_id` FROM `user_note_shares` WHERE `note_id` IN ({$placeholders})");
-            $sStmt->execute($noteIds);
-            $sharedNotesCount = count($sStmt->fetchAll(PDO::FETCH_ASSOC));
-
-            $eStmt = $pdo->prepare(
-                "SELECT COUNT(*) FROM `user_note_events` WHERE `note_id` IN ({$placeholders}) AND `kind` = 'cloned_by'"
-            );
-            $eStmt->execute($noteIds);
-            $clonesReceivedCount = (int) $eStmt->fetchColumn();
-        }
-
-        return [
-            'totalNotes' => count($noteRows),
-            'distinctLessonIdsCount' => count($distinctLessons),
-            'maxBodyLength' => $maxBodyLength,
-            'sharedNotesCount' => $sharedNotesCount,
-            'clonesReceivedCount' => $clonesReceivedCount,
-        ];
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM `user_notes` WHERE `user_id` = :uid AND `cloned_from_note_id` IS NULL');
+        $stmt->execute([':uid' => $userId]);
+        return (int) $stmt->fetchColumn();
     }
 
     /**
      * @param array<string, mixed> $user
-     * @param array<int, string> $extraIds
+     * @param array<string, mixed> $snapshot
      * @return array{user: array<string, mixed>, awarded: array<string, mixed>, leveledUp: bool}
      */
-    private static function evaluateAndAwardGrimoire(array $user, array $extraIds = []): array
+    private static function evaluateAndAwardGrimoire(array $user, array $snapshot): array
     {
-        $stats = self::gatherGrimoireStats((int) $user['id']);
         $existing = is_array($user['conquistas'] ?? null) ? array_values($user['conquistas']) : [];
-        $fromStats = AchievementsEvaluator::evaluateGrimoire($stats, $existing);
-        return ProgressShared::awardAchievementIds($user, array_merge($fromStats, $extraIds));
+        $ids = AchievementsEvaluator::evaluateGrimoireIds(array_merge($snapshot, [
+            'unlocked' => $existing,
+        ]));
+        return ProgressShared::awardAchievementIds($user, $ids);
     }
 
     /**
@@ -1030,8 +1105,20 @@ final class FriendsNotesService
         $cntStmt = $pdo->prepare('SELECT COUNT(*) FROM `user_notes` WHERE `user_id` = :uid');
         $cntStmt->execute([':uid' => $userId]);
         $count = (int) $cntStmt->fetchColumn();
+        $originalCount = self::countOriginalUserNotes($userId);
 
-        $grimoire = self::evaluateAndAwardGrimoire($user);
+        $grimoire = self::evaluateAndAwardGrimoire($user, [
+            'event' => 'create',
+            'originalNoteCount' => $originalCount,
+            'isCloneNote' => false,
+            'note' => [
+                'lessonId' => $scope,
+                'body' => $cleanBody,
+                'tags' => $tags,
+                'shareCount' => 0,
+                'pinned' => (bool) $pinned,
+            ],
+        ]);
 
         Http::json(201, [
             'ok' => true,
@@ -1132,7 +1219,18 @@ final class FriendsNotesService
 
         $sharesByNote = self::fetchSharesForNotes([$id]);
         $sharedWith = $sharesByNote[$id] ?? [];
-        $grimoire = self::evaluateAndAwardGrimoire($user);
+        $grimoire = self::evaluateAndAwardGrimoire($user, [
+            'event' => 'update',
+            'originalNoteCount' => self::countOriginalUserNotes($userId),
+            'isCloneNote' => !empty($updatedRow['cloned_from_note_id']),
+            'note' => [
+                'lessonId' => $nextLesson,
+                'body' => $nextBody,
+                'tags' => $nextTags,
+                'shareCount' => count($sharedWith),
+                'pinned' => (bool) $nextPinned,
+            ],
+        ]);
 
         Http::json(200, [
             'ok' => true,
@@ -1212,7 +1310,18 @@ final class FriendsNotesService
 
         $sharesByNote = self::fetchSharesForNotes([$id]);
         $sharedWith = $sharesByNote[$id] ?? [];
-        $grimoire = self::evaluateAndAwardGrimoire($user);
+        $grimoire = self::evaluateAndAwardGrimoire($user, [
+            'event' => 'share',
+            'originalNoteCount' => self::countOriginalUserNotes($userId),
+            'isCloneNote' => !empty($existing['cloned_from_note_id']),
+            'note' => [
+                'lessonId' => $existing['lesson_id'] ?? null,
+                'body' => $existing['body'] ?? '',
+                'tags' => self::normalizeNoteTags($existing['tags'] ?? []),
+                'shareCount' => count($sharedWith),
+                'pinned' => !empty($existing['pinned']),
+            ],
+        ]);
 
         Http::json(200, [
             'ok' => true,
@@ -1330,7 +1439,17 @@ final class FriendsNotesService
         self::insertNoteEvent($id, $userId, 'cloned_by');
 
         $clonedFrom = self::resolveClonedFrom((int) $source['id']);
-        $grimoire = self::evaluateAndAwardGrimoire($user, ['eco_do_grimorio']);
+        $grimoire = self::evaluateAndAwardGrimoire($user, [
+            'event' => 'clone',
+            'originalNoteCount' => self::countOriginalUserNotes($userId),
+            'isCloneNote' => true,
+            'note' => [
+                'lessonId' => $clonedScope,
+                'body' => (string) ($source['body'] ?? ''),
+                'tags' => $tags,
+                'shareCount' => 0,
+            ],
+        ]);
 
         Http::json(201, [
             'ok' => true,

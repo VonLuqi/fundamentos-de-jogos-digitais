@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services\Progress;
 
+use App\Core\AdminAudit;
 use App\Core\Database;
 use App\Core\GameCatalog;
 use App\Core\Http;
@@ -14,9 +15,24 @@ use PDO;
  */
 final class LeaderboardAdminService
 {
-    public const LEADERBOARD_PAGE_DEFAULT = 25;
-    public const LEADERBOARD_PAGE_MAX = 100;
+    public const LEADERBOARD_PAGE_DEFAULT = 50;
+    public const LEADERBOARD_PAGE_MAX = 200;
     public const LEADERBOARD_SORT_KEYS = ['xp', 'achievements', 'juizoBest', 'prestigeCount', 'lifetimeSouls'];
+
+    private static function normalizeLifetimeSoulsString(mixed $raw): string
+    {
+        if ($raw === null || $raw === '') {
+            return '0';
+        }
+        $s = trim((string) $raw);
+        if (!preg_match('/^\d+(?:\.\d+)?$/', $s)) {
+            return '0';
+        }
+        if (str_contains($s, '.')) {
+            $s = rtrim(rtrim($s, '0'), '.');
+        }
+        return $s !== '' ? $s : '0';
+    }
 
     /**
      * @param array<string, mixed> $user
@@ -61,8 +77,12 @@ final class LeaderboardAdminService
                 'ok' => true,
                 'scope' => 'turma',
                 'turma' => null,
+                'turmasDisponiveis' => [],
+                'adminView' => false,
+                'topN' => $limit,
                 'sort' => $sort,
                 'entries' => [],
+                'self' => null,
                 'myEntry' => null,
                 'total' => 0,
                 'limit' => $limit,
@@ -88,7 +108,7 @@ final class LeaderboardAdminService
                     `u`.`avatar_index`,
                     `u`.`conquistas`,
                     `u`.`completed_lessons`,
-                    COALESCE(`d`.`juizo_best`, 0) AS `juizo_best`,
+                    COALESCE(`d`.`juizo_best_streak`, 0) AS `juizo_best`,
                     COALESCE(`d`.`prestige_count`, 0) AS `prestige_count`,
                     COALESCE(`d`.`lifetime_souls`, 0) AS `lifetime_souls`
                 FROM `users` `u`
@@ -115,8 +135,8 @@ final class LeaderboardAdminService
         foreach ($rows as $row) {
             $conq = Database::decodeJsonArray($row['conquistas'] ?? null);
             $comp = Database::decodeJsonArray($row['completed_lessons'] ?? null);
+            $lifetimeStr = self::normalizeLifetimeSoulsString($row['lifetime_souls'] ?? '0');
             $lifetimeNum = is_numeric($row['lifetime_souls'] ?? null) ? (float) $row['lifetime_souls'] : 0.0;
-            $lifetimeStr = number_format($lifetimeNum, 0, '.', '');
 
             $enriched[] = [
                 'row' => $row,
@@ -176,15 +196,18 @@ final class LeaderboardAdminService
             $card = ProgressShared::toFriendCard($r);
 
             $dto = [
+                'rank' => $pos,
                 'position' => $pos,
+                'userId' => $card['id'],
                 'id' => $card['id'],
                 'username' => $card['username'],
                 'fullName' => $card['fullName'],
                 'turma' => $card['turma'],
                 'avatarIndex' => $card['avatarIndex'],
                 'xp' => $item['xp'],
-                'rank' => $card['rank'],
+                'rankTitle' => $card['rank'],
                 'level' => $card['level'],
+                'achievements' => $item['achievementsCount'],
                 'achievementsCount' => $item['achievementsCount'],
                 'completedLessonsCount' => $item['completedLessonsCount'],
                 'juizoBest' => $item['juizoBest'],
@@ -207,8 +230,12 @@ final class LeaderboardAdminService
             'ok' => true,
             'scope' => $scope,
             'turma' => $scope === 'turma' ? $effectiveTurma : null,
+            'turmasDisponiveis' => $isAdmin && $scope === 'turma' ? ProgressShared::VALID_TURMAS : [],
+            'adminView' => $isAdmin,
+            'topN' => $limit,
             'sort' => $sort,
             'entries' => $entries,
+            'self' => $myEntry,
             'myEntry' => $myEntry,
             'total' => $total,
             'limit' => $limit,
@@ -249,8 +276,8 @@ final class LeaderboardAdminService
         $viewRows = $vStmt ? $vStmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
         $dStmt = $pdo->query(
-            'SELECT `user_id`, `souls`, `lifetime_souls`, `total_clicks`, `prestige_count`,
-                    `prestige_shards`, `juizo_best`, `play_time_sec`, `updated_at`
+            'SELECT `user_id`, `souls`, `lifetime_souls`, `prestige_count`,
+                    `juizo_best_streak`, `stats`, `updated_at`
              FROM `despertar_states`'
         );
         $despertarRows = $dStmt ? $dStmt->fetchAll(PDO::FETCH_ASSOC) : [];
@@ -280,19 +307,20 @@ final class LeaderboardAdminService
         $despertarByUser = [];
         foreach ($despertarRows as $row) {
             $uid = (int) $row['user_id'];
+            $stats = Database::decodeJsonObject($row['stats'] ?? null);
             $despertarByUser[$uid] = [
                 'souls' => (string) ($row['souls'] ?? '0'),
                 'lifetimeSouls' => (string) ($row['lifetime_souls'] ?? '0'),
-                'totalClicks' => (int) ($row['total_clicks'] ?? 0),
+                'totalClicks' => (int) ($stats['totalClicks'] ?? 0),
                 'prestigeCount' => (int) ($row['prestige_count'] ?? 0),
-                'prestigeShards' => (int) ($row['prestige_shards'] ?? 0),
-                'juizoBest' => (int) ($row['juizo_best'] ?? 0),
-                'playTimeSec' => (int) ($row['play_time_sec'] ?? 0),
+                'juizoBest' => (int) ($row['juizo_best_streak'] ?? 0),
+                'playTimeSec' => (int) ($stats['playTimeSec'] ?? 0),
                 'updatedAt' => Database::sqlToIso($row['updated_at'] ?? null),
             ];
         }
 
         $normalized = [];
+        $usersById = [];
         foreach ($users as $raw) {
             $hydrated = Database::HydrateUserRow($raw);
             if (!$hydrated) {
@@ -300,12 +328,17 @@ final class LeaderboardAdminService
             }
             $s = GameCatalog::sanitizeUser($hydrated);
             $uid = (int) $hydrated['id'];
-            $normalized[] = array_merge($s, [
+            $userViews = $viewsByUser[$uid] ?? [];
+            $entry = array_merge($s, [
                 'createdAt' => $hydrated['created_at'],
                 'activities' => $paragraphsByUser[$uid] ?? [],
-                'lessonViews' => $viewsByUser[$uid] ?? [],
+                'viewedLessons' => $userViews,
+                'lessonViews' => $userViews,
+                'hasDespertarState' => isset($despertarByUser[$uid]),
                 'despertar' => $despertarByUser[$uid] ?? null,
             ]);
+            $normalized[] = $entry;
+            $usersById[$uid] = $entry;
         }
 
         usort($normalized, static function (array $a, array $b): int {
@@ -318,14 +351,37 @@ final class LeaderboardAdminService
             return ((int) ($b['xp'] ?? 0)) <=> ((int) ($a['xp'] ?? 0));
         });
 
-        Http::json(200, ['ok' => true, 'users' => $normalized]);
+        $activities = [];
+        foreach ($paragraphRows as $row) {
+            $uid = (int) $row['user_id'];
+            $activityUser = $usersById[$uid] ?? null;
+            if (!$activityUser || ($activityUser['role'] ?? '') === 'admin') {
+                continue;
+            }
+            $activities[] = [
+                'userId' => $activityUser['id'],
+                'lessonId' => (string) $row['lesson_id'],
+                'paragraph' => (string) ($row['paragraph'] ?? ''),
+                'updatedAt' => Database::sqlToIso($row['updated_at'] ?? null),
+                'fullName' => $activityUser['fullName'],
+                'username' => $activityUser['username'],
+                'turma' => $activityUser['turma'],
+                'avatarIndex' => (int) ($activityUser['avatar_index'] ?? $activityUser['avatarIndex'] ?? 0),
+            ];
+        }
+
+        Http::json(200, [
+            'ok' => true,
+            'users' => $normalized,
+            'activities' => $activities,
+        ]);
     }
 
     /**
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminUpdateProfile(array $user, array $body): never
+    public static function adminUpdateProfile(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
@@ -333,17 +389,19 @@ final class LeaderboardAdminService
 
         $sets = [];
         $params = [':id' => $targetId];
+        $auditUpdates = [];
 
-        if (array_key_exists('fullName', $body)) {
+        if (array_key_exists('fullName', $body) && $body['fullName'] !== null) {
             $fn = is_string($body['fullName']) ? trim($body['fullName']) : '';
             if (mb_strlen($fn, 'UTF-8') < 3) {
-                Http::error(400, 'Nome completo deve ter ao menos 3 caracteres.');
+                Http::error(400, 'Nome muito curto.');
             }
             $sets[] = '`full_name` = :fn';
             $params[':fn'] = $fn;
+            $auditUpdates['full_name'] = $fn;
         }
 
-        if (array_key_exists('username', $body)) {
+        if (array_key_exists('username', $body) && $body['username'] !== null) {
             $un = is_string($body['username']) ? strtolower(trim($body['username'])) : '';
             if (!preg_match('/^[a-z0-9_]{3,24}$/', $un)) {
                 Http::error(400, 'Usuário deve ter 3-24 caracteres (a-z, 0-9 ou _).');
@@ -356,34 +414,40 @@ final class LeaderboardAdminService
             }
             $sets[] = '`username` = :un';
             $params[':un'] = $un;
+            $auditUpdates['username'] = $un;
         }
 
-        if (array_key_exists('turma', $body)) {
+        if (array_key_exists('turma', $body) && $body['turma'] !== null) {
             $t = is_string($body['turma']) ? strtoupper(trim($body['turma'])) : '';
             if (!in_array($t, ProgressShared::VALID_TURMAS, true)) {
                 Http::error(400, 'Turma inválida.');
             }
             $sets[] = '`turma` = :turma';
             $params[':turma'] = $t;
+            $auditUpdates['turma'] = $t;
         }
 
-        if (array_key_exists('avatarIndex', $body)) {
+        if (array_key_exists('avatarIndex', $body) && $body['avatarIndex'] !== null) {
             $idx = is_numeric($body['avatarIndex']) ? (int) $body['avatarIndex'] : -1;
             if ($idx < 0 || $idx > ProgressShared::AVATAR_INDEX_MAX) {
                 Http::error(400, 'Avatar inválido.');
             }
             $sets[] = '`avatar_index` = :av';
             $params[':av'] = $idx;
+            $auditUpdates['avatar_index'] = $idx;
         }
 
         if ($sets === []) {
-            Http::error(400, 'Nenhum campo válido para atualizar.');
+            Http::error(400, 'Nada para atualizar.');
         }
 
         $pdo = Database::pdo();
         $sql = 'UPDATE `users` SET ' . implode(', ', $sets) . ' WHERE `id` = :id';
         $upd = $pdo->prepare($sql);
         $upd->execute($params);
+
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['updateProfile'], $targetId, ['updates' => $auditUpdates]);
 
         $updated = ProgressShared::loadUserById($targetId);
         Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
@@ -393,19 +457,46 @@ final class LeaderboardAdminService
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminAdjustXp(array $user, array $body): never
+    public static function adminAdjustXp(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
         $targetId = (int) $target['id'];
 
+        $before = (int) ($target['xp'] ?? 0);
         $nextXp = null;
-        if (isset($body['setXp']) && is_numeric($body['setXp'])) {
-            $nextXp = max(0, (int) round((float) $body['setXp']));
+        $adjustMode = 'set';
+        $amount = 0;
+        $reason = isset($body['reason']) && is_string($body['reason']) ? trim($body['reason']) : '';
+
+        if (array_key_exists('xp', $body) || array_key_exists('mode', $body)) {
+            if (mb_strlen($reason, 'UTF-8') < 3) {
+                Http::error(400, 'Informe a razão do ajuste de XP.');
+            }
+            if (!isset($body['xp']) || !is_numeric($body['xp'])) {
+                Http::error(400, 'XP inválido.');
+            }
+            $amount = (int) floor((float) $body['xp']);
+            $adjustMode = isset($body['mode']) && is_string($body['mode'])
+                ? strtolower(trim($body['mode']))
+                : 'set';
+            if ($adjustMode === 'delta') {
+                $nextXp = max(0, $before + $amount);
+            } elseif ($adjustMode === 'set') {
+                $nextXp = max(0, $amount);
+            } else {
+                Http::error(400, 'mode deve ser set ou delta.');
+            }
+        } elseif (isset($body['setXp']) && is_numeric($body['setXp'])) {
+            $adjustMode = 'set';
+            $amount = (int) round((float) $body['setXp']);
+            $nextXp = max(0, $amount);
         } elseif (isset($body['deltaXp']) && is_numeric($body['deltaXp'])) {
-            $nextXp = max(0, (int) ($target['xp'] ?? 0) + (int) round((float) $body['deltaXp']));
+            $adjustMode = 'delta';
+            $amount = (int) round((float) $body['deltaXp']);
+            $nextXp = max(0, $before + $amount);
         } else {
-            Http::error(400, 'Informe deltaXp ou setXp.');
+            Http::error(400, 'XP inválido.');
         }
 
         $nextAchievements = GameCatalog::recalculateAchievements([
@@ -422,6 +513,15 @@ final class LeaderboardAdminService
             ':id' => $targetId,
         ]);
 
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['adjustXp'], $targetId, [
+            'mode' => $adjustMode,
+            'before' => $before,
+            'after' => $nextXp,
+            'amount' => $amount,
+            'reason' => $reason,
+        ]);
+
         $updated = ProgressShared::loadUserById($targetId);
         Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
     }
@@ -430,7 +530,7 @@ final class LeaderboardAdminService
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminSetLessonCompleted(array $user, array $body): never
+    public static function adminSetLessonCompleted(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
@@ -442,8 +542,9 @@ final class LeaderboardAdminService
             Http::error(400, 'Aula inválida.');
         }
 
-        $completed = !empty($body['completed']);
-        $applyLessonXp = !array_key_exists('applyLessonXp', $body) || !empty($body['applyLessonXp']);
+        $completed = ($body['completed'] ?? true) !== false
+            && ($body['completed'] ?? true) !== 'false'
+            && ($body['completed'] ?? true) !== 0;
 
         $currentLessons = is_array($target['completed_lessons'] ?? null) ? array_values($target['completed_lessons']) : [];
         $alreadyHas = in_array($lessonId, $currentLessons, true);
@@ -454,45 +555,19 @@ final class LeaderboardAdminService
             $nextLessons = array_values(array_filter($currentLessons, static fn(string $id): bool => $id !== $lessonId));
         }
 
-        $nextXp = (int) ($target['xp'] ?? 0);
-        if ($applyLessonXp) {
-            if ($completed && !$alreadyHas) {
-                $nextXp += (int) $lesson['xp'];
-            } elseif (!$completed && $alreadyHas) {
-                $nextXp = max(0, $nextXp - (int) $lesson['xp']);
-            }
-        }
-
-        $lessonAchMap = [
-            'aula1' => 'primeira_aula',
-            'aula2' => 'aula2_completa',
-            'aula3' => 'aula3_completa',
-            'aula4' => 'aula4_completa',
-        ];
-        $seededAchievements = is_array($target['conquistas'] ?? null) ? array_values($target['conquistas']) : [];
-        if (!$completed && isset($lessonAchMap[$lessonId])) {
-            $remId = $lessonAchMap[$lessonId];
-            $seededAchievements = array_values(array_filter($seededAchievements, static fn(string $id): bool => $id !== $remId));
-            if (count($nextLessons) < 3) {
-                $seededAchievements = array_values(array_filter($seededAchievements, static fn(string $id): bool => $id !== 'tres_aulas'));
-            }
-        }
-
-        $nextAchievements = GameCatalog::recalculateAchievements([
-            'xp' => $nextXp,
-            'completed_lessons' => $nextLessons,
-            'conquistas' => $seededAchievements,
-        ]);
-
         $pdo = Database::pdo();
         $upd = $pdo->prepare(
-            'UPDATE `users` SET `xp` = :xp, `completed_lessons` = :comp, `conquistas` = :conq WHERE `id` = :id'
+            'UPDATE `users` SET `completed_lessons` = :comp WHERE `id` = :id'
         );
         $upd->execute([
-            ':xp' => $nextXp,
             ':comp' => Database::encodeJsonArray($nextLessons),
-            ':conq' => Database::encodeJsonArray($nextAchievements),
             ':id' => $targetId,
+        ]);
+
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['setLessonCompleted'], $targetId, [
+            'lessonId' => $lessonId,
+            'completed' => $completed,
         ]);
 
         $updated = ProgressShared::loadUserById($targetId);
@@ -503,41 +578,38 @@ final class LeaderboardAdminService
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminGrantAchievement(array $user, array $body): never
+    public static function adminGrantAchievement(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
         $targetId = (int) $target['id'];
 
         $achievementId = isset($body['achievementId']) && is_string($body['achievementId']) ? trim($body['achievementId']) : '';
-        if ($achievementId === '') {
-            Http::error(400, 'Informe achievementId.');
+        if ($achievementId === '' || !GameCatalog::getAchievementById($achievementId)) {
+            Http::error(400, 'Conquista inválida.');
         }
 
-        $applyXp = !array_key_exists('applyAchievementXp', $body) || !empty($body['applyAchievementXp']);
-        $current = is_array($target['conquistas'] ?? null) ? array_values($target['conquistas']) : [];
-        $already = in_array($achievementId, $current, true);
-        $nextConq = $already ? $current : array_merge($current, [$achievementId]);
-        $achXp = (!$already && $applyXp) ? GameCatalog::getAchievementXp($achievementId) : 0;
-        $nextXp = max(0, (int) ($target['xp'] ?? 0) + $achXp);
+        $result = ProgressShared::awardAchievementIds($target, [$achievementId]);
 
-        $pdo = Database::pdo();
-        $upd = $pdo->prepare('UPDATE `users` SET `xp` = :xp, `conquistas` = :conq WHERE `id` = :id');
-        $upd->execute([
-            ':xp' => $nextXp,
-            ':conq' => Database::encodeJsonArray($nextConq),
-            ':id' => $targetId,
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['grantAchievement'], $targetId, [
+            'achievementId' => $achievementId,
+            'xpGain' => $result['awarded']['xp'] ?? 0,
+            'alreadyHad' => empty($result['awarded']['achievements']),
         ]);
 
-        $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, [
+            'ok' => true,
+            'user' => GameCatalog::sanitizeUser($result['user']),
+            'awarded' => $result['awarded'],
+        ]);
     }
 
     /**
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminRevokeAchievement(array $user, array $body): never
+    public static function adminRevokeAchievement(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
@@ -545,15 +617,17 @@ final class LeaderboardAdminService
 
         $achievementId = isset($body['achievementId']) && is_string($body['achievementId']) ? trim($body['achievementId']) : '';
         if ($achievementId === '') {
-            Http::error(400, 'Informe achievementId.');
+            Http::error(400, 'Conquista inválida.');
         }
 
-        $applyXp = !array_key_exists('applyAchievementXp', $body) || !empty($body['applyAchievementXp']);
         $current = is_array($target['conquistas'] ?? null) ? array_values($target['conquistas']) : [];
-        $had = in_array($achievementId, $current, true);
+        if (!in_array($achievementId, $current, true)) {
+            Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($target), 'revoked' => false]);
+        }
+
+        $xpLoss = GameCatalog::getAchievementXp($achievementId);
+        $nextXp = max(0, (int) ($target['xp'] ?? 0) - $xpLoss);
         $nextConq = array_values(array_filter($current, static fn(string $id): bool => $id !== $achievementId));
-        $achXp = ($had && $applyXp) ? GameCatalog::getAchievementXp($achievementId) : 0;
-        $nextXp = max(0, (int) ($target['xp'] ?? 0) - $achXp);
 
         $pdo = Database::pdo();
         $upd = $pdo->prepare('UPDATE `users` SET `xp` = :xp, `conquistas` = :conq WHERE `id` = :id');
@@ -563,15 +637,21 @@ final class LeaderboardAdminService
             ':id' => $targetId,
         ]);
 
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['revokeAchievement'], $targetId, [
+            'achievementId' => $achievementId,
+            'xpLoss' => $xpLoss,
+        ]);
+
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated), 'revoked' => true]);
     }
 
     /**
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminClearEmailSeal(array $user, array $body): never
+    public static function adminClearEmailSeal(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
@@ -584,6 +664,11 @@ final class LeaderboardAdminService
         $upd = $pdo->prepare('UPDATE `users` SET `email` = NULL, `email_verified_at` = NULL WHERE `id` = :id');
         $upd->execute([':id' => $targetId]);
 
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['clearEmailSeal'], $targetId, [
+            'previousEmail' => $target['email'] ?? null,
+        ]);
+
         $updated = ProgressShared::loadUserById($targetId);
         Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
     }
@@ -592,7 +677,7 @@ final class LeaderboardAdminService
      * @param array<string, mixed> $user
      * @param array<string, mixed> $body
      */
-    public static function adminInvalidateSessions(array $user, array $body): never
+    public static function adminInvalidateSessions(array $user, array $body, int $actorId = 0): never
     {
         ProgressShared::requireAdmin($user);
         $target = ProgressShared::loadTargetStudentOrAbort($body['targetUserId'] ?? null);
@@ -601,6 +686,9 @@ final class LeaderboardAdminService
         $pdo = Database::pdo();
         $del = $pdo->prepare('DELETE FROM `sessions` WHERE `user_id` = :uid');
         $del->execute([':uid' => $targetId]);
+
+        $actor = $actorId > 0 ? $actorId : (int) ($user['id'] ?? 0);
+        AdminAudit::record($actor, AdminAudit::ACTIONS['invalidateSessions'], $targetId, []);
 
         Http::json(200, ['ok' => true, 'invalidatedUserId' => $targetId]);
     }

@@ -139,6 +139,7 @@ final class ProgressController
             case 'notesListForUser':
                 FriendsNotesService::notesListForUser($user, $body);
             case 'leaderboard':
+            case 'leaderboardGet':
                 LeaderboardAdminService::leaderboardGet($user, $userId, $body);
             case 'underworldJudgment':
                 RedeemLessonsService::underworldJudgment();
@@ -147,19 +148,19 @@ final class ProgressController
             case 'listUsers':
                 LeaderboardAdminService::listUsers($user);
             case 'adminUpdateProfile':
-                LeaderboardAdminService::adminUpdateProfile($user, $body);
+                LeaderboardAdminService::adminUpdateProfile($user, $body, $userId);
             case 'adminAdjustXp':
-                LeaderboardAdminService::adminAdjustXp($user, $body);
+                LeaderboardAdminService::adminAdjustXp($user, $body, $userId);
             case 'adminSetLessonCompleted':
-                LeaderboardAdminService::adminSetLessonCompleted($user, $body);
+                LeaderboardAdminService::adminSetLessonCompleted($user, $body, $userId);
             case 'adminGrantAchievement':
-                LeaderboardAdminService::adminGrantAchievement($user, $body);
+                LeaderboardAdminService::adminGrantAchievement($user, $body, $userId);
             case 'adminRevokeAchievement':
-                LeaderboardAdminService::adminRevokeAchievement($user, $body);
+                LeaderboardAdminService::adminRevokeAchievement($user, $body, $userId);
             case 'adminClearEmailSeal':
-                LeaderboardAdminService::adminClearEmailSeal($user, $body);
+                LeaderboardAdminService::adminClearEmailSeal($user, $body, $userId);
             case 'adminInvalidateSessions':
-                LeaderboardAdminService::adminInvalidateSessions($user, $body);
+                LeaderboardAdminService::adminInvalidateSessions($user, $body, $userId);
             default:
                 Http::error(400, 'Ação desconhecida.');
         }
