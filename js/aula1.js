@@ -1,7 +1,7 @@
 'use strict';
 
 import { initAppShell } from './app-shell.js';
-import { initLessonUx } from './lesson-ux.js';
+import { bindLazySlideLoad, initLessonUx } from './lesson-ux.js';
 
 import {
   ACHIEVEMENTS,
@@ -102,16 +102,17 @@ function initSlidesViewer() {
     pdfFallback.hidden = true;
     status.textContent = 'Visualização do PPTX em localhost pode falhar; usando PDF online como fallback.';
     return;
-  } else {
-    localFallbackPanel.hidden = true;
-    pptxViewer.hidden = false;
-    pdfFallback.hidden = false;
-    pptxViewer.src = officeViewerUrl;
-    status.textContent = 'Visualização PPTX carregada para ambiente publicado.';
   }
 
-  // Fallback secundário em produção caso o PPTX não carregue no navegador do aluno.
-  pdfFallback.src = pdfRelativePath;
+  localFallbackPanel.hidden = true;
+  pptxViewer.hidden = false;
+  pdfFallback.hidden = false;
+  status.textContent = 'Abra a aba III. Slides para carregar a apresentação.';
+  bindLazySlideLoad(() => {
+    if (!pptxViewer.getAttribute('src')) pptxViewer.src = officeViewerUrl;
+    if (!pdfFallback.getAttribute('src')) pdfFallback.src = pdfRelativePath;
+    status.textContent = 'Visualização PPTX carregada para ambiente publicado.';
+  });
 }
 
 function setNotesStatus(message, kind = 'info') {

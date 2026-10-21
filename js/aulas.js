@@ -168,13 +168,13 @@ async function init() {
     token: currentToken,
   });
 
-  try {
-    publishMap = await fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id));
-  } catch {
-    publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
-  }
-
-  await refreshAssessmentStates();
+  const [map] = await Promise.all([
+    fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id)).catch(() => (
+      Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']))
+    )),
+    refreshAssessmentStates(),
+  ]);
+  publishMap = map;
   renderTrail();
 }
 

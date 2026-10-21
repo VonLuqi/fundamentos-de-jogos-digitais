@@ -208,12 +208,12 @@ assert(
 );
 assert(
   /\.achievement-slot\s*\{[^}]*overflow:\s*hidden/.test(conquistasCss)
-    && /\.achievement-slot\s*\{[^}]*contain:\s*paint/.test(conquistasCss),
+    && /\.achievement-slot\s*\{[^}]*contain:\s*(?:layout\s+)?paint/.test(conquistasCss),
   'achievement-slot base: overflow hidden + contain paint'
 );
 assert(
   /\.achievement-card\s*\{[^}]*overflow:\s*hidden/.test(dashboardCss)
-    && /\.achievement-card\s*\{[^}]*contain:\s*paint/.test(dashboardCss),
+    && /\.achievement-card\s*\{[^}]*contain:\s*(?:layout\s+)?paint/.test(dashboardCss),
   'achievement-card hub: overflow hidden + contain paint'
 );
 assert(

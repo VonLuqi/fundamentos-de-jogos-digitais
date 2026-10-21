@@ -6,7 +6,7 @@
 'use strict';
 
 import { initAppShell } from './app-shell.js';
-import { initLessonUx } from './lesson-ux.js';
+import { bindLazySlideLoad, initLessonUx } from './lesson-ux.js';
 import {
   ACHIEVEMENTS,
   ApiError,
@@ -117,9 +117,12 @@ function initSlidesViewer() {
   localFallbackPanel.hidden = true;
   pptxViewer.hidden = false;
   pdfFallback.hidden = false;
-  pptxViewer.src = officeViewerUrl;
-  status.textContent = 'Visualização PPTX carregada para ambiente publicado.';
-  pdfFallback.src = pdfRelativePath;
+  status.textContent = 'Abra a aba III. Slides para carregar a apresentação.';
+  bindLazySlideLoad(() => {
+    if (!pptxViewer.getAttribute('src')) pptxViewer.src = officeViewerUrl;
+    if (!pdfFallback.getAttribute('src')) pdfFallback.src = pdfRelativePath;
+    status.textContent = 'Visualização PPTX carregada para ambiente publicado.';
+  });
 }
 
 function setNotesStatus(message, kind = 'info') {

@@ -51,10 +51,49 @@ function escapeCell(value) {
   return String(value ?? '');
 }
 
+const RANKING_CACHE_KEY = 'hades_ranking_cache_v1';
+const RANKING_CACHE_TTL_MS = 30_000;
+const rankingMemoryCache = new Map();
+
+function rankingCacheKey(scope, sort, turma = '') {
+  return `${scope}:${sort}:${turma || ''}`;
+}
+
+function readRankingCache(key) {
+  const mem = rankingMemoryCache.get(key);
+  if (mem && Date.now() - mem.ts < RANKING_CACHE_TTL_MS) return mem.payload;
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    const raw = sessionStorage.getItem(RANKING_CACHE_KEY);
+    if (!raw) return null;
+    const all = JSON.parse(raw);
+    const entry = all?.[key];
+    if (!entry?.payload || Date.now() - Number(entry.ts || 0) > RANKING_CACHE_TTL_MS) return null;
+    rankingMemoryCache.set(key, entry);
+    return entry.payload;
+  } catch {
+    return null;
+  }
+}
+
+function writeRankingCache(key, payload) {
+  const entry = { ts: Date.now(), payload };
+  rankingMemoryCache.set(key, entry);
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    const raw = sessionStorage.getItem(RANKING_CACHE_KEY);
+    const all = raw ? JSON.parse(raw) : {};
+    all[key] = entry;
+    sessionStorage.setItem(RANKING_CACHE_KEY, JSON.stringify(all));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
 function renderRows(body, entries, selfId) {
   if (!body) return;
-  body.replaceChildren();
   if (!entries.length) {
+    body.replaceChildren();
     const tr = document.createElement('tr');
     const td = document.createElement('td');
     td.colSpan = 8;
@@ -64,6 +103,7 @@ function renderRows(body, entries, selfId) {
     return;
   }
 
+  const fragment = document.createDocumentFragment();
   for (const row of entries) {
     const tr = document.createElement('tr');
     if (Number(row.userId) === Number(selfId)) tr.classList.add('is-self');
@@ -108,8 +148,9 @@ function renderRows(body, entries, selfId) {
       }
       tr.append(td);
     });
-    body.append(tr);
+    fragment.append(tr);
   }
+  body.replaceChildren(fragment);
 }
 
 function renderSelf(panel, lineEl, self, total, sort, inTop) {
@@ -214,13 +255,39 @@ async function init() {
     state.turma = current;
   }
 
+  function applyPayload(payload) {
+    syncTurmaFilter(payload);
+    const entries = Array.isArray(payload.entries) ? payload.entries : [];
+    renderRows(body, entries, state.selfId);
+    const scopeLabel = payload.scope === 'global'
+      ? 'Global'
+      : `Turma ${payload.turma || '—'}`;
+    setText(
+      meta,
+      `${scopeLabel} · ordenado por ${SORT_LABELS[payload.sort] || payload.sort} · ${formatNumber(payload.total || 0)} almas · top ${payload.topN || 50}`,
+    );
+    const inTop = entries.some((row) => Number(row.userId) === Number(state.selfId));
+    renderSelf(selfPanel, selfLine, payload.self, payload.total, payload.sort, inTop);
+  }
+
   async function refresh() {
     clearWarning();
-    setText(meta, 'Consultando o Domínio…');
     const token = getSession()?.token;
     if (!token) {
       showWarning('Sessão inválida.');
       return;
+    }
+    const cacheKey = rankingCacheKey(
+      state.scope,
+      state.sort,
+      state.scope === 'turma' && isAdmin ? state.turma : '',
+    );
+    const cached = readRankingCache(cacheKey);
+    if (cached) {
+      applyPayload(cached);
+    } else {
+      setText(meta, 'Consultando o Domínio…');
+      body?.closest('.ranking-table')?.classList.add('is-refreshing');
     }
     try {
       const payload = await leaderboardGet(token, {
@@ -228,25 +295,15 @@ async function init() {
         sort: state.sort,
         turma: state.scope === 'turma' && isAdmin ? state.turma : undefined,
       });
-      syncTurmaFilter(payload);
-      const entries = Array.isArray(payload.entries) ? payload.entries : [];
-      renderRows(body, entries, state.selfId);
-      const scopeLabel = payload.scope === 'global'
-        ? 'Global'
-        : `Turma ${payload.turma || '—'}`;
-      setText(
-        meta,
-        `${scopeLabel} · ordenado por ${SORT_LABELS[payload.sort] || payload.sort} · ${formatNumber(payload.total || 0)} almas · top ${payload.topN || 50}`,
-      );
-      const inTop = entries.some((row) => Number(row.userId) === Number(state.selfId));
-      renderSelf(selfPanel, selfLine, payload.self, payload.total, payload.sort, inTop);
+      writeRankingCache(cacheKey, payload);
+      applyPayload(payload);
     } catch (error) {
       if (error instanceof ApiError && error.payload?.error === 'messenger_seal_required') {
         showWarning(error.payload?.message || error.message);
       } else {
         showWarning(error instanceof ApiError ? error.message : 'O Placar não respondeu.');
       }
-      if (body) {
+      if (!cached && body) {
         body.replaceChildren();
         const tr = document.createElement('tr');
         const td = document.createElement('td');
@@ -255,8 +312,12 @@ async function init() {
         tr.append(td);
         body.append(tr);
       }
-      setText(meta, 'Placar indisponível.');
-      if (selfPanel) selfPanel.hidden = true;
+      if (!cached) {
+        setText(meta, 'Placar indisponível.');
+        if (selfPanel) selfPanel.hidden = true;
+      }
+    } finally {
+      body?.closest('.ranking-table')?.classList.remove('is-refreshing');
     }
   }
 

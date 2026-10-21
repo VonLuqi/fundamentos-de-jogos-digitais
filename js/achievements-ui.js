@@ -20,6 +20,29 @@ const ACHIEVEMENT_ART_CATALOG_FILE = 'assets/achievements/catalog.json';
 /** @type {Map<string, string>} id → nome do arquivo webp */
 let achievementArtById = new Map();
 let achievementArtCatalogPromise = null;
+const ACHIEVEMENT_ART_CATALOG_CACHE_KEY = 'hades_achievement_art_catalog_v1';
+
+function readCachedAchievementArtCatalog() {
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    const raw = sessionStorage.getItem(ACHIEVEMENT_ART_CATALOG_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const map = normalizeAchievementArtCatalog(parsed);
+    return map.size > 0 ? map : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedAchievementArtCatalog(rawPayload) {
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.setItem(ACHIEVEMENT_ART_CATALOG_CACHE_KEY, JSON.stringify(rawPayload));
+  } catch {
+    /* ignore quota/private mode */
+  }
+}
 
 /**
  * Set vivo dos ids com arte. Preferir o catalog.json; este Set é preenchido no load.
@@ -64,13 +87,21 @@ function applyAchievementArtCatalog(map) {
  * Sem arte listada → UI usa emoji (sem 404).
  */
 export async function ensureAchievementArtCatalogLoaded() {
+  if (achievementArtById.size > 0) {
+    return achievementArtById;
+  }
+  const cached = readCachedAchievementArtCatalog();
+  if (cached) {
+    return applyAchievementArtCatalog(cached);
+  }
   if (!achievementArtCatalogPromise) {
-    achievementArtCatalogPromise = fetch(achievementArtCatalogUrl(), { cache: 'no-store' })
+    achievementArtCatalogPromise = fetch(achievementArtCatalogUrl())
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`Falha ao carregar catalogo de artes (${response.status})`);
         }
         const payload = await response.json();
+        writeCachedAchievementArtCatalog(payload);
         return applyAchievementArtCatalog(normalizeAchievementArtCatalog(payload));
       })
       .catch(() => applyAchievementArtCatalog(new Map()));
@@ -119,7 +150,10 @@ export function createAchievementArtNode(achievement, {
     img.className = classes;
     img.src = url;
     img.alt = '';
+    img.loading = 'lazy';
     img.decoding = 'async';
+    img.width = 96;
+    img.height = 96;
     img.draggable = false;
     img.setAttribute('aria-hidden', 'true');
     img.onerror = () => {
@@ -599,34 +633,15 @@ export async function applyRainbowCardJuiceVfx(root = document) {
   ].join(', ')));
   if (rainbowTargets.length === 0) return;
 
-  const vfx = await getRainbowVfxInstance();
-  if (!vfx) {
-    rainbowTargets.forEach((el) => {
-      el.classList.add('is-rainbow-css-fallback');
-      el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
-    });
-    return;
-  }
-
+  // Usa o fallback CSS acelerado por GPU por padrão para evitar leituras de layout
+  // (getBoundingClientRect a cada frame) do canvas WebGL durante a rolagem.
   rainbowTargets.forEach((el) => {
-    if (rainbowVfxBoundElements.has(el)) return;
-
-    try {
-      vfx.add(el, {
-        shader: 'glitch',
-        overflow: RAINBOW_VFX_OVERFLOW_PX,
-      });
-      rainbowVfxBoundElements.add(el);
-      el.classList.add('is-rainbow-vfx');
-      el.closest('.achievement-slot')?.classList.add('is-rainbow-vfx');
-    } catch {
-      el.classList.add('is-rainbow-css-fallback');
-      el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
-    }
+    rainbowVfxBoundElements.add(el);
+    el.classList.add('is-rainbow-css-fallback');
+    el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
   });
-
-  rainbowVfxCanvas = findRainbowVfxCanvas() || rainbowVfxCanvas;
-  syncRainbowVfxCanvasVisibility();
+  void RAINBOW_VFX_OVERFLOW_PX;
+  void getRainbowVfxInstance;
 }
 
 if (typeof reducedMotionQuery.addEventListener === 'function') {
@@ -712,6 +727,10 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
     return;
   }
 
+  const fragment = typeof document.createDocumentFragment === 'function'
+    ? document.createDocumentFragment()
+    : container;
+
   visibleAchievements.forEach((ach, index) => {
     const unlocked = isAchievementUnlocked(user, ach.id);
     const justUnlocked = highlightIds.includes(ach.id);
@@ -746,8 +765,12 @@ function renderCardsMode(container, user, { highlightIds, emptyMessage, achievem
       li.classList.add('is-rainbow-burst');
     }
 
-    container.appendChild(li);
+    fragment.appendChild(li);
   });
+
+  if (fragment !== container) {
+    container.appendChild(fragment);
+  }
 }
 
 /**
@@ -782,6 +805,10 @@ function renderAlbumMode(container, user, {
     container.appendChild(li);
     return;
   }
+
+  const fragment = typeof document.createDocumentFragment === 'function'
+    ? document.createDocumentFragment()
+    : container;
 
   catalog.forEach((ach, index) => {
     const model = getAlbumSlotModel(user, ach, { visitorView, viewerUser });
@@ -915,8 +942,12 @@ function renderAlbumMode(container, user, {
     }
 
     li.appendChild(button);
-    container.appendChild(li);
+    fragment.appendChild(li);
   });
+
+  if (fragment !== container) {
+    container.appendChild(fragment);
+  }
 }
 
 /**

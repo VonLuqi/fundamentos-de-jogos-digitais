@@ -88,6 +88,96 @@ let messengerGateFocused = false;
 const MESSENGER_RESEND_COPY = 'Se o selo ainda estiver pendente, o Mensageiro já partiu. Olhe a caixa — e o reino das promoções.';
 const MESSENGER_FAILED_COPY = 'O Mensageiro não partiu. Olhe o spam ou avise o Mestre — canal de e-mail.';
 const MESSENGER_BIND_FAILED_COPY = 'O endereço foi gravado, mas o Mensageiro não partiu. Avise o Mestre — canal de e-mail.';
+const DASH_PUBLISH_CACHE_KEY = 'hades_publish_map_v1';
+const DASH_RAIL_CACHE_KEY = 'hades_rail_preview_v1';
+const DASH_CACHE_TTL_MS = 30_000;
+
+function readJsonSession(key) {
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function writeJsonSession(key, value) {
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+function readPublishMapCache() {
+  const parsed = readJsonSession(DASH_PUBLISH_CACHE_KEY);
+  if (!parsed?.map || typeof parsed.map !== 'object') return null;
+  if (Date.now() - Number(parsed.ts || 0) > DASH_CACHE_TTL_MS) return null;
+  return parsed.map;
+}
+
+function writePublishMapCache(map) {
+  if (!map || typeof map !== 'object') return;
+  writeJsonSession(DASH_PUBLISH_CACHE_KEY, { ts: Date.now(), map });
+}
+
+function readRailPreviewCache(token) {
+  const parsed = readJsonSession(DASH_RAIL_CACHE_KEY);
+  if (!parsed || parsed.token !== token || !parsed.snapshot) return null;
+  if (Date.now() - Number(parsed.ts || 0) > DASH_CACHE_TTL_MS) return null;
+  return parsed.snapshot;
+}
+
+function writeRailPreviewCache(token, snapshot) {
+  if (!token || !snapshot) return;
+  writeJsonSession(DASH_RAIL_CACHE_KEY, { ts: Date.now(), token, snapshot });
+}
+
+function applyRailPreviewSnapshot(snapshot) {
+  if (!snapshot) return;
+  const summaryEl = document.getElementById('salao-preview-summary');
+  const companionsEl = document.getElementById('salao-preview-companions');
+  const turmaEl = document.getElementById('salao-preview-turma');
+  const invitesWrap = document.getElementById('salao-preview-invites-wrap');
+  const invitesEl = document.getElementById('salao-preview-invites');
+  const grimorioSummary = document.getElementById('grimorio-preview-summary');
+  if (turmaEl && snapshot.turmaText) turmaEl.textContent = snapshot.turmaText;
+  if (companionsEl && snapshot.companionsText) companionsEl.textContent = snapshot.companionsText;
+  if (invitesWrap && invitesEl) {
+    if (Number(snapshot.incomingCount) > 0) {
+      invitesWrap.hidden = false;
+      invitesEl.textContent = String(snapshot.incomingCount);
+    } else {
+      invitesWrap.hidden = true;
+    }
+  }
+  if (summaryEl && snapshot.summary) summaryEl.textContent = snapshot.summary;
+  if (grimorioSummary && snapshot.grimorioSummary) grimorioSummary.textContent = snapshot.grimorioSummary;
+
+  const notes = Array.isArray(snapshot.grimorioNotes) ? snapshot.grimorioNotes : [];
+  const previewHost = document.getElementById('grimorio-preview');
+  if (!previewHost || notes.length === 0) return;
+  let list = document.getElementById('grimorio-preview-list');
+  if (!list) {
+    list = document.createElement('ul');
+    list.id = 'grimorio-preview-list';
+    list.className = 'grimorio-preview-list';
+    list.setAttribute('aria-label', 'Inscrições recentes');
+    previewHost.appendChild(list);
+  }
+  list.replaceChildren();
+  notes.forEach((note) => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = `./grimorio-nota.html?id=${encodeURIComponent(note.id)}`;
+    a.textContent = note.pinned ? `◆ ${note.title}` : note.title;
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+}
 
 function mergeSelfUser(next) {
   const prev = currentUser || {};
@@ -447,13 +537,15 @@ async function renderRailPreviews(token) {
   const invitesWrap = document.getElementById('salao-preview-invites-wrap');
   const invitesEl = document.getElementById('salao-preview-invites');
   const grimorioSummary = document.getElementById('grimorio-preview-summary');
+  const cachedRail = token ? readRailPreviewCache(token) : null;
+  if (cachedRail) applyRailPreviewSnapshot(cachedRail);
 
-  if (turmaEl) {
+  if (turmaEl && !cachedRail) {
     const turma = currentUser?.turma;
     turmaEl.textContent = turma ? String(turma) : 'Ver no Salão';
   }
 
-  if (grimorioSummary) {
+  if (grimorioSummary && !cachedRail) {
     grimorioSummary.textContent = 'O Grimório espera a primeira inscrição.';
   }
 
@@ -557,6 +649,21 @@ async function renderRailPreviews(token) {
             list.appendChild(li);
           });
       }
+    }
+
+    if (token) {
+      writeRailPreviewCache(token, {
+        turmaText: turmaEl?.textContent || '',
+        companionsText: companionsEl?.textContent || '',
+        incomingCount,
+        summary: summaryEl?.textContent || '',
+        grimorioSummary: grimorioSummary?.textContent || '',
+        grimorioNotes: (notesPayload.notes || [])
+          .slice()
+          .sort((a, b) => Number(b.pinned) - Number(a.pinned))
+          .slice(0, 3)
+          .map((note) => ({ id: note.id, title: note.title, pinned: note.pinned })),
+      });
     }
   } catch {
     if (summaryEl) summaryEl.textContent = 'Os laços estão inacessíveis no momento.';
@@ -1992,6 +2099,7 @@ function renderMasterLessonsMatrix(perLessonStats = {}) {
       try {
         await setLessonGate(currentToken, lesson.id, PUBLISHED_GATE_KEY, next);
         publishMap[lesson.id] = next;
+        writePublishMapCache(publishMap);
         renderLessons(currentUser);
         await refreshAdminOverview();
       } catch (error) {
@@ -2610,33 +2718,22 @@ async function init() {
       : undefined,
   });
 
-  await avatarCountReady; // garante getAvatarCount()/avatarSafeIndex corretos antes de renderizar
+  await avatarCountReady; // cache de catálogo torna isto instantâneo após a 1ª leitura
 
-  try {
-    publishMap = await fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id));
-  } catch {
-    publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
+  const cachedPublish = readPublishMapCache();
+  if (cachedPublish) {
+    publishMap = cachedPublish;
   }
 
   if (typeof result.gates?.despertar?.published === 'boolean') {
     despertarPublished = result.gates.despertar.published;
-  } else {
-    try {
-      despertarPublished = await fetchDespertarPublished(currentToken);
-    } catch {
-      despertarPublished = false;
-    }
   }
 
-  // A hidratação visual (stats/cards) pode falhar por dado inesperado
-  // do servidor, mas isso NUNCA pode impedir os botões de funcionar.
-  // Por isso a renderização fica isolada em seu próprio try/catch,
-  // separado da vinculação dos event listeners logo abaixo.
   try {
     renderProfile(currentUser);
     renderAchievements(currentUser);
     renderLessons(currentUser);
-    renderXpBar(currentUser, { fromZero: true }); // JUICE: enche de 0 até o valor real
+    renderXpBar(currentUser, { fromZero: true });
   } catch (error) {
     console.error('[dashboard] Falha ao renderizar os dados do perfil:', error);
   }
@@ -2646,10 +2743,32 @@ async function init() {
   initAdminTools();
   initMessengerSeal();
   initUnderworldGate();
-  // Previews do trilho (amigos/notas) — selo não bloqueia mais.
   renderRailPreviews(currentToken).catch((error) => {
     console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
   });
+
+  void fetchLessonsPublishMap(currentToken, LESSONS.map((lesson) => lesson.id))
+    .then((map) => {
+      publishMap = map;
+      writePublishMapCache(map);
+      renderLessons(currentUser);
+    })
+    .catch(() => {
+      if (!cachedPublish) {
+        publishMap = Object.fromEntries(LESSONS.map((lesson) => [lesson.id, lesson.id === 'aula1']));
+        renderLessons(currentUser);
+      }
+    });
+
+  if (typeof result.gates?.despertar?.published !== 'boolean') {
+    fetchDespertarPublished(currentToken)
+      .then((published) => {
+        despertarPublished = published;
+      })
+      .catch(() => {
+        despertarPublished = false;
+      });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

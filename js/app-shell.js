@@ -22,6 +22,57 @@ const FOCUSABLE_SELECTOR = [
 ].join(',');
 
 let lastFocusedBeforeOpen = null;
+const prefetchedNavUrls = new Set();
+
+function bindNavPrefetch(shell) {
+  if (!shell || typeof document === 'undefined' || !document.head) return;
+  const triggerPrefetch = (link) => {
+    if (!link || link.getAttribute('aria-disabled') === 'true' || link.hidden) return;
+    const rawHref = link.getAttribute('href');
+    if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:')) return;
+    let resolvedUrl = rawHref;
+    try {
+      resolvedUrl = new URL(rawHref, window.location.href).href;
+      if (resolvedUrl === window.location.href) return;
+    } catch {
+      return;
+    }
+    if (prefetchedNavUrls.has(resolvedUrl)) return;
+    prefetchedNavUrls.add(resolvedUrl);
+    const hint = document.createElement('link');
+    hint.rel = 'prefetch';
+    hint.href = resolvedUrl;
+    hint.as = 'document';
+    document.head.appendChild(hint);
+  };
+
+  shell.querySelectorAll('.app-shell__link[href]').forEach((link) => {
+    if (link.dataset.prefetchBound === '1') return;
+    link.dataset.prefetchBound = '1';
+    link.addEventListener('pointerenter', () => triggerPrefetch(link), { passive: true });
+    link.addEventListener('focus', () => triggerPrefetch(link), { passive: true });
+  });
+}
+
+function prehydrateAppShellOnLoad() {
+  if (typeof document === 'undefined') return;
+  const shell = document.querySelector('[data-shell]');
+  if (!shell) return;
+  const sidebar = shell.querySelector('[data-shell-sidebar]');
+  const toggle = shell.querySelector('[data-shell-toggle]');
+  const overlay = shell.querySelector('[data-shell-overlay]');
+  const activeNav = mapRouteToNavItem(document.body?.dataset?.route || '');
+  if (activeNav) {
+    shell.querySelectorAll('[data-nav-item]').forEach((item) => {
+      const isActive = item.dataset.navItem === activeNav;
+      item.classList.toggle('is-active', isActive);
+      if (isActive) item.setAttribute('aria-current', 'page');
+      else item.removeAttribute('aria-current');
+    });
+  }
+  syncShellState(shell, sidebar, toggle, overlay);
+  bindNavPrefetch(shell);
+}
 
 /**
  * Destinos primários do aside (aluno):
@@ -294,6 +345,7 @@ export function initAppShell({
   );
 
   bindLockedNavClicks(shell);
+  bindNavPrefetch(shell);
 
   if (mainRegion && !mainRegion.hasAttribute('tabindex')) {
     mainRegion.setAttribute('tabindex', '-1');
@@ -411,3 +463,6 @@ export function initAppShell({
     despertarGatePromise,
   };
 }
+
+prehydrateAppShellOnLoad();
+

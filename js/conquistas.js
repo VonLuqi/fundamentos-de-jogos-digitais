@@ -38,6 +38,7 @@ const FOCUSABLE_SELECTOR = [
 
 let currentUser = null;
 let lastFocusedSlot = null;
+let pendingInspectRafId = 0;
 let activeInspectedAchievement = null;
 let activeInspectedState = 'locked';
 let currentAlbumFilter = 'all';
@@ -242,9 +243,9 @@ function focusAlbumSlot(achievementId, { openModal = false, scroll = true } = {}
   const slot = document.getElementById(`relic-${achievementId}`);
   if (!slot) return false;
 
-  document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
-    el.classList.remove('is-focused');
-  });
+  if (lastFocusedSlot && lastFocusedSlot !== slot) {
+    lastFocusedSlot.classList.remove('is-focused');
+  }
   slot.classList.add('is-focused');
   if (scroll) {
     slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -287,21 +288,39 @@ function slotMatchesRarityFilter(slot, rarityFilter) {
 }
 
 function updateCabinetFilterButtonLabels(slots) {
+  const stateCounts = { all: 0, unlocked: 0, locked: 0, secret: 0 };
+  const rarityCounts = { all: 0, stone: 0, copper: 0, silver: 0, gold: 0, rainbow: 0, unique: 0 };
+
+  for (let i = 0; i < slots.length; i += 1) {
+    const slot = slots[i];
+    const matchesCurrentRarity = slotMatchesRarityFilter(slot, currentRarityFilter);
+    if (matchesCurrentRarity) {
+      stateCounts.all += 1;
+      if (slotMatchesStateFilter(slot, 'unlocked')) stateCounts.unlocked += 1;
+      if (slotMatchesStateFilter(slot, 'locked')) stateCounts.locked += 1;
+      if (slotMatchesStateFilter(slot, 'secret')) stateCounts.secret += 1;
+    }
+
+    if (slotMatchesStateFilter(slot, currentAlbumFilter)) {
+      rarityCounts.all += 1;
+      const rarity = slot.dataset.rarity || 'stone';
+      if (rarity in rarityCounts) {
+        rarityCounts[rarity] += 1;
+      }
+    }
+  }
+
   document.querySelectorAll('[data-album-filter]').forEach((btn) => {
     const key = btn.dataset.albumFilter || 'all';
     const baseLabel = STATE_FILTER_LABELS[key] || btn.textContent.trim();
-    const count = slots.filter(
-      (slot) => slotMatchesStateFilter(slot, key) && slotMatchesRarityFilter(slot, currentRarityFilter),
-    ).length;
+    const count = stateCounts[key] ?? 0;
     btn.textContent = `${baseLabel} (${count})`;
   });
 
   document.querySelectorAll('[data-album-rarity]').forEach((btn) => {
     const key = btn.dataset.albumRarity || 'all';
     const baseLabel = RARITY_FILTER_LABELS[key] || btn.textContent.trim();
-    const count = slots.filter(
-      (slot) => slotMatchesStateFilter(slot, currentAlbumFilter) && slotMatchesRarityFilter(slot, key),
-    ).length;
+    const count = rarityCounts[key] ?? 0;
     btn.textContent = key === 'all' ? baseLabel : `${baseLabel} (${count})`;
   });
 }
@@ -374,13 +393,22 @@ function selectInitialInspectorSlot() {
 }
 
 function handleSlotInspect(achievement, state, slotEl, { scrollInspectorOnMobile = false } = {}) {
+  if (lastFocusedSlot === slotEl && activeInspectedAchievement === achievement && !scrollInspectorOnMobile) {
+    return;
+  }
+  if (lastFocusedSlot && lastFocusedSlot !== slotEl) {
+    lastFocusedSlot.classList.remove('is-focused');
+  }
   lastFocusedSlot = slotEl;
   slotEl.classList.add('is-focused');
-  document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
-    if (el !== slotEl) el.classList.remove('is-focused');
-  });
 
-  void updateRelicInspector(achievement, state);
+  if (pendingInspectRafId) {
+    window.cancelAnimationFrame(pendingInspectRafId);
+  }
+  pendingInspectRafId = window.requestAnimationFrame(() => {
+    pendingInspectRafId = 0;
+    void updateRelicInspector(achievement, state);
+  });
 
   if (scrollInspectorOnMobile && window.matchMedia('(max-width: 960px)').matches) {
     document.getElementById('relic-inspector')?.scrollIntoView({

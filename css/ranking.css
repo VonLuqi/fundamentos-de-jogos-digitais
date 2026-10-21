@@ -89,6 +89,7 @@
 
 .ranking-table-wrap {
   overflow-x: auto;
+  min-height: 12rem;
   border: 2px solid var(--hades-gold-dark, #8a6a2f);
   outline: 1px solid var(--hades-gold, #cfa759);
   outline-offset: 3px;
@@ -100,6 +101,11 @@
   border-collapse: collapse;
   font-family: var(--font-body);
   font-size: 0.95rem;
+  transition: opacity 180ms ease;
+}
+
+.ranking-table.is-refreshing {
+  opacity: 0.62;
 }
 
 .ranking-table th,

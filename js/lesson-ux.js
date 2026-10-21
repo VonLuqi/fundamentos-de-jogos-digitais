@@ -7,6 +7,26 @@
 
 'use strict';
 
+export function bindLazySlideLoad(loadSlides) {
+  if (typeof loadSlides !== 'function') return;
+  const slidesPanel = document.getElementById('slides');
+  let loaded = false;
+  const run = () => {
+    if (loaded) return;
+    loaded = true;
+    loadSlides();
+  };
+
+  if (slidesPanel?.classList.contains('is-active')) {
+    run();
+    return;
+  }
+
+  document.querySelectorAll('.tab[data-tab="slides"], [data-goto-tab="slides"]').forEach((trigger) => {
+    trigger.addEventListener('click', run, { once: true });
+  });
+}
+
 function switchToTab(tabId) {
   const targetTab = document.querySelector(`.tab[data-tab="${tabId}"]`);
   if (!targetTab) return;

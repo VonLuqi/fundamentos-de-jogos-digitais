@@ -63,6 +63,29 @@ const AVATAR_FILTER_ALL_ID = 'todos';
 
 let avatarCatalog = [];
 let avatarCatalogPromise = null;
+const AVATAR_CATALOG_CACHE_KEY = 'hades_avatar_catalog_v1';
+
+function readCachedAvatarCatalog() {
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    const raw = sessionStorage.getItem(AVATAR_CATALOG_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    const normalized = normalizeAvatarCatalog(parsed);
+    return normalized.length > 0 ? normalized : null;
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedAvatarCatalog(rawPayload) {
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.setItem(AVATAR_CATALOG_CACHE_KEY, JSON.stringify(rawPayload));
+  } catch {
+    /* ignore quota/private mode */
+  }
+}
 
 function normalizeAvatarSearchTerm(value) {
   return String(value ?? '')
@@ -155,14 +178,23 @@ function currentAvatarCatalog() {
 }
 
 async function ensureAvatarCatalogLoaded() {
+  if (avatarCatalog.length > 0) {
+    return avatarCatalog;
+  }
+  const cached = readCachedAvatarCatalog();
+  if (cached) {
+    avatarCatalog = cached;
+    return avatarCatalog;
+  }
   if (!avatarCatalogPromise) {
-    avatarCatalogPromise = fetch(avatarCatalogUrl(), { cache: 'no-store' })
+    avatarCatalogPromise = fetch(avatarCatalogUrl())
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`Falha ao carregar catalogo (${response.status})`);
         }
 
         const payload = await response.json();
+        writeCachedAvatarCatalog(payload);
         const normalized = normalizeAvatarCatalog(payload);
         avatarCatalog = normalized.length > 0 ? normalized : defaultAvatarCatalog();
         return avatarCatalog;
@@ -390,7 +422,38 @@ export function getSession() {
 export function clearSession() {
   localStorage.removeItem(SESSION_KEY);
   setBootstrapGates(null);
+  invalidateSessionBootstrapCache();
 }
+
+const READ_ONLY_API_ACTIONS = new Set([
+  'lessonGates',
+  'lessonGatesBatch',
+  'getLessonParagraph',
+  'listMyLessonParagraphs',
+  'listUsers',
+  'listCodes',
+  'adminOverview',
+  'adminAuditLog',
+  'adminMailerStatus',
+  'lessonCode',
+  'friendsList',
+  'classmatesList',
+  'leaderboardGet',
+  'friendSearch',
+  'lessonDuoList',
+  'lessonJournalGet',
+  'friendProfile',
+  'notesList',
+  'noteGet',
+  'notesListAdmin',
+  'notesListForUser',
+  'stateGet',
+  'lessonView',
+  'status',
+  'listExams',
+  'getExam',
+  'getAttempt',
+]);
 
 /* ============================================================
    3. TRANSPORTE HTTP
@@ -424,6 +487,22 @@ async function request(path, options = {}) {
   if (!response.ok || payload.ok === false) {
     throw new ApiError(payload?.error ?? 'Erro desconhecido no Domínio.', response.status, payload);
   }
+
+  const method = String(fetchOptions.method || 'GET').toUpperCase();
+  if (method !== 'GET') {
+    let action = '';
+    if (typeof fetchOptions.body === 'string') {
+      try {
+        action = String(JSON.parse(fetchOptions.body)?.action || '');
+      } catch {
+        action = '';
+      }
+    }
+    if (!action || !READ_ONLY_API_ACTIONS.has(action)) {
+      invalidateSessionBootstrapCache();
+    }
+  }
+
   return payload;
 }
 
@@ -609,12 +688,65 @@ export async function fetchSessionBootstrap(token) {
 
 /** Cache em memória do último bootstrap (mesmo page-load → shell sem 2º GET de gate). */
 let bootstrapGatesCache = null;
+const SESSION_BOOTSTRAP_SWR_KEY = 'hades_session_bootstrap_swr_v1';
+const SESSION_BOOTSTRAP_SWR_TTL_MS = 30_000;
+
+function readSessionBootstrapSwr(token) {
+  if (!token) return null;
+  try {
+    if (typeof sessionStorage === 'undefined') return null;
+    const raw = sessionStorage.getItem(SESSION_BOOTSTRAP_SWR_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.token !== token || !parsed.user || !parsed.gates) return null;
+    if (Date.now() - Number(parsed.ts || 0) > SESSION_BOOTSTRAP_SWR_TTL_MS) return null;
+    return {
+      user: normalizeUser(parsed.user),
+      gates: parsed.gates,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function writeSessionBootstrapSwr(token, user, gates) {
+  if (!token || !user || !gates) return;
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    sessionStorage.setItem(
+      SESSION_BOOTSTRAP_SWR_KEY,
+      JSON.stringify({ token, ts: Date.now(), user, gates }),
+    );
+  } catch {
+    /* ignore quota/private mode */
+  }
+}
+
+export function invalidateSessionBootstrapCache() {
+  bootstrapGatesCache = null;
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem(SESSION_BOOTSTRAP_SWR_KEY);
+    }
+  } catch {
+    /* ignore */
+  }
+}
 
 /**
  * @returns {{ token: string, gates: { despertar: { published: boolean }, prova?: { inProgress: boolean } } } | null}
  */
 export function getBootstrapGates() {
-  return bootstrapGatesCache;
+  if (bootstrapGatesCache) return bootstrapGatesCache;
+  const session = getSession();
+  if (session?.token) {
+    const cached = readSessionBootstrapSwr(session.token);
+    if (cached?.gates) {
+      bootstrapGatesCache = { token: session.token, gates: cached.gates };
+      return bootstrapGatesCache;
+    }
+  }
+  return null;
 }
 
 function setBootstrapGates(token, gates) {
@@ -1962,12 +2094,38 @@ export async function requireSession(options = {}) {
 
   const finishOk = (user, gates = null) => {
     saveSession({ token: session.token, name: user.name, role: user.role });
-    if (gates) setBootstrapGates(session.token, gates);
-    else setBootstrapGates(null);
+    if (gates) {
+      setBootstrapGates(session.token, gates);
+      writeSessionBootstrapSwr(session.token, user, gates);
+    } else {
+      setBootstrapGates(null);
+    }
     // Task C1: tentativa in_progress → força retorno à prova (exceto prova/auth/admin)
     if (redirectIfProvaInProgress(user, gates)) return null;
     return { session, user, gates };
   };
+
+  if (!options?.forceRefresh && shouldSkipProvaInProgressRedirect() === false) {
+    const cachedBoot = readSessionBootstrapSwr(session.token);
+    if (cachedBoot && !cachedBoot.gates?.prova?.inProgress) {
+      const immediateResult = finishOk(cachedBoot.user, cachedBoot.gates);
+      // Revalidação SWR silenciosa em segundo plano
+      void fetchSessionBootstrap(session.token)
+        .then((fresh) => {
+          saveSession({ token: session.token, name: fresh.user.name, role: fresh.user.role });
+          setBootstrapGates(session.token, fresh.gates);
+          writeSessionBootstrapSwr(session.token, fresh.user, fresh.gates);
+          redirectIfProvaInProgress(fresh.user, fresh.gates);
+        })
+        .catch((err) => {
+          if (err instanceof ApiError && err.status === 401) {
+            clearSession();
+            window.location.replace(ROUTES.auth());
+          }
+        });
+      return immediateResult;
+    }
+  }
 
   const validateLegacy = async () => {
     const { user } = await validateSession(session.token);

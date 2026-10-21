@@ -812,7 +812,7 @@ body.is-messenger-gate .app-shell__link[data-nav-item="dashboard"] {
   background: var(--hades-panel-alt);
   border: 1px solid var(--hades-gold-dark);
   overflow: hidden;
-  contain: paint;
+  contain: layout paint;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
 
   /* Só opacity — animar transform bloqueava o :hover (fill-mode both). */
@@ -1051,6 +1051,13 @@ img.achievement-card__art.has-art {
 
 .achievement-card.is-unlocked[data-rarity='silver'] {
   animation: silverSheen 3.2s ease-in-out infinite;
+}
+
+.achievement-card.is-unlocked[data-rarity='silver']:not(:hover):not(:focus-within):not(.is-just-unlocked),
+.achievement-card.is-unlocked[data-rarity='gold']:not(:hover):not(:focus-within):not(.is-just-unlocked),
+.achievement-card.is-unlocked[data-rarity='silver']:not(:hover):not(:focus-within):not(.is-just-unlocked)::before,
+.achievement-card.is-unlocked[data-rarity='gold']:not(:hover):not(:focus-within):not(.is-just-unlocked)::before {
+  animation-play-state: paused;
 }
 
 .achievement-card.is-unlocked[data-rarity='silver'] .achievement-card__rarity {
