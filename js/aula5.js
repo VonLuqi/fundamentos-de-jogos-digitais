@@ -6,6 +6,7 @@
 'use strict';
 
 import { initAppShell } from './app-shell.js';
+import { initLessonUx } from './lesson-ux.js';
 import {
   ACHIEVEMENTS,
   ApiError,
@@ -143,6 +144,7 @@ function initIarc() {
 
 async function init() {
   initTabs();
+  initLessonUx();
   initClassindCta();
   initSlidesViewer();
   bindLessonDiscoveryLifecycle();

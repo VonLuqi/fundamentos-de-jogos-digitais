@@ -6,6 +6,7 @@
 'use strict';
 
 import { initAppShell } from './app-shell.js';
+import { initLessonUx } from './lesson-ux.js';
 import {
   ACHIEVEMENTS,
   ApiError,
@@ -275,6 +276,7 @@ function initAdminExample() {
 
 async function init() {
   initTabs();
+  initLessonUx();
   initSlidesViewer();
   bindLessonDiscoveryLifecycle();
 

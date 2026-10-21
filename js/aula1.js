@@ -1,6 +1,7 @@
 'use strict';
 
 import { initAppShell } from './app-shell.js';
+import { initLessonUx } from './lesson-ux.js';
 
 import {
   ACHIEVEMENTS,
@@ -476,6 +477,7 @@ function initAdminExample() {
 
 async function init() {
   initTabs();
+  initLessonUx();
   initSlidesViewer();
   initFeelLab();
   bindLessonDiscoveryLifecycle();
