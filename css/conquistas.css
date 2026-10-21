@@ -285,6 +285,10 @@ body.is-relic-modal-open {
 }
 
 /* Soberano do Submundo — destaque hero no álbum/Espelho (mesmo velado) */
+.achievement-slot.is-unique-vfx {
+  z-index: 3;
+}
+
 .achievement-slot.is-soberano-featured {
   grid-column: 1 / -1;
   justify-self: center;

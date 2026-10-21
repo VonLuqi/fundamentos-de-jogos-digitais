@@ -260,6 +260,9 @@ export function setRainbowVfxSuspended(suspended, reason = 'default') {
   else rainbowVfxSuspendReasons.delete(key);
   rainbowVfxSuspended = rainbowVfxSuspendReasons.size > 0;
   syncRainbowVfxCanvasVisibility();
+  if (rainbowVfxSuspended) {
+    stopUniqueGlitchBurst();
+  }
 }
 
 /** Catálogo visível no modo cards (hidden só aparece se desbloqueada, exceto admin). */
@@ -621,9 +624,102 @@ async function getRainbowVfxInstance() {
 
 /** Overflow do shader glitch — baixo p/ conviver com `overflow: hidden` no card/face. */
 const RAINBOW_VFX_OVERFLOW_PX = 8;
+const UNIQUE_GLITCH_ON_MS = 1400;
+const UNIQUE_GLITCH_OFF_MS = 9000;
+const uniqueGlitchElements = new Set();
+let uniqueGlitchVfx = null;
+let uniqueGlitchOnTimer = 0;
+let uniqueGlitchOffTimer = 0;
+let uniqueGlitchLoopStarted = false;
+
+function isElementMostlyVisible(el) {
+  if (!el?.isConnected) return false;
+  const rect = el.getBoundingClientRect();
+  if (rect.width < 8 || rect.height < 8) return false;
+  const vh = window.innerHeight || 0;
+  return rect.bottom > 48 && rect.top < vh - 16;
+}
+
+function clearUniqueGlitchTimers() {
+  if (uniqueGlitchOnTimer) {
+    window.clearTimeout(uniqueGlitchOnTimer);
+    uniqueGlitchOnTimer = 0;
+  }
+  if (uniqueGlitchOffTimer) {
+    window.clearTimeout(uniqueGlitchOffTimer);
+    uniqueGlitchOffTimer = 0;
+  }
+}
+
+function stopUniqueGlitchBurst() {
+  if (!uniqueGlitchVfx) return;
+  uniqueGlitchElements.forEach((el) => {
+    try {
+      uniqueGlitchVfx.remove(el);
+    } catch {
+      /* já removido */
+    }
+    rainbowVfxBoundElements.delete(el);
+    el.classList.remove('is-unique-vfx');
+    el.closest('.achievement-slot')?.classList.remove('is-unique-vfx');
+  });
+}
+
+function scheduleUniqueGlitchLoop() {
+  if (uniqueGlitchLoopStarted) return;
+  uniqueGlitchLoopStarted = true;
+  void runUniqueGlitchPulse();
+}
+
+async function runUniqueGlitchPulse() {
+  clearUniqueGlitchTimers();
+  if (reducedMotionQuery.matches || rainbowVfxSuspended) {
+    uniqueGlitchOffTimer = window.setTimeout(runUniqueGlitchPulse, UNIQUE_GLITCH_OFF_MS);
+    return;
+  }
+
+  [...uniqueGlitchElements].forEach((el) => {
+    if (!el.isConnected) uniqueGlitchElements.delete(el);
+  });
+  if (uniqueGlitchElements.size === 0) {
+    uniqueGlitchLoopStarted = false;
+    return;
+  }
+
+  const vfx = await getRainbowVfxInstance();
+  if (!vfx) {
+    uniqueGlitchLoopStarted = false;
+    return;
+  }
+  uniqueGlitchVfx = vfx;
+
+  const visible = [...uniqueGlitchElements].filter(isElementMostlyVisible);
+  visible.forEach((el) => {
+    if (rainbowVfxBoundElements.has(el)) return;
+    try {
+      vfx.add(el, {
+        shader: 'glitch',
+        overflow: RAINBOW_VFX_OVERFLOW_PX,
+      });
+      rainbowVfxBoundElements.add(el);
+      el.classList.add('is-unique-vfx');
+      el.closest('.achievement-slot')?.classList.add('is-unique-vfx');
+    } catch {
+      /* card Único já tem juice CSS próprio */
+    }
+  });
+  rainbowVfxCanvas = findRainbowVfxCanvas() || rainbowVfxCanvas;
+  syncRainbowVfxCanvasVisibility();
+
+  uniqueGlitchOnTimer = window.setTimeout(() => {
+    stopUniqueGlitchBurst();
+    const restMs = UNIQUE_GLITCH_OFF_MS + Math.round(Math.random() * 2500);
+    uniqueGlitchOffTimer = window.setTimeout(runUniqueGlitchPulse, restMs);
+  }, UNIQUE_GLITCH_ON_MS);
+}
 
 export async function applyRainbowCardJuiceVfx(root = document) {
-  if (rainbowVfxDisabled || reducedMotionQuery.matches) return;
+  if (reducedMotionQuery.matches) return;
 
   const scope = root?.querySelectorAll ? root : document;
   /* Só desbloqueadas: locked rainbow não deve “viver” como Juramento. */
@@ -631,17 +727,21 @@ export async function applyRainbowCardJuiceVfx(root = document) {
     '.achievement-card.is-unlocked[data-rarity="rainbow"]',
     '.achievement-slot.is-unlocked[data-rarity="rainbow"] .achievement-slot__face',
   ].join(', ')));
-  if (rainbowTargets.length === 0) return;
 
-  // Usa o fallback CSS acelerado por GPU por padrão para evitar leituras de layout
-  // (getBoundingClientRect a cada frame) do canvas WebGL durante a rolagem.
+  // Arco-íris fica no fallback CSS (sem WebGL no scroll). Glitch WebGL só no Único.
   rainbowTargets.forEach((el) => {
-    rainbowVfxBoundElements.add(el);
     el.classList.add('is-rainbow-css-fallback');
     el.closest('.achievement-slot')?.classList.add('is-rainbow-css-fallback');
   });
-  void RAINBOW_VFX_OVERFLOW_PX;
-  void getRainbowVfxInstance;
+
+  const uniqueTargets = Array.from(scope.querySelectorAll([
+    '.achievement-card.is-unlocked[data-rarity="unique"]',
+    '.achievement-slot.is-unlocked[data-rarity="unique"] .achievement-slot__face',
+  ].join(', ')));
+  uniqueTargets.forEach((el) => uniqueGlitchElements.add(el));
+  if (uniqueTargets.length > 0) {
+    scheduleUniqueGlitchLoop();
+  }
 }
 
 if (typeof reducedMotionQuery.addEventListener === 'function') {
