@@ -94,9 +94,9 @@ final class CronController
 
     private static function requireCronSecret(): void
     {
-        $secret = trim(Env::get('CRON_SECRET', ''));
-        $bearer = Http::bearerToken();
-        $querySecret = trim(Http::query('secret', ''));
+        $secret = trim((string) Env::get('CRON_SECRET', ''));
+        $bearer = trim((string) (Http::bearerToken() ?? ''));
+        $querySecret = trim((string) (Http::query('secret', '') ?? ''));
         $provided = $bearer !== '' ? $bearer : $querySecret;
         if ($secret === '' || $provided === '' || !hash_equals($secret, $provided)) {
             Http::json(401, ['error' => 'Unauthorized']);
