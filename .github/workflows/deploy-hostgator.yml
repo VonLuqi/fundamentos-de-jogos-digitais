@@ -30,7 +30,7 @@ jobs:
         run: |
           find backend -name "*.php" -print0 | xargs -0 -n1 php -l
 
-      - name: Deploy files to HostGator via FTP
+      - name: Deploy Public Frontend to HostGator (/projects/public)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -44,6 +44,8 @@ jobs:
             **/.git*/**
             **/.cursor/**
             **/.github/**
+            **/.vscode/**
+            .vscode/**
             **/node_modules/**
             **/tests/**
             **/scripts/**
@@ -54,6 +56,9 @@ jobs:
             .env.*
             **/.env
             **/.env.*
+            backend/src/**
+            backend/bootstrap.php
+            backend/cron-purge.php
             backend/storage/**
             *.md
             *.mjs
@@ -63,3 +68,23 @@ jobs:
             vercel.json
             middleware.js
             migrate-passwords.js
+
+      - name: Deploy Private Backend to HostGator (/projects/src)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT || 21 }}
+          protocol: ${{ secrets.FTP_PROTOCOL || 'ftp' }}
+          local-dir: ./backend/
+          server-dir: ${{ secrets.FTP_BACKEND_DIR || './projects/src/fundamentos-de-jogos-digitais/' }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            index.php
+            storage/**
+            .env
+            .env.*
+            **/.env
+            **/.env.*

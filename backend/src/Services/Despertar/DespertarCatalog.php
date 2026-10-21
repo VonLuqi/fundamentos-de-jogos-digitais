@@ -304,7 +304,8 @@ final class DespertarCatalog
         if (self::$juizoPool !== null) {
             return self::$juizoPool;
         }
-        $path = dirname(__DIR__, 3) . '/data/despertar-juizo-pool.stub.json';
+        $root = defined('FJD_ROOT') ? FJD_ROOT : dirname(__DIR__, 3);
+        $path = $root . '/data/despertar-juizo-pool.stub.json';
         if (!is_file($path)) {
             self::$juizoPool = [];
             return [];

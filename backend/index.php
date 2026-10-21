@@ -6,7 +6,14 @@ declare(strict_types=1);
  * Todas as requisições a `/api/*` são encaminhadas para cá pelo `.htaccess`.
  */
 
-require_once __DIR__ . '/bootstrap.php';
+define('FJD_ROOT', dirname(__DIR__));
+
+$externalBootstrap = dirname(__DIR__, 3) . '/src/' . basename(dirname(__DIR__)) . '/bootstrap.php';
+if (is_file($externalBootstrap)) {
+    require_once $externalBootstrap;
+} else {
+    require_once __DIR__ . '/bootstrap.php';
+}
 
 use App\Controllers\AuthController;
 use App\Controllers\ClassindController;

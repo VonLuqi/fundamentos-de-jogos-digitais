@@ -12,16 +12,27 @@ final class Env
     /** @var array<string, string> */
     private static array $vars = [];
 
-    public static function load(string $rootDir): void
+    public static function load(string $rootDir, ?string $backendDir = null): void
     {
         if (self::$loaded) {
             return;
         }
         self::$loaded = true;
 
-        // .env primeiro, depois .env.local sobrescreve (mesma precedência do projeto)
-        self::loadFile($rootDir . '/.env');
-        self::loadFile($rootDir . '/.env.local');
+        $dirs = [$rootDir];
+        if ($backendDir !== null && $backendDir !== '' && !in_array($backendDir, $dirs, true)) {
+            $dirs[] = $backendDir;
+        }
+        $externalSrcDir = dirname($rootDir, 2) . '/src/' . basename($rootDir);
+        if (!in_array($externalSrcDir, $dirs, true) && is_dir($externalSrcDir)) {
+            $dirs[] = $externalSrcDir;
+        }
+
+        // .env primeiro, depois .env.local sobrescreve (e o diretório privado /src tem precedência final)
+        foreach ($dirs as $dir) {
+            self::loadFile($dir . '/.env');
+            self::loadFile($dir . '/.env.local');
+        }
     }
 
     private static function loadFile(string $path): void

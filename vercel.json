@@ -1,6 +1,18 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "https://projects.vonluqi.com/fundamentos-de-jogos-digitais/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://projects.vonluqi.com/fundamentos-de-jogos-digitais/:path*",
+      "permanent": true
+    }
+  ],
   "functions": {
     "api/**/*.js": {
       "memory": 256,

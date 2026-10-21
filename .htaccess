@@ -18,8 +18,8 @@ DirectoryIndex index.html index.php
   # ---------------------------------------------------------------------------
   # 1. Bloqueio de pastas e arquivos sensíveis (segurança)
   # ---------------------------------------------------------------------------
-  RewriteRule ^(?:db|scripts|tests|docs|node_modules|\.git|\.cursor|\.github)(?:/|$) - [F,L,NC]
-  RewriteRule ^backend/(?:src|storage)(?:/|$) - [F,L,NC]
+  RewriteRule ^(?:db|scripts|tests|docs|node_modules|\.git|\.cursor|\.github|\.vscode)(?:/|$) - [F,L,NC]
+  RewriteRule ^backend/(?!index\.php$) - [F,L,NC]
   RewriteRule ^api/.*\.js$ - [F,L,NC]
   RewriteRule ^(?:middleware\.js|local-server\.mjs|migrate-passwords\.js|package(?:-lock)?\.json|vercel\.json)$ - [F,L,NC]
 

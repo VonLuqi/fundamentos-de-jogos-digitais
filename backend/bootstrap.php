@@ -8,8 +8,13 @@ declare(strict_types=1);
 date_default_timezone_set('UTC');
 mb_internal_encoding('UTF-8');
 
-define('FJD_ROOT', dirname(__DIR__));
-define('FJD_BACKEND_ROOT', __DIR__);
+if (!defined('FJD_ROOT')) {
+    $candidatePublic = dirname(__DIR__, 2) . '/public/' . basename(__DIR__);
+    define('FJD_ROOT', is_dir($candidatePublic) ? $candidatePublic : dirname(__DIR__));
+}
+if (!defined('FJD_BACKEND_ROOT')) {
+    define('FJD_BACKEND_ROOT', __DIR__);
+}
 
 spl_autoload_register(static function (string $class): void {
     $prefix = 'App\\';
@@ -23,4 +28,4 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-\App\Core\Env::load(FJD_ROOT);
+\App\Core\Env::load(FJD_ROOT, FJD_BACKEND_ROOT);
