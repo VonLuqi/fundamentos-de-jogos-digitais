@@ -47,11 +47,11 @@ jobs:
             **/.vscode/**
             .vscode/**
             **/node_modules/**
-            **/tests/**
-            **/scripts/**
-            **/db/**
-            **/docs/**
-            **/api/**
+            tests/**
+            scripts/**
+            db/**
+            docs/**
+            api/**
             .env
             .env.*
             **/.env

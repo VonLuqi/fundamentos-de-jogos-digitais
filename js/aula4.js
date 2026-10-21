@@ -96,7 +96,7 @@ function initSlidesViewer() {
   openPptx.href = pptxRelativePath;
   openPdf.href = pdfRelativePath;
 
-  const pptxPublicUrl = `${window.location.origin}/assets/docs/aulas/${encodedPptx}`;
+  const pptxPublicUrl = new URL(pptxRelativePath, window.location.href).href;
   const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(pptxPublicUrl)}`;
   const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
