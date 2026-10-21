@@ -1934,8 +1934,12 @@ function renderMasterLessonsMatrix(perLessonStats = {}) {
   if (!host) return;
   host.replaceChildren();
 
+  const statsById = Array.isArray(perLessonStats)
+    ? Object.fromEntries(perLessonStats.filter((item) => item?.lessonId).map((item) => [item.lessonId, item]))
+    : (perLessonStats || {});
+
   LESSONS.forEach((lesson) => {
-    const stat = perLessonStats?.[lesson.id] || {};
+    const stat = statsById?.[lesson.id] || {};
     const open = typeof stat.published === 'boolean'
       ? stat.published
       : isLessonPublished(lesson.id, publishMap);

@@ -19,9 +19,10 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="../css/hades-tokens.css" />
-  <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021b" />
+  <link rel="stylesheet" href="../css/hades-components.css?v=20261021b" />
+  <link rel="stylesheet" href="../css/app-shell.css?v=20261021b" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=20261021b" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
@@ -152,9 +153,9 @@
                 <p class="hades-boon-card__desc" id="kpi-souls-turmas">Consultando turmas TCG01 e TCG02…</p>
               </div>
               <div class="hades-progress-ring" title="Percentual de almas com Selo do Mensageiro verificado">
-                <svg viewBox="0 0 56 56" aria-hidden="true">
-                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23"></circle>
-                  <circle class="hades-progress-ring__fill" id="kpi-souls-ring" cx="28" cy="28" r="23" style="--ring-offset: 144.51;"></circle>
+                <svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true">
+                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"></circle>
+                  <circle class="hades-progress-ring__fill" id="kpi-souls-ring" cx="28" cy="28" r="23" fill="none" stroke="#f2d59a" stroke-width="5" style="--ring-offset: 144.51;"></circle>
                 </svg>
                 <span class="hades-progress-ring__label" id="kpi-souls-pct">0%</span>
               </div>
@@ -174,9 +175,9 @@
                 <p class="hades-boon-card__desc" id="kpi-lessons-gdds">Carregando entregas e média de XP…</p>
               </div>
               <div class="hades-progress-ring" title="Percentual de aulas abertas na Trilha">
-                <svg viewBox="0 0 56 56" aria-hidden="true">
-                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23"></circle>
-                  <circle class="hades-progress-ring__fill" id="kpi-lessons-ring" cx="28" cy="28" r="23" style="--ring-offset: 144.51;"></circle>
+                <svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true">
+                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="5"></circle>
+                  <circle class="hades-progress-ring__fill" id="kpi-lessons-ring" cx="28" cy="28" r="23" fill="none" stroke="#f2d59a" stroke-width="5" style="--ring-offset: 144.51;"></circle>
                 </svg>
                 <span class="hades-progress-ring__label" id="kpi-lessons-pct">0%</span>
               </div>
@@ -815,7 +816,7 @@
        vinculava o listener do botão "Ver Almas Registradas" e usava
        alert() estático em vez da API real. js/dashboard.js é a
        implementação completa (modais, admin tools, avatar, altar). -->
-  <script type="module" src="../js/dashboard.js"></script>
+  <script type="module" src="../js/dashboard.js?v=20261021b"></script>
 
 </body>
 </html>

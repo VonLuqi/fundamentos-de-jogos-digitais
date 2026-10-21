@@ -909,7 +909,7 @@ final class LeaderboardAdminService
             if ($pub) {
                 $publishedLessonsCount++;
             }
-            $perLessonStats[] = [
+            $perLessonStats[$lid] = [
                 'lessonId' => $lid,
                 'title' => $lmeta['lessonTitle'],
                 'xp' => (int) $lmeta['xp'],
