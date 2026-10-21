@@ -7,7 +7,7 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js';
+import { initAppShell } from './app-shell.js?v=20261021e';
 import {
   ApiError,
   ROUTES,
@@ -18,7 +18,7 @@ import {
   logout,
   requireSession,
   fetchFriendProfile,
-} from './api.js';
+} from './api.js?v=20261021e';
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
@@ -31,7 +31,7 @@ import {
   setRainbowVfxSuspended,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js';
+} from './achievements-ui.js?v=20261021e';
 
 const COMPANIONS_FLASH_KEY = 'companionsFlash';
 
@@ -50,6 +50,24 @@ let lastFocusedSlot = null;
 let activeMirrorAchievement = null;
 let activeMirrorModel = null;
 let currentMirrorFilter = 'all';
+let currentMirrorRarityFilter = 'all';
+
+const STATE_FILTER_LABELS = Object.freeze({
+  all: 'Todas',
+  unlocked: 'Descobertas',
+  locked: 'Bloqueadas',
+  secret: 'Segredos',
+});
+
+const RARITY_FILTER_LABELS = Object.freeze({
+  all: 'Todas as Raridades',
+  stone: 'Pedra',
+  copper: 'Cobre',
+  silver: 'Prata',
+  gold: 'Ouro',
+  rainbow: 'Arco-Íris',
+  unique: 'Única',
+});
 
 const RARITY_STARS = Object.freeze({
   unknown: '✦ ✦ ✦',
@@ -312,6 +330,7 @@ async function updateMirrorInspector(achievement, model = null) {
   const inspector = document.getElementById('mirror-relic-inspector');
   if (!inspector || !achievement || !friendUser) return;
 
+  const panel = inspector.querySelector('.relic-inspector__panel') || inspector;
   const resolvedModel = model && typeof model === 'object' && model.kind
     ? model
     : getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
@@ -322,7 +341,7 @@ async function updateMirrorInspector(achievement, model = null) {
   await populateMirrorRelicHost({
     achievement,
     model: resolvedModel,
-    containerEl: inspector,
+    containerEl: panel,
     artEl: document.getElementById('mirror-inspector-art'),
     rarityEl: document.getElementById('mirror-inspector-rarity'),
     starsEl: document.getElementById('mirror-inspector-stars'),
@@ -331,6 +350,14 @@ async function updateMirrorInspector(achievement, model = null) {
     descEl: document.getElementById('mirror-inspector-desc'),
     metaEl: document.getElementById('mirror-inspector-meta'),
   });
+
+  inspector.dataset.rarity = panel.dataset.rarity || 'stone';
+  inspector.dataset.state = panel.dataset.state || resolvedModel.kind;
+  if (panel.dataset.secret) {
+    inspector.dataset.secret = panel.dataset.secret;
+  } else {
+    delete inspector.dataset.secret;
+  }
 }
 
 async function openRelicModal(achievement, model = null) {
@@ -383,7 +410,7 @@ function closeRelicModal({ restoreHash = true } = {}) {
   }
 }
 
-function focusAlbumSlot(achievementId, { openModal = true, scroll = true } = {}) {
+function focusAlbumSlot(achievementId, { openModal = false, scroll = true } = {}) {
   const slot = document.getElementById(`relic-${achievementId}`);
   if (!slot) return false;
 
@@ -411,42 +438,126 @@ function handleDeepLink() {
   const achievementId = raw.startsWith('relic-') ? raw.slice('relic-'.length) : raw;
   if (!getAchievementById(achievementId)) return false;
   window.requestAnimationFrame(() => {
-    focusAlbumSlot(achievementId, { openModal: true });
+    focusAlbumSlot(achievementId, { openModal: false, scroll: true });
   });
   return true;
 }
 
-function applyMirrorFilter(filterValue = currentMirrorFilter) {
+function slotMatchesStateFilter(slot, stateFilter) {
+  const state = slot.dataset.state || 'locked';
+  const isSecret = slot.dataset.secret === 'true';
+  if (stateFilter === 'unlocked') return state === 'unlocked';
+  if (stateFilter === 'locked') return state !== 'unlocked';
+  if (stateFilter === 'secret') return isSecret;
+  return true;
+}
+
+function slotMatchesRarityFilter(slot, rarityFilter) {
+  if (!rarityFilter || rarityFilter === 'all') return true;
+  const rarity = slot.dataset.rarity || 'stone';
+  return rarity === rarityFilter;
+}
+
+function updateMirrorFilterButtonLabels(slots) {
+  document.querySelectorAll('[data-mirror-filter]').forEach((btn) => {
+    const key = btn.dataset.mirrorFilter || 'all';
+    const baseLabel = STATE_FILTER_LABELS[key] || btn.textContent.trim();
+    const count = slots.filter(
+      (slot) => slotMatchesStateFilter(slot, key) && slotMatchesRarityFilter(slot, currentMirrorRarityFilter),
+    ).length;
+    btn.textContent = `${baseLabel} (${count})`;
+  });
+
+  document.querySelectorAll('[data-mirror-rarity]').forEach((btn) => {
+    const key = btn.dataset.mirrorRarity || 'all';
+    const baseLabel = RARITY_FILTER_LABELS[key] || btn.textContent.trim();
+    const count = slots.filter(
+      (slot) => slotMatchesStateFilter(slot, currentMirrorFilter) && slotMatchesRarityFilter(slot, key),
+    ).length;
+    btn.textContent = key === 'all' ? baseLabel : `${baseLabel} (${count})`;
+  });
+}
+
+function applyMirrorFilter(filterValue = currentMirrorFilter, rarityValue = currentMirrorRarityFilter) {
   currentMirrorFilter = filterValue;
+  currentMirrorRarityFilter = rarityValue;
   const grid = document.getElementById('mirror-album-grid');
   if (!grid) return;
 
   document.querySelectorAll('[data-mirror-filter]').forEach((btn) => {
-    const active = btn.dataset.mirrorFilter === filterValue;
+    const active = btn.dataset.mirrorFilter === currentMirrorFilter;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('[data-mirror-rarity]').forEach((btn) => {
+    const active = btn.dataset.mirrorRarity === currentMirrorRarityFilter;
     btn.classList.toggle('is-active', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
 
   const slots = Array.from(grid.querySelectorAll('.achievement-slot'));
+  let visibleCount = 0;
+
   slots.forEach((slot) => {
-    const state = slot.dataset.state || 'locked';
-    if (filterValue === 'unlocked') {
-      slot.hidden = state !== 'unlocked';
-    } else if (filterValue === 'locked') {
-      slot.hidden = state === 'unlocked';
-    } else {
-      slot.hidden = false;
-    }
+    const visible =
+      slotMatchesStateFilter(slot, currentMirrorFilter) &&
+      slotMatchesRarityFilter(slot, currentMirrorRarityFilter);
+    slot.hidden = !visible;
+    if (visible) visibleCount += 1;
   });
+
+  updateMirrorFilterButtonLabels(slots);
+
+  let emptyEl = grid.querySelector('[data-filter-empty]');
+  if (visibleCount === 0 && slots.length > 0) {
+    if (!emptyEl) {
+      emptyEl = document.createElement('li');
+      emptyEl.className = 'achievement-empty';
+      emptyEl.dataset.filterEmpty = 'true';
+      grid.appendChild(emptyEl);
+    }
+    emptyEl.textContent = 'Nenhuma relíquia corresponde aos filtros selecionados neste Espelho.';
+    emptyEl.hidden = false;
+  } else if (emptyEl) {
+    emptyEl.hidden = true;
+  }
+
+  const focusedSlot = grid.querySelector('.achievement-slot.is-focused');
+  if (visibleCount > 0 && (!focusedSlot || focusedSlot.hidden)) {
+    selectInitialMirrorSlot();
+  }
 }
 
 function selectInitialMirrorSlot() {
   const grid = document.getElementById('mirror-album-grid');
   if (!grid || !friendUser) return;
-  const firstSlot = grid.querySelector('.achievement-slot:not([hidden])') || grid.querySelector('.achievement-slot');
-  const firstId = firstSlot?.dataset?.achievementId;
+  const visibleSlots = Array.from(grid.querySelectorAll('.achievement-slot:not([hidden])'));
+  const preferredSlot =
+    visibleSlots.find((el) => el.dataset.achievementId && el.dataset.achievementId !== SOBERANO_ACHIEVEMENT_ID) ||
+    visibleSlots[0] ||
+    grid.querySelector('.achievement-slot');
+  const firstId = preferredSlot?.dataset?.achievementId;
   if (!firstId) return;
   focusAlbumSlot(firstId, { openModal: false, scroll: false });
+}
+
+function handleMirrorSlotInspect(achievement, slotEl, { scrollInspectorOnMobile = false } = {}) {
+  lastFocusedSlot = slotEl;
+  slotEl.classList.add('is-focused');
+  document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
+    if (el !== slotEl) el.classList.remove('is-focused');
+  });
+
+  const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+  void updateMirrorInspector(achievement, model);
+
+  if (scrollInspectorOnMobile && window.matchMedia('(max-width: 960px)').matches) {
+    document.getElementById('mirror-relic-inspector')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
+  }
 }
 
 function renderAlbum() {
@@ -459,29 +570,14 @@ function renderAlbum() {
     viewerUser,
     applyRainbowVfx: true,
     emptyMessage: 'Nenhuma relíquia neste Espelho ainda.',
+    onSlotHover: (achievement, _state, slotEl) => {
+      handleMirrorSlotInspect(achievement, slotEl, { scrollInspectorOnMobile: false });
+    },
     onSlotClick: (achievement, _state, slotEl) => {
-      const wasAlreadyFocused = slotEl.classList.contains('is-focused');
-      lastFocusedSlot = slotEl;
-      slotEl.classList.add('is-focused');
-      document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
-        if (el !== slotEl) el.classList.remove('is-focused');
-      });
-
-      const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
-      void updateMirrorInspector(achievement, model);
-
-      const isMobileViewport = window.matchMedia('(max-width: 960px)').matches;
-      if (isMobileViewport || wasAlreadyFocused) {
-        window.history.replaceState(
-          null,
-          '',
-          `${window.location.pathname}${window.location.search}#${achievement.id}`
-        );
-        openRelicModal(achievement, model);
-      }
+      handleMirrorSlotInspect(achievement, slotEl, { scrollInspectorOnMobile: true });
     },
   }).then(() => {
-    applyMirrorFilter(currentMirrorFilter);
+    applyMirrorFilter(currentMirrorFilter, currentMirrorRarityFilter);
     if (!window.location.hash) {
       selectInitialMirrorSlot();
     }
@@ -493,7 +589,13 @@ function renderAlbum() {
 function initRelicModal() {
   document.querySelectorAll('[data-mirror-filter]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      applyMirrorFilter(btn.dataset.mirrorFilter || 'all');
+      applyMirrorFilter(btn.dataset.mirrorFilter || 'all', currentMirrorRarityFilter);
+    });
+  });
+
+  document.querySelectorAll('[data-mirror-rarity]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyMirrorFilter(currentMirrorFilter, btn.dataset.mirrorRarity || 'all');
     });
   });
 

@@ -755,6 +755,7 @@ function renderAlbumMode(container, user, {
   highlightIds,
   emptyMessage,
   onSlotClick,
+  onSlotHover,
   achievements,
   visitorView,
   viewerUser,
@@ -819,6 +820,7 @@ function renderAlbumMode(container, user, {
     li.dataset.achievementId = ach.id;
     li.dataset.rarity = displayRarity;
     li.dataset.state = slotState;
+    li.dataset.secret = ach.hidden ? 'true' : 'false';
     if (featured) li.dataset.featured = 'soberano';
     if (visitorView && model.isSecret) {
       li.dataset.revealText = String(model.revealText);
@@ -898,6 +900,16 @@ function renderAlbumMode(container, user, {
       }
     });
 
+    if (typeof onSlotHover === 'function') {
+      button.addEventListener('pointerenter', (event) => {
+        if (event.pointerType === 'touch') return;
+        onSlotHover(ach, slotState, li);
+      });
+      button.addEventListener('focus', () => {
+        onSlotHover(ach, slotState, li);
+      });
+    }
+
     li.appendChild(button);
     container.appendChild(li);
   });
@@ -930,6 +942,7 @@ export async function renderAchievementsList(container, user, options = {}) {
     visitorView = false,
     viewerUser = null,
     onSlotClick,
+    onSlotHover,
   } = options;
 
   if (mode === 'album') {
@@ -937,6 +950,7 @@ export async function renderAchievementsList(container, user, options = {}) {
       highlightIds,
       emptyMessage,
       onSlotClick,
+      onSlotHover,
       achievements,
       visitorView,
       viewerUser,

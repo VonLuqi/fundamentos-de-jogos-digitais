@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js';
+import { initAppShell } from './app-shell.js?v=20261021e';
 import {
   ApiError,
   ROUTES,
@@ -13,7 +13,7 @@ import {
   normalizeAchievementRarity,
   requireSession,
   getSession,
-} from './api.js';
+} from './api.js?v=20261021e';
 import {
   fillAchievementArtHost,
   fillAchievementDescription,
@@ -25,7 +25,7 @@ import {
   renderAchievementsList,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js';
+} from './achievements-ui.js?v=20261021e';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -41,6 +41,24 @@ let lastFocusedSlot = null;
 let activeInspectedAchievement = null;
 let activeInspectedState = 'locked';
 let currentAlbumFilter = 'all';
+let currentRarityFilter = 'all';
+
+const STATE_FILTER_LABELS = Object.freeze({
+  all: 'Todas',
+  unlocked: 'Descobertas',
+  locked: 'Bloqueadas',
+  secret: 'Segredos',
+});
+
+const RARITY_FILTER_LABELS = Object.freeze({
+  all: 'Todas as Raridades',
+  stone: 'Pedra',
+  copper: 'Cobre',
+  silver: 'Prata',
+  gold: 'Ouro',
+  rainbow: 'Arco-Íris',
+  unique: 'Única',
+});
 
 const RARITY_STARS = Object.freeze({
   unknown: '✦ ✦ ✦',
@@ -151,13 +169,14 @@ async function updateRelicInspector(achievement, state) {
   const inspector = document.getElementById('relic-inspector');
   if (!inspector || !achievement) return;
 
+  const panel = inspector.querySelector('.relic-inspector__panel') || inspector;
   activeInspectedAchievement = achievement;
   activeInspectedState = state;
 
   await populateRelicDetailHost({
     achievement,
     state,
-    containerEl: inspector,
+    containerEl: panel,
     artEl: document.getElementById('relic-inspector-art'),
     rarityEl: document.getElementById('relic-inspector-rarity'),
     starsEl: document.getElementById('relic-inspector-stars'),
@@ -166,6 +185,9 @@ async function updateRelicInspector(achievement, state) {
     descEl: document.getElementById('relic-inspector-desc'),
     metaEl: document.getElementById('relic-inspector-meta'),
   });
+
+  inspector.dataset.rarity = panel.dataset.rarity || 'stone';
+  inspector.dataset.state = panel.dataset.state || state;
 }
 
 async function openRelicModal(achievement, state) {
@@ -216,7 +238,7 @@ function closeRelicModal({ restoreHash = true } = {}) {
   }
 }
 
-function focusAlbumSlot(achievementId, { openModal = true, scroll = true } = {}) {
+function focusAlbumSlot(achievementId, { openModal = false, scroll = true } = {}) {
   const slot = document.getElementById(`relic-${achievementId}`);
   if (!slot) return false;
 
@@ -244,42 +266,128 @@ function handleDeepLink() {
   const achievementId = raw.startsWith('relic-') ? raw.slice('relic-'.length) : raw;
   if (!getAchievementById(achievementId)) return false;
   window.requestAnimationFrame(() => {
-    focusAlbumSlot(achievementId, { openModal: true });
+    focusAlbumSlot(achievementId, { openModal: false, scroll: true });
   });
   return true;
 }
 
-function applyAlbumFilter(filterValue = currentAlbumFilter) {
+function slotMatchesStateFilter(slot, stateFilter) {
+  const state = slot.dataset.state || 'locked';
+  const isSecret = slot.dataset.secret === 'true';
+  if (stateFilter === 'unlocked') return state === 'unlocked';
+  if (stateFilter === 'locked') return state !== 'unlocked';
+  if (stateFilter === 'secret') return isSecret;
+  return true;
+}
+
+function slotMatchesRarityFilter(slot, rarityFilter) {
+  if (!rarityFilter || rarityFilter === 'all') return true;
+  const rarity = slot.dataset.rarity || 'stone';
+  return rarity === rarityFilter;
+}
+
+function updateCabinetFilterButtonLabels(slots) {
+  document.querySelectorAll('[data-album-filter]').forEach((btn) => {
+    const key = btn.dataset.albumFilter || 'all';
+    const baseLabel = STATE_FILTER_LABELS[key] || btn.textContent.trim();
+    const count = slots.filter(
+      (slot) => slotMatchesStateFilter(slot, key) && slotMatchesRarityFilter(slot, currentRarityFilter),
+    ).length;
+    btn.textContent = `${baseLabel} (${count})`;
+  });
+
+  document.querySelectorAll('[data-album-rarity]').forEach((btn) => {
+    const key = btn.dataset.albumRarity || 'all';
+    const baseLabel = RARITY_FILTER_LABELS[key] || btn.textContent.trim();
+    const count = slots.filter(
+      (slot) => slotMatchesStateFilter(slot, currentAlbumFilter) && slotMatchesRarityFilter(slot, key),
+    ).length;
+    btn.textContent = key === 'all' ? baseLabel : `${baseLabel} (${count})`;
+  });
+}
+
+function applyAlbumFilter(filterValue = currentAlbumFilter, rarityValue = currentRarityFilter) {
   currentAlbumFilter = filterValue;
+  currentRarityFilter = rarityValue;
   const grid = document.getElementById('album-grid');
   if (!grid) return;
 
   document.querySelectorAll('[data-album-filter]').forEach((btn) => {
-    const active = btn.dataset.albumFilter === filterValue;
+    const active = btn.dataset.albumFilter === currentAlbumFilter;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  document.querySelectorAll('[data-album-rarity]').forEach((btn) => {
+    const active = btn.dataset.albumRarity === currentRarityFilter;
     btn.classList.toggle('is-active', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   });
 
   const slots = Array.from(grid.querySelectorAll('.achievement-slot'));
+  let visibleCount = 0;
+
   slots.forEach((slot) => {
-    const state = slot.dataset.state || 'locked';
-    if (filterValue === 'unlocked') {
-      slot.hidden = state !== 'unlocked';
-    } else if (filterValue === 'locked') {
-      slot.hidden = state === 'unlocked';
-    } else {
-      slot.hidden = false;
-    }
+    const visible =
+      slotMatchesStateFilter(slot, currentAlbumFilter) &&
+      slotMatchesRarityFilter(slot, currentRarityFilter);
+    slot.hidden = !visible;
+    if (visible) visibleCount += 1;
   });
+
+  updateCabinetFilterButtonLabels(slots);
+
+  let emptyEl = grid.querySelector('[data-filter-empty]');
+  if (visibleCount === 0 && slots.length > 0) {
+    if (!emptyEl) {
+      emptyEl = document.createElement('li');
+      emptyEl.className = 'achievement-empty';
+      emptyEl.dataset.filterEmpty = 'true';
+      grid.appendChild(emptyEl);
+    }
+    emptyEl.textContent =
+      currentAlbumFilter === 'locked' && currentUser?.role === 'admin'
+        ? 'Nenhuma relíquia bloqueada (Visão do Mestre — todas as 68 relíquias estão reveladas).'
+        : 'Nenhuma relíquia corresponde aos filtros selecionados.';
+    emptyEl.hidden = false;
+  } else if (emptyEl) {
+    emptyEl.hidden = true;
+  }
+
+  const focusedSlot = grid.querySelector('.achievement-slot.is-focused');
+  if (visibleCount > 0 && (!focusedSlot || focusedSlot.hidden)) {
+    selectInitialInspectorSlot();
+  }
 }
 
 function selectInitialInspectorSlot() {
   const grid = document.getElementById('album-grid');
   if (!grid || !currentUser) return;
-  const firstSlot = grid.querySelector('.achievement-slot:not([hidden])') || grid.querySelector('.achievement-slot');
-  const firstId = firstSlot?.dataset?.achievementId;
+  const visibleSlots = Array.from(grid.querySelectorAll('.achievement-slot:not([hidden])'));
+  const preferredSlot =
+    visibleSlots.find((el) => el.dataset.achievementId && el.dataset.achievementId !== SOBERANO_ACHIEVEMENT_ID) ||
+    visibleSlots[0] ||
+    grid.querySelector('.achievement-slot');
+  const firstId = preferredSlot?.dataset?.achievementId;
   if (!firstId) return;
   focusAlbumSlot(firstId, { openModal: false, scroll: false });
+}
+
+function handleSlotInspect(achievement, state, slotEl, { scrollInspectorOnMobile = false } = {}) {
+  lastFocusedSlot = slotEl;
+  slotEl.classList.add('is-focused');
+  document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
+    if (el !== slotEl) el.classList.remove('is-focused');
+  });
+
+  void updateRelicInspector(achievement, state);
+
+  if (scrollInspectorOnMobile && window.matchMedia('(max-width: 960px)').matches) {
+    document.getElementById('relic-inspector')?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+    });
+  }
 }
 
 function renderAlbum() {
@@ -288,24 +396,14 @@ function renderAlbum() {
 
   void renderAchievementsList(grid, currentUser, {
     mode: 'album',
+    onSlotHover: (achievement, state, slotEl) => {
+      handleSlotInspect(achievement, state, slotEl, { scrollInspectorOnMobile: false });
+    },
     onSlotClick: (achievement, state, slotEl) => {
-      const wasAlreadyFocused = slotEl.classList.contains('is-focused');
-      lastFocusedSlot = slotEl;
-      slotEl.classList.add('is-focused');
-      document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
-        if (el !== slotEl) el.classList.remove('is-focused');
-      });
-
-      void updateRelicInspector(achievement, state);
-
-      const isMobileViewport = window.matchMedia('(max-width: 960px)').matches;
-      if (isMobileViewport || wasAlreadyFocused) {
-        window.history.replaceState(null, '', `#${achievement.id}`);
-        openRelicModal(achievement, state);
-      }
+      handleSlotInspect(achievement, state, slotEl, { scrollInspectorOnMobile: true });
     },
   }).then(() => {
-    applyAlbumFilter(currentAlbumFilter);
+    applyAlbumFilter(currentAlbumFilter, currentRarityFilter);
     if (!window.location.hash) {
       selectInitialInspectorSlot();
     }
@@ -317,7 +415,13 @@ function renderAlbum() {
 function initKeepsakeCabinetControls() {
   document.querySelectorAll('[data-album-filter]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      applyAlbumFilter(btn.dataset.albumFilter || 'all');
+      applyAlbumFilter(btn.dataset.albumFilter || 'all', currentRarityFilter);
+    });
+  });
+
+  document.querySelectorAll('[data-album-rarity]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyAlbumFilter(currentAlbumFilter, btn.dataset.albumRarity || 'all');
     });
   });
 

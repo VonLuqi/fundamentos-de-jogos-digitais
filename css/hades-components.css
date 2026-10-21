@@ -34,11 +34,11 @@
   --asset-banner-throne-2x: url("../assets/ui/hades/banners/admin-throne-banner@2x.webp");
   --asset-banner-hero-1x: url("../assets/ui/hades/banners/hero-underworld-banner.webp");
   --asset-banner-hero-2x: url("../assets/ui/hades/banners/hero-underworld-banner@2x.webp");
-  --asset-keepsake-ribbon-left: url("../assets/ui/hades/keepsakes/keepsake-ribbon-left.svg");
-  --asset-keepsake-ribbon-right: url("../assets/ui/hades/keepsakes/keepsake-ribbon-right.svg");
-  --asset-keepsake-heart-lock: url("../assets/ui/hades/keepsakes/keepsake-heart-lock.svg");
-  --asset-keepsake-shroud-pedestal: url("../assets/ui/hades/keepsakes/keepsake-shroud-pedestal.svg");
-  --asset-keepsake-slot-selection: url("../assets/ui/hades/keepsakes/keepsake-slot-selection.svg");
+  --asset-keepsake-ribbon-left: url("../assets/ui/hades/keepsakes/keepsake-ribbon-left.svg?v=20261021e");
+  --asset-keepsake-ribbon-right: url("../assets/ui/hades/keepsakes/keepsake-ribbon-right.svg?v=20261021e");
+  --asset-keepsake-heart-lock: url("../assets/ui/hades/keepsakes/keepsake-heart-lock.svg?v=20261021e");
+  --asset-keepsake-shroud-pedestal: url("../assets/ui/hades/keepsakes/keepsake-shroud-pedestal.svg?v=20261021e");
+  --asset-keepsake-slot-selection: url("../assets/ui/hades/keepsakes/keepsake-slot-selection.svg?v=20261021e");
 }
 
 /* --------------------------------------------------------------------------
