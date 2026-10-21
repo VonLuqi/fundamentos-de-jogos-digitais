@@ -40,7 +40,7 @@ final class CronController
 
         try {
             $pdo = Database::get();
-            $pdo->query('SELECT id FROM site_settings LIMIT 1');
+            $pdo->query('SELECT `key` FROM site_settings LIMIT 1');
             Http::json(200, [
                 'ok' => true,
                 'warmedAt' => Database::nowIso(),
@@ -95,8 +95,10 @@ final class CronController
     private static function requireCronSecret(): void
     {
         $secret = trim(Env::get('CRON_SECRET', ''));
-        $authHeader = Http::header('Authorization');
-        if ($secret === '' || $authHeader !== "Bearer {$secret}") {
+        $bearer = Http::bearerToken();
+        $querySecret = trim(Http::query('secret', ''));
+        $provided = $bearer !== '' ? $bearer : $querySecret;
+        if ($secret === '' || $provided === '' || !hash_equals($secret, $provided)) {
             Http::json(401, ['error' => 'Unauthorized']);
         }
     }
