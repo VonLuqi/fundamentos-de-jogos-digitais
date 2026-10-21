@@ -79,6 +79,8 @@ export async function ensureAchievementArtCatalogLoaded() {
   return achievementArtCatalogPromise;
 }
 
+const ACHIEVEMENT_ART_CACHE_VER = '20261021f';
+
 /**
  * URL da arte WebP se o id estiver no catálogo; senão `null` (usar emoji).
  * Chame `ensureAchievementArtCatalogLoaded()` antes do render.
@@ -88,7 +90,9 @@ export function achievementArtUrl(achievementId) {
   if (!id) return null;
   const file = achievementArtById.get(id);
   if (!file) return null;
-  return `${rootPath()}/assets/achievements/${encodeURIComponent(file)}`;
+  const base = `${rootPath()}/assets/achievements/${encodeURIComponent(file)}`;
+  const isHttp = typeof window !== 'undefined' && /^https?:$/i.test(String(window.location?.protocol || ''));
+  return isHttp ? `${base}?v=${ACHIEVEMENT_ART_CACHE_VER}` : base;
 }
 
 /**
