@@ -415,10 +415,6 @@ function bindAuthInteractions() {
   if (formLegacy) formLegacy.addEventListener('submit', handleLegacySubmit);
   if (formReset) formReset.addEventListener('submit', handleResetSubmit);
 
-  window.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') window.location.href = ROUTES.home();
-  });
-
   authInteractionsBound = true;
 }
 

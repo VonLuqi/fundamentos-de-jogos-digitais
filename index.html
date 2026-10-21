@@ -23,70 +23,21 @@
   <link rel="stylesheet" href="./css/hades-components.css?v=20261021c" />
   <link rel="stylesheet" href="./css/style.css?v=20261021c" />
   <script src="./js/devtools-guard.boot.js"></script>
+  <script>
+    (function () {
+      try {
+        var raw = localStorage.getItem('activeSession');
+        var session = raw ? JSON.parse(raw) : null;
+        if (session && session.token) {
+          window.location.replace('./pages/dashboard.html');
+          return;
+        }
+      } catch (e) {}
+      window.location.replace('./pages/auth.html');
+    })();
+  </script>
 </head>
 <body class="game-screen">
-
-  <!-- Vinheta escura nas bordas (profundidade de tela de menu) -->
-  <div class="vignette" aria-hidden="true"></div>
-
-  <main class="intro-shell">
-    <section class="intro-hero hades-mirror-frame" aria-labelledby="intro-title">
-      <p class="intro-hero__eyebrow hades-crest-header">Fundamentos de Jogos Digitais</p>
-      <h1 class="intro-hero__title" id="intro-title">Aprenda design de jogos em uma plataforma com aulas, conquistas e progressão real</h1>
-      <p class="intro-hero__lead">Esta plataforma organiza sua jornada de aprendizagem em trilhas de conteúdo, atividades guiadas e um sistema de evolução que transforma estudo em progresso visível.</p>
-
-      <div class="intro-hero__actions">
-        <button class="intro-cta" type="button" id="btn-enter-system">Acessar Plataforma</button>
-      </div>
-    </section>
-
-    <div class="ornate-divider hades-svg-divider" aria-hidden="true">
-      <img
-        src="./assets/ui/hades/dividers/divider-laurel-skull.svg"
-        alt=""
-        width="680"
-        height="36"
-        loading="eager"
-        decoding="async"
-      />
-    </div>
-
-    <section class="intro-overview" aria-label="Visão geral da plataforma">
-      <article class="intro-card hades-meander-box">
-        <div class="intro-card__head">
-          <div class="hades-boon-token">
-            <img src="./assets/ui/hades/icons/icon-grimoire-quill.svg" alt="" width="38" height="38" loading="lazy" />
-          </div>
-          <p class="intro-card__eyebrow">Aulas</p>
-        </div>
-        <h2 class="intro-card__title">Trilhas organizadas por módulo</h2>
-        <p class="intro-card__text">A navegação principal leva à <strong>Trilha do Herói</strong>, onde os módulos crescem com clareza e o Mestre libera cada aula quando a turma começa.</p>
-      </article>
-
-      <article class="intro-card hades-meander-box">
-        <div class="intro-card__head">
-          <div class="hades-boon-token">
-            <img src="./assets/ui/hades/icons/icon-styx-coin.svg" alt="" width="38" height="38" loading="lazy" />
-          </div>
-          <p class="intro-card__eyebrow">Conquistas</p>
-        </div>
-        <h2 class="intro-card__title">Relíquias, figurinhas e coleção</h2>
-        <p class="intro-card__text">As conquistas vivem no <strong>Álbum de Relíquias</strong>, com slots fixos, raridade e linguagem de coleção visual.</p>
-      </article>
-
-      <article class="intro-card hades-meander-box">
-        <div class="intro-card__head">
-          <div class="hades-boon-token">
-            <img src="./assets/ui/hades/icons/icon-mirror-night.svg" alt="" width="38" height="38" loading="lazy" />
-          </div>
-          <p class="intro-card__eyebrow">Progresso</p>
-        </div>
-        <h2 class="intro-card__title">Painel autenticado como centro real</h2>
-        <p class="intro-card__text">Depois de entrar, o aluno acessa o Painel do Herói como entrada principal do sistema, com progresso, atalhos e navegação interna consistente.</p>
-      </article>
-    </section>
-  </main>
-
   <script type="module" src="./js/main.js"></script>
 </body>
 </html>

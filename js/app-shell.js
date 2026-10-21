@@ -25,7 +25,7 @@ let lastFocusedBeforeOpen = null;
 
 /**
  * Destinos primários do aside (aluno):
- * Inicio · Painel · Aulas · Conquistas · Salão Espiritual · Grimório Pessoal · O Despertar
+ * Painel · Aulas · Conquistas · Placar · Salão Espiritual · Grimório Pessoal · O Despertar
  * Condicional admin: Almas Registradas (não conta no teto do aluno).
  */
 function mapRouteToNavItem(route) {

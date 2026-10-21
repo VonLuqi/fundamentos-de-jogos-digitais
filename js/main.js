@@ -42,10 +42,8 @@ async function handleEnterSystem() {
 }
 
 async function init() {
-  const button = document.getElementById('btn-enter-system');
-  if (!button) return;
-
-  button.addEventListener('click', handleEnterSystem);
+  const target = await resolveEntryTarget();
+  window.location.replace(target);
 }
 
 document.addEventListener('DOMContentLoaded', init);
