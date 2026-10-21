@@ -422,9 +422,19 @@ final class AuthController
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }
+                if (!empty($body['bindAdminEmail'])) {
+                    $bindTarget = AuthEmailService::normalizeEmail($body['bindAdminEmail']);
+                    if (AuthEmailService::isValidEmail($bindTarget) && !self::emailTakenByOther($bindTarget, (int) $admin['id'])) {
+                        $nowSql = Database::nowSql();
+                        $upd = $pdo->prepare('UPDATE `users` SET `email` = :email, `email_verified_at` = :now WHERE `id` = :id');
+                        $upd->execute([':email' => $bindTarget, ':now' => $nowSql, ':id' => (int) $admin['id']]);
+                        $admin = self::loadUserById((int) $admin['id']) ?? $admin;
+                    }
+                }
                 Http::json(200, [
                     'ok' => true,
                     'status' => Mailer::getStatus(),
+                    'user' => GameCatalog::sanitizeUser($admin),
                 ]);
             }
 
