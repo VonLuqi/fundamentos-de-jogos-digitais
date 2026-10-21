@@ -1,16 +1,27 @@
 'use strict';
 
-const NEXT = '/submundo/cocito-espelho';
-const GATE_TOKEN = 'CAPE_MATAPAN_GATE';
-const TOLERANCE = 0.02;
-
-function resolveSubmundoPath(nextPath) {
+function resolveSubmundoRoot() {
   const p = String(window.location?.pathname || '');
   for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
     const idx = p.indexOf(marker);
-    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+    if (idx >= 0) return p.slice(0, idx);
   }
-  return nextPath;
+  return '';
+}
+
+function resolveSubmundoPath(nextPath) {
+  const root = resolveSubmundoRoot();
+  return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
+}
+
+async function postUnderworldStep(payload) {
+  const root = resolveSubmundoRoot();
+  const res = await fetch(`${root}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'underworldStep', ...payload }),
+  });
+  return res.json();
 }
 
 const form = document.getElementById('observatorio-form');
@@ -20,46 +31,32 @@ const mapEl = document.getElementById('observatorio-map');
 
 let marker = null;
 
-function targetPoint() {
-  // Evita literais óbvios no HTML; ainda auditável no JS (Notpron).
-  return {
-    lat: Number(atob('MzYuNDAwNQ==')),
-    lng: Number(atob('MjIuNDg1OA==')),
-  };
-}
-
-function coordsMatch(lat, lng) {
-  const t = targetPoint();
-  return Math.abs(lat - t.lat) <= TOLERANCE && Math.abs(lng - t.lng) <= TOLERANCE;
-}
-
 function parseCoords(raw) {
   const text = String(raw || '').trim();
   if (!text) return null;
   const normalized = text.replace(/;/g, ',').replace(/\s+/g, ' ');
-  const token = normalized.toUpperCase().replace(/\s+/g, '_');
-  if (token === GATE_TOKEN) return { kind: 'token' };
-
   const match = normalized.match(/(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)/);
-  if (!match) return null;
+  if (!match) return { kind: 'token', pass: text };
   const lat = Number(match[1]);
   const lng = Number(match[2]);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  return { kind: 'coords', lat, lng };
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return { kind: 'token', pass: text };
+  return { kind: 'coords', lat, lng, pass: text };
 }
 
-function succeed() {
+function succeed(result) {
   if (statusEl) {
     statusEl.dataset.tone = 'ok';
-    statusEl.textContent = 'Hélio aponta o portal. O espelho aguarda…';
+    statusEl.textContent = result?.message || 'Hélio aponta o portal. O espelho aguarda…';
   }
-  window.location.assign(resolveSubmundoPath(NEXT));
+  if (result?.nextPath) {
+    window.location.assign(resolveSubmundoPath(result.nextPath));
+  }
 }
 
-function fail() {
+function fail(message) {
   if (statusEl) {
     statusEl.dataset.tone = 'error';
-    statusEl.textContent = 'Hélio ainda não aponta o portal.';
+    statusEl.textContent = message || 'Hélio ainda não aponta o portal.';
   }
 }
 
@@ -67,6 +64,19 @@ function placeMarker(lat, lng) {
   if (!marker) return;
   marker.setLatLng([lat, lng]);
   if (input) input.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+}
+
+async function checkObservatorioPayload(payload) {
+  try {
+    const result = await postUnderworldStep({ stage: 'observatorio', ...payload });
+    if (result?.ok && result?.nextPath) {
+      succeed(result);
+    } else {
+      fail(result?.message);
+    }
+  } catch {
+    fail();
+  }
 }
 
 if (mapEl && typeof window.L !== 'undefined') {
@@ -95,11 +105,7 @@ if (mapEl && typeof window.L !== 'undefined') {
   map.on('click', (event) => {
     const { lat, lng } = event.latlng;
     placeMarker(lat, lng);
-    if (coordsMatch(lat, lng)) {
-      succeed();
-    } else {
-      fail();
-    }
+    void checkObservatorioPayload({ lat, lng, pass: `${lat.toFixed(4)}, ${lng.toFixed(4)}` });
   });
 }
 
@@ -110,14 +116,10 @@ form?.addEventListener('submit', (event) => {
     fail();
     return;
   }
-  if (parsed.kind === 'token') {
-    succeed();
+  if (parsed.kind === 'coords') {
+    placeMarker(parsed.lat, parsed.lng);
+    void checkObservatorioPayload({ lat: parsed.lat, lng: parsed.lng, pass: parsed.pass });
     return;
   }
-  placeMarker(parsed.lat, parsed.lng);
-  if (coordsMatch(parsed.lat, parsed.lng)) {
-    succeed();
-  } else {
-    fail();
-  }
+  void checkObservatorioPayload({ pass: parsed.pass });
 });

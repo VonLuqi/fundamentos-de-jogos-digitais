@@ -779,8 +779,292 @@ final class RedeemLessonsService
     }
 
     // -------------------------------------------------------------------------
-    // ARG do Submundo (Elísios / Estige)
+    // ARG do Submundo (Portão + 8 Salas)
     // -------------------------------------------------------------------------
+
+    private static function stripAccentsAscii(string $value): string
+    {
+        return strtr($value, [
+            'á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'ä' => 'a',
+            'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e',
+            'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ö' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'û' => 'u', 'ü' => 'u',
+            'ç' => 'c',
+            'Á' => 'a', 'À' => 'a', 'Â' => 'a', 'Ã' => 'a', 'Ä' => 'a',
+            'É' => 'e', 'È' => 'e', 'Ê' => 'e', 'Ë' => 'e',
+            'Í' => 'i', 'Ì' => 'i', 'Î' => 'i', 'Ï' => 'i',
+            'Ó' => 'o', 'Ò' => 'o', 'Ô' => 'o', 'Õ' => 'o', 'Ö' => 'o',
+            'Ú' => 'u', 'Ù' => 'u', 'Û' => 'u', 'Ü' => 'u',
+            'Ç' => 'c',
+        ]);
+    }
+
+    /**
+     * Gera retângulos [x, y, w, h] para a inscrição submersa do Rio Cócito
+     * a partir da constante no servidor, embaralhados para não expor ordem de glifos.
+     *
+     * @return array<int, array{0:int,1:int,2:int,3:int}>
+     */
+    private static function buildCocitoMirrorSpans(): array
+    {
+        $glyphs = [
+            'C' => [0b01110, 0b10001, 0b10000, 0b10000, 0b10000, 0b10001, 0b01110],
+            'O' => [0b01110, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110],
+            'Y' => [0b10001, 0b10001, 0b01010, 0b00100, 0b00100, 0b00100, 0b00100],
+            'T' => [0b11111, 0b00100, 0b00100, 0b00100, 0b00100, 0b00100, 0b00100],
+            'U' => [0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b10001, 0b01110],
+            'S' => [0b01111, 0b10000, 0b10000, 0b01110, 0b00001, 0b00001, 0b11110],
+            '_' => [0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b00000, 0b11111],
+            'R' => [0b11110, 0b10001, 0b10001, 0b11110, 0b10100, 0b10010, 0b10001],
+            'E' => [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b11111],
+            'F' => [0b11111, 0b10000, 0b10000, 0b11110, 0b10000, 0b10000, 0b10000],
+            'L' => [0b10000, 0b10000, 0b10000, 0b10000, 0b10000, 0b10000, 0b11111],
+            'I' => [0b01110, 0b00100, 0b00100, 0b00100, 0b00100, 0b00100, 0b01110],
+            'N' => [0b10001, 0b11001, 0b10101, 0b10011, 0b10001, 0b10001, 0b10001],
+            '4' => [0b00010, 0b00110, 0b01010, 0b10010, 0b11111, 0b00010, 0b00010],
+            '0' => [0b01110, 0b10001, 0b10011, 0b10101, 0b11001, 0b10001, 0b01110],
+        ];
+
+        $text = ProgressShared::UNDERWORLD_COCITO_PASS;
+        $len = strlen($text);
+        $scaleX = 4;
+        $scaleY = 5;
+        $advance = 6 * $scaleX;
+        $totalW = $len * $advance - $scaleX;
+        $startX = (int) floor((640 - $totalW) / 2);
+        $startY = (int) floor((220 - 7 * $scaleY) / 2);
+
+        $spans = [];
+        for ($i = 0; $i < $len; $i++) {
+            $ch = $text[$i];
+            $rows = $glyphs[$ch] ?? null;
+            if (!$rows) {
+                continue;
+            }
+            $charX = $startX + $i * $advance;
+            for ($row = 0; $row < 7; $row++) {
+                $bits = $rows[$row];
+                $col = 0;
+                while ($col < 5) {
+                    if ((($bits >> (4 - $col)) & 1) === 0) {
+                        $col++;
+                        continue;
+                    }
+                    $runStart = $col;
+                    while ($col < 5 && ((($bits >> (4 - $col)) & 1) === 1)) {
+                        $col++;
+                    }
+                    $runCols = $col - $runStart;
+                    $spans[] = [
+                        $charX + $runStart * $scaleX,
+                        $startY + $row * $scaleY,
+                        $runCols * $scaleX,
+                        $scaleY,
+                    ];
+                }
+            }
+        }
+
+        usort($spans, static function (array $a, array $b): int {
+            $ha = (($a[1] * 37) + ($a[0] * 73) + ($a[2] * 19)) % 997;
+            $hb = (($b[1] * 37) + ($b[0] * 73) + ($b[2] * 19)) % 997;
+            return $ha <=> $hb;
+        });
+
+        return $spans;
+    }
+
+    /**
+     * Valida todas as etapas do ARG no servidor sem expor senhas nem URLs no JS cliente.
+     *
+     * @param array<string, mixed>|null $user
+     * @param array<string, mixed> $body
+     */
+    public static function underworldStep(?array $user, array $body): never
+    {
+        $stage = strtolower(trim((string) ($body['stage'] ?? '')));
+        $rawPass = (string) ($body['pass'] ?? '');
+
+        switch ($stage) {
+            case 'gate': {
+                $norm = strtolower(trim(self::stripAccentsAscii($rawPass)));
+                $normSpaces = (string) preg_replace('/[\s\-]+/', ' ', $norm);
+                $normHyphen = (string) preg_replace('/[\s\-]+/', '-', $norm);
+                $ok = in_array($normSpaces, ProgressShared::UNDERWORLD_GATE_PASSES, true)
+                    || in_array($normHyphen, ProgressShared::UNDERWORLD_GATE_PASSES, true);
+
+                if (!$ok) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'O Cérbero não reconhece essa voz.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['gate'],
+                    'message' => 'O portão cede…',
+                ]);
+            }
+
+            case 'tartaro': {
+                $norm = strtoupper(trim($rawPass));
+                if ($norm !== ProgressShared::UNDERWORLD_TARTARO_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'As runas ainda dormem.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['tartaro'],
+                    'message' => 'O abismo cede…',
+                ]);
+            }
+
+            case 'asfodelos': {
+                $norm = (string) preg_replace('/\s+/', '_', strtoupper(trim($rawPass)));
+                if ($norm !== ProgressShared::UNDERWORLD_ASFODELOS_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'O eco ainda é só chiado.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['asfodelos'],
+                    'message' => 'O caminho se abre entre as flores pálidas…',
+                ]);
+            }
+
+            case 'hecate': {
+                $norm = (string) preg_replace('/\s+/', '_', strtoupper(trim($rawPass)));
+                if ($norm !== ProgressShared::UNDERWORLD_HECATE_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'A relíquia ainda guarda silêncio.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['hecate'],
+                    'message' => 'As três vias se alinham…',
+                ]);
+            }
+
+            case 'elisios': {
+                $norm = trim($rawPass);
+                if ($norm !== ProgressShared::UNDERWORLD_ELISIOS_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'Os juízes permanecem mudos.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['elisios'],
+                    'message' => 'Os juízes se calam. O jardim chama…',
+                ]);
+            }
+
+            case 'persefone_claim': {
+                $role = strtolower(trim(self::stripAccentsAscii((string) ($body['role'] ?? ''))));
+                $seeds = trim((string) ($body['seeds'] ?? ''));
+                $roleOk = in_array($role, ProgressShared::UNDERWORLD_PERSEFONE_ROLES, true);
+                $seedsOk = $seeds === ProgressShared::UNDERWORLD_PERSEFONE_SEEDS;
+
+                if (!$roleOk || !$seedsOk) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'Ainda és mortal neste jardim.',
+                        'whisper' => 'O trono rejeita quem ainda não provou das sementes nem reivindicou o consórcio.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'seal' => ProgressShared::UNDERWORLD_PERSEFONE_PASS,
+                    'message' => 'Selo revelado: ' . ProgressShared::UNDERWORLD_PERSEFONE_PASS,
+                    'whisper' => 'O jardim cede. O selo do trono desperta.',
+                ]);
+            }
+
+            case 'persefone': {
+                $norm = (string) preg_replace('/\s+/', '_', strtoupper(trim($rawPass)));
+                if ($norm !== ProgressShared::UNDERWORLD_PERSEFONE_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'Ainda és mortal neste jardim.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['persefone'],
+                    'message' => 'As romãs abrem o caminho…',
+                ]);
+            }
+
+            case 'observatorio': {
+                $lat = isset($body['lat']) && is_numeric($body['lat']) ? (float) $body['lat'] : null;
+                $lng = isset($body['lng']) && is_numeric($body['lng']) ? (float) $body['lng'] : null;
+
+                $text = trim(self::stripAccentsAscii($rawPass));
+                $tokenNorm = (string) preg_replace('/\s+/', '_', strtoupper(str_replace(';', ',', $text)));
+                $tokenOk = in_array($tokenNorm, ProgressShared::UNDERWORLD_OBSERVATORIO_TOKENS, true);
+
+                if (!$tokenOk && ($lat === null || $lng === null) && $text !== '') {
+                    if (preg_match('/(-?\d+(?:\.\d+)?)\s*[,; ]\s*(-?\d+(?:\.\d+)?)/', $text, $m)) {
+                        $lat = (float) $m[1];
+                        $lng = (float) $m[2];
+                    }
+                }
+
+                $coordsOk = $lat !== null
+                    && $lng !== null
+                    && abs($lat - ProgressShared::UNDERWORLD_OBSERVATORIO_LAT) <= ProgressShared::UNDERWORLD_OBSERVATORIO_TOLERANCE
+                    && abs($lng - ProgressShared::UNDERWORLD_OBSERVATORIO_LNG) <= ProgressShared::UNDERWORLD_OBSERVATORIO_TOLERANCE;
+
+                if (!$tokenOk && !$coordsOk) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'Hélio ainda não aponta o portal.',
+                    ]);
+                }
+
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['observatorio'],
+                    'message' => 'Hélio aponta o portal. O espelho aguarda…',
+                ]);
+            }
+
+            case 'cocito_mirror': {
+                Http::json(200, [
+                    'ok' => true,
+                    'width' => 640,
+                    'height' => 220,
+                    'spans' => self::buildCocitoMirrorSpans(),
+                ]);
+            }
+
+            case 'cocito': {
+                $norm = (string) preg_replace('/\s+/', '_', strtoupper(trim($rawPass)));
+                if ($norm !== ProgressShared::UNDERWORLD_COCITO_PASS) {
+                    Http::json(200, [
+                        'ok' => false,
+                        'message' => 'O lamento ainda é negro.',
+                    ]);
+                }
+                Http::json(200, [
+                    'ok' => true,
+                    'nextPath' => ProgressShared::UNDERWORLD_NEXT_PATHS['cocito'],
+                    'message' => 'A runa emerge. O Estige chama…',
+                ]);
+            }
+
+            default:
+                Http::error(400, 'Etapa desconhecida.');
+        }
+    }
 
     public static function underworldJudgment(): never
     {

@@ -1,6 +1,6 @@
 /**
  * Portão do Submundo — eco glitch no Salão dos Heróis.
- * Palavra-passe = anagrama das runas (TARTARO OCULTO) → /submundo/tartaro-oculto
+ * Validação da palavra-passe e destino ficam exclusivamente no servidor.
  *
  * Juice é CSS-first (RGB split, flicker, rift) para não competir com o
  * canvas @vfx-js do arco-íris no body.
@@ -9,10 +9,9 @@
 'use strict';
 
 import { setRainbowVfxSuspended } from './achievements-ui.js';
+import { underworldStep } from './api.js';
 
-const GATE_DESTINATION = '/submundo/tartaro-oculto';
 const GATE_STORAGE_KEY = 'underworld_gate_ok';
-const ACCEPTED_PASSES = new Set(['tartaro oculto', 'tartaro-oculto']);
 
 function resolveSubmundoPath(nextPath) {
   const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
@@ -38,22 +37,6 @@ let gateBound = false;
 let failCount = 0;
 let corruptTimer = null;
 let titleGlitchTimer = null;
-
-function normalizePass(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, ' ');
-}
-
-function isAcceptedPass(value) {
-  const normalized = normalizePass(value);
-  if (ACCEPTED_PASSES.has(normalized)) return true;
-  return normalized.replace(/-/g, ' ') === 'tartaro oculto'
-    || normalized.replace(/\s+/g, '-') === 'tartaro-oculto';
-}
 
 function startCorruptLoop(label) {
   if (!label || reducedMotionQuery.matches || corruptTimer) return;
@@ -186,36 +169,45 @@ async function handleGateSubmit(event) {
   const form = event.currentTarget;
   const input = document.getElementById('underworld-gate-input');
   const submitBtn = document.getElementById('underworld-gate-submit');
-  const value = input?.value || '';
+  const value = String(input?.value || '').trim();
 
-  if (!isAcceptedPass(value)) {
+  if (submitBtn) submitBtn.disabled = true;
+
+  let result = null;
+  try {
+    result = await underworldStep({ stage: 'gate', pass: value });
+  } catch {
+    result = { ok: false, message: 'O Cérbero não reconhece essa voz.' };
+  }
+
+  if (!result?.ok || !result?.nextPath) {
     failCount += 1;
-    setGateStatus('O Cérbero não reconhece essa voz.', 'error');
+    setGateStatus(result?.message || 'O Cérbero não reconhece essa voz.', 'error');
     const modal = document.getElementById('underworld-gate-modal');
     modal?.classList.remove('is-error-shake');
     void modal?.offsetWidth;
     modal?.classList.add('is-error-shake');
     if (failCount >= 3 && submitBtn) {
-      submitBtn.disabled = true;
       window.setTimeout(() => {
         submitBtn.disabled = false;
       }, 1200);
+    } else if (submitBtn) {
+      submitBtn.disabled = false;
     }
     return;
   }
 
   failCount = 0;
-  setGateStatus('O portão cede…', 'ok');
+  setGateStatus(result.message || 'O portão cede…', 'ok');
   try {
     sessionStorage.setItem(GATE_STORAGE_KEY, '1');
   } catch {
     /* ignore */
   }
 
-  if (submitBtn) submitBtn.disabled = true;
   form?.classList.add('is-success');
   await playSuccessRift();
-  window.location.assign(resolveSubmundoPath(GATE_DESTINATION));
+  window.location.assign(resolveSubmundoPath(result.nextPath));
 }
 
 /** Inicializa o portão glitch do Salão. */

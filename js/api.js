@@ -319,11 +319,11 @@ export function siteBasePath() {
 export function rootPath() {
   const rawPathname = String(window.location?.pathname || '/');
   const pathname = rawPathname.replace(/\/+$/, '') || '/';
-  // Arquivo direto: /pages/submundo/estige-obolo.html
+  // Arquivo direto em subpasta de segundo nível
   if (pathname.includes('/pages/submundo/')) return '../..';
-  // URL limpa do ARG com barra final (ex. subdiretório Apache): /submundo/estige-obolo/
+  // URL limpa do abismo com barra final
   if (/(^|\/)submundo\/[^/]+\/$/.test(rawPathname)) return '../..';
-  // URL limpa do ARG: /submundo/estige-obolo
+  // URL limpa do abismo sem barra final
   if (/(^|\/)submundo(\/|$)/.test(pathname)) return '..';
   if (pathname.includes('/pages/')) return '..';
   return '.';
@@ -699,6 +699,16 @@ export async function redeemCode(token, code) {
     body: JSON.stringify({ token, action: 'redeem', code }),
   });
   return { ...payload, user: normalizeUser(payload.user) };
+}
+
+export async function underworldStep(payload = {}) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'underworldStep',
+      ...payload,
+    }),
+  });
 }
 
 export async function underworldJudgment(token) {

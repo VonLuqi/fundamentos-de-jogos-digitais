@@ -28,6 +28,35 @@ final class ProgressShared
     public const UNDERWORLD_ESTIGE_HASH = '18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c';
     public const UNDERWORLD_ORACLE_TOKEN = 'a2V5X2VsZXN0aWFsX2hhZGVz'; // base64('key_elestial_hades')
 
+    public const UNDERWORLD_GATE_PASSES = ['tartaro oculto', 'tartaro-oculto'];
+    public const UNDERWORLD_TARTARO_PASS = 'CERBERUS-UNBOUND';
+    public const UNDERWORLD_ASFODELOS_PASS = 'PERSEPHONE_PASS';
+    public const UNDERWORLD_HECATE_PASS = 'HECATE_TORCH_KEY_777';
+    public const UNDERWORLD_ELISIOS_PASS = 'key_elestial_hades';
+    public const UNDERWORLD_PERSEFONE_ROLES = ['queen_consort', 'rainha', 'soberano', 'soberana', 'queen'];
+    public const UNDERWORLD_PERSEFONE_SEEDS = '6';
+    public const UNDERWORLD_PERSEFONE_PASS = 'POMEGRANATE_6_SEEDS';
+    public const UNDERWORLD_OBSERVATORIO_LAT = 36.4005;
+    public const UNDERWORLD_OBSERVATORIO_LNG = 22.4858;
+    public const UNDERWORLD_OBSERVATORIO_TOLERANCE = 0.025;
+    public const UNDERWORLD_OBSERVATORIO_TOKENS = [
+        'CAPE_MATAPAN_GATE',
+        'CABO_MATAPAN',
+        'CABO_TENARO',
+        'CAPE_TAENARUM',
+    ];
+    public const UNDERWORLD_COCITO_PASS = 'COCYTUS_REFLECTION_404';
+    public const UNDERWORLD_NEXT_PATHS = [
+        'gate' => '/submundo/tartaro-oculto',
+        'tartaro' => '/submundo/asfodelos-sussurros',
+        'asfodelos' => '/submundo/hecate-encruzilhada',
+        'hecate' => '/submundo/elisios-julgamento',
+        'elisios' => '/submundo/persefone-jardim',
+        'persefone' => '/submundo/observatorio-sombras',
+        'observatorio' => '/submundo/cocito-espelho',
+        'cocito' => '/submundo/estige-obolo',
+    ];
+
     /**
      * @param array<string, mixed> $user
      */

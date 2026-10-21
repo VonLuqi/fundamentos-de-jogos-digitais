@@ -1,30 +1,34 @@
 'use strict';
 
-const NEXT = '/submundo/estige-obolo';
-const EXPECTED = 'COCYTUS_REFLECTION_404';
-
-function resolveSubmundoPath(nextPath) {
+function resolveSubmundoRoot() {
   const p = String(window.location?.pathname || '');
   for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
     const idx = p.indexOf(marker);
-    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+    if (idx >= 0) return p.slice(0, idx);
   }
-  return nextPath;
+  return '';
+}
+
+function resolveSubmundoPath(nextPath) {
+  const root = resolveSubmundoRoot();
+  return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
+}
+
+async function postUnderworldStep(payload) {
+  const root = resolveSubmundoRoot();
+  const res = await fetch(`${root}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'underworldStep', ...payload }),
+  });
+  return res.json();
 }
 
 const canvas = document.getElementById('cocito-mirror');
 const form = document.getElementById('cocito-form');
 const statusEl = document.getElementById('cocito-status');
 
-function paintMirror() {
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  if (!ctx) return;
-
-  const w = canvas.width;
-  const h = canvas.height;
-
-  // 1) Desenha a versão verdadeira (runa clara no abismo).
+function paintWaterBase(ctx, w, h) {
   ctx.fillStyle = '#05070c';
   ctx.fillRect(0, 0, w, h);
 
@@ -38,51 +42,97 @@ function paintMirror() {
     ctx.stroke();
   }
 
-  ctx.font = '600 26px Cinzel, Georgia, serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillStyle = '#e8d5a3';
-  ctx.fillText(EXPECTED, w / 2, h / 2);
-
-  // 2) Inverte RGB e afoga a runa: pixels de texto ficam com alfa 0;
-  //    o fundo vira água opaca negra (esconde o negativo claro).
   const img = ctx.getImageData(0, 0, w, h);
   const d = img.data;
   for (let i = 0; i < d.length; i += 4) {
-    const isRune = d[i] > 120 || d[i + 1] > 110; // ouro da inscrição
-    d[i] = 255 - d[i];
-    d[i + 1] = 255 - d[i + 1];
-    d[i + 2] = 255 - d[i + 2];
-    if (isRune) {
-      d[i + 3] = 0;
-    } else {
-      d[i] = 4 + (i % 3);
-      d[i + 1] = 6;
-      d[i + 2] = 10;
-      d[i + 3] = 255;
-    }
+    d[i] = 4 + (i % 3);
+    d[i + 1] = 6;
+    d[i + 2] = 10;
+    d[i + 3] = 255;
   }
   ctx.putImageData(img, 0, 0);
 }
 
-paintMirror();
+function applySubmergedSpans(ctx, w, h, spans) {
+  if (!Array.isArray(spans) || !spans.length) return;
+  const img = ctx.getImageData(0, 0, w, h);
+  const d = img.data;
 
-form?.addEventListener('submit', (event) => {
+  for (const span of spans) {
+    if (!Array.isArray(span) || span.length < 4) continue;
+    const x0 = Math.max(0, Number(span[0]) | 0);
+    const y0 = Math.max(0, Number(span[1]) | 0);
+    const sw = Math.max(0, Number(span[2]) | 0);
+    const sh = Math.max(0, Number(span[3]) | 0);
+    const xEnd = Math.min(w, x0 + sw);
+    const yEnd = Math.min(h, y0 + sh);
+
+    for (let y = y0; y < yEnd; y += 1) {
+      for (let x = x0; x < xEnd; x += 1) {
+        const idx = (y * w + x) * 4;
+        // Negativo submerso do ouro (#e8d5a3 -> 23, 42, 92) com alfa 0:
+        // só emerge quando o detetive inverte RGB (255 - c) e força alfa 255 no Console.
+        d[idx] = 23;
+        d[idx + 1] = 42;
+        d[idx + 2] = 92;
+        d[idx + 3] = 0;
+      }
+    }
+  }
+
+  ctx.putImageData(img, 0, 0);
+}
+
+async function paintMirror() {
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  paintWaterBase(ctx, w, h);
+
+  try {
+    const payload = await postUnderworldStep({ stage: 'cocito_mirror' });
+    if (payload?.ok && Array.isArray(payload.spans)) {
+      applySubmergedSpans(ctx, w, h, payload.spans);
+    }
+  } catch {
+    /* Mantém a superfície negra caso o espelho esteja inacessível */
+  }
+}
+
+void paintMirror();
+
+form?.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const value = String(document.getElementById('cocito-pass')?.value || '')
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '_');
-  if (value !== EXPECTED) {
+  const value = String(document.getElementById('cocito-pass')?.value || '').trim();
+  if (!value) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
       statusEl.textContent = 'O lamento ainda é negro.';
     }
     return;
   }
-  if (statusEl) {
-    statusEl.dataset.tone = 'ok';
-    statusEl.textContent = 'A runa emerge. O Estige chama…';
+
+  try {
+    const result = await postUnderworldStep({ stage: 'cocito', pass: value });
+    if (!result?.ok || !result?.nextPath) {
+      if (statusEl) {
+        statusEl.dataset.tone = 'error';
+        statusEl.textContent = result?.message || 'O lamento ainda é negro.';
+      }
+      return;
+    }
+    if (statusEl) {
+      statusEl.dataset.tone = 'ok';
+      statusEl.textContent = result.message || 'A runa emerge. O Estige chama…';
+    }
+    window.location.assign(resolveSubmundoPath(result.nextPath));
+  } catch {
+    if (statusEl) {
+      statusEl.dataset.tone = 'error';
+      statusEl.textContent = 'O lamento ainda é negro.';
+    }
   }
-  window.location.assign(resolveSubmundoPath(NEXT));
 });

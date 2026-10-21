@@ -1,16 +1,29 @@
 'use strict';
 
-const NEXT = '/submundo/observatorio-sombras';
-const EXPECTED = 'POMEGRANATE_6_SEEDS';
-
-function resolveSubmundoPath(nextPath) {
+function resolveSubmundoRoot() {
   const p = String(window.location?.pathname || '');
   for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
     const idx = p.indexOf(marker);
-    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+    if (idx >= 0) return p.slice(0, idx);
   }
-  return nextPath;
+  return '';
 }
+
+function resolveSubmundoPath(nextPath) {
+  const root = resolveSubmundoRoot();
+  return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
+}
+
+async function postUnderworldStep(payload) {
+  const root = resolveSubmundoRoot();
+  const res = await fetch(`${root}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'underworldStep', ...payload }),
+  });
+  return res.json();
+}
+
 const ROLE_COOKIE = 'underworld_role';
 const SEEDS_KEY = 'pomegranate_seeds';
 
@@ -36,7 +49,7 @@ function getCookie(name) {
   return '';
 }
 
-// Estado inicial do mortal — o detetive deve elevar autoridade e sementes.
+// Estado inicial do mortal — o detetive deve elevar autoridade e sementes no navegador.
 setCookie(ROLE_COOKIE, 'mortal');
 try {
   localStorage.setItem(SEEDS_KEY, '0');
@@ -44,7 +57,7 @@ try {
   /* storage bloqueado */
 }
 
-claimBtn?.addEventListener('click', () => {
+claimBtn?.addEventListener('click', async () => {
   const role = getCookie(ROLE_COOKIE);
   let seeds = '0';
   try {
@@ -53,44 +66,66 @@ claimBtn?.addEventListener('click', () => {
     seeds = '0';
   }
 
-  if (role !== 'queen_consort' || seeds !== '6') {
+  try {
+    const result = await postUnderworldStep({ stage: 'persefone_claim', role, seeds });
+    if (!result?.ok || !result?.seal) {
+      if (statusEl) {
+        statusEl.dataset.tone = 'error';
+        statusEl.textContent = result?.message || 'Ainda és mortal neste jardim.';
+      }
+      if (whisper) {
+        whisper.textContent = result?.whisper
+          || 'O trono rejeita quem ainda não provou das sementes nem reivindicou o consórcio.';
+      }
+      return;
+    }
+
+    if (whisper) {
+      whisper.textContent = result.whisper || 'O jardim cede. O selo do trono desperta.';
+    }
+    if (statusEl) {
+      statusEl.dataset.tone = 'ok';
+      statusEl.textContent = result.message || `Selo revelado: ${result.seal}`;
+    }
+    if (form) form.hidden = false;
+    if (passInput) passInput.value = result.seal;
+  } catch {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
       statusEl.textContent = 'Ainda és mortal neste jardim.';
     }
-    if (whisper) {
-      whisper.textContent = 'O trono rejeita quem ainda não provou das sementes nem reivindicou o consórcio.';
-    }
-    return;
   }
-
-  if (whisper) {
-    whisper.textContent = 'O jardim cede. O selo do trono desperta.';
-  }
-  if (statusEl) {
-    statusEl.dataset.tone = 'ok';
-    statusEl.textContent = `Selo revelado: ${EXPECTED}`;
-  }
-  if (form) form.hidden = false;
-  if (passInput) passInput.value = EXPECTED;
 });
 
-form?.addEventListener('submit', (event) => {
+form?.addEventListener('submit', async (event) => {
   event.preventDefault();
-  const value = String(passInput?.value || '')
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, '_');
-  if (value !== EXPECTED) {
+  const value = String(passInput?.value || '').trim();
+  if (!value) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
       statusEl.textContent = 'Ainda és mortal neste jardim.';
     }
     return;
   }
-  if (statusEl) {
-    statusEl.dataset.tone = 'ok';
-    statusEl.textContent = 'As romãs abrem o caminho…';
+
+  try {
+    const result = await postUnderworldStep({ stage: 'persefone', pass: value });
+    if (!result?.ok || !result?.nextPath) {
+      if (statusEl) {
+        statusEl.dataset.tone = 'error';
+        statusEl.textContent = result?.message || 'Ainda és mortal neste jardim.';
+      }
+      return;
+    }
+    if (statusEl) {
+      statusEl.dataset.tone = 'ok';
+      statusEl.textContent = result.message || 'As romãs abrem o caminho…';
+    }
+    window.location.assign(resolveSubmundoPath(result.nextPath));
+  } catch {
+    if (statusEl) {
+      statusEl.dataset.tone = 'error';
+      statusEl.textContent = 'Ainda és mortal neste jardim.';
+    }
   }
-  window.location.assign(resolveSubmundoPath(NEXT));
 });

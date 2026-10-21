@@ -24,8 +24,16 @@ final class ProgressController
         }
 
         $token = SessionService::extractRequestToken() ?? '';
-
         $user = SessionService::loadUserBySessionToken($token);
+
+        if ($method === 'POST') {
+            $body = Http::body();
+            $action = (string) ($body['action'] ?? '');
+            if ($action === 'underworldStep') {
+                RedeemLessonsService::underworldStep($user, $body);
+            }
+        }
+
         if (!$user) {
             Http::error(401, 'Sessão inválida.');
         }

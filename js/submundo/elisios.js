@@ -1,9 +1,6 @@
 'use strict';
 
-import { ApiError, getSession, underworldJudgment } from '../api.js';
-
-const NEXT = '/submundo/persefone-jardim';
-const EXPECTED = 'key_elestial_hades';
+import { ApiError, getSession, underworldJudgment, underworldStep } from '../api.js';
 
 function resolveSubmundoPath(nextPath) {
   const p = String(window.location?.pathname || '');
@@ -48,19 +45,40 @@ judgeBtn?.addEventListener('click', async () => {
   }
 });
 
-form?.addEventListener('submit', (event) => {
+form?.addEventListener('submit', async (event) => {
   event.preventDefault();
   const value = String(document.getElementById('elisios-pass')?.value || '').trim();
-  if (value !== EXPECTED) {
+  if (!value) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
       statusEl.textContent = 'Os juízes permanecem mudos.';
     }
     return;
   }
-  if (statusEl) {
-    statusEl.dataset.tone = 'ok';
-    statusEl.textContent = 'Os juízes se calam. O jardim chama…';
+
+  try {
+    const session = getSession();
+    const result = await underworldStep({
+      stage: 'elisios',
+      pass: value,
+      ...(session?.token ? { token: session.token } : {}),
+    });
+    if (!result?.ok || !result?.nextPath) {
+      if (statusEl) {
+        statusEl.dataset.tone = 'error';
+        statusEl.textContent = result?.message || 'Os juízes permanecem mudos.';
+      }
+      return;
+    }
+    if (statusEl) {
+      statusEl.dataset.tone = 'ok';
+      statusEl.textContent = result.message || 'Os juízes se calam. O jardim chama…';
+    }
+    window.location.assign(resolveSubmundoPath(result.nextPath));
+  } catch {
+    if (statusEl) {
+      statusEl.dataset.tone = 'error';
+      statusEl.textContent = 'Os juízes permanecem mudos.';
+    }
   }
-  window.location.assign(resolveSubmundoPath(NEXT));
 });

@@ -1,5 +1,5 @@
 /**
- * Smoke — Submundo ARG (8 fases) + Única + trailhead
+ * Smoke — Submundo ARG (8 fases server-side) + Única + trailhead
  */
 
 import { spawnSync } from 'node:child_process';
@@ -86,44 +86,79 @@ const roomFiles = [
 ];
 roomFiles.forEach((rel) => assert(fs.existsSync(path.join(root, rel)), `arquivo ${rel}`));
 
-assert(read('js/submundo/asfodelos.js').includes('/submundo/hecate-encruzilhada'), 'Asfódelos → Hécate');
-assert(read('js/submundo/hecate.js').includes('/submundo/elisios-julgamento'), 'Hécate → Elísios');
-assert(read('js/submundo/elisios.js').includes('/submundo/persefone-jardim'), 'Elísios → Perséfone');
-assert(read('js/submundo/persefone.js').includes('/submundo/observatorio-sombras'), 'Perséfone → Observatório');
-assert(read('js/submundo/observatorio.js').includes('/submundo/cocito-espelho'), 'Observatório → Cócito');
-assert(read('js/submundo/cocito.js').includes('/submundo/estige-obolo'), 'Cócito → Estige');
+// 1) Verifica que o JS cliente NÃO vaza senhas nem URLs das próximas salas
+const gateJs = read('js/underworld-gate.js');
+const tartaroJs = read('js/submundo/tartaro.js');
+const asfodelosJs = read('js/submundo/asfodelos.js');
+const hecateJs = read('js/submundo/hecate.js');
+const elisiosJs = read('js/submundo/elisios.js');
+const persefoneJs = read('js/submundo/persefone.js');
+const observatorioJs = read('js/submundo/observatorio.js');
+const cocitoJs = read('js/submundo/cocito.js');
 
-assert(read('js/submundo/hecate.js').includes('HECATE_TORCH_KEY_777'), 'chave Hécate');
-assert(read('js/submundo/persefone.js').includes('POMEGRANATE_6_SEEDS'), 'chave Perséfone');
-assert(read('js/submundo/persefone.js').includes('queen_consort'), 'role Perséfone');
-assert(read('js/submundo/cocito.js').includes('COCYTUS_REFLECTION_404'), 'chave Cócito');
-assert(read('js/submundo/observatorio.js').includes('CAPE_MATAPAN_GATE'), 'token Observatório');
+assert(!/tartaro[\s-]oculto/i.test(gateJs), 'underworld-gate.js não vaza senha nem URL do Tártaro');
+assert(!tartaroJs.includes('CERBERUS-UNBOUND') && !tartaroJs.includes('asfodelos-sussurros'), 'tartaro.js não vaza senha nem próxima sala');
+assert(!tartaroJs.includes('underworld-gate.js'), 'tartaro.js não importa underworld-gate.js no Sources');
+assert(!asfodelosJs.includes('PERSEPHONE_PASS') && !asfodelosJs.includes('hecate-encruzilhada'), 'asfodelos.js não vaza senha nem próxima sala');
+assert(!hecateJs.includes('HECATE_TORCH_KEY_777') && !hecateJs.includes('elisios-julgamento'), 'hecate.js não vaza senha nem próxima sala');
+assert(!elisiosJs.includes('key_elestial_hades') && !elisiosJs.includes('persefone-jardim'), 'elisios.js não vaza senha nem próxima sala');
+assert(
+  !persefoneJs.includes('POMEGRANATE_6_SEEDS')
+    && !persefoneJs.includes('queen_consort')
+    && !persefoneJs.includes('observatorio-sombras'),
+  'persefone.js não vaza selo, role nem próxima sala'
+);
+assert(
+  !observatorioJs.includes('CAPE_MATAPAN_GATE')
+    && !observatorioJs.includes('MzYuNDAwNQ==')
+    && !observatorioJs.includes('cocito-espelho'),
+  'observatorio.js não vaza coordenadas, token nem próxima sala'
+);
+assert(
+  !cocitoJs.includes('COCYTUS_REFLECTION_404')
+    && !cocitoJs.includes('estige-obolo'),
+  'cocito.js não vaza runa nem próxima sala'
+);
 
-const tartaro = read('pages/submundo/tartaro-oculto.html');
-assert(tartaro.includes('hidden-rune') && tartaro.includes('noindex'), 'Tártaro rune + noindex');
+// 2) Verifica onde as pistas DEVEM continuar acessíveis ao jogador
+const tartaroHtml = read('pages/submundo/tartaro-oculto.html');
+assert(tartaroHtml.includes('hidden-rune') && tartaroHtml.includes('CERBERUS-UNBOUND') && tartaroHtml.includes('noindex'), 'Tártaro mantém runa oculta no HTML/CSS');
+assert(read('pages/submundo/persefone-jardim.html').includes('queen_consort'), 'Perséfone mantém pista mitológica no comentário HTML');
 assert(read('css/submundo.css').includes('--shadow-color'), 'CSS shadow-color');
 assert(read('css/submundo.css').includes('submundo--hecate'), 'tema Hécate');
 assert(read('css/submundo.css').includes('submundo--persefone'), 'tema Perséfone');
 assert(read('css/submundo.css').includes('submundo--observatorio'), 'tema Observatório');
 assert(read('css/submundo.css').includes('submundo--cocito'), 'tema Cócito');
 
-const vercel = read('vercel.json');
-assert(vercel.includes('/submundo/hecate-encruzilhada'), 'rewrite hecate');
-assert(vercel.includes('/submundo/persefone-jardim'), 'rewrite persefone');
-assert(vercel.includes('/submundo/observatorio-sombras'), 'rewrite observatorio');
-assert(vercel.includes('/submundo/cocito-espelho'), 'rewrite cocito');
-assert(vercel.includes('/submundo/estige-obolo'), 'rewrite estige');
+const htaccess = read('.htaccess');
+assert(htaccess.includes('submundo/hecate-encruzilhada'), 'rewrite .htaccess hecate');
+assert(htaccess.includes('submundo/persefone-jardim'), 'rewrite .htaccess persefone');
+assert(htaccess.includes('submundo/observatorio-sombras'), 'rewrite .htaccess observatorio');
+assert(htaccess.includes('submundo/cocito-espelho'), 'rewrite .htaccess cocito');
+assert(htaccess.includes('submundo/estige-obolo'), 'rewrite .htaccess estige');
 
-const local = read('local-server.mjs');
-assert(local.includes('/submundo/hecate-encruzilhada'), 'rewrite local hecate');
-assert(local.includes('/submundo/cocito-espelho'), 'rewrite local cocito');
-
+// 3) Verifica que o servidor PHP guarda todas as senhas e rotas de transição
 const progress = readProgressSurface(root);
-assert(progress.includes("action === 'underworldJudgment'"), 'underworldJudgment');
-assert(progress.includes("action === 'underworldRedeem'"), 'underworldRedeem');
-assert(progress.includes('consumeGameRateLimit'), 'underworld rate limit via KV helper (A2)');
+assert(progress.includes('underworldStep'), 'servidor expõe underworldStep');
+assert(progress.includes('underworldJudgment'), 'servidor expõe underworldJudgment');
+assert(progress.includes('underworldRedeem'), 'servidor expõe underworldRedeem');
+assert(progress.includes('/submundo/tartaro-oculto'), 'servidor guarda rota Tártaro');
+assert(progress.includes('/submundo/asfodelos-sussurros'), 'servidor guarda rota Asfódelos');
+assert(progress.includes('/submundo/hecate-encruzilhada'), 'servidor guarda rota Hécate');
+assert(progress.includes('/submundo/elisios-julgamento'), 'servidor guarda rota Elísios');
+assert(progress.includes('/submundo/persefone-jardim'), 'servidor guarda rota Perséfone');
+assert(progress.includes('/submundo/observatorio-sombras'), 'servidor guarda rota Observatório');
+assert(progress.includes('/submundo/cocito-espelho'), 'servidor guarda rota Cócito');
+assert(progress.includes('/submundo/estige-obolo'), 'servidor guarda rota Estige');
+assert(progress.includes('CERBERUS-UNBOUND'), 'servidor valida Tártaro');
+assert(progress.includes('PERSEPHONE_PASS'), 'servidor valida Asfódelos');
+assert(progress.includes('HECATE_TORCH_KEY_777'), 'servidor valida Hécate');
+assert(progress.includes('key_elestial_hades'), 'servidor valida Elísios');
+assert(progress.includes('POMEGRANATE_6_SEEDS') && progress.includes('queen_consort'), 'servidor valida Perséfone');
+assert(progress.includes('CAPE_MATAPAN_GATE') && progress.includes('36.4005'), 'servidor valida Observatório');
+assert(progress.includes('COCYTUS_REFLECTION_404') && progress.includes('buildCocitoMirrorSpans'), 'servidor valida e gera espelho do Cócito');
+assert(progress.includes('RateLimiter::consumeGame'), 'underworld rate limit server-side');
 assert(progress.includes('applyRetryAfterHeader'), 'underworld 429 com Retry-After');
-assert(!progress.includes('underworldRedeemAttempts'), 'Map underworldRedeemAttempts removido (A2)');
 assert(progress.includes('18fec91c717e94c6b979a9c288ac1e041fd57101a2a2379b346e3b4fce39083c'), 'hash server-side');
 assert(!progress.includes("encoding: 'Base64'"), 'judgment sem encoding spoiler');
 assert(!/hint:\s*'Use atob/.test(progress), 'judgment sem hint atob');
@@ -182,7 +217,11 @@ assert(hecateBin.includes(Buffer.from('vermelho mais fraco')), 'Comment enigmát
 assert(!hecateBin.includes(Buffer.from('LSB Channel')), 'Comment sem spoiler técnico');
 
 const apiJs = read('js/api.js');
-assert(apiJs.includes('underworldJudgment') && apiJs.includes('underworldRedeem'), 'helpers API front');
+assert(
+  apiJs.includes('underworldStep') && apiJs.includes('underworldJudgment') && apiJs.includes('underworldRedeem'),
+  'helpers API front'
+);
+assert(!apiJs.includes('estige-obolo'), 'api.js não vaza nome da sala final nos comentários');
 assert(apiJs.includes('submundo'), 'rootPath conhece /submundo');
 assert(apiJs.includes("from './devtools-guard.js'"), 'api.js instala o véu de F12');
 assert(apiJs.includes('installDevtoolsGuard()'), 'véu de F12 arma no load do cliente');
@@ -219,9 +258,7 @@ assert(
   'node --check devtools-guard.boot.js'
 );
 
-const gateJs = read('js/underworld-gate.js');
-assert(gateJs.includes('initUnderworldGate') && gateJs.includes('TARTARO'), 'portão do Salão');
-assert(gateJs.includes('/submundo/tartaro-oculto'), 'portão redireciona ao Tártaro');
+assert(gateJs.includes('initUnderworldGate') && gateJs.includes('underworldStep'), 'portão do Salão via servidor');
 assert(read('pages/dashboard.html').includes('underworld-gate'), 'markup do portão no hub');
 assert(read('css/dashboard.css').includes('.underworld-gate'), 'CSS juicy do portão');
 assert(read('js/dashboard.js').includes('initUnderworldGate'), 'dashboard inicia o portão');
@@ -255,7 +292,6 @@ assert(read('css/conquistas.css').includes('trailhead-rune') || read('css/dashbo
   'js/submundo/estige.js',
   'js/achievements-ui.js',
   'js/conquistas.js',
-  'api/progress.js',
   'scripts/generate-hecate-relic.mjs',
 ].forEach((rel) => {
   const result = spawnSync(process.execPath, ['--check', path.join(root, rel)], { encoding: 'utf8' });
@@ -268,4 +304,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('OK — smoke Submundo / Única / trailhead (8 fases)');
+console.log('OK — smoke Submundo / Única / trailhead (8 fases server-side)');
