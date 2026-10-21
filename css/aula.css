@@ -479,10 +479,13 @@ img.discovery-card__item-art.has-art {
   z-index: 2;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.75rem;
+  width: 100%;
   max-width: 640px;
   margin: 0 auto 0.5rem;
   padding: 0 2rem;
+  box-sizing: border-box;
 }
 .ornate-divider__line {
   flex: 1;

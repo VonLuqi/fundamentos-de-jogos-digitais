@@ -343,7 +343,11 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
   padding: 1.2rem 1.5rem 0.7rem;
+  box-sizing: border-box;
   background:
     linear-gradient(180deg, rgba(18, 14, 22, 0.44), rgba(18, 14, 22, 0));
 }
@@ -359,14 +363,19 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
 }
 
 .app-shell__header-left {
+  position: relative;
   display: flex;
+  flex: 1 1 auto;
   align-items: center;
   gap: 1rem;
   min-width: 0;
+  padding-right: 3.25rem;
 }
 
 .app-shell__titles {
+  flex: 1 1 auto;
   min-width: 0;
+  text-align: center;
 }
 
 .app-shell__title {

@@ -15,6 +15,7 @@ body.is-relic-modal-open {
 
 .album-intro {
   margin-bottom: 1.5rem;
+  text-align: center;
 }
 .album-intro__lead {
   margin: 0 0 0.55rem;
