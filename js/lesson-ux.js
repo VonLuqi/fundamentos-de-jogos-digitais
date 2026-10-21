@@ -213,8 +213,39 @@ function enhanceSubmissionFlow() {
   window.setTimeout(syncPills, 1200);
 }
 
+function enhanceCodeBlocks() {
+  document.querySelectorAll('.lesson-copy-code[data-copy-target]').forEach((button) => {
+    if (button.dataset.uxCopyBound === 'true') return;
+    button.dataset.uxCopyBound = 'true';
+
+    button.addEventListener('click', async () => {
+      const targetId = button.getAttribute('data-copy-target');
+      const pre = targetId ? document.getElementById(targetId) : null;
+      const status = targetId
+        ? document.querySelector(`[data-copy-status-for="${targetId}"]`)
+        : null;
+      const text = pre?.textContent?.trim() ?? '';
+      if (!text || !navigator.clipboard?.writeText) return;
+
+      try {
+        await navigator.clipboard.writeText(`${text}\n`);
+        if (status) {
+          status.className = 'lesson-code-block__status is-success';
+          status.textContent = '✓ Código GDScript copiado!';
+        }
+      } catch {
+        if (status) {
+          status.className = 'lesson-code-block__status is-error';
+          status.textContent = 'Não foi possível copiar automaticamente.';
+        }
+      }
+    });
+  });
+}
+
 export function initLessonUx() {
   enhanceLessonCallouts();
+  enhanceCodeBlocks();
   enhanceTabNavigation();
   enhanceSubmissionFlow();
 }

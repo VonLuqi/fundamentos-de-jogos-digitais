@@ -205,6 +205,10 @@
           <li>Adicione um filho <strong>CollisionShape2D</strong> e escolha um shape (ex.: <code>RectangleShape2D</code> ou <code>CapsuleShape2D</code>) alinhado ao sprite.</li>
           <li>Salve a cena como <code>player.tscn</code> (ou nome equivalente combinado com a turma).</li>
         </ol>
+        <pre class="lesson-pre" aria-label="Hierarquia esperada do Player">Player (CharacterBody2D) ← script player.gd
+├── Sprite2D
+└── CollisionShape2D</pre>
+        <p><strong>Checkpoint 1:</strong> Na aba Scene, confirme que <code>Sprite2D</code> e <code>CollisionShape2D</code> são filhos diretos de <code>Player</code> e que não há alerta amarelo de colisão vazia.</p>
 
         <h3 class="lesson-subtitle">3. Input Map</h3>
         <ol class="lesson-list">
@@ -219,6 +223,27 @@
           <li>Leia as ações <code>ir_*</code> e chame <code>move_and_slide()</code> (sem câmera follow nesta aula).</li>
           <li>Pressione <strong>Play</strong> e confirme que o personagem se move — o início do Grokking.</li>
         </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Script mínimo (cole em player.gd)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="player-bloco-base" aria-describedby="player-bloco-base-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="player-bloco-base-hint" class="lesson-code-block__hint">
+            Anexe o script na raiz <code>Player (CharacterBody2D)</code> e confirme que os nomes no <strong>Input Map</strong> são idênticos.
+          </p>
+          <pre id="player-bloco-base" class="lesson-pre" aria-label="Código mínimo do player.gd">extends CharacterBody2D
+
+@export var speed: float = 200.0
+
+func _physics_process(_delta: float) -&gt; void:
+	var direction := Input.get_vector("ir_esquerda", "ir_direita", "ir_cima", "ir_baixo")
+	velocity = direction * speed
+	move_and_slide()</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="player-bloco-base" aria-live="polite"></p>
+        </div>
+        <p><strong>Checkpoint 2:</strong> Pressione <code>F5</code> (ou <code>F6</code>) e teste o movimento nas quatro direções usando <code>W A S D</code> ou as setas.</p>
 
         <h3 class="lesson-subtitle">Checklist do artefato</h3>
         <ul class="lesson-list">
