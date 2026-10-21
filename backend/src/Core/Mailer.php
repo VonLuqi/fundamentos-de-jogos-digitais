@@ -86,31 +86,31 @@ final class Mailer
     {
         $hasResend = trim((string) Env::get('RESEND_API_KEY', '')) !== '';
         $hasSmtp = self::smtpConfig() !== null;
+        $hasNative = function_exists('mail') && strtolower(trim((string) Env::get('MAIL_TRANSPORT', 'native'))) === 'native';
         $appBaseUrlSet = trim((string) Env::get('APP_BASE_URL', '')) !== '';
         $fromPreview = self::mailFrom();
         $resendFromPreview = self::resendFrom();
         $usingTestingFrom = (bool) preg_match('/(?:@resend\.dev>?$|onboarding@resend\.dev)/i', $resendFromPreview);
 
         $primary = 'none';
-        if ($hasResend) {
+        if ($hasNative) {
+            $primary = 'native';
+        } elseif ($hasResend) {
             $primary = 'resend';
         } elseif ($hasSmtp) {
             $primary = 'smtp';
         }
 
         $hint = null;
-        if (!$hasResend && !$hasSmtp) {
-            $hint = 'Nenhum provedor: defina RESEND_API_KEY ou SMTP_HOST + SMTP_USER + SMTP_PASS.';
-        } elseif ($hasResend && $usingTestingFrom && !$hasSmtp) {
-            $hint = 'Remetente resend.dev só entrega na caixa da conta Resend. Verifique um domínio ou configure SMTP.';
-        } elseif ($hasResend && $usingTestingFrom && $hasSmtp) {
-            $hint = 'Resend em modo teste; a turma deve cair no fallback SMTP se o Resend recusar.';
+        if (!$hasNative && !$hasResend && !$hasSmtp) {
+            $hint = 'Nenhum provedor: defina MAIL_TRANSPORT=native, RESEND_API_KEY ou SMTP_HOST + SMTP_USER + SMTP_PASS.';
         } elseif (!$appBaseUrlSet) {
             $hint = 'APP_BASE_URL ausente — links de selo/reset podem usar o host HTTP atual.';
         }
 
         return [
-            'ready' => $hasResend || $hasSmtp,
+            'ready' => $hasNative || $hasResend || $hasSmtp,
+            'hasNative' => $hasNative,
             'hasResend' => $hasResend,
             'hasSmtp' => $hasSmtp,
             'appBaseUrlSet' => $appBaseUrlSet,
@@ -139,6 +139,16 @@ final class Mailer
         }
 
         $status = self::getStatus();
+
+        // 1) Envio nativo via servidor de e-mail local do cPanel (Exim / noreply@vonluqi.com com DKIM/SPF)
+        if (!empty($status['hasNative'])) {
+            $nativeRes = self::sendViaNativeMail($recipient, $subject, $html, $text);
+            if ($nativeRes['ok']) {
+                return $nativeRes;
+            }
+        }
+
+        // 2) Resend API (se configurado)
         if ($status['hasResend']) {
             $res = self::sendViaResend($recipient, $subject, $html, $text);
             if ($res['ok']) {
@@ -150,12 +160,70 @@ final class Mailer
             return $res;
         }
 
+        // 3) Fallback SMTP autenticado
         if ($status['hasSmtp']) {
             return self::sendViaSmtp($recipient, $subject, $html, $text);
         }
 
         error_log("[mailer] Nenhum provedor configurado; e-mail para {$recipient} ({$subject}) não enviado.");
         return ['ok' => false, 'skipped' => true, 'reason' => 'no_provider'];
+    }
+
+    /**
+     * Envia pelo MTA local do cPanel/HostGator (Exim) usando a conta local (ex.: noreply@vonluqi.com).
+     * @return array{ok: bool, id?: ?string, provider?: string, reason?: string}
+     */
+    private static function sendViaNativeMail(string $recipient, string $subject, string $html, string $text): array
+    {
+        if (!function_exists('mail')) {
+            return ['ok' => false, 'reason' => 'mail_disabled'];
+        }
+
+        $fromHeader = self::mailFrom();
+        $envelopeFrom = 'noreply@vonluqi.com';
+        if (preg_match('/<([^>]+)>/', $fromHeader, $m)) {
+            $envelopeFrom = trim($m[1]);
+        } elseif (filter_var($fromHeader, FILTER_VALIDATE_EMAIL)) {
+            $envelopeFrom = $fromHeader;
+        }
+
+        $boundary = '=_fjd_' . bin2hex(random_bytes(12));
+        $encodedSubject = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+        $domain = substr(strrchr($envelopeFrom, '@') ?: '@vonluqi.com', 1) ?: 'vonluqi.com';
+        $msgId = '<' . bin2hex(random_bytes(12)) . '@' . $domain . '>';
+
+        $plainBody = $text !== '' ? $text : strip_tags($html);
+        $htmlBody = $html !== '' ? $html : nl2br(htmlspecialchars($plainBody, ENT_QUOTES, 'UTF-8'));
+
+        $headers = [
+            "From: {$fromHeader}",
+            "Reply-To: {$envelopeFrom}",
+            "Return-Path: <{$envelopeFrom}>",
+            "Message-ID: {$msgId}",
+            'MIME-Version: 1.0',
+            "Content-Type: multipart/alternative; boundary=\"{$boundary}\"",
+        ];
+
+        $body = "--{$boundary}\r\n"
+            . "Content-Type: text/plain; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($plainBody)) . "\r\n"
+            . "--{$boundary}\r\n"
+            . "Content-Type: text/html; charset=UTF-8\r\n"
+            . "Content-Transfer-Encoding: base64\r\n\r\n"
+            . chunk_split(base64_encode($htmlBody)) . "\r\n"
+            . "--{$boundary}--";
+
+        $sent = @mail($recipient, $encodedSubject, $body, implode("\r\n", $headers), "-f{$envelopeFrom}");
+        if (!$sent) {
+            return ['ok' => false, 'reason' => 'native_mail_failed'];
+        }
+
+        return [
+            'ok' => true,
+            'id' => $msgId,
+            'provider' => 'cpanel-native',
+        ];
     }
 
     /**
