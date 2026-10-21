@@ -2066,7 +2066,7 @@ img.achievement-card__art.has-art {
   background-image:
     linear-gradient(90deg, rgba(13, 8, 16, 0.92) 0%, rgba(18, 10, 22, 0.78) 55%, rgba(13, 8, 16, 0.92) 100%),
     image-set(
-      url("../assets/ui/hades/banners/admin-throne-banner@1x.webp") 1x,
+      url("../assets/ui/hades/banners/admin-throne-banner.webp") 1x,
       url("../assets/ui/hades/banners/admin-throne-banner@2x.webp") 2x
     );
   background-size: cover;

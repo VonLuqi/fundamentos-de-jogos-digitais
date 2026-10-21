@@ -119,7 +119,7 @@ body.game-screen {
   background-image:
     linear-gradient(180deg, rgba(16, 11, 20, 0.84), rgba(11, 8, 14, 0.94)),
     image-set(
-      url("../assets/ui/hades/banners/hero-underworld-banner@1x.webp") 1x,
+      url("../assets/ui/hades/banners/hero-underworld-banner.webp") 1x,
       url("../assets/ui/hades/banners/hero-underworld-banner@2x.webp") 2x
     );
   background-size: cover;
