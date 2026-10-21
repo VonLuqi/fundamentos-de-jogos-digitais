@@ -9,19 +9,35 @@
 'use strict';
 
 import { setRainbowVfxSuspended } from './achievements-ui.js';
-import { underworldStep } from './api.js';
 
 const GATE_STORAGE_KEY = 'underworld_gate_ok';
 
-function resolveSubmundoPath(nextPath) {
+function resolveSiteRoot() {
   const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
   for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
     const idx = p.indexOf(marker);
-    if (idx > 0) {
-      return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
-    }
+    if (idx >= 0) return p.slice(0, idx);
   }
-  return nextPath;
+  return '';
+}
+
+function resolveSubmundoPath(nextPath) {
+  const root = resolveSiteRoot();
+  return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
+}
+
+async function postUnderworldGateStep(pass) {
+  const root = resolveSiteRoot();
+  const res = await fetch(`${root}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'underworldStep',
+      stage: 'gate',
+      pass,
+    }),
+  });
+  return res.json();
 }
 
 const IDLE_LABEL = '░';
@@ -175,7 +191,7 @@ async function handleGateSubmit(event) {
 
   let result = null;
   try {
-    result = await underworldStep({ stage: 'gate', pass: value });
+    result = await postUnderworldGateStep(value);
   } catch {
     result = { ok: false, message: 'O Cérbero não reconhece essa voz.' };
   }

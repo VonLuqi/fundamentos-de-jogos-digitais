@@ -100,4 +100,9 @@ DirectoryIndex index.html index.php
   <If "%{REQUEST_URI} =~ m#(?:^|/)data/#">
     Header set Cache-Control "public, max-age=60, stale-while-revalidate=300"
   </If>
+
+  # HTML, CSS e JS de aplicação revalidam sempre (evita módulos ES cacheados em versões diferentes)
+  <If "%{REQUEST_URI} =~ m#\.(?:html|js|mjs|css)$#">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </If>
 </IfModule>

@@ -6,7 +6,7 @@ import {
   getAchievementById,
   getSession,
   underworldRedeem,
-} from '../api.js';
+} from '../api.js?v=20261021i';
 
 const form = document.getElementById('estige-form');
 const statusEl = document.getElementById('estige-status');

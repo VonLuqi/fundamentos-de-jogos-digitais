@@ -1,14 +1,44 @@
 'use strict';
 
-import { ApiError, getSession, underworldJudgment, underworldStep } from '../api.js';
+const SESSION_KEY = 'activeSession';
 
-function resolveSubmundoPath(nextPath) {
+function resolveSubmundoRoot() {
   const p = String(window.location?.pathname || '');
   for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
     const idx = p.indexOf(marker);
-    if (idx > 0) return `${p.slice(0, idx)}${nextPath.replace(/\/+$/, '')}/`;
+    if (idx >= 0) return p.slice(0, idx);
   }
-  return nextPath;
+  return '';
+}
+
+function resolveSubmundoPath(nextPath) {
+  const root = resolveSubmundoRoot();
+  return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
+}
+
+function getActiveSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const session = JSON.parse(raw);
+    return session && session.token ? session : null;
+  } catch {
+    return null;
+  }
+}
+
+async function postProgress(payload) {
+  const root = resolveSubmundoRoot();
+  const res = await fetch(`${root}/api/progress`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || 'O tribunal não respondeu.');
+  }
+  return data;
 }
 
 const judgeBtn = document.getElementById('elisios-judge');
@@ -16,7 +46,7 @@ const statusEl = document.getElementById('elisios-status');
 const form = document.getElementById('elisios-form');
 
 judgeBtn?.addEventListener('click', async () => {
-  const session = getSession();
+  const session = getActiveSession();
   if (!session?.token) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
@@ -29,7 +59,10 @@ judgeBtn?.addEventListener('click', async () => {
     statusEl.textContent = 'Consultando o tribunal…';
   }
   try {
-    const payload = await underworldJudgment(session.token);
+    const payload = await postProgress({
+      token: session.token,
+      action: 'underworldJudgment',
+    });
     if (statusEl) {
       statusEl.dataset.tone = 'error';
       statusEl.textContent = payload.message || 'Acesso Negado pelos Juízes';
@@ -38,7 +71,7 @@ judgeBtn?.addEventListener('click', async () => {
   } catch (error) {
     if (statusEl) {
       statusEl.dataset.tone = 'error';
-      statusEl.textContent = error instanceof ApiError
+      statusEl.textContent = error instanceof Error
         ? error.message
         : 'O tribunal não respondeu.';
     }
@@ -57,8 +90,9 @@ form?.addEventListener('submit', async (event) => {
   }
 
   try {
-    const session = getSession();
-    const result = await underworldStep({
+    const session = getActiveSession();
+    const result = await postProgress({
+      action: 'underworldStep',
       stage: 'elisios',
       pass: value,
       ...(session?.token ? { token: session.token } : {}),

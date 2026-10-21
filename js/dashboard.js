@@ -22,7 +22,7 @@ import {
   setRainbowVfxSuspended,
 } from './achievements-ui.js';
 import { isLessonPublished, PUBLISHED_GATE_KEY, renderLessonsList } from './lessons-ui.js';
-import { initUnderworldGate } from './underworld-gate.js';
+import { initUnderworldGate } from './underworld-gate.js?v=20261021i';
 
 import {
   detectAvatarCount,
