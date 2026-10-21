@@ -19,10 +19,10 @@
     rel="stylesheet"
   />
 
-  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021c" />
-  <link rel="stylesheet" href="../css/hades-components.css?v=20261021c" />
-  <link rel="stylesheet" href="../css/app-shell.css?v=20261021c" />
-  <link rel="stylesheet" href="../css/conquistas.css?v=20261021c" />
+  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/app-shell.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/conquistas.css?v=20261021d" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="conquistas" data-role-scope="protected">
@@ -117,14 +117,87 @@
         -->
         <section class="album-intro" aria-label="Introdução do álbum">
           <p class="album-intro__lead">
-            Cada conquista ocupa um slot fixo. Segredos ainda não revelados aparecem como
-            <strong>?</strong>. Examine uma figurinha para ver o detalhe completo.
+            Cada conquista ocupa um nicho fixo na Vitrine do Submundo. Segredos ainda não revelados permanecem
+            velados sob o manto de Nyx (<strong>???</strong>). Selecione qualquer relíquia na estante para inspecionar sua inscrição.
             Algumas letras guardam um caminho — e o caminho nem sempre começa na raiz.
           </p>
-          <p class="album-intro__counter" id="album-counter" role="status">Carregando coleção…</p>
         </section>
 
-        <ul class="achievement-album" id="album-grid" aria-label="Álbum de Relíquias" aria-live="polite"></ul>
+        <section class="keepsake-cabinet" aria-label="Vitrine de Relíquias do Domínio">
+          <header class="keepsake-cabinet__cornice">
+            <img
+              class="keepsake-cabinet__ribbon keepsake-cabinet__ribbon--left"
+              src="../assets/ui/hades/keepsakes/keepsake-ribbon-left.svg"
+              alt=""
+              width="280"
+              height="105"
+              aria-hidden="true"
+            />
+            <div class="keepsake-cabinet__cornice-center">
+              <p class="keepsake-cabinet__eyebrow">Mostruário Ctônico · Coleção de Lembranças</p>
+              <p class="album-intro__counter keepsake-cabinet__counter" id="album-counter" role="status">Carregando coleção…</p>
+              <div class="keepsake-cabinet__filters" role="toolbar" aria-label="Filtrar relíquias da vitrine">
+                <button class="keepsake-filter-btn is-active" type="button" data-album-filter="all" aria-pressed="true">
+                  Todas as Relíquias
+                </button>
+                <button class="keepsake-filter-btn" type="button" data-album-filter="unlocked" aria-pressed="false">
+                  Descobertas
+                </button>
+                <button class="keepsake-filter-btn" type="button" data-album-filter="locked" aria-pressed="false">
+                  Veladas &amp; Segredos
+                </button>
+              </div>
+            </div>
+            <img
+              class="keepsake-cabinet__ribbon keepsake-cabinet__ribbon--right"
+              src="../assets/ui/hades/keepsakes/keepsake-ribbon-right.svg"
+              alt=""
+              width="230"
+              height="88"
+              aria-hidden="true"
+            />
+          </header>
+
+          <div class="keepsake-cabinet__body">
+            <div class="keepsake-cabinet__shelves">
+              <ul class="achievement-album" id="album-grid" aria-label="Álbum de Relíquias" aria-live="polite"></ul>
+            </div>
+
+            <aside
+              class="relic-inspector"
+              id="relic-inspector"
+              aria-label="Inspetor da Relíquia Selecionada"
+              aria-live="polite"
+              data-rarity="stone"
+              data-state="unlocked"
+            >
+              <div class="relic-inspector__panel">
+                <p class="relic-inspector__eyebrow" id="relic-inspector-eyebrow">Nicho Selecionado</p>
+                <h2 class="relic-inspector__title" id="relic-inspector-title">Relíquia</h2>
+
+                <div class="relic-inspector__art-pedestal">
+                  <div class="relic-inspector__art" id="relic-inspector-art" aria-hidden="true"></div>
+                </div>
+
+                <div class="relic-inspector__rarity-bar">
+                  <p class="relic-inspector__rarity" id="relic-inspector-rarity">Pedra</p>
+                  <span class="relic-inspector__stars" id="relic-inspector-stars" aria-hidden="true">★</span>
+                </div>
+
+                <div class="relic-inspector__parchment">
+                  <p class="relic-inspector__desc" id="relic-inspector-desc">
+                    Selecione uma relíquia nos nichos à esquerda para examinar seus detalhes e inscrições.
+                  </p>
+                  <p class="relic-inspector__meta" id="relic-inspector-meta"></p>
+                </div>
+
+                <button class="relic-inspector__expand-btn" type="button" id="relic-inspector-expand">
+                  Ampliar Relíquia
+                </button>
+              </div>
+            </aside>
+          </div>
+        </section>
       </main>
     </div>
   </div>

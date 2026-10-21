@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="180" viewBox="0 0 160 180">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="0" y1="0" x2="160" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff4b8"/>
+      <stop offset="0.5" stop-color="#e5bd52"/>
+      <stop offset="1" stop-color="#9e761e"/>
+    </linearGradient>
+  </defs>
+  <title>keepsake-slot-selection.svg</title>
+  <g id="pp-artwork">
+    <path d="M9 14 L151 14 C152.657 14 154 15.343 154 17 L154 171 C154 172.657 152.657 174 151 174 L9 174 C7.343 174 6 172.657 6 171 L6 17 C6 15.343 7.343 14 9 14 Z" fill="none" stroke="url(#linear-gradient-1)" stroke-width="3.5"/>
+    <path d="M13 19 L147 19 C148.105 19 149 19.895 149 21 L149 167 C149 168.105 148.105 169 147 169 L13 169 C11.895 169 11 168.105 11 167 L11 21 C11 19.895 11.895 19 13 19 Z" fill="none" stroke="#fff6cc" stroke-width="1.2" opacity="0.8"/>
+    <path d="M62 14 C68 14 72 6 80 3 C88 6 92 14 98 14 Z" fill="url(#linear-gradient-1)" stroke="#0d0812" stroke-width="1.8"/>
+    <path d="M83 8 C83 9.657 81.657 11 80 11 C78.343 11 77 9.657 77 8 C77 6.343 78.343 5 80 5 C81.657 5 83 6.343 83 8 Z" fill="#fff8d6"/>
+    <path d="M70 12 C70 13.105 69.105 14 68 14 C66.895 14 66 13.105 66 12 C66 10.895 66.895 10 68 10 C69.105 10 70 10.895 70 12 Z" fill="#f6d365"/>
+    <path d="M94 12 C94 13.105 93.105 14 92 14 C90.895 14 90 13.105 90 12 C90 10.895 90.895 10 92 10 C93.105 10 94 10.895 94 12 Z" fill="#f6d365"/>
+  </g>
+</svg>

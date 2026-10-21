@@ -38,6 +38,24 @@ const FOCUSABLE_SELECTOR = [
 
 let currentUser = null;
 let lastFocusedSlot = null;
+let activeInspectedAchievement = null;
+let activeInspectedState = 'locked';
+let currentAlbumFilter = 'all';
+
+const RARITY_STARS = Object.freeze({
+  unknown: '✦ ✦ ✦',
+  stone: '★ ☆ ☆',
+  copper: '★ ★ ☆',
+  silver: '★ ★ ★',
+  gold: '★ ★ ★ ★',
+  rainbow: '★ ★ ★ ★ ★',
+  unique: '♛ ★ ★ ★ ★ ★',
+});
+
+function starsForRarity(rarity, state) {
+  if (state === 'mystery' && rarity === 'unknown') return RARITY_STARS.unknown;
+  return RARITY_STARS[rarity] || RARITY_STARS.stone;
+}
 
 function showApiWarning(message) {
   const box = document.getElementById('api-warning');
@@ -61,6 +79,95 @@ function setShellInert(inert) {
   else shell.removeAttribute('aria-hidden');
 }
 
+async function populateRelicDetailHost({
+  achievement,
+  state,
+  containerEl,
+  artEl,
+  rarityEl,
+  starsEl,
+  eyebrowEl,
+  titleEl,
+  descEl,
+  metaEl,
+}) {
+  if (!achievement || !containerEl || !artEl || !rarityEl || !titleEl || !descEl || !metaEl) return;
+
+  stopVeiledDescScramble(descEl);
+
+  const rarity = normalizeAchievementRarity(achievement.rarity, achievement.difficulty);
+  const isSoberano = String(achievement.id) === SOBERANO_ACHIEVEMENT_ID;
+  const effectiveRarity = state === 'mystery' && !isSoberano ? 'unknown' : rarity;
+
+  containerEl.dataset.rarity = effectiveRarity;
+  containerEl.dataset.state = state;
+  artEl.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
+
+  if (starsEl) {
+    starsEl.textContent = starsForRarity(effectiveRarity, state);
+  }
+
+  if (state === 'mystery') {
+    await fillAchievementArtHost(artEl, achievement, { grayscale: true });
+    rarityEl.textContent = isSoberano ? rarityLabelForAchievement(achievement) : 'Segredo Oculto';
+    if (eyebrowEl) {
+      eyebrowEl.textContent = isSoberano ? 'Relíquia Soberana · Velada' : 'Cofre Selado · Segredo';
+    }
+    titleEl.textContent = isSoberano ? '???' : 'Relíquia Misteriosa';
+    fillLockedAchievementDescription(
+      descEl,
+      achievement,
+      'Um segredo ainda não revelado. Explore as aulas e as oferendas para descobri-lo.',
+    );
+    metaEl.textContent = isSoberano ? 'Coroa velada do Domínio' : 'Slot oculto do álbum';
+  } else if (state === 'locked') {
+    await fillAchievementArtHost(artEl, achievement, { grayscale: true });
+    rarityEl.textContent = rarityLabelForAchievement(achievement);
+    if (eyebrowEl) {
+      eyebrowEl.textContent = 'Nicho Bloqueado';
+    }
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
+    fillLockedAchievementDescription(
+      descEl,
+      achievement,
+      'Esta relíquia ainda não foi conquistada. O caminho continua no Salão e na Trilha.',
+    );
+    metaEl.textContent = 'Figurinha bloqueada';
+  } else {
+    await fillAchievementArtHost(artEl, achievement, { grayscale: false });
+    rarityEl.textContent = rarityLabelForAchievement(achievement);
+    if (eyebrowEl) {
+      eyebrowEl.textContent = achievement.hidden ? 'Segredo Descoberto' : 'Relíquia em Exibição';
+    }
+    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
+    fillAchievementDescription(descEl, achievement);
+    metaEl.textContent = currentUser?.role === 'admin'
+      ? 'Visão do Mestre — catálogo completo'
+      : 'Relíquia descoberta';
+  }
+}
+
+async function updateRelicInspector(achievement, state) {
+  const inspector = document.getElementById('relic-inspector');
+  if (!inspector || !achievement) return;
+
+  activeInspectedAchievement = achievement;
+  activeInspectedState = state;
+
+  await populateRelicDetailHost({
+    achievement,
+    state,
+    containerEl: inspector,
+    artEl: document.getElementById('relic-inspector-art'),
+    rarityEl: document.getElementById('relic-inspector-rarity'),
+    starsEl: document.getElementById('relic-inspector-stars'),
+    eyebrowEl: document.getElementById('relic-inspector-eyebrow'),
+    titleEl: document.getElementById('relic-inspector-title'),
+    descEl: document.getElementById('relic-inspector-desc'),
+    metaEl: document.getElementById('relic-inspector-meta'),
+  });
+}
+
 async function openRelicModal(achievement, state) {
   const modal = document.getElementById('relic-modal');
   const panel = modal?.querySelector('.relic-modal__panel');
@@ -72,44 +179,16 @@ async function openRelicModal(achievement, state) {
   const closeBtn = document.getElementById('relic-modal-close');
   if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl) return;
 
-  stopVeiledDescScramble(descEl);
-
-  const rarity = normalizeAchievementRarity(achievement.rarity, achievement.difficulty);
-  panel.dataset.rarity = state === 'mystery' ? 'unknown' : rarity;
-  panel.dataset.state = state;
-  art.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
-
-  if (state === 'mystery') {
-    const isSoberano = String(achievement.id) === SOBERANO_ACHIEVEMENT_ID;
-    await fillAchievementArtHost(art, achievement, { grayscale: true });
-    panel.dataset.rarity = isSoberano ? rarity : 'unknown';
-    rarityEl.textContent = isSoberano ? rarityLabelForAchievement(achievement) : 'Desconhecida';
-    titleEl.textContent = isSoberano ? '???' : 'Relíquia Misteriosa';
-    fillLockedAchievementDescription(
-      descEl,
-      achievement,
-      'Um segredo ainda não revelado. Explore as aulas e as oferendas para descobri-lo.',
-    );
-    metaEl.textContent = isSoberano ? 'Coroa velada do Domínio' : 'Slot oculto do álbum';
-  } else if (state === 'locked') {
-    await fillAchievementArtHost(art, achievement, { grayscale: true });
-    rarityEl.textContent = rarityLabelForAchievement(achievement);
-    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
-    fillLockedAchievementDescription(
-      descEl,
-      achievement,
-      'Esta relíquia ainda não foi conquistada. O caminho continua no Salão e na Trilha.',
-    );
-    metaEl.textContent = 'Figurinha bloqueada';
-  } else {
-    await fillAchievementArtHost(art, achievement, { grayscale: false });
-    rarityEl.textContent = rarityLabelForAchievement(achievement);
-    fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
-    fillAchievementDescription(descEl, achievement);
-    metaEl.textContent = currentUser?.role === 'admin'
-      ? 'Visão do Mestre — catálogo completo'
-      : 'Relíquia descoberta';
-  }
+  await populateRelicDetailHost({
+    achievement,
+    state,
+    containerEl: panel,
+    artEl: art,
+    rarityEl,
+    titleEl,
+    descEl,
+    metaEl,
+  });
 
   modal.hidden = false;
   modal.classList.add('is-open');
@@ -137,7 +216,7 @@ function closeRelicModal({ restoreHash = true } = {}) {
   }
 }
 
-function focusAlbumSlot(achievementId, { openModal = true } = {}) {
+function focusAlbumSlot(achievementId, { openModal = true, scroll = true } = {}) {
   const slot = document.getElementById(`relic-${achievementId}`);
   if (!slot) return false;
 
@@ -145,48 +224,112 @@ function focusAlbumSlot(achievementId, { openModal = true } = {}) {
     el.classList.remove('is-focused');
   });
   slot.classList.add('is-focused');
-  slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (scroll) {
+    slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
   lastFocusedSlot = slot;
 
   const achievement = getAchievementById(achievementId);
   if (!achievement || !currentUser) return true;
 
   const state = getAlbumSlotState(currentUser, achievement);
+  void updateRelicInspector(achievement, state);
   if (openModal) openRelicModal(achievement, state);
   return true;
 }
 
 function handleDeepLink() {
   const raw = window.location.hash.replace(/^#/, '').trim();
-  if (!raw) return;
+  if (!raw) return false;
   const achievementId = raw.startsWith('relic-') ? raw.slice('relic-'.length) : raw;
-  if (!getAchievementById(achievementId)) return;
+  if (!getAchievementById(achievementId)) return false;
   window.requestAnimationFrame(() => {
     focusAlbumSlot(achievementId, { openModal: true });
   });
+  return true;
+}
+
+function applyAlbumFilter(filterValue = currentAlbumFilter) {
+  currentAlbumFilter = filterValue;
+  const grid = document.getElementById('album-grid');
+  if (!grid) return;
+
+  document.querySelectorAll('[data-album-filter]').forEach((btn) => {
+    const active = btn.dataset.albumFilter === filterValue;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  const slots = Array.from(grid.querySelectorAll('.achievement-slot'));
+  slots.forEach((slot) => {
+    const state = slot.dataset.state || 'locked';
+    if (filterValue === 'unlocked') {
+      slot.hidden = state !== 'unlocked';
+    } else if (filterValue === 'locked') {
+      slot.hidden = state === 'unlocked';
+    } else {
+      slot.hidden = false;
+    }
+  });
+}
+
+function selectInitialInspectorSlot() {
+  const grid = document.getElementById('album-grid');
+  if (!grid || !currentUser) return;
+  const firstSlot = grid.querySelector('.achievement-slot:not([hidden])') || grid.querySelector('.achievement-slot');
+  const firstId = firstSlot?.dataset?.achievementId;
+  if (!firstId) return;
+  focusAlbumSlot(firstId, { openModal: false, scroll: false });
 }
 
 function renderAlbum() {
   const grid = document.getElementById('album-grid');
   if (!grid || !currentUser) return;
 
-  renderAchievementsList(grid, currentUser, {
+  void renderAchievementsList(grid, currentUser, {
     mode: 'album',
     onSlotClick: (achievement, state, slotEl) => {
+      const wasAlreadyFocused = slotEl.classList.contains('is-focused');
       lastFocusedSlot = slotEl;
-      window.history.replaceState(null, '', `#${achievement.id}`);
-      openRelicModal(achievement, state);
       slotEl.classList.add('is-focused');
       document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
         if (el !== slotEl) el.classList.remove('is-focused');
       });
+
+      void updateRelicInspector(achievement, state);
+
+      const isMobileViewport = window.matchMedia('(max-width: 960px)').matches;
+      if (isMobileViewport || wasAlreadyFocused) {
+        window.history.replaceState(null, '', `#${achievement.id}`);
+        openRelicModal(achievement, state);
+      }
     },
+  }).then(() => {
+    applyAlbumFilter(currentAlbumFilter);
+    if (!window.location.hash) {
+      selectInitialInspectorSlot();
+    }
   });
 
   updateAlbumCounter();
 }
 
+function initKeepsakeCabinetControls() {
+  document.querySelectorAll('[data-album-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyAlbumFilter(btn.dataset.albumFilter || 'all');
+    });
+  });
+
+  document.getElementById('relic-inspector-expand')?.addEventListener('click', () => {
+    if (!activeInspectedAchievement) return;
+    window.history.replaceState(null, '', `#${activeInspectedAchievement.id}`);
+    openRelicModal(activeInspectedAchievement, activeInspectedState);
+  });
+}
+
 function initRelicModal() {
+  initKeepsakeCabinetControls();
   const modal = document.getElementById('relic-modal');
   const panel = modal?.querySelector('.relic-modal__panel');
 

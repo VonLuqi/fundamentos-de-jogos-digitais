@@ -20,11 +20,12 @@ const FRAMES_DIR = path.join(OUT_ROOT, 'frames');
 const DIVIDERS_DIR = path.join(OUT_ROOT, 'dividers');
 const ICONS_DIR = path.join(OUT_ROOT, 'icons');
 const BANNERS_DIR = path.join(OUT_ROOT, 'banners');
+const KEEPSAKES_DIR = path.join(OUT_ROOT, 'keepsakes');
 const SRC_DIR = path.join(OUT_ROOT, 'src');
 
 const PREFLIGHT_PY = 'C:/Users/VonLuqi/Projects/papelprint-print-kit/preflight.py';
 
-for (const dir of [OUT_ROOT, FRAMES_DIR, DIVIDERS_DIR, ICONS_DIR, BANNERS_DIR, SRC_DIR]) {
+for (const dir of [OUT_ROOT, FRAMES_DIR, DIVIDERS_DIR, ICONS_DIR, BANNERS_DIR, KEEPSAKES_DIR, SRC_DIR]) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
@@ -463,6 +464,201 @@ for (const icon of BOON_ICONS) {
     '--name', icon.name,
   ]);
   console.log(`[ui-export ${icon.name}]`, res.ok ? 'OK' : res);
+}
+
+// =============================================================================
+// 5. VITRINE KEEPSAKES (HADES KEEPSAKE CABINET — Ref 7)
+//    Fitas púrpuras com corações dourados, cofre selado Heart-Lock,
+//    pedestal velado (Secret Stash) e moldura de seleção com florão real.
+// =============================================================================
+
+const keepsakeRibbonLeftSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="120" viewBox="0 0 320 120" fill="none">
+  <defs>
+    <linearGradient id="ksRibbonPurple" x1="0" y1="0" x2="220" y2="120" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9d75ff"/>
+      <stop offset="50%" stop-color="#6e44c9"/>
+      <stop offset="100%" stop-color="#3c1e78"/>
+    </linearGradient>
+    <linearGradient id="ksRibbonDark" x1="0" y1="20" x2="180" y2="115" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5a32a8"/>
+      <stop offset="100%" stop-color="#271252"/>
+    </linearGradient>
+    <linearGradient id="ksHeartGold" x1="90" y1="6" x2="195" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff2b2"/>
+      <stop offset="38%" stop-color="#e5bd52"/>
+      <stop offset="78%" stop-color="#a87c20"/>
+      <stop offset="100%" stop-color="#593e0a"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Cauda da fita caindo à esquerda sobre a moldura -->
+    <path d="M58 66 C34 72 16 88 6 114 L38 106 L44 116 C56 96 68 82 84 74 Z" fill="url(#ksRibbonDark)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <!-- Laço esquerdo em camadas -->
+    <path d="M112 58 C78 28 36 30 22 52 C14 66 36 82 76 76 C94 73 106 66 112 58 Z" fill="url(#ksRibbonPurple)" stroke="#0d0714" stroke-width="3.4" stroke-linejoin="round"/>
+    <path d="M98 56 C74 38 44 40 34 53 C48 62 72 64 98 56 Z" fill="#b794ff" opacity="0.45"/>
+    <!-- Laço direito sob os corações -->
+    <path d="M126 60 C154 36 196 36 212 58 C218 70 198 84 162 80 C142 78 132 69 126 60 Z" fill="url(#ksRibbonDark)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <!-- Nó central da fita -->
+    <rect x="102" y="48" width="28" height="26" rx="6" fill="#7c52d6" stroke="#0d0714" stroke-width="3.2"/>
+
+    <!-- Ramos de louro dourados à direita -->
+    <path d="M188 74 C222 72 258 64 298 56" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+    <path d="M214 70 C222 56 238 54 246 64 C234 68 224 70 214 70 Z" fill="#d4af37" stroke="#0d0714" stroke-width="2"/>
+    <path d="M242 66 C252 52 268 52 276 61 C264 65 252 67 242 66 Z" fill="#f6d365" stroke="#0d0714" stroke-width="2"/>
+    <path d="M226 74 C236 84 252 84 260 74 C248 72 236 72 226 74 Z" fill="#a87c20" stroke="#0d0714" stroke-width="2"/>
+    <circle cx="286" cy="58" r="4.5" fill="#f6d365" stroke="#0d0714" stroke-width="1.8"/>
+
+    <!-- Coração Dourado Principal (inclinado como no Hades Keepsakes) -->
+    <path d="M138 30 C138 14 114 6 100 18 C84 32 94 58 134 82 C176 62 190 36 176 20 C164 8 142 14 138 30 Z" fill="url(#ksHeartGold)" stroke="#0d0714" stroke-width="3.8" stroke-linejoin="round"/>
+    <!-- Brilho chanfrado no Coração Principal -->
+    <path d="M108 24 C116 16 128 20 133 31 C124 27 114 28 106 36 C103 31 104 27 108 24 Z" fill="#fff8d6" opacity="0.78"/>
+
+    <!-- Segundo Coração Dourado Menor (embaixo à direita) -->
+    <path d="M174 58 C174 48 160 44 152 51 C143 59 149 75 171 89 C194 78 202 62 194 52 C187 45 176 49 174 58 Z" fill="url(#ksHeartGold)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <!-- Terceiro Coração Dourado Pequeno -->
+    <path d="M204 50 C204 43 194 40 189 45 C183 51 187 62 202 72 C218 64 223 53 218 46 C213 41 206 44 204 50 Z" fill="#e5bd52" stroke="#0d0714" stroke-width="2.6" stroke-linejoin="round"/>
+  </g>
+</svg>
+`;
+
+const keepsakeRibbonRightSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="260" height="100" viewBox="0 0 260 100" fill="none">
+  <defs>
+    <linearGradient id="ksRightPurple" x1="30" y1="10" x2="240" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9d75ff"/>
+      <stop offset="55%" stop-color="#6e44c9"/>
+      <stop offset="100%" stop-color="#3c1e78"/>
+    </linearGradient>
+    <linearGradient id="ksRightDark" x1="10" y1="20" x2="250" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#5a32a8"/>
+      <stop offset="100%" stop-color="#271252"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Fita serpenteando à esquerda sobre a cornija -->
+    <path d="M12 68 C42 54 68 58 98 66 L118 58 C86 44 52 44 12 68 Z" fill="url(#ksRightDark)" stroke="#0d0714" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Cauda direita caindo na borda lateral -->
+    <path d="M196 56 C220 62 238 76 250 96 L222 90 L216 98 C206 80 194 68 178 60 Z" fill="url(#ksRightDark)" stroke="#0d0714" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Laço Esquerdo -->
+    <path d="M150 48 C122 24 84 26 72 46 C66 58 84 72 118 66 C134 63 144 56 150 48 Z" fill="url(#ksRightPurple)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <!-- Laço Direito -->
+    <path d="M168 48 C194 22 230 26 240 46 C246 58 228 72 196 66 C180 63 172 56 168 48 Z" fill="url(#ksRightPurple)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <!-- Brilhos de seda -->
+    <path d="M138 46 C118 32 94 34 86 46 C98 53 118 54 138 46 Z" fill="#b794ff" opacity="0.45"/>
+    <path d="M180 46 C198 32 220 34 228 46 C216 53 198 54 180 46 Z" fill="#b794ff" opacity="0.45"/>
+    <!-- Nó Central -->
+    <rect x="144" y="38" width="26" height="24" rx="6" fill="#855be0" stroke="#0d0714" stroke-width="3.2"/>
+  </g>
+</svg>
+`;
+
+const keepsakeHeartLockSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="200" viewBox="0 0 160 200" fill="none">
+  <defs>
+    <linearGradient id="vaultPlate" x1="0" y1="0" x2="160" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9c7a32"/>
+      <stop offset="48%" stop-color="#6e5219"/>
+      <stop offset="52%" stop-color="#47330d"/>
+      <stop offset="100%" stop-color="#2b1e07"/>
+    </linearGradient>
+    <linearGradient id="vaultHeart" x1="40" y1="45" x2="120" y2="145" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#f6d365"/>
+      <stop offset="50%" stop-color="#c99e32"/>
+      <stop offset="100%" stop-color="#5e430d"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Placa de Bronze do Cofre -->
+    <rect x="6" y="6" width="148" height="188" rx="4" fill="url(#vaultPlate)" stroke="#0d0812" stroke-width="4"/>
+    <rect x="14" y="14" width="132" height="172" fill="none" stroke="#d4af37" stroke-width="1.6" opacity="0.75"/>
+    <!-- Sombra Diagonal Dramática estilo Supergiant -->
+    <polygon points="14,186 146,54 146,186" fill="#0d0812" opacity="0.46"/>
+
+    <!-- Arabescos Folheados nos 4 Cantos -->
+    <path d="M18 34 C18 22 22 18 34 18 C28 24 24 28 18 34 Z" fill="#f6d365"/>
+    <path d="M142 34 C142 22 138 18 126 18 C132 24 136 28 142 34 Z" fill="#f6d365"/>
+    <path d="M18 166 C18 178 22 182 34 182 C28 176 24 172 18 166 Z" fill="#d4af37"/>
+    <path d="M142 166 C142 178 138 182 126 182 C132 176 136 172 142 166 Z" fill="#d4af37"/>
+
+    <!-- Arco Superior do Cadeado -->
+    <path d="M58 76 V54 C58 38 68 28 80 28 C92 28 102 38 102 54 V76" stroke="url(#vaultHeart)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M58 76 V54 C58 38 68 28 80 28 C92 28 102 38 102 54 V76" stroke="#0d0812" stroke-width="2.5" stroke-linecap="round"/>
+
+    <!-- Corpo de Coração Dourado com Fechadura -->
+    <path d="M80 78 C80 62 54 54 42 68 C28 84 42 116 80 144 C118 116 132 84 118 68 C106 54 80 62 80 78 Z" fill="url(#vaultHeart)" stroke="#0d0812" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M80 83 C80 70 60 64 50 74 C39 86 50 112 80 134 C110 112 121 86 110 74 C100 64 80 70 80 83 Z" fill="none" stroke="#fff2b2" stroke-width="1.4" opacity="0.65"/>
+
+    <!-- Buraco da Fechadura -->
+    <circle cx="80" cy="96" r="8" fill="#0d0812"/>
+    <polygon points="75,99 85,99 88,120 72,120" fill="#0d0812"/>
+  </g>
+</svg>
+`;
+
+const keepsakeShroudPedestalSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="shroudBody" x1="36" y1="14" x2="92" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2a1119"/>
+      <stop offset="45%" stop-color="#14090e"/>
+      <stop offset="100%" stop-color="#070408"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Sombra Projetada no Nicho -->
+    <ellipse cx="66" cy="104" rx="34" ry="10" fill="#040307" opacity="0.85"/>
+    <polygon points="34,100 98,108 86,116 26,106" fill="#040307"/>
+    <!-- Manto / Silhueta Oculta estilo Secret Stash do Hades -->
+    <path d="M64 16 C74 26 84 52 90 92 L68 106 L40 94 C44 54 54 26 64 16 Z" fill="url(#shroudBody)" stroke="#4a1520" stroke-width="2" stroke-linejoin="round"/>
+    <!-- Dobras internas carmesim escuro -->
+    <path d="M64 22 L56 92 M64 22 L72 96" stroke="#6e1b29" stroke-width="1.4" opacity="0.65"/>
+    <!-- Base chanfrada do pedestal -->
+    <path d="M36 92 L68 104 L92 92 L86 108 L66 116 L40 106 Z" fill="#120b14" stroke="#7a5c1d" stroke-width="1.6"/>
+  </g>
+</svg>
+`;
+
+const keepsakeSlotSelectionSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="180" viewBox="0 0 160 180" fill="none">
+  <defs>
+    <linearGradient id="selGold" x1="0" y1="0" x2="160" y2="180" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff4b8"/>
+      <stop offset="50%" stop-color="#e5bd52"/>
+      <stop offset="100%" stop-color="#9e761e"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Moldura Dupla de Seleção Ativa -->
+    <rect x="6" y="14" width="148" height="160" rx="3" stroke="url(#selGold)" stroke-width="3.5"/>
+    <rect x="11" y="19" width="138" height="150" rx="2" stroke="#fff6cc" stroke-width="1.2" opacity="0.8"/>
+    <!-- Florão Real (Crest Finial) no Topo Central, idêntico ao slot selecionado na referência -->
+    <path d="M62 14 C68 14 72 6 80 3 C88 6 92 14 98 14 Z" fill="url(#selGold)" stroke="#0d0812" stroke-width="1.8"/>
+    <circle cx="80" cy="8" r="3" fill="#fff8d6"/>
+    <circle cx="68" cy="12" r="2" fill="#f6d365"/>
+    <circle cx="92" cy="12" r="2" fill="#f6d365"/>
+  </g>
+</svg>
+`;
+
+const KEEPSAKE_ASSETS = [
+  { name: 'keepsake-ribbon-left', svg: keepsakeRibbonLeftSvg },
+  { name: 'keepsake-ribbon-right', svg: keepsakeRibbonRightSvg },
+  { name: 'keepsake-heart-lock', svg: keepsakeHeartLockSvg },
+  { name: 'keepsake-shroud-pedestal', svg: keepsakeShroudPedestalSvg },
+  { name: 'keepsake-slot-selection', svg: keepsakeSlotSelectionSvg },
+];
+
+for (const item of KEEPSAKE_ASSETS) {
+  const svgPath = path.join(KEEPSAKES_DIR, `${item.name}.svg`);
+  writeSvg(svgPath, item.svg);
+  const res = runPreflight([
+    'ui-export',
+    '--in', svgPath,
+    '--out-dir', KEEPSAKES_DIR,
+    '--name', item.name,
+  ]);
+  console.log(`[ui-export ${item.name}]`, res.ok ? 'OK' : res);
 }
 
 console.log('\n[done] Kit de assets Hades gerado em assets/ui/hades/');

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="260" height="100" viewBox="0 0 260 100">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="10" y1="20" x2="250" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5a32a8"/>
+      <stop offset="1" stop-color="#271252"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="30" y1="10" x2="240" y2="95" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9d75ff"/>
+      <stop offset="0.55" stop-color="#6e44c9"/>
+      <stop offset="1" stop-color="#3c1e78"/>
+    </linearGradient>
+  </defs>
+  <title>keepsake-ribbon-right.svg</title>
+  <g id="pp-artwork">
+    <path d="M12 68 C42 54 68 58 98 66 L118 58 C86 44 52 44 12 68 Z" fill="url(#linear-gradient-1)" stroke="#0d0714" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M196 56 C220 62 238 76 250 96 L222 90 L216 98 C206 80 194 68 178 60 Z" fill="url(#linear-gradient-1)" stroke="#0d0714" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M150 48 C122 24 84 26 72 46 C66 58 84 72 118 66 C134 63 144 56 150 48 Z" fill="url(#linear-gradient-2)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M168 48 C194 22 230 26 240 46 C246 58 228 72 196 66 C180 63 172 56 168 48 Z" fill="url(#linear-gradient-2)" stroke="#0d0714" stroke-width="3.2" stroke-linejoin="round"/>
+    <path d="M138 46 C118 32 94 34 86 46 C98 53 118 54 138 46 Z" fill="#b794ff" opacity="0.45"/>
+    <path d="M180 46 C198 32 220 34 228 46 C216 53 198 54 180 46 Z" fill="#b794ff" opacity="0.45"/>
+    <path d="M150 38 L164 38 C167.314 38 170 40.686 170 44 L170 56 C170 59.314 167.314 62 164 62 L150 62 C146.686 62 144 59.314 144 56 L144 44 C144 40.686 146.686 38 150 38 Z" fill="#855be0" stroke="#0d0714" stroke-width="3.2"/>
+  </g>
+</svg>

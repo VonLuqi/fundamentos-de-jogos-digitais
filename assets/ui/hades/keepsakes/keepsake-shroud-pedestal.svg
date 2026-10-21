@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="36" y1="14" x2="92" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2a1119"/>
+      <stop offset="0.45" stop-color="#14090e"/>
+      <stop offset="1" stop-color="#070408"/>
+    </linearGradient>
+  </defs>
+  <title>keepsake-shroud-pedestal.svg</title>
+  <g id="pp-artwork">
+    <path d="M100 104 C100 109.523 84.778 114 66 114 C47.222 114 32 109.523 32 104 C32 98.477 47.222 94 66 94 C84.778 94 100 98.477 100 104 Z" fill="#040307" opacity="0.85"/>
+    <path d="M34 100 L98 108 L86 116 L26 106 Z" fill="#040307"/>
+    <path d="M64 16 C74 26 84 52 90 92 L68 106 L40 94 C44 54 54 26 64 16 Z" fill="url(#linear-gradient-1)" stroke="#4a1520" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M64 22 L56 92 M64 22 L72 96" fill="none" stroke="#6e1b29" stroke-width="1.4" opacity="0.65"/>
+    <path d="M36 92 L68 104 L92 92 L86 108 L66 116 L40 106 Z" fill="#120b14" stroke="#7a5c1d" stroke-width="1.6"/>
+  </g>
+</svg>

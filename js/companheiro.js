@@ -47,6 +47,24 @@ const FOCUSABLE_SELECTOR = [
 let viewerUser = null;
 let friendUser = null;
 let lastFocusedSlot = null;
+let activeMirrorAchievement = null;
+let activeMirrorModel = null;
+let currentMirrorFilter = 'all';
+
+const RARITY_STARS = Object.freeze({
+  unknown: '✦ ✦ ✦',
+  stone: '★ ☆ ☆',
+  copper: '★ ★ ☆',
+  silver: '★ ★ ★',
+  gold: '★ ★ ★ ★',
+  rainbow: '★ ★ ★ ★ ★',
+  unique: '♛ ★ ★ ★ ★ ★',
+});
+
+function starsForRarity(rarity, state) {
+  if (state === 'mystery' && rarity === 'unknown') return RARITY_STARS.unknown;
+  return RARITY_STARS[rarity] || RARITY_STARS.stone;
+}
 
 function showApiWarning(message) {
   const box = document.getElementById('api-warning');
@@ -190,16 +208,19 @@ function mirrorSlotOptions() {
   return { visitorView: true, viewerUser };
 }
 
-async function openRelicModal(achievement, model = null) {
-  const modal = document.getElementById('relic-modal');
-  const panel = modal?.querySelector('.relic-modal__panel');
-  const art = document.getElementById('relic-modal-art');
-  const rarityEl = document.getElementById('relic-modal-rarity');
-  const titleEl = document.getElementById('relic-modal-title');
-  const descEl = document.getElementById('relic-modal-desc');
-  const metaEl = document.getElementById('relic-modal-meta');
-  const closeBtn = document.getElementById('relic-modal-close');
-  if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl || !friendUser) return;
+async function populateMirrorRelicHost({
+  achievement,
+  model = null,
+  containerEl,
+  artEl,
+  rarityEl,
+  starsEl,
+  eyebrowEl,
+  titleEl,
+  descEl,
+  metaEl,
+}) {
+  if (!achievement || !containerEl || !artEl || !rarityEl || !titleEl || !descEl || !metaEl || !friendUser) return;
 
   stopVeiledDescScramble(descEl);
 
@@ -208,25 +229,34 @@ async function openRelicModal(achievement, model = null) {
     : getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
 
   const rarityName = rarityLabelForAchievement(achievement);
-  panel.dataset.rarity = slot.rarity;
-  panel.dataset.state = slot.kind;
+  containerEl.dataset.rarity = slot.rarity;
+  containerEl.dataset.state = slot.kind;
   if (slot.isSecret) {
-    if (slot.revealText && slot.applySecretStyle) panel.dataset.secret = 'revealed';
-    else if (slot.revealText) panel.dataset.secret = 'known';
-    else if (slot.applySecretStyle) panel.dataset.secret = 'veiled-styled';
-    else panel.dataset.secret = 'veiled';
+    if (slot.revealText && slot.applySecretStyle) containerEl.dataset.secret = 'revealed';
+    else if (slot.revealText) containerEl.dataset.secret = 'known';
+    else if (slot.applySecretStyle) containerEl.dataset.secret = 'veiled-styled';
+    else containerEl.dataset.secret = 'veiled';
   } else {
-    delete panel.dataset.secret;
+    delete containerEl.dataset.secret;
   }
-  art.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
+  artEl.classList.remove('is-silhouette', 'is-bw', 'has-art', 'has-emoji');
   rarityEl.hidden = false;
+
+  if (starsEl) {
+    starsEl.textContent = starsForRarity(slot.rarity, slot.kind);
+  }
 
   if (slot.isSecret) {
     // Q2-C: texto pelo observador; chrome pelo espelhado.
     if (slot.revealText) {
-      await fillAchievementArtHost(art, achievement, {
+      await fillAchievementArtHost(artEl, achievement, {
         grayscale: !slot.applySecretStyle,
       });
+      if (eyebrowEl) {
+        eyebrowEl.textContent = slot.applySecretStyle
+          ? 'Segredo Revelado no Espelho'
+          : 'Segredo Conhecido · Não Conquistado';
+      }
       fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
       fillAchievementDescription(descEl, achievement);
       metaEl.textContent = slot.applySecretStyle
@@ -234,7 +264,10 @@ async function openRelicModal(achievement, model = null) {
         : 'Segredo conhecido — ainda não conquistado neste Espelho';
     } else {
       const isSoberano = String(achievement.id) === SOBERANO_ACHIEVEMENT_ID;
-      await fillAchievementArtHost(art, achievement, { grayscale: true });
+      await fillAchievementArtHost(artEl, achievement, { grayscale: true });
+      if (eyebrowEl) {
+        eyebrowEl.textContent = isSoberano ? 'Coroa Velada no Espelho' : 'Cofre Selado no Espelho';
+      }
       titleEl.textContent = '???';
       fillLockedAchievementDescription(descEl, achievement, MIRROR_SECRET_DESC);
       metaEl.textContent = isSoberano
@@ -243,7 +276,7 @@ async function openRelicModal(achievement, model = null) {
           ? 'Segredo velado no Espelho'
           : 'Segredo velado — ainda não conquistado neste Espelho');
       if (isSoberano) {
-        panel.dataset.rarity = 'unique';
+        containerEl.dataset.rarity = 'unique';
       }
     }
 
@@ -255,8 +288,9 @@ async function openRelicModal(achievement, model = null) {
       rarityEl.hidden = true;
     }
   } else if (slot.kind === 'locked') {
-    await fillAchievementArtHost(art, achievement, { grayscale: true });
+    await fillAchievementArtHost(artEl, achievement, { grayscale: true });
     rarityEl.textContent = rarityName;
+    if (eyebrowEl) eyebrowEl.textContent = 'Nicho Bloqueado no Espelho';
     fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
     fillLockedAchievementDescription(
       descEl,
@@ -265,12 +299,61 @@ async function openRelicModal(achievement, model = null) {
     );
     metaEl.textContent = 'Figurinha bloqueada no Espelho';
   } else {
-    await fillAchievementArtHost(art, achievement, { grayscale: false });
+    await fillAchievementArtHost(artEl, achievement, { grayscale: false });
     rarityEl.textContent = rarityName;
+    if (eyebrowEl) eyebrowEl.textContent = 'Relíquia Revelada no Espelho';
     fillTrailheadField(titleEl, achievement.name, achievement.trailhead?.nameIndexes);
     fillAchievementDescription(descEl, achievement);
     metaEl.textContent = 'Relíquia revelada no Espelho';
   }
+}
+
+async function updateMirrorInspector(achievement, model = null) {
+  const inspector = document.getElementById('mirror-relic-inspector');
+  if (!inspector || !achievement || !friendUser) return;
+
+  const resolvedModel = model && typeof model === 'object' && model.kind
+    ? model
+    : getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+
+  activeMirrorAchievement = achievement;
+  activeMirrorModel = resolvedModel;
+
+  await populateMirrorRelicHost({
+    achievement,
+    model: resolvedModel,
+    containerEl: inspector,
+    artEl: document.getElementById('mirror-inspector-art'),
+    rarityEl: document.getElementById('mirror-inspector-rarity'),
+    starsEl: document.getElementById('mirror-inspector-stars'),
+    eyebrowEl: document.getElementById('mirror-inspector-eyebrow'),
+    titleEl: document.getElementById('mirror-inspector-title'),
+    descEl: document.getElementById('mirror-inspector-desc'),
+    metaEl: document.getElementById('mirror-inspector-meta'),
+  });
+}
+
+async function openRelicModal(achievement, model = null) {
+  const modal = document.getElementById('relic-modal');
+  const panel = modal?.querySelector('.relic-modal__panel');
+  const art = document.getElementById('relic-modal-art');
+  const rarityEl = document.getElementById('relic-modal-rarity');
+  const titleEl = document.getElementById('relic-modal-title');
+  const descEl = document.getElementById('relic-modal-desc');
+  const metaEl = document.getElementById('relic-modal-meta');
+  const closeBtn = document.getElementById('relic-modal-close');
+  if (!modal || !panel || !art || !rarityEl || !titleEl || !descEl || !metaEl || !friendUser) return;
+
+  await populateMirrorRelicHost({
+    achievement,
+    model,
+    containerEl: panel,
+    artEl: art,
+    rarityEl,
+    titleEl,
+    descEl,
+    metaEl,
+  });
 
   modal.hidden = false;
   modal.classList.add('is-open');
@@ -300,7 +383,7 @@ function closeRelicModal({ restoreHash = true } = {}) {
   }
 }
 
-function focusAlbumSlot(achievementId, { openModal = true } = {}) {
+function focusAlbumSlot(achievementId, { openModal = true, scroll = true } = {}) {
   const slot = document.getElementById(`relic-${achievementId}`);
   if (!slot) return false;
 
@@ -308,57 +391,122 @@ function focusAlbumSlot(achievementId, { openModal = true } = {}) {
     el.classList.remove('is-focused');
   });
   slot.classList.add('is-focused');
-  slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (scroll) {
+    slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
   lastFocusedSlot = slot;
 
   const achievement = getAchievementById(achievementId);
   if (!achievement || !friendUser) return true;
 
   const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+  void updateMirrorInspector(achievement, model);
   if (openModal) openRelicModal(achievement, model);
   return true;
 }
 
 function handleDeepLink() {
   const raw = window.location.hash.replace(/^#/, '').trim();
-  if (!raw) return;
+  if (!raw) return false;
   const achievementId = raw.startsWith('relic-') ? raw.slice('relic-'.length) : raw;
-  if (!getAchievementById(achievementId)) return;
+  if (!getAchievementById(achievementId)) return false;
   window.requestAnimationFrame(() => {
     focusAlbumSlot(achievementId, { openModal: true });
   });
+  return true;
+}
+
+function applyMirrorFilter(filterValue = currentMirrorFilter) {
+  currentMirrorFilter = filterValue;
+  const grid = document.getElementById('mirror-album-grid');
+  if (!grid) return;
+
+  document.querySelectorAll('[data-mirror-filter]').forEach((btn) => {
+    const active = btn.dataset.mirrorFilter === filterValue;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+
+  const slots = Array.from(grid.querySelectorAll('.achievement-slot'));
+  slots.forEach((slot) => {
+    const state = slot.dataset.state || 'locked';
+    if (filterValue === 'unlocked') {
+      slot.hidden = state !== 'unlocked';
+    } else if (filterValue === 'locked') {
+      slot.hidden = state === 'unlocked';
+    } else {
+      slot.hidden = false;
+    }
+  });
+}
+
+function selectInitialMirrorSlot() {
+  const grid = document.getElementById('mirror-album-grid');
+  if (!grid || !friendUser) return;
+  const firstSlot = grid.querySelector('.achievement-slot:not([hidden])') || grid.querySelector('.achievement-slot');
+  const firstId = firstSlot?.dataset?.achievementId;
+  if (!firstId) return;
+  focusAlbumSlot(firstId, { openModal: false, scroll: false });
 }
 
 function renderAlbum() {
   const grid = document.getElementById('mirror-album-grid');
   if (!grid || !friendUser) return;
 
-  renderAchievementsList(grid, friendUser, {
+  void renderAchievementsList(grid, friendUser, {
     mode: 'album',
     visitorView: true,
     viewerUser,
     applyRainbowVfx: true,
     emptyMessage: 'Nenhuma relíquia neste Espelho ainda.',
     onSlotClick: (achievement, _state, slotEl) => {
+      const wasAlreadyFocused = slotEl.classList.contains('is-focused');
       lastFocusedSlot = slotEl;
-      window.history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}${window.location.search}#${achievement.id}`
-      );
-      const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
-      openRelicModal(achievement, model);
       slotEl.classList.add('is-focused');
       document.querySelectorAll('.achievement-slot.is-focused').forEach((el) => {
         if (el !== slotEl) el.classList.remove('is-focused');
       });
+
+      const model = getAlbumSlotModel(friendUser, achievement, mirrorSlotOptions());
+      void updateMirrorInspector(achievement, model);
+
+      const isMobileViewport = window.matchMedia('(max-width: 960px)').matches;
+      if (isMobileViewport || wasAlreadyFocused) {
+        window.history.replaceState(
+          null,
+          '',
+          `${window.location.pathname}${window.location.search}#${achievement.id}`
+        );
+        openRelicModal(achievement, model);
+      }
     },
+  }).then(() => {
+    applyMirrorFilter(currentMirrorFilter);
+    if (!window.location.hash) {
+      selectInitialMirrorSlot();
+    }
   });
 
   updateAlbumCounter();
 }
 
 function initRelicModal() {
+  document.querySelectorAll('[data-mirror-filter]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      applyMirrorFilter(btn.dataset.mirrorFilter || 'all');
+    });
+  });
+
+  document.getElementById('mirror-inspector-expand')?.addEventListener('click', () => {
+    if (!activeMirrorAchievement || !friendUser) return;
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#${activeMirrorAchievement.id}`
+    );
+    openRelicModal(activeMirrorAchievement, activeMirrorModel);
+  });
+
   const modal = document.getElementById('relic-modal');
   const panel = modal?.querySelector('.relic-modal__panel');
 

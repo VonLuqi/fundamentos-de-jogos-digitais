@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="160" height="200" viewBox="0 0 160 200">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="0" y1="0" x2="160" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#9c7a32"/>
+      <stop offset="0.48" stop-color="#6e5219"/>
+      <stop offset="0.52" stop-color="#47330d"/>
+      <stop offset="1" stop-color="#2b1e07"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="40" y1="45" x2="120" y2="145" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6d365"/>
+      <stop offset="0.5" stop-color="#c99e32"/>
+      <stop offset="1" stop-color="#5e430d"/>
+    </linearGradient>
+  </defs>
+  <title>keepsake-heart-lock.svg</title>
+  <g id="pp-artwork">
+    <path d="M10 6 L150 6 C152.209 6 154 7.791 154 10 L154 190 C154 192.209 152.209 194 150 194 L10 194 C7.791 194 6 192.209 6 190 L6 10 C6 7.791 7.791 6 10 6 Z" fill="url(#linear-gradient-1)" stroke="#0d0812" stroke-width="4"/>
+    <path d="M14 14 L146 14 L146 186 L14 186 Z" fill="none" stroke="#d4af37" stroke-width="1.6" opacity="0.75"/>
+    <path d="M14 186 L146 54 L146 186 Z" fill="#0d0812" opacity="0.46"/>
+    <path d="M18 34 C18 22 22 18 34 18 C28 24 24 28 18 34 Z" fill="#f6d365"/>
+    <path d="M142 34 C142 22 138 18 126 18 C132 24 136 28 142 34 Z" fill="#f6d365"/>
+    <path d="M18 166 C18 178 22 182 34 182 C28 176 24 172 18 166 Z" fill="#d4af37"/>
+    <path d="M142 166 C142 178 138 182 126 182 C132 176 136 172 142 166 Z" fill="#d4af37"/>
+    <path d="M58 76 L58 54 C58 38 68 28 80 28 C92 28 102 38 102 54 L102 76" fill="none" stroke="url(#linear-gradient-2)" stroke-width="10" stroke-linecap="round"/>
+    <path d="M58 76 L58 54 C58 38 68 28 80 28 C92 28 102 38 102 54 L102 76" fill="none" stroke="#0d0812" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M80 78 C80 62 54 54 42 68 C28 84 42 116 80 144 C118 116 132 84 118 68 C106 54 80 62 80 78 Z" fill="url(#linear-gradient-2)" stroke="#0d0812" stroke-width="4" stroke-linejoin="round"/>
+    <path d="M80 83 C80 70 60 64 50 74 C39 86 50 112 80 134 C110 112 121 86 110 74 C100 64 80 70 80 83 Z" fill="none" stroke="#fff2b2" stroke-width="1.4" opacity="0.65"/>
+    <path d="M88 96 C88 100.418 84.418 104 80 104 C75.582 104 72 100.418 72 96 C72 91.582 75.582 88 80 88 C84.418 88 88 91.582 88 96 Z" fill="#0d0812"/>
+    <path d="M75 99 L85 99 L88 120 L72 120 Z" fill="#0d0812"/>
+  </g>
+</svg>
