@@ -189,7 +189,7 @@ export function renderLessonsList(container, user, options = {}) {
 
     if (!navigate) {
       const lock = document.createElement('span');
-      lock.className = 'lesson-row__lock';
+      lock.className = 'lesson-row__lock hades-sealed-padlock';
       lock.setAttribute('aria-hidden', 'true');
       lock.textContent = '🔒';
       li.append(number, body, lock);

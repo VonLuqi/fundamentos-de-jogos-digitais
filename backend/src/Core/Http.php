@@ -95,6 +95,14 @@ final class Http
 
     public static function clientIp(): string
     {
+        $cf = self::header('cf-connecting-ip');
+        if ($cf !== null && trim($cf) !== '') {
+            return substr(trim($cf), 0, 64);
+        }
+        $remote = trim((string) ($_SERVER['REMOTE_ADDR'] ?? ''));
+        if ($remote !== '' && !in_array($remote, ['127.0.0.1', '::1'], true)) {
+            return substr($remote, 0, 64);
+        }
         $xff = self::header('x-forwarded-for');
         if ($xff !== null && trim($xff) !== '') {
             $parts = explode(',', $xff);
@@ -107,12 +115,7 @@ final class Http
         if ($real !== null && trim($real) !== '') {
             return substr(trim($real), 0, 64);
         }
-        $cf = self::header('cf-connecting-ip');
-        if ($cf !== null && trim($cf) !== '') {
-            return substr(trim($cf), 0, 64);
-        }
-        $remote = (string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
-        return substr(trim($remote) ?: 'unknown', 0, 64);
+        return $remote !== '' ? substr($remote, 0, 64) : 'unknown';
     }
 
     public static function setHeader(string $name, string $value): void
@@ -131,6 +134,9 @@ final class Http
             http_response_code($status);
             header('Content-Type: application/json; charset=utf-8');
             header('Cache-Control: no-store, max-age=0');
+            header('X-Content-Type-Options: nosniff');
+            header('X-Frame-Options: SAMEORIGIN');
+            header('Referrer-Policy: strict-origin-when-cross-origin');
         }
         echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;

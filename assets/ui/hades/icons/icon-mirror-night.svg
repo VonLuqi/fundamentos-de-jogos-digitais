@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6d365"/>
+      <stop offset="0.5" stop-color="#c084fc"/>
+      <stop offset="1" stop-color="#6e5219"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient-1" cx="32" cy="32" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4c1d95"/>
+      <stop offset="1" stop-color="#130924"/>
+    </radialGradient>
+  </defs>
+  <title>icon-mirror-night.svg</title>
+  <g id="pp-artwork">
+    <path d="M32 4 L60 32 L32 60 L4 32 Z" fill="#100b16" stroke="url(#linear-gradient-1)" stroke-width="2.6"/>
+    <path d="M32 8 L56 32 L32 56 L8 32 Z" fill="url(#radial-gradient-1)" stroke="#f6d365" stroke-opacity="0.75" stroke-width="1.1"/>
+    <path d="M32 10 L35 24 L32 32 L29 24 Z M54 32 L40 35 L32 32 L40 29 Z M32 54 L29 40 L32 32 L35 40 Z M10 32 L24 29 L32 32 L24 35 Z" fill="#e879f9" opacity="0.24"/>
+    <path d="M32 4 L36 9 L32 12 L28 9 Z" fill="#f6d365"/>
+    <path d="M60 32 L55 36 L52 32 L55 28 Z" fill="#f6d365"/>
+    <path d="M32 60 L28 55 L32 52 L36 55 Z" fill="#f6d365"/>
+    <path d="M4 32 L9 28 L12 32 L9 36 Z" fill="#f6d365"/>
+    <path d="M32 15 L44 32 L32 49 L20 32 Z" fill="#a855f7" stroke="#f6d365" stroke-width="1.8"/>
+    <path d="M32 20 L39 32 L32 44 L25 32 Z" fill="#f3e8ff" opacity="0.8"/>
+    <path d="M35.2 32 C35.2 32.849 34.863 33.663 34.263 34.263 C33.663 34.863 32.849 35.2 32 35.2 C31.151 35.2 30.337 34.863 29.737 34.263 C29.137 33.663 28.8 32.849 28.8 32 C28.8 31.151 29.137 30.337 29.737 29.737 C30.337 29.137 31.151 28.8 32 28.8 C32.849 28.8 33.663 29.137 34.263 29.737 C34.863 30.337 35.2 31.151 35.2 32 Z" fill="#3b0764"/>
+  </g>
+</svg>

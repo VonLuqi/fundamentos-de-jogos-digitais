@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f6d365"/>
+      <stop offset="0.5" stop-color="#d4af37"/>
+      <stop offset="1" stop-color="#6e5219"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient-1" cx="32" cy="32" r="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5e111a"/>
+      <stop offset="1" stop-color="#17070a"/>
+    </radialGradient>
+  </defs>
+  <title>icon-cerberus-shield.svg</title>
+  <g id="pp-artwork">
+    <path d="M32 4 L60 32 L32 60 L4 32 Z" fill="#100b16" stroke="url(#linear-gradient-1)" stroke-width="2.6"/>
+    <path d="M32 8 L56 32 L32 56 L8 32 Z" fill="url(#radial-gradient-1)" stroke="#f6d365" stroke-opacity="0.75" stroke-width="1.1"/>
+    <path d="M32 10 L35 24 L32 32 L29 24 Z M54 32 L40 35 L32 32 L40 29 Z M32 54 L29 40 L32 32 L35 40 Z M10 32 L24 29 L32 32 L24 35 Z" fill="#ff4500" opacity="0.24"/>
+    <path d="M32 4 L36 9 L32 12 L28 9 Z" fill="#f6d365"/>
+    <path d="M60 32 L55 36 L52 32 L55 28 Z" fill="#f6d365"/>
+    <path d="M32 60 L28 55 L32 52 L36 55 Z" fill="#f6d365"/>
+    <path d="M4 32 L9 28 L12 32 L9 36 Z" fill="#f6d365"/>
+    <path d="M22 20 L42 20 L42 33 C42 40 32 46 32 46 C32 46 22 40 22 33 Z" fill="#8b1a1a" stroke="#f6d365" stroke-width="2"/>
+    <path d="M32 24 L37 32 L32 40 L27 32 Z" fill="#f6d365"/>
+  </g>
+</svg>

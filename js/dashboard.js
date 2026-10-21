@@ -68,6 +68,8 @@ import {
   listNotes,
   provaAdminGetOverview,
   provaAdminSetExamOpen,
+  fetchAdminOverview,
+  generateCode,
 } from './api.js';
 import { formatRate, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
 import { localDatetimeToIsoUtc } from './hades-despertar/ui/pauseVeil.js';
@@ -1863,6 +1865,433 @@ function initMasterToolsTabs() {
   });
 }
 
+let adminOverviewCache = null;
+
+const RING_CIRCUMFERENCE = 144.51;
+
+function setProgressRingPercent(ringId, labelId, percent) {
+  const pct = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+  const ring = document.getElementById(ringId);
+  const label = document.getElementById(labelId);
+  if (ring) {
+    const offset = RING_CIRCUMFERENCE - (RING_CIRCUMFERENCE * pct) / 100;
+    ring.style.setProperty('--ring-offset', offset.toFixed(2));
+  }
+  if (label) {
+    label.textContent = `${pct}%`;
+  }
+}
+
+function formatShortDateTime(isoString) {
+  if (!isoString) return '—';
+  try {
+    return new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(new Date(isoString));
+  } catch {
+    return String(isoString);
+  }
+}
+
+function formatAuditActionLabel(action) {
+  const map = {
+    adminUpdateUser: 'Editou alma no Espelho',
+    adminIssueRecoveryCode: 'Emitiu código de recuperação',
+    adminDeleteUser: 'Removeu alma do Domínio',
+    generateCode: 'Cunhou oferenda ao Estige',
+    setLessonGate: 'Alterou portão de aula',
+    rotateRecoveryCode: 'Rotacionou Senha do Caronte',
+    pauseSet: 'Armou Véu da Aula',
+    pauseClear: 'Liberou Véu da Aula',
+    stateResetStudents: 'Limpou Estelas do Acheron',
+    adminSetExamOpen: 'Alterou portão da Provação',
+    adminFinalizeGrade: 'Fechou nota da Provação',
+  };
+  return map[action] || String(action || 'Ação do Mestre');
+}
+
+function syncInlineProvaButtons(gateState) {
+  const state = gateState || 'closed';
+  const statusEl = document.getElementById('master-prova-inline-status');
+  if (statusEl) {
+    statusEl.textContent = state === 'closed'
+      ? 'Portão Selado (Nenhuma turma liberada)'
+      : `Portão Aberto · Exclusivo ${state}`;
+  }
+  document.querySelectorAll('[data-inline-prova-mode]').forEach((btn) => {
+    const mode = btn.getAttribute('data-inline-prova-mode');
+    const active = mode === state;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', String(active));
+  });
+}
+
+function renderMasterLessonsMatrix(perLessonStats = {}) {
+  const host = document.getElementById('master-lessons-matrix');
+  if (!host) return;
+  host.replaceChildren();
+
+  LESSONS.forEach((lesson) => {
+    const stat = perLessonStats?.[lesson.id] || {};
+    const open = typeof stat.published === 'boolean'
+      ? stat.published
+      : isLessonPublished(lesson.id, publishMap);
+    const completedCount = Number(stat.completedCount) || 0;
+    const paragraphCount = Number(stat.paragraphCount) || 0;
+    const viewCount = Number(stat.viewCount) || 0;
+
+    const tile = document.createElement('article');
+    tile.className = `master-lesson-tile ${open ? 'is-open' : 'is-sealed'}`;
+
+    const top = document.createElement('div');
+    top.className = 'master-lesson-tile__top';
+
+    const num = document.createElement('span');
+    num.className = 'master-lesson-tile__num';
+    num.textContent = `Aula ${lesson.number}`;
+
+    const badge = document.createElement('span');
+    badge.className = `hades-rarity-badge ${open ? 'hades-rarity-badge--styx' : 'hades-rarity-badge--heroic'}`;
+    badge.textContent = open ? 'Aberta' : 'Selada';
+
+    top.append(num, badge);
+
+    const title = document.createElement('h4');
+    title.className = 'master-lesson-tile__title';
+    title.textContent = lesson.title;
+
+    const stats = document.createElement('p');
+    stats.className = 'master-lesson-tile__stats';
+    stats.textContent = `${completedCount} concluíram · ${paragraphCount} GDDs · ${viewCount} leituras`;
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `btn-gold ${open ? 'btn-gold--ghost' : 'btn-gold--pulse'} master-lesson-tile__btn`;
+    btn.textContent = open ? 'Selar Aula' : 'Liberar Aula';
+    btn.addEventListener('click', async () => {
+      if (!currentToken) return;
+      btn.disabled = true;
+      const next = !open;
+      btn.textContent = next ? 'Liberando…' : 'Selando…';
+      try {
+        await setLessonGate(currentToken, lesson.id, PUBLISHED_GATE_KEY, next);
+        publishMap[lesson.id] = next;
+        renderLessons(currentUser);
+        await refreshAdminOverview();
+      } catch (error) {
+        showApiWarning(error instanceof ApiError ? error.message : 'Falha ao atualizar portão da aula.');
+        btn.disabled = false;
+        btn.textContent = open ? 'Selar Aula' : 'Liberar Aula';
+      }
+    });
+
+    tile.append(top, title, stats, btn);
+    host.appendChild(tile);
+  });
+}
+
+function renderMasterActiveCodes(activeCodes = []) {
+  const list = document.getElementById('master-active-codes-list');
+  const badge = document.getElementById('master-active-codes-badge');
+  if (badge) {
+    badge.textContent = `${activeCodes.length} ativa${activeCodes.length === 1 ? '' : 's'}`;
+  }
+  if (!list) return;
+  list.replaceChildren();
+
+  if (!Array.isArray(activeCodes) || activeCodes.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'master-active-codes__empty';
+    empty.textContent = 'Nenhum código ativo no momento. Cunhe uma oferenda ao lado.';
+    list.appendChild(empty);
+    return;
+  }
+
+  activeCodes.forEach((entry) => {
+    const li = document.createElement('li');
+    li.className = 'master-active-codes__item';
+
+    const left = document.createElement('div');
+    const codeEl = document.createElement('div');
+    codeEl.className = 'master-active-codes__code';
+    codeEl.textContent = entry.code || '-------';
+
+    const lessonMeta = LESSONS.find((l) => l.id === entry.lessonId);
+    const metaEl = document.createElement('div');
+    metaEl.className = 'master-active-codes__meta';
+    const modeLabel = entry.singleUse ? 'Uso único' : 'Turma';
+    metaEl.textContent = `${lessonMeta ? `Aula ${lessonMeta.number}` : entry.lessonId} · ${modeLabel} · até ${formatShortDateTime(entry.expiresAt)}`;
+
+    left.append(codeEl, metaEl);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'btn-gold btn-gold--ghost';
+    copyBtn.textContent = 'Copiar';
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(String(entry.code || ''));
+        copyBtn.textContent = 'Copiado ✓';
+        window.setTimeout(() => {
+          copyBtn.textContent = 'Copiar';
+        }, 1600);
+      } catch {
+        copyBtn.textContent = entry.code || '—';
+      }
+    });
+
+    li.append(left, copyBtn);
+    list.appendChild(li);
+  });
+}
+
+function renderMasterSoulsSummary(kpis = {}) {
+  const host = document.getElementById('master-souls-summary');
+  if (!host) return;
+  host.replaceChildren();
+
+  const pills = [
+    ['Total de Almas', kpis.totalStudents ?? 0],
+    ['Turma TCG01', kpis.byTurma?.TCG01 ?? 0],
+    ['Turma TCG02', kpis.byTurma?.TCG02 ?? 0],
+    ['Selos Verificados', kpis.verifiedEmailCount ?? 0],
+    ['Selos Pendentes', kpis.pendingEmailCount ?? 0],
+    ['Sem E-mail', kpis.noEmailCount ?? 0],
+    ['Média de XP', `${kpis.avgXp ?? 0} XP`],
+    ['Topo de XP', `${kpis.maxXp ?? 0} XP`],
+  ];
+
+  pills.forEach(([label, val]) => {
+    const pill = document.createElement('span');
+    pill.className = 'master-souls-pill';
+    const strong = document.createElement('strong');
+    strong.textContent = String(val);
+    pill.append(`${label}: `, strong);
+    host.appendChild(pill);
+  });
+}
+
+function renderMasterAuditChronicle(auditLog = []) {
+  const list = document.getElementById('master-audit-list');
+  const countBadge = document.getElementById('master-audit-count');
+  if (countBadge) {
+    countBadge.textContent = `${auditLog.length} registro${auditLog.length === 1 ? '' : 's'}`;
+  }
+  if (!list) return;
+  list.replaceChildren();
+
+  if (!Array.isArray(auditLog) || auditLog.length === 0) {
+    const empty = document.createElement('li');
+    empty.className = 'master-audit-list__empty';
+    empty.textContent = 'Nenhuma ação administrativa registrada ainda.';
+    list.appendChild(empty);
+    return;
+  }
+
+  auditLog.forEach((item) => {
+    const li = document.createElement('li');
+    li.className = 'master-audit-item';
+
+    const main = document.createElement('span');
+    main.className = 'master-audit-item__main';
+    const strong = document.createElement('strong');
+    strong.textContent = formatAuditActionLabel(item.action);
+    const targetText = item.targetUsername
+      ? ` → @${item.targetUsername}`
+      : (item.targetName ? ` → ${item.targetName}` : '');
+    const actorText = item.actorUsername ? ` (por @${item.actorUsername})` : '';
+    main.append(strong, `${targetText}${actorText}`);
+
+    const time = document.createElement('span');
+    time.className = 'master-audit-item__time';
+    time.textContent = formatShortDateTime(item.createdAt);
+
+    li.append(main, time);
+    list.appendChild(li);
+  });
+}
+
+function renderAdminOverview(overview) {
+  if (!overview || typeof overview !== 'object') return;
+  adminOverviewCache = overview;
+
+  const liveBadge = document.getElementById('master-live-status');
+  if (liveBadge) {
+    liveBadge.textContent = 'Domínio Ativo';
+  }
+
+  const kpis = overview.kpis || {};
+  const lessons = overview.lessons || {};
+  const activeCodes = Array.isArray(overview.activeCodes) ? overview.activeCodes : [];
+  const acheron = overview.acheron || {};
+  const prova = overview.prova || {};
+  const provaCounts = prova.counts || {};
+  const gateState = prova.exam?.gate?.state || 'closed';
+
+  // KPI 1: Almas & Selos
+  const soulsTotalEl = document.getElementById('kpi-souls-total');
+  const soulsTurmasEl = document.getElementById('kpi-souls-turmas');
+  if (soulsTotalEl) soulsTotalEl.textContent = `${kpis.totalStudents ?? 0} Almas`;
+  if (soulsTurmasEl) {
+    soulsTurmasEl.textContent = `TCG01: ${kpis.byTurma?.TCG01 ?? 0} · TCG02: ${kpis.byTurma?.TCG02 ?? 0} · Sem selo: ${(kpis.pendingEmailCount ?? 0) + (kpis.noEmailCount ?? 0)}`;
+  }
+  setProgressRingPercent('kpi-souls-ring', 'kpi-souls-pct', kpis.sealedPercent ?? 0);
+
+  // KPI 2: Trilha & GDDs
+  const lessonsOpenEl = document.getElementById('kpi-lessons-open');
+  const lessonsGddsEl = document.getElementById('kpi-lessons-gdds');
+  if (lessonsOpenEl) {
+    lessonsOpenEl.textContent = `${lessons.publishedCount ?? 0} / ${lessons.totalLessons ?? LESSONS.length} Aulas`;
+  }
+  if (lessonsGddsEl) {
+    lessonsGddsEl.textContent = `${kpis.totalActivitiesSubmitted ?? 0} parágrafos GDD · Média ${kpis.avgXp ?? 0} XP`;
+  }
+  setProgressRingPercent('kpi-lessons-ring', 'kpi-lessons-pct', lessons.publishedPercent ?? 0);
+
+  // KPI 3: Estige & Acheron
+  const codesActiveEl = document.getElementById('kpi-codes-active');
+  const acheronBadgeEl = document.getElementById('kpi-acheron-badge');
+  const acheronSummaryEl = document.getElementById('kpi-acheron-summary');
+  if (codesActiveEl) {
+    codesActiveEl.textContent = `${activeCodes.length} Oferenda${activeCodes.length === 1 ? '' : 's'}`;
+  }
+  if (acheronBadgeEl) {
+    acheronBadgeEl.textContent = acheron.published ? 'Acheron Aberto' : 'Acheron Selado';
+  }
+  if (acheronSummaryEl) {
+    acheronSummaryEl.textContent = `${acheron.soulsInAcheron ?? 0} Estelas no Acheron · ${kpis.activeSessionsCount ?? 0} sessões ativas`;
+  }
+
+  // KPI 4: Provação Módulo 1
+  const provaBadgeEl = document.getElementById('kpi-prova-badge');
+  const provaGateEl = document.getElementById('kpi-prova-gate');
+  const provaCountsEl = document.getElementById('kpi-prova-counts');
+  if (provaBadgeEl) {
+    provaBadgeEl.textContent = gateState === 'closed' ? 'Fechada' : gateState;
+  }
+  if (provaGateEl) {
+    provaGateEl.textContent = gateState === 'closed' ? 'Portão Selado' : `Aberta · ${gateState}`;
+  }
+  if (provaCountsEl) {
+    provaCountsEl.textContent = `${provaCounts.inProgress ?? 0} em curso · ${provaCounts.awaitingGrade ?? 0} p/ nota · ${provaCounts.openContests ?? 0} recursos`;
+  }
+
+  // Sincroniza estados derivados
+  if (typeof acheron.published === 'boolean') {
+    despertarPublished = acheron.published;
+    syncAcheronToggleButton();
+  }
+  if (acheron.pause) {
+    renderMasterPauseStatus(acheron.pause);
+  }
+  if (overview.mailer) {
+    renderMasterMailerStatus(overview.mailer);
+  }
+  syncProvaMasterButton(gateState);
+  syncInlineProvaButtons(gateState);
+  renderMasterActiveCodes(activeCodes);
+  renderMasterLessonsMatrix(lessons.perLessonStats || {});
+  renderMasterSoulsSummary(kpis);
+  renderMasterAuditChronicle(overview.auditLog || []);
+}
+
+async function refreshAdminOverview() {
+  if (!currentToken || currentUser?.role !== 'admin') return;
+  const liveBadge = document.getElementById('master-live-status');
+  if (liveBadge) liveBadge.textContent = 'Sincronizando…';
+  try {
+    const overview = await fetchAdminOverview(currentToken);
+    renderAdminOverview(overview);
+  } catch {
+    if (liveBadge) liveBadge.textContent = 'Modo Local';
+    renderMasterLessonsMatrix({});
+  }
+}
+
+function bindMasterForgeAndInlineControls() {
+  const forgeForm = document.getElementById('master-forge-form');
+  const forgeSubmit = document.getElementById('master-forge-submit');
+  const forgeResult = document.getElementById('master-forge-result');
+  const forgeCodeEl = document.getElementById('master-forge-result-code');
+  const forgeMetaEl = document.getElementById('master-forge-result-meta');
+  const forgeCopyBtn = document.getElementById('master-forge-copy');
+
+  forgeForm?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!currentToken || !forgeSubmit) return;
+
+    const lessonId = String(document.getElementById('master-forge-lesson')?.value || 'aula1');
+    const ttlMinutes = Number(document.getElementById('master-forge-ttl')?.value || 20);
+    const singleUse = Boolean(document.getElementById('master-forge-single')?.checked);
+
+    forgeSubmit.disabled = true;
+    const prevLabel = forgeSubmit.textContent;
+    forgeSubmit.textContent = 'Cunhando…';
+
+    try {
+      const created = await generateCode(currentToken, lessonId, { ttlMinutes, singleUse });
+      const code = String(created?.code || '').trim();
+      const lessonMeta = LESSONS.find((l) => l.id === lessonId);
+      if (forgeCodeEl) forgeCodeEl.textContent = code || '-------';
+      if (forgeMetaEl) {
+        forgeMetaEl.textContent = `${lessonMeta ? `Aula ${lessonMeta.number}` : lessonId} · ${singleUse ? 'Uso único' : 'Turma'} · ${ttlMinutes} min`;
+      }
+      if (forgeResult) forgeResult.hidden = false;
+      flashScreen();
+      await refreshAdminOverview();
+    } catch (error) {
+      showApiWarning(error instanceof ApiError ? error.message : 'Falha ao cunhar código de oferenda.');
+    } finally {
+      forgeSubmit.disabled = false;
+      forgeSubmit.textContent = prevLabel;
+    }
+  });
+
+  forgeCopyBtn?.addEventListener('click', async () => {
+    const code = String(forgeCodeEl?.textContent || '').trim();
+    if (!code || code === '-------') return;
+    try {
+      await navigator.clipboard.writeText(code);
+      forgeCopyBtn.textContent = 'Copiado ✓';
+      window.setTimeout(() => {
+        forgeCopyBtn.textContent = 'Copiar Código';
+      }, 1800);
+    } catch {
+      // ignore clipboard restriction
+    }
+  });
+
+  document.querySelectorAll('[data-inline-prova-mode]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!currentToken) return;
+      const mode = btn.getAttribute('data-inline-prova-mode') || 'closed';
+      document.querySelectorAll('[data-inline-prova-mode]').forEach((b) => {
+        b.disabled = true;
+      });
+      try {
+        const result = await provaAdminSetExamOpen(currentToken, { mode });
+        const nextState = result?.gate?.state || mode;
+        syncProvaMasterButton(nextState);
+        syncInlineProvaButtons(nextState);
+        await refreshAdminOverview();
+      } catch (error) {
+        showApiWarning(error instanceof ApiError ? error.message : 'Falha ao atualizar o portão da Provação.');
+      } finally {
+        document.querySelectorAll('[data-inline-prova-mode]').forEach((b) => {
+          b.disabled = false;
+        });
+      }
+    });
+  });
+
+  document.getElementById('btn-master-refresh')?.addEventListener('click', () => {
+    void refreshAdminOverview();
+  });
+}
+
 function initAdminTools() {
   const tools = document.getElementById('master-tools');
   if (currentUser?.role !== 'admin') {
@@ -1891,10 +2320,19 @@ function initAdminTools() {
 
   syncAcheronToggleButton();
   bindMasterClassroomPauseControls();
+  bindMasterForgeAndInlineControls();
+  renderMasterLessonsMatrix({});
+  void refreshAdminOverview();
   refreshMasterMailerStatus();
   provaAdminGetOverview(currentToken)
-    .then((overview) => syncProvaMasterButton(overview?.gate?.state))
-    .catch(() => syncProvaMasterButton('closed'));
+    .then((overview) => {
+      syncProvaMasterButton(overview?.gate?.state);
+      syncInlineProvaButtons(overview?.gate?.state);
+    })
+    .catch(() => {
+      syncProvaMasterButton('closed');
+      syncInlineProvaButtons('closed');
+    });
 
   btnProva?.addEventListener('click', () => {
     void openProvaGateModal();
@@ -2037,6 +2475,7 @@ function initAdminTools() {
       }
       syncAcheronToggleButton();
       renderDespertarPreview(currentToken).catch(() => {});
+      void refreshAdminOverview();
     } catch (error) {
       const message = error instanceof ApiError
         ? error.message
@@ -2074,6 +2513,7 @@ function initAdminTools() {
           return note;
         })(),
       );
+      void refreshAdminOverview();
     } catch (error) {
       const message = error instanceof ApiError
         ? error.message
@@ -2129,7 +2569,7 @@ async function init() {
     showApiWarning(
       error instanceof ApiError
         ? error.message
-        : 'A API não respondeu. Rode `vercel dev` localmente ou publique no Vercel.'
+        : 'A API do Domínio não respondeu. Verifique a conexão com o servidor.'
     );
     return;
   }

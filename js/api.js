@@ -397,9 +397,17 @@ export function clearSession() {
    ============================================================ */
 async function request(path, options = {}) {
   const apiUrl = `${siteBasePath()}${API_BASE}${path}`;
+  const { authToken, headers: customHeaders, ...fetchOptions } = options;
+  const resolvedToken = String(authToken || getSession()?.token || '').trim();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(resolvedToken ? { Authorization: `Bearer ${resolvedToken}` } : {}),
+    ...(customHeaders || {}),
+  };
+
   const response = await fetch(apiUrl, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
+    ...fetchOptions,
+    headers,
   });
 
   let payload = null;
@@ -408,7 +416,7 @@ async function request(path, options = {}) {
   } catch {
     // Resposta sem corpo JSON (ex.: 404 estático quando a API não está rodando)
     throw new ApiError(
-      'A API não respondeu. Rode `vercel dev` localmente ou publique no Vercel.',
+      'A API do Domínio não respondeu. Verifique a conexão com o servidor.',
       response.status
     );
   }
@@ -564,7 +572,7 @@ export async function logout() {
 
 /** Valida a sessão no servidor e devolve o usuário atualizado. */
 export async function validateSession(token) {
-  const payload = await request(`/auth?token=${encodeURIComponent(token)}`, { method: 'GET' });
+  const payload = await request('/auth', { method: 'GET', authToken: token });
   return { ...payload, user: normalizeUser(payload.user) };
 }
 
@@ -574,8 +582,8 @@ export async function validateSession(token) {
  */
 export async function fetchSessionBootstrap(token) {
   const payload = await request(
-    `/session-bootstrap?token=${encodeURIComponent(token)}`,
-    { method: 'GET' },
+    '/session-bootstrap',
+    { method: 'GET', authToken: token },
   );
   const gates = payload?.gates && typeof payload.gates === 'object'
     ? payload.gates
@@ -726,7 +734,30 @@ export async function setAvatar(token, avatarIndex) {
 export function listCodes(token) {
   return request('/progress', {
     method: 'POST',
+    authToken: token,
     body: JSON.stringify({ token, action: 'listCodes' }),
+  });
+}
+
+/**
+ * Telemetria unificada do Trono do Mestre (KPIs, turmas, aulas, códigos, Acheron, prova e auditoria).
+ */
+export function fetchAdminOverview(token) {
+  return request('/progress', {
+    method: 'POST',
+    authToken: token,
+    body: JSON.stringify({ token, action: 'adminOverview' }),
+  });
+}
+
+/**
+ * Crônica de Auditoria do Mestre (`admin_audit_events`).
+ */
+export function fetchAdminAuditLog(token, limit = 25) {
+  return request('/progress', {
+    method: 'POST',
+    authToken: token,
+    body: JSON.stringify({ token, action: 'adminAuditLog', limit }),
   });
 }
 

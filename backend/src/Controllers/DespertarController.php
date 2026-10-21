@@ -34,7 +34,7 @@ final class DespertarController
 
         $body = Http::body();
         $action = (string) ($body['action'] ?? '');
-        $token = (string) ($body['token'] ?? '');
+        $token = SessionService::extractRequestToken() ?? '';
 
         $user = SessionService::loadUserBySessionToken($token);
         if (!$user) {

@@ -1,0 +1,379 @@
+/* ==========================================================================
+   HADES CHTHONIC-BAROQUE COMPONENT SYSTEM (Supergiant Games Inspired)
+   Derivado das 7 referências: Mirror of Night, Pool of Purging, Zagreus
+   Dialogue Box, Boon Tokens, Blessings of Guanyin, Hades GUI Set e Keepsakes.
+   ========================================================================== */
+
+:root {
+  /* Paleta Ctônica Expandida (Mirror of Night / Pool of Purging) */
+  --hades-obsidian: #0b0710;
+  --hades-obsidian-mid: #150e1f;
+  --hades-amethyst: #a020f0;
+  --hades-amethyst-bright: #e0aaff;
+  --hades-amethyst-deep: #3c096c;
+  --hades-styx-green: #4ce666;
+  --hades-acheron-cyan: #2ce6d0;
+  --hades-crimson-flame: #ff4500;
+  --hades-oxblood: #4a0e17;
+
+  /* Raridades de Bênçãos (Boons) */
+  --boon-common: #d6cbb9;
+  --boon-rare: #38bdf8;
+  --boon-epic: #c084fc;
+  --boon-heroic: #f87171;
+  --boon-duo: #a3e635;
+
+  /* Assets Vetoriais Exportados pelo Kit PapelPrint / VectorCraft */
+  --asset-corner-mirror: url("../assets/ui/hades/frames/mirror-frame-corners.svg");
+  --asset-corner-meander: url("../assets/ui/hades/frames/meander-corners.svg");
+  --asset-crest-laurel: url("../assets/ui/hades/frames/laurel-header-crest.svg");
+  --asset-padlock-gate: url("../assets/ui/hades/frames/sealed-padlock-gate.svg");
+  --asset-divider-laurel: url("../assets/ui/hades/dividers/divider-laurel-skull.svg");
+  --asset-divider-styx: url("../assets/ui/hades/dividers/divider-styx-gems.svg");
+  --asset-banner-throne-1x: url("../assets/ui/hades/banners/admin-throne-banner.webp");
+  --asset-banner-throne-2x: url("../assets/ui/hades/banners/admin-throne-banner@2x.webp");
+  --asset-banner-hero-1x: url("../assets/ui/hades/banners/hero-underworld-banner.webp");
+  --asset-banner-hero-2x: url("../assets/ui/hades/banners/hero-underworld-banner@2x.webp");
+}
+
+/* --------------------------------------------------------------------------
+   1. Moldura Mirror of Night (.hades-mirror-frame)
+   -------------------------------------------------------------------------- */
+.hades-mirror-frame {
+  position: relative;
+  background:
+    linear-gradient(135deg, rgba(160, 32, 240, 0.08) 0%, transparent 45%),
+    linear-gradient(180deg, rgba(22, 15, 32, 0.96) 0%, rgba(11, 8, 16, 0.98) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(246, 211, 101, 0.12),
+    inset 0 0 32px rgba(60, 9, 108, 0.28),
+    0 18px 44px rgba(0, 0, 0, 0.72);
+}
+
+.hades-mirror-frame::before,
+.hades-mirror-frame::after {
+  content: "";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  background-image: var(--asset-corner-mirror);
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hades-mirror-frame::before {
+  top: -2px;
+  left: -2px;
+}
+
+.hades-mirror-frame::after {
+  top: -2px;
+  right: -2px;
+  transform: scaleX(-1);
+}
+
+/* --------------------------------------------------------------------------
+   2. Moldura Meandro Grego (.hades-meander-box — Ref 5 Blessings)
+   -------------------------------------------------------------------------- */
+.hades-meander-box {
+  position: relative;
+  background:
+    linear-gradient(125deg, rgba(255, 255, 255, 0.035) 0%, transparent 38%),
+    linear-gradient(180deg, rgba(24, 14, 22, 0.95), rgba(12, 9, 16, 0.98));
+  border: 1px solid rgba(207, 167, 89, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(201, 42, 42, 0.22),
+    0 10px 28px rgba(0, 0, 0, 0.55);
+}
+
+.hades-meander-box::before,
+.hades-meander-box::after {
+  content: "";
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  background-image: var(--asset-corner-meander);
+  background-size: contain;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.hades-meander-box::before {
+  top: 2px;
+  left: 2px;
+}
+
+.hades-meander-box::after {
+  bottom: 2px;
+  right: 2px;
+  transform: rotate(180deg);
+}
+
+/* --------------------------------------------------------------------------
+   3. Brasão e Divisores Vetoriais SVG
+   -------------------------------------------------------------------------- */
+.hades-crest-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.hades-crest-header::before {
+  content: "";
+  display: block;
+  width: min(320px, 85%);
+  height: 52px;
+  background-image: var(--asset-crest-laurel);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.hades-svg-divider {
+  width: 100%;
+  height: 26px;
+  margin: 1rem 0;
+  background-image: var(--asset-divider-laurel);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+}
+
+.hades-svg-divider--compact {
+  height: 16px;
+  margin: 0.65rem 0;
+  background-image: var(--asset-divider-styx);
+}
+
+/* --------------------------------------------------------------------------
+   4. Boon Cards e Tokens Losangulares (Ref 2 Pool of Purging & Ref 4/5)
+   -------------------------------------------------------------------------- */
+.hades-boon-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0) 42%),
+    linear-gradient(180deg, rgba(30, 20, 34, 0.96), rgba(15, 11, 20, 0.98));
+  border: 1px solid rgba(207, 167, 89, 0.36);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 213, 154, 0.06),
+    0 10px 24px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  overflow: hidden;
+}
+
+.hades-boon-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-blood-bright));
+  opacity: 0.85;
+}
+
+.hades-boon-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(242, 213, 154, 0.72);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.65),
+    0 0 18px rgba(207, 167, 89, 0.2);
+}
+
+.hades-boon-token {
+  width: 56px;
+  height: 56px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.65));
+}
+
+.hades-boon-token img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Badges de Raridade estilo Hades (Ref 2 & Ref 5) */
+.hades-rarity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.55rem;
+  font-family: var(--font-title);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(15, 11, 20, 0.85);
+}
+
+.hades-rarity-badge--epic {
+  color: var(--boon-epic);
+  border-color: rgba(192, 132, 252, 0.45);
+  background: rgba(88, 28, 135, 0.28);
+}
+
+.hades-rarity-badge--rare {
+  color: var(--boon-rare);
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(12, 74, 110, 0.28);
+}
+
+.hades-rarity-badge--heroic {
+  color: var(--boon-heroic);
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(127, 29, 29, 0.32);
+}
+
+.hades-rarity-badge--styx {
+  color: var(--hades-styx-green);
+  border-color: rgba(76, 230, 102, 0.48);
+  background: rgba(20, 83, 45, 0.3);
+}
+
+.hades-rarity-badge--gold {
+  color: var(--hades-gold-bright);
+  border-color: rgba(242, 213, 154, 0.48);
+  background: rgba(120, 83, 28, 0.28);
+}
+
+/* Valores numéricos em verde-estígio (Ref 1 Mirror of Night & Ref 2 Pool) */
+.hades-stat-green {
+  color: var(--hades-styx-green);
+  font-family: "JetBrains Mono", monospace;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(76, 230, 102, 0.28);
+}
+
+/* --------------------------------------------------------------------------
+   5. Anéis de Progresso Circulares SVG (Ref 6 Hades GUI Set)
+   -------------------------------------------------------------------------- */
+.hades-progress-ring {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hades-progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.hades-progress-ring__track {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 5;
+}
+
+.hades-progress-ring__fill {
+  fill: none;
+  stroke: var(--hades-gold-bright);
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 144.51;
+  stroke-dashoffset: var(--ring-offset, 144.51);
+  filter: drop-shadow(0 0 6px rgba(242, 213, 154, 0.55));
+  transition: stroke-dashoffset 500ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hades-progress-ring--amethyst .hades-progress-ring__fill {
+  stroke: #c084fc;
+  filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.65));
+}
+
+.hades-progress-ring--styx .hades-progress-ring__fill {
+  stroke: var(--hades-styx-green);
+  filter: drop-shadow(0 0 6px rgba(76, 230, 102, 0.6));
+}
+
+.hades-progress-ring--crimson .hades-progress-ring__fill {
+  stroke: #ff6b6b;
+  filter: drop-shadow(0 0 6px rgba(255, 69, 0, 0.65));
+}
+
+.hades-progress-ring__label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--hades-text);
+}
+
+/* --------------------------------------------------------------------------
+   6. Tooltip / Caixa de Glossário Lateral (.hades-codex-box — Ref 1, 2, 5)
+   -------------------------------------------------------------------------- */
+.hades-codex-box {
+  position: relative;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(180deg, rgba(16, 12, 22, 0.96), rgba(9, 7, 14, 0.98));
+  border: 1.5px solid var(--hades-gold);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 213, 154, 0.08),
+    0 10px 24px rgba(0, 0, 0, 0.65);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.hades-codex-box__title {
+  margin: 0 0 0.25rem;
+  font-family: var(--font-title);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.hades-codex-box__body {
+  margin: 0;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: var(--hades-text-dim);
+}
+
+/* --------------------------------------------------------------------------
+   7. Cadeado Selado Chtônico (.hades-sealed-padlock — Ref 1 Mirror of Night)
+   -------------------------------------------------------------------------- */
+.hades-sealed-padlock {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background-image: var(--asset-padlock-gate);
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: transparent !important;
+  font-size: 0 !important;
+  filter: drop-shadow(0 0 8px rgba(194, 53, 72, 0.45));
+}

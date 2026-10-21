@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1440" height="600" viewBox="0 0 1440 600">
+  <defs>
+    <linearGradient id="linear-gradient-1" x1="0" y1="0" x2="1440" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#09060e"/>
+      <stop offset="0.45" stop-color="#180d22"/>
+      <stop offset="0.8" stop-color="#2e0e19"/>
+      <stop offset="1" stop-color="#0b0710"/>
+    </linearGradient>
+    <radialGradient id="radial-gradient-1" cx="0" cy="0" r="662.4" gradientTransform="matrix(1 0 0 0.417 720 270)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d9381e" stop-opacity="0.26"/>
+      <stop offset="0.55" stop-color="#a020f0" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#09060e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <title>hero-underworld-banner.svg</title>
+  <g id="pp-artwork">
+    <path d="M0 0 L1440 0 L1440 600 L0 600 Z" fill="url(#linear-gradient-1)"/>
+    <path d="M0 0 L1440 0 L1440 600 L0 600 Z" fill="url(#radial-gradient-1)"/>
+    <path d="M68 68 L1372 68 L1372 532 L68 532 Z" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.65"/>
+    <path d="M78 78 L1362 78 L1362 522 L78 522 Z" fill="none" stroke="#8b1a1a" stroke-width="1.2" opacity="0.6"/>
+    <path d="M220 140 L380 300 L220 460 L68 308 L68 292 Z" fill="#140c1f" stroke="#d4af37" stroke-width="2.4" opacity="0.75"/>
+    <path d="M1220 140 L1372 292 L1372 308 L1220 460 L1060 300 Z" fill="#1c0c14" stroke="#d4af37" stroke-width="2.4" opacity="0.75"/>
+    <path d="M910 300 C910 404.934 824.934 490 720 490 C615.066 490 530 404.934 530 300 C530 195.066 615.066 110 720 110 C824.934 110 910 195.066 910 300 Z" fill="none" stroke="#d4af37" stroke-width="1.5" opacity="0.3"/>
+    <path d="M720 96 L924 300 L720 504 L516 300 Z" fill="none" stroke="#ff4500" stroke-width="1.6" opacity="0.35"/>
+  </g>
+</svg>

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="600" viewBox="0 0 1440 600" fill="none">
+  <defs>
+    <linearGradient id="heroBg" x1="0" y1="0" x2="1440" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#09060e"/>
+      <stop offset="45%" stop-color="#180d22"/>
+      <stop offset="80%" stop-color="#2e0e19"/>
+      <stop offset="100%" stop-color="#0b0710"/>
+    </linearGradient>
+    <radialGradient id="heroCenterGlow" cx="50%" cy="45%" r="46%">
+      <stop offset="0%" stop-color="#d9381e" stop-opacity="0.26"/>
+      <stop offset="55%" stop-color="#a020f0" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#09060e" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <g id="pp-artwork">
+    <rect x="0" y="0" width="1440" height="600" fill="url(#heroBg)"/>
+    <rect x="0" y="0" width="1440" height="600" fill="url(#heroCenterGlow)"/>
+    <!-- Moldura Segura (safe margin >= 64px) -->
+    <polygon points="68,68 1372,68 1372,532 68,532" fill="none" stroke="#d4af37" stroke-width="2" opacity="0.65"/>
+    <polygon points="78,78 1362,78 1362,522 78,522" fill="none" stroke="#8b1a1a" stroke-width="1.2" opacity="0.6"/>
+    <!-- Grandes Diamantes Ctônicos Laterais -->
+    <polygon points="220,140 380,300 220,460 68,308 68,292" fill="#140c1f" stroke="#d4af37" stroke-width="2.4" opacity="0.75"/>
+    <polygon points="1220,140 1372,292 1372,308 1220,460 1060,300" fill="#1c0c14" stroke="#d4af37" stroke-width="2.4" opacity="0.75"/>
+    <!-- Arco Solar/Estígio Central -->
+    <circle cx="720" cy="300" r="190" stroke="#d4af37" stroke-width="1.5" opacity="0.3"/>
+    <polygon points="720,96 924,300 720,504 516,300" fill="none" stroke="#ff4500" stroke-width="1.6" opacity="0.35"/>
+  </g>
+</svg>

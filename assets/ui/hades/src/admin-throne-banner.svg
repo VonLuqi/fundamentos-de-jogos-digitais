@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" fill="none">
+  <defs>
+    <linearGradient id="throneBg" x1="0" y1="0" x2="1200" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0d0814"/>
+      <stop offset="38%" stop-color="#1b0f24"/>
+      <stop offset="72%" stop-color="#38101c"/>
+      <stop offset="100%" stop-color="#120916"/>
+    </linearGradient>
+    <radialGradient id="throneGlowLeft" cx="18%" cy="50%" r="48%">
+      <stop offset="0%" stop-color="#a020f0" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#a020f0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="throneGlowRight" cx="84%" cy="45%" r="45%">
+      <stop offset="0%" stop-color="#ff4500" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#ff4500" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="goldBorder" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6e5219"/>
+      <stop offset="50%" stop-color="#f6d365"/>
+      <stop offset="100%" stop-color="#6e5219"/>
+    </linearGradient>
+  </defs>
+  <g id="pp-artwork">
+    <!-- Fundo Ctônico Obsidiana & Carmesim -->
+    <rect x="0" y="0" width="1200" height="320" fill="url(#throneBg)"/>
+    <rect x="0" y="0" width="1200" height="320" fill="url(#throneGlowLeft)"/>
+    <rect x="0" y="0" width="1200" height="320" fill="url(#throneGlowRight)"/>
+
+    <!-- Feixes Diagonais de Luz (Ref 1 Mirror of Night & Ref 5 Blessings) -->
+    <polygon points="180,0 310,0 140,320 10,320" fill="#ffffff" opacity="0.03"/>
+    <polygon points="360,0 420,0 250,320 190,320" fill="#f6d365" opacity="0.04"/>
+    <polygon points="820,0 960,0 790,320 650,320" fill="#ff4500" opacity="0.05"/>
+
+    <!-- Moldura Arquitetônica Interna (Respeitando safe padding de 32px) -->
+    <polygon points="36,36 1164,36 1164,284 36,284" fill="none" stroke="url(#goldBorder)" stroke-width="2" opacity="0.8"/>
+    <polygon points="44,44 1156,44 1156,276 44,276" fill="none" stroke="#c92a2a" stroke-width="1" opacity="0.65"/>
+
+    <!-- Ornamentos de Canto e Cristais de Ametista (Dentro da área segura >=36px) -->
+    <polygon points="36,36 96,36 82,50 50,50 50,82 36,96" fill="#d4af37"/>
+    <polygon points="1164,36 1104,36 1118,50 1150,50 1150,82 1164,96" fill="#d4af37"/>
+    <polygon points="36,284 96,284 82,270 50,270 50,238 36,224" fill="#d4af37"/>
+    <polygon points="1164,284 1104,284 1118,270 1150,270 1150,238 1164,224" fill="#d4af37"/>
+
+    <!-- Brasão Losangular Esquerdo (Espelho da Noite) -->
+    <polygon points="160,64 256,160 160,256 64,160" fill="#140c1f" stroke="#d4af37" stroke-width="3"/>
+    <polygon points="160,78 242,160 160,242 78,160" fill="#251238" stroke="#a020f0" stroke-width="1.6"/>
+    <polygon points="160,104 216,160 160,216 104,160" fill="#7b2cbf" stroke="#f6d365" stroke-width="2"/>
+    <polygon points="160,122 198,160 160,198 122,160" fill="#e0aaff" opacity="0.55"/>
+
+    <!-- Brasão Losangular Direito (Chama de Minos & Estige) -->
+    <polygon points="1040,64 1136,160 1040,256 944,160" fill="#1a0b10" stroke="#d4af37" stroke-width="3"/>
+    <polygon points="1040,78 1122,160 1040,242 958,160" fill="#3d1018" stroke="#ff4500" stroke-width="1.6"/>
+    <polygon points="1040,106 1094,160 1040,214 986,160" fill="#9e1b1b" stroke="#f6d365" stroke-width="2"/>
+    <circle cx="1040" cy="160" r="22" fill="#f6d365" opacity="0.85"/>
+    <circle cx="1040" cy="160" r="13" fill="#1a0b10"/>
+
+    <!-- Constelação de Filigrana Central -->
+    <line x1="290" y1="160" x2="910" y2="160" stroke="url(#goldBorder)" stroke-width="1.5" opacity="0.35"/>
+    <polygon points="600,48 618,66 600,84 582,66" fill="#d9381e" stroke="#f6d365" stroke-width="1.5"/>
+    <polygon points="600,236 618,254 600,272 582,254" fill="#a020f0" stroke="#f6d365" stroke-width="1.5"/>
+  </g>
+</svg>

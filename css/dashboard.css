@@ -2033,56 +2033,154 @@ img.achievement-card__art.has-art {
   display: none !important;
 }
 
-/* Ferramentas do Mestre — abas + painéis */
+/* Ferramentas do Mestre — Command Center Trono de Hades */
 .master-tools {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 0.85rem;
-  margin: 0 0 1.25rem;
-  padding: 0.85rem 1.1rem 1.05rem;
+  gap: 1.15rem;
+  margin: 0 0 1.65rem;
+  padding: 1.25rem 1.35rem 1.45rem;
   max-width: 1320px;
-  background: linear-gradient(180deg, rgba(74, 0, 0, 0.55), rgba(18, 12, 20, 0.92));
-  border: 1px solid rgba(194, 53, 72, 0.55);
-  outline: 1px solid rgba(207, 167, 89, 0.35);
-  outline-offset: 2px;
-  box-shadow: inset 0 0 28px rgba(194, 53, 72, 0.12), 0 8px 28px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, rgba(58, 10, 18, 0.72), rgba(14, 10, 18, 0.96));
+  border: 2px solid var(--hades-gold-dark);
+  outline: 1px solid rgba(207, 167, 89, 0.45);
+  outline-offset: 3px;
+  box-shadow: inset 0 0 42px rgba(194, 53, 72, 0.16), 0 16px 42px rgba(0, 0, 0, 0.65);
   animation: panelEnter 450ms cubic-bezier(0.22, 0.8, 0.32, 1) both;
+}
+
+.master-tools__throne-banner {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid rgba(207, 167, 89, 0.42);
+  background-color: #120912;
+  background-image:
+    linear-gradient(90deg, rgba(13, 8, 16, 0.92) 0%, rgba(18, 10, 22, 0.78) 55%, rgba(13, 8, 16, 0.92) 100%),
+    url("../assets/ui/hades/banners/admin-throne-banner.webp");
+  background-image:
+    linear-gradient(90deg, rgba(13, 8, 16, 0.92) 0%, rgba(18, 10, 22, 0.78) 55%, rgba(13, 8, 16, 0.92) 100%),
+    image-set(
+      url("../assets/ui/hades/banners/admin-throne-banner@1x.webp") 1x,
+      url("../assets/ui/hades/banners/admin-throne-banner@2x.webp") 2x
+    );
+  background-size: cover;
+  background-position: center;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, 0.75);
+}
+
+.master-tools__throne-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: 46rem;
 }
 
 .master-tools__label {
   margin: 0;
   font-family: var(--font-title);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--hades-gold-bright);
 }
 
+.master-tools__throne-title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: clamp(1.05rem, 1.9vw, 1.38rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hades-text);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.85);
+}
+
+.master-tools__throne-sub {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--hades-text-dim);
+}
+
+.master-tools__throne-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.master-tools__refresh-btn {
+  padding: 0.48rem 0.85rem;
+  font-size: 0.62rem;
+}
+
+/* Grid de 4 KPIs estilo Boon Screen do Hades */
+.master-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.master-kpi-card {
+  padding: 0.9rem 1rem;
+  align-items: center;
+}
+
+.master-kpi-card__value {
+  margin: 0.1rem 0 0.2rem;
+  font-family: var(--font-title);
+  font-size: 1.18rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--hades-gold-bright);
+}
+
+.master-kpi-card[data-rarity="epic"] {
+  border-color: rgba(168, 85, 247, 0.45);
+}
+
+.master-kpi-card[data-rarity="styx"] {
+  border-color: rgba(45, 212, 191, 0.45);
+}
+
+.master-kpi-card[data-rarity="heroic"] {
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+/* Abas trapezoidais estilo Codex do Hades */
 .master-tools__tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem;
+  gap: 0.45rem;
+  border-bottom: 1px solid rgba(207, 167, 89, 0.32);
+  padding-bottom: 0.45rem;
 }
 
 .master-tools__tab {
-  padding: 0.5rem 0.85rem;
+  position: relative;
+  padding: 0.55rem 1rem;
   font-family: var(--font-title);
-  font-size: 0.62rem;
+  font-size: 0.64rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: var(--hades-gold-bright);
-  background: transparent;
+  background: rgba(16, 12, 22, 0.85);
   border: 1px solid var(--hades-gold-dark);
+  clip-path: polygon(8px 0, calc(100% - 8px) 0, 100% 100%, 0 100%);
   cursor: pointer;
-  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
 .master-tools__tab:hover {
   border-color: var(--hades-gold);
-  background: rgba(207, 167, 89, 0.1);
+  background: rgba(207, 167, 89, 0.14);
 }
 
 .master-tools__tab.is-active {
@@ -2100,8 +2198,8 @@ img.achievement-card__art.has-art {
 .master-tools__panel {
   display: none;
   flex-direction: column;
-  gap: 0.75rem;
-  padding-top: 0.15rem;
+  gap: 0.9rem;
+  padding-top: 0.2rem;
 }
 
 .master-tools__panel.is-active {
@@ -2114,7 +2212,7 @@ img.achievement-card__art.has-art {
 
 .master-tools__panel-lead {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   color: var(--hades-text-dim);
   font-style: italic;
 }
@@ -2122,7 +2220,370 @@ img.achievement-card__art.has-art {
 .master-tools__actions {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+/* Painel 1: Forja Rápida + Códigos Ativos */
+.master-forge-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.master-forge {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1rem 1.15rem;
+}
+
+.master-forge__head,
+.master-active-codes__head,
+.master-audit-box__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+}
+
+.master-forge__title {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.master-forge__controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.master-forge__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1 1 13rem;
+  font-size: 0.82rem;
+  color: var(--hades-text-dim);
+}
+
+.master-forge__field--narrow {
+  flex: 0 1 9rem;
+}
+
+.master-forge__check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: rgba(10, 8, 14, 0.75);
+  font-size: 0.85rem;
+  color: var(--hades-text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.master-forge__check input {
+  accent-color: var(--hades-gold);
+}
+
+.master-forge__result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--hades-gold);
+  background: linear-gradient(90deg, rgba(207, 167, 89, 0.16), rgba(45, 212, 191, 0.1));
+  box-shadow: inset 0 0 18px rgba(207, 167, 89, 0.15);
+}
+
+.master-forge__result[hidden] {
+  display: none !important;
+}
+
+.master-forge__result-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.master-forge__result-eyebrow {
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--hades-text-dim);
+}
+
+.master-forge__result-code {
+  font-family: var(--font-title);
+  font-size: 1.45rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  color: var(--hades-gold-bright);
+  text-shadow: 0 0 14px rgba(207, 167, 89, 0.55);
+}
+
+.master-active-codes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1rem 1.15rem;
+}
+
+.master-active-codes__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  max-height: 11.5rem;
+  overflow-y: auto;
+}
+
+.master-active-codes__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(207, 167, 89, 0.28);
+  background: rgba(8, 6, 12, 0.75);
+}
+
+.master-active-codes__code {
+  font-family: var(--font-title);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--hades-gold-bright);
+}
+
+.master-active-codes__meta {
+  font-size: 0.8rem;
+  color: var(--hades-text-dim);
+}
+
+.master-active-codes__empty,
+.master-audit-list__empty {
+  font-size: 0.88rem;
+  color: var(--hades-text-dim);
+  font-style: italic;
+  padding: 0.35rem 0;
+}
+
+/* Painel 2: Aulas & Provação */
+.master-aulas-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.master-prova-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  padding: 0.85rem 1.1rem;
+}
+
+.master-prova-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.master-prova-bar__eyebrow {
+  font-family: var(--font-title);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--hades-gold);
+}
+
+.master-prova-bar__state {
+  font-family: var(--font-title);
+  font-size: 0.95rem;
+  color: var(--hades-gold-bright);
+}
+
+.master-prova-bar__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.master-prova-bar__buttons .btn-gold.is-active {
+  color: #1a1208;
+  background: linear-gradient(180deg, var(--hades-gold-bright), var(--hades-gold));
+  border-color: var(--hades-gold-dark);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.master-lessons-matrix {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.master-lesson-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(207, 167, 89, 0.32);
+  background: rgba(12, 9, 18, 0.88);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.master-lesson-tile.is-open {
+  border-color: rgba(45, 212, 191, 0.48);
+  box-shadow: inset 0 0 18px rgba(45, 212, 191, 0.08);
+}
+
+.master-lesson-tile.is-sealed {
+  border-color: rgba(194, 53, 72, 0.4);
+  background: rgba(18, 10, 16, 0.82);
+}
+
+.master-lesson-tile__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.master-lesson-tile__num {
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright);
+}
+
+.master-lesson-tile__title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 600;
+  line-height: 1.28;
+  color: var(--hades-text);
+}
+
+.master-lesson-tile__stats {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--hades-text-dim);
+}
+
+.master-lesson-tile__btn {
+  width: 100%;
+  padding: 0.42rem 0.6rem !important;
+  font-size: 0.58rem !important;
+}
+
+/* Painel 4: Resumo de Almas */
+.master-souls-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.master-souls-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: rgba(10, 8, 15, 0.8);
+  font-size: 0.84rem;
+  color: var(--hades-text);
+}
+
+.master-souls-pill strong {
+  font-family: var(--font-title);
+  color: var(--hades-gold-bright);
+}
+
+/* Painel 5: Crônica de Auditoria */
+.master-audit-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.master-audit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.master-audit-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 0.5rem;
+  padding: 0.42rem 0.65rem;
+  border-left: 2px solid var(--hades-gold);
+  background: rgba(8, 6, 12, 0.72);
+  font-size: 0.84rem;
+}
+
+.master-audit-item__main {
+  color: var(--hades-text);
+}
+
+.master-audit-item__main strong {
+  font-family: var(--font-title);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  color: var(--hades-gold-bright);
+}
+
+.master-audit-item__time {
+  font-size: 0.76rem;
+  color: var(--hades-text-dim);
+}
+
+@media (max-width: 1120px) {
+  .master-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .master-lessons-matrix {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .master-forge-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .master-kpis,
+  .master-lessons-matrix {
+    grid-template-columns: 1fr;
+  }
 }
 
 .master-tools__mailer-status {

@@ -4,6 +4,8 @@
    Incluir ANTES de app-shell.css.
    ============================================================ */
 
+@import url("./hades-components.css");
+
 :root {
   --hades-bg: #0d0a10;
   --hades-bg-alt: #14101a;

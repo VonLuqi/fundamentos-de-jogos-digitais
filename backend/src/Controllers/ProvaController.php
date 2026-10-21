@@ -253,12 +253,11 @@ final class ProvaController
                 $nextSummary = ProvaService::bumpIntegritySummary($attempt['integrity_summary'] ?? [], $eventType, $atIso);
 
                 $insEv = $pdo->prepare(
-                    'INSERT INTO prova_integrity_events (attempt_id, user_id, event_type, meta, created_at)
-                     VALUES (:aid, :uid, :et, :meta, :now)'
+                    'INSERT INTO prova_integrity_events (attempt_id, event_type, meta, created_at)
+                     VALUES (:aid, :et, :meta, :now)'
                 );
                 $insEv->execute([
                     ':aid' => $attempt['id'],
-                    ':uid' => (int) $user['id'],
                     ':et' => $eventType,
                     ':meta' => json_encode((object) $meta, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
                     ':now' => $nowSql,

@@ -23,9 +23,7 @@ final class ProgressController
             Http::error(405, 'Método não permitido');
         }
 
-        $token = $method === 'GET'
-            ? (string) (Http::query('token') ?? '')
-            : (string) (Http::body()['token'] ?? '');
+        $token = SessionService::extractRequestToken() ?? '';
 
         $user = SessionService::loadUserBySessionToken($token);
         if (!$user) {
@@ -147,6 +145,10 @@ final class ProgressController
                 RedeemLessonsService::underworldRedeem($user, $userId, $body);
             case 'listUsers':
                 LeaderboardAdminService::listUsers($user);
+            case 'adminOverview':
+                LeaderboardAdminService::adminOverview($user, $body);
+            case 'adminAuditLog':
+                LeaderboardAdminService::adminAuditLog($user, $body);
             case 'adminUpdateProfile':
                 LeaderboardAdminService::adminUpdateProfile($user, $body, $userId);
             case 'adminAdjustXp':

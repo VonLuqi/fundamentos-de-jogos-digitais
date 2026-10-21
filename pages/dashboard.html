@@ -105,17 +105,113 @@
         </div>
       </header>
 
-      <div class="ornate-divider" aria-hidden="true">
-        <span class="ornate-divider__line"></span>
-        <span class="ornate-divider__gem">◆</span>
-        <span class="ornate-divider__line"></span>
+      <div class="ornate-divider hades-svg-divider" aria-hidden="true">
+        <img
+          src="../assets/ui/hades/dividers/divider-laurel-skull.svg"
+          alt=""
+          width="680"
+          height="36"
+          loading="eager"
+          decoding="async"
+        />
       </div>
 
       <main class="app-shell__content dashboard-shell__content" aria-labelledby="dashboard-page-title">
 
-        <!-- Ferramentas do Mestre — abas (somente admin) -->
-        <section class="master-tools" id="master-tools" data-admin-only hidden aria-label="Ferramentas do Mestre">
-          <p class="master-tools__label">Ferramentas do Mestre</p>
+        <!-- Ferramentas do Mestre — Command Center Trono de Hades (somente admin) -->
+        <section class="master-tools hades-mirror-frame" id="master-tools" data-admin-only hidden aria-label="Ferramentas do Mestre">
+          <header class="master-tools__throne-banner">
+            <div class="master-tools__throne-copy">
+              <p class="master-tools__label hades-crest-header">Trono de Hades · Central de Comando do Mestre</p>
+              <h2 class="master-tools__throne-title">Governo do Submundo &amp; Telemetria da Turma</h2>
+              <p class="master-tools__throne-sub">
+                Controle instantâneo sobre ofertas do Estige, portões de aula, Véu do Acheron, Provação de Minos e auditoria.
+              </p>
+            </div>
+            <div class="master-tools__throne-actions">
+              <span class="hades-rarity-badge hades-rarity-badge--styx" id="master-live-status">Sincronizando…</span>
+              <button class="btn-gold btn-gold--ghost master-tools__refresh-btn" type="button" id="btn-master-refresh" title="Atualizar telemetria do Trono">
+                ↻ Atualizar Trono
+              </button>
+            </div>
+          </header>
+
+          <!-- 4 KPI Boon Cards com Progress Rings SVG e Boon Tokens losangulares -->
+          <div class="master-kpis" id="master-kpis" aria-label="Indicadores do Domínio">
+            <!-- KPI 1: Almas & Selos -->
+            <article class="hades-boon-card master-kpi-card" data-rarity="epic">
+              <div class="hades-boon-token">
+                <img src="../assets/ui/hades/icons/icon-mirror-night.svg" alt="" width="40" height="40" loading="lazy" />
+              </div>
+              <div class="hades-boon-card__body">
+                <div class="hades-boon-card__header">
+                  <h3 class="hades-boon-card__title">Almas no Domínio</h3>
+                  <span class="hades-rarity-badge hades-rarity-badge--epic">Espelho</span>
+                </div>
+                <p class="master-kpi-card__value" id="kpi-souls-total">— Almas</p>
+                <p class="hades-boon-card__desc" id="kpi-souls-turmas">Consultando turmas TCG01 e TCG02…</p>
+              </div>
+              <div class="hades-progress-ring" title="Percentual de almas com Selo do Mensageiro verificado">
+                <svg viewBox="0 0 56 56" aria-hidden="true">
+                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23"></circle>
+                  <circle class="hades-progress-ring__fill" id="kpi-souls-ring" cx="28" cy="28" r="23" style="--ring-offset: 144.51;"></circle>
+                </svg>
+                <span class="hades-progress-ring__label" id="kpi-souls-pct">0%</span>
+              </div>
+            </article>
+
+            <!-- KPI 2: Trilha & GDDs -->
+            <article class="hades-boon-card master-kpi-card" data-rarity="gold">
+              <div class="hades-boon-token">
+                <img src="../assets/ui/hades/icons/icon-grimoire-quill.svg" alt="" width="40" height="40" loading="lazy" />
+              </div>
+              <div class="hades-boon-card__body">
+                <div class="hades-boon-card__header">
+                  <h3 class="hades-boon-card__title">Trilha &amp; GDDs</h3>
+                  <span class="hades-rarity-badge hades-rarity-badge--gold">Códice</span>
+                </div>
+                <p class="master-kpi-card__value" id="kpi-lessons-open">— / 8 Aulas</p>
+                <p class="hades-boon-card__desc" id="kpi-lessons-gdds">Carregando entregas e média de XP…</p>
+              </div>
+              <div class="hades-progress-ring" title="Percentual de aulas abertas na Trilha">
+                <svg viewBox="0 0 56 56" aria-hidden="true">
+                  <circle class="hades-progress-ring__track" cx="28" cy="28" r="23"></circle>
+                  <circle class="hades-progress-ring__fill" id="kpi-lessons-ring" cx="28" cy="28" r="23" style="--ring-offset: 144.51;"></circle>
+                </svg>
+                <span class="hades-progress-ring__label" id="kpi-lessons-pct">0%</span>
+              </div>
+            </article>
+
+            <!-- KPI 3: Oferendas & Acheron -->
+            <article class="hades-boon-card master-kpi-card" data-rarity="styx">
+              <div class="hades-boon-token">
+                <img src="../assets/ui/hades/icons/icon-styx-coin.svg" alt="" width="40" height="40" loading="lazy" />
+              </div>
+              <div class="hades-boon-card__body">
+                <div class="hades-boon-card__header">
+                  <h3 class="hades-boon-card__title">Estige &amp; Acheron</h3>
+                  <span class="hades-rarity-badge hades-rarity-badge--styx" id="kpi-acheron-badge">Estige</span>
+                </div>
+                <p class="master-kpi-card__value" id="kpi-codes-active">0 Oferendas</p>
+                <p class="hades-boon-card__desc" id="kpi-acheron-summary">Verificando códigos ativos e Estelas…</p>
+              </div>
+            </article>
+
+            <!-- KPI 4: Provação de Minos -->
+            <article class="hades-boon-card master-kpi-card" data-rarity="heroic">
+              <div class="hades-boon-token">
+                <img src="../assets/ui/hades/icons/icon-minos-scales.svg" alt="" width="40" height="40" loading="lazy" />
+              </div>
+              <div class="hades-boon-card__body">
+                <div class="hades-boon-card__header">
+                  <h3 class="hades-boon-card__title">Provação Módulo 1</h3>
+                  <span class="hades-rarity-badge hades-rarity-badge--heroic" id="kpi-prova-badge">Fechada</span>
+                </div>
+                <p class="master-kpi-card__value" id="kpi-prova-gate">Portão Selado</p>
+                <p class="hades-boon-card__desc" id="kpi-prova-counts">Consultando tentativas e recursos…</p>
+              </div>
+            </article>
+          </div>
 
           <div class="master-tools__tabs" role="tablist" aria-label="Categorias das ferramentas">
             <button
@@ -126,17 +222,7 @@
               data-master-tab="codigos"
               aria-selected="true"
               aria-controls="master-panel-codigos"
-            >Códigos</button>
-            <button
-              class="master-tools__tab"
-              type="button"
-              role="tab"
-              id="master-tab-despertar"
-              data-master-tab="despertar"
-              aria-selected="false"
-              aria-controls="master-panel-despertar"
-              tabindex="-1"
-            >Despertar</button>
+            >Códigos &amp; Forja</button>
             <button
               class="master-tools__tab"
               type="button"
@@ -146,7 +232,17 @@
               aria-selected="false"
               aria-controls="master-panel-aulas"
               tabindex="-1"
-            >Aulas e Prova</button>
+            >Aulas &amp; Prova</button>
+            <button
+              class="master-tools__tab"
+              type="button"
+              role="tab"
+              id="master-tab-despertar"
+              data-master-tab="despertar"
+              aria-selected="false"
+              aria-controls="master-panel-despertar"
+              tabindex="-1"
+            >Acheron &amp; Véu</button>
             <button
               class="master-tools__tab"
               type="button"
@@ -156,7 +252,7 @@
               aria-selected="false"
               aria-controls="master-panel-relatorios"
               tabindex="-1"
-            >Relatórios</button>
+            >Almas &amp; Grimórios</button>
             <button
               class="master-tools__tab"
               type="button"
@@ -166,9 +262,10 @@
               aria-selected="false"
               aria-controls="master-panel-sistema"
               tabindex="-1"
-            >Sistema</button>
+            >Sistema &amp; Crônica</button>
           </div>
 
+          <!-- PAINEL 1: FORJA RÁPIDA DE OFERENDAS + CÓDIGOS ATIVOS -->
           <div
             class="master-tools__panel is-active"
             id="master-panel-codigos"
@@ -176,16 +273,132 @@
             aria-labelledby="master-tab-codigos"
             data-master-panel="codigos"
           >
-            <p class="master-tools__panel-lead">
-              Gere códigos de oferenda com duração e modo (turma ou uso único).
-            </p>
-            <div class="master-tools__actions">
-              <a class="btn-gold btn-gold--pulse" id="btn-generate-codes" href="./codigos.html">
-                Abrir Códigos de Acesso
-              </a>
+            <div class="master-forge-grid">
+              <form class="master-forge hades-meander-box" id="master-forge-form" novalidate>
+                <div class="master-forge__head">
+                  <div>
+                    <h3 class="master-forge__title">Forja Rápida de Oferenda</h3>
+                    <p class="master-tools__panel-lead">
+                      Cunhe um código de 7 caracteres sem sair do Painel ou abra o Salão completo.
+                    </p>
+                  </div>
+                  <a class="btn-gold btn-gold--ghost" id="btn-generate-codes" href="./codigos.html">
+                    Salão dos Códigos ↗
+                  </a>
+                </div>
+
+                <div class="master-forge__controls">
+                  <label class="master-forge__field" for="master-forge-lesson">
+                    <span>Aula da Trilha</span>
+                    <select class="master-tools__pause-input" id="master-forge-lesson" name="lessonId">
+                      <option value="aula1">Aula 01 — Círculo Mágico e Godot 4</option>
+                      <option value="aula2">Aula 02 — Glossário e Player na Tela</option>
+                      <option value="aula3">Aula 03 — Homo Ludens e Pixel Art</option>
+                      <option value="aula4">Aula 04 — Plataformas e Restrições</option>
+                      <option value="aula5">Aula 05 — ClassInd, IARC e Design Saudável</option>
+                      <option value="aula6">Aula 06 — Mercado, IP e Monetização Ética</option>
+                      <option value="aula7">Aula 07 — Papéis, Workflow e Duplas</option>
+                      <option value="aula8">Aula 08 — Perfis Quantic Foundry</option>
+                    </select>
+                  </label>
+
+                  <label class="master-forge__field master-forge__field--narrow" for="master-forge-ttl">
+                    <span>Validade</span>
+                    <select class="master-tools__pause-input" id="master-forge-ttl" name="ttlMinutes">
+                      <option value="5">5 minutos</option>
+                      <option value="10">10 minutos</option>
+                      <option value="20" selected>20 minutos</option>
+                      <option value="30">30 minutos</option>
+                      <option value="45">45 minutos</option>
+                      <option value="60">60 minutos</option>
+                      <option value="90">90 minutos</option>
+                      <option value="120">120 minutos</option>
+                    </select>
+                  </label>
+
+                  <label class="master-forge__check" for="master-forge-single">
+                    <input type="checkbox" id="master-forge-single" name="singleUse" />
+                    <span>Uso único (1 herói)</span>
+                  </label>
+
+                  <button class="btn-gold btn-gold--pulse" type="submit" id="master-forge-submit">
+                    Cunhar Oferenda
+                  </button>
+                </div>
+
+                <div class="master-forge__result" id="master-forge-result" hidden aria-live="polite">
+                  <div class="master-forge__result-main">
+                    <span class="master-forge__result-eyebrow" id="master-forge-result-meta">Oferenda Cunhada</span>
+                    <strong class="master-forge__result-code" id="master-forge-result-code">-------</strong>
+                  </div>
+                  <button class="btn-gold" type="button" id="master-forge-copy">
+                    Copiar Código
+                  </button>
+                </div>
+              </form>
+
+              <div class="master-active-codes hades-codex-box">
+                <div class="master-active-codes__head">
+                  <h3 class="master-forge__title">Oferendas Ativas no Estige</h3>
+                  <span class="hades-rarity-badge hades-rarity-badge--gold" id="master-active-codes-badge">0 ativas</span>
+                </div>
+                <ul class="master-active-codes__list" id="master-active-codes-list" aria-live="polite">
+                  <li class="master-active-codes__empty">Nenhum código ativo no momento.</li>
+                </ul>
+              </div>
             </div>
           </div>
 
+          <!-- PAINEL 2: AULAS & PROVAÇÃO -->
+          <div
+            class="master-tools__panel"
+            id="master-panel-aulas"
+            role="tabpanel"
+            aria-labelledby="master-tab-aulas"
+            data-master-panel="aulas"
+            hidden
+          >
+            <div class="master-aulas-header">
+              <p class="master-tools__panel-lead">
+                Abra ou sele cada aula em 1 clique e controle o portão da Provação Módulo 1 por turma.
+              </p>
+              <div class="master-tools__actions">
+                <button class="btn-gold btn-gold--ghost" type="button" id="btn-manage-lessons">
+                  Ver Trilha Completa ↗
+                </button>
+                <button class="btn-gold btn-gold--ghost" type="button" id="btn-prova-modulo1">
+                  Modal da Prova
+                </button>
+                <a class="btn-gold btn-gold--ghost" href="./prova-admin.html">
+                  Hub de Correção da Prova ↗
+                </a>
+              </div>
+            </div>
+
+            <!-- Controle direto do Gate da Provação -->
+            <div class="master-prova-bar hades-meander-box" aria-label="Portão da Provação Módulo 1">
+              <div class="master-prova-bar__info">
+                <span class="master-prova-bar__eyebrow">Portão de Minos · Provação Módulo 1</span>
+                <strong class="master-prova-bar__state" id="master-prova-inline-status">Verificando portão…</strong>
+              </div>
+              <div class="master-prova-bar__buttons" role="group" aria-label="Modo do Portão da Prova">
+                <button class="btn-gold btn-gold--ghost" type="button" data-inline-prova-mode="closed">
+                  Selar Prova (Fechada)
+                </button>
+                <button class="btn-gold btn-gold--ghost" type="button" data-inline-prova-mode="TCG01">
+                  Liberar Só TCG01
+                </button>
+                <button class="btn-gold btn-gold--ghost" type="button" data-inline-prova-mode="TCG02">
+                  Liberar Só TCG02
+                </button>
+              </div>
+            </div>
+
+            <!-- Matriz rápida das 8 aulas -->
+            <div class="master-lessons-matrix" id="master-lessons-matrix" aria-label="Portões das Aulas"></div>
+          </div>
+
+          <!-- PAINEL 3: ACHERON & VÉU DA AULA -->
           <div
             class="master-tools__panel"
             id="master-panel-despertar"
@@ -195,7 +408,7 @@
             hidden
           >
             <p class="master-tools__panel-lead">
-              Controle o Acheron, limpe Estelas antecipadas e pause a sala com o Véu.
+              Controle o Acheron, limpe Estelas antecipadas e pause a sala com o Véu de Nyx durante a explicação.
             </p>
             <div class="master-tools__actions">
               <button class="btn-gold btn-gold--ghost" type="button" id="btn-toggle-acheron" aria-pressed="false">
@@ -204,10 +417,13 @@
               <button class="btn-gold btn-gold--ghost" type="button" id="btn-reset-despertar">
                 Limpar Estelas antecipadas
               </button>
+              <a class="btn-gold btn-gold--ghost" href="./despertar.html">
+                Ir ao Acheron ↗
+              </a>
             </div>
 
             <div class="master-tools__pause" id="master-despertar-pause" aria-label="Véu da Aula">
-              <p class="master-tools__pause-heading">Véu da Aula</p>
+              <p class="master-tools__pause-heading">Véu da Aula (Nyx)</p>
               <p class="master-tools__pause-hint">
                 Pausa temporária durante a explicação — o progresso dos alunos permanece na Estela.
                 Separado de “Limpar Estelas” (destrutivo).
@@ -266,27 +482,7 @@
             </div>
           </div>
 
-          <div
-            class="master-tools__panel"
-            id="master-panel-aulas"
-            role="tabpanel"
-            aria-labelledby="master-tab-aulas"
-            data-master-panel="aulas"
-            hidden
-          >
-            <p class="master-tools__panel-lead">
-              Libere aulas na Trilha e abra ou feche a Provação do módulo.
-            </p>
-            <div class="master-tools__actions">
-              <button class="btn-gold btn-gold--ghost" type="button" id="btn-manage-lessons">
-                Liberar Aulas na Trilha
-              </button>
-              <button class="btn-gold btn-gold--ghost" type="button" id="btn-prova-modulo1">
-                Prova Módulo 1
-              </button>
-            </div>
-          </div>
-
+          <!-- PAINEL 4: ALMAS & GRIMÓRIOS -->
           <div
             class="master-tools__panel"
             id="master-panel-relatorios"
@@ -296,18 +492,23 @@
             hidden
           >
             <p class="master-tools__panel-lead">
-              Consulte almas, atividades e grimórios sob vigília.
+              Inspecione almas por turma, edite XP/aulas, emita códigos de recuperação no Espelho e vigie Grimórios.
             </p>
+            <div class="master-souls-summary" id="master-souls-summary"></div>
             <div class="master-tools__actions">
-              <button class="btn-gold btn-gold--ghost" type="button" id="btn-list-souls">
-                Ver Almas Registradas
+              <button class="btn-gold btn-gold--pulse" type="button" id="btn-list-souls">
+                Abrir Almas Registradas ↗
               </button>
               <button class="btn-gold btn-gold--ghost" type="button" id="btn-vigilancia">
-                Grimórios sob Vigília
+                Grimórios sob Vigília ↗
               </button>
+              <a class="btn-gold btn-gold--ghost" href="./ranking.html">
+                Placar do Domínio ↗
+              </a>
             </div>
           </div>
 
+          <!-- PAINEL 5: SISTEMA, HERMES & CRÔNICA DE AUDITORIA -->
           <div
             class="master-tools__panel"
             id="master-panel-sistema"
@@ -317,17 +518,27 @@
             hidden
           >
             <p class="master-tools__panel-lead">
-              Diagnóstico do Mensageiro e legado do Caronte (prefira recuperação no Espelho).
+              Diagnóstico do Mensageiro (Hermes), senha legada do Caronte e Crônica de Auditoria do Mestre.
             </p>
             <div class="master-tools__actions">
               <button class="btn-gold btn-gold--ghost" type="button" id="btn-probe-mailer">
-                Testar o Mensageiro
+                Testar o Mensageiro (Hermes)
               </button>
               <button class="btn-gold btn-gold--ghost" type="button" id="btn-rotate-caronte" title="Legado — prefira Código de Recuperação no Espelho">
                 Senha do Caronte (legado)
               </button>
             </div>
             <p class="master-tools__mailer-status" id="master-mailer-status" role="status" aria-live="polite" hidden></p>
+
+            <div class="master-audit-box hades-codex-box">
+              <div class="master-audit-box__head">
+                <h3 class="master-forge__title">Crônica de Auditoria do Trono</h3>
+                <span class="hades-rarity-badge hades-rarity-badge--epic" id="master-audit-count">Últimos registros</span>
+              </div>
+              <ul class="master-audit-list" id="master-audit-list" aria-live="polite">
+                <li class="master-audit-list__empty">Carregando crônica de ações administrativas…</li>
+              </ul>
+            </div>
           </div>
         </section>
 
@@ -335,7 +546,7 @@
 
           <!-- ========== TRILHO ESQUERDO: identidade + previews ========== -->
           <div class="dashboard-rail">
-            <aside class="profile-panel" id="profile-panel" aria-label="Perfil do aluno">
+            <aside class="profile-panel hades-mirror-frame" id="profile-panel" aria-label="Perfil do aluno">
 
               <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
                 <span class="avatar-frame__crown" aria-hidden="true">♛</span>
@@ -478,7 +689,7 @@
           <section class="hall-content" aria-label="Progresso e conquistas">
 
       <!-- ========== ALTAR: OFERENDA AO ESTIGE ========== -->
-      <article class="altar-block">
+      <article class="altar-block hades-mirror-frame">
         <h3 class="block-title">Oferenda ao Estige <span class="block-title__sub">(Resgate de Código)</span></h3>
         <p class="altar-block__intro">
           O Mestre passa um <strong>código de 7 caracteres</strong> ao fim da aula.

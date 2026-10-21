@@ -1,0 +1,55 @@
+.path {
+  width: 1440px;
+  height: 600px;
+  background-image: linear-gradient(112.62deg, #09060e 0%, #180d22 45%, #2e0e19 80%, #0b0710 100%);
+}
+
+.path-2 {
+  width: 1440px;
+  height: 600px;
+  background-image: radial-gradient(ellipse 662.4px 276px at 720px 270px, rgba(217, 56, 30, 0.26) 0%, rgba(160, 32, 240, 0.12) 55%, rgba(9, 6, 14, 0) 100%);
+}
+
+.path-3 {
+  width: 1304px;
+  height: 464px;
+  border: 2px solid #d4af37;
+  opacity: 0.65;
+}
+
+.path-4 {
+  width: 1284px;
+  height: 444px;
+  border: 1.2px solid #8b1a1a;
+  opacity: 0.6;
+}
+
+.path-5 {
+  width: 312px;
+  height: 320px;
+  background-color: #140c1f;
+  border: 2.4px solid #d4af37;
+  opacity: 0.75;
+}
+
+.path-6 {
+  width: 312px;
+  height: 320px;
+  background-color: #1c0c14;
+  border: 2.4px solid #d4af37;
+  opacity: 0.75;
+}
+
+.path-7 {
+  width: 380px;
+  height: 380px;
+  border: 1.5px solid #d4af37;
+  opacity: 0.3;
+}
+
+.path-8 {
+  width: 408px;
+  height: 408px;
+  border: 1.6px solid #ff4500;
+  opacity: 0.35;
+}

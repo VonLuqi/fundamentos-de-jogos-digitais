@@ -1652,12 +1652,6 @@ final class DespertarService
             }
         }
 
-        // Também mantém a coluna espelho `juizo_best` sincronizada se `juizo_best_streak` vier no patch
-        if (array_key_exists('juizo_best_streak', $patch)) {
-            $sets[] = '`juizo_best` = :p_juizo_best_mirror';
-            $params[':p_juizo_best_mirror'] = (int) $patch['juizo_best_streak'];
-        }
-
         if ($sets !== []) {
             $sql = 'UPDATE `despertar_states` SET ' . implode(', ', $sets) . ' WHERE `user_id` = :uid';
             $upd = $pdo->prepare($sql);

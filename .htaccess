@@ -82,6 +82,10 @@ DirectoryIndex index.html index.php
 
 # Cabeçalhos de Cache e Segurança (compatíveis com raiz ou subdiretório)
 <IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
   # Desativa indexação nas salas secretas do Submundo
   <If "%{REQUEST_URI} =~ m#(?:^|/)(?:pages/)?submundo/#">
     Header set X-Robots-Tag "noindex, nofollow"

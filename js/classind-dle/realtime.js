@@ -1,17 +1,15 @@
 /**
- * Sync live: Supabase Realtime em classind_live_snapshots + fallback poll.
+ * Sync live do ClassInd-dle via HTTP polling (HostGator PHP + MySQL).
  */
 
 'use strict';
 
-import { createBrowserSupabase } from './supabase-browser.js';
-
-const FALLBACK_POLL_MS = 4000;
+const FALLBACK_POLL_MS = 3000;
 
 /**
  * @param {{
  *   roomId: string,
- *   realtime: { url: string, anonKey: string, roomId: string } | null,
+ *   realtime?: { url: string, anonKey: string, roomId: string } | null,
  *   getState: () => Promise<{ state: object }>,
  *   onSnapshot: (payload: object, meta: { source: string }) => void,
  *   onStatus: (status: 'live'|'poll'|'offline'|'connecting', detail?: string) => void,
@@ -19,16 +17,12 @@ const FALLBACK_POLL_MS = 4000;
  */
 export function createRealtimeSync(options) {
   const {
-    roomId,
-    realtime,
     getState,
     onSnapshot,
     onStatus,
   } = options;
 
   let localVersion = 0;
-  let supabase = null;
-  let channel = null;
   let pollTimer = null;
   let stopped = false;
   let mode = 'connecting';
@@ -66,67 +60,12 @@ export function createRealtimeSync(options) {
 
   function startPoll(reason) {
     stopPoll();
-    setMode('poll', reason || 'Fallback polling');
+    setMode('poll', reason || 'Sincronização ativa');
     pollTimer = setInterval(() => {
       if (document.hidden) return;
       resync('poll');
     }, FALLBACK_POLL_MS);
     resync('poll');
-  }
-
-  async function subscribe() {
-    if (!realtime?.url || !realtime?.anonKey) {
-      startPoll('Sem anon key — polling');
-      return;
-    }
-
-    try {
-      setMode('connecting');
-      supabase = await createBrowserSupabase({
-        url: realtime.url,
-        anonKey: realtime.anonKey,
-      });
-
-      channel = supabase
-        .channel(`classind-live:${roomId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'classind_live_snapshots',
-            filter: `room_id=eq.${roomId}`,
-          },
-          (event) => {
-            const row = event?.new || event?.record || null;
-            const payload = row?.payload;
-            if (payload) {
-              if (typeof payload === 'string') {
-                try {
-                  applyPayload(JSON.parse(payload), 'realtime');
-                } catch {
-                  /* ignore */
-                }
-              } else {
-                applyPayload(payload, 'realtime');
-              }
-            }
-          }
-        )
-        .subscribe((status) => {
-          if (stopped) return;
-          if (status === 'SUBSCRIBED') {
-            stopPoll();
-            setMode('live');
-            resync('subscribed');
-          } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            startPoll(`Canal ${status}`);
-          }
-        });
-    } catch (error) {
-      console.warn('[classind-realtime] subscribe falhou', error);
-      startPoll(error?.message || 'Realtime indisponível');
-    }
   }
 
   function onVisibility() {
@@ -139,17 +78,12 @@ export function createRealtimeSync(options) {
   return {
     start() {
       stopped = false;
-      subscribe();
+      startPoll('Sincronização HTTP ativa');
     },
     stop() {
       stopped = true;
       stopPoll();
       document.removeEventListener('visibilitychange', onVisibility);
-      if (channel && supabase) {
-        supabase.removeChannel(channel).catch(() => {});
-      }
-      channel = null;
-      supabase = null;
     },
     bumpLocalVersion(version) {
       const v = Number(version) || 0;

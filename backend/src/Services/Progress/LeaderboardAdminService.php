@@ -7,6 +7,10 @@ use App\Core\AdminAudit;
 use App\Core\Database;
 use App\Core\GameCatalog;
 use App\Core\Http;
+use App\Core\Mailer;
+use App\Services\Despertar\DespertarService;
+use App\Services\Prova\ProvaCatalog;
+use App\Services\Prova\ProvaService;
 use PDO;
 
 /**
@@ -311,10 +315,10 @@ final class LeaderboardAdminService
             $despertarByUser[$uid] = [
                 'souls' => (string) ($row['souls'] ?? '0'),
                 'lifetimeSouls' => (string) ($row['lifetime_souls'] ?? '0'),
-                'totalClicks' => (int) ($stats['totalClicks'] ?? 0),
+                'totalClicks' => (int) ($stats['clicks'] ?? $stats['totalClicks'] ?? 0),
                 'prestigeCount' => (int) ($row['prestige_count'] ?? 0),
                 'juizoBest' => (int) ($row['juizo_best_streak'] ?? 0),
-                'playTimeSec' => (int) ($stats['playTimeSec'] ?? 0),
+                'playTimeSec' => (int) ($stats['playTimeSec'] ?? $stats['play_time_sec'] ?? 0),
                 'updatedAt' => Database::sqlToIso($row['updated_at'] ?? null),
             ];
         }
@@ -691,5 +695,313 @@ final class LeaderboardAdminService
         AdminAudit::record($actor, AdminAudit::ACTIONS['invalidateSessions'], $targetId, []);
 
         Http::json(200, ['ok' => true, 'invalidatedUserId' => $targetId]);
+    }
+
+    /**
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $body
+     */
+    public static function adminAuditLog(array $user, array $body = []): never
+    {
+        ProgressShared::requireAdmin($user);
+        $limit = isset($body['limit']) && is_numeric($body['limit'])
+            ? max(1, min(100, (int) $body['limit']))
+            : 25;
+
+        Http::json(200, [
+            'ok' => true,
+            'events' => self::fetchAuditEvents($limit),
+        ]);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private static function fetchAuditEvents(int $limit = 25): array
+    {
+        $pdo = Database::pdo();
+        $lim = max(1, min(100, $limit));
+        $stmt = $pdo->query(
+            "SELECT
+                `e`.`id`,
+                `e`.`actor_id`,
+                `e`.`target_user_id`,
+                `e`.`action`,
+                `e`.`payload`,
+                `e`.`created_at`,
+                `a`.`username` AS `actor_username`,
+                `a`.`full_name` AS `actor_full_name`,
+                `t`.`username` AS `target_username`,
+                `t`.`full_name` AS `target_full_name`,
+                `t`.`turma` AS `target_turma`
+             FROM `admin_audit_events` `e`
+             LEFT JOIN `users` `a` ON `a`.`id` = `e`.`actor_id`
+             LEFT JOIN `users` `t` ON `t`.`id` = `e`.`target_user_id`
+             ORDER BY `e`.`created_at` DESC
+             LIMIT {$lim}"
+        );
+        $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $out = [];
+        foreach ($rows as $r) {
+            $out[] = [
+                'id' => (int) $r['id'],
+                'action' => (string) $r['action'],
+                'actorId' => (int) $r['actor_id'],
+                'actorUsername' => (string) ($r['actor_username'] ?? 'mestre'),
+                'actorName' => (string) (($r['actor_full_name'] ?? '') ?: ($r['actor_username'] ?? 'Mestre')),
+                'targetUserId' => isset($r['target_user_id']) ? (int) $r['target_user_id'] : null,
+                'targetUsername' => isset($r['target_username']) ? (string) $r['target_username'] : null,
+                'targetName' => isset($r['target_full_name']) || isset($r['target_username'])
+                    ? (string) (($r['target_full_name'] ?? '') ?: ($r['target_username'] ?? ''))
+                    : null,
+                'targetTurma' => isset($r['target_turma']) ? (string) $r['target_turma'] : null,
+                'payload' => Database::decodeJsonObject($r['payload'] ?? null),
+                'createdAt' => Database::sqlToIso($r['created_at'] ?? null),
+            ];
+        }
+        return $out;
+    }
+
+    /**
+     * Telemetria consolidada do Trono do Mestre (`adminOverview`).
+     *
+     * @param array<string, mixed> $user
+     * @param array<string, mixed> $body
+     */
+    public static function adminOverview(array $user, array $body = []): never
+    {
+        ProgressShared::requireAdmin($user);
+        $pdo = Database::pdo();
+        $nowMs = (int) round(microtime(true) * 1000);
+        $nowIso = Database::nowIso($nowMs);
+        $nowSql = Database::nowSql($nowMs);
+
+        // 1. Almas Registradas
+        $uStmt = $pdo->query(
+            'SELECT `id`, `turma`, `role`, `xp`, `completed_lessons`, `email`, `email_verified_at`
+             FROM `users` WHERE `role` = \'student\''
+        );
+        $students = $uStmt ? $uStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $totalStudents = count($students);
+        $byTurma = ['TCG01' => 0, 'TCG02' => 0, 'OUTRA' => 0];
+        $verifiedEmailCount = 0;
+        $pendingEmailCount = 0;
+        $noEmailCount = 0;
+        $xpSum = 0;
+        $maxXp = 0;
+        $completedCountByLesson = [];
+
+        foreach ($students as $st) {
+            $t = strtoupper(trim((string) ($st['turma'] ?? '')));
+            if (isset($byTurma[$t])) {
+                $byTurma[$t]++;
+            } else {
+                $byTurma['OUTRA']++;
+            }
+
+            $email = trim((string) ($st['email'] ?? ''));
+            if ($email === '') {
+                $noEmailCount++;
+            } elseif (!empty($st['email_verified_at'])) {
+                $verifiedEmailCount++;
+            } else {
+                $pendingEmailCount++;
+            }
+
+            $xp = (int) ($st['xp'] ?? 0);
+            $xpSum += $xp;
+            if ($xp > $maxXp) {
+                $maxXp = $xp;
+            }
+
+            $comp = Database::decodeJsonArray($st['completed_lessons'] ?? null);
+            foreach ($comp as $lid) {
+                $lidStr = (string) $lid;
+                $completedCountByLesson[$lidStr] = ($completedCountByLesson[$lidStr] ?? 0) + 1;
+            }
+        }
+
+        // 2. Parágrafos GDD e Visualizações por aula
+        $pStmt = $pdo->query(
+            'SELECT `p`.`lesson_id`, COUNT(*) AS `cnt`
+             FROM `lesson_paragraphs` `p`
+             INNER JOIN `users` `u` ON `u`.`id` = `p`.`user_id` AND `u`.`role` = \'student\'
+             GROUP BY `p`.`lesson_id`'
+        );
+        $paragraphsByLesson = [];
+        $totalActivitiesSubmitted = 0;
+        if ($pStmt) {
+            foreach ($pStmt->fetchAll(PDO::FETCH_ASSOC) as $pr) {
+                $c = (int) ($pr['cnt'] ?? 0);
+                $paragraphsByLesson[(string) $pr['lesson_id']] = $c;
+                $totalActivitiesSubmitted += $c;
+            }
+        }
+
+        $vStmt = $pdo->query(
+            'SELECT `v`.`lesson_id`, COUNT(DISTINCT `v`.`user_id`) AS `viewers`
+             FROM `lesson_views` `v`
+             INNER JOIN `users` `u` ON `u`.`id` = `v`.`user_id` AND `u`.`role` = \'student\'
+             GROUP BY `v`.`lesson_id`'
+        );
+        $viewsByLesson = [];
+        if ($vStmt) {
+            foreach ($vStmt->fetchAll(PDO::FETCH_ASSOC) as $vr) {
+                $viewsByLesson[(string) $vr['lesson_id']] = (int) ($vr['viewers'] ?? 0);
+            }
+        }
+
+        // 3. Gates de Aulas e O Despertar
+        $gStmt = $pdo->query('SELECT `lesson_id`, `gate_key`, `released` FROM `lesson_gates`');
+        $gateRows = $gStmt ? $gStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $gatesMap = [];
+        foreach (array_keys(GameCatalog::LESSON_CATALOG) as $lid) {
+            $gatesMap[$lid] = ProgressShared::defaultGatesForLesson($lid);
+        }
+        $gatesMap['despertar'] = ProgressShared::defaultGatesForLesson('despertar');
+        foreach ($gateRows as $gr) {
+            $lid = (string) ($gr['lesson_id'] ?? '');
+            $gk = (string) ($gr['gate_key'] ?? '');
+            if ($lid !== '' && $gk !== '' && isset($gatesMap[$lid])) {
+                $gatesMap[$lid][$gk] = (bool) $gr['released'];
+            }
+        }
+
+        // 4. Códigos de Oferenda Ativos
+        $cStmt = $pdo->query(
+            'SELECT `code`, `lesson_id`, `lesson_title`, `xp`, `created_at`, `expires_at`, `redeemed_at`, `redeemed_by`, `single_use`
+             FROM `redeem_codes`
+             ORDER BY `created_at` DESC
+             LIMIT 60'
+        );
+        $codeRows = $cStmt ? $cStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $activeCodes = [];
+        $activeCodeByLesson = [];
+        foreach ($codeRows as $cr) {
+            $expIso = !empty($cr['expires_at'])
+                ? (Database::sqlToIso((string) $cr['expires_at']) ?? $nowIso)
+                : Database::nowIso((Database::parseMs((string) ($cr['created_at'] ?? '')) ?? $nowMs) + ProgressShared::CODE_TTL_MINUTES * 60000);
+            $expired = $expIso <= $nowIso;
+            $singleUse = (bool) ($cr['single_use'] ?? false);
+            $used = !empty($cr['redeemed_at']);
+            if (!$expired && !($singleUse && $used)) {
+                $dto = [
+                    'code' => (string) $cr['code'],
+                    'lessonId' => (string) $cr['lesson_id'],
+                    'lessonTitle' => (string) $cr['lesson_title'],
+                    'xp' => (int) ($cr['xp'] ?? 0),
+                    'createdAt' => Database::sqlToIso($cr['created_at'] ?? null),
+                    'expiresAt' => $expIso,
+                    'singleUse' => $singleUse,
+                    'used' => $used,
+                ];
+                $activeCodes[] = $dto;
+                if (!isset($activeCodeByLesson[$dto['lessonId']])) {
+                    $activeCodeByLesson[$dto['lessonId']] = $dto;
+                }
+            }
+        }
+
+        $publishedLessonsCount = 0;
+        $perLessonStats = [];
+        foreach (GameCatalog::LESSON_CATALOG as $lid => $lmeta) {
+            $pub = !empty($gatesMap[$lid]['published']);
+            if ($pub) {
+                $publishedLessonsCount++;
+            }
+            $perLessonStats[] = [
+                'lessonId' => $lid,
+                'title' => $lmeta['lessonTitle'],
+                'xp' => (int) $lmeta['xp'],
+                'published' => $pub,
+                'completedCount' => $completedCountByLesson[$lid] ?? 0,
+                'paragraphCount' => $paragraphsByLesson[$lid] ?? 0,
+                'viewCount' => $viewsByLesson[$lid] ?? 0,
+                'activeCode' => $activeCodeByLesson[$lid] ?? null,
+            ];
+        }
+
+        // 5. Acheron & Sessões
+        $dCountStmt = $pdo->query(
+            'SELECT COUNT(*) FROM `despertar_states` `d`
+             INNER JOIN `users` `u` ON `u`.`id` = `d`.`user_id` AND `u`.`role` = \'student\''
+        );
+        $activeDespertarSouls = $dCountStmt ? (int) $dCountStmt->fetchColumn() : 0;
+
+        $sCountStmt = $pdo->prepare('SELECT COUNT(*) FROM `sessions` WHERE `expires_at` IS NULL OR `expires_at` > :now');
+        $sCountStmt->execute([':now' => $nowSql]);
+        $activeSessionsCount = (int) $sCountStmt->fetchColumn();
+
+        $pauseState = DespertarService::getDespertarPauseState();
+        $pauseDto = DespertarService::pausePublicDto($pauseState, $nowMs);
+
+        // 6. Provação Módulo 1
+        $exam = ProvaService::loadExam(ProvaCatalog::EXAM_ID);
+        $attStmt = $pdo->prepare(
+            'SELECT `status`, `contest_status`, `integrity_summary`
+             FROM `prova_attempts`
+             WHERE `exam_id` = :eid'
+        );
+        $attStmt->execute([':eid' => ProvaCatalog::EXAM_ID]);
+        $attRows = $attStmt->fetchAll(PDO::FETCH_ASSOC);
+        $provaCounts = ProvaService::countAttemptsByStatus($attRows);
+        $openContests = 0;
+        $integrityAlerts = 0;
+        foreach ($attRows as $ar) {
+            if (($ar['contest_status'] ?? '') === 'open') {
+                $openContests++;
+            }
+            $isum = Database::decodeJsonObject($ar['integrity_summary'] ?? null);
+            $blurCount = (int) ($isum['tab_blur'] ?? 0) + (int) ($isum['window_blur'] ?? 0);
+            if ($blurCount >= ProvaService::PROVA_ALERT_BLUR_MIN) {
+                $integrityAlerts++;
+            }
+        }
+        $provaCounts['openContests'] = $openContests;
+        $provaCounts['integrityAlerts'] = $integrityAlerts;
+
+        $totalLessons = count(GameCatalog::LESSON_CATALOG);
+        $sealedPercent = $totalStudents > 0 ? (int) round(($verifiedEmailCount / $totalStudents) * 100) : 0;
+        $publishedPercent = $totalLessons > 0 ? (int) round(($publishedLessonsCount / $totalLessons) * 100) : 0;
+
+        Http::json(200, [
+            'ok' => true,
+            'serverNow' => $nowIso,
+            'kpis' => [
+                'totalStudents' => $totalStudents,
+                'byTurma' => [
+                    'TCG01' => $byTurma['TCG01'],
+                    'TCG02' => $byTurma['TCG02'],
+                ],
+                'verifiedEmailCount' => $verifiedEmailCount,
+                'pendingEmailCount' => $pendingEmailCount,
+                'noEmailCount' => $noEmailCount,
+                'sealedPercent' => $sealedPercent,
+                'avgXp' => $totalStudents > 0 ? (int) round($xpSum / $totalStudents) : 0,
+                'maxXp' => $maxXp,
+                'totalActivitiesSubmitted' => $totalActivitiesSubmitted,
+                'activeDespertarSouls' => $activeDespertarSouls,
+                'activeSessionsCount' => $activeSessionsCount,
+            ],
+            'lessons' => [
+                'gates' => $gatesMap,
+                'publishedCount' => $publishedLessonsCount,
+                'totalLessons' => $totalLessons,
+                'publishedPercent' => $publishedPercent,
+                'perLessonStats' => $perLessonStats,
+            ],
+            'activeCodes' => $activeCodes,
+            'acheron' => [
+                'published' => !empty($gatesMap['despertar']['published']),
+                'pause' => $pauseDto,
+                'soulsInAcheron' => $activeDespertarSouls,
+            ],
+            'prova' => [
+                'exam' => ProvaService::examPublicDto($exam),
+                'counts' => $provaCounts,
+            ],
+            'mailer' => Mailer::getStatus(),
+            'auditLog' => self::fetchAuditEvents(15),
+        ]);
     }
 }

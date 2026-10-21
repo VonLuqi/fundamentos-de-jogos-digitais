@@ -111,18 +111,33 @@ body.game-screen {
 
 .intro-hero {
   padding: 3.5rem 2.5rem;
-  border: 1px solid rgba(207, 167, 89, 0.22);
-  background:
-    radial-gradient(circle at top left, rgba(207, 167, 89, 0.14), transparent 38%),
-    radial-gradient(circle at bottom right, rgba(194, 53, 72, 0.1), transparent 32%),
-    linear-gradient(180deg, rgba(24, 18, 26, 0.94), rgba(14, 10, 16, 0.98));
+  border: 2px solid var(--hades-gold-dark);
+  background-color: #120b16;
+  background-image:
+    linear-gradient(180deg, rgba(16, 11, 20, 0.84), rgba(11, 8, 14, 0.94)),
+    url("../assets/ui/hades/banners/hero-underworld-banner.webp");
+  background-image:
+    linear-gradient(180deg, rgba(16, 11, 20, 0.84), rgba(11, 8, 14, 0.94)),
+    image-set(
+      url("../assets/ui/hades/banners/hero-underworld-banner@1x.webp") 1x,
+      url("../assets/ui/hades/banners/hero-underworld-banner@2x.webp") 2x
+    );
+  background-size: cover;
+  background-position: center;
   box-shadow:
     var(--shadow-panel),
-    inset 0 0 0 1px rgba(242, 213, 154, 0.06),
-    inset 0 0 44px rgba(0, 0, 0, 0.22);
+    inset 0 0 0 1px rgba(242, 213, 154, 0.1),
+    inset 0 0 54px rgba(0, 0, 0, 0.45);
   text-align: center;
   max-width: 860px;
   margin: 0 auto;
+}
+
+.intro-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .intro-hero__eyebrow {

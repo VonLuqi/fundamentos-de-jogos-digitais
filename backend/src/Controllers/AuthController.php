@@ -49,7 +49,7 @@ final class AuthController
         $method = Http::method();
 
         if ($method === 'GET') {
-            $token = Http::query('token');
+            $token = SessionService::extractRequestToken();
             if ($token === null || trim($token) === '') {
                 Http::error(400, 'Token ausente.');
             }
@@ -227,7 +227,7 @@ final class AuthController
             }
 
             case 'logout': {
-                $token = trim((string) ($body['token'] ?? ''));
+                $token = trim((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if ($token !== '') {
                     $del = $pdo->prepare('DELETE FROM `sessions` WHERE `token` = :token');
                     $del->execute([':token' => $token]);
@@ -236,7 +236,7 @@ final class AuthController
             }
 
             case 'requestEmailVerification': {
-                $user = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $user = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$user) {
                     Http::error(401, 'Sessão inválida.');
                 }
@@ -249,7 +249,7 @@ final class AuthController
             }
 
             case 'bindEmail': {
-                $user = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $user = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$user) {
                     Http::error(401, 'Sessão inválida.');
                 }
@@ -400,7 +400,7 @@ final class AuthController
             }
 
             case 'rotateRecoveryCode': {
-                $admin = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $admin = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }
@@ -418,7 +418,7 @@ final class AuthController
             }
 
             case 'adminMailerStatus': {
-                $admin = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $admin = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }
@@ -439,7 +439,7 @@ final class AuthController
             }
 
             case 'adminProbeMailer': {
-                $admin = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $admin = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }
@@ -516,7 +516,7 @@ final class AuthController
             }
 
             case 'adminForceTempPassword': {
-                $admin = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $admin = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }
@@ -559,7 +559,7 @@ final class AuthController
             }
 
             case 'adminIssueSoulRecoveryCode': {
-                $admin = SessionService::loadUserBySessionToken((string) ($body['token'] ?? ''));
+                $admin = SessionService::loadUserBySessionToken((string) (SessionService::extractRequestToken() ?? $body['token'] ?? ''));
                 if (!$admin || ($admin['role'] ?? '') !== 'admin') {
                     Http::error(403, 'Esta senda é só do Mestre.');
                 }

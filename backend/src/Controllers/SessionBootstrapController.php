@@ -81,7 +81,7 @@ final class SessionBootstrapController
             Http::error(405, 'Método não permitido.');
         }
 
-        $token = Http::query('token');
+        $token = SessionService::extractRequestToken();
         if ($token === null || trim($token) === '') {
             Http::error(400, 'Token ausente.');
         }
