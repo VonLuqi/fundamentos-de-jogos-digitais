@@ -2238,6 +2238,15 @@ img.achievement-card__art.has-art {
   text-align: center;
 }
 
+#master-lethe-rebalance-status {
+  margin-top: 0.35rem;
+  font-style: normal;
+}
+
+#master-lethe-rebalance-status.is-error {
+  color: #e8a0a0;
+}
+
 .master-tools__actions {
   display: flex;
   flex-wrap: wrap;

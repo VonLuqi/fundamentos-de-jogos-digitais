@@ -2672,35 +2672,67 @@ function initAdminTools() {
     }
   });
 
-  btnRebalanceLethe?.addEventListener('click', async () => {
-    if (!currentToken) return;
-    const confirmed = window.confirm(
-      'Recalcular óbolos, essências e bônus de TODOS os alunos?\n\n'
-      + 'Usa as fórmulas atuais do Lethe (divisor 4e9, Catábase progressiva, essência 2:1) '
-      + 'a partir das Catábases e almas de vida. Talentos e Catábases ficam; carteiras só caem, nunca sobem.\n\n'
-      + 'Pode rodar de novo sem efeito (marca quem já foi alinhado).',
-    );
-    if (!confirmed) return;
+  const letheStatusEl = document.getElementById('master-lethe-rebalance-status');
+  const setLetheStatus = (text, { error = false } = {}) => {
+    if (!letheStatusEl) return;
+    letheStatusEl.hidden = !text;
+    letheStatusEl.textContent = text || '';
+    letheStatusEl.classList.toggle('is-error', Boolean(error));
+  };
 
+  btnRebalanceLethe?.addEventListener('click', async () => {
+    if (!currentToken) {
+      setLetheStatus('Sessão ausente — entre de novo no Domínio e tente outra vez.', { error: true });
+      showApiWarning('Sessão ausente para recalcular o Lethe.');
+      return;
+    }
+
+    // Dois cliques no próprio botão (evita window.confirm, que em alguns contextos some sem UI).
+    if (btnRebalanceLethe.dataset.confirmArmed !== '1') {
+      btnRebalanceLethe.dataset.confirmArmed = '1';
+      btnRebalanceLethe.textContent = 'Confirmar recálculo';
+      btnRebalanceLethe.classList.add('btn-gold--pulse');
+      btnRebalanceLethe.classList.remove('btn-gold--ghost');
+      setLetheStatus(
+        'Clique de novo em “Confirmar recálculo” para aplicar a todos os alunos. '
+        + 'Talentos e Catábases ficam; óbolos/essência só caem. Cancelar: mude de aba ou aguarde 8s.',
+      );
+      window.setTimeout(() => {
+        if (btnRebalanceLethe.dataset.confirmArmed !== '1') return;
+        btnRebalanceLethe.dataset.confirmArmed = '';
+        btnRebalanceLethe.textContent = 'Recalcular óbolos e essências';
+        btnRebalanceLethe.classList.add('btn-gold--ghost');
+        btnRebalanceLethe.classList.remove('btn-gold--pulse');
+        setLetheStatus('Recálculo cancelado (tempo esgotado).');
+      }, 8000);
+      return;
+    }
+
+    btnRebalanceLethe.dataset.confirmArmed = '';
     btnRebalanceLethe.disabled = true;
-    const previousLabel = btnRebalanceLethe.textContent;
+    btnRebalanceLethe.classList.add('btn-gold--ghost');
+    btnRebalanceLethe.classList.remove('btn-gold--pulse');
+    const previousLabel = 'Recalcular óbolos e essências';
     btnRebalanceLethe.textContent = 'Recalculando…';
+    setLetheStatus('Recalculando carteiras no Submundo…');
     try {
       const result = await despertarRebalanceLetheWallets(currentToken, { apply: true });
       const scanned = Number(result?.scanned) || 0;
       const changed = Number(result?.changed) || 0;
       const skipped = Number(result?.skipped) || 0;
       const aligned = Number(result?.aligned) || 0;
+      const summary = scanned === 0
+        ? 'Nenhuma Estela de aluno para recalcular.'
+        : `${changed} carteira(s) ajustada(s) · ${aligned} já alinhada(s) · ${skipped} ignorada(s) · ${scanned} lida(s). `
+          + 'O bônus de óbolos atualiza no próximo sync de cada aluno.';
+      setLetheStatus(summary);
       openScrollModal(
         'Lethe realinhado',
         (() => {
           const wrap = document.createElement('div');
           const note = document.createElement('p');
           note.className = 'scroll-modal__note';
-          note.textContent = scanned === 0
-            ? 'Nenhuma Estela de aluno para recalcular.'
-            : `${changed} carteira(s) ajustada(s) · ${aligned} já alinhada(s) · ${skipped} ignorada(s) · ${scanned} lida(s). `
-              + 'O bônus de óbolos atualiza no próximo sync de cada aluno.';
+          note.textContent = summary;
           wrap.appendChild(note);
           return wrap;
         })(),
@@ -2710,6 +2742,7 @@ function initAdminTools() {
       const message = error instanceof ApiError
         ? error.message
         : 'Falha ao recalcular óbolos e essências.';
+      setLetheStatus(message, { error: true });
       showApiWarning(message);
     } finally {
       btnRebalanceLethe.disabled = false;
