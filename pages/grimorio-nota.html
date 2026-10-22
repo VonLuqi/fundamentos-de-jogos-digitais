@@ -15,28 +15,28 @@
     (function () {
       var params = new URLSearchParams(window.location.search);
       var id = params.get('id');
-      var next = './grimorio.html';
+      var next = '../grimorio/';
       if (id) {
         var q = new URLSearchParams();
         q.set('id', id);
         if (params.get('edit') === '1') {
-          next = './grimorio-editar.html?' + q.toString();
+          next = '../grimorio-editar/?' + q.toString();
         } else {
-          next = './grimorio.html?' + q.toString();
+          next = '../grimorio/?' + q.toString();
         }
       } else if (params.get('edit') === '1') {
-        next = './grimorio-editar.html';
+        next = '../grimorio-editar/';
       }
       window.location.replace(next);
     })();
   </script>
-  <meta http-equiv="refresh" content="0;url=./grimorio.html" />
+  <meta http-equiv="refresh" content="0;url=../grimorio/" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page">
   <p style="font-family: Cinzel, serif; color: #cfa759; padding: 2rem; text-align: center;">
     Abrindo o Grimório…
-    <a href="./grimorio.html">Continuar</a>
+    <a href="../grimorio/">Continuar</a>
   </p>
   <script type="module" src="../js/grimorio-nota.js"></script>
 </body>

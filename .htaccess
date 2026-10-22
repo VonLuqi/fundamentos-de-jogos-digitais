@@ -30,7 +30,20 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/(.*)$ backend/index.php?_route=$1 [QSA,L]
 
   # ---------------------------------------------------------------------------
-  # 3. Rewrites do ARG do Submundo (espelho exato do vercel.json)
+  # 3. URLs limpas das páginas da app (sem /pages/ e sem .html)
+  #    Canônico: /despertar/  →  pages/despertar.html
+  #    Legado:   /pages/despertar.html e /despertar  →  301 /despertar/
+  # ---------------------------------------------------------------------------
+  # Slugs = arquivos em pages/*.html (exceto submundo/)
+  RewriteRule ^pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html$ $1/ [R=301,L,QSA]
+
+  # Sem barra final → canônico com barra (../css e ../js resolvem na raiz do site)
+  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)$ $1/ [R=301,L,QSA]
+
+  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)/$ pages/$1.html [L]
+
+  # ---------------------------------------------------------------------------
+  # 4. Rewrites do ARG do Submundo (espelho do vercel.json)
   #    Em subdiretório (ex.: /fundamentos-de-jogos-digitais/submundo/tartaro-oculto),
   #    garante barra final para que os caminhos relativos ../../ do HTML resolvam
   #    para a raiz do projeto.

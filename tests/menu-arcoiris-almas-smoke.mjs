@@ -83,7 +83,10 @@ shellPages.forEach((rel) => {
     assert(despertarLinks[0].includes('O Despertar · em breve'), `${rel}: começa selado na nav`);
     assert(despertarLinks[0].includes('is-locked'), `${rel}: Despertar começa com is-locked`);
     assert(/aria-disabled="true"/.test(despertarLinks[0]), `${rel}: Despertar começa aria-disabled=true`);
-    assert(despertarLinks[0].includes('despertar.html'), `${rel}: href aponta para despertar.html`);
+    assert(
+      despertarLinks[0].includes('../despertar/') || despertarLinks[0].includes('despertar/'),
+      `${rel}: href aponta para URL limpa despertar/`
+    );
   }
 });
 

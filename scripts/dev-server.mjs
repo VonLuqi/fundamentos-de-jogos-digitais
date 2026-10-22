@@ -2,6 +2,7 @@
 /**
  * Servidor de Desenvolvimento Local (Frontend Estático + Proxy API HostGator)
  * - Serve HTML, CSS, JS, SVG, WebP, PNG sem cache (Cache-Control: no-store)
+ * - URLs limpas: /dashboard/ → pages/dashboard.html (espelha .htaccess)
  * - Encaminha chamadas /api/* para o backend PHP/MySQL em produção na HostGator
  *   (preservando Authorization: Bearer e corpo JSON)
  */
@@ -33,6 +34,33 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
 };
 
+const APP_PAGE_SLUGS = new Set([
+  'auth',
+  'dashboard',
+  'aulas',
+  'aula1',
+  'aula2',
+  'aula3',
+  'aula4',
+  'aula5',
+  'aula6',
+  'aula7',
+  'aula8',
+  'conquistas',
+  'salao-espiritual',
+  'grimorio',
+  'grimorio-editar',
+  'grimorio-nota',
+  'companheiro',
+  'souls',
+  'codigos',
+  'despertar',
+  'ranking',
+  'classind-dle',
+  'prova',
+  'prova-admin',
+]);
+
 const SUBMUNDO_ROUTES = {
   '/submundo/tartaro-oculto': '/pages/submundo/tartaro-oculto.html',
   '/submundo/asfodelos-sussurros': '/pages/submundo/asfodelos-sussurros.html',
@@ -46,19 +74,30 @@ const SUBMUNDO_ROUTES = {
   '/submundo/estige-obolo': '/pages/submundo/estige-obolo.html',
 };
 
+function sendRedirect(res, location, status = 301) {
+  res.writeHead(status, {
+    Location: location,
+    'Cache-Control': 'no-store',
+  });
+  res.end();
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const rawUrl = new URL(req.url || '/', `http://localhost:${PORT}`);
     let pathname = decodeURIComponent(rawUrl.pathname);
+    const search = rawUrl.search || '';
 
     // Suporta abrir tanto em / quanto em /fundamentos-de-jogos-digitais/
+    let basePrefix = '';
     if (pathname.startsWith('/fundamentos-de-jogos-digitais')) {
-      pathname = pathname.slice('/fundamentos-de-jogos-digitais'.length) || '/';
+      basePrefix = '/fundamentos-de-jogos-digitais';
+      pathname = pathname.slice(basePrefix.length) || '/';
     }
 
     // Proxy transparente para /api/* na HostGator
     if (pathname === '/api' || pathname.startsWith('/api/')) {
-      const targetUrl = `${PROD_API_BASE}${pathname}${rawUrl.search}`;
+      const targetUrl = `${PROD_API_BASE}${pathname}${search}`;
       const chunks = [];
       for await (const chunk of req) {
         chunks.push(chunk);
@@ -89,6 +128,26 @@ const server = http.createServer(async (req, res) => {
       });
       res.end(responseBuffer);
       return;
+    }
+
+    // Legado: /pages/<slug>.html → /<slug>/
+    const pagesLegacy = pathname.match(/^\/pages\/([a-z0-9-]+)\.html$/i);
+    if (pagesLegacy && APP_PAGE_SLUGS.has(pagesLegacy[1])) {
+      sendRedirect(res, `${basePrefix}/${pagesLegacy[1]}/${search}`);
+      return;
+    }
+
+    // /<slug> (sem barra) → /<slug>/
+    const noSlash = pathname.match(/^\/([a-z0-9-]+)$/i);
+    if (noSlash && APP_PAGE_SLUGS.has(noSlash[1])) {
+      sendRedirect(res, `${basePrefix}/${noSlash[1]}/${search}`);
+      return;
+    }
+
+    // /<slug>/ → pages/<slug>.html
+    const withSlash = pathname.match(/^\/([a-z0-9-]+)\/$/i);
+    if (withSlash && APP_PAGE_SLUGS.has(withSlash[1])) {
+      pathname = `/pages/${withSlash[1]}.html`;
     }
 
     // Rotas do ARG do Submundo
@@ -132,8 +191,8 @@ server.listen(PORT, '127.0.0.1', () => {
   console.log(`\n============================================================`);
   console.log(`  DOMÍNIO DO HERÓI — Servidor Local Ativo!`);
   console.log(`  -> Home:      http://localhost:${PORT}/`);
-  console.log(`  -> Dashboard: http://localhost:${PORT}/pages/dashboard.html`);
-  console.log(`  -> Códigos:   http://localhost:${PORT}/pages/codigos.html`);
-  console.log(`  -> Almas:     http://localhost:${PORT}/pages/souls.html`);
+  console.log(`  -> Dashboard: http://localhost:${PORT}/dashboard/`);
+  console.log(`  -> Despertar: http://localhost:${PORT}/despertar/`);
+  console.log(`  -> Códigos:   http://localhost:${PORT}/codigos/`);
   console.log(`============================================================\n`);
 });

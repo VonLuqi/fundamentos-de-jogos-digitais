@@ -322,20 +322,46 @@ export async function loadAvatarImage(imgEl, index) {
 /* ============================================================
    1. RESOLUÇÃO DE CAMINHOS
    ============================================================
-   As páginas vivem em vários níveis:
-   - `/index.html`
-   - `/pages/*.html`
-   - `/pages/submundo/*.html` (arquivo direto)
-   - `/submundo/*` (URL limpa do ARG via rewrite)
+   URLs públicas limpas (rewrite Apache / dev-server):
+   - `/` · `/dashboard/` · `/aula8/` · `/despertar/`
+   - `/submundo/*` (ARG)
+   Legado ainda válido via 301: `/pages/*.html`
 
-   A API é sempre absoluta a partir da raiz do domínio — o que
-   funciona igual no Vercel e no `vercel dev`.
+   A API usa `siteBasePath() + /api` (subdiretório HostGator).
    ============================================================ */
 const API_BASE = '/api';
 
+/** Slugs de páginas em `pages/*.html` (exceto submundo). */
+const APP_PAGE_SLUGS = new Set([
+  'auth',
+  'dashboard',
+  'aulas',
+  'aula1',
+  'aula2',
+  'aula3',
+  'aula4',
+  'aula5',
+  'aula6',
+  'aula7',
+  'aula8',
+  'conquistas',
+  'salao-espiritual',
+  'grimorio',
+  'grimorio-editar',
+  'grimorio-nota',
+  'companheiro',
+  'souls',
+  'codigos',
+  'despertar',
+  'ranking',
+  'classind-dle',
+  'prova',
+  'prova-admin',
+]);
+
 /**
  * Prefixo do site quando hospedado em subdiretório (ex.: `/fundamentos-de-jogos-digitais`).
- * Na raiz do domínio (Vercel / localhost), retorna `''`.
+ * Na raiz do domínio (localhost), retorna `''`.
  */
 export function siteBasePath() {
   if (typeof window === 'undefined' || !window.location?.pathname) return '';
@@ -344,7 +370,13 @@ export function siteBasePath() {
     const idx = p.indexOf(marker);
     if (idx !== -1) return p.slice(0, idx);
   }
-  return p.replace(/\/index\.html$/i, '').replace(/\/+$/, '');
+  const trimmed = p.replace(/\/index\.html$/i, '').replace(/\/+$/, '') || '';
+  const parts = trimmed.split('/').filter(Boolean);
+  if (parts.length > 0 && APP_PAGE_SLUGS.has(parts[parts.length - 1])) {
+    parts.pop();
+    return parts.length ? `/${parts.join('/')}` : '';
+  }
+  return trimmed;
 }
 
 /** Caminho relativo até a raiz do site, a partir da página atual. */
@@ -358,40 +390,47 @@ export function rootPath() {
   // URL limpa do abismo sem barra final
   if (/(^|\/)submundo(\/|$)/.test(pathname)) return '..';
   if (pathname.includes('/pages/')) return '..';
+  // URL limpa da app: /dashboard/ ou /fundamentos-de-jogos-digitais/aula8/
+  const leaf = pathname.split('/').filter(Boolean).pop() || '';
+  if (APP_PAGE_SLUGS.has(leaf)) return '..';
   return '.';
 }
 
+function appRoute(slug) {
+  return `${rootPath()}/${slug}/`;
+}
+
 export const ROUTES = {
-  home: () => `${rootPath()}/index.html`,
-  auth: () => `${rootPath()}/pages/auth.html`,
-  dashboard: () => `${rootPath()}/pages/dashboard.html`,
-  aulas: () => `${rootPath()}/pages/aulas.html`,
-  conquistas: () => `${rootPath()}/pages/conquistas.html`,
-  salao: () => `${rootPath()}/pages/salao-espiritual.html`,
-  grimorio: () => `${rootPath()}/pages/grimorio.html`,
+  home: () => `${rootPath()}/`,
+  auth: () => appRoute('auth'),
+  dashboard: () => appRoute('dashboard'),
+  aulas: () => appRoute('aulas'),
+  conquistas: () => appRoute('conquistas'),
+  salao: () => appRoute('salao-espiritual'),
+  grimorio: () => appRoute('grimorio'),
   grimorioNota: (id) => {
-    const base = `${rootPath()}/pages/grimorio.html`;
+    const base = appRoute('grimorio');
     if (!id) return base;
     return `${base}?id=${encodeURIComponent(id)}`;
   },
   grimorioEditar: (id) => {
-    const base = `${rootPath()}/pages/grimorio-editar.html`;
+    const base = appRoute('grimorio-editar');
     if (!id) return base;
     return `${base}?id=${encodeURIComponent(id)}`;
   },
   companheiro: (username) => {
-    const base = `${rootPath()}/pages/companheiro.html`;
+    const base = appRoute('companheiro');
     if (!username) return base;
     return `${base}?u=${encodeURIComponent(username)}`;
   },
-  souls: () => `${rootPath()}/pages/souls.html`,
-  codigos: () => `${rootPath()}/pages/codigos.html`,
-  despertar: () => `${rootPath()}/pages/despertar.html`,
-  ranking: () => `${rootPath()}/pages/ranking.html`,
-  classindDle: () => `${rootPath()}/pages/classind-dle.html`,
-  prova: () => `${rootPath()}/pages/prova.html`,
-  provaAdmin: () => `${rootPath()}/pages/prova-admin.html`,
-  lesson: (id) => `${rootPath()}/pages/${id}.html`,
+  souls: () => appRoute('souls'),
+  codigos: () => appRoute('codigos'),
+  despertar: () => appRoute('despertar'),
+  ranking: () => appRoute('ranking'),
+  classindDle: () => appRoute('classind-dle'),
+  prova: () => appRoute('prova'),
+  provaAdmin: () => appRoute('prova-admin'),
+  lesson: (id) => appRoute(String(id || '').replace(/\.html$/i, '')),
 };
 
 /* ============================================================
@@ -772,6 +811,9 @@ export function shouldSkipProvaInProgressRedirect() {
   if (route === 'prova' || route === 'auth') return true;
   if (path.includes('/prova.html') || path.includes('/auth.html')) return true;
   if (path.includes('/prova-admin.html')) return true;
+  // URLs limpas: /prova/ · /auth/ · /prova-admin/
+  if (/\/prova\/?$/.test(path) || /\/auth\/?$/.test(path)) return true;
+  if (/\/prova-admin\/?$/.test(path)) return true;
   return false;
 }
 

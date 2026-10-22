@@ -21,8 +21,28 @@ function resolveAssetUrl(url) {
   const s = String(url || '');
   if (!s.startsWith('/')) return s;
   const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
-  const idx = p.indexOf('/pages/');
-  const base = idx > 0 ? p.slice(0, idx) : '';
+  let base = '';
+  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
+    const idx = p.indexOf(marker);
+    if (idx !== -1) {
+      base = p.slice(0, idx);
+      break;
+    }
+  }
+  if (!base) {
+    const trimmed = p.replace(/\/+$/, '');
+    const parts = trimmed.split('/').filter(Boolean);
+    const leaf = parts[parts.length - 1] || '';
+    const appSlugs = new Set([
+      'auth', 'dashboard', 'aulas', 'aula1', 'aula2', 'aula3', 'aula4', 'aula5', 'aula6', 'aula7', 'aula8',
+      'conquistas', 'salao-espiritual', 'grimorio', 'grimorio-editar', 'grimorio-nota', 'companheiro',
+      'souls', 'codigos', 'despertar', 'ranking', 'classind-dle', 'prova', 'prova-admin',
+    ]);
+    if (appSlugs.has(leaf)) {
+      parts.pop();
+      base = parts.length ? `/${parts.join('/')}` : '';
+    }
+  }
   return base && !s.startsWith(`${base}/`) ? `${base}${s}` : s;
 }
 

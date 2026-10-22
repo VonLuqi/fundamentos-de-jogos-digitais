@@ -108,14 +108,14 @@ export function bindAltar() {
   });
 }
 
-// Admin UI helper (legado — a página dedicada /pages/codigos.html é o caminho vivo)
+// Admin UI helper (legado — a página dedicada /codigos/ é o caminho vivo)
 export function bindAdmin() {
   const btn = document.getElementById('btn-generate-codes') || document.getElementById('admin-gen');
   if (!btn) return;
   // Se já for link para a página de códigos, não intercepta.
-  if (btn.tagName === 'A' && /codigos\.html/i.test(btn.getAttribute('href') || '')) return;
+  if (btn.tagName === 'A' && /codigos(\.html|\/)/i.test(btn.getAttribute('href') || '')) return;
   btn.addEventListener('click', async (event) => {
     event.preventDefault();
-    window.location.href = './codigos.html';
+    window.location.href = '../codigos/';
   });
 }

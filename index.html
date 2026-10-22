@@ -29,11 +29,11 @@
         var raw = localStorage.getItem('activeSession');
         var session = raw ? JSON.parse(raw) : null;
         if (session && session.token) {
-          window.location.replace('./pages/dashboard.html');
+          window.location.replace('./dashboard/');
           return;
         }
       } catch (e) {}
-      window.location.replace('./pages/auth.html');
+      window.location.replace('./auth/');
     })();
   </script>
 </head>
