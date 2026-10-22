@@ -26,6 +26,10 @@ assert.ok(
   '.htaccess 301 só no request original (THE_REQUEST) + [END] no rewrite interno'
 );
 assert.ok(
+  htaccess.includes('%1/%2/') && !/RewriteRule \^pages\/.*\$ \$1\//.test(htaccess),
+  '.htaccess 301 usa Location absoluta (%1/%2/) sem redirect relativo'
+);
+assert.ok(
   /pages\/\(auth\|dashboard/.test(htaccess) || htaccess.includes('pages/(auth|dashboard'),
   '.htaccess 301 de pages/*.html legado'
 );
