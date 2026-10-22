@@ -59,6 +59,7 @@ import {
   despertarPauseClear,
   despertarPauseSet,
   despertarResetStudents,
+  despertarRebalanceLetheWallets,
   despertarStateGet,
   needsMessengerSeal,
   normalizeAchievementRarity,
@@ -2023,6 +2024,8 @@ function formatAuditActionLabel(action) {
     pauseSet: 'Armou Véu da Aula',
     pauseClear: 'Liberou Véu da Aula',
     stateResetStudents: 'Limpou Estelas do Acheron',
+    rebalanceLetheWallets: 'Recalculou óbolos e essências do Lethe',
+    admin_rebalance_lethe_wallets: 'Recalculou óbolos e essências do Lethe',
     adminSetExamOpen: 'Alterou portão da Provação',
     adminFinalizeGrade: 'Fechou nota da Provação',
   };
@@ -2457,6 +2460,7 @@ function initAdminTools() {
   const btnManageLessons = document.getElementById('btn-manage-lessons');
   const btnAcheron = document.getElementById('btn-toggle-acheron');
   const btnResetDespertar = document.getElementById('btn-reset-despertar');
+  const btnRebalanceLethe = document.getElementById('btn-rebalance-lethe');
   const btnProva = document.getElementById('btn-prova-modulo1');
   const btnSouls = document.getElementById('btn-list-souls');
   const btnVigilancia = document.getElementById('btn-vigilancia');
@@ -2665,6 +2669,51 @@ function initAdminTools() {
     } finally {
       btnResetDespertar.disabled = false;
       btnResetDespertar.textContent = previousLabel;
+    }
+  });
+
+  btnRebalanceLethe?.addEventListener('click', async () => {
+    if (!currentToken) return;
+    const confirmed = window.confirm(
+      'Recalcular óbolos, essências e bônus de TODOS os alunos?\n\n'
+      + 'Usa as fórmulas atuais do Lethe (divisor 4e9, Catábase progressiva, essência 2:1) '
+      + 'a partir das Catábases e almas de vida. Talentos e Catábases ficam; carteiras só caem, nunca sobem.\n\n'
+      + 'Pode rodar de novo sem efeito (marca quem já foi alinhado).',
+    );
+    if (!confirmed) return;
+
+    btnRebalanceLethe.disabled = true;
+    const previousLabel = btnRebalanceLethe.textContent;
+    btnRebalanceLethe.textContent = 'Recalculando…';
+    try {
+      const result = await despertarRebalanceLetheWallets(currentToken, { apply: true });
+      const scanned = Number(result?.scanned) || 0;
+      const changed = Number(result?.changed) || 0;
+      const skipped = Number(result?.skipped) || 0;
+      const aligned = Number(result?.aligned) || 0;
+      openScrollModal(
+        'Lethe realinhado',
+        (() => {
+          const wrap = document.createElement('div');
+          const note = document.createElement('p');
+          note.className = 'scroll-modal__note';
+          note.textContent = scanned === 0
+            ? 'Nenhuma Estela de aluno para recalcular.'
+            : `${changed} carteira(s) ajustada(s) · ${aligned} já alinhada(s) · ${skipped} ignorada(s) · ${scanned} lida(s). `
+              + 'O bônus de óbolos atualiza no próximo sync de cada aluno.';
+          wrap.appendChild(note);
+          return wrap;
+        })(),
+      );
+      void refreshAdminOverview();
+    } catch (error) {
+      const message = error instanceof ApiError
+        ? error.message
+        : 'Falha ao recalcular óbolos e essências.';
+      showApiWarning(message);
+    } finally {
+      btnRebalanceLethe.disabled = false;
+      btnRebalanceLethe.textContent = previousLabel;
     }
   });
 

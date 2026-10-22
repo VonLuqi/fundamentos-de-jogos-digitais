@@ -1866,6 +1866,23 @@ export function despertarResetStudents(token) {
   });
 }
 
+/**
+ * Admin: recalcula óbolos/essência/bônus Lethe dos alunos (pós-rebalance).
+ * @param {string} token
+ * @param {{ apply?: boolean, force?: boolean }} [options]
+ */
+export function despertarRebalanceLetheWallets(token, options = {}) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'rebalanceLetheWallets',
+      apply: Boolean(options.apply),
+      force: Boolean(options.force),
+    }),
+  });
+}
+
 /** Admin: reseta conquistas do Despertar + planta sandbox na própria Estela. */
 export function despertarDebugSandbox(token) {
   return request('/despertar', {

@@ -30,6 +30,7 @@ final class AdminAudit
         'reopenProvaGrade' => 'admin_reopen_prova_grade',
         'resetProvaAttempt' => 'admin_reset_prova_attempt',
         'resetAllProvaAttempts' => 'admin_reset_all_prova_attempts',
+        'rebalanceLetheWallets' => 'admin_rebalance_lethe_wallets',
     ];
 
     /**

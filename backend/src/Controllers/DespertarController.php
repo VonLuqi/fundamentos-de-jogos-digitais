@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+use App\Core\AdminAudit;
 use App\Core\Database;
 use App\Core\GameCatalog;
 use App\Core\Http;
@@ -92,6 +93,36 @@ final class DespertarController
                 'deleted' => $deleted,
                 'scanned' => count($studentIds),
             ]);
+        }
+
+        // Admin: recalcular óbolos/essência/bônus após rebalance Lethe
+        if ($action === 'rebalanceLetheWallets') {
+            if (!$isAdmin) {
+                Http::error(403, 'Esta senda é só do Mestre.');
+            }
+            $apply = ($body['apply'] ?? false) === true
+                || ($body['apply'] ?? '') === 'true'
+                || ($body['apply'] ?? 0) === 1;
+            $force = ($body['force'] ?? false) === true
+                || ($body['force'] ?? '') === 'true'
+                || ($body['force'] ?? 0) === 1;
+
+            $result = DespertarService::rebalanceStudentLetheWallets($apply, $force);
+            if ($apply) {
+                AdminAudit::record(
+                    $userId,
+                    AdminAudit::ACTIONS['rebalanceLetheWallets'],
+                    null,
+                    [
+                        'force' => $force,
+                        'scanned' => $result['scanned'],
+                        'changed' => $result['changed'],
+                        'skipped' => $result['skipped'],
+                        'aligned' => $result['aligned'],
+                    ]
+                );
+            }
+            Http::json(200, $result);
         }
 
         // Admin: sandbox / reset / grant

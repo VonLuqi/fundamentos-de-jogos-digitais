@@ -455,6 +455,172 @@ final class DespertarFormulas
         ];
     }
 
+    /**
+     * Soma dos custos de talentos do Panteão já comprados.
+     *
+     * @param array<int, string> $talents
+     */
+    public static function talentSpend(array $talents): string
+    {
+        $spent = '0';
+        foreach ($talents as $tid) {
+            $cost = DespertarCatalog::TALENTS[(string) $tid]['cost'] ?? null;
+            if ($cost === null) {
+                continue;
+            }
+            $spent = DespertarDecimal::intAdd($spent, DespertarDecimal::toBigIntFloor((string) $cost));
+        }
+        return $spent;
+    }
+
+    /**
+     * Reconstrói óbolos/essência sob as fórmulas atuais a partir de Catábases + almas de vida.
+     * Só reduz carteiras (nunca aumenta) — heal do rebalance Lethe (divisor 4e9 + /(1+k) + essência 2:1).
+     *
+     * @param array<string, mixed> $state canonical rowToCanonical
+     * @return array{
+     *   changed: bool,
+     *   skipped: bool,
+     *   reason: string,
+     *   prestigeCount: int,
+     *   avgRunSouls: string,
+     *   obolsBefore: string,
+     *   obolsAfter: string,
+     *   mnemosyneBefore: string,
+     *   mnemosyneAfter: string,
+     *   prestigeBonusBefore: string,
+     *   prestigeBonusAfter: string,
+     *   talentSpend: string,
+     *   earnedEssenceTarget: string
+     * }
+     */
+    public static function planLetheWalletRebalance(array $state, bool $force = false): array
+    {
+        $milestones = is_array($state['milestones'] ?? null) ? $state['milestones'] : [];
+        $obolsBefore = DespertarDecimal::money(DespertarDecimal::decimalString($state['obols'] ?? '0'));
+        $mnemosyneBefore = DespertarDecimal::money(DespertarDecimal::decimalString($state['mnemosyne'] ?? '0'));
+        $talents = is_array($state['talents'] ?? null) ? array_values(array_map('strval', $state['talents'])) : [];
+        $prestigeCount = max(0, (int) ($state['prestigeCount'] ?? 0));
+        $bonusBefore = self::prestigeBonus($obolsBefore, $talents);
+        $spend = self::talentSpend($talents);
+
+        $base = [
+            'changed' => false,
+            'skipped' => false,
+            'reason' => '',
+            'prestigeCount' => $prestigeCount,
+            'avgRunSouls' => '0.00',
+            'obolsBefore' => $obolsBefore,
+            'obolsAfter' => $obolsBefore,
+            'mnemosyneBefore' => $mnemosyneBefore,
+            'mnemosyneAfter' => $mnemosyneBefore,
+            'prestigeBonusBefore' => $bonusBefore,
+            'prestigeBonusAfter' => $bonusBefore,
+            'talentSpend' => $spend,
+            'earnedEssenceTarget' => '0',
+        ];
+
+        if (!$force && !empty($milestones[DespertarCatalog::LETHE_REBALANCE_MILESTONE])) {
+            return array_merge($base, ['skipped' => true, 'reason' => 'already_rebalanced']);
+        }
+
+        if ($prestigeCount <= 0 && DespertarDecimal::cmp($obolsBefore, '0') <= 0) {
+            return array_merge($base, ['skipped' => true, 'reason' => 'no_lethe_progress']);
+        }
+
+        $lifetime = DespertarDecimal::money(DespertarDecimal::decimalString($state['lifetimeSouls'] ?? '0'));
+        $runSouls = DespertarDecimal::money(DespertarDecimal::decimalString($state['runSouls'] ?? '0'));
+        $completedLifetime = DespertarDecimal::cmp($lifetime, $runSouls) > 0
+            ? DespertarDecimal::sub($lifetime, $runSouls)
+            : '0.00';
+
+        $avgRun = '0.00';
+        $targetObolsInt = '0';
+        $earnedEssence = '0';
+
+        if ($prestigeCount > 0) {
+            if (DespertarDecimal::cmp($completedLifetime, '0') > 0) {
+                $avgRun = DespertarDecimal::money(
+                    DespertarDecimal::div($completedLifetime, (string) $prestigeCount)
+                );
+            } else {
+                // Fallback: inverte óbolos legados (divisor antigo, sem /(1+k)).
+                $obolsInt = DespertarDecimal::toBigIntFloor($obolsBefore);
+                $rawLegacy = DespertarDecimal::intDiv($obolsInt, (string) $prestigeCount);
+                // sqrt(1e9/4e9) = 1/2 → raw novo ≈ raw legado / 2
+                $rawNew = DespertarDecimal::intDiv($rawLegacy, '2');
+                // Equivalente a runSouls tal que floor(sqrt(run/4e9)) ≈ rawNew
+                // run ≈ rawNew² × 4e9 — útil só para report; óbolos usam soma direta.
+                for ($k = 0; $k < $prestigeCount; $k++) {
+                    $gain = DespertarDecimal::intDiv($rawNew, (string) (1 + $k));
+                    $targetObolsInt = DespertarDecimal::intAdd($targetObolsInt, $gain);
+                    $earnedEssence = DespertarDecimal::intAdd(
+                        $earnedEssence,
+                        DespertarDecimal::intDiv($gain, '2')
+                    );
+                }
+                $avgRun = '0.00';
+            }
+
+            if (DespertarDecimal::cmp($avgRun, '0') > 0) {
+                $targetObolsInt = '0';
+                $earnedEssence = '0';
+                for ($k = 0; $k < $prestigeCount; $k++) {
+                    $gain = DespertarDecimal::toBigIntFloor(self::obolsFromRunSouls($avgRun, $k));
+                    $targetObolsInt = DespertarDecimal::intAdd($targetObolsInt, $gain);
+                    // Essência histórica na taxa 2:1 (sem Cálice — evita inflar quem comprou tarde).
+                    $earnedEssence = DespertarDecimal::intAdd(
+                        $earnedEssence,
+                        DespertarDecimal::intDiv($gain, '2')
+                    );
+                }
+            }
+        } elseif (DespertarDecimal::cmp($obolsBefore, '0') > 0) {
+            // Óbolos sem Catábase (concessão/debug): metade para espelhar divisor ×4.
+            $targetObolsInt = DespertarDecimal::intDiv(DespertarDecimal::toBigIntFloor($obolsBefore), '2');
+            $earnedEssence = DespertarDecimal::intDiv($targetObolsInt, '2');
+        }
+
+        $targetObols = DespertarDecimal::money($targetObolsInt . '.00');
+        // Nunca aumentar óbolos no heal.
+        if (DespertarDecimal::cmp($targetObols, $obolsBefore) > 0) {
+            $targetObols = $obolsBefore;
+        }
+
+        $currentEarnedEst = DespertarDecimal::intAdd(
+            DespertarDecimal::toBigIntFloor($mnemosyneBefore),
+            $spend
+        );
+        $targetEarned = $earnedEssence;
+        if (DespertarDecimal::intCmp($targetEarned, $currentEarnedEst) > 0) {
+            $targetEarned = $currentEarnedEst;
+        }
+        $walletInt = DespertarDecimal::intCmp($targetEarned, $spend) > 0
+            ? DespertarDecimal::intSub($targetEarned, $spend)
+            : '0';
+        $targetMnemosyne = DespertarDecimal::money($walletInt . '.00');
+
+        $bonusAfter = self::prestigeBonus($targetObols, $talents);
+        $changed = DespertarDecimal::cmp($targetObols, $obolsBefore) !== 0
+            || DespertarDecimal::cmp($targetMnemosyne, $mnemosyneBefore) !== 0;
+
+        return [
+            'changed' => $changed,
+            'skipped' => false,
+            'reason' => $changed ? 'rebalanced' : 'already_aligned',
+            'prestigeCount' => $prestigeCount,
+            'avgRunSouls' => $avgRun,
+            'obolsBefore' => $obolsBefore,
+            'obolsAfter' => $targetObols,
+            'mnemosyneBefore' => $mnemosyneBefore,
+            'mnemosyneAfter' => $targetMnemosyne,
+            'prestigeBonusBefore' => $bonusBefore,
+            'prestigeBonusAfter' => $bonusAfter,
+            'talentSpend' => $spend,
+            'earnedEssenceTarget' => $targetEarned,
+        ];
+    }
+
     public static function theoreticalMaxGain(string $sps, string $clickPower, float $deltaSeconds): string
     {
         $safeDt = is_finite($deltaSeconds) && $deltaSeconds > 0

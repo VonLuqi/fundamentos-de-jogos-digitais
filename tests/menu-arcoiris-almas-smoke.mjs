@@ -118,8 +118,10 @@ assert(
     && dashboardJs.includes('DESPERTAR_GATE_ID')
     && dashboardJs.includes('Abrir o Acheron')
     && dashboardHtml.includes('btn-reset-despertar')
-    && dashboardJs.includes('despertarResetStudents'),
-  'dashboard deve ter toggle Abrir/Selar o Acheron e Limpar Estelas'
+    && dashboardHtml.includes('btn-rebalance-lethe')
+    && dashboardJs.includes('despertarResetStudents')
+    && dashboardJs.includes('despertarRebalanceLetheWallets'),
+  'dashboard deve ter toggle Abrir/Selar o Acheron, Limpar Estelas e Recalcular óbolos'
 );
 assert(
   progressApi.includes("despertar: { published: false }")

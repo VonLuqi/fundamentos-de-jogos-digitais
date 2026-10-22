@@ -1457,6 +1457,102 @@ final class DespertarService
         return ['ok' => true, 'patch' => $patch, 'label' => 'Definido: ' . implode(', ', $parts)];
     }
 
+    /**
+     * Recalcula óbolos/essência/bônus Lethe de todos os alunos após rebalance de fórmulas.
+     * Talentos e Catábases permanecem; carteiras só caem (nunca sobem).
+     *
+     * @return array{
+     *   ok: bool,
+     *   dryRun: bool,
+     *   scanned: int,
+     *   changed: int,
+     *   skipped: int,
+     *   aligned: int,
+     *   samples: array<int, array<string, mixed>>
+     * }
+     */
+    public static function rebalanceStudentLetheWallets(bool $apply = false, bool $force = false): array
+    {
+        $pdo = Database::pdo();
+        $stmt = $pdo->query(
+            'SELECT `d`.*
+             FROM `despertar_states` `d`
+             INNER JOIN `users` `u` ON `u`.`id` = `d`.`user_id` AND `u`.`role` = \'student\''
+        );
+        $rows = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        $nowIso = Database::nowIso();
+
+        $changed = 0;
+        $skipped = 0;
+        $aligned = 0;
+        $samples = [];
+
+        foreach ($rows as $raw) {
+            $row = self::hydrateStateRow($raw);
+            $canonical = self::rowToCanonical($row);
+            $plan = DespertarFormulas::planLetheWalletRebalance($canonical, $force);
+            $uid = (int) ($row['user_id'] ?? 0);
+
+            if ($plan['skipped']) {
+                $skipped++;
+            } elseif ($plan['changed']) {
+                $changed++;
+            } else {
+                $aligned++;
+            }
+
+            if (count($samples) < 12 && ($plan['changed'] || ($plan['skipped'] && $plan['reason'] === 'already_rebalanced'))) {
+                $samples[] = [
+                    'userId' => $uid,
+                    'prestigeCount' => $plan['prestigeCount'],
+                    'obolsBefore' => $plan['obolsBefore'],
+                    'obolsAfter' => $plan['obolsAfter'],
+                    'mnemosyneBefore' => $plan['mnemosyneBefore'],
+                    'mnemosyneAfter' => $plan['mnemosyneAfter'],
+                    'prestigeBonusBefore' => $plan['prestigeBonusBefore'],
+                    'prestigeBonusAfter' => $plan['prestigeBonusAfter'],
+                    'reason' => $plan['reason'],
+                ];
+            }
+
+            if (!$apply) {
+                continue;
+            }
+
+            $milestones = is_array($canonical['milestones'] ?? null) ? $canonical['milestones'] : [];
+            $milestones[DespertarCatalog::LETHE_REBALANCE_MILESTONE] = true;
+
+            if ($plan['skipped'] && !$force) {
+                continue;
+            }
+
+            $patch = [
+                'obols' => $plan['obolsAfter'],
+                'mnemosyne' => $plan['mnemosyneAfter'],
+                'milestones' => $milestones,
+                'updated_at' => $nowIso,
+            ];
+            // Mesmo alinhado: grava milestone para não reprocessar.
+            if (!$plan['changed'] && !$force) {
+                $patch = [
+                    'milestones' => $milestones,
+                    'updated_at' => $nowIso,
+                ];
+            }
+            self::persistPatch($uid, $patch);
+        }
+
+        return [
+            'ok' => true,
+            'dryRun' => !$apply,
+            'scanned' => count($rows),
+            'changed' => $changed,
+            'skipped' => $skipped,
+            'aligned' => $aligned,
+            'samples' => $samples,
+        ];
+    }
+
     // -------------------------------------------------------------------------
     // Persistência Transacional PDO (substitui `public.despertar_persist_and_award`)
     // -------------------------------------------------------------------------

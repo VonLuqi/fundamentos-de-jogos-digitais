@@ -10,8 +10,12 @@ final class DespertarCatalog
 {
     public const COST_MULTIPLIER = '1.15';
     public const PRESTIGE_RUN_DIVISOR = '4000000000';
+    /** Divisor legado (pré-rebalance) — só para telemetria/documentação do heal. */
+    public const LEGACY_PRESTIGE_RUN_DIVISOR = '1000000000';
     public const OBOL_BONUS_PER = '0.05';
     public const LETHE_PREVIEW_RUN_SOULS = '100000000';
+    /** Milestone: carteira Lethe já alinhada às fórmulas atuais. */
+    public const LETHE_REBALANCE_MILESTONE = 'letheRebalanceV1';
 
     public const CLICK_BASE = '1';
     public const CLICK_FLAT_BASE = '0';
