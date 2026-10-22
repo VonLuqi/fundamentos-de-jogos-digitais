@@ -481,18 +481,19 @@ func _on_body_entered(body: Node2D) -&gt; void:
             </button>
           </div>
           <p id="aula8-bloco-acao-hint" class="lesson-code-block__hint">
-            Cole em <code>scripts/obstaculo.gd</code> anexado ao nó <code>Obstaculo</code>.
-            Ajuste <code>distance</code> e <code>speed</code> no Inspector.
+            Cole em <code>scripts/obstaculo.gd</code> anexado à raiz <code>AnimatableBody2D</code> do <code>Obstaculo</code>
+            (não use o script da moeda). Ajuste <code>distance</code> e <code>speed</code> no Inspector.
+            Deixe o obstáculo <strong>no ar</strong>, sem encravar a colisão no chão.
           </p>
           <pre id="aula8-bloco-acao" class="lesson-pre" aria-label="Código trilha Ação — obstáculo móvel">extends AnimatableBody2D
 ## Aula 08 — obstáculo móvel (trilha Ação)
-## Movimento ping-pong no eixo X (mude para Y se preferir).
+## Movimento ping-pong no eixo X (sem inverter _dir — evita pisca).
 
 @export var distance: float = 120.0
 @export var speed: float = 80.0
 
 var _origin: Vector2
-var _dir: float = 1.0
+var _traveled: float = 0.0
 
 
 func _ready() -&gt; void:
@@ -500,10 +501,9 @@ func _ready() -&gt; void:
 
 
 func _physics_process(delta: float) -&gt; void:
-	global_position.x += _dir * speed * delta
-	if absf(global_position.x - _origin.x) &gt;= distance:
-		_dir *= -1.0
-		global_position.x = _origin.x + _dir * distance</pre>
+	_traveled += speed * delta
+	# 0 → distance → 0 → … sem teleporte nas bordas.
+	global_position.x = _origin.x + pingpong(_traveled, distance)</pre>
           <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-acao" aria-live="polite"></p>
         </div>
         <p><strong>Checkpoint Ação:</strong> obstáculo vai e volta · Player precisa de timing para cruzar.</p>
