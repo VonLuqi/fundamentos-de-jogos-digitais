@@ -1,9 +1,9 @@
 extends AnimatableBody2D
-## Aula 08 — obstáculo móvel (script-espelho · trilha Ação)
+## Aula 08 — plataforma móvel (script-espelho · trilha Ação)
 ## Preferir construir por etapas na Oficina (bloco Copiar código).
-## Hierarquia: Obstaculo (AnimatableBody2D) → Sprite2D + CollisionShape2D
+## Hierarquia: Plataforma (AnimatableBody2D) → Sprite2D + CollisionShape2D
 ## Ajuste distance e speed no Inspector.
-## Dica: deixe o obstáculo no ar (não encravado no chão StaticBody2D).
+## Dica: deixe a plataforma no ar (não encravada no chão StaticBody2D).
 
 @export var distance: float = 120.0
 @export var speed: float = 80.0

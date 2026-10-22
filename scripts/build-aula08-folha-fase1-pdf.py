@@ -116,7 +116,7 @@ def draw_front(c: canvas.Canvas, page_w: float, page_h: float) -> None:
     legend_rows = [
         "P  = plataforma / chão / parede          M  = moeda comum (coleta Aula 07)",
         "*  = moeda brilhante / difícil           S  = área / caminho secreto",
-        "O  = obstáculo móvel (trilha Ação)       >  = início do Player     X  = meta (opcional)",
+        "V  = plataforma móvel (trilha Ação)     >  = início do Player     X  = meta (opcional)",
     ]
     for row in legend_rows:
         c.drawString(x + pad, y, row)
@@ -156,7 +156,7 @@ def draw_front(c: canvas.Canvas, page_w: float, page_h: float) -> None:
 
     c.setFont("Helvetica-Bold", SMALL_SIZE)
     c.setFillColorRGB(*INK)
-    c.drawString(x + pad, y, "Se AÇÃO — obstáculo O")
+    c.drawString(x + pad, y, "Se AÇÃO — plataforma móvel V")
     y -= 16
     y = blank_line(c, x + pad, y, usable - pad, "Onde fica?")
     y = blank_line(c, x + pad, y, usable - pad, "Timing / desvio:")

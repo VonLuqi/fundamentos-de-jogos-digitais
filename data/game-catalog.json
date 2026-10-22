@@ -387,7 +387,7 @@
     {
       "id": "segredo_trilha_labirinto",
       "name": "Trilha do Labirinto",
-      "desc": "Descreveu a trilha Conquista (segredo/moeda) ou Ação (obstáculo móvel).",
+      "desc": "Descreveu a trilha Conquista (segredo/moeda) ou Ação (plataforma móvel).",
       "icon": "🏛️",
       "art": "segredo_trilha_labirinto.webp",
       "hidden": true,

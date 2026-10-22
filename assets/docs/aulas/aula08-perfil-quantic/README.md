@@ -1,7 +1,7 @@
 # Aula 08 — Perfis Quantic Foundry + Labirinto direcionado (Godot 4)
 
 > **Página da aula:** `pages/aula8.html`  
-> **Scripts-espelho:** [`camera-player-exemplo.gd`](./camera-player-exemplo.gd) · [`moeda-brilhante-exemplo.gd`](./moeda-brilhante-exemplo.gd) · [`obstaculo-exemplo.gd`](./obstaculo-exemplo.gd)  
+> **Scripts-espelho:** [`camera-player-exemplo.gd`](./camera-player-exemplo.gd) · [`moeda-brilhante-exemplo.gd`](./moeda-brilhante-exemplo.gd) · [`plataforma-exemplo.gd`](./plataforma-exemplo.gd)  
 > **Folha Fase 1 (imprimir 1× aluno):** [`folha-fase1.pdf`](./folha-fase1.pdf) · fonte [`folha-fase1.md`](./folha-fase1.md)  
 > **Quadro ofícios:** [`quadro-atribuicao.md`](./quadro-atribuicao.md)  
 > **Árvore:** [`estrutura-pastas.txt`](./estrutura-pastas.txt)  
@@ -29,7 +29,7 @@ O código completo para copiar está na **Oficina** da plataforma (botão Copiar
 - [ ] Folha Fase 1 preenchida (plataformas + moedas + trilha)
 - [ ] `Camera2D` filha do Player (vista segue ao andar)
 - [ ] Perfil Quantic Foundry escrito no diário
-- [ ] Uma trilha jogável (segredo+moeda brilhante **ou** obstáculo móvel)
+- [ ] Uma trilha jogável (segredo+moeda brilhante **ou** plataforma móvel)
 - [ ] ≥3 itens fora do escopo
 - [ ] Diário finalizado (cada aluno)
 
@@ -59,9 +59,9 @@ O código completo para copiar está na **Oficina** da plataforma (botão Copiar
 
 ## Trilha Ação
 
-1. Nó `Obstaculo` (`AnimatableBody2D`) + shape.
-2. Script ping-pong (`obstaculo-exemplo.gd`).
-3. Playtest: timing para cruzar.
+1. Nó `Plataforma` (`AnimatableBody2D`) + shape.
+2. Script ping-pong (`plataforma-exemplo.gd`).
+3. Playtest: timing para cruzar / subir.
 
 ---
 

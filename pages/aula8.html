@@ -151,7 +151,7 @@
         <div class="triplet-grid">
           <article class="triplet-card">
             <h3>Ação e desafio</h3>
-            <p><strong>Destruição</strong> e <strong>Desafio</strong> apelam a quem quer tensão, timing e impacto — obstáculos que se movem, riscos, ritmo.</p>
+            <p><strong>Destruição</strong> e <strong>Desafio</strong> apelam a quem quer tensão, timing e impacto — plataformas móveis, riscos, ritmo.</p>
           </article>
           <article class="triplet-card">
             <h3>Descoberta</h3>
@@ -159,7 +159,7 @@
           </article>
           <article class="triplet-card">
             <h3>Ponte Godot</h3>
-            <p>Na sala: trilha <strong>Ação</strong> (obstáculo móvel) ou trilha <strong>Conquista</strong> (área secreta + moeda brilhante difícil).</p>
+            <p>Na sala: trilha <strong>Ação</strong> (plataforma móvel) ou trilha <strong>Conquista</strong> (área secreta + moeda brilhante difícil).</p>
           </article>
         </div>
 
@@ -199,7 +199,7 @@
           </article>
           <article class="triplet-card">
             <h3>Encontro 2 — Mecânica</h3>
-            <p>Scripts + playtest: segredo/moeda brilhante <strong>ou</strong> obstáculo móvel.</p>
+            <p>Scripts + playtest: segredo/moeda brilhante <strong>ou</strong> plataforma móvel.</p>
           </article>
           <article class="triplet-card">
             <h3>Diário</h3>
@@ -273,8 +273,8 @@
             <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/moeda-brilhante-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
               Baixar moeda-brilhante-exemplo.gd
             </a>
-            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/obstaculo-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
-              Baixar obstaculo-exemplo.gd
+            <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/plataforma-exemplo.gd" target="_blank" rel="noopener noreferrer" download>
+              Baixar plataforma-exemplo.gd
             </a>
             <a class="lesson-cta lesson-cta--ghost" href="../assets/docs/aulas/aula08-perfil-quantic/quadro-atribuicao.md" target="_blank" rel="noopener noreferrer">
               Abrir quadro de atribuição
@@ -326,7 +326,7 @@
                 </tr>
                 <tr>
                   <td data-label="Ofício"><strong>Trilha Ação</strong></td>
-                  <td data-label="Entrega">Obstáculo móvel (vai-e-volta) com timing</td>
+                  <td data-label="Entrega">Plataforma móvel (vai-e-volta) com timing</td>
                 </tr>
               </tbody>
             </table>
@@ -345,7 +345,7 @@
         <ul class="lesson-list">
           <li>Marcar perfil Quantic Foundry + trilha (Conquista <strong>ou</strong> Ação).</li>
           <li>No mapa em grade: desenhar <strong>plataformas</strong> (<code>P</code>) e locais das <strong>moedas</strong> (<code>M</code> / <code>★</code>).</li>
-          <li>Marcar segredo (<code>S</code>) ou obstáculo (<code>O</code>) conforme a trilha.</li>
+          <li>Marcar segredo (<code>S</code>) ou plataforma móvel (<code>V</code>) conforme a trilha.</li>
           <li>Listar ≥3 itens fora do escopo.</li>
           <li>Em dupla: podem combinar o layout, mas <strong>cada um preenche a própria folha</strong>.</li>
         </ul>
@@ -361,7 +361,7 @@
 
         <h3 class="lesson-subtitle">2. Câmera que segue o Player (Encontro 1)</h3>
         <p>
-          Com o mapa maior (segredos, gaps, obstáculos), a vista fixa da Aula 07 não basta.
+          Com o mapa maior (segredos, gaps, plataformas móveis), a vista fixa da Aula 07 não basta.
           A <code>Camera2D</code> filha do Player acompanha o personagem para vocês desenharem o nível.
         </p>
         <pre class="lesson-pre" aria-label="Hierarquia Player com Camera2D">Player (CharacterBody2D)
@@ -467,26 +467,26 @@ func _on_body_entered(body: Node2D) -&gt; void:
         </div>
         <p><strong>Checkpoint Conquista:</strong> moeda pulsa · difícil de pegar · some ao coletar · Output mostra <code>Moedas secretas: 1</code>.</p>
 
-        <h3 class="lesson-subtitle">4. Trilha Ação — obstáculo móvel</h3>
+        <h3 class="lesson-subtitle">4. Trilha Ação — plataforma móvel</h3>
         <ol class="lesson-list">
-          <li>Em <code>cenario.tscn</code>, crie <code>Obstaculo</code> (<code>AnimatableBody2D</code>) + <code>Sprite2D</code> + <code>CollisionShape2D</code>.</li>
+          <li>Em <code>cenario.tscn</code>, crie <code>Plataforma</code> (<code>AnimatableBody2D</code>) + <code>Sprite2D</code> + <code>CollisionShape2D</code>.</li>
           <li>Anexe o script do bloco abaixo (movimento vai-e-volta).</li>
-          <li>Posicione no caminho do Player — timing obrigatório para passar.</li>
+          <li>Posicione no caminho do Player — timing obrigatório para cruzar / subir.</li>
         </ol>
         <div class="lesson-code-block">
           <div class="lesson-code-block__toolbar">
-            <p class="lesson-code-block__label">Apoio — Trilha Ação (cole em scripts/obstaculo.gd)</p>
+            <p class="lesson-code-block__label">Apoio — Trilha Ação (cole em scripts/plataforma.gd)</p>
             <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="aula8-bloco-acao" aria-describedby="aula8-bloco-acao-hint">
               Copiar código
             </button>
           </div>
           <p id="aula8-bloco-acao-hint" class="lesson-code-block__hint">
-            Cole em <code>scripts/obstaculo.gd</code> anexado à raiz <code>AnimatableBody2D</code> do <code>Obstaculo</code>
+            Cole em <code>scripts/plataforma.gd</code> anexado à raiz <code>AnimatableBody2D</code> da <code>Plataforma</code>
             (não use o script da moeda). Ajuste <code>distance</code> e <code>speed</code> no Inspector.
-            Deixe o obstáculo <strong>no ar</strong>, sem encravar a colisão no chão.
+            Deixe a plataforma <strong>no ar</strong>, sem encravar a colisão no chão.
           </p>
-          <pre id="aula8-bloco-acao" class="lesson-pre" aria-label="Código trilha Ação — obstáculo móvel">extends AnimatableBody2D
-## Aula 08 — obstáculo móvel (trilha Ação)
+          <pre id="aula8-bloco-acao" class="lesson-pre" aria-label="Código trilha Ação — plataforma móvel">extends AnimatableBody2D
+## Aula 08 — plataforma móvel (trilha Ação)
 ## Movimento ping-pong no eixo X (sem inverter _dir — evita pisca).
 
 @export var distance: float = 120.0
@@ -506,7 +506,7 @@ func _physics_process(delta: float) -&gt; void:
 	global_position.x = _origin.x + pingpong(_traveled, distance)</pre>
           <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-acao" aria-live="polite"></p>
         </div>
-        <p><strong>Checkpoint Ação:</strong> obstáculo vai e volta · Player precisa de timing para cruzar.</p>
+        <p><strong>Checkpoint Ação:</strong> plataforma vai e volta · Player precisa de timing para cruzar / subir.</p>
 
         <h3 class="lesson-subtitle">O que NÃO fazer nesta aula</h3>
         <ul class="lesson-list">
@@ -516,7 +516,7 @@ func _physics_process(delta: float) -&gt; void:
         </ul>
 
         <section class="quote-block" aria-label="Pistas secretas da aula 8">
-          <p><strong>Pistas secretas do Submundo:</strong> nomeie o modelo Quantic Foundry ou uma motivação; diga como o perfil escolhido virou mecânica; e descreva a trilha Conquista (segredo/moeda) ou Ação (obstáculo).</p>
+          <p><strong>Pistas secretas do Submundo:</strong> nomeie o modelo Quantic Foundry ou uma motivação; diga como o perfil escolhido virou mecânica; e descreva a trilha Conquista (segredo/moeda) ou Ação (plataforma móvel).</p>
         </section>
 
         <section class="config-notes-box" id="aula-atividade" aria-label="Diário de desenvolvimento">
@@ -594,6 +594,6 @@ func _physics_process(delta: float) -&gt; void:
     </div>
   </div>
 
-  <script type="module" src="../js/aula8.js?v=20261021i"></script>
+  <script type="module" src="../js/aula8.js?v=20261022a"></script>
 </body>
 </html>

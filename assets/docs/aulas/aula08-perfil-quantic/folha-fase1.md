@@ -29,7 +29,7 @@ ________________________________________________________________
   M  = moeda comum (coleta Aula 07)
   ★  = moeda brilhante / difícil (trilha Conquista)
   S  = área / caminho secreto
-  O  = obstáculo móvel (trilha Ação)
+  V  = plataforma móvel (trilha Ação)
   →  = início do Player
   X  = meta / saída (opcional)
 
@@ -53,9 +53,9 @@ Se CONQUISTA — segredo + ★:
   Onde fica o desvio / gap / altura? ___________________________
   Por que é “difícil de alcançar”? _____________________________
 
-Se AÇÃO — obstáculo O:
-  Onde fica o obstáculo? ______________________________________
-  O que o jogador precisa fazer (timing / desvio)? _____________
+Se AÇÃO — plataforma móvel V:
+  Onde fica a plataforma? _____________________________________
+  O que o jogador precisa fazer (timing / subir / cruzar)? _____
 
 ────────────────────────────────────────────────────────────────
   FORA DO ESCOPO NESTA FASE (≥3)

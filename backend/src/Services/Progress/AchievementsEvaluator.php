@@ -341,13 +341,13 @@ final class AchievementsEvaluator
                     $candidates[] = 'segredo_modelo_quantic';
                 }
                 $perfil = [['perfil', 'publico-alvo', 'jogador alvo', 'atrair']];
-                $mec = [['mecanica', 'mecanicas', 'area secreta', 'obstaculo', 'moeda brilhante', 'level design', 'design de nivel']];
+                $mec = [['mecanica', 'mecanicas', 'area secreta', 'plataforma movel', 'plataforma', 'obstaculo', 'moeda brilhante', 'level design', 'design de nivel']];
                 if (self::coverageAtLeast($norm, $perfil, 1) && self::coverageAtLeast($norm, $mec, 1)) {
                     $candidates[] = 'segredo_perfil_mecanica';
                 }
                 $trilhas = [
                     ['conquista', 'area secreta', 'moeda brilhante', 'moeda dificil', 'segredo no mapa'],
-                    ['acao', 'obstaculo movel', 'obstaculo', 'vai-e-volta', 'timing'],
+                    ['acao', 'plataforma movel', 'plataforma', 'obstaculo movel', 'obstaculo', 'vai-e-volta', 'timing'],
                 ];
                 if (self::coverageAtLeast($norm, $trilhas, 1)) {
                     $candidates[] = 'segredo_trilha_labirinto';

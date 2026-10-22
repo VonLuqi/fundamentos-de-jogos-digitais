@@ -1,27 +1,23 @@
-LabirintoDeMoedas/                 # CONTINUAR o projeto da Aula 07 (local)
+LabirintoDeMoedas/
 ├── project.godot
 ├── cenas/
-│   ├── player.tscn               # + Camera2D filha (Encontro 1)
-│   ├── moeda.tscn                # já existe — coleção
-│   └── cenario.tscn              # adaptar: segredo OU obstáculo
+│   ├── player.tscn               # + Camera2D (Aula 08)
+│   ├── moeda.tscn                # coleta Aula 07
+│   └── cenario.tscn              # adaptar: segredo OU plataforma móvel
 ├── sprites/
-├── audio/
-├── scripts/
-│   ├── player.gd                 # já tem coleta (Aula 07)
-│   ├── camera_player.gd          # opcional — make_current()
-│   ├── moeda.gd                  # já existe
-│   ├── moeda_brilhante.gd        # trilha Conquista (opcional / variante)
-│   └── obstaculo.gd              # trilha Ação
-└── ui/
+│   └── …
+├── audio/                        # opcional
+└── scripts/
+    ├── player.gd
+    ├── moeda.gd                  # Aula 07
+    ├── moeda_brilhante.gd        # trilha Conquista (opcional / variante)
+    └── plataforma.gd             # trilha Ação
 
-# Scripts-espelho (material da aula):
+# Scripts-espelho na plataforma (assets/docs/aulas/aula08-perfil-quantic/):
 #   camera-player-exemplo.gd
 #   moeda-brilhante-exemplo.gd
-#   obstaculo-exemplo.gd
+#   plataforma-exemplo.gd
 
-# Encontro 1: Camera2D no Player (Enabled) — vista segue para level design.
-# Escolham UMA trilha:
+# Trilhas (escolha UMA):
 #   Conquista — área secreta + moeda brilhante difícil
-#   Ação      — obstáculo móvel vai-e-volta
-
-# SEM pasta sync / Drive / OneDrive DENTRO do projeto Godot.
+#   Ação      — plataforma móvel vai-e-volta

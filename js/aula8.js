@@ -37,7 +37,7 @@ const AUTOSAVE_MS = 2000;
 const JOURNAL_TEMPLATE = [
   '1) Ofícios: (solo: eu nos dois · ou Design do perfil = … / Programação das mecânicas = …)',
   '2) Perfil Quantic Foundry escolhido + motivações (ex.: Destruição, Desafio, Descoberta): …',
-  '3) Mecânicas (trilha Conquista: área secreta + moeda brilhante · OU trilha Ação: obstáculo móvel) + o que ficou de fora: …',
+  '3) Mecânicas (trilha Conquista: área secreta + moeda brilhante · OU trilha Ação: plataforma móvel) + o que ficou de fora: …',
   '4) Playtest — o que um jogador desse perfil sente no Labirinto: …',
 ].join('\n');
 
@@ -95,8 +95,8 @@ function initSlidesViewer() {
 
   const encodedPptx = encodeURIComponent(PPTX_FILE);
   const encodedPdf = encodeURIComponent(PDF_FILE);
-  const pptxRelativePath = `../assets/docs/aulas/${encodedPptx}?v=20261021h`;
-  const pdfRelativePath = `../assets/docs/aulas/${encodedPdf}?v=20261021h`;
+  const pptxRelativePath = `../assets/docs/aulas/${encodedPptx}?v=20261022a`;
+  const pdfRelativePath = `../assets/docs/aulas/${encodedPdf}?v=20261022a`;
 
   downloadPptx.href = pptxRelativePath;
   downloadPdf.href = pdfRelativePath;

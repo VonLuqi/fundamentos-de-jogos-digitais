@@ -67,7 +67,7 @@ Finalize + Altar no **fim do Encontro 2**.
 | Querem loja / boss | Fora do escopo |
 | Trio | Formato = 1 ou 2 |
 | Coleta Aula 07 quebrou | Restaurar `moeda.gd` / grupo player antes da trilha nova |
-| Obstáculo não move | `AnimatableBody2D` + script · `_physics_process` |
+| Plataforma móvel não anda | `AnimatableBody2D` + script · `_physics_process` · `pingpong` |
 | Moeda sem brilho | Script de pulse · `_process` |
 | Câmera não segue | `Camera2D` filha do Player · Enabled/Current · ou `make_current()` |
 
@@ -79,7 +79,7 @@ Finalize + Altar no **fim do Encontro 2**.
 
 - README: [`assets/docs/aulas/aula08-perfil-quantic/README.md`](../assets/docs/aulas/aula08-perfil-quantic/README.md)
 - Folha Fase 1 (imprimir): [`folha-fase1.pdf`](../assets/docs/aulas/aula08-perfil-quantic/folha-fase1.pdf) · `python scripts/build-aula08-folha-fase1-pdf.py`
-- Scripts: `camera-player-exemplo.gd` · `moeda-brilhante-exemplo.gd` · `obstaculo-exemplo.gd`
+- Scripts: `camera-player-exemplo.gd` · `moeda-brilhante-exemplo.gd` · `plataforma-exemplo.gd`
 - Slides: `aula08_quantic_foundry_slides.{pptx,pdf}` (`python scripts/build-aula08-slides.py`)
 - Página: [`pages/aula8.html`](../pages/aula8.html)
 

@@ -36,7 +36,7 @@ assert.ok(aula8Html.includes('Pistas secretas'), 'pistas na Oficina');
 assert.ok(!aula8Html.includes('segredo_modelo_quantic'), 'HTML sem id secreta');
 assert.ok(/individual ou dupla|trabalhar sozinho/i.test(aula8Html), 'solo/dupla');
 assert.ok(/Design do perfil|Programação das mecânicas/i.test(aula8Html), 'ofícios aula8');
-assert.ok(/Conquista|Ação|obstáculo|moeda brilhante/i.test(aula8Html), 'trilhas Godot');
+assert.ok(/Conquista|Ação|plataforma móvel|moeda brilhante/i.test(aula8Html), 'trilhas Godot');
 assert.ok(aula8Html.includes('id="aula8-bloco-conquista"') && aula8Html.includes('id="aula8-bloco-acao"'), 'blocos copiáveis');
 assert.ok(aula8Html.includes('id="aula8-bloco-camera"') && /Camera2D|make_current/i.test(aula8Html), 'bloco câmera E1');
 assert.ok(aula8Html.includes('lesson-copy-code'), 'botões Copiar código');
@@ -59,7 +59,7 @@ assert.ok(exists('scripts/build-aula08-folha-fase1-pdf.py'), 'script build folha
 assert.ok(exists('assets/docs/aulas/aula08-perfil-quantic/estrutura-pastas.txt'), 'estrutura');
 assert.ok(exists('assets/docs/aulas/aula08-perfil-quantic/camera-player-exemplo.gd'), 'script câmera');
 assert.ok(exists('assets/docs/aulas/aula08-perfil-quantic/moeda-brilhante-exemplo.gd'), 'script conquista');
-assert.ok(exists('assets/docs/aulas/aula08-perfil-quantic/obstaculo-exemplo.gd'), 'script ação');
+assert.ok(exists('assets/docs/aulas/aula08-perfil-quantic/plataforma-exemplo.gd'), 'script ação');
 assert.ok(aula8Html.includes('folha-fase1.pdf') && /folha Fase 1|plataformas/i.test(aula8Html), 'Oficina cita PDF da folha');
 const folha = read('assets/docs/aulas/aula08-perfil-quantic/folha-fase1.md');
 assert.ok(/plataforma|moeda/i.test(folha) && /LEGENDA|MAPA DA FASE 1/i.test(folha), 'folha tem mapa + legenda');

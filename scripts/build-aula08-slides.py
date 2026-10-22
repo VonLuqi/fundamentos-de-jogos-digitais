@@ -256,7 +256,7 @@ def build_deck() -> Presentation:
         [
             ("AÇÃO · DESAFIO", {"size": 14, "bold": True, "color": GOLD, "font": TITLE_FONT, "space_after": 8}),
             "Tensão, timing, impacto.",
-            "Obstáculos que se movem.",
+            "Plataformas móveis.",
             "Risco e ritmo.",
         ],
         size_pt=15,
@@ -300,7 +300,7 @@ def build_deck() -> Presentation:
         tf,
         [
             ("AÇÃO", {"size": 14, "bold": True, "color": GOLD, "font": TITLE_FONT, "space_after": 8}),
-            "Obstáculo móvel (vai-e-volta).",
+            "Plataforma móvel (vai-e-volta).",
             "Timing obrigatório.",
             "Eco Action + Challenge.",
         ],

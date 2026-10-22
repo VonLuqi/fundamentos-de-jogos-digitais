@@ -114,7 +114,7 @@ Enxergar o estúdio como **sistema de papéis**, fechar o **cercado do escopo** 
 
 ### Objetivo
 
-Ligar **motivações Quantic Foundry** a **mecânicas de nível** no Labirinto: escolher um perfil-alvo e implementar a trilha **Conquista** (segredo + moeda brilhante) **ou** **Ação** (obstáculo móvel).
+Ligar **motivações Quantic Foundry** a **mecânicas de nível** no Labirinto: escolher um perfil-alvo e implementar a trilha **Conquista** (segredo + moeda brilhante) **ou** **Ação** (plataforma móvel).
 
 ### Conceitos-chave
 

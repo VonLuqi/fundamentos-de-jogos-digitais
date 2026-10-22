@@ -30,7 +30,7 @@ for (const id of AULA8_IDS) {
 }
 
 const quanticBom = 'Usamos o modelo Quantic Foundry: motivação Desafio e Descoberta.';
-const quanticNome = 'A motivação Destruição explica o obstáculo.';
+const quanticNome = 'A motivação Destruição explica a plataforma móvel.';
 const quanticFraco = 'Gostei do labirinto.';
 assert.ok(matchesModeloQuantic(normalizeForSecretCheck(quanticBom)));
 assert.ok(matchesModeloQuantic(normalizeForSecretCheck(quanticNome)));
@@ -42,7 +42,7 @@ assert.ok(matchesPerfilMecanica(normalizeForSecretCheck(perfilBom)));
 assert.ok(!matchesPerfilMecanica(normalizeForSecretCheck(perfilSoPerfil)));
 
 const trilhaConquista = 'Trilha Conquista: área secreta com moeda brilhante.';
-const trilhaAcao = 'Trilha Ação: obstáculo móvel com timing.';
+const trilhaAcao = 'Trilha Ação: plataforma móvel com timing.';
 const trilhaFraco = 'Mexemos no cenário.';
 assert.ok(matchesTrilhaLabirinto(normalizeForSecretCheck(trilhaConquista)));
 assert.ok(matchesTrilhaLabirinto(normalizeForSecretCheck(trilhaAcao)));
@@ -62,7 +62,7 @@ assert.deepEqual(
   'idempotente'
 );
 
-const soQuantic = 'Quantic Foundry: motivação Desafio no perfil e mecânica de obstáculo móvel.';
+const soQuantic = 'Quantic Foundry: motivação Desafio no perfil e mecânica de plataforma móvel.';
 assert.deepEqual(
   evaluateSecretAchievements('aula7', soQuantic).map((e) => e.id),
   [],
