@@ -8,6 +8,7 @@ import {
   fetchLessonGates,
   getBootstrapGates,
 } from './api.js';
+import { maybeOfferInstall } from './pwa-install.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
 /** Preferência de aside recolhido no desktop (Q18 / Task S.1). */
@@ -438,6 +439,8 @@ export function initAppShell({
       await onLogout();
     });
   }
+
+  maybeOfferInstall();
 
   return {
     open: () => {

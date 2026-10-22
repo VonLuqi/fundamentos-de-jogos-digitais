@@ -89,12 +89,13 @@ DirectoryIndex index.html index.php
   </IfModule>
 </FilesMatch>
 
-# Tipos MIME modernos (WebP, WAV, ES Modules, JSON)
+# Tipos MIME modernos (WebP, WAV, ES Modules, JSON, PWA manifest)
 <IfModule mod_mime.c>
   AddType image/webp .webp
   AddType audio/wav .wav
   AddType application/javascript .js .mjs
   AddType application/json .json
+  AddType application/manifest+json .webmanifest
 </IfModule>
 
 <IfModule mod_deflate.c>

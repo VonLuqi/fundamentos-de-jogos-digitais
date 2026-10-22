@@ -734,3 +734,75 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
     margin-inline: 0.85rem;
   }
 }
+
+/* —— Convite PWA: instalar app na área de trabalho / tela inicial —— */
+.pwa-install {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 80;
+  display: flex;
+  justify-content: center;
+  padding: 0 max(0.85rem, env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px))
+    max(0.85rem, env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(1.1rem);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.pwa-install.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.pwa-install__panel {
+  width: min(100%, 28rem);
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem 1.05rem;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(165deg, rgba(28, 22, 34, 0.97), rgba(13, 10, 16, 0.98)),
+    #0d0a10;
+  box-shadow: 0 -0.4rem 1.6rem rgba(0, 0, 0, 0.45);
+}
+
+.pwa-install__title {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e8d5a3;
+}
+
+.pwa-install__body {
+  margin: 0.35rem 0 0;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: rgba(236, 228, 214, 0.88);
+}
+
+.pwa-install__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.pwa-install__actions .btn-gold,
+.pwa-install__actions .btn-gold--ghost {
+  flex: 1 1 auto;
+  min-width: 7.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-install {
+    transition: none;
+  }
+}
+
