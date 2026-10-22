@@ -433,6 +433,10 @@ final class DespertarService
     }
 
     /**
+     * Sync econômico: confia no cliente (fluidez Cookie Clicker).
+     * Sanitiza IDs/contagens; não rejeita por maxGain / Estela antiga / spend.
+     * Anti-cheat de ganho propositalmente fraco — pedido explícito da turma.
+     *
      * @param array<string, mixed> $dbRow
      * @return array<string, mixed>
      */
@@ -455,157 +459,57 @@ final class DespertarService
             return $withEcho([
                 'ok' => false,
                 'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
+                'error' => 'Payload de sync inválido.',
                 'state' => self::buildStateDto($db, $echoOpts),
             ]);
         }
 
-        $clientLast = $clientState['lastSyncAt'] ?? $clientState['last_sync_at'] ?? null;
-        if ($clientLast && !empty($db['lastSyncAt'])) {
-            $clientMs = Database::parseMs((string) $clientLast);
-            $dbMs = Database::parseMs((string) $db['lastSyncAt']);
-            if ($clientMs !== null && $dbMs !== null && $clientMs < $dbMs - 1000) {
-                return $withEcho([
-                    'ok' => false,
-                    'status' => 409,
-                    'error' => 'A Estela do servidor é mais recente. Estado restaurado.',
-                    'state' => self::buildStateDto($db, $echoOpts),
-                ]);
-            }
-        }
+        // last-write-wins: ignora lastSyncAt mais velho (sem 409 punitivo).
 
         $rawGens = self::asObject($clientState['generators'] ?? $clientState['generators_state'] ?? []);
         $rawUps = self::asStringArray($clientState['upgrades'] ?? $clientState['upgrades_state'] ?? []);
-        $rawTals = self::asStringArray($clientState['talents'] ?? $clientState['talents_state'] ?? []);
-        $unknown = DespertarFormulas::unknownCatalogIds($rawGens, $rawUps, $rawTals);
-        if ($unknown !== []) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-                'unknown' => $unknown,
-            ]);
+        $genById = DespertarCatalog::generatorsById();
+        $filteredGens = [];
+        foreach ($rawGens as $id => $qty) {
+            if (isset($genById[(string) $id])) {
+                $filteredGens[(string) $id] = $qty;
+            }
         }
 
         $upById = DespertarCatalog::upgradesById();
+        $souls = DespertarDecimal::money(DespertarDecimal::decimalString($clientState['souls'] ?? null, $db['souls']));
+        if (DespertarDecimal::cmp($souls, '0') < 0) {
+            $souls = '0.00';
+        }
+        $runSouls = DespertarDecimal::money(DespertarDecimal::decimalString($clientState['runSouls'] ?? $clientState['run_souls'] ?? null, $db['runSouls']));
+        if (DespertarDecimal::cmp($runSouls, '0') < 0) {
+            $runSouls = '0.00';
+        }
+        $lifetimeSouls = DespertarDecimal::money(DespertarDecimal::decimalString($clientState['lifetimeSouls'] ?? $clientState['lifetime_souls'] ?? null, $db['lifetimeSouls']));
+        if (DespertarDecimal::cmp($lifetimeSouls, '0') < 0) {
+            $lifetimeSouls = '0.00';
+        }
+
         $client = [
-            'souls' => DespertarDecimal::money(DespertarDecimal::decimalString($clientState['souls'] ?? null, $db['souls'])),
-            'generators' => self::normalizeGenerators($rawGens),
+            'souls' => $souls,
+            'generators' => self::normalizeGenerators($filteredGens),
             'upgrades' => array_values(array_filter($rawUps, static fn(string $id): bool => isset($upById[$id]))),
-            'runSouls' => DespertarDecimal::money(DespertarDecimal::decimalString($clientState['runSouls'] ?? $clientState['run_souls'] ?? null, $db['runSouls'])),
-            'lifetimeSouls' => DespertarDecimal::money(DespertarDecimal::decimalString($clientState['lifetimeSouls'] ?? $clientState['lifetime_souls'] ?? null, $db['lifetimeSouls'])),
+            'runSouls' => $runSouls,
+            'lifetimeSouls' => $lifetimeSouls,
             'eduLogsSeen' => self::asStringArray($clientState['eduLogsSeen'] ?? $clientState['edu_logs_seen'] ?? []),
             'milestones' => self::asObject($clientState['milestones'] ?? []),
         ];
 
-        $goldRes = self::normalizeGoldCounts($clientState['goldCounts'] ?? $clientState['gold_counts'] ?? [], $client['generators'], false);
-        if (!$goldRes['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-                'detail' => $goldRes['error'],
-            ]);
-        }
+        // soft=true: clamp contagens OOB em vez de rejeitar
+        $goldRes = self::normalizeGoldCounts($clientState['goldCounts'] ?? $clientState['gold_counts'] ?? [], $client['generators'], true);
         $client['goldCounts'] = $goldRes['goldCounts'] ?? [];
-
-        $shinyRes = self::normalizeShinyCounts($clientState['shinyCounts'] ?? $clientState['shiny_counts'] ?? [], $client['generators'], $client['goldCounts'], false);
-        if (!$shinyRes['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-                'detail' => $shinyRes['error'],
-            ]);
-        }
+        $shinyRes = self::normalizeShinyCounts($clientState['shinyCounts'] ?? $clientState['shiny_counts'] ?? [], $client['generators'], $client['goldCounts'], true);
         $client['shinyCounts'] = $shinyRes['shinyCounts'] ?? [];
-
-        if (DespertarDecimal::cmp($client['souls'], '0') < 0) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
-        }
-
-        if (DespertarDecimal::cmp($client['runSouls'], $db['runSouls']) < 0
-            || DespertarDecimal::cmp($client['lifetimeSouls'], $db['lifetimeSouls']) < 0) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
-        }
 
         $spend = self::computeSpend($db, $client);
         if (!$spend['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-                'detail' => $spend['error'],
-            ]);
-        }
-
-        $lastMs = !empty($db['lastSyncAt']) ? Database::parseMs((string) $db['lastSyncAt']) : $nowMs;
-        $rawDt = max(0.0, ($nowMs - ($lastMs ?? $nowMs)) / 1000.0);
-        $econ = DespertarFormulas::economyEffects($db['talents'], $db['verdictPurchases']);
-        $ceiling = ((float) ($econ['offlineHours'] ?? DespertarCatalog::OFFLINE_MAX_HOURS_BASE)) * 3600.0 + DespertarCatalog::SYNC_OFFLINE_JITTER_SECONDS;
-        $dt = min($rawDt, $ceiling);
-
-        $sps = DespertarFormulas::calculateTotalSPS([
-            'generators' => $client['generators'],
-            'upgrades' => $client['upgrades'],
-            'talents' => $db['talents'],
-            'obols' => $db['obols'],
-            'verdictPurchases' => $db['verdictPurchases'],
-            'shinyCounts' => $client['shinyCounts'],
-            'goldCounts' => $client['goldCounts'],
-        ]);
-        $power = DespertarFormulas::clickPower([
-            'generators' => $client['generators'],
-            'upgrades' => $client['upgrades'],
-            'talents' => $db['talents'],
-            'obols' => $db['obols'],
-            'sps' => $sps,
-            'verdictPurchases' => $db['verdictPurchases'],
-            'shinyCounts' => $client['shinyCounts'],
-            'goldCounts' => $client['goldCounts'],
-        ]);
-        $maxGain = DespertarFormulas::theoreticalMaxGain($sps, $power, $dt);
-
-        $walletDelta = DespertarDecimal::sub($client['souls'], $db['souls']);
-        $claimedGain = DespertarDecimal::add($walletDelta, $spend['spent'] ?? '0');
-
-        if (DespertarDecimal::cmp($claimedGain, '0') < 0) {
-            $available = DespertarDecimal::add($db['souls'], $maxGain);
-            if (DespertarDecimal::cmp($spend['spent'] ?? '0', $available) > 0) {
-                return $withEcho([
-                    'ok' => false,
-                    'status' => 400,
-                    'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                    'state' => self::buildStateDto($db, $echoOpts),
-                ]);
-            }
-        }
-
-        $excess = DespertarDecimal::sub($claimedGain, $maxGain);
-        if (DespertarDecimal::cmp($claimedGain, $maxGain) > 0
-            && DespertarDecimal::cmp($excess, DespertarCatalog::SYNC_ABSURD_GAIN_FLOOR) > 0) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => DespertarCatalog::JUDGES_REFUSED_MESSAGE,
-                'state' => self::buildStateDto($db, $echoOpts),
-                'maxGain' => DespertarDecimal::decimalString($maxGain),
-                'claimedGain' => DespertarDecimal::decimalString($claimedGain),
-            ]);
+            // Trust client mesmo se a reconciliação de gasto falhar (qty caiu, etc.)
+            $spend = ['ok' => true, 'spent' => '0.00', 'biggestBuy' => 0];
         }
 
         $eduSet = array_flip(DespertarCatalog::EDU_LOG_IDS);

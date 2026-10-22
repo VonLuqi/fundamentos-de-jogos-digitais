@@ -44,9 +44,11 @@ final class DespertarCatalog
     public const TALENT_CALICE_MNEMOSYNE_DEN = '2';
     public const ECO_STYX_RESSONANTE_COUNT = 2;
 
+    /** Legado — validateSync confia no cliente; não usam mais reject de ganho. */
     public const SYNC_GAIN_TOLERANCE = '1.08';
     public const SYNC_ABSURD_GAIN_FLOOR = '100';
     public const SYNC_OFFLINE_JITTER_SECONDS = 60;
+    /** Copy legada (não retornada no sync econômico). */
     public const JUDGES_REFUSED_MESSAGE = 'Os Juízes recusaram o saldo declarado — o Submundo restaurou o estado verdadeiro.';
 
     public const NEGATIVO_MULT = '15';

@@ -703,7 +703,7 @@ async function init() {
               return null;
             })
             .catch(() => {
-              showApiWarning(JUDGES_REFUSED_MESSAGE);
+              showApiWarning('Não foi possível verificar a pausa da aula.');
             });
           return;
         }
@@ -712,8 +712,16 @@ async function init() {
         showSealedState();
         return;
       }
-      showApiWarning(error || JUDGES_REFUSED_MESSAGE);
-      pushJudgesTickerHint();
+      // Sync econômico confia no cliente — sem toast dos Juízes / Estela.
+      const msg = String(error || '');
+      if (
+        msg === JUDGES_REFUSED_MESSAGE
+        || /Estela do servidor/i.test(msg)
+        || /restaurou o estado verdadeiro/i.test(msg)
+      ) {
+        return;
+      }
+      if (msg) showApiWarning(msg);
     },
     onSynced: ({ awarded }) => {
       if (awarded?.achievements?.length) {

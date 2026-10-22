@@ -59,8 +59,8 @@ const css = read('css/despertar.css');
 const indexJs = read('js/hades-despertar/index.js');
 const rendererSrc = read('js/hades-despertar/ui/UIRenderer.js');
 const loopSrc = read('js/hades-despertar/core/GameLoop.js');
-const apiSrc = read('api/despertar.js');
-const validateSrc = read('api/_lib/despertar-validate.js');
+const validateSrc = read('backend/src/Services/Despertar/DespertarService.php');
+const controllerSrc = read('backend/src/Controllers/DespertarController.php');
 const shellSrc = read('js/app-shell.js');
 const dashboardHtml = read('pages/dashboard.html');
 const pkg = read('package.json');
@@ -78,8 +78,12 @@ staticAssert(cmp(OFFLINE_EFFICIENCY_BASE, '0.80') === 0, 'eficiência offline 80
 staticAssert(TICK_FPS === 60, 'loop alvo 60 Hz');
 staticAssert(loopSrc.includes('panicUpdates') || loopSrc.includes('LOOP_PANIC'), 'panic no GameLoop');
 staticAssert(SYNC_HEARTBEAT_MS === 30_000, 'sync heartbeat 30 s');
-staticAssert(validateSrc.includes('validateSync'), 'validateSync autoritativo');
-staticAssert(apiSrc.includes('JUDGES_REFUSED') || apiSrc.includes('recus') || validateSrc.includes('teto') || validateSrc.includes('1.08') || validateSrc.includes('1.05'), 'anti-cheat no validate');
+staticAssert(validateSrc.includes('function validateSync'), 'validateSync no backend PHP');
+staticAssert(controllerSrc.includes('stateSync'), 'controller stateSync');
+staticAssert(
+  validateSrc.includes('confia no cliente') || !validateSrc.includes('SYNC_ABSURD_GAIN_FLOOR'),
+  'sync confia no cliente (sem reject absurdo de ganho)'
+);
 staticAssert(html.includes('despertar-layout'), 'três colunas no markup');
 staticAssert(html.includes('despertar-codex-book') || html.includes('despertar-codex-drawer'), 'Códice na UI');
 staticAssert(EDU_LOG_IDS.length === 21, '21 logs do Códice');

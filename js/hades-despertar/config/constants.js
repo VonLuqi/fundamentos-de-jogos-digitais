@@ -53,16 +53,17 @@ export const ECO_STYX_RESSONANTE_COUNT = 2;
 
 export const SYNC_HEARTBEAT_MS = 30_000;
 export const SYNC_MIN_INTERVAL_MS = 5_000;
+/** Legado — sync PHP confia no cliente; não disparam mais reject de ganho. */
 export const SYNC_GAIN_TOLERANCE = '1.08';
 export const SYNC_ABSURD_GAIN_FLOOR = '100';
 export const SYNC_MAX_PER_MINUTE = 12;
 export const SYNC_OFFLINE_JITTER_SECONDS = 60;
 
-/** Sync rejeitado (anti-cheat) — Task F0.1: copy legível para o aluno. */
+/** Copy legada (sync econômico não a devolve; cliente suprime toast se aparecer). */
 export const JUDGES_REFUSED_MESSAGE =
   'Os Juízes recusaram o saldo declarado — o Submundo restaurou o estado verdadeiro.';
 
-/** Rumor do ticker quando o sync é recusado. */
+/** Rumor do ticker (catálogo de rumores; não é mais disparado no reject de sync). */
 export const JUDGES_REFUSED_TICKER =
   'Rumor: o servidor julga o saldo — o browser só simula; a Estela verdadeira é a do Submundo.';
 
