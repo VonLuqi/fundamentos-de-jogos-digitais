@@ -307,8 +307,94 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
 
 .app-shell__footer {
   margin-top: auto;
+  display: grid;
+  gap: 0.45rem;
   padding-top: 0.4rem;
   border-top: 1px solid rgba(207, 167, 89, 0.14);
+}
+
+/* Botão permanente: instalar PWA (chama atenção até instalar) */
+.app-shell__install {
+  position: relative;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 3.15rem;
+  padding: 0.75rem 0.95rem;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #1a1208;
+  border: 1px solid rgba(242, 213, 154, 0.75);
+  background:
+    linear-gradient(180deg, rgba(242, 213, 154, 0.95), rgba(207, 167, 89, 0.88));
+  box-shadow:
+    0 0 18px rgba(207, 167, 89, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.app-shell__install.is-attention {
+  animation: app-shell-install-pulse 1.8s ease-in-out infinite;
+}
+
+.app-shell__install:hover,
+.app-shell__install:focus-visible {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 24px rgba(242, 213, 154, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.app-shell__install:focus-visible {
+  outline: 2px solid var(--hades-gold-bright);
+  outline-offset: 2px;
+}
+
+.app-shell__install.is-installed {
+  animation: none;
+  cursor: default;
+  color: rgba(200, 230, 190, 0.92);
+  border-color: rgba(120, 180, 120, 0.45);
+  background: rgba(40, 70, 45, 0.35);
+  box-shadow: none;
+}
+
+.app-shell__install.is-installed:hover,
+.app-shell__install.is-installed:focus-visible {
+  transform: none;
+  box-shadow: none;
+}
+
+@keyframes app-shell-install-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px rgba(207, 167, 89, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(242, 213, 154, 0.55),
+      0 0 8px rgba(207, 167, 89, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-shell__install.is-attention {
+    animation: none;
+  }
 }
 
 .app-shell__logout {

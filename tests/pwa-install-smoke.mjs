@@ -41,6 +41,9 @@ assert.ok(pwa.includes('bindEmail') && pwa.includes('requestEmailVerification'),
 assert.ok(pwa.includes('handleInstallIntent') || pwa.includes('openEmailGate'), 'gate no clique Instalar');
 assert.ok(pwa.includes('data-pwa-action="continue"') || pwa.includes("action=\"continue\""), 'iOS Continuar');
 assert.ok(pwa.includes('pwa-install-gate'), 'markup do popup de e-mail');
+assert.ok(pwa.includes('export async function isAppInstalled') || pwa.includes('export async function isAppInstalled()'), 'detecta app instalado');
+assert.ok(pwa.includes('mountInstallButton') && pwa.includes('data-pwa-install-btn'), 'botão permanente no shell');
+assert.ok(pwa.includes('App instalado') && pwa.includes('Instalar o app'), 'estados do botão');
 
 const api = read('js/api.js');
 assert.ok(api.includes('export function needsMessengerSeal'), 'needsMessengerSeal exportado');
@@ -58,5 +61,6 @@ assert.ok(
 const css = read('css/app-shell.css');
 assert.ok(css.includes('.pwa-install'), 'estilos do banner PWA');
 assert.ok(css.includes('.pwa-install-gate'), 'estilos do popup de e-mail');
+assert.ok(css.includes('.app-shell__install') && css.includes('app-shell-install-pulse'), 'botão instalar chama atenção');
 
 console.log('OK pwa-install-smoke');

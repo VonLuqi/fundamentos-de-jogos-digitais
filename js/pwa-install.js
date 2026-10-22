@@ -26,6 +26,7 @@ let deferredPrompt = null;
 let bannerEl = null;
 let gateEl = null;
 let started = false;
+let installBtnWired = false;
 /** @type {'chromium' | 'ios' | null} */
 let pendingInstallMode = null;
 
@@ -38,10 +39,98 @@ function siteRootUrl() {
 }
 
 function isStandalone() {
-  if (typeof window === 'undefined') return true;
+  if (typeof window === 'undefined') return false;
   if (window.matchMedia?.('(display-mode: standalone)')?.matches) return true;
+  if (window.matchMedia?.('(display-mode: fullscreen)')?.matches) return true;
   if (window.navigator?.standalone === true) return true;
   return false;
+}
+
+/** Detecta se o PWA já está instalado (standalone, flag local ou related apps). */
+export async function isAppInstalled() {
+  if (isStandalone() || wasInstalled()) return true;
+  if (typeof navigator !== 'undefined' && typeof navigator.getInstalledRelatedApps === 'function') {
+    try {
+      const apps = await navigator.getInstalledRelatedApps();
+      if (Array.isArray(apps) && apps.length > 0) {
+        markInstalled();
+        return true;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+  return false;
+}
+
+function installModeForDevice() {
+  return isIosSafari() ? 'ios' : 'chromium';
+}
+
+function refreshInstallButtons() {
+  void isAppInstalled().then((installed) => {
+    document.querySelectorAll('[data-pwa-install-btn]').forEach((btn) => {
+      applyInstallButtonState(btn, installed);
+    });
+  });
+}
+
+function applyInstallButtonState(btn, installed) {
+  if (!btn) return;
+  btn.classList.toggle('is-installed', installed);
+  btn.classList.toggle('is-attention', !installed);
+  if (installed) {
+    btn.textContent = 'App instalado';
+    btn.setAttribute('aria-label', 'O app já está instalado neste dispositivo');
+    btn.title = 'Você já está usando o atalho do app (ou ele já foi instalado).';
+    btn.setAttribute('aria-disabled', 'true');
+  } else {
+    btn.textContent = 'Instalar o app';
+    btn.setAttribute('aria-label', 'Instalar o app na área de trabalho');
+    btn.title = 'Instalar Fundamentos na área de trabalho / tela inicial';
+    btn.removeAttribute('aria-disabled');
+  }
+}
+
+/**
+ * Botão permanente no rodapé do aside (injeta em todas as páginas com app-shell).
+ */
+export function mountInstallButton(shell = typeof document !== 'undefined' ? document.querySelector('[data-shell]') : null) {
+  const footer = shell?.querySelector?.('.app-shell__footer');
+  if (!footer) return null;
+
+  let btn = footer.querySelector('[data-pwa-install-btn]');
+  if (!btn) {
+    btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'app-shell__install is-attention';
+    btn.setAttribute('data-pwa-install-btn', '1');
+    const logout = footer.querySelector('[data-shell-logout]');
+    if (logout) footer.insertBefore(btn, logout);
+    else footer.appendChild(btn);
+  }
+
+  if (!installBtnWired) {
+    installBtnWired = true;
+    document.addEventListener('click', (event) => {
+      const target = event.target?.closest?.('[data-pwa-install-btn]');
+      if (!target) return;
+      event.preventDefault();
+      void onInstallButtonClick(target);
+    });
+  }
+
+  void isAppInstalled().then((installed) => applyInstallButtonState(btn, installed));
+  return btn;
+}
+
+async function onInstallButtonClick(btn) {
+  if (btn?.classList.contains('is-installed') || (await isAppInstalled())) {
+    applyInstallButtonState(btn, true);
+    return;
+  }
+  await handleInstallIntent(installModeForDevice());
+  refreshInstallButtons();
 }
 
 function isIosSafari() {
@@ -164,15 +253,25 @@ function hideGate() {
 async function runNativeInstall() {
   const promptEvent = deferredPrompt;
   if (!promptEvent) {
+    if (await isAppInstalled()) {
+      refreshInstallButtons();
+      hideGate();
+      hideBanner();
+      return;
+    }
+    hideGate();
     hideBanner();
+    renderBanner({ mode: 'manual-hint' });
     return;
   }
   deferredPrompt = null;
   try {
     promptEvent.prompt();
     const choice = await promptEvent.userChoice;
-    if (choice?.outcome === 'accepted') markInstalled();
-    else markDismissed();
+    if (choice?.outcome === 'accepted') {
+      markInstalled();
+      refreshInstallButtons();
+    } else markDismissed();
   } catch {
     markDismissed();
   }
@@ -409,6 +508,11 @@ function renderBanner({ mode }) {
       'No Safari: toque em Compartilhar e depois em Adicionar à Tela de Início.';
     primaryHtml =
       '<button type="button" class="btn-gold" data-pwa-action="ok">Entendi</button>';
+  } else if (mode === 'manual-hint') {
+    bodyText =
+      'Se o diálogo não aparecer: no Chrome, use o ícone de instalar na barra de endereço — ou abra pelo atalho se o app já estiver na área de trabalho.';
+    primaryHtml =
+      '<button type="button" class="btn-gold" data-pwa-action="ok">Entendi</button>';
   }
 
   card.innerHTML = `
@@ -457,6 +561,7 @@ function bindBeforeInstallPrompt() {
   window.addEventListener('beforeinstallprompt', (event) => {
     event.preventDefault();
     deferredPrompt = event;
+    refreshInstallButtons();
     if (!shouldOffer() || bannerEl || gateEl) return;
     renderBanner({ mode: 'chromium' });
   });
@@ -466,21 +571,34 @@ function bindBeforeInstallPrompt() {
     deferredPrompt = null;
     hideGate();
     hideBanner();
+    refreshInstallButtons();
+  });
+
+  window.matchMedia?.('(display-mode: standalone)')?.addEventListener?.('change', () => {
+    refreshInstallButtons();
   });
 }
 
 /**
- * Inicia registro PWA e, se couber, mostra o convite de instalação.
+ * Inicia registro PWA, botão no menu e, se couber, o convite flutuante.
  * Seguro chamar várias vezes (idempotente).
  */
 export function maybeOfferInstall() {
-  if (typeof window === 'undefined' || started) return;
+  if (typeof window === 'undefined') return;
+
+  mountInstallButton();
+
+  if (started) {
+    refreshInstallButtons();
+    return;
+  }
   started = true;
 
   ensureManifestLink();
   bindBeforeInstallPrompt();
 
   void registerServiceWorker();
+  refreshInstallButtons();
 
   if (!shouldOffer()) return;
 
