@@ -37,11 +37,11 @@ DirectoryIndex index.html index.php
   # Slugs = arquivos em pages/*.html (exceto submundo/)
   # THE_REQUEST: só no request do browser (não após rewrite interno).
   # Location absoluta via %1 (prefixo público) — evita /home4/... no HostGator.
-  RewriteCond %{THE_REQUEST} \s[A-Z]+\s((?:/[^?\s]+)*)/pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html[\s?] [NC]
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html[\s?] [NC]
   RewriteRule ^pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html$ %1/%2/ [R=301,L,QSA]
 
   # Sem barra final → canônico com barra (../css e ../js resolvem na raiz do site)
-  RewriteCond %{THE_REQUEST} \s[A-Z]+\s((?:/[^?\s]+)*)/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)(?:\s|\?) [NC]
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)(?:\s|\?) [NC]
   RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)$ %1/%2/ [R=301,L,QSA]
 
   RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)/$ pages/$1.html [L,END]
@@ -52,7 +52,7 @@ DirectoryIndex index.html index.php
   #    garante barra final para que os caminhos relativos ../../ do HTML resolvam
   #    para a raiz do projeto.
   # ---------------------------------------------------------------------------
-  RewriteCond %{THE_REQUEST} \s[A-Z]+\s((?:/[^?\s]+)*)/(submundo/(?:tartaro-oculto|asfodelos-sussurros|hecate-encruzilhada|elisios-julgamento|persefone-jardim|persefone-estacoes|observatorio-sombras|observatorio-oculto|cocito-espelho|estige-obolo))(?:\s|\?) [NC]
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/(submundo/(?:tartaro-oculto|asfodelos-sussurros|hecate-encruzilhada|elisios-julgamento|persefone-jardim|persefone-estacoes|observatorio-sombras|observatorio-oculto|cocito-espelho|estige-obolo))(?:\s|\?) [NC]
   RewriteRule ^(submundo/(?:tartaro-oculto|asfodelos-sussurros|hecate-encruzilhada|elisios-julgamento|persefone-jardim|persefone-estacoes|observatorio-sombras|observatorio-oculto|cocito-espelho|estige-obolo))$ %1/%2/ [R=302,L]
 
   RewriteRule ^submundo/tartaro-oculto/?$ pages/submundo/tartaro-oculto.html [L]
