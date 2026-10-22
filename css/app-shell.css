@@ -800,8 +800,140 @@ body.is-admin-context .app-shell__link.is-locked[aria-disabled="false"]:focus-vi
   min-width: 7.5rem;
 }
 
+/* Popup: Selo do Mensageiro antes de instalar o PWA */
+.pwa-install-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) max(0.85rem, env(safe-area-inset-right, 0px))
+    max(1rem, env(safe-area-inset-bottom, 0px)) max(0.85rem, env(safe-area-inset-left, 0px));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
+}
+
+.pwa-install-gate.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.pwa-install-gate__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 4, 8, 0.72);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.pwa-install-gate__panel {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 26rem);
+  display: grid;
+  gap: 0.75rem;
+  padding: 1.15rem 1.2rem 1.1rem;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(165deg, rgba(28, 22, 34, 0.98), rgba(13, 10, 16, 0.99)),
+    #0d0a10;
+  box-shadow: 0 0.6rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.pwa-install-gate__title {
+  margin: 0;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #e8d5a3;
+}
+
+.pwa-install-gate__body,
+.pwa-install-gate__hint {
+  margin: 0;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  color: rgba(236, 228, 214, 0.88);
+}
+
+.pwa-install-gate__email {
+  margin: 0;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 1rem;
+  color: rgba(232, 213, 163, 0.95);
+}
+
+.pwa-install-gate__status {
+  margin: 0;
+  min-height: 1.2em;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 0.98rem;
+  color: rgba(200, 220, 190, 0.9);
+}
+
+.pwa-install-gate__status.is-error {
+  color: #e8a0a0;
+}
+
+.pwa-install-gate__form {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.pwa-install-gate__label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(232, 213, 163, 0.75);
+}
+
+.pwa-install-gate__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 0.25rem;
+  background: rgba(8, 6, 12, 0.85);
+  color: #f0e6d4;
+  font-family: 'Crimson Text', Georgia, serif;
+  font-size: 1.05rem;
+}
+
+.pwa-install-gate__input:focus {
+  outline: 2px solid rgba(212, 175, 55, 0.55);
+  outline-offset: 1px;
+}
+
+.pwa-install-gate__pending {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.pwa-install-gate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.15rem;
+}
+
+.pwa-install-gate__form .btn-gold,
+.pwa-install-gate__pending .btn-gold,
+.pwa-install-gate__actions .btn-gold,
+.pwa-install-gate__actions .btn-gold--ghost {
+  width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .pwa-install {
+  .pwa-install,
+  .pwa-install-gate {
     transition: none;
   }
 }
