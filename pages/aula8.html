@@ -400,9 +400,30 @@ func _ready() -&gt; void:
         <h3 class="lesson-subtitle">3. Trilha Conquista — área secreta + moeda brilhante</h3>
         <ol class="lesson-list">
           <li>Em <code>cenario.tscn</code>, adicione um desvio / gap / altura com uma moeda difícil de alcançar.</li>
-          <li>Na moeda especial: anexe o script de brilho (bloco abaixo) ou use <code>moeda-brilhante-exemplo.gd</code>.</li>
+          <li>No <code>player.gd</code>, acrescente o contador <code>moedas_secretas</code> e a função <code>coletar_moeda_secreta</code> (bloco abaixo) — não apague a coleta da Aula 07.</li>
+          <li>Na moeda especial: anexe o script de brilho (segundo bloco) ou use <code>moeda-brilhante-exemplo.gd</code>.</li>
           <li>Opcional: <code>Area2D</code> <code>ZonaSecreta</code> com <code>body_entered</code> → <code>print("Segredo encontrado!")</code>.</li>
         </ol>
+        <div class="lesson-code-block">
+          <div class="lesson-code-block__toolbar">
+            <p class="lesson-code-block__label">Apoio — Contador secreto (cole no final do player.gd)</p>
+            <button type="button" class="lesson-cta lesson-cta--ghost lesson-copy-code" data-copy-target="aula8-bloco-moedas-secretas" aria-describedby="aula8-bloco-moedas-secretas-hint">
+              Copiar código
+            </button>
+          </div>
+          <p id="aula8-bloco-moedas-secretas-hint" class="lesson-code-block__hint">
+            Cole <strong>no final</strong> do <code>player.gd</code> (depois de <code>coletar_moeda</code> da Aula 07).
+            Contador separado: moedas normais continuam em <code>moedas</code>; as brilhantes usam <code>moedas_secretas</code>.
+          </p>
+          <pre id="aula8-bloco-moedas-secretas" class="lesson-pre" aria-label="Código trilha Conquista — contador moedas secretas no player">## --- Aula 08: moedas secretas (acrescente no player.gd) ---
+var moedas_secretas: int = 0
+
+
+func coletar_moeda_secreta() -&gt; void:
+	moedas_secretas += 1
+	print("Moedas secretas: %d" % moedas_secretas)</pre>
+          <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-moedas-secretas" aria-live="polite"></p>
+        </div>
         <div class="lesson-code-block">
           <div class="lesson-code-block__toolbar">
             <p class="lesson-code-block__label">Apoio — Trilha Conquista (cole na moeda especial)</p>
@@ -411,12 +432,13 @@ func _ready() -&gt; void:
             </button>
           </div>
           <p id="aula8-bloco-conquista-hint" class="lesson-code-block__hint">
-            Anexe à raiz <code>Area2D</code> da moeda difícil (além do <code>moeda.gd</code> de coleta da Aula 07,
-            ou combine: brilho + <code>queue_free</code> no mesmo script).
+            Anexe à raiz <code>Area2D</code> da moeda difícil. Conecte <code>body_entered</code> →
+            <code>_on_body_entered</code>. A moeda brilhante chama <code>coletar_moeda_secreta</code>
+            (não a coleta comum da Aula 07).
           </p>
           <pre id="aula8-bloco-conquista" class="lesson-pre" aria-label="Código trilha Conquista — moeda brilhante">extends Area2D
 ## Aula 08 — moeda brilhante (trilha Conquista)
-## Coleta: reusa a lógica da Aula 07 + pulso visual.
+## Coleta secreta + pulso visual.
 
 @export var pulse_speed: float = 4.0
 @export var pulse_amount: float = 0.15
@@ -438,12 +460,12 @@ func _process(delta: float) -&gt; void:
 func _on_body_entered(body: Node2D) -&gt; void:
 	if not body.is_in_group("player"):
 		return
-	if body.has_method("coletar_moeda"):
-		body.coletar_moeda()
+	if body.has_method("coletar_moeda_secreta"):
+		body.coletar_moeda_secreta()
 	queue_free()</pre>
           <p class="lesson-code-block__status" data-copy-status-for="aula8-bloco-conquista" aria-live="polite"></p>
         </div>
-        <p><strong>Checkpoint Conquista:</strong> moeda pulsa · difícil de pegar · some ao coletar.</p>
+        <p><strong>Checkpoint Conquista:</strong> moeda pulsa · difícil de pegar · some ao coletar · Output mostra <code>Moedas secretas: 1</code>.</p>
 
         <h3 class="lesson-subtitle">4. Trilha Ação — obstáculo móvel</h3>
         <ol class="lesson-list">

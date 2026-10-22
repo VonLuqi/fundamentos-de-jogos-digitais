@@ -53,8 +53,9 @@ O código completo para copiar está na **Oficina** da plataforma (botão Copiar
 ## Trilha Conquista
 
 1. Desvio / gap / altura no `cenario.tscn`.
-2. Moeda especial com brilho (script-espelho ou bloco da Oficina).
-3. Conectar `body_entered` → coleta + `queue_free`.
+2. No `player.gd`: `moedas_secretas` + `coletar_moeda_secreta` (bloco da Oficina).
+3. Moeda especial com brilho (script-espelho ou bloco da Oficina) — chama `coletar_moeda_secreta`.
+4. Conectar `body_entered` → coleta secreta + `queue_free`.
 
 ## Trilha Ação
 
