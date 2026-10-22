@@ -35,12 +35,15 @@ DirectoryIndex index.html index.php
   #    Legado:   /pages/despertar.html e /despertar  →  301 /despertar/
   # ---------------------------------------------------------------------------
   # Slugs = arquivos em pages/*.html (exceto submundo/)
+  # THE_REQUEST evita 301 após rewrite interno (HostGator: Location com /home4/...)
+  RewriteCond %{THE_REQUEST} \s/+[^\s]*/pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html[\s?] [NC]
   RewriteRule ^pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)\.html$ $1/ [R=301,L,QSA]
 
   # Sem barra final → canônico com barra (../css e ../js resolvem na raiz do site)
+  RewriteCond %{THE_REQUEST} \s/+[^\s]*/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)(?:\s|\?) [NC]
   RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)$ $1/ [R=301,L,QSA]
 
-  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)/$ pages/$1.html [L]
+  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|classind-dle|prova|prova-admin)/$ pages/$1.html [L,END]
 
   # ---------------------------------------------------------------------------
   # 4. Rewrites do ARG do Submundo (espelho do vercel.json)

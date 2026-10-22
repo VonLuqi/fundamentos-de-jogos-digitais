@@ -113,7 +113,7 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
     link.removeAttribute('aria-disabled');
     link.removeAttribute('tabindex');
     if (!link.getAttribute('href') || link.getAttribute('href') === '#') {
-      link.setAttribute('href', './despertar.html');
+      link.setAttribute('href', '../despertar/');
     }
     // A4 stub: badge textual — link continua clicável (véu na página).
     if (pauseActive && !isAdmin) {

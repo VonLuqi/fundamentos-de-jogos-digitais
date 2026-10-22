@@ -22,6 +22,10 @@ assert.ok(
   '.htaccess reescreve slugs limpos para pages/*.html'
 );
 assert.ok(
+  htaccess.includes('%{THE_REQUEST}') && /pages\/\$1\.html\s*\[L,END\]/.test(htaccess),
+  '.htaccess 301 só no request original (THE_REQUEST) + [END] no rewrite interno'
+);
+assert.ok(
   /pages\/\(auth\|dashboard/.test(htaccess) || htaccess.includes('pages/(auth|dashboard'),
   '.htaccess 301 de pages/*.html legado'
 );
