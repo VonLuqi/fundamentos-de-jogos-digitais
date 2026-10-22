@@ -778,7 +778,7 @@ final class LeaderboardAdminService
 
         // 1. Almas Registradas
         $uStmt = $pdo->query(
-            'SELECT `id`, `turma`, `role`, `xp`, `completed_lessons`, `email`, `email_verified_at`
+            'SELECT `id`, `turma`, `role`, `xp`, `completed_lessons`, `conquistas`, `email`, `email_verified_at`
              FROM `users` WHERE `role` = \'student\''
         );
         $students = $uStmt ? $uStmt->fetchAll(PDO::FETCH_ASSOC) : [];
@@ -790,6 +790,9 @@ final class LeaderboardAdminService
         $xpSum = 0;
         $maxXp = 0;
         $completedCountByLesson = [];
+        // Oferendas do Estige = conquistas aulaN_concluida (quem já resgatou cada aula).
+        $oferendaCountByLesson = [];
+        $totalOferendas = 0;
 
         foreach ($students as $st) {
             $t = strtoupper(trim((string) ($st['turma'] ?? '')));
@@ -818,6 +821,17 @@ final class LeaderboardAdminService
             foreach ($comp as $lid) {
                 $lidStr = (string) $lid;
                 $completedCountByLesson[$lidStr] = ($completedCountByLesson[$lidStr] ?? 0) + 1;
+            }
+
+            $achievements = Database::decodeJsonArray($st['conquistas'] ?? null);
+            foreach ($achievements as $achId) {
+                $ach = (string) $achId;
+                if (!preg_match('/^aula(\d+)_concluida$/', $ach, $m)) {
+                    continue;
+                }
+                $lidStr = 'aula' . $m[1];
+                $oferendaCountByLesson[$lidStr] = ($oferendaCountByLesson[$lidStr] ?? 0) + 1;
+                $totalOferendas++;
             }
         }
 
@@ -909,12 +923,16 @@ final class LeaderboardAdminService
             if ($pub) {
                 $publishedLessonsCount++;
             }
+            $fromLessons = $completedCountByLesson[$lid] ?? 0;
+            $fromAchievements = $oferendaCountByLesson[$lid] ?? 0;
             $perLessonStats[$lid] = [
                 'lessonId' => $lid,
                 'title' => $lmeta['lessonTitle'],
                 'xp' => (int) $lmeta['xp'],
                 'published' => $pub,
-                'completedCount' => $completedCountByLesson[$lid] ?? 0,
+                // Preferência às conquistas; completed_lessons cobre drift legado.
+                'completedCount' => max($fromAchievements, $fromLessons),
+                'oferendaCount' => $fromAchievements,
                 'paragraphCount' => $paragraphsByLesson[$lid] ?? 0,
                 'viewCount' => $viewsByLesson[$lid] ?? 0,
                 'activeCode' => $activeCodeByLesson[$lid] ?? null,
@@ -980,8 +998,11 @@ final class LeaderboardAdminService
                 'avgXp' => $totalStudents > 0 ? (int) round($xpSum / $totalStudents) : 0,
                 'maxXp' => $maxXp,
                 'totalActivitiesSubmitted' => $totalActivitiesSubmitted,
+                'totalOferendas' => $totalOferendas,
+                'oferendaCountByLesson' => $oferendaCountByLesson,
                 'activeDespertarSouls' => $activeDespertarSouls,
                 'activeSessionsCount' => $activeSessionsCount,
+                'activeCodesCount' => count($activeCodes),
             ],
             'lessons' => [
                 'gates' => $gatesMap,

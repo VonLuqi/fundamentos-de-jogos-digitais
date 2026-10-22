@@ -2235,6 +2235,16 @@ function renderMasterAuditChronicle(auditLog = []) {
   });
 }
 
+/** Soma resgates por aula a partir de perLessonStats (fallback se o KPI não vier no payload). */
+function sumLessonOferendas(perLessonStats) {
+  if (!perLessonStats || typeof perLessonStats !== 'object') return 0;
+  const rows = Array.isArray(perLessonStats) ? perLessonStats : Object.values(perLessonStats);
+  return rows.reduce((acc, row) => {
+    const n = Number(row?.oferendaCount ?? row?.completedCount ?? 0);
+    return acc + (Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0);
+  }, 0);
+}
+
 function renderAdminOverview(overview) {
   if (!overview || typeof overview !== 'object') return;
   adminOverviewCache = overview;
@@ -2272,18 +2282,30 @@ function renderAdminOverview(overview) {
   }
   setProgressRingPercent('kpi-lessons-ring', 'kpi-lessons-pct', lessons.publishedPercent ?? 0);
 
-  // KPI 3: Estige & Acheron
+  // KPI 3: Estige & Acheron — oferendas = conquistas aulaN_concluida (resgates).
   const codesActiveEl = document.getElementById('kpi-codes-active');
   const acheronBadgeEl = document.getElementById('kpi-acheron-badge');
   const acheronSummaryEl = document.getElementById('kpi-acheron-summary');
+  const totalOferendas = Number(kpis.totalOferendas);
+  const oferendasCount = Number.isFinite(totalOferendas)
+    ? Math.max(0, Math.floor(totalOferendas))
+    : sumLessonOferendas(lessons.perLessonStats);
   if (codesActiveEl) {
-    codesActiveEl.textContent = `${activeCodes.length} Oferenda${activeCodes.length === 1 ? '' : 's'}`;
+    codesActiveEl.textContent = `${oferendasCount} Oferenda${oferendasCount === 1 ? '' : 's'}`;
   }
   if (acheronBadgeEl) {
     acheronBadgeEl.textContent = acheron.published ? 'Acheron Aberto' : 'Acheron Selado';
   }
   if (acheronSummaryEl) {
-    acheronSummaryEl.textContent = `${acheron.soulsInAcheron ?? 0} Estelas no Acheron · ${kpis.activeSessionsCount ?? 0} sessões ativas`;
+    const activeCodesCount = Number(kpis.activeCodesCount);
+    const codesLabel = Number.isFinite(activeCodesCount)
+      ? activeCodesCount
+      : activeCodes.length;
+    acheronSummaryEl.textContent = [
+      `${acheron.soulsInAcheron ?? 0} Estelas no Acheron`,
+      `${kpis.activeSessionsCount ?? 0} sessões ativas`,
+      `${codesLabel} código${codesLabel === 1 ? '' : 's'} ativo${codesLabel === 1 ? '' : 's'}`,
+    ].join(' · ');
   }
 
   // KPI 4: Provação Módulo 1
