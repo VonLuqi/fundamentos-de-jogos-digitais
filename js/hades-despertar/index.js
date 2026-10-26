@@ -35,7 +35,6 @@ import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil }
 import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY } from './config/season-closed.js';
 import {
   consumeAdminPreviewQuery,
-  isAdminPreviewActive,
   setAdminPreviewActive,
 } from './config/admin-preview.js';
 import { getJuizoCtaState } from './config/juizo-pool.js';
