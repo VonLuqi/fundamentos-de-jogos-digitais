@@ -300,10 +300,12 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.eyebrow)}</p>
       <h2 class="despertar-classroom-veil__title app-shell__title">${escapeHtml(SEASON_CLOSED_COPY.title)}</h2>
       <p class="despertar-classroom-veil__body">${escapeHtml(SEASON_CLOSED_COPY.body)}</p>
+      <p class="despertar-season-prize" data-season-prize>${escapeHtml(SEASON_CLOSED_COPY.prizeNote)}</p>
       <p class="despertar-classroom-veil__eyebrow despertar-season-boards__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.boardsEyebrow)}</p>
       <div class="despertar-season-boards" data-season-boards>
         ${boardSlots}
       </div>
+      <p class="despertar-season-tablet" data-season-tablet>${escapeHtml(SEASON_CLOSED_COPY.tabletNote)}</p>
       <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
         <a class="btn-gold" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
         <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaRanking)}</a>

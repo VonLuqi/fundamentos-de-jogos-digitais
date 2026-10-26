@@ -3394,6 +3394,24 @@ button.despertar-juizo-card:disabled {
   align-items: center;
 }
 
+.despertar-season-prize,
+.despertar-season-tablet {
+  margin: 0.85rem 0 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  background: rgba(207, 167, 89, 0.08);
+  font-family: 'Crimson Text', serif;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  color: var(--hades-parchment, #f3e9d7);
+}
+
+.despertar-season-tablet {
+  border-color: rgba(0, 168, 150, 0.4);
+  background: rgba(0, 168, 150, 0.1);
+  color: var(--hades-parchment, #f3e9d7);
+}
+
 .despertar-classroom-veil--pulse {
   animation: despertar-classroom-veil-breathe 2.8s ease-in-out infinite;
 }
