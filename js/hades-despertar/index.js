@@ -32,7 +32,12 @@ import { JuizoModal } from './ui/JuizoModal.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
 import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil } from './ui/pauseVeil.js';
-import { DESPERTAR_SEASON_CLOSED } from './config/season-closed.js';
+import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY } from './config/season-closed.js';
+import {
+  consumeAdminPreviewQuery,
+  isAdminPreviewActive,
+  setAdminPreviewActive,
+} from './config/admin-preview.js';
 import { getJuizoCtaState } from './config/juizo-pool.js';
 import {
   API_WARNING_DISMISS_MS,
@@ -90,6 +95,28 @@ function showSealedState() {
   presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
 }
 
+function mountAdminPreviewBanner() {
+  const host = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!host || host.querySelector('[data-admin-preview-banner]')) return;
+  const bar = document.createElement('div');
+  bar.className = 'despertar-admin-preview-banner';
+  bar.setAttribute('data-admin-preview-banner', '1');
+  bar.setAttribute('role', 'status');
+  const text = document.createElement('p');
+  text.className = 'despertar-admin-preview-banner__text';
+  text.textContent = SEASON_CLOSED_COPY.previewBanner;
+  const exitBtn = document.createElement('button');
+  exitBtn.type = 'button';
+  exitBtn.className = 'despertar-ghost';
+  exitBtn.textContent = SEASON_CLOSED_COPY.ctaExitPreview;
+  exitBtn.addEventListener('click', () => {
+    setAdminPreviewActive(false);
+    globalThis.location.reload();
+  });
+  bar.append(text, exitBtn);
+  host.prepend(bar);
+}
+
 async function showSeasonClosedState(token, { isAdmin = false } = {}) {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
@@ -111,6 +138,12 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
     token,
     isAdmin,
     leaderboardGet,
+    onPreview: isAdmin
+      ? () => {
+        setAdminPreviewActive(true);
+        globalThis.location.reload();
+      }
+      : undefined,
     onLiberate: isAdmin
       ? async () => {
         await setLessonGate(token, 'despertar', 'published', true);
@@ -635,8 +668,9 @@ async function init() {
   });
 
   // Hold até Dia 1: pódio para todos enquanto Acheron estiver selado.
-  // Liberar = Abrir o Acheron (botão no véu ou Painel) — sem redeploy.
-  if (DESPERTAR_SEASON_CLOSED && !published) {
+  // Liberar = Abrir o Acheron (turma). Pré-visualizar = só este admin (sessionStorage).
+  const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin });
+  if (DESPERTAR_SEASON_CLOSED && !published && !adminPreview) {
     await ensureAcheronSealedForSeason(token, isAdmin);
     await showSeasonClosedState(token, { isAdmin });
     return;
@@ -645,6 +679,10 @@ async function init() {
   if (!isAdmin && !published) {
     showSealedState();
     return;
+  }
+
+  if (adminPreview && !published) {
+    mountAdminPreviewBanner();
   }
 
   // Probe: Acheron publicado mas sob Véu da Aula → countdown (aluno).

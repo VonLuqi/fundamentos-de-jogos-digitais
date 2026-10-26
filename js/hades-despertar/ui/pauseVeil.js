@@ -279,6 +279,7 @@ function renderSeasonBoardRows(entries, category) {
  *   token?: string|null,
  *   isAdmin?: boolean,
  *   onLiberate?: () => Promise<void>|void,
+ *   onPreview?: () => Promise<void>|void,
  *   leaderboardGet?: (token: string, opts: object) => Promise<object>,
  *   scope?: 'turma'|'global',
  * }} [opts]
@@ -299,8 +300,11 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
     </section>
   `).join('');
 
-  const liberateHtml = isAdmin
-    ? `<button class="btn-gold" type="button" data-season-liberate>${escapeHtml(SEASON_CLOSED_COPY.ctaLiberate)}</button>`
+  const adminActions = isAdmin
+    ? `
+        <button class="btn-gold" type="button" data-season-preview>${escapeHtml(SEASON_CLOSED_COPY.ctaPreview)}</button>
+        <button class="despertar-ghost" type="button" data-season-liberate>${escapeHtml(SEASON_CLOSED_COPY.ctaLiberate)}</button>
+      `
     : '';
 
   container.innerHTML = `
@@ -315,7 +319,7 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       </div>
       <p class="despertar-season-tablet" data-season-tablet>${escapeHtml(SEASON_CLOSED_COPY.tabletNote)}</p>
       <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
-        ${liberateHtml}
+        ${adminActions}
         <a class="${isAdmin ? 'despertar-ghost' : 'btn-gold'}" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
         <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaRanking)}</a>
       </p>
@@ -324,7 +328,13 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   `;
 
   const liberateBtn = container.querySelector('[data-season-liberate]');
+  const previewBtn = container.querySelector('[data-season-preview]');
   const liberateError = container.querySelector('[data-season-liberate-error]');
+  if (previewBtn && typeof opts.onPreview === 'function') {
+    previewBtn.addEventListener('click', () => {
+      void opts.onPreview();
+    });
+  }
   if (liberateBtn && typeof opts.onLiberate === 'function') {
     liberateBtn.addEventListener('click', async () => {
       if (liberateBtn.disabled) return;

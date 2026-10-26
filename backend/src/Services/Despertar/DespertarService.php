@@ -837,6 +837,31 @@ final class DespertarService
             'lifetimeClaimedIds' => is_array($prevFortunes['lifetimeClaimedIds'] ?? null) ? $prevFortunes['lifetimeClaimedIds'] : [],
         ];
 
+        // F6: alinhar com GameState.applyPrestige — Catábase/Sanguessugas da corrida resetam; pops vitalícios ficam.
+        $prevCat = is_array($nextMilestones['f6Catabase'] ?? null) ? $nextMilestones['f6Catabase'] : [];
+        $stats = is_array($db['stats'] ?? null) ? $db['stats'] : [];
+        $leechesPopped = (int) ($stats['leechesPopped'] ?? $prevCat['leechesPopped'] ?? 0);
+        $shinyLeechesPopped = (int) ($stats['shinyLeechesPopped'] ?? $prevCat['shinyLeechesPopped'] ?? 0);
+        $resetCatabase = [
+            'stage' => 0,
+            'covenantActive' => false,
+            'pledgeExpiresAt' => null,
+            'pledgesCount' => 0,
+            'leeches' => [],
+            'leechesPopped' => $leechesPopped,
+            'shinyLeechesPopped' => $shinyLeechesPopped,
+            'unlockedResearchIds' => [],
+            'researchTargetId' => null,
+            'researchRemainingSec' => 0,
+        ];
+        $nextMilestones['f6Catabase'] = $resetCatabase;
+        unset($nextMilestones['catabaseActive']);
+
+        // F5: Frenesi de Néctar é por corrida.
+        if (is_array($nextMilestones['f5Nectar'] ?? null)) {
+            $nextMilestones['f5Nectar']['nectarFrenzyUsedThisRun'] = false;
+        }
+
         $next = array_merge($db, [
             'obols' => DespertarDecimal::money(DespertarDecimal::add($db['obols'], $preview['obolsGain'])),
             'mnemosyne' => DespertarDecimal::money(DespertarDecimal::add($db['mnemosyne'], $preview['mnemosyneGain'])),
@@ -848,6 +873,10 @@ final class DespertarService
             'souls' => $startingSouls,
             'runSouls' => $startingSouls,
             'milestones' => $nextMilestones,
+            'activeBuffs' => [],
+            'catabase' => $resetCatabase,
+            'catabaseActive' => false,
+            'nectarFrenzyUsedThisRun' => false,
             'lastSyncAt' => $nowIso,
         ]);
 

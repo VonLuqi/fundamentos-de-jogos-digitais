@@ -4414,3 +4414,22 @@ button.despertar-juizo-card:disabled {
 .despertar-season-closed__actions .btn-gold.despertar-ghost {
   opacity: 0.92;
 }
+
+.despertar-admin-preview-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0 0 0.85rem;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid rgba(0, 168, 150, 0.45);
+  background: rgba(0, 168, 150, 0.12);
+}
+
+.despertar-admin-preview-banner__text {
+  margin: 0;
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  color: var(--hades-parchment, #f3e9d7);
+}
