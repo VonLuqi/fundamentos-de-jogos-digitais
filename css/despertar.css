@@ -2715,15 +2715,35 @@
   font-style: italic;
 }
 
-/* Fase B / B1 — livro flutuante + drawer */
-.despertar-codex-book {
+/* FABs Códice + Placar — cluster evita overlap (left absoluto compartilhado). */
+.despertar-fab-cluster {
   position: absolute;
   z-index: 35;
   left: max(0.65rem, env(safe-area-inset-left, 0px));
   bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  gap: 1rem;
+  pointer-events: none;
+}
+
+.despertar-fab-cluster > .despertar-codex-book,
+.despertar-fab-cluster > .despertar-codex-tip {
+  pointer-events: auto;
+}
+
+/* Fase B / B1 — livro flutuante + drawer */
+.despertar-codex-book {
+  position: relative;
+  z-index: 1;
+  left: auto;
+  bottom: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 3rem;
   width: 3rem;
   height: 3rem;
   padding: 0;
@@ -2749,7 +2769,8 @@
 .despertar-codex-book__badge {
   position: absolute;
   top: -0.35rem;
-  right: -0.35rem;
+  left: -0.35rem;
+  right: auto;
   min-width: 1.25rem;
   height: 1.25rem;
   padding: 0 0.28rem;
@@ -2771,9 +2792,9 @@
   animation: despertar-codex-book-pulse 1.6s ease-in-out infinite;
 }
 
-/* Placar do Loop — FAB ao lado do Códice */
+/* Placar do Loop — no cluster, ao lado do Códice (sem left absoluto). */
 .despertar-loop-board {
-  left: calc(max(0.65rem, env(safe-area-inset-left, 0px)) + 3.55rem);
+  left: auto;
 }
 
 .despertar-loop-board-drawer .despertar-loop-board__blurb {
@@ -2951,10 +2972,10 @@
 
 .despertar-codex-tip {
   position: absolute;
-  z-index: 36;
-  left: max(0.65rem, env(safe-area-inset-left, 0px));
-  bottom: calc(max(0.65rem, env(safe-area-inset-bottom, 0px)) + 3.45rem);
-  max-width: min(16.5rem, calc(100% - 1.5rem));
+  z-index: 2;
+  left: 0;
+  bottom: calc(100% + 0.45rem);
+  max-width: min(16.5rem, 70vw);
   padding: 0.55rem 0.7rem;
   border: 1px solid color-mix(in srgb, var(--hades-gold) 45%, transparent);
   background:
