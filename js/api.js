@@ -975,6 +975,8 @@ export function getLessonCode(token, lessonId) {
 export const DESPERTAR_GATE_ID = 'despertar';
 export const DESPERTAR_NAV_LABEL = 'O Despertar';
 export const DESPERTAR_NAV_LOCKED_LABEL = 'O Despertar · em breve';
+/** Temporada fechada: link permanece clicável (pódio), sem abrir o jogo. */
+export const DESPERTAR_NAV_SEASON_LABEL = 'O Despertar · placar';
 export const DESPERTAR_SEALED_ERROR = 'despertar_sealed';
 export const DESPERTAR_PAUSED_ERROR = 'despertar_paused';
 

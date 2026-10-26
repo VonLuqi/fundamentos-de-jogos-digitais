@@ -120,17 +120,12 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   const shell = document.querySelector('[data-shell]');
-  // Mantém o link navegável para o placar de temporada; o jogo em si não monta.
+  // Link aberto para toda a turma ver o pódio (jogo não monta enquanto published=false).
   applyDespertarNavState(shell, {
-    published: true,
-    isAdmin: true,
+    published: false,
+    isAdmin,
     pauseActive: false,
   });
-  const link = shell?.querySelector('[data-nav-item="despertar"]');
-  if (link) {
-    link.textContent = 'O Despertar · aguardando Dia 1';
-    link.title = 'Fechado até a liberação do Dia 1';
-  }
   await presentSeasonClosedVeil(main, {
     aulasHref: ROUTES.aulas(),
     rankingHref: ROUTES.ranking(),

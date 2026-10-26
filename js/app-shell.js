@@ -5,9 +5,11 @@ import {
   DESPERTAR_GATE_ID,
   DESPERTAR_NAV_LABEL,
   DESPERTAR_NAV_LOCKED_LABEL,
+  DESPERTAR_NAV_SEASON_LABEL,
   fetchLessonGates,
   getBootstrapGates,
 } from './api.js';
+import { DESPERTAR_SEASON_CLOSED } from './hades-despertar/config/season-closed.js';
 import { maybeOfferInstall } from './pwa-install.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
@@ -98,7 +100,8 @@ function mapRouteToNavItem(route) {
 }
 
 /**
- * Admin sempre vê o link vivo (pode pré-visualizar). Aluno só quando o Acheron está aberto.
+ * Admin sempre vê o link vivo (pode pré-visualizar).
+ * Aluno: Acheron aberto OU temporada fechada (só o pódio — o jogo não monta).
  */
 export function applyDespertarNavState(shell, { published = false, isAdmin = false, pauseActive = false } = {}) {
   const root = shell || document.querySelector('[data-shell]');
@@ -106,9 +109,14 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
   const link = root.querySelector('[data-nav-item="despertar"]');
   if (!link) return;
 
-  const open = Boolean(isAdmin || published);
+  const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && !published);
+  const open = Boolean(isAdmin || published || seasonHold);
   link.classList.toggle('is-locked', !open);
-  link.textContent = open ? DESPERTAR_NAV_LABEL : DESPERTAR_NAV_LOCKED_LABEL;
+  if (seasonHold && !published) {
+    link.textContent = DESPERTAR_NAV_SEASON_LABEL;
+  } else {
+    link.textContent = open ? DESPERTAR_NAV_LABEL : DESPERTAR_NAV_LOCKED_LABEL;
+  }
 
   if (open) {
     link.removeAttribute('aria-disabled');
@@ -117,7 +125,10 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
       link.setAttribute('href', '../despertar/');
     }
     // A4 stub: badge textual — link continua clicável (véu na página).
-    if (pauseActive && !isAdmin) {
+    if (seasonHold && !published) {
+      link.setAttribute('title', 'Temporada encerrada — ver o pódio');
+      delete link.dataset.despertarPause;
+    } else if (pauseActive && !isAdmin) {
       link.setAttribute('title', 'Em aula');
       link.dataset.despertarPause = '1';
     } else {

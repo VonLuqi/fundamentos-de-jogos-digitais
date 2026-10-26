@@ -72,6 +72,7 @@ import {
   fetchAdminOverview,
   generateCode,
 } from './api.js';
+import { DESPERTAR_SEASON_CLOSED } from './hades-despertar/config/season-closed.js';
 import { formatRate, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
 import { localDatetimeToIsoUtc } from './hades-despertar/ui/pauseVeil.js';
 import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
@@ -817,6 +818,7 @@ function syncProvaMasterButton(gateState) {
 /**
  * Preview compacto de O Despertar no trilho (Task 11).
  * Respeita o gate do Acheron: aluno só vê números/CTA quando aberto.
+ * Temporada fechada: CTA leva ao pódio (jogo não monta).
  */
 async function renderDespertarPreview(token) {
   const host = document.getElementById('despertar-preview');
@@ -827,21 +829,38 @@ async function renderDespertarPreview(token) {
   if (!host) return;
 
   const isAdmin = currentUser?.role === 'admin';
-  const open = Boolean(isAdmin || despertarPublished);
+  const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && !despertarPublished);
+  const open = Boolean(isAdmin || despertarPublished || seasonHold);
 
   if (cta) {
     cta.href = ROUTES.despertar();
-    cta.textContent = 'Descer ao Acheron';
+    cta.textContent = seasonHold && !despertarPublished
+      ? 'Ver o pódio do Loop'
+      : 'Descer ao Acheron';
     cta.classList.toggle('is-locked', !open);
     if (open) {
       cta.removeAttribute('aria-disabled');
       cta.removeAttribute('tabindex');
-      cta.removeAttribute('title');
+      if (seasonHold && !despertarPublished) {
+        cta.setAttribute('title', 'Temporada encerrada — ver o pódio');
+      } else {
+        cta.removeAttribute('title');
+      }
     } else {
       cta.setAttribute('aria-disabled', 'true');
       cta.setAttribute('tabindex', '-1');
       cta.setAttribute('title', 'O Acheron ainda está selado');
     }
+  }
+
+  if (seasonHold && !despertarPublished) {
+    if (summary) {
+      summary.textContent = 'Temporada encerrada. O Domínio honra o pódio até a liberação do Dia 1.';
+    }
+    if (soulsEl) soulsEl.textContent = '—';
+    if (spsEl) spsEl.textContent = '—';
+    host.classList.add('is-sealed');
+    return;
   }
 
   if (!open) {
