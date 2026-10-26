@@ -587,20 +587,23 @@ final class ProvaController
                     ? trim((string) ($body['contestAdminMessage'] ?? ''))
                     : ($attempt['contest_admin_message'] ?? null);
 
+                // PDO nativo (ATTR_EMULATE_PREPARES=false) não aceita o mesmo named param repetido.
                 if ($hadContest) {
                     $upAtt = $pdo->prepare(
                         'UPDATE prova_attempts
                          SET status = \'graded\', mc_score = :mcs, discursive_score = :ds, final_score = :fs,
-                             graded_at = :now, admin_notes = :an, updated_at = :now,
-                             contest_status = \'revised\', contest_resolved_at = :now, contest_admin_message = :cam
+                             graded_at = :gat, admin_notes = :an, updated_at = :uat,
+                             contest_status = \'revised\', contest_resolved_at = :crat, contest_admin_message = :cam
                          WHERE id = :id'
                     );
                     $upAtt->execute([
                         ':mcs' => $mc['mcScore'],
                         ':ds' => $discScore,
                         ':fs' => $finalScore,
-                        ':now' => $nowSql,
+                        ':gat' => $nowSql,
                         ':an' => $serializedNotes,
+                        ':uat' => $nowSql,
+                        ':crat' => $nowSql,
                         ':cam' => $adminMsg ?: null,
                         ':id' => $attempt['id'],
                     ]);
@@ -608,15 +611,16 @@ final class ProvaController
                     $upAtt = $pdo->prepare(
                         'UPDATE prova_attempts
                          SET status = \'graded\', mc_score = :mcs, discursive_score = :ds, final_score = :fs,
-                             graded_at = :now, admin_notes = :an, updated_at = :now
+                             graded_at = :gat, admin_notes = :an, updated_at = :uat
                          WHERE id = :id'
                     );
                     $upAtt->execute([
                         ':mcs' => $mc['mcScore'],
                         ':ds' => $discScore,
                         ':fs' => $finalScore,
-                        ':now' => $nowSql,
+                        ':gat' => $nowSql,
                         ':an' => $serializedNotes,
+                        ':uat' => $nowSql,
                         ':id' => $attempt['id'],
                     ]);
                 }
@@ -657,12 +661,13 @@ final class ProvaController
                 $up = $pdo->prepare(
                     'UPDATE prova_attempts
                      SET contest_status = \'open\', contest_student_message = :msg,
-                         contested_at = :now, contest_resolved_at = NULL, updated_at = :now
+                         contested_at = :cat, contest_resolved_at = NULL, updated_at = :uat
                      WHERE id = :id'
                 );
                 $up->execute([
                     ':msg' => $msg,
-                    ':now' => $nowSql,
+                    ':cat' => $nowSql,
+                    ':uat' => $nowSql,
                     ':id' => $attempt['id'],
                 ]);
                 $updated = ProvaService::loadAttemptById((string) $attempt['id']);
@@ -703,10 +708,15 @@ final class ProvaController
                     $up = $pdo->prepare(
                         'UPDATE prova_attempts
                          SET contest_status = \'answered\', contest_admin_message = :msg,
-                             contest_resolved_at = :now, updated_at = :now
+                             contest_resolved_at = :crat, updated_at = :uat
                          WHERE id = :id'
                     );
-                    $up->execute([':msg' => $adminMessage, ':now' => $nowSql, ':id' => $attempt['id']]);
+                    $up->execute([
+                        ':msg' => $adminMessage,
+                        ':crat' => $nowSql,
+                        ':uat' => $nowSql,
+                        ':id' => $attempt['id'],
+                    ]);
                 } else {
                     $up = $pdo->prepare(
                         'UPDATE prova_attempts
