@@ -2390,10 +2390,12 @@ export class GameState {
         snapshot.generatorLifetimeSouls ?? snapshot.generator_lifetime_souls,
       );
     }
-    this.prestigeCount = Math.max(
-      0,
-      Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10) || this.prestigeCount,
-    );
+    // Replace autoritativo: 0 é valor válido (ZERAR/sandbox). Não usar `|| this.prestigeCount`
+    // — 0 é falsy e mantinha Catábases antigas, reatribuindo despertar_catabase → anti-cheat no sync.
+    if (snapshot.prestigeCount != null || snapshot.prestige_count != null) {
+      const parsed = Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10);
+      this.prestigeCount = Math.max(0, Number.isFinite(parsed) ? parsed : 0);
+    }
     this.generators.applyQuantities(
       asQuantities(snapshot.generators ?? snapshot.generators_state),
     );

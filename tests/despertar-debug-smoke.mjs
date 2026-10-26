@@ -69,6 +69,19 @@ staticAssert(
   fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8').includes('isFreeShopping'),
   'B3 index pula sync em free shopping',
 );
+const phpCtrl = fs.readFileSync(
+  path.join(root, 'backend/src/Controllers/DespertarController.php'),
+  'utf8',
+);
+staticAssert(
+  /'achievements'\s*=>\s*\$kept/.test(phpCtrl),
+  'debugReset/sandbox devolve conquistas kept no DTO',
+);
+staticAssert(
+  !fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameState.js'), 'utf8')
+    .includes('|| this.prestigeCount'),
+  'replace não usa || this.prestigeCount (0 é válido)',
+);
 
 if (errors.length) {
   console.error('despertar-debug-smoke (estático):');
@@ -242,6 +255,36 @@ run('B4 free shopping: compra não chama requestSync / não suja ApiService', ()
   assert.equal(api.isDirty, false, 'dirty permanece limpo');
   assert.equal(syncCalls, 0, 'syncFn não disparou');
   api.stop();
+});
+
+run('Estela ZERAR: prestigeCount 0 no replace (não reatribui despertar_catabase)', () => {
+  const state = new GameState({
+    souls: '1e20',
+    runSouls: '1e20',
+    lifetimeSouls: '1e20',
+    prestigeCount: 3,
+    achievements: ['despertar_catabase'],
+  });
+  assert.ok(state.achievements.includes('despertar_catabase'));
+
+  // Espelha DTO do debugReset: prestige 0 + conquistas sem família Despertar.
+  state.applyAuthoritativeState({
+    souls: '0',
+    runSouls: '0',
+    lifetimeSouls: '0',
+    prestigeCount: 0,
+    generators: {},
+    upgrades: [],
+    talents: [],
+    achievements: [],
+  }, { mode: 'replace' });
+
+  assert.equal(state.prestigeCount, 0, 'ZERAR zera Catábases no cliente');
+  assert.equal(
+    state.achievements.includes('despertar_catabase'),
+    false,
+    'não reatribui despertar_catabase com prestige 0',
+  );
 });
 
 console.log(`\ndespertar-debug-smoke: ${passed} passed, ${failed} failed`);

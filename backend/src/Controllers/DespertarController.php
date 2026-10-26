@@ -151,7 +151,10 @@ final class DespertarController
 
                 Http::json(200, [
                     'ok' => true,
-                    'state' => DespertarService::buildStateDto($saved),
+                    // Perfil atual: o replace no cliente não pode apagar conquistas do Domínio.
+                    'state' => DespertarService::buildStateDto($saved, [
+                        'achievements' => $user['conquistas'] ?? [],
+                    ]),
                     'grantId' => $grant['grantId'] ?? null,
                     'label' => $grant['label'] ?? '',
                     'awarded' => self::emptyAwarded(),
@@ -192,7 +195,10 @@ final class DespertarController
 
             Http::json(200, [
                 'ok' => true,
-                'state' => DespertarService::buildStateDto($saved),
+                // `$kept` = perfil sem família Despertar (já persistido acima).
+                'state' => DespertarService::buildStateDto($saved, [
+                    'achievements' => $kept,
+                ]),
                 'strippedAchievements' => $removed,
                 'xpLoss' => $xpLoss,
                 'xp' => $nextXp,
