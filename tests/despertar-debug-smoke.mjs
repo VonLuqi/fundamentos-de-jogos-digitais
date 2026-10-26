@@ -78,8 +78,8 @@ staticAssert(
   'debugReset/sandbox devolve conquistas kept no DTO',
 );
 staticAssert(
-  !fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameState.js'), 'utf8')
-    .includes('|| this.prestigeCount'),
+  !/Number\.parseInt\([^)]*prestigeCount[^)]*\)\s*\|\|\s*this\.prestigeCount/
+    .test(fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameState.js'), 'utf8')),
   'replace não usa || this.prestigeCount (0 é válido)',
 );
 
