@@ -2715,17 +2715,11 @@
   font-style: italic;
 }
 
-/* FABs Códice + Placar — cluster evita overlap (left absoluto compartilhado). */
+/* FABs Códice + Placar — âncora full-bleed; cada botão num canto (nunca partilham left). */
 .despertar-fab-cluster {
   position: absolute;
+  inset: 0;
   z-index: 35;
-  left: max(0.65rem, env(safe-area-inset-left, 0px));
-  bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: flex-end;
-  gap: 1rem;
   pointer-events: none;
 }
 
@@ -2736,16 +2730,17 @@
 
 /* Fase B / B1 — livro flutuante + drawer */
 .despertar-codex-book {
-  position: relative;
+  position: absolute;
   z-index: 1;
-  left: auto;
-  bottom: auto;
+  left: max(0.65rem, env(safe-area-inset-left, 0px));
+  right: auto;
+  bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 3rem;
   width: 3rem;
   height: 3rem;
+  margin: 0;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--hades-gold) 55%, transparent);
   background:
@@ -2792,9 +2787,11 @@
   animation: despertar-codex-book-pulse 1.6s ease-in-out infinite;
 }
 
-/* Placar do Loop — no cluster, ao lado do Códice (sem left absoluto). */
+/* Placar do Loop — canto oposto ao Códice (direita do Domínio). */
 .despertar-loop-board {
   left: auto;
+  right: max(0.65rem, env(safe-area-inset-right, 0px));
+  bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
 }
 
 .despertar-loop-board-drawer .despertar-loop-board__blurb {
@@ -2973,8 +2970,8 @@
 .despertar-codex-tip {
   position: absolute;
   z-index: 2;
-  left: 0;
-  bottom: calc(100% + 0.45rem);
+  left: max(0.65rem, env(safe-area-inset-left, 0px));
+  bottom: calc(max(0.65rem, env(safe-area-inset-bottom, 0px)) + 3.55rem);
   max-width: min(16.5rem, 70vw);
   padding: 0.55rem 0.7rem;
   border: 1px solid color-mix(in srgb, var(--hades-gold) 45%, transparent);
