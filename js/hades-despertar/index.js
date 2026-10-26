@@ -13,9 +13,11 @@ import {
   despertarStateGet,
   fetchDespertarPublished,
   getSession,
+  leaderboardGet,
   logout,
   requireSession,
   ROUTES,
+  setLessonGate,
 } from '../api.js';
 import { GameLoop } from './core/GameLoop.js';
 import { ApiService } from './services/ApiService.js';
@@ -27,7 +29,8 @@ import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } fro
 import { JuizoModal } from './ui/JuizoModal.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
-import { presentClassroomPauseVeil, presentSealedVeil } from './ui/pauseVeil.js';
+import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil } from './ui/pauseVeil.js';
+import { DESPERTAR_SEASON_CLOSED } from './config/season-closed.js';
 import { getJuizoCtaState } from './config/juizo-pool.js';
 import {
   API_WARNING_DISMISS_MS,
@@ -83,6 +86,39 @@ function showSealedState() {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
+}
+
+async function showSeasonClosedState(token) {
+  const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!main) return;
+  const shell = document.querySelector('[data-shell]');
+  // Mantém o link navegável para o placar de temporada; o jogo em si não monta.
+  applyDespertarNavState(shell, {
+    published: true,
+    isAdmin: true,
+    pauseActive: false,
+  });
+  const link = shell?.querySelector('[data-nav-item="despertar"]');
+  if (link) {
+    link.textContent = 'O Despertar · encerrado';
+    link.title = 'Temporada encerrada até o próximo patch';
+  }
+  await presentSeasonClosedVeil(main, {
+    aulasHref: ROUTES.aulas(),
+    rankingHref: ROUTES.ranking(),
+    token,
+    leaderboardGet,
+  });
+}
+
+/** Admin na tela fechada: sela o Acheron no servidor (API) uma vez. */
+async function ensureAcheronSealedForSeason(token, isAdmin) {
+  if (!DESPERTAR_SEASON_CLOSED || !isAdmin || !token) return;
+  try {
+    await setLessonGate(token, 'despertar', 'published', false);
+  } catch (error) {
+    console.warn('[Despertar] não foi possível selar o Acheron:', error);
+  }
 }
 
 /**
@@ -576,6 +612,12 @@ async function init() {
       await logout();
     },
   });
+
+  if (DESPERTAR_SEASON_CLOSED) {
+    await ensureAcheronSealedForSeason(token, isAdmin);
+    await showSeasonClosedState(token);
+    return;
+  }
 
   if (!isAdmin && !published) {
     showSealedState();

@@ -3310,6 +3310,90 @@ button.despertar-juizo-card:disabled {
   margin: 1.25rem 0 0;
 }
 
+.despertar-classroom-veil--season {
+  max-width: 56rem;
+  text-align: left;
+}
+
+.despertar-season-boards__eyebrow {
+  margin-top: 1.25rem;
+}
+
+.despertar-season-boards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  gap: 0.75rem;
+  margin: 0.35rem 0 0;
+}
+
+.despertar-season-board {
+  margin: 0;
+  padding: 0.7rem 0.75rem 0.8rem;
+  border: 1px solid rgba(207, 167, 89, 0.28);
+  background: linear-gradient(180deg, rgba(22, 16, 28, 0.92), rgba(8, 6, 12, 0.96));
+}
+
+.despertar-season-board__title {
+  margin: 0 0 0.55rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hades-gold-bright, #e8d4a8);
+}
+
+.despertar-season-board__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.despertar-season-board__row {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
+  gap: 0.35rem;
+  align-items: baseline;
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.despertar-season-board__rank {
+  font-family: var(--font-title, Cinzel, serif);
+  color: var(--hades-gold, #cfa759);
+}
+
+.despertar-season-board__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--hades-parchment, #f3e9d7);
+}
+
+.despertar-season-board__metric {
+  font-variant-numeric: tabular-nums;
+  color: var(--despertar-styx, #00a896);
+}
+
+.despertar-season-board__row.is-podium-1 .despertar-season-board__rank,
+.despertar-season-board__row.is-podium-1 .despertar-season-board__name {
+  color: var(--hades-gold-bright, #e8d4a8);
+}
+
+.despertar-season-board__empty {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--hades-text-dim, #a89bb0);
+}
+
+.despertar-season-closed__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
 .despertar-classroom-veil--pulse {
   animation: despertar-classroom-veil-breathe 2.8s ease-in-out infinite;
 }

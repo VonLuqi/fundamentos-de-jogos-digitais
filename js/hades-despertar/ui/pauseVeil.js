@@ -1,7 +1,14 @@
 /**
  * Véu da Aula — UI de pausa temporária (Task A2).
  * Copy congelada em docs/plano-despertar-producao-profundo.md Task 0A.
+ * Inclui véu de temporada encerrada (top 3 por categoria) até o próximo patch.
  */
+
+import {
+  SEASON_CLOSED_CATEGORIES,
+  SEASON_CLOSED_COPY,
+} from '../config/season-closed.js';
+import { formatSouls } from './NumberFormatter.js';
 
 export const PAUSE_VEIL_COPY = Object.freeze({
   title: 'O Acheron guarda silêncio',
@@ -228,6 +235,103 @@ export function presentSealedVeil(container, opts = {}) {
       </p>
     </article>
   `;
+}
+
+function formatSeasonMetric(entry, category) {
+  const raw = entry?.[category.metricKey];
+  if (category.format === 'souls') {
+    return formatSouls(raw == null || raw === '' ? '0' : String(raw));
+  }
+  const n = Number(raw) || 0;
+  try {
+    return n.toLocaleString('pt-BR');
+  } catch {
+    return String(n);
+  }
+}
+
+function renderSeasonBoardRows(entries, category) {
+  if (!entries?.length) {
+    return `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.empty)}</li>`;
+  }
+  return entries.slice(0, 3).map((row, index) => {
+    const rank = Number(row.rank) || index + 1;
+    const name = row.fullName || row.username || '—';
+    const metric = formatSeasonMetric(row, category);
+    return `
+      <li class="despertar-season-board__row is-podium-${rank}">
+        <span class="despertar-season-board__rank">#${rank}</span>
+        <span class="despertar-season-board__name" title="${escapeAttr(row.username ? `@${row.username}` : name)}">${escapeHtml(name)}</span>
+        <span class="despertar-season-board__metric despertar-num">${escapeHtml(metric)}</span>
+      </li>
+    `;
+  }).join('');
+}
+
+/**
+ * Temporada encerrada: jogo fechado + top 3 por categoria do placar.
+ *
+ * @param {ParentNode & { innerHTML?: string }} container
+ * @param {{
+ *   aulasHref?: string,
+ *   rankingHref?: string,
+ *   token?: string|null,
+ *   leaderboardGet?: (token: string, opts: object) => Promise<object>,
+ *   scope?: 'turma'|'global',
+ * }} [opts]
+ */
+export async function presentSeasonClosedVeil(container, opts = {}) {
+  if (!container) return;
+  const aulasHref = String(opts.aulasHref || '#');
+  const rankingHref = String(opts.rankingHref || '#');
+  const scope = opts.scope === 'global' ? 'global' : 'turma';
+
+  const boardSlots = SEASON_CLOSED_CATEGORIES.map((category) => `
+    <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">
+      <h3 class="despertar-season-board__title">${escapeHtml(category.label)}</h3>
+      <ol class="despertar-season-board__list" data-season-list>
+        <li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.loading)}</li>
+      </ol>
+    </section>
+  `).join('');
+
+  container.innerHTML = `
+    <article class="despertar-classroom-veil despertar-classroom-veil--season hades-frame" data-despertar-season-closed-veil>
+      <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.eyebrow)}</p>
+      <h2 class="despertar-classroom-veil__title app-shell__title">${escapeHtml(SEASON_CLOSED_COPY.title)}</h2>
+      <p class="despertar-classroom-veil__body">${escapeHtml(SEASON_CLOSED_COPY.body)}</p>
+      <p class="despertar-classroom-veil__eyebrow despertar-season-boards__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.boardsEyebrow)}</p>
+      <div class="despertar-season-boards" data-season-boards>
+        ${boardSlots}
+      </div>
+      <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
+        <a class="btn-gold" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
+        <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaRanking)}</a>
+      </p>
+    </article>
+  `;
+
+  const token = opts.token;
+  const fetchBoard = typeof opts.leaderboardGet === 'function' ? opts.leaderboardGet : null;
+  if (!token || !fetchBoard) {
+    container.querySelectorAll('[data-season-list]').forEach((list) => {
+      list.innerHTML = `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.error)}</li>`;
+    });
+    return;
+  }
+
+  await Promise.all(SEASON_CLOSED_CATEGORIES.map(async (category) => {
+    const section = container.querySelector(`[data-season-board="${category.sort}"]`);
+    const list = section?.querySelector('[data-season-list]');
+    if (!list) return;
+    try {
+      const result = await fetchBoard(token, { scope, sort: category.sort, limit: 3 });
+      const entries = Array.isArray(result?.entries) ? result.entries : [];
+      list.innerHTML = renderSeasonBoardRows(entries, category);
+    } catch {
+      list.innerHTML = `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.error)}</li>`;
+    }
+  }));
 }
 
 /**
