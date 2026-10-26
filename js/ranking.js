@@ -209,9 +209,8 @@ async function init() {
   });
 
   const state = {
-    scope: 'turma',
+    scope: 'global',
     sort: 'xp',
-    turma: '',
     selfId: session.user?.id ?? null,
   };
 
@@ -219,18 +218,9 @@ async function init() {
   const meta = document.getElementById('ranking-meta');
   const selfPanel = document.getElementById('ranking-self');
   const selfLine = document.getElementById('ranking-self-line');
-  const turmaWrap = document.getElementById('ranking-turma-wrap');
-  const turmaSelect = document.getElementById('ranking-turma');
-
-  const scopeButtons = [...document.querySelectorAll('[data-ranking-scope]')];
   const sortButtons = [...document.querySelectorAll('[data-ranking-sort]')];
 
   function syncChips() {
-    scopeButtons.forEach((btn) => {
-      const on = btn.getAttribute('data-ranking-scope') === state.scope;
-      btn.classList.toggle('is-active', on);
-      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-    });
     sortButtons.forEach((btn) => {
       const on = btn.getAttribute('data-ranking-sort') === state.sort;
       btn.classList.toggle('is-active', on);
@@ -238,33 +228,12 @@ async function init() {
     });
   }
 
-  function syncTurmaFilter(payload) {
-    const show = Boolean(isAdmin && state.scope === 'turma');
-    if (turmaWrap) turmaWrap.hidden = !show;
-    if (!show || !turmaSelect) return;
-    const list = Array.isArray(payload?.turmasDisponiveis) ? payload.turmasDisponiveis : [];
-    const current = payload?.turma || state.turma || list[0] || '';
-    turmaSelect.replaceChildren();
-    for (const turma of list) {
-      const option = document.createElement('option');
-      option.value = turma;
-      option.textContent = turma;
-      if (turma === current) option.selected = true;
-      turmaSelect.append(option);
-    }
-    state.turma = current;
-  }
-
   function applyPayload(payload) {
-    syncTurmaFilter(payload);
     const entries = Array.isArray(payload.entries) ? payload.entries : [];
     renderRows(body, entries, state.selfId);
-    const scopeLabel = payload.scope === 'global'
-      ? 'Global'
-      : `Turma ${payload.turma || '—'}`;
     setText(
       meta,
-      `${scopeLabel} · ordenado por ${SORT_LABELS[payload.sort] || payload.sort} · ${formatNumber(payload.total || 0)} almas · top ${payload.topN || 50}`,
+      `Global · ordenado por ${SORT_LABELS[payload.sort] || payload.sort} · ${formatNumber(payload.total || 0)} almas · top ${payload.topN || 50}`,
     );
     const inTop = entries.some((row) => Number(row.userId) === Number(state.selfId));
     renderSelf(selfPanel, selfLine, payload.self, payload.total, payload.sort, inTop);
@@ -277,11 +246,7 @@ async function init() {
       showWarning('Sessão inválida.');
       return;
     }
-    const cacheKey = rankingCacheKey(
-      state.scope,
-      state.sort,
-      state.scope === 'turma' && isAdmin ? state.turma : '',
-    );
+    const cacheKey = rankingCacheKey(state.scope, state.sort);
     const cached = readRankingCache(cacheKey);
     if (cached) {
       applyPayload(cached);
@@ -291,9 +256,8 @@ async function init() {
     }
     try {
       const payload = await leaderboardGet(token, {
-        scope: state.scope,
+        scope: 'global',
         sort: state.sort,
-        turma: state.scope === 'turma' && isAdmin ? state.turma : undefined,
       });
       writeRankingCache(cacheKey, payload);
       applyPayload(payload);
@@ -307,7 +271,7 @@ async function init() {
         body.replaceChildren();
         const tr = document.createElement('tr');
         const td = document.createElement('td');
-        td.colSpan = 6;
+        td.colSpan = 8;
         td.textContent = '—';
         tr.append(td);
         body.append(tr);
@@ -321,16 +285,6 @@ async function init() {
     }
   }
 
-  scopeButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const next = btn.getAttribute('data-ranking-scope');
-      if (!next || next === state.scope) return;
-      state.scope = next;
-      syncChips();
-      refresh();
-    });
-  });
-
   sortButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const next = btn.getAttribute('data-ranking-sort');
@@ -339,11 +293,6 @@ async function init() {
       syncChips();
       refresh();
     });
-  });
-
-  turmaSelect?.addEventListener('change', () => {
-    state.turma = turmaSelect.value;
-    refresh();
   });
 
   syncChips();

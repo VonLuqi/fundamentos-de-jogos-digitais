@@ -18,7 +18,7 @@ export const SEASON_CLOSED_COPY = Object.freeze({
     'No fim do módulo, quem ficar em 1º no placar de XP e no de Relíquias (categorias ligadas entre si) ganha uma mesa digitalizadora. Confira esses placares no Placar completo.',
   ctaAulas: 'Voltar à Trilha',
   ctaRanking: 'Placar completo',
-  boardsEyebrow: 'Top 3 · Despertar · turma',
+  boardsEyebrow: 'Top 3 · Despertar · global',
   loading: 'Consultando o Placar…',
   empty: 'Nenhuma alma neste placar ainda.',
   error: 'O Placar não respondeu. Tente o placar completo.',

@@ -284,7 +284,7 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   if (!container) return;
   const aulasHref = String(opts.aulasHref || '#');
   const rankingHref = String(opts.rankingHref || '#');
-  const scope = opts.scope === 'global' ? 'global' : 'turma';
+  const scope = opts.scope === 'turma' ? 'turma' : 'global';
 
   const boardSlots = SEASON_CLOSED_CATEGORIES.map((category) => `
     <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">

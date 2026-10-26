@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Placar do Domínio — turma e global | Fundamentos de Jogos Digitais." />
+  <meta name="description" content="Placar do Domínio — ranking global | Fundamentos de Jogos Digitais." />
   <meta name="theme-color" content="#0d0a10" />
   <title>Placar do Domínio | Fundamentos de Jogos Digitais</title>
 
@@ -97,16 +97,12 @@
         </div>
 
         <p class="ranking-intro">
-          Ordenação por <strong>XP</strong>, <strong>relíquias</strong>, <strong>Juízo</strong>,
+          Placar <strong>global</strong> — ordenação por <strong>XP</strong>, <strong>relíquias</strong>, <strong>Juízo</strong>,
           <strong>Catábases</strong> ou <strong>almas totais</strong> do Despertar.
           Sem SPS nem óbolos — o Domínio não vaza a taxa do Acheron.
         </p>
 
         <div class="ranking-controls" role="group" aria-label="Filtros do Placar">
-          <div class="ranking-controls__group" role="group" aria-label="Escopo">
-            <button class="ranking-chip is-active" type="button" data-ranking-scope="turma" aria-pressed="true">Turma</button>
-            <button class="ranking-chip" type="button" data-ranking-scope="global" aria-pressed="false">Global</button>
-          </div>
           <div class="ranking-controls__group" role="group" aria-label="Ordenação">
             <button class="ranking-chip is-active" type="button" data-ranking-sort="xp" aria-pressed="true">XP</button>
             <button class="ranking-chip" type="button" data-ranking-sort="achievements" aria-pressed="false">Relíquias</button>
@@ -114,10 +110,6 @@
             <button class="ranking-chip" type="button" data-ranking-sort="prestigeCount" aria-pressed="false">Catábases</button>
             <button class="ranking-chip" type="button" data-ranking-sort="lifetimeSouls" aria-pressed="false">Almas</button>
           </div>
-          <label class="ranking-turma" id="ranking-turma-wrap" hidden>
-            <span class="ranking-turma__label">Turma</span>
-            <select class="ranking-turma__select" id="ranking-turma" aria-label="Filtrar turma"></select>
-          </label>
         </div>
 
         <p class="ranking-meta" id="ranking-meta" aria-live="polite">Consultando o Domínio…</p>

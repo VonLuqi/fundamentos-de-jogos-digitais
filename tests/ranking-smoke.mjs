@@ -44,8 +44,8 @@ staticAssert(fs.existsSync(path.join(root, 'css/ranking.css')), 'css/ranking.css
 staticAssert(fs.existsSync(path.join(root, 'api/_lib/leaderboard.js')), 'leaderboard.js');
 
 staticAssert(html.includes('PLACAR DO'), 'título Placar');
-staticAssert(html.includes('data-ranking-scope="turma"'), 'escopo turma');
-staticAssert(html.includes('data-ranking-scope="global"'), 'escopo global');
+staticAssert(!html.includes('data-ranking-scope='), 'sem chips de escopo turma/global');
+staticAssert(html.includes('Placar <strong>global</strong>') || html.includes('Placar global'), 'copy placar global');
 staticAssert(html.includes('data-ranking-sort="juizoBest"'), 'sort juizoBest');
 staticAssert(html.includes('data-nav-item="ranking"'), 'Placar na nav do ranking');
 
@@ -67,6 +67,8 @@ staticAssert(
 );
 staticAssert(apiJs.includes('limit') && /leaderboardGet[\s\S]*limit/.test(apiJs), 'cliente limit opcional');
 staticAssert(rankingJs.includes('leaderboardGet'), 'ranking.js chama API');
+staticAssert(rankingJs.includes("scope: 'global'"), 'ranking.js força escopo global');
+staticAssert(!rankingJs.includes("scope: 'turma'"), 'ranking.js sem escopo turma');
 staticAssert(pkg.includes('ranking-smoke.mjs'), 'check inclui ranking-smoke');
 
 staticAssert(normalizeLeaderboardScope('GLOBAL') === 'global', 'scope normalize');
