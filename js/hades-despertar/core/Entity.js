@@ -3,12 +3,13 @@
  * UpgradeMult NÃO vive aqui: o estado (juramentos) passa o multiplicador.
  */
 
-import { GENERATOR_COST_MULT_BASE } from '../config/constants.js';
+import { GENERATOR_COST_MULT_BASE, GENERATOR_SELL_REFUND_BASE } from '../config/constants.js';
 import { getGenerator } from '../config/generators.js';
-import { cmp, money, mul, sub } from './decimal.js';
+import { add, cmp, money, mul, sub } from './decimal.js';
 import {
   generatorBatchCost,
   generatorPriceAt,
+  generatorSellRefund,
   maxAffordableCount,
 } from './formulas.js';
 
@@ -48,6 +49,10 @@ export class Entity {
     return maxAffordableCount(this.baseCost, this.quantity, wallet, costMult);
   }
 
+  sellRefund(count, costMult = GENERATOR_COST_MULT_BASE, refundRate = GENERATOR_SELL_REFUND_BASE) {
+    return generatorSellRefund(this.baseCost, this.quantity, count, costMult, refundRate);
+  }
+
   unitRate(upgradeMult = '1') {
     return mul(this.baseRate, upgradeMult);
   }
@@ -72,6 +77,21 @@ export class Entity {
       wallet: money(sub(wallet, cost)),
       cost,
       bought: qty,
+    };
+  }
+
+  sell(count, wallet, costMult = GENERATOR_COST_MULT_BASE, refundRate = GENERATOR_SELL_REFUND_BASE) {
+    const qty = Math.min(this.quantity, Math.max(0, Math.floor(Number(count) || 0)));
+    if (qty <= 0 || this.quantity <= 0) {
+      return { ok: false, wallet: money(wallet), refund: money('0'), sold: 0 };
+    }
+    const refund = this.sellRefund(qty, costMult, refundRate);
+    this.quantity = Math.max(0, this.quantity - qty);
+    return {
+      ok: true,
+      wallet: money(add(wallet, refund)),
+      refund,
+      sold: qty,
     };
   }
 }

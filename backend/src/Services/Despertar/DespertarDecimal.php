@@ -18,12 +18,36 @@ final class DespertarDecimal
     private const COST_NUM = '23'; // 1.15 = 23/20
     private const COST_DEN = '20';
 
+    private static function expandScientificString(string $raw): string
+    {
+        if (!preg_match('/^(-?)(\d+)(?:\.(\d+))?[eE]([+-]?\d+)$/', $raw, $m)) {
+            return $raw;
+        }
+        $sign = $m[1];
+        $intPart = $m[2];
+        $fracPart = $m[3] ?? '';
+        $exp = (int) $m[4];
+        if ($exp < -20 || $exp > 300) {
+            return $raw;
+        }
+        $digits = $intPart . $fracPart;
+        $shift = $exp - strlen($fracPart);
+        if ($shift >= 0) {
+            return $sign . $digits . str_repeat('0', $shift);
+        }
+        $cut = strlen($digits) + $shift;
+        if ($cut <= 0) {
+            return $sign . '0.' . str_repeat('0', -$cut) . $digits;
+        }
+        return $sign . substr($digits, 0, $cut) . '.' . substr($digits, $cut);
+    }
+
     public static function decimalString(mixed $value, string $fallback = '0.00'): string
     {
         if ($value === null || $value === '') {
             return $fallback;
         }
-        $raw = trim((string) $value);
+        $raw = self::expandScientificString(trim((string) $value));
         if (!preg_match('/^(-?\d+)(?:\.(\d+))?$/', $raw, $m)) {
             return $fallback;
         }
@@ -45,7 +69,7 @@ final class DespertarDecimal
             }
             $value = number_format($value, 8, '.', '');
         }
-        $raw = trim((string) $value);
+        $raw = self::expandScientificString(trim((string) $value));
         if (!preg_match('/^(-?)(\d+)(?:\.(\d+))?$/', $raw, $m)) {
             throw new \InvalidArgumentException('Decimal inválido: ' . $raw);
         }
@@ -260,6 +284,35 @@ final class DespertarDecimal
             $x1 = self::intDiv(self::intAdd($x0, self::intDiv($ratio, $x0)), '2');
         }
         return $x0;
+    }
+
+    /**
+     * floor(cbrt(p / q)) para inteiros escalados p, q >= 0 (Fase F8 — curva cúbica de prestígio).
+     */
+    public static function floorCbrtRatio(string $pScaled, string $qScaled): string
+    {
+        if (self::intCmp($qScaled, '0') <= 0) {
+            throw new \InvalidArgumentException('Denominador inválido.');
+        }
+        if (self::intCmp($pScaled, '0') <= 0) {
+            return '0';
+        }
+        $ratio = self::intDiv($pScaled, $qScaled);
+        if ($ratio === '0') {
+            return '0';
+        }
+        $lo = '0';
+        $hi = self::intAdd(self::floorSqrtRatio($ratio, '1'), '1');
+        while (self::intCmp($lo, $hi) < 0) {
+            $mid = self::intDiv(self::intAdd(self::intAdd($lo, $hi), '1'), '2');
+            $cube = self::intMul(self::intMul($mid, $mid), $mid);
+            if (self::intCmp($cube, $ratio) <= 0) {
+                $lo = $mid;
+            } else {
+                $hi = self::intSub($mid, '1');
+            }
+        }
+        return $lo;
     }
 
     // -------------------------------------------------------------------------

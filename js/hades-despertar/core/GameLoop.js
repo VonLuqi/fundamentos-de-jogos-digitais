@@ -4,7 +4,13 @@
  * Relógio / RAF injetáveis para o smoke no Node.
  */
 
-import { LOOP_PANIC_UPDATES, TICK_FPS } from '../config/constants.js';
+import {
+  LOOP_PANIC_UPDATES,
+  PERF_AUTO_LOD_FPS_THRESHOLD,
+  PERF_AUTO_LOD_FRAME_MS,
+  PERF_AUTO_LOD_WINDOW_FRAMES,
+  TICK_FPS,
+} from '../config/constants.js';
 
 function defaultNow() {
   if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
@@ -52,12 +58,22 @@ export class GameLoop {
       ? options.matchMedia
       : defaultMatchMedia;
     this.onResume = typeof options.onResume === 'function' ? options.onResume : null;
+    this.onAutoLod = typeof options.onAutoLod === 'function' ? options.onAutoLod : null;
+    this.autoLodThresholdFps = Number(options.autoLodThresholdFps) > 0
+      ? Number(options.autoLodThresholdFps)
+      : PERF_AUTO_LOD_FPS_THRESHOLD;
+    this.autoLodWindowFrames = Number(options.autoLodWindowFrames) > 0
+      ? Math.floor(Number(options.autoLodWindowFrames))
+      : PERF_AUTO_LOD_WINDOW_FRAMES;
 
     this.lastTime = null;
     this.accumulatedLag = 0;
     this.animationFrameId = null;
     this.isRunning = false;
     this.hiddenAt = null;
+    this._frameDeltas = [];
+    this.autoLodActive = false;
+    this.averageFps = fps;
     this._listeningVisibility = false;
     this._onVisibility = () => this.#handleVisibility();
     this.loop = (currentTime) => this.#onFrame(currentTime);
@@ -124,10 +140,33 @@ export class GameLoop {
     this.hiddenAt = null;
     this.accumulatedLag = 0;
     this.lastTime = this.now();
+    this._frameDeltas.length = 0;
     if (elapsedMs > 0 && this.onResume) {
       this.onResume(elapsedMs / 1000);
     }
     if (this.isRunning) this.#schedule();
+  }
+
+  #trackFrameTime(deltaMs) {
+    if (!(deltaMs > 0) || deltaMs > 1000) return;
+    this._frameDeltas.push(deltaMs);
+    if (this._frameDeltas.length > this.autoLodWindowFrames) {
+      this._frameDeltas.shift();
+    }
+    if (this._frameDeltas.length < this.autoLodWindowFrames) return;
+    const sum = this._frameDeltas.reduce((acc, v) => acc + v, 0);
+    const avgMs = sum / this._frameDeltas.length;
+    this.averageFps = avgMs > 0 ? 1000 / avgMs : 60;
+    const thresholdMs = 1000 / this.autoLodThresholdFps || PERF_AUTO_LOD_FRAME_MS;
+    if (!this.autoLodActive && avgMs > thresholdMs) {
+      this.autoLodActive = true;
+      this.onAutoLod?.({ active: true, averageFps: this.averageFps, avgFrameMs: avgMs });
+    }
+  }
+
+  resetAutoLod() {
+    this.autoLodActive = false;
+    this._frameDeltas.length = 0;
   }
 
   #onFrame(currentTime) {
@@ -139,6 +178,7 @@ export class GameLoop {
     const deltaTime = Math.max(0, now - previous);
     this.lastTime = now;
     this.accumulatedLag += deltaTime;
+    this.#trackFrameTime(deltaTime);
 
     let updateCount = 0;
     while (this.accumulatedLag >= this.step) {
@@ -152,7 +192,15 @@ export class GameLoop {
 
     const reducedMotion = this.prefersReducedMotion();
     const alpha = reducedMotion ? 1 : this.accumulatedLag / this.step;
-    this.render(alpha, { reducedMotion, updates: updateCount });
+    const dtSeconds = Math.min(0.05, deltaTime / 1000);
+    this.render(alpha, {
+      reducedMotion,
+      updates: updateCount,
+      dt: dtSeconds,
+      nowMs: now,
+      autoLod: this.autoLodActive,
+      averageFps: this.averageFps,
+    });
 
     if (this.isRunning) this.#schedule();
   }

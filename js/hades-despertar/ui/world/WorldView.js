@@ -7,11 +7,20 @@
 
 import { GENERATORS } from '../../config/generators.js';
 import {
+  DEFAULT_PERF_PREFS,
+  PERF_ANIMATED_VARIANT_CAP_PER_SHELF,
+  PERF_SHELF_NONFANCY_FRAME_SKIP,
+} from '../../config/constants.js';
+import {
   activeCosmetics,
   cosmeticsForGenerator,
   indexMatchesCoverage,
+  pickCoveredCosmetic,
+  UPGRADE_COSMETICS,
 } from '../../config/upgrade-cosmetics.js';
 import { setMarqueeTextIfOverflow } from '../Marquee.js';
+import { acquirePooledNode, releasePooledNode } from '../particles.js';
+import { withPerfMeasure } from '../perfTelemetry.js';
 import {
   shinyChromaticPx,
   shinyGlitchNow,
@@ -27,7 +36,7 @@ import {
   paintGoldAura,
   paintGoldSparkles,
 } from './goldJuice.js';
-import { loadGeneratorImage } from './SpriteAtlas.js';
+import { loadHabitatBackgroundImage, loadHabitatImage, loadHabitatVariantImage } from './SpriteAtlas.js';
 import { peekCosmeticImage, prefetchCosmeticImages } from './CosmeticsAtlas.js';
 import { unitRarityAt } from './unitRarity.js';
 
@@ -71,12 +80,12 @@ export function isShelfGenerator(defOrId) {
 export const SHELF_GRID_ROWS = 4;
 /** Colunas de referência (viewport mínimo / docs). */
 export const SHELF_GRID_COLS = 10;
-/** Teto de colunas vazias só para preencher a largura visível do campo. */
-export const SHELF_COLS_MAX_FILL = 32;
 /**
  * Célula quadrada em px lógicos (sprites contain).
  */
 export const SHELF_CELL = 36;
+/** Célula do preview no tooltip NPC (mesmo pipeline da prateleira, só maior). */
+export const NPC_PORTRAIT_CELL = 72;
 export const SHELF_CELL_GAP = 4;
 export const SHELF_PAD = 10;
 
@@ -94,6 +103,20 @@ const TIER_PALETTE = Object.freeze({
   4: { body: 'rgba(14, 10, 22, 0.94)', accent: 'rgba(168, 85, 247, 0.8)' },
   5: { body: 'rgba(20, 8, 10, 0.94)', accent: 'rgba(217, 4, 41, 0.9)' },
   6: { body: 'rgba(10, 8, 18, 0.96)', accent: 'rgba(207, 167, 89, 0.95)' },
+  7: { body: 'rgba(12, 16, 24, 0.94)', accent: 'rgba(192, 132, 252, 0.9)' },
+  8: { body: 'rgba(8, 20, 18, 0.94)', accent: 'rgba(45, 212, 191, 0.9)' },
+  9: { body: 'rgba(10, 14, 26, 0.95)', accent: 'rgba(232, 212, 168, 0.92)' },
+  10: { body: 'rgba(22, 12, 14, 0.95)', accent: 'rgba(251, 146, 60, 0.9)' },
+  11: { body: 'rgba(12, 8, 24, 0.96)', accent: 'rgba(168, 85, 247, 0.95)' },
+  12: { body: 'rgba(18, 16, 10, 0.96)', accent: 'rgba(245, 197, 66, 0.95)' },
+  13: { body: 'rgba(8, 12, 26, 0.96)', accent: 'rgba(56, 189, 248, 0.92)' },
+  14: { body: 'rgba(18, 10, 26, 0.96)', accent: 'rgba(244, 114, 182, 0.92)' },
+  15: { body: 'rgba(20, 18, 8, 0.96)', accent: 'rgba(250, 204, 21, 0.94)' },
+  16: { body: 'rgba(8, 22, 20, 0.96)', accent: 'rgba(52, 211, 153, 0.92)' },
+  17: { body: 'rgba(10, 18, 14, 0.96)', accent: 'rgba(163, 230, 53, 0.92)' },
+  18: { body: 'rgba(14, 8, 28, 0.97)', accent: 'rgba(129, 140, 248, 0.94)' },
+  19: { body: 'rgba(24, 10, 20, 0.97)', accent: 'rgba(251, 113, 133, 0.94)' },
+  20: { body: 'rgba(16, 12, 6, 0.98)', accent: 'rgba(253, 224, 71, 0.98)' },
 });
 
 /**
@@ -135,7 +158,7 @@ export function shelfColumnsForWidth(widthPx) {
   const inner = Number(widthPx) - SHELF_PAD * 2;
   if (!(inner > 0)) return 1;
   const stride = SHELF_CELL + SHELF_CELL_GAP;
-  return Math.max(1, Math.min(SHELF_COLS_MAX_FILL, Math.floor((inner + SHELF_CELL_GAP) / stride)));
+  return Math.max(1, Math.floor((inner + SHELF_CELL_GAP) / stride));
 }
 
 /** Cap de DPR para nitidez em telas HiDPI sem estourar VRAM. */
@@ -204,6 +227,49 @@ export const BUY_PULSE_PEAK = 0.2;
 export function buyPulseScale(progress) {
   const p = Math.min(1, Math.max(0, Number(progress) || 0));
   return 1 + BUY_PULSE_PEAK * Math.sin(Math.PI * p);
+}
+
+/** Tile 64×64 desenhado 1:1, para o chão cobrir a prateleira sem esticar. */
+export const SHELF_BG_SCALE = 1;
+
+/**
+ * Chão do habitat, em pixels inteiros, repetido na horizontal e na vertical.
+ * Desenha o tile inteiro mesmo na borda: o canvas corta o excesso e não sobra faixa.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasImageSource|null|undefined} image
+ * @param {number} width
+ * @param {number} height
+ */
+export function drawShelfBackground(ctx, image, width, height) {
+  if (!ctx || !image) return;
+  const w = Number(width) || 0;
+  const h = Number(height) || 0;
+  if (w < 1 || h < 1) return;
+  const iw = Number(image.naturalWidth || image.width) || 0;
+  const ih = Number(image.naturalHeight || image.height) || 0;
+  if (iw < 1 || ih < 1) return;
+  const dw = iw * SHELF_BG_SCALE;
+  const dh = ih * SHELF_BG_SCALE;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  for (let y = 0; y < h; y += dh) {
+    for (let x = 0; x < w; x += dw) {
+      ctx.drawImage(image, x, y, dw, dh);
+    }
+  }
+  ctx.restore();
+}
+
+/** Cobre a faixa do campo que o canvas não alcança (sobra da grade e a barra). */
+export function applyShelfFloor(field, image) {
+  if (!field?.style || !image) return;
+  const src = image.currentSrc || image.src;
+  if (!src) return;
+  const w = Number(image.naturalWidth || image.width) || 64;
+  const h = Number(image.naturalHeight || image.height) || 64;
+  const size = `${w * SHELF_BG_SCALE}px ${h * SHELF_BG_SCALE}px`;
+  // Shorthand inline vence o `background:` dos tiers no CSS (senão o chão some).
+  field.style.setProperty('background', `#101218 url("${src}") 0 0 / ${size} repeat`);
 }
 
 /**
@@ -295,11 +361,12 @@ export function drawContainedInCell(ctx, img, cellX, cellY, cell = SHELF_CELL, b
   const dh = ih * scale;
   const dx = cellX + (cell - dw) / 2;
   const dy = cellY + (cell - dh) / 2 + bobY;
+  const crisp = Boolean(opts.crisp);
   const prev = ctx.imageSmoothingEnabled;
   const prevQuality = ctx.imageSmoothingQuality;
   ctx.save();
-  ctx.imageSmoothingEnabled = true;
-  if (prevQuality != null) ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingEnabled = !crisp;
+  if (!crisp && prevQuality != null) ctx.imageSmoothingQuality = 'high';
 
   const drawInvertSprite = (ox = 0) => {
     if (typeof ctx.filter === 'string' || 'filter' in ctx) {
@@ -548,6 +615,79 @@ export function drawNpcSilhouette(ctx, cellX, cellY, tier, bobY = 0, cell = SHEL
 }
 
 /**
+ * Uma unidade exatamente como na prateleira: variante (chapéu etc.), raridade, overlays.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{
+ *   cell?: number,
+ *   sprite?: CanvasImageSource|null,
+ *   variants?: Map<string, CanvasImageSource>|Record<string, CanvasImageSource>|null,
+ *   cosmetics?: Array<{ accessory?: string, coverage?: number, priority?: number, upgradeId?: string }>,
+ *   tier?: number,
+ *   index?: number,
+ *   rarity?: 'normal'|'gold'|'negativo'|false,
+ *   reducedMotion?: boolean,
+ *   timeSec?: number,
+ * }} [opts]
+ */
+export function paintShelfUnitPortrait(ctx, opts = {}) {
+  if (!ctx) return false;
+  const cell = Number(opts.cell) > 0 ? Number(opts.cell) : NPC_PORTRAIT_CELL;
+  const index = Math.max(0, Math.floor(Number(opts.index) || 0));
+  const tier = Number(opts.tier) || 1;
+  const rarityRaw = opts.rarity;
+  const rarity = rarityRaw === 'gold' || rarityRaw === 'negativo' || rarityRaw === 'normal'
+    ? rarityRaw
+    : rarityFromOpts(opts);
+  const reducedMotion = Boolean(opts.reducedMotion);
+  const timeSec = Number(opts.timeSec) || 0;
+  const cosmetics = Array.isArray(opts.cosmetics) ? opts.cosmetics : [];
+  const variants = opts.variants || null;
+  const hasVariant = (accessory) => {
+    if (!variants || !accessory) return false;
+    if (typeof variants.get === 'function') return Boolean(variants.get(accessory));
+    return Boolean(variants[accessory]);
+  };
+  const getVariant = (accessory) => {
+    if (!variants || !accessory) return null;
+    if (typeof variants.get === 'function') return variants.get(accessory) || null;
+    return variants[accessory] || null;
+  };
+
+  ctx.clearRect(0, 0, cell, cell);
+  const rarityOpts = {
+    rarity: rarity === 'normal' ? false : rarity,
+    shiny: rarity === 'negativo',
+    gold: rarity === 'gold',
+    // Tip é snapshot: raridade precisa do look real (invert/gold), não do fallback “borda”.
+    reducedMotion: false,
+    crisp: true,
+  };
+  void reducedMotion;
+
+  const variant = pickCoveredCosmetic(cosmetics, index, (cos) => hasVariant(cos.accessory));
+  const paintSprite = variant ? getVariant(variant.accessory) : (opts.sprite || null);
+  if (paintSprite) {
+    drawContainedInCell(ctx, paintSprite, 0, 0, cell, 0, rarityOpts);
+  } else {
+    drawNpcSilhouette(ctx, 0, 0, tier, 0, cell, rarityOpts);
+  }
+  if (variant) return true;
+
+  for (const cos of cosmetics) {
+    if (!cos?.accessory) continue;
+    const salt = cos.upgradeId || cos.accessory || 0;
+    if (!indexMatchesCoverage(index, cos.coverage, salt)) continue;
+    drawAccessory(ctx, cos.accessory, 0, 0, cell, 0, {
+      tier,
+      reducedMotion: true,
+      timeSec,
+      image: peekCosmeticImage(cos.accessory) || undefined,
+    });
+  }
+  return true;
+}
+
+/**
  * Overlay procedural de accessory (Fase E / E2).
  * @param {CanvasRenderingContext2D} ctx
  * @param {string} accessory
@@ -784,10 +924,17 @@ export class WorldView {
     this._host = null;
     this._hint = null;
     this._shelves = new Map();
-    this._raf = null;
-    this._running = false;
     this._reducedMotion = false;
+    this._prefs = {
+      ...DEFAULT_PERF_PREFS,
+      ...(options.prefs && typeof options.prefs === 'object' ? options.prefs : {}),
+    };
+    this.animatedVariantCap = Number(options.animatedVariantCap) > 0
+      ? Math.floor(Number(options.animatedVariantCap))
+      : PERF_ANIMATED_VARIANT_CAP_PER_SHELF;
+    this._frameCounter = 0;
     this._hasSprites = false;
+    this._artFlush = false;
     this._mounted = false;
     this._moteRates = {};
     this._moteCarry = {};
@@ -795,7 +942,7 @@ export class WorldView {
     this._baseSize = shelfCanvasSize(SHELF_GRID_COLS, SHELF_GRID_ROWS);
     this._dpr = shelfDevicePixelRatio();
     this._resizeObserver = null;
-    this._onVisibility = () => this.#onVisibility();
+    this._intersectionObserver = null;
     /** @type {((hit: { generatorId: string, index: number, rarity?: string, shiny: boolean, gold?: boolean }|null, event?: PointerEvent) => void)|null} */
     this.onNpcHover = typeof options.onNpcHover === 'function' ? options.onNpcHover : null;
     this._hoverKey = null;
@@ -859,14 +1006,20 @@ export class WorldView {
         motes,
         count: 0,
         cols: SHELF_GRID_COLS,
+        cachedFieldWidth: Number(field?.clientWidth) || 0,
+        cachedCanvasRect: null,
         logicalSize: shelfCanvasSize(SHELF_GRID_COLS, SHELF_GRID_ROWS),
         phase: Math.random() * Math.PI * 2,
         sprite: null,
         spriteTried: false,
+        background: null,
+        backgroundTried: false,
+        variants: new Map(),
         shinyCount: 0,
         goldCount: 0,
         cosmetics: [],
         cosmeticSig: '',
+        inViewport: true,
       };
       this.#layoutShelf(nodes);
       this.#bindShelfPointer(nodes);
@@ -874,12 +1027,36 @@ export class WorldView {
     }
 
     this.#bindResizeObserver();
+    this.#bindIntersectionObserver();
     this._mounted = true;
     this._reducedMotion = prefersReducedMotion(this.matchMedia);
-    this.#listenVisibility(true);
     this.#prefetchSprites();
     this.#prefetchCosmetics();
     return this;
+  }
+
+  /**
+   * Atualiza preferências de performance (Perf-4: particles / fancy).
+   * @param {{ particles?: boolean, fancy?: boolean, cursors?: boolean }} [prefs]
+   */
+  setPrefs(prefs = {}) {
+    if (!prefs || typeof prefs !== 'object') return this._prefs;
+    const prevFancy = this._prefs.fancy;
+    const prevParticles = this._prefs.particles;
+    if (typeof prefs.cursors === 'boolean') this._prefs.cursors = prefs.cursors;
+    if (typeof prefs.particles === 'boolean') this._prefs.particles = prefs.particles;
+    if (typeof prefs.fancy === 'boolean') this._prefs.fancy = prefs.fancy;
+    if (!this._prefs.particles && prevParticles) {
+      this.#clearAllMotes();
+    }
+    if (this._prefs.fancy !== prevFancy && this._hasSprites) {
+      this.#paintAll(this._reducedMotion || !this._prefs.fancy);
+    }
+    return { ...this._prefs };
+  }
+
+  get prefs() {
+    return { ...this._prefs };
   }
 
   /**
@@ -894,6 +1071,9 @@ export class WorldView {
     } else {
       this._reducedMotion = prefersReducedMotion(this.matchMedia);
     }
+    if (meta.prefs && typeof meta.prefs === 'object') {
+      this.setPrefs(meta.prefs);
+    }
 
     const qtyMap = typeof state.quantities === 'function'
       ? state.quantities()
@@ -904,6 +1084,7 @@ export class WorldView {
     let sprites = 0;
     const weights = {};
     this._dpr = shelfDevicePixelRatio();
+    const staticPose = this._reducedMotion || !this._prefs.fancy;
 
     for (const def of GENERATORS) {
       if (!isShelfGenerator(def)) continue;
@@ -912,6 +1093,7 @@ export class WorldView {
       const qty = Number(qtyMap[def.id] || 0);
       const revealed = this.isGeneratorRevealed(def.id, { souls, generators: qtyMap });
       const show = revealed && qty > 0;
+      const visibilityChanged = nodes.shelf.hidden !== !show;
       nodes.shelf.hidden = !show;
       if (!show) {
         if (nodes.count !== 0) {
@@ -921,7 +1103,7 @@ export class WorldView {
           applyShelfCosmeticClasses(nodes.shelf, [], def.id);
           this.#paintShelf(nodes, true);
         }
-        nodes.motes?.replaceChildren?.();
+        this.#clearShelfMotes(nodes);
         continue;
       }
 
@@ -945,12 +1127,16 @@ export class WorldView {
       nodes.cosmetics = shelfCosmetics;
       nodes.cosmeticSig = cosSig;
       applyShelfCosmeticClasses(nodes.shelf, cosmeticsActive, def.id);
-      this.#refreshShelfLabel(nodes);
+      if (visibilityChanged) {
+        this.#refreshShelfLabel(nodes);
+      }
       weights[def.id] = shelfLineMoteWeight(qty, def.baseRate);
 
       const countChanged = visual !== nodes.count;
       nodes.count = visual;
-      this.#layoutShelf(nodes);
+      if (countChanged || visibilityChanged) {
+        this.#layoutShelf(nodes);
+      }
       if (this._pendingBuyPulse?.generatorId === def.id && show) {
         nodes._buyPulse = {
           from: this._pendingBuyPulse.from,
@@ -963,11 +1149,11 @@ export class WorldView {
       }
       if (countChanged || rarityChanged || cosChanged || nodes._needsPaint) {
         nodes._needsPaint = false;
-        this.#paintShelf(nodes, true);
+        this.#paintShelf(nodes, staticPose, staticPose ? 0 : this.now() / 1000);
       }
     }
 
-    this._moteRates = this._reducedMotion
+    this._moteRates = (this._reducedMotion || !this._prefs.particles)
       ? {}
       : allocateShelfMoteRates(weights, SHELF_MOTE_MAX_PER_SEC);
 
@@ -976,27 +1162,58 @@ export class WorldView {
     }
 
     this._hasSprites = sprites > 0;
-    if (this._hasSprites && !this._reducedMotion) {
-      this.#startLoop();
-    } else {
-      this.#stopLoop();
+    if (!this._hasSprites || this._reducedMotion || !this._prefs.particles) {
       this.#clearAllMotes();
-      if (this._hasSprites && this._reducedMotion) {
-        this.#paintAll(true);
-      }
+    }
+    if (this._hasSprites && staticPose) {
+      this.#paintAll(true);
     }
     return this;
   }
 
+  /**
+   * Avança um frame das prateleiras a partir do GameLoop único (Perf-1: sem RAF próprio).
+   * @param {number} [dtSeconds]
+   * @param {{ reducedMotion?: boolean, fancy?: boolean, particles?: boolean }} [meta]
+   */
+  frame(dtSeconds = 1 / 60, meta = {}) {
+    if (!this._mounted || !this._hasSprites) return;
+    const reduced = typeof meta.reducedMotion === 'boolean'
+      ? meta.reducedMotion
+      : this._reducedMotion;
+    const fancy = typeof meta.fancy === 'boolean' ? meta.fancy : this._prefs.fancy;
+    const particles = typeof meta.particles === 'boolean' ? meta.particles : this._prefs.particles;
+
+    if (reduced) return;
+
+    const dt = Math.min(0.05, Math.max(0, Number(dtSeconds) || 0));
+    this._frameCounter = (this._frameCounter + 1) % 10000;
+
+    if (fancy) {
+      this.#paintAll(false);
+    } else if (this._frameCounter % PERF_SHELF_NONFANCY_FRAME_SKIP === 0) {
+      // Sem fancy (estilo Cookie Clicker): repinta apenas se houver buyPulse ativo
+      for (const nodes of this._shelves.values()) {
+        if (nodes.count > 0 && nodes._buyPulse) {
+          this.#paintShelf(nodes, true, this.now() / 1000);
+        }
+      }
+    }
+
+    if (particles && dt > 0) {
+      this.#tickMotes(dt);
+    }
+  }
+
   /** Força um frame (testes / reduced-motion). */
   paint(staticPose = false) {
-    this.#paintAll(staticPose || this._reducedMotion);
+    this.#paintAll(staticPose || this._reducedMotion || !this._prefs.fancy);
   }
 
   destroy() {
-    this.#stopLoop();
-    this.#listenVisibility(false);
     this.#unbindResizeObserver();
+    this.#unbindIntersectionObserver();
+    this.#clearAllMotes();
     for (const nodes of this._shelves.values()) {
       this.#unbindShelfPointer(nodes);
     }
@@ -1014,7 +1231,7 @@ export class WorldView {
   }
 
   get isAnimating() {
-    return this._running;
+    return Boolean(this._mounted && this._hasSprites && !this._reducedMotion && this._prefs.fancy);
   }
 
   get moteRates() {
@@ -1044,31 +1261,58 @@ export class WorldView {
     if (nodes && !nodes.shelf?.hidden && nodes.count > 0) {
       nodes._buyPulse = pulse;
       this._pendingBuyPulse = null;
-      this.#paintShelf(nodes, false, now / 1000);
-      if (this._hasSprites && !this._running) this.#startLoop();
+      this.#paintShelf(nodes, !this._prefs.fancy, now / 1000);
       return true;
     }
     this._pendingBuyPulse = { generatorId, ...pulse };
     return true;
   }
 
+  /**
+   * Fase F7 (Viewport Culling): controla se uma prateleira está visível no scroll da coluna central.
+   * Prateleiras com `inViewport === false` não executam `#paintShelf` a 60 Hz no loop de animação.
+   */
+  setShelfViewportVisibility(generatorId, inViewport = true) {
+    const nodes = this._shelves.get(generatorId);
+    if (!nodes) return false;
+    const next = Boolean(inViewport);
+    const prev = nodes.inViewport !== false;
+    nodes.inViewport = next;
+    if (next && !prev && nodes.count > 0 && !nodes.shelf?.hidden) {
+      this.#paintShelf(nodes, this._reducedMotion || !this._prefs.fancy, this.now() / 1000);
+    }
+    return next;
+  }
+
   #paintAll(staticPose) {
     const t = this.now() / 1000;
     for (const nodes of this._shelves.values()) {
-      if (nodes.count > 0) this.#paintShelf(nodes, staticPose, t);
+      if (nodes.count <= 0 || nodes.shelf?.hidden) continue;
+      if (!staticPose && nodes.inViewport === false) continue;
+      this.#paintShelf(nodes, staticPose, t);
     }
+  }
+
+  #clearShelfMotes(nodes) {
+    if (!nodes?.motes) return;
+    const doc = nodes.motes.ownerDocument || this.root;
+    const kids = Array.isArray(nodes.motes.childNodes) ? [...nodes.motes.childNodes] : [];
+    for (const child of kids) {
+      releasePooledNode(doc, 'shelf-mote', child);
+    }
+    nodes.motes.replaceChildren?.();
   }
 
   #clearAllMotes() {
     this._moteCarry = {};
     this._moteLast = null;
     for (const nodes of this._shelves.values()) {
-      nodes.motes?.replaceChildren?.();
+      this.#clearShelfMotes(nodes);
     }
   }
 
   #tickMotes(dt) {
-    if (this._reducedMotion || dt <= 0) return;
+    if (this._reducedMotion || !this._prefs.particles || dt <= 0) return;
     const rates = this._moteRates || {};
     for (const [id, rate] of Object.entries(rates)) {
       if (!(rate > 0)) continue;
@@ -1086,15 +1330,16 @@ export class WorldView {
 
       for (let i = 0; i < spawn; i += 1) {
         while (layer.childElementCount >= SHELF_MOTE_MAX_ON_SCREEN) {
-          layer.firstElementChild?.remove();
+          const oldest = layer.firstElementChild;
+          if (!oldest) break;
+          releasePooledNode(doc, 'shelf-mote', oldest);
         }
-        const mote = doc.createElement('span');
-        mote.className = 'despertar-shelf__mote';
-        mote.setAttribute('aria-hidden', 'true');
+        const mote = acquirePooledNode(doc, 'shelf-mote', 'despertar-shelf__mote');
+        if (!mote) break;
         const x = 8 + Math.random() * 84;
         mote.style.setProperty('--mote-x', `${x}%`);
         mote.style.setProperty('--mote-dur', `${0.9 + Math.random() * 0.7}s`);
-        mote.addEventListener('animationend', () => mote.remove(), { once: true });
+        mote.addEventListener('animationend', () => releasePooledNode(doc, 'shelf-mote', mote), { once: true });
         layer.appendChild(mote);
       }
     }
@@ -1102,12 +1347,18 @@ export class WorldView {
 
   #layoutShelf(nodes) {
     if (!nodes) return;
-    const fieldW = Number(nodes.field?.clientWidth) || 0;
+    // Largura ao vivo: o cache do RO atrasa e o canvas ficava curto (sprite cortado no meio da faixa).
+    const measured = Math.floor(Number(nodes.field?.clientWidth) || 0);
+    if (measured > 0) nodes.cachedFieldWidth = measured;
+    const fieldW = Number(nodes.cachedFieldWidth) || 0;
     const colsNeeded = shelfColumnsForCount(nodes.count);
     // Viewport cheio quando qty é baixa; quando qty exige mais colunas → overflow-x.
     const colsFit = fieldW > 0 ? shelfColumnsForWidth(fieldW) : SHELF_GRID_COLS;
     const layoutCols = Math.max(1, colsNeeded, colsFit);
-    const logical = shelfCanvasSize(layoutCols, SHELF_GRID_ROWS);
+    const grid = shelfCanvasSize(layoutCols, SHELF_GRID_ROWS);
+    // Cobre a faixa inteira em px (não só a grade): evita buraco de chão CSS à direita do canvas.
+    const coverW = Math.max(grid.width, fieldW > 0 ? fieldW : 0);
+    const logical = { width: coverW, height: grid.height };
     const changed = nodes.cols !== layoutCols
       || nodes.logicalSize?.width !== logical.width
       || nodes.logicalSize?.height !== logical.height;
@@ -1130,10 +1381,12 @@ export class WorldView {
       canvas.height = bh;
       nodes._needsPaint = true;
     }
-    // Tamanho intrínseco em px — o field faz overflow-x se o canvas for mais largo.
+    // Tamanho intrínseco em px — min 100% do field; overflow-x só se qty exigir mais colunas.
     if (canvas.style) {
       canvas.style.width = `${logical.width}px`;
+      canvas.style.minWidth = '100%';
       canvas.style.height = `${logical.height}px`;
+      canvas.style.maxWidth = 'none';
     }
     if (nodes.ctx?.setTransform) {
       nodes.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1141,82 +1394,108 @@ export class WorldView {
   }
 
   #paintShelf(nodes, staticPose, timeSec = 0) {
-    const { ctx, canvas, count, def, phase, sprite } = nodes;
-    if (!ctx || !canvas) return;
-    const logical = nodes.logicalSize || shelfCanvasSize(nodes.cols || SHELF_GRID_COLS, SHELF_GRID_ROWS);
-    ctx.clearRect(0, 0, logical.width, logical.height);
-    if (count <= 0) return;
+    return withPerfMeasure('WorldView.#paintShelf', () => {
+      const { ctx, canvas, count, def, phase, sprite } = nodes;
+      if (!ctx || !canvas) return;
+      const logical = nodes.logicalSize || shelfCanvasSize(nodes.cols || SHELF_GRID_COLS, SHELF_GRID_ROWS);
+      ctx.clearRect(0, 0, logical.width, logical.height);
+      if (count <= 0) return;
+      drawShelfBackground(ctx, nodes.background, logical.width, logical.height);
 
-    const n = Math.min(count, this.cap);
-    const bobAmp = Math.max(1.2, SHELF_CELL * 0.06);
-    const shinyCount = Math.max(0, Math.floor(Number(nodes.shinyCount) || 0));
-    const goldCount = Math.max(0, Math.floor(Number(nodes.goldCount) || 0));
-    const cosmetics = Array.isArray(nodes.cosmetics) ? nodes.cosmetics : [];
-    const pulse = nodes._buyPulse;
-    const nowMs = this.now();
-    let pulseScaleFor = null;
-    if (pulse && !this._reducedMotion) {
-      const elapsed = nowMs - pulse.start;
-      if (elapsed >= pulse.duration) {
-        nodes._buyPulse = null;
-      } else {
-        const factor = buyPulseScale(elapsed / pulse.duration);
-        pulseScaleFor = (i) => (
-          i >= pulse.from && i < pulse.from + pulse.count ? factor : 1
-        );
-      }
-    }
-
-    for (let i = 0; i < n; i += 1) {
-      const { x, y } = shelfCellOrigin(i, SHELF_GRID_ROWS);
-      let bob = 0;
-      if (!staticPose && !this._reducedMotion) {
-        bob = Math.sin(timeSec * 2.2 + phase + i * 0.37) * bobAmp;
-      }
-      const rarity = unitRarityAt(i, { gold: goldCount, shiny: shinyCount });
-      const rarityOpts = {
-        rarity: rarity === 'normal' ? false : rarity,
-        shiny: rarity === 'negativo',
-        gold: rarity === 'gold',
-        reducedMotion: this._reducedMotion,
-      };
-      const cellScale = pulseScaleFor ? pulseScaleFor(i) : 1;
-
-      const paintCell = (ox, oy) => {
-        if (sprite) {
-          drawContainedInCell(ctx, sprite, ox, oy, SHELF_CELL, bob, rarityOpts);
+      const n = Math.min(count, this.cap);
+      const bobAmp = Math.max(1.2, SHELF_CELL * 0.06);
+      const shinyCount = Math.max(0, Math.floor(Number(nodes.shinyCount) || 0));
+      const goldCount = Math.max(0, Math.floor(Number(nodes.goldCount) || 0));
+      const cosmetics = Array.isArray(nodes.cosmetics) ? nodes.cosmetics : [];
+      const pulse = nodes._buyPulse;
+      const nowMs = this.now();
+      let pulseScaleFor = null;
+      const fancyActive = !this._reducedMotion && this._prefs.fancy;
+      if (pulse && !this._reducedMotion) {
+        const elapsed = nowMs - pulse.start;
+        if (elapsed >= pulse.duration) {
+          nodes._buyPulse = null;
         } else {
-          drawNpcSilhouette(ctx, ox, oy, def.tier, bob, SHELF_CELL, rarityOpts);
+          const factor = buyPulseScale(elapsed / pulse.duration);
+          pulseScaleFor = (i) => (
+            i >= pulse.from && i < pulse.from + pulse.count ? factor : 1
+          );
         }
-        for (const cos of cosmetics) {
-          const salt = cos.upgradeId || cos.accessory || 0;
-          if (!indexMatchesCoverage(i, cos.coverage, salt)) continue;
-          drawAccessory(ctx, cos.accessory, ox, oy, SHELF_CELL, bob, {
-            tier: def.tier,
-            reducedMotion: this._reducedMotion,
-            timeSec,
-          });
-        }
-      };
-
-      if (cellScale !== 1) {
-        const cx = x + SHELF_CELL / 2;
-        const cy = y + SHELF_CELL / 2;
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.scale(cellScale, cellScale);
-        paintCell(-SHELF_CELL / 2, -SHELF_CELL / 2);
-        ctx.restore();
-      } else {
-        paintCell(x, y);
       }
-    }
 
-    const hover = this._hoverHit;
-    if (hover && hover.generatorId === def.id && hover.index >= 0 && hover.index < n) {
-      const { x, y } = shelfCellOrigin(hover.index, SHELF_GRID_ROWS);
-      drawShelfCellHighlight(ctx, x, y, SHELF_CELL);
-    }
+      // Perf-5: Cap estrito de variantes gold/negativo animadas por prateleira por frame.
+      let animatedVariantsRemaining = fancyActive ? this.animatedVariantCap : 0;
+
+      for (let i = 0; i < n; i += 1) {
+        const { x, y } = shelfCellOrigin(i, SHELF_GRID_ROWS);
+        let bob = 0;
+        if (!staticPose && fancyActive) {
+          bob = Math.sin(timeSec * 2.2 + phase + i * 0.37) * bobAmp;
+        }
+        const rarity = unitRarityAt(i, { gold: goldCount, shiny: shinyCount });
+        const isVariant = rarity === 'gold' || rarity === 'negativo';
+        let useStaticVariant = !fancyActive;
+        if (isVariant && !useStaticVariant) {
+          if (animatedVariantsRemaining > 0) {
+            animatedVariantsRemaining -= 1;
+          } else {
+            useStaticVariant = true;
+          }
+        }
+        const rarityOpts = {
+          rarity: rarity === 'normal' ? false : rarity,
+          shiny: rarity === 'negativo',
+          gold: rarity === 'gold',
+          reducedMotion: useStaticVariant,
+        };
+        const cellScale = pulseScaleFor ? pulseScaleFor(i) : 1;
+
+        const paintCell = (ox, oy) => {
+          const variant = pickCoveredCosmetic(
+            cosmetics,
+            i,
+            (cos) => Boolean(nodes.variants?.get(cos.accessory)),
+          );
+          const paintSprite = variant ? nodes.variants.get(variant.accessory) : sprite;
+          if (paintSprite) {
+            drawContainedInCell(ctx, paintSprite, ox, oy, SHELF_CELL, bob, {
+              ...rarityOpts,
+              crisp: true,
+            });
+          } else {
+            drawNpcSilhouette(ctx, ox, oy, def.tier, bob, SHELF_CELL, rarityOpts);
+          }
+          if (variant) return;
+          for (const cos of cosmetics) {
+            const salt = cos.upgradeId || cos.accessory || 0;
+            if (!indexMatchesCoverage(i, cos.coverage, salt)) continue;
+            drawAccessory(ctx, cos.accessory, ox, oy, SHELF_CELL, bob, {
+              tier: def.tier,
+              reducedMotion: !fancyActive,
+              timeSec,
+            });
+          }
+        };
+
+        if (cellScale !== 1) {
+          const cx = x + SHELF_CELL / 2;
+          const cy = y + SHELF_CELL / 2;
+          ctx.save();
+          ctx.translate(cx, cy);
+          ctx.scale(cellScale, cellScale);
+          paintCell(-SHELF_CELL / 2, -SHELF_CELL / 2);
+          ctx.restore();
+        } else {
+          paintCell(x, y);
+        }
+      }
+
+      const hover = this._hoverHit;
+      if (hover && hover.generatorId === def.id && hover.index >= 0 && hover.index < n) {
+        const { x, y } = shelfCellOrigin(hover.index, SHELF_GRID_ROWS);
+        drawShelfCellHighlight(ctx, x, y, SHELF_CELL);
+      }
+    });
   }
 
   #refreshShelfLabel(nodes) {
@@ -1334,21 +1613,70 @@ export class WorldView {
   #repaintShelfId(generatorId) {
     const nodes = this._shelves.get(generatorId);
     if (!nodes || nodes.count <= 0 || nodes.shelf?.hidden) return;
-    this.#paintShelf(nodes, this._reducedMotion || !this._running, this.now() / 1000);
+    this.#paintShelf(nodes, this._reducedMotion || !this._prefs.fancy, this.now() / 1000);
+  }
+
+  /**
+   * Preview do tip = mesma unidade da prateleira (chapéu / negativo / gold).
+   * @param {HTMLCanvasElement} canvas
+   * @param {{ generatorId: string, index: number, rarity?: string, shiny?: boolean, gold?: boolean }} hit
+   */
+  paintNpcPortrait(canvas, hit) {
+    if (!canvas || !hit?.generatorId) return false;
+    const nodes = this._shelves.get(hit.generatorId);
+    const cell = NPC_PORTRAIT_CELL;
+    const dpr = Math.min(2, (typeof globalThis.devicePixelRatio === 'number' && globalThis.devicePixelRatio > 0)
+      ? globalThis.devicePixelRatio
+      : 1);
+    canvas.width = Math.round(cell * dpr);
+    canvas.height = Math.round(cell * dpr);
+    if (canvas.style) {
+      canvas.style.width = `${cell}px`;
+      canvas.style.height = `${cell}px`;
+    }
+    const ctx = canvas.getContext?.('2d');
+    if (!ctx) return false;
+    if (typeof ctx.setTransform === 'function') ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const rarity = hit.rarity
+      || (hit.gold ? 'gold' : (hit.shiny ? 'negativo' : 'normal'));
+    return paintShelfUnitPortrait(ctx, {
+      cell,
+      sprite: nodes?.sprite || null,
+      variants: nodes?.variants || null,
+      cosmetics: Array.isArray(nodes?.cosmetics) ? nodes.cosmetics : [],
+      tier: nodes?.def?.tier || 1,
+      index: hit.index,
+      rarity,
+      timeSec: this.now() / 1000,
+    });
   }
 
   #bindResizeObserver() {
     this.#unbindResizeObserver();
     if (typeof ResizeObserver !== 'function') return;
-    this._resizeObserver = new ResizeObserver(() => {
+    this._resizeObserver = new ResizeObserver((entries) => {
       if (!this._mounted) return;
+      const byField = new Map();
+      for (const entry of entries || []) {
+        const w = entry?.contentRect?.width;
+        if (entry?.target && Number.isFinite(w) && w > 0) {
+          byField.set(entry.target, Math.floor(w));
+        }
+      }
       for (const nodes of this._shelves.values()) {
+        if (nodes.field && byField.has(nodes.field)) {
+          nodes.cachedFieldWidth = byField.get(nodes.field);
+        } else if (nodes.field && !nodes.shelf?.hidden) {
+          const live = Math.floor(Number(nodes.field.clientWidth) || 0);
+          if (live > 0) nodes.cachedFieldWidth = live;
+        }
         if (nodes.shelf?.hidden) continue;
         this.#layoutShelf(nodes);
         this.#refreshShelfLabel(nodes);
         if (nodes._needsPaint && nodes.count > 0) {
           nodes._needsPaint = false;
-          this.#paintShelf(nodes, this._reducedMotion);
+          const staticPose = this._reducedMotion || !this._prefs.fancy;
+          this.#paintShelf(nodes, staticPose, staticPose ? 0 : this.now() / 1000);
         }
       }
     });
@@ -1362,15 +1690,67 @@ export class WorldView {
     this._resizeObserver = null;
   }
 
+  #bindIntersectionObserver() {
+    this.#unbindIntersectionObserver();
+    if (typeof IntersectionObserver !== 'function') return;
+    const byShelf = new Map();
+    for (const nodes of this._shelves.values()) {
+      if (nodes.shelf) byShelf.set(nodes.shelf, nodes);
+    }
+    this._intersectionObserver = new IntersectionObserver((entries) => {
+      if (!this._mounted) return;
+      for (const entry of entries || []) {
+        const nodes = byShelf.get(entry?.target);
+        if (!nodes) continue;
+        const visible = Boolean(entry.isIntersecting || entry.intersectionRatio > 0);
+        this.setShelfViewportVisibility(nodes.def.id, visible);
+      }
+    }, { root: null, rootMargin: '120px 0px' });
+    for (const nodes of this._shelves.values()) {
+      if (nodes.shelf) this._intersectionObserver.observe(nodes.shelf);
+    }
+  }
+
+  #unbindIntersectionObserver() {
+    this._intersectionObserver?.disconnect?.();
+    this._intersectionObserver = null;
+  }
+
   #prefetchSprites() {
+    const accessoriesByGenerator = new Map();
+    for (const def of Object.values(UPGRADE_COSMETICS)) {
+      if (!def?.targetGeneratorId || !def.accessory) continue;
+      const list = accessoriesByGenerator.get(def.targetGeneratorId) || [];
+      list.push(def.accessory);
+      accessoriesByGenerator.set(def.targetGeneratorId, list);
+    }
     for (const [id, nodes] of this._shelves) {
-      if (nodes.spriteTried) continue;
-      nodes.spriteTried = true;
-      loadGeneratorImage(id).then((img) => {
-        if (!img || !this._mounted) return;
-        nodes.sprite = img;
-        if (nodes.count > 0) this.#paintShelf(nodes, this._reducedMotion);
-      });
+      if (!nodes.spriteTried) {
+        nodes.spriteTried = true;
+        loadHabitatImage(id).then((img) => {
+          if (!img || !this._mounted) return;
+          nodes.sprite = img;
+          this.#scheduleShelfArt(nodes);
+        });
+      }
+      if (!nodes.backgroundTried) {
+        nodes.backgroundTried = true;
+        loadHabitatBackgroundImage(id).then((img) => {
+          if (!img || !this._mounted) return;
+          nodes.background = img;
+          applyShelfFloor(nodes.field, img);
+          this.#scheduleShelfArt(nodes);
+        });
+      }
+      for (const accessory of accessoriesByGenerator.get(id) || []) {
+        if (nodes.variants?.has(accessory) || nodes.variants?.get(`${accessory}:tried`)) continue;
+        nodes.variants?.set(`${accessory}:tried`, true);
+        loadHabitatVariantImage(accessory).then((img) => {
+          if (!img || !this._mounted) return;
+          nodes.variants.set(accessory, img);
+          this.#scheduleShelfArt(nodes);
+        });
+      }
     }
   }
 
@@ -1379,57 +1759,33 @@ export class WorldView {
     prefetchCosmeticImages().then(() => {
       if (!this._mounted) return;
       for (const nodes of this._shelves.values()) {
-        if (nodes.count > 0 && nodes.cosmetics?.length) {
-          this.#paintShelf(nodes, this._reducedMotion);
-        }
+        if (nodes.count > 0 && nodes.cosmetics?.length) this.#scheduleShelfArt(nodes);
       }
     }).catch(() => {});
   }
 
-  #startLoop() {
-    if (this._running || !this.requestFrame) return;
-    if (typeof document !== 'undefined' && document.hidden) return;
-    this._running = true;
-    this._moteLast = this.now();
-    const tick = (nowArg) => {
-      if (!this._running) return;
-      const now = Number.isFinite(nowArg) ? nowArg : this.now();
-      const last = this._moteLast == null ? now : this._moteLast;
-      const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
-      this._moteLast = now;
-      this.#paintAll(false);
-      this.#tickMotes(dt);
-      this._raf = this.requestFrame(tick);
+  /**
+   * A arte chegou. Com o jogo animando, o próximo frame pega o sprite
+   * sem pregar o bob em t=0. Parado, um único frame pinta o lote.
+   */
+  #scheduleShelfArt(nodes) {
+    if (!nodes || nodes.count <= 0) return;
+    nodes._artDirty = true;
+    if (this._artFlush) return;
+    this._artFlush = true;
+    const flush = () => {
+      this._artFlush = false;
+      if (!this._mounted) return;
+      const staticPose = this._reducedMotion || !this._prefs.fancy;
+      for (const shelf of this._shelves.values()) {
+        if (!shelf._artDirty) continue;
+        shelf._artDirty = false;
+        if (shelf.count <= 0) continue;
+        if (!staticPose && shelf.inViewport !== false) continue;
+        this.#paintShelf(shelf, true, 0);
+      }
     };
-    this._raf = this.requestFrame(tick);
-  }
-
-  #stopLoop() {
-    this._running = false;
-    this._moteLast = null;
-    if (this._raf != null && this.cancelFrame) {
-      this.cancelFrame(this._raf);
-    }
-    this._raf = null;
-  }
-
-  #onVisibility() {
-    if (typeof document === 'undefined') return;
-    if (document.hidden) {
-      this.#stopLoop();
-      return;
-    }
-    if (this._hasSprites && !this._reducedMotion) {
-      this.#startLoop();
-    }
-  }
-
-  #listenVisibility(on) {
-    if (typeof document === 'undefined' || !document.addEventListener) return;
-    if (on) {
-      document.addEventListener('visibilitychange', this._onVisibility);
-    } else {
-      document.removeEventListener('visibilitychange', this._onVisibility);
-    }
+    if (typeof this.requestFrame === 'function') this.requestFrame(flush);
+    else flush();
   }
 }

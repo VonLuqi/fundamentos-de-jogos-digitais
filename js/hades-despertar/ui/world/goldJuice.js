@@ -22,8 +22,10 @@ export function goldPulse(t = shinyGlitchNow()) {
   return 0.55 + 0.45 * (0.5 + 0.5 * a) * (0.85 + 0.15 * b);
 }
 
+const _sparkleBuffer = Array.from({ length: 8 }, () => ({ x: 0, y: 0, r: 0, a: 0 }));
+
 /**
- * Sparkles orbitando levemente o centro.
+ * Sparkles orbitando levemente o centro (pool reutilizável sem alocar objetos por frame — Perf-5).
  * @param {number} cx
  * @param {number} cy
  * @param {number} radius
@@ -32,22 +34,22 @@ export function goldPulse(t = shinyGlitchNow()) {
  * @returns {{ x: number, y: number, r: number, a: number }[]}
  */
 export function goldSparkles(cx, cy, radius, t = shinyGlitchNow(), count = 6) {
-  const out = [];
   const n = Math.max(3, Math.min(8, Math.floor(Number(count) || 6)));
   const R = Math.max(4, Number(radius) || 10);
+  let len = 0;
   for (let i = 0; i < n; i += 1) {
     const phase = t * 0.0024 + i * ((Math.PI * 2) / n);
     const twinkle = 0.35 + 0.65 * Math.max(0, Math.sin(t * 0.012 + i * 1.7));
     if (twinkle < 0.4) continue;
     const orbit = R * (0.55 + 0.35 * Math.sin(phase * 0.7 + i));
-    out.push({
-      x: cx + Math.cos(phase) * orbit,
-      y: cy + Math.sin(phase * 1.15) * orbit * 0.85,
-      r: 0.6 + twinkle * 1.4,
-      a: 0.35 + twinkle * 0.55,
-    });
+    const slot = _sparkleBuffer[len];
+    slot.x = cx + Math.cos(phase) * orbit;
+    slot.y = cy + Math.sin(phase * 1.15) * orbit * 0.85;
+    slot.r = 0.6 + twinkle * 1.4;
+    slot.a = 0.35 + twinkle * 0.55;
+    len += 1;
   }
-  return out;
+  return _sparkleBuffer.slice(0, len);
 }
 
 /**

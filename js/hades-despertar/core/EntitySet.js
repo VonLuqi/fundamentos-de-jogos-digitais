@@ -2,7 +2,7 @@
  * Coleção de geradores — evolução ES-Module de Aldo111 EntitySet.
  */
 
-import { GENERATOR_COST_MULT_BASE } from '../config/constants.js';
+import { GENERATOR_COST_MULT_BASE, GENERATOR_SELL_REFUND_BASE } from '../config/constants.js';
 import { GENERATORS } from '../config/generators.js';
 import { add } from './decimal.js';
 import { Entity } from './Entity.js';
@@ -59,6 +59,14 @@ export class EntitySet {
       return { ok: false, wallet, cost: '0.00', bought: 0 };
     }
     return entity.buy(count, wallet, costMult);
+  }
+
+  sell(id, count, wallet, costMult = GENERATOR_COST_MULT_BASE, refundRate = GENERATOR_SELL_REFUND_BASE) {
+    const entity = this.get(id);
+    if (!entity) {
+      return { ok: false, wallet, refund: '0.00', sold: 0 };
+    }
+    return entity.sell(count, wallet, costMult, refundRate);
   }
 
   totalRate(upgradeMultById = {}) {

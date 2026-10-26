@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" width="200" height="48" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="bandFace" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1a1520"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </linearGradient>
+    <linearGradient id="bandEdge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7a5a28"/>
+      <stop offset="50%" stop-color="#e8d4a8"/>
+      <stop offset="100%" stop-color="#7a5a28"/>
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="198" height="46" rx="4" fill="url(#bandFace)" stroke="url(#bandEdge)" stroke-width="2"/>
+  <path d="M12 8 H188" stroke="#cfa759" stroke-opacity="0.35" stroke-width="1"/>
+  <path d="M12 40 H188" stroke="#000" stroke-opacity="0.45" stroke-width="2"/>
+  <circle cx="16" cy="24" r="3" fill="#00a896" fill-opacity="0.7"/>
+  <circle cx="184" cy="24" r="3" fill="#00a896" fill-opacity="0.7"/>
+</svg>

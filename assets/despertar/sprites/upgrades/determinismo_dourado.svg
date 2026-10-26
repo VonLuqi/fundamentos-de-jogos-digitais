@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="g" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1a1a26"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" fill="url(#g)"/>
+  
+  <rect x="8" y="8" width="112" height="112" rx="18" fill="#140a1a" fill-opacity="0.72" stroke="#c084fc" stroke-width="3"/>
+  <path d="M14 20 H114" stroke="#e9d5ff" stroke-opacity="0.15" stroke-width="2"/>
+  <path d="M14 108 H114" stroke="#000" stroke-opacity="0.35" stroke-width="3"/>
+  <circle cx="71" cy="85" r="1" fill="#e9d5ff" opacity="0.10"/><circle cx="88" cy="114" r="2" fill="#e9d5ff" opacity="0.04"/><circle cx="105" cy="39" r="1" fill="#e9d5ff" opacity="0.05"/><circle cx="18" cy="68" r="2" fill="#e9d5ff" opacity="0.06"/><circle cx="35" cy="97" r="1" fill="#e9d5ff" opacity="0.07"/><circle cx="52" cy="22" r="2" fill="#e9d5ff" opacity="0.08"/><circle cx="69" cy="51" r="1" fill="#e9d5ff" opacity="0.09"/><circle cx="86" cy="80" r="2" fill="#e9d5ff" opacity="0.10"/><circle cx="103" cy="109" r="1" fill="#e9d5ff" opacity="0.04"/><circle cx="16" cy="34" r="2" fill="#e9d5ff" opacity="0.05"/><circle cx="33" cy="63" r="1" fill="#e9d5ff" opacity="0.06"/><circle cx="50" cy="92" r="2" fill="#e9d5ff" opacity="0.07"/><circle cx="67" cy="17" r="1" fill="#e9d5ff" opacity="0.08"/><circle cx="84" cy="46" r="2" fill="#e9d5ff" opacity="0.09"/><circle cx="101" cy="75" r="1" fill="#e9d5ff" opacity="0.10"/><circle cx="14" cy="104" r="2" fill="#e9d5ff" opacity="0.04"/><circle cx="31" cy="29" r="1" fill="#e9d5ff" opacity="0.05"/><circle cx="48" cy="58" r="2" fill="#e9d5ff" opacity="0.06"/><circle cx="65" cy="87" r="1" fill="#e9d5ff" opacity="0.07"/><circle cx="82" cy="12" r="2" fill="#e9d5ff" opacity="0.08"/><circle cx="99" cy="41" r="1" fill="#e9d5ff" opacity="0.09"/><circle cx="12" cy="70" r="2" fill="#e9d5ff" opacity="0.10"/><circle cx="29" cy="99" r="1" fill="#e9d5ff" opacity="0.04"/><circle cx="46" cy="24" r="2" fill="#e9d5ff" opacity="0.05"/><circle cx="63" cy="53" r="1" fill="#e9d5ff" opacity="0.06"/><circle cx="80" cy="82" r="2" fill="#e9d5ff" opacity="0.07"/><circle cx="97" cy="111" r="1" fill="#e9d5ff" opacity="0.08"/><circle cx="114" cy="36" r="2" fill="#e9d5ff" opacity="0.09"/><circle cx="27" cy="65" r="1" fill="#e9d5ff" opacity="0.10"/><circle cx="44" cy="94" r="2" fill="#e9d5ff" opacity="0.04"/><circle cx="61" cy="19" r="1" fill="#e9d5ff" opacity="0.05"/><circle cx="78" cy="48" r="2" fill="#e9d5ff" opacity="0.06"/><circle cx="95" cy="77" r="1" fill="#e9d5ff" opacity="0.07"/><circle cx="112" cy="106" r="2" fill="#e9d5ff" opacity="0.08"/><circle cx="25" cy="31" r="1" fill="#e9d5ff" opacity="0.09"/><circle cx="42" cy="60" r="2" fill="#e9d5ff" opacity="0.10"/><circle cx="59" cy="89" r="1" fill="#e9d5ff" opacity="0.04"/><circle cx="76" cy="14" r="2" fill="#e9d5ff" opacity="0.05"/><circle cx="93" cy="43" r="1" fill="#e9d5ff" opacity="0.06"/><circle cx="110" cy="72" r="2" fill="#e9d5ff" opacity="0.07"/><circle cx="23" cy="101" r="1" fill="#e9d5ff" opacity="0.08"/><circle cx="40" cy="26" r="2" fill="#e9d5ff" opacity="0.09"/><circle cx="57" cy="55" r="1" fill="#e9d5ff" opacity="0.10"/><circle cx="74" cy="84" r="2" fill="#e9d5ff" opacity="0.04"/><circle cx="91" cy="113" r="1" fill="#e9d5ff" opacity="0.05"/><circle cx="108" cy="38" r="2" fill="#e9d5ff" opacity="0.06"/><circle cx="21" cy="67" r="1" fill="#e9d5ff" opacity="0.07"/><circle cx="38" cy="96" r="2" fill="#e9d5ff" opacity="0.08"/>
+  <path d="M40 88 H88 L80 48 H48 Z" fill="#fb7185" fill-opacity="0.3" stroke="#fb7185" stroke-width="3"/>
+      <path d="M64 48 V28 M56 36 H72" stroke="#fb7185" stroke-width="3"/>
+      <circle cx="64" cy="70" r="8" fill="#fb7185"/><circle cx="100" cy="28" r="10" fill="#140a1a" stroke="#c084fc" stroke-width="2"/>
+        <circle cx="100" cy="28" r="5" fill="#fb7185"/>
+  <circle cx="105.8" cy="60.3" r="1.6" fill="#e9d5ff" opacity="0.7"/>
+  <rect x="10" y="10" width="108" height="108" rx="16" fill="none" stroke="#e9d5ff" stroke-opacity="0.28" stroke-width="1"/>
+  <!-- wave:E kind:generatorMult -->
+
+</svg>

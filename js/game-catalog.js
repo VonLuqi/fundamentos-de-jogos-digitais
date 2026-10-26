@@ -83,6 +83,7 @@ function normalizeAchievement(raw) {
     ...raw,
     xp: Number(raw.xp) || 0,
     hidden: Boolean(raw.hidden),
+    shadow: Boolean(raw.shadow || raw.meta?.shadow),
     difficulty,
     rarity: normalizeAchievementRarity(raw.rarity, difficulty),
     trailhead: raw.trailhead && typeof raw.trailhead === 'object' ? raw.trailhead : null,

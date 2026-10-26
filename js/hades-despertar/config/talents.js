@@ -122,6 +122,50 @@ export const TALENTS = freezeAll([
     cost: '10',
     effects: { startingGeneratorId: 'phlegethon_forge', startingGeneratorQty: 1 },
   },
+  // --- Fase F5: Néctar do Lethe (Sugar Baking & Sugar Frenzy) ---
+  {
+    id: 'nectar_em_reserva',
+    name: 'Néctar em Reserva',
+    cost: '5',
+    effects: { nectarReserveBonus: true },
+  },
+  {
+    id: 'frenesi_de_nectar_talento',
+    name: 'Cálice do Frenesi',
+    cost: '8',
+    effects: { nectarFrenzyUnlock: true },
+  },
+  // --- Fase F8: Dragão Ctoniano, Estações do Submundo e Slots de Eco do Styx III–V ---
+  {
+    id: 'ovo_primordial',
+    name: 'Ovo Primordial',
+    cost: '5',
+    effects: { dragonUnlock: true },
+  },
+  {
+    id: 'rodizio_das_estacoes',
+    name: 'Roda das Estações',
+    cost: '5',
+    effects: { seasonSwitcherUnlock: true },
+  },
+  {
+    id: 'eco_ancestral_iii',
+    name: 'Eco do Styx III',
+    cost: '9',
+    effects: { softPrestigeStyxCount: 3 },
+  },
+  {
+    id: 'eco_ancestral_iv',
+    name: 'Eco do Styx IV',
+    cost: '12',
+    effects: { softPrestigeStyxCount: 4 },
+  },
+  {
+    id: 'eco_ancestral_v',
+    name: 'Eco do Styx V',
+    cost: '15',
+    effects: { softPrestigeStyxCount: 5 },
+  },
 ]);
 
 export const TALENT_IDS = Object.freeze(TALENTS.map((item) => item.id));

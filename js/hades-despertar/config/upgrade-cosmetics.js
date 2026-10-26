@@ -175,6 +175,27 @@ export function indexMatchesCoverage(index, coverage, salt = 0) {
 }
 
 /**
+ * Uma variação por unidade (estilo avó): o cosmético de maior prioridade
+ * que cobre o índice. Empate fica com o último da lista.
+ * @param {Array<{ accessory?: string, coverage?: number, priority?: number, upgradeId?: string }>} cosmetics
+ * @param {number} index
+ * @param {(cos: object) => boolean} [accept]
+ */
+export function pickCoveredCosmetic(cosmetics, index, accept = null) {
+  let chosen = null;
+  for (const cos of cosmetics || []) {
+    if (!cos?.accessory) continue;
+    if (accept && !accept(cos)) continue;
+    const salt = cos.upgradeId || cos.accessory || 0;
+    if (!indexMatchesCoverage(index, cos.coverage, salt)) continue;
+    if (!chosen || (Number(cos.priority) || 0) >= (Number(chosen.priority) || 0)) {
+      chosen = cos;
+    }
+  }
+  return chosen;
+}
+
+/**
  * @param {number} count
  * @param {number} coverage
  * @param {number|string} [salt]

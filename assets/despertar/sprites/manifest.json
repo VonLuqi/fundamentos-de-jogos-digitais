@@ -48,6 +48,104 @@
       "webp": "generators/obsidian_throne.webp",
       "svg": "generators/obsidian_throne.svg",
       "size": 128
+    },
+    "mnemosyne_temple": {
+      "tier": 7,
+      "name": "Templo de Mnemosyne",
+      "webp": "generators/mnemosyne_temple.webp",
+      "svg": "generators/mnemosyne_temple.svg",
+      "size": 128
+    },
+    "styx_tower": {
+      "tier": 8,
+      "name": "Torre do Estige",
+      "webp": "generators/styx_tower.webp",
+      "svg": "generators/styx_tower.svg",
+      "size": 128
+    },
+    "star_barge": {
+      "tier": 9,
+      "name": "Barca das Estrelas",
+      "webp": "generators/star_barge.webp",
+      "svg": "generators/star_barge.svg",
+      "size": 128
+    },
+    "tartarus_lab": {
+      "tier": 10,
+      "name": "Laboratório do Tártaro",
+      "webp": "generators/tartarus_lab.webp",
+      "svg": "generators/tartarus_lab.svg",
+      "size": 128
+    },
+    "erebus_portal": {
+      "tier": 11,
+      "name": "Portal do Érebo",
+      "webp": "generators/erebus_portal.webp",
+      "svg": "generators/erebus_portal.svg",
+      "size": 128
+    },
+    "chronos_loom": {
+      "tier": 12,
+      "name": "Tear de Cronos",
+      "webp": "generators/chronos_loom.webp",
+      "svg": "generators/chronos_loom.svg",
+      "size": 128
+    },
+    "void_condenser": {
+      "tier": 13,
+      "name": "Condensador do Vazio",
+      "webp": "generators/void_condenser.webp",
+      "svg": "generators/void_condenser.svg",
+      "size": 128
+    },
+    "moirai_prism": {
+      "tier": 14,
+      "name": "Prisma das Moiras",
+      "webp": "generators/moirai_prism.webp",
+      "svg": "generators/moirai_prism.svg",
+      "size": 128
+    },
+    "fate_forge": {
+      "tier": 15,
+      "name": "Forja do Destino",
+      "webp": "generators/fate_forge.webp",
+      "svg": "generators/fate_forge.svg",
+      "size": 128
+    },
+    "fractal_engine": {
+      "tier": 16,
+      "name": "Motor Fractal",
+      "webp": "generators/fractal_engine.webp",
+      "svg": "generators/fractal_engine.svg",
+      "size": 128
+    },
+    "oracle_console": {
+      "tier": 17,
+      "name": "Console do Oráculo",
+      "webp": "generators/oracle_console.webp",
+      "svg": "generators/oracle_console.svg",
+      "size": 128
+    },
+    "chthonic_idleverse": {
+      "tier": 18,
+      "name": "Idleverso Ctoniano",
+      "webp": "generators/chthonic_idleverse.webp",
+      "svg": "generators/chthonic_idleverse.svg",
+      "size": 128
+    },
+    "cortex_baker": {
+      "tier": 19,
+      "name": "Padeiro do Córtex",
+      "webp": "generators/cortex_baker.webp",
+      "svg": "generators/cortex_baker.svg",
+      "size": 128
+    },
+    "the_emperor": {
+      "tier": 20,
+      "name": "O Imperador (You)",
+      "webp": "generators/the_emperor.webp",
+      "svg": "generators/the_emperor.svg",
+      "size": 128
     }
   },
   "upgrades": {
@@ -86,11 +184,95 @@
       "svg": "upgrades/colheita_eterna.svg",
       "size": 128
     },
+    "fio_da_foice": {
+      "name": "Fio da Foice",
+      "kind": "clickMult",
+      "webp": "upgrades/fio_da_foice.webp",
+      "svg": "upgrades/fio_da_foice.svg",
+      "size": 128
+    },
+    "lamina_do_styx": {
+      "name": "Lâmina do Styx",
+      "kind": "clickMult",
+      "webp": "upgrades/lamina_do_styx.webp",
+      "svg": "upgrades/lamina_do_styx.svg",
+      "size": 128
+    },
+    "ceifa_das_almas": {
+      "name": "Ceifa das Almas",
+      "kind": "clickMult",
+      "webp": "upgrades/ceifa_das_almas.webp",
+      "svg": "upgrades/ceifa_das_almas.svg",
+      "size": 128
+    },
+    "pacto_do_corte": {
+      "name": "Pacto do Corte",
+      "kind": "clickMult",
+      "webp": "upgrades/pacto_do_corte.webp",
+      "svg": "upgrades/pacto_do_corte.svg",
+      "size": 128
+    },
+    "eco_da_foice": {
+      "name": "Eco da Foice",
+      "kind": "clickKSps",
+      "webp": "upgrades/eco_da_foice.webp",
+      "svg": "upgrades/eco_da_foice.svg",
+      "size": 128
+    },
+    "danca_da_morte": {
+      "name": "Dança da Morte",
+      "kind": "clickMult",
+      "webp": "upgrades/danca_da_morte.webp",
+      "svg": "upgrades/danca_da_morte.svg",
+      "size": 128
+    },
+    "colheita_absoluta": {
+      "name": "Colheita Absoluta",
+      "kind": "clickMult",
+      "webp": "upgrades/colheita_absoluta.webp",
+      "svg": "upgrades/colheita_absoluta.svg",
+      "size": 128
+    },
+    "mil_foices": {
+      "name": "Mil Foices",
+      "kind": "thousandBlades",
+      "webp": "upgrades/mil_foices.webp",
+      "svg": "upgrades/mil_foices.svg",
+      "size": 128
+    },
+    "milhao_de_foices": {
+      "name": "Milhão de Foices",
+      "kind": "thousandBladesMult",
+      "webp": "upgrades/milhao_de_foices.webp",
+      "svg": "upgrades/milhao_de_foices.svg",
+      "size": 128
+    },
+    "bilhao_de_foices": {
+      "name": "Bilhão de Foices",
+      "kind": "thousandBladesMult",
+      "webp": "upgrades/bilhao_de_foices.webp",
+      "svg": "upgrades/bilhao_de_foices.svg",
+      "size": 128
+    },
+    "trilhao_de_foices": {
+      "name": "Trilhão de Foices",
+      "kind": "thousandBladesMult",
+      "webp": "upgrades/trilhao_de_foices.webp",
+      "svg": "upgrades/trilhao_de_foices.svg",
+      "size": 128
+    },
     "umbras_despertas": {
       "name": "Umbras Despertas",
       "kind": "generatorMult",
       "webp": "upgrades/umbras_despertas.webp",
       "svg": "upgrades/umbras_despertas.svg",
+      "size": 128
+    },
+    "sussurro_dos_juncos": {
+      "name": "Sussurro dos Juncos",
+      "kind": "generatorMult",
+      "webp": "upgrades/sussurro_dos_juncos.webp",
+      "svg": "upgrades/sussurro_dos_juncos.svg",
       "size": 128
     },
     "cortejo_das_sombras": {
@@ -100,11 +282,102 @@
       "svg": "upgrades/cortejo_das_sombras.svg",
       "size": 128
     },
+    "legiao_das_umbras": {
+      "name": "Legião das Umbras",
+      "kind": "generatorMult",
+      "webp": "upgrades/legiao_das_umbras.webp",
+      "svg": "upgrades/legiao_das_umbras.svg",
+      "size": 128
+    },
+    "mare_de_sombras": {
+      "name": "Maré de Sombras",
+      "kind": "generatorMult",
+      "webp": "upgrades/mare_de_sombras.webp",
+      "svg": "upgrades/mare_de_sombras.svg",
+      "size": 128
+    },
+    "manto_do_crepusculo": {
+      "name": "Manto do Crepúsculo",
+      "kind": "generatorMult",
+      "webp": "upgrades/manto_do_crepusculo.webp",
+      "svg": "upgrades/manto_do_crepusculo.svg",
+      "size": 128
+    },
+    "eclipse_do_acheron": {
+      "name": "Eclipse do Acheron",
+      "kind": "generatorMult",
+      "webp": "upgrades/eclipse_do_acheron.webp",
+      "svg": "upgrades/eclipse_do_acheron.svg",
+      "size": 128
+    },
+    "procissao_silente": {
+      "name": "Procissão Silente",
+      "kind": "generatorMult",
+      "webp": "upgrades/procissao_silente.webp",
+      "svg": "upgrades/procissao_silente.svg",
+      "size": 128
+    },
+    "cortejo_infinito": {
+      "name": "Cortejo Infinito",
+      "kind": "generatorMult",
+      "webp": "upgrades/cortejo_infinito.webp",
+      "svg": "upgrades/cortejo_infinito.svg",
+      "size": 128
+    },
+    "coroa_de_penumbra": {
+      "name": "Coroa de Penumbra",
+      "kind": "generatorMult",
+      "webp": "upgrades/coroa_de_penumbra.webp",
+      "svg": "upgrades/coroa_de_penumbra.svg",
+      "size": 128
+    },
+    "noite_sem_fim": {
+      "name": "Noite Sem Fim",
+      "kind": "generatorMult",
+      "webp": "upgrades/noite_sem_fim.webp",
+      "svg": "upgrades/noite_sem_fim.svg",
+      "size": 128
+    },
+    "veu_dos_esquecidos": {
+      "name": "Véu dos Esquecidos",
+      "kind": "generatorMult",
+      "webp": "upgrades/veu_dos_esquecidos.webp",
+      "svg": "upgrades/veu_dos_esquecidos.svg",
+      "size": 128
+    },
+    "abismo_sussurrante": {
+      "name": "Abismo Sussurrante",
+      "kind": "generatorMult",
+      "webp": "upgrades/abismo_sussurrante.webp",
+      "svg": "upgrades/abismo_sussurrante.svg",
+      "size": 128
+    },
+    "eternidade_cinzenta": {
+      "name": "Eternidade Cinzenta",
+      "kind": "generatorMult",
+      "webp": "upgrades/eternidade_cinzenta.webp",
+      "svg": "upgrades/eternidade_cinzenta.svg",
+      "size": 128
+    },
+    "soberania_das_umbras": {
+      "name": "Soberania das Umbras",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberania_das_umbras.webp",
+      "svg": "upgrades/soberania_das_umbras.svg",
+      "size": 128
+    },
     "moeda_no_barquinho": {
       "name": "Moeda no Barquinho",
       "kind": "generatorMult",
       "webp": "upgrades/moeda_no_barquinho.webp",
       "svg": "upgrades/moeda_no_barquinho.svg",
+      "size": 128
+    },
+    "remos_de_cipreste": {
+      "name": "Remos de Cipreste",
+      "kind": "generatorMult",
+      "webp": "upgrades/remos_de_cipreste.webp",
+      "svg": "upgrades/remos_de_cipreste.svg",
       "size": 128
     },
     "frota_de_caronte": {
@@ -114,11 +387,102 @@
       "svg": "upgrades/frota_de_caronte.svg",
       "size": 128
     },
+    "remadores_do_styx": {
+      "name": "Remadores do Styx",
+      "kind": "generatorMult",
+      "webp": "upgrades/remadores_do_styx.webp",
+      "svg": "upgrades/remadores_do_styx.svg",
+      "size": 128
+    },
+    "armada_das_margens": {
+      "name": "Armada das Margens",
+      "kind": "generatorMult",
+      "webp": "upgrades/armada_das_margens.webp",
+      "svg": "upgrades/armada_das_margens.svg",
+      "size": 128
+    },
+    "lanternas_de_estige": {
+      "name": "Lanternas de Estige",
+      "kind": "generatorMult",
+      "webp": "upgrades/lanternas_de_estige.webp",
+      "svg": "upgrades/lanternas_de_estige.svg",
+      "size": 128
+    },
+    "travessia_eterna": {
+      "name": "Travessia Eterna",
+      "kind": "generatorMult",
+      "webp": "upgrades/travessia_eterna.webp",
+      "svg": "upgrades/travessia_eterna.svg",
+      "size": 128
+    },
+    "pedagio_inapelavel": {
+      "name": "Pedágio Inapelável",
+      "kind": "generatorMult",
+      "webp": "upgrades/pedagio_inapelavel.webp",
+      "svg": "upgrades/pedagio_inapelavel.svg",
+      "size": 128
+    },
+    "porto_das_cem_barcas": {
+      "name": "Porto das Cem Barcas",
+      "kind": "generatorMult",
+      "webp": "upgrades/porto_das_cem_barcas.webp",
+      "svg": "upgrades/porto_das_cem_barcas.svg",
+      "size": 128
+    },
+    "velas_de_mortalha": {
+      "name": "Velas de Mortalha",
+      "kind": "generatorMult",
+      "webp": "upgrades/velas_de_mortalha.webp",
+      "svg": "upgrades/velas_de_mortalha.svg",
+      "size": 128
+    },
+    "mar_de_obolos": {
+      "name": "Mar de Óbolos",
+      "kind": "generatorMult",
+      "webp": "upgrades/mar_de_obolos.webp",
+      "svg": "upgrades/mar_de_obolos.svg",
+      "size": 128
+    },
+    "bussola_dos_afogados": {
+      "name": "Bússola dos Afogados",
+      "kind": "generatorMult",
+      "webp": "upgrades/bussola_dos_afogados.webp",
+      "svg": "upgrades/bussola_dos_afogados.svg",
+      "size": 128
+    },
+    "esquadra_do_cocytus": {
+      "name": "Esquadra do Cocytus",
+      "kind": "generatorMult",
+      "webp": "upgrades/esquadra_do_cocytus.webp",
+      "svg": "upgrades/esquadra_do_cocytus.svg",
+      "size": 128
+    },
+    "almirantado_das_aguas_negras": {
+      "name": "Almirantado das Águas Negras",
+      "kind": "generatorMult",
+      "webp": "upgrades/almirantado_das_aguas_negras.webp",
+      "svg": "upgrades/almirantado_das_aguas_negras.svg",
+      "size": 128
+    },
+    "horizonte_de_caronte": {
+      "name": "Horizonte de Caronte",
+      "kind": "generatorMult",
+      "webp": "upgrades/horizonte_de_caronte.webp",
+      "svg": "upgrades/horizonte_de_caronte.svg",
+      "size": 128
+    },
     "trela_cerberiana": {
       "name": "Trela Cerberiana",
       "kind": "generatorMult",
       "webp": "upgrades/trela_cerberiana.webp",
       "svg": "upgrades/trela_cerberiana.svg",
+      "size": 128
+    },
+    "faro_de_enxofre": {
+      "name": "Faro de Enxofre",
+      "kind": "generatorMult",
+      "webp": "upgrades/faro_de_enxofre.webp",
+      "svg": "upgrades/faro_de_enxofre.svg",
       "size": 128
     },
     "tres_cabecas": {
@@ -128,11 +492,102 @@
       "svg": "upgrades/tres_cabecas.svg",
       "size": 128
     },
+    "matilha_do_ade": {
+      "name": "Matilha do Ade",
+      "kind": "generatorMult",
+      "webp": "upgrades/matilha_do_ade.webp",
+      "svg": "upgrades/matilha_do_ade.svg",
+      "size": 128
+    },
+    "guardiao_triplo": {
+      "name": "Guardião Triplo",
+      "kind": "generatorMult",
+      "webp": "upgrades/guardiao_triplo.webp",
+      "svg": "upgrades/guardiao_triplo.svg",
+      "size": 128
+    },
+    "coleira_de_bronze_estigio": {
+      "name": "Coleira de Bronze Estígio",
+      "kind": "generatorMult",
+      "webp": "upgrades/coleira_de_bronze_estigio.webp",
+      "svg": "upgrades/coleira_de_bronze_estigio.svg",
+      "size": 128
+    },
+    "canil_do_tartaro": {
+      "name": "Canil do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/canil_do_tartaro.webp",
+      "svg": "upgrades/canil_do_tartaro.svg",
+      "size": 128
+    },
+    "presas_de_obsidiana": {
+      "name": "Presas de Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/presas_de_obsidiana.webp",
+      "svg": "upgrades/presas_de_obsidiana.svg",
+      "size": 128
+    },
+    "uivo_das_portas": {
+      "name": "Uivo das Portas",
+      "kind": "generatorMult",
+      "webp": "upgrades/uivo_das_portas.webp",
+      "svg": "upgrades/uivo_das_portas.svg",
+      "size": 128
+    },
+    "juba_de_serpentes": {
+      "name": "Juba de Serpentes",
+      "kind": "generatorMult",
+      "webp": "upgrades/juba_de_serpentes.webp",
+      "svg": "upgrades/juba_de_serpentes.svg",
+      "size": 128
+    },
+    "fome_sem_fim": {
+      "name": "Fome Sem Fim",
+      "kind": "generatorMult",
+      "webp": "upgrades/fome_sem_fim.webp",
+      "svg": "upgrades/fome_sem_fim.svg",
+      "size": 128
+    },
+    "sentinela_dos_tres_rios": {
+      "name": "Sentinela dos Três Rios",
+      "kind": "generatorMult",
+      "webp": "upgrades/sentinela_dos_tres_rios.webp",
+      "svg": "upgrades/sentinela_dos_tres_rios.svg",
+      "size": 128
+    },
+    "cacada_infernus": {
+      "name": "Caçada Infernus",
+      "kind": "generatorMult",
+      "webp": "upgrades/cacada_infernus.webp",
+      "svg": "upgrades/cacada_infernus.svg",
+      "size": 128
+    },
+    "rugido_do_abismo": {
+      "name": "Rugido do Abismo",
+      "kind": "generatorMult",
+      "webp": "upgrades/rugido_do_abismo.webp",
+      "svg": "upgrades/rugido_do_abismo.svg",
+      "size": 128
+    },
+    "soberania_cerberiana": {
+      "name": "Soberania Cerberiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberania_cerberiana.webp",
+      "svg": "upgrades/soberania_cerberiana.svg",
+      "size": 128
+    },
     "veredito_tartaro": {
       "name": "Veredito do Tártaro",
       "kind": "generatorMult",
       "webp": "upgrades/veredito_tartaro.webp",
       "svg": "upgrades/veredito_tartaro.svg",
+      "size": 128
+    },
+    "balanca_de_ouro_frio": {
+      "name": "Balança de Ouro Frio",
+      "kind": "generatorMult",
+      "webp": "upgrades/balanca_de_ouro_frio.webp",
+      "svg": "upgrades/balanca_de_ouro_frio.svg",
       "size": 128
     },
     "lei_inquebravel": {
@@ -142,11 +597,102 @@
       "svg": "upgrades/lei_inquebravel.svg",
       "size": 128
     },
+    "banco_dos_juizes": {
+      "name": "Banco dos Juízes",
+      "kind": "generatorMult",
+      "webp": "upgrades/banco_dos_juizes.webp",
+      "svg": "upgrades/banco_dos_juizes.svg",
+      "size": 128
+    },
+    "codigo_das_profundezas": {
+      "name": "Código das Profundezas",
+      "kind": "generatorMult",
+      "webp": "upgrades/codigo_das_profundezas.webp",
+      "svg": "upgrades/codigo_das_profundezas.svg",
+      "size": 128
+    },
+    "pergaminhos_de_bronze": {
+      "name": "Pergaminhos de Bronze",
+      "kind": "generatorMult",
+      "webp": "upgrades/pergaminhos_de_bronze.webp",
+      "svg": "upgrades/pergaminhos_de_bronze.svg",
+      "size": 128
+    },
+    "sentenca_coletiva": {
+      "name": "Sentença Coletiva",
+      "kind": "generatorMult",
+      "webp": "upgrades/sentenca_coletiva.webp",
+      "svg": "upgrades/sentenca_coletiva.svg",
+      "size": 128
+    },
+    "tribunal_dos_cem_ecos": {
+      "name": "Tribunal dos Cem Ecos",
+      "kind": "generatorMult",
+      "webp": "upgrades/tribunal_dos_cem_ecos.webp",
+      "svg": "upgrades/tribunal_dos_cem_ecos.svg",
+      "size": 128
+    },
+    "colegio_infernus": {
+      "name": "Colégio Infernus",
+      "kind": "generatorMult",
+      "webp": "upgrades/colegio_infernus.webp",
+      "svg": "upgrades/colegio_infernus.svg",
+      "size": 128
+    },
+    "malhete_de_adamante": {
+      "name": "Malhete de Adamante",
+      "kind": "generatorMult",
+      "webp": "upgrades/malhete_de_adamante.webp",
+      "svg": "upgrades/malhete_de_adamante.svg",
+      "size": 128
+    },
+    "lei_do_abismo": {
+      "name": "Lei do Abismo",
+      "kind": "generatorMult",
+      "webp": "upgrades/lei_do_abismo.webp",
+      "svg": "upgrades/lei_do_abismo.svg",
+      "size": 128
+    },
+    "jurisprudencia_eterna": {
+      "name": "Jurisprudência Eterna",
+      "kind": "generatorMult",
+      "webp": "upgrades/jurisprudencia_eterna.webp",
+      "svg": "upgrades/jurisprudencia_eterna.svg",
+      "size": 128
+    },
+    "supremo_conselho_ctoniano": {
+      "name": "Supremo Conselho Ctoniano",
+      "kind": "generatorMult",
+      "webp": "upgrades/supremo_conselho_ctoniano.webp",
+      "svg": "upgrades/supremo_conselho_ctoniano.svg",
+      "size": 128
+    },
+    "decreto_irrevogavel": {
+      "name": "Decreto Irrevogável",
+      "kind": "generatorMult",
+      "webp": "upgrades/decreto_irrevogavel.webp",
+      "svg": "upgrades/decreto_irrevogavel.svg",
+      "size": 128
+    },
+    "justica_absoluta_do_tartaro": {
+      "name": "Justiça Absoluta do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/justica_absoluta_do_tartaro.webp",
+      "svg": "upgrades/justica_absoluta_do_tartaro.svg",
+      "size": 128
+    },
     "brasa_phlegethon": {
       "name": "Brasa de Phlegethon",
       "kind": "generatorMult",
       "webp": "upgrades/brasa_phlegethon.webp",
       "svg": "upgrades/brasa_phlegethon.svg",
+      "size": 128
+    },
+    "foles_de_tifao": {
+      "name": "Foles de Tifão",
+      "kind": "generatorMult",
+      "webp": "upgrades/foles_de_tifao.webp",
+      "svg": "upgrades/foles_de_tifao.svg",
       "size": 128
     },
     "fornalha_industrial": {
@@ -156,6 +702,90 @@
       "svg": "upgrades/fornalha_industrial.svg",
       "size": 128
     },
+    "caldeiras_gemeas": {
+      "name": "Caldeiras Gêmeas",
+      "kind": "generatorMult",
+      "webp": "upgrades/caldeiras_gemeas.webp",
+      "svg": "upgrades/caldeiras_gemeas.svg",
+      "size": 128
+    },
+    "rio_de_ferro": {
+      "name": "Rio de Ferro",
+      "kind": "generatorMult",
+      "webp": "upgrades/rio_de_ferro.webp",
+      "svg": "upgrades/rio_de_ferro.svg",
+      "size": 128
+    },
+    "bigornas_ciclopicas": {
+      "name": "Bigornas Ciclópicas",
+      "kind": "generatorMult",
+      "webp": "upgrades/bigornas_ciclopicas.webp",
+      "svg": "upgrades/bigornas_ciclopicas.svg",
+      "size": 128
+    },
+    "fundicao_eterna": {
+      "name": "Fundição Eterna",
+      "kind": "generatorMult",
+      "webp": "upgrades/fundicao_eterna.webp",
+      "svg": "upgrades/fundicao_eterna.svg",
+      "size": 128
+    },
+    "tempera_de_lagrimas": {
+      "name": "Têmpera de Lágrimas",
+      "kind": "generatorMult",
+      "webp": "upgrades/tempera_de_lagrimas.webp",
+      "svg": "upgrades/tempera_de_lagrimas.svg",
+      "size": 128
+    },
+    "cinzas_do_rio": {
+      "name": "Cinzas do Rio",
+      "kind": "generatorMult",
+      "webp": "upgrades/cinzas_do_rio.webp",
+      "svg": "upgrades/cinzas_do_rio.svg",
+      "size": 128
+    },
+    "martelos_automatos": {
+      "name": "Martelos Autômatos",
+      "kind": "generatorMult",
+      "webp": "upgrades/martelos_automatos.webp",
+      "svg": "upgrades/martelos_automatos.svg",
+      "size": 128
+    },
+    "coracao_de_magma": {
+      "name": "Coração de Magma",
+      "kind": "generatorMult",
+      "webp": "upgrades/coracao_de_magma.webp",
+      "svg": "upgrades/coracao_de_magma.svg",
+      "size": 128
+    },
+    "veias_de_piropo": {
+      "name": "Veias de Piropo",
+      "kind": "generatorMult",
+      "webp": "upgrades/veias_de_piropo.webp",
+      "svg": "upgrades/veias_de_piropo.svg",
+      "size": 128
+    },
+    "cidadela_da_forja": {
+      "name": "Cidadela da Forja",
+      "kind": "generatorMult",
+      "webp": "upgrades/cidadela_da_forja.webp",
+      "svg": "upgrades/cidadela_da_forja.svg",
+      "size": 128
+    },
+    "sol_subterraneo": {
+      "name": "Sol Subterrâneo",
+      "kind": "generatorMult",
+      "webp": "upgrades/sol_subterraneo.webp",
+      "svg": "upgrades/sol_subterraneo.svg",
+      "size": 128
+    },
+    "hegemonia_do_phlegethon": {
+      "name": "Hegemonia do Phlegethon",
+      "kind": "generatorMult",
+      "webp": "upgrades/hegemonia_do_phlegethon.webp",
+      "svg": "upgrades/hegemonia_do_phlegethon.svg",
+      "size": 128
+    },
     "cetro_obsidiana": {
       "name": "Cetro de Obsidiana",
       "kind": "generatorMult",
@@ -163,11 +793,1768 @@
       "svg": "upgrades/cetro_obsidiana.svg",
       "size": 128
     },
+    "degraus_de_onix": {
+      "name": "Degraus de Ônix",
+      "kind": "generatorMult",
+      "webp": "upgrades/degraus_de_onix.webp",
+      "svg": "upgrades/degraus_de_onix.svg",
+      "size": 128
+    },
     "soberania_absoluta": {
       "name": "Soberania Absoluta",
       "kind": "generatorMult",
       "webp": "upgrades/soberania_absoluta.webp",
       "svg": "upgrades/soberania_absoluta.svg",
+      "size": 128
+    },
+    "corte_obsidiana": {
+      "name": "Corte Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/corte_obsidiana.webp",
+      "svg": "upgrades/corte_obsidiana.svg",
+      "size": 128
+    },
+    "dominio_ctoniano": {
+      "name": "Domínio Ctoniano",
+      "kind": "generatorMult",
+      "webp": "upgrades/dominio_ctoniano.webp",
+      "svg": "upgrades/dominio_ctoniano.svg",
+      "size": 128
+    },
+    "dossel_de_estrelas_mortas": {
+      "name": "Dossel de Estrelas Mortas",
+      "kind": "generatorMult",
+      "webp": "upgrades/dossel_de_estrelas_mortas.webp",
+      "svg": "upgrades/dossel_de_estrelas_mortas.svg",
+      "size": 128
+    },
+    "imperio_sem_sol": {
+      "name": "Império Sem Sol",
+      "kind": "generatorMult",
+      "webp": "upgrades/imperio_sem_sol.webp",
+      "svg": "upgrades/imperio_sem_sol.svg",
+      "size": 128
+    },
+    "diadema_de_sangue_e_ouro": {
+      "name": "Diadema de Sangue e Ouro",
+      "kind": "generatorMult",
+      "webp": "upgrades/diadema_de_sangue_e_ouro.webp",
+      "svg": "upgrades/diadema_de_sangue_e_ouro.svg",
+      "size": 128
+    },
+    "trono_sem_fim": {
+      "name": "Trono Sem Fim",
+      "kind": "generatorMult",
+      "webp": "upgrades/trono_sem_fim.webp",
+      "svg": "upgrades/trono_sem_fim.svg",
+      "size": 128
+    },
+    "arautos_da_eternidade": {
+      "name": "Arautos da Eternidade",
+      "kind": "generatorMult",
+      "webp": "upgrades/arautos_da_eternidade.webp",
+      "svg": "upgrades/arautos_da_eternidade.svg",
+      "size": 128
+    },
+    "noite_do_imperador": {
+      "name": "Noite do Imperador",
+      "kind": "generatorMult",
+      "webp": "upgrades/noite_do_imperador.webp",
+      "svg": "upgrades/noite_do_imperador.svg",
+      "size": 128
+    },
+    "pacto_das_coroas_negras": {
+      "name": "Pacto das Coroas Negras",
+      "kind": "generatorMult",
+      "webp": "upgrades/pacto_das_coroas_negras.webp",
+      "svg": "upgrades/pacto_das_coroas_negras.svg",
+      "size": 128
+    },
+    "dinastia_do_erebo": {
+      "name": "Dinastia do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/dinastia_do_erebo.webp",
+      "svg": "upgrades/dinastia_do_erebo.svg",
+      "size": 128
+    },
+    "onipresenca_de_obsidiana": {
+      "name": "Onipresença de Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/onipresenca_de_obsidiana.webp",
+      "svg": "upgrades/onipresenca_de_obsidiana.svg",
+      "size": 128
+    },
+    "apoteose_do_submundo": {
+      "name": "Apoteose do Submundo",
+      "kind": "generatorMult",
+      "webp": "upgrades/apoteose_do_submundo.webp",
+      "svg": "upgrades/apoteose_do_submundo.svg",
+      "size": 128
+    },
+    "incenso_de_asfodelos": {
+      "name": "Incenso de Asfódelos",
+      "kind": "generatorMult",
+      "webp": "upgrades/incenso_de_asfodelos.webp",
+      "svg": "upgrades/incenso_de_asfodelos.svg",
+      "size": 128
+    },
+    "colunas_de_marmore_negro": {
+      "name": "Colunas de Mármore Negro",
+      "kind": "generatorMult",
+      "webp": "upgrades/colunas_de_marmore_negro.webp",
+      "svg": "upgrades/colunas_de_marmore_negro.svg",
+      "size": 128
+    },
+    "coro_das_recordacoes": {
+      "name": "Coro das Recordações",
+      "kind": "generatorMult",
+      "webp": "upgrades/coro_das_recordacoes.webp",
+      "svg": "upgrades/coro_das_recordacoes.svg",
+      "size": 128
+    },
+    "liturgia_da_memoria": {
+      "name": "Liturgia da Memória",
+      "kind": "generatorMult",
+      "webp": "upgrades/liturgia_da_memoria.webp",
+      "svg": "upgrades/liturgia_da_memoria.svg",
+      "size": 128
+    },
+    "altares_de_prata_fria": {
+      "name": "Altares de Prata Fria",
+      "kind": "generatorMult",
+      "webp": "upgrades/altares_de_prata_fria.webp",
+      "svg": "upgrades/altares_de_prata_fria.svg",
+      "size": 128
+    },
+    "sacerdocio_do_esquecimento": {
+      "name": "Sacerdócio do Esquecimento",
+      "kind": "generatorMult",
+      "webp": "upgrades/sacerdocio_do_esquecimento.webp",
+      "svg": "upgrades/sacerdocio_do_esquecimento.svg",
+      "size": 128
+    },
+    "campanario_de_mnemosyne": {
+      "name": "Campanário de Mnemosyne",
+      "kind": "generatorMult",
+      "webp": "upgrades/campanario_de_mnemosyne.webp",
+      "svg": "upgrades/campanario_de_mnemosyne.svg",
+      "size": 128
+    },
+    "claustro_dos_ecos": {
+      "name": "Claustro dos Ecos",
+      "kind": "generatorMult",
+      "webp": "upgrades/claustro_dos_ecos.webp",
+      "svg": "upgrades/claustro_dos_ecos.svg",
+      "size": 128
+    },
+    "basilica_das_aguas_claras": {
+      "name": "Basílica das Águas Claras",
+      "kind": "generatorMult",
+      "webp": "upgrades/basilica_das_aguas_claras.webp",
+      "svg": "upgrades/basilica_das_aguas_claras.svg",
+      "size": 128
+    },
+    "reliquias_da_primeira_era": {
+      "name": "Relíquias da Primeira Era",
+      "kind": "generatorMult",
+      "webp": "upgrades/reliquias_da_primeira_era.webp",
+      "svg": "upgrades/reliquias_da_primeira_era.svg",
+      "size": 128
+    },
+    "sinodo_dos_imortais": {
+      "name": "Sínodo dos Imortais",
+      "kind": "generatorMult",
+      "webp": "upgrades/sinodo_dos_imortais.webp",
+      "svg": "upgrades/sinodo_dos_imortais.svg",
+      "size": 128
+    },
+    "navio_votivo_de_ouro": {
+      "name": "Navio Votivo de Ouro",
+      "kind": "generatorMult",
+      "webp": "upgrades/navio_votivo_de_ouro.webp",
+      "svg": "upgrades/navio_votivo_de_ouro.svg",
+      "size": 128
+    },
+    "oraculo_da_lembranca_pura": {
+      "name": "Oráculo da Lembrança Pura",
+      "kind": "generatorMult",
+      "webp": "upgrades/oraculo_da_lembranca_pura.webp",
+      "svg": "upgrades/oraculo_da_lembranca_pura.svg",
+      "size": 128
+    },
+    "abobada_das_nove_musas": {
+      "name": "Abóbada das Nove Musas",
+      "kind": "generatorMult",
+      "webp": "upgrades/abobada_das_nove_musas.webp",
+      "svg": "upgrades/abobada_das_nove_musas.svg",
+      "size": 128
+    },
+    "panteao_da_memoria_eterna": {
+      "name": "Panteão da Memória Eterna",
+      "kind": "generatorMult",
+      "webp": "upgrades/panteao_da_memoria_eterna.webp",
+      "svg": "upgrades/panteao_da_memoria_eterna.svg",
+      "size": 128
+    },
+    "grimorio_das_aguas_negras": {
+      "name": "Grimório das Águas Negras",
+      "kind": "generatorMult",
+      "webp": "upgrades/grimorio_das_aguas_negras.webp",
+      "svg": "upgrades/grimorio_das_aguas_negras.svg",
+      "size": 128
+    },
+    "astrolabio_de_bronze_estigio": {
+      "name": "Astrolábio de Bronze Estígio",
+      "kind": "generatorMult",
+      "webp": "upgrades/astrolabio_de_bronze_estigio.webp",
+      "svg": "upgrades/astrolabio_de_bronze_estigio.svg",
+      "size": 128
+    },
+    "circulo_de_invocacao_ctoniana": {
+      "name": "Círculo de Invocação Ctoniana",
+      "kind": "generatorMult",
+      "webp": "upgrades/circulo_de_invocacao_ctoniana.webp",
+      "svg": "upgrades/circulo_de_invocacao_ctoniana.svg",
+      "size": 128
+    },
+    "esfera_de_vidro_fumego": {
+      "name": "Esfera de Vidro Fúmego",
+      "kind": "generatorMult",
+      "webp": "upgrades/esfera_de_vidro_fumego.webp",
+      "svg": "upgrades/esfera_de_vidro_fumego.svg",
+      "size": 128
+    },
+    "runas_do_juramento_quebrado": {
+      "name": "Runas do Juramento Quebrado",
+      "kind": "generatorMult",
+      "webp": "upgrades/runas_do_juramento_quebrado.webp",
+      "svg": "upgrades/runas_do_juramento_quebrado.svg",
+      "size": 128
+    },
+    "conclave_dos_arcanos_mortos": {
+      "name": "Conclave dos Arcanos Mortos",
+      "kind": "generatorMult",
+      "webp": "upgrades/conclave_dos_arcanos_mortos.webp",
+      "svg": "upgrades/conclave_dos_arcanos_mortos.svg",
+      "size": 128
+    },
+    "farol_de_chama_verde": {
+      "name": "Farol de Chama Verde",
+      "kind": "generatorMult",
+      "webp": "upgrades/farol_de_chama_verde.webp",
+      "svg": "upgrades/farol_de_chama_verde.svg",
+      "size": 128
+    },
+    "biblioteca_de_pergaminhos_vivos": {
+      "name": "Biblioteca de Pergaminhos Vivos",
+      "kind": "generatorMult",
+      "webp": "upgrades/biblioteca_de_pergaminhos_vivos.webp",
+      "svg": "upgrades/biblioteca_de_pergaminhos_vivos.svg",
+      "size": 128
+    },
+    "pinaculo_da_tempestade_de_almas": {
+      "name": "Pináculo da Tempestade de Almas",
+      "kind": "generatorMult",
+      "webp": "upgrades/pinaculo_da_tempestade_de_almas.webp",
+      "svg": "upgrades/pinaculo_da_tempestade_de_almas.svg",
+      "size": 128
+    },
+    "selo_de_hecate_noturna": {
+      "name": "Selo de Hécate Noturna",
+      "kind": "generatorMult",
+      "webp": "upgrades/selo_de_hecate_noturna.webp",
+      "svg": "upgrades/selo_de_hecate_noturna.svg",
+      "size": 128
+    },
+    "cidadela_dos_feiticeiros_do_styx": {
+      "name": "Cidadela dos Feiticeiros do Styx",
+      "kind": "generatorMult",
+      "webp": "upgrades/cidadela_dos_feiticeiros_do_styx.webp",
+      "svg": "upgrades/cidadela_dos_feiticeiros_do_styx.svg",
+      "size": 128
+    },
+    "coroa_de_relampagos_frios": {
+      "name": "Coroa de Relâmpagos Frios",
+      "kind": "generatorMult",
+      "webp": "upgrades/coroa_de_relampagos_frios.webp",
+      "svg": "upgrades/coroa_de_relampagos_frios.svg",
+      "size": 128
+    },
+    "observatorio_do_abismo_profundo": {
+      "name": "Observatório do Abismo Profundo",
+      "kind": "generatorMult",
+      "webp": "upgrades/observatorio_do_abismo_profundo.webp",
+      "svg": "upgrades/observatorio_do_abismo_profundo.svg",
+      "size": 128
+    },
+    "nexus_de_encantamento_perpetuo": {
+      "name": "Nexus de Encantamento Perpétuo",
+      "kind": "generatorMult",
+      "webp": "upgrades/nexus_de_encantamento_perpetuo.webp",
+      "svg": "upgrades/nexus_de_encantamento_perpetuo.svg",
+      "size": 128
+    },
+    "arquimagia_do_rio_inviolavel": {
+      "name": "Arquimagia do Rio Inviolável",
+      "kind": "generatorMult",
+      "webp": "upgrades/arquimagia_do_rio_inviolavel.webp",
+      "svg": "upgrades/arquimagia_do_rio_inviolavel.svg",
+      "size": 128
+    },
+    "velas_de_eter_noturno": {
+      "name": "Velas de Éter Noturno",
+      "kind": "generatorMult",
+      "webp": "upgrades/velas_de_eter_noturno.webp",
+      "svg": "upgrades/velas_de_eter_noturno.svg",
+      "size": 128
+    },
+    "sextante_das_constelacoes_mortas": {
+      "name": "Sextante das Constelações Mortas",
+      "kind": "generatorMult",
+      "webp": "upgrades/sextante_das_constelacoes_mortas.webp",
+      "svg": "upgrades/sextante_das_constelacoes_mortas.svg",
+      "size": 128
+    },
+    "quilha_de_meteorito_ferro": {
+      "name": "Quilha de Meteorito Férreo",
+      "kind": "generatorMult",
+      "webp": "upgrades/quilha_de_meteorito_ferro.webp",
+      "svg": "upgrades/quilha_de_meteorito_ferro.svg",
+      "size": 128
+    },
+    "carta_nautica_do_vazio": {
+      "name": "Carta Náutica do Vazio",
+      "kind": "generatorMult",
+      "webp": "upgrades/carta_nautica_do_vazio.webp",
+      "svg": "upgrades/carta_nautica_do_vazio.svg",
+      "size": 128
+    },
+    "lemes_de_luz_fossil": {
+      "name": "Lemes de Luz Fóssil",
+      "kind": "generatorMult",
+      "webp": "upgrades/lemes_de_luz_fossil.webp",
+      "svg": "upgrades/lemes_de_luz_fossil.svg",
+      "size": 128
+    },
+    "ancoradouro_da_nebulosa": {
+      "name": "Ancoradouro da Nebulosa",
+      "kind": "generatorMult",
+      "webp": "upgrades/ancoradouro_da_nebulosa.webp",
+      "svg": "upgrades/ancoradouro_da_nebulosa.svg",
+      "size": 128
+    },
+    "comboio_astral_do_acheron": {
+      "name": "Comboio Astral do Acheron",
+      "kind": "generatorMult",
+      "webp": "upgrades/comboio_astral_do_acheron.webp",
+      "svg": "upgrades/comboio_astral_do_acheron.svg",
+      "size": 128
+    },
+    "lanternas_de_pulsar": {
+      "name": "Lanternas de Pulsar",
+      "kind": "generatorMult",
+      "webp": "upgrades/lanternas_de_pulsar.webp",
+      "svg": "upgrades/lanternas_de_pulsar.svg",
+      "size": 128
+    },
+    "convocados_do_zenite": {
+      "name": "Convocados do Zênite",
+      "kind": "generatorMult",
+      "webp": "upgrades/convocados_do_zenite.webp",
+      "svg": "upgrades/convocados_do_zenite.svg",
+      "size": 128
+    },
+    "astrolabio_de_nyx": {
+      "name": "Astrolábio de Nyx",
+      "kind": "generatorMult",
+      "webp": "upgrades/astrolabio_de_nyx.webp",
+      "svg": "upgrades/astrolabio_de_nyx.svg",
+      "size": 128
+    },
+    "armada_das_esferas_celestes": {
+      "name": "Armada das Esferas Celestes",
+      "kind": "generatorMult",
+      "webp": "upgrades/armada_das_esferas_celestes.webp",
+      "svg": "upgrades/armada_das_esferas_celestes.svg",
+      "size": 128
+    },
+    "propulsao_de_cometa_negro": {
+      "name": "Propulsão de Cometa Negro",
+      "kind": "generatorMult",
+      "webp": "upgrades/propulsao_de_cometa_negro.webp",
+      "svg": "upgrades/propulsao_de_cometa_negro.svg",
+      "size": 128
+    },
+    "cais_do_horizonte_de_eventos": {
+      "name": "Cais do Horizonte de Eventos",
+      "kind": "generatorMult",
+      "webp": "upgrades/cais_do_horizonte_de_eventos.webp",
+      "svg": "upgrades/cais_do_horizonte_de_eventos.svg",
+      "size": 128
+    },
+    "rotas_transcendais_do_erebo": {
+      "name": "Rotas Transcendentais do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/rotas_transcendais_do_erebo.webp",
+      "svg": "upgrades/rotas_transcendais_do_erebo.svg",
+      "size": 128
+    },
+    "soberania_da_frota_sideral": {
+      "name": "Soberania da Frota Sideral",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberania_da_frota_sideral.webp",
+      "svg": "upgrades/soberania_da_frota_sideral.svg",
+      "size": 128
+    },
+    "alambiques_de_obsidiana": {
+      "name": "Alambiques de Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/alambiques_de_obsidiana.webp",
+      "svg": "upgrades/alambiques_de_obsidiana.svg",
+      "size": 128
+    },
+    "mercurio_filosofal_ctoniano": {
+      "name": "Mercúrio Filosofal Ctoniano",
+      "kind": "generatorMult",
+      "webp": "upgrades/mercurio_filosofal_ctoniano.webp",
+      "svg": "upgrades/mercurio_filosofal_ctoniano.svg",
+      "size": 128
+    },
+    "fornalha_de_athanor_duplo": {
+      "name": "Fornalha de Athanor Duplo",
+      "kind": "generatorMult",
+      "webp": "upgrades/fornalha_de_athanor_duplo.webp",
+      "svg": "upgrades/fornalha_de_athanor_duplo.svg",
+      "size": 128
+    },
+    "sal_de_enxofre_purificado": {
+      "name": "Sal de Enxofre Purificado",
+      "kind": "generatorMult",
+      "webp": "upgrades/sal_de_enxofre_purificado.webp",
+      "svg": "upgrades/sal_de_enxofre_purificado.svg",
+      "size": 128
+    },
+    "cadinhos_de_ouro_frio": {
+      "name": "Cadinhos de Ouro Frio",
+      "kind": "generatorMult",
+      "webp": "upgrades/cadinhos_de_ouro_frio.webp",
+      "svg": "upgrades/cadinhos_de_ouro_frio.svg",
+      "size": 128
+    },
+    "elixir_da_noite_perpetua": {
+      "name": "Elixir da Noite Perpétua",
+      "kind": "generatorMult",
+      "webp": "upgrades/elixir_da_noite_perpetua.webp",
+      "svg": "upgrades/elixir_da_noite_perpetua.svg",
+      "size": 128
+    },
+    "pedra_rubra_do_tartaro": {
+      "name": "Pedra Rubra do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/pedra_rubra_do_tartaro.webp",
+      "svg": "upgrades/pedra_rubra_do_tartaro.svg",
+      "size": 128
+    },
+    "serpentinas_de_eter_puro": {
+      "name": "Serpentinas de Éter Puro",
+      "kind": "generatorMult",
+      "webp": "upgrades/serpentinas_de_eter_puro.webp",
+      "svg": "upgrades/serpentinas_de_eter_puro.svg",
+      "size": 128
+    },
+    "reagentes_de_cinza_titanica": {
+      "name": "Reagentes de Cinza Titânica",
+      "kind": "generatorMult",
+      "webp": "upgrades/reagentes_de_cinza_titanica.webp",
+      "svg": "upgrades/reagentes_de_cinza_titanica.svg",
+      "size": 128
+    },
+    "hermetismo_das_profundezas": {
+      "name": "Hermetismo das Profundezas",
+      "kind": "generatorMult",
+      "webp": "upgrades/hermetismo_das_profundezas.webp",
+      "svg": "upgrades/hermetismo_das_profundezas.svg",
+      "size": 128
+    },
+    "grande_obra_do_submundo": {
+      "name": "Grande Obra do Submundo",
+      "kind": "generatorMult",
+      "webp": "upgrades/grande_obra_do_submundo.webp",
+      "svg": "upgrades/grande_obra_do_submundo.svg",
+      "size": 128
+    },
+    "solvente_universal_do_styx": {
+      "name": "Solvente Universal do Styx",
+      "kind": "generatorMult",
+      "webp": "upgrades/solvente_universal_do_styx.webp",
+      "svg": "upgrades/solvente_universal_do_styx.svg",
+      "size": 128
+    },
+    "matriz_de_transmutacao_aurica": {
+      "name": "Matriz de Transmutação Áurica",
+      "kind": "generatorMult",
+      "webp": "upgrades/matriz_de_transmutacao_aurica.webp",
+      "svg": "upgrades/matriz_de_transmutacao_aurica.svg",
+      "size": 128
+    },
+    "quintessencia_do_erebo": {
+      "name": "Quintessência do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/quintessencia_do_erebo.webp",
+      "svg": "upgrades/quintessencia_do_erebo.svg",
+      "size": 128
+    },
+    "crisopeia_absoluta_de_hades": {
+      "name": "Crisopeia Absoluta de Hades",
+      "kind": "generatorMult",
+      "webp": "upgrades/crisopeia_absoluta_de_hades.webp",
+      "svg": "upgrades/crisopeia_absoluta_de_hades.svg",
+      "size": 128
+    },
+    "umbral_de_pedra_vazia": {
+      "name": "Umbral de Pedra Vazia",
+      "kind": "generatorMult",
+      "webp": "upgrades/umbral_de_pedra_vazia.webp",
+      "svg": "upgrades/umbral_de_pedra_vazia.svg",
+      "size": 128
+    },
+    "chaves_do_abismo_anterior": {
+      "name": "Chaves do Abismo Anterior",
+      "kind": "generatorMult",
+      "webp": "upgrades/chaves_do_abismo_anterior.webp",
+      "svg": "upgrades/chaves_do_abismo_anterior.svg",
+      "size": 128
+    },
+    "aneis_de_contencao_dimensional": {
+      "name": "Anéis de Contenção Dimensional",
+      "kind": "generatorMult",
+      "webp": "upgrades/aneis_de_contencao_dimensional.webp",
+      "svg": "upgrades/aneis_de_contencao_dimensional.svg",
+      "size": 128
+    },
+    "ventos_do_outro_lado": {
+      "name": "Ventos do Outro Lado",
+      "kind": "generatorMult",
+      "webp": "upgrades/ventos_do_outro_lado.webp",
+      "svg": "upgrades/ventos_do_outro_lado.svg",
+      "size": 128
+    },
+    "pilares_de_noite_solida": {
+      "name": "Pilares de Noite Sólida",
+      "kind": "generatorMult",
+      "webp": "upgrades/pilares_de_noite_solida.webp",
+      "svg": "upgrades/pilares_de_noite_solida.svg",
+      "size": 128
+    },
+    "convergencia_das_fendas": {
+      "name": "Convergência das Fendas",
+      "kind": "generatorMult",
+      "webp": "upgrades/convergencia_das_fendas.webp",
+      "svg": "upgrades/convergencia_das_fendas.svg",
+      "size": 128
+    },
+    "horizonte_do_erebo_eterno": {
+      "name": "Horizonte do Érebo Eterno",
+      "kind": "generatorMult",
+      "webp": "upgrades/horizonte_do_erebo_eterno.webp",
+      "svg": "upgrades/horizonte_do_erebo_eterno.svg",
+      "size": 128
+    },
+    "ancoras_de_gravidade_escura": {
+      "name": "Âncoras de Gravidade Escura",
+      "kind": "generatorMult",
+      "webp": "upgrades/ancoras_de_gravidade_escura.webp",
+      "svg": "upgrades/ancoras_de_gravidade_escura.svg",
+      "size": 128
+    },
+    "corredor_dos_mil_planos": {
+      "name": "Corredor dos Mil Planos",
+      "kind": "generatorMult",
+      "webp": "upgrades/corredor_dos_mil_planos.webp",
+      "svg": "upgrades/corredor_dos_mil_planos.svg",
+      "size": 128
+    },
+    "rasgo_no_veu_primordial": {
+      "name": "Rasgo no Véu Primordial",
+      "kind": "generatorMult",
+      "webp": "upgrades/rasgo_no_veu_primordial.webp",
+      "svg": "upgrades/rasgo_no_veu_primordial.svg",
+      "size": 128
+    },
+    "malha_de_portais_imperiais": {
+      "name": "Malha de Portais Imperiais",
+      "kind": "generatorMult",
+      "webp": "upgrades/malha_de_portais_imperiais.webp",
+      "svg": "upgrades/malha_de_portais_imperiais.svg",
+      "size": 128
+    },
+    "vortice_de_caos_domado": {
+      "name": "Vórtice de Caos Domado",
+      "kind": "generatorMult",
+      "webp": "upgrades/vortice_de_caos_domado.webp",
+      "svg": "upgrades/vortice_de_caos_domado.svg",
+      "size": 128
+    },
+    "singularidade_ctoniana": {
+      "name": "Singularidade Ctoniana",
+      "kind": "generatorMult",
+      "webp": "upgrades/singularidade_ctoniana.webp",
+      "svg": "upgrades/singularidade_ctoniana.svg",
+      "size": 128
+    },
+    "onipresenca_dimensional": {
+      "name": "Onipresença Dimensional",
+      "kind": "generatorMult",
+      "webp": "upgrades/onipresenca_dimensional.webp",
+      "svg": "upgrades/onipresenca_dimensional.svg",
+      "size": 128
+    },
+    "impero_do_erebo_sem_fronteiras": {
+      "name": "Império do Érebo Sem Fronteiras",
+      "kind": "generatorMult",
+      "webp": "upgrades/impero_do_erebo_sem_fronteiras.webp",
+      "svg": "upgrades/impero_do_erebo_sem_fronteiras.svg",
+      "size": 128
+    },
+    "fuso_de_bronze_temporal": {
+      "name": "Fuso de Bronze Temporal",
+      "kind": "generatorMult",
+      "webp": "upgrades/fuso_de_bronze_temporal.webp",
+      "svg": "upgrades/fuso_de_bronze_temporal.svg",
+      "size": 128
+    },
+    "engrenagens_retrogradas": {
+      "name": "Engrenagens Retrógradas",
+      "kind": "generatorMult",
+      "webp": "upgrades/engrenagens_retrogradas.webp",
+      "svg": "upgrades/engrenagens_retrogradas.svg",
+      "size": 128
+    },
+    "fios_das_moiras_dourados": {
+      "name": "Fios das Moiras Dourados",
+      "kind": "generatorMult",
+      "webp": "upgrades/fios_das_moiras_dourados.webp",
+      "svg": "upgrades/fios_das_moiras_dourados.svg",
+      "size": 128
+    },
+    "pendulo_da_eternidade": {
+      "name": "Pêndulo da Eternidade",
+      "kind": "generatorMult",
+      "webp": "upgrades/pendulo_da_eternidade.webp",
+      "svg": "upgrades/pendulo_da_eternidade.svg",
+      "size": 128
+    },
+    "ampulheta_de_areia_estelar": {
+      "name": "Ampulheta de Areia Estelar",
+      "kind": "generatorMult",
+      "webp": "upgrades/ampulheta_de_areia_estelar.webp",
+      "svg": "upgrades/ampulheta_de_areia_estelar.svg",
+      "size": 128
+    },
+    "bobinas_de_causalidade": {
+      "name": "Bobinas de Causalidade",
+      "kind": "generatorMult",
+      "webp": "upgrades/bobinas_de_causalidade.webp",
+      "svg": "upgrades/bobinas_de_causalidade.svg",
+      "size": 128
+    },
+    "relogio_do_juizo_perpetuo": {
+      "name": "Relógio do Juízo Perpétuo",
+      "kind": "generatorMult",
+      "webp": "upgrades/relogio_do_juizo_perpetuo.webp",
+      "svg": "upgrades/relogio_do_juizo_perpetuo.svg",
+      "size": 128
+    },
+    "dobras_de_segundo_infinito": {
+      "name": "Dobras de Segundo Infinito",
+      "kind": "generatorMult",
+      "webp": "upgrades/dobras_de_segundo_infinito.webp",
+      "svg": "upgrades/dobras_de_segundo_infinito.svg",
+      "size": 128
+    },
+    "tapecaria_das_eras_mortas": {
+      "name": "Tapeçaria das Eras Mortas",
+      "kind": "generatorMult",
+      "webp": "upgrades/tapecaria_das_eras_mortas.webp",
+      "svg": "upgrades/tapecaria_das_eras_mortas.svg",
+      "size": 128
+    },
+    "paradoxo_da_colheita_dupla": {
+      "name": "Paradoxo da Colheita Dupla",
+      "kind": "generatorMult",
+      "webp": "upgrades/paradoxo_da_colheita_dupla.webp",
+      "svg": "upgrades/paradoxo_da_colheita_dupla.svg",
+      "size": 128
+    },
+    "santuario_de_cronos_desperto": {
+      "name": "Santuário de Cronos Desperto",
+      "kind": "generatorMult",
+      "webp": "upgrades/santuario_de_cronos_desperto.webp",
+      "svg": "upgrades/santuario_de_cronos_desperto.svg",
+      "size": 128
+    },
+    "lacos_de_retroalimentacao_eterna": {
+      "name": "Laços de Retroalimentação Eterna",
+      "kind": "generatorMult",
+      "webp": "upgrades/lacos_de_retroalimentacao_eterna.webp",
+      "svg": "upgrades/lacos_de_retroalimentacao_eterna.svg",
+      "size": 128
+    },
+    "horizonte_acronico": {
+      "name": "Horizonte Acrônico",
+      "kind": "generatorMult",
+      "webp": "upgrades/horizonte_acronico.webp",
+      "svg": "upgrades/horizonte_acronico.svg",
+      "size": 128
+    },
+    "coroa_do_tempo_soberano": {
+      "name": "Coroa do Tempo Soberano",
+      "kind": "generatorMult",
+      "webp": "upgrades/coroa_do_tempo_soberano.webp",
+      "svg": "upgrades/coroa_do_tempo_soberano.svg",
+      "size": 128
+    },
+    "dominio_sobre_o_principio_e_o_fim": {
+      "name": "Domínio sobre o Princípio e o Fim",
+      "kind": "generatorMult",
+      "webp": "upgrades/dominio_sobre_o_principio_e_o_fim.webp",
+      "svg": "upgrades/dominio_sobre_o_principio_e_o_fim.svg",
+      "size": 128
+    },
+    "camara_de_vazio_primordial": {
+      "name": "Câmara de Vazio Primordial",
+      "kind": "generatorMult",
+      "webp": "upgrades/camara_de_vazio_primordial.webp",
+      "svg": "upgrades/camara_de_vazio_primordial.svg",
+      "size": 128
+    },
+    "bobinas_de_antimateria_estigia": {
+      "name": "Bobinas de Antimatéria Estígia",
+      "kind": "generatorMult",
+      "webp": "upgrades/bobinas_de_antimateria_estigia.webp",
+      "svg": "upgrades/bobinas_de_antimateria_estigia.svg",
+      "size": 128
+    },
+    "injetores_de_vacuo_absoluto": {
+      "name": "Injetores de Vácuo Absoluto",
+      "kind": "generatorMult",
+      "webp": "upgrades/injetores_de_vacuo_absoluto.webp",
+      "svg": "upgrades/injetores_de_vacuo_absoluto.svg",
+      "size": 128
+    },
+    "colisor_de_sombras_opostas": {
+      "name": "Colisor de Sombras Opostas",
+      "kind": "generatorMult",
+      "webp": "upgrades/colisor_de_sombras_opostas.webp",
+      "svg": "upgrades/colisor_de_sombras_opostas.svg",
+      "size": 128
+    },
+    "aneis_de_aniquilacao_controlada": {
+      "name": "Anéis de Aniquilação Controlada",
+      "kind": "generatorMult",
+      "webp": "upgrades/aneis_de_aniquilacao_controlada.webp",
+      "svg": "upgrades/aneis_de_aniquilacao_controlada.svg",
+      "size": 128
+    },
+    "simetria_reversa_do_erebo": {
+      "name": "Simetria Reversa do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/simetria_reversa_do_erebo.webp",
+      "svg": "upgrades/simetria_reversa_do_erebo.svg",
+      "size": 128
+    },
+    "nucleo_de_singularidade_fria": {
+      "name": "Núcleo de Singularidade Fria",
+      "kind": "generatorMult",
+      "webp": "upgrades/nucleo_de_singularidade_fria.webp",
+      "svg": "upgrades/nucleo_de_singularidade_fria.svg",
+      "size": 128
+    },
+    "destilador_de_entropia_negra": {
+      "name": "Destilador de Entropia Negra",
+      "kind": "generatorMult",
+      "webp": "upgrades/destilador_de_entropia_negra.webp",
+      "svg": "upgrades/destilador_de_entropia_negra.svg",
+      "size": 128
+    },
+    "matriz_de_positrons_ctonianos": {
+      "name": "Matriz de Pósitrons Ctonianos",
+      "kind": "generatorMult",
+      "webp": "upgrades/matriz_de_positrons_ctonianos.webp",
+      "svg": "upgrades/matriz_de_positrons_ctonianos.svg",
+      "size": 128
+    },
+    "reator_de_ponto_zero_abissal": {
+      "name": "Reator de Ponto Zero Abissal",
+      "kind": "generatorMult",
+      "webp": "upgrades/reator_de_ponto_zero_abissal.webp",
+      "svg": "upgrades/reator_de_ponto_zero_abissal.svg",
+      "size": 128
+    },
+    "catedral_do_vacuo_eterno": {
+      "name": "Catedral do Vácuo Eterno",
+      "kind": "generatorMult",
+      "webp": "upgrades/catedral_do_vacuo_eterno.webp",
+      "svg": "upgrades/catedral_do_vacuo_eterno.svg",
+      "size": 128
+    },
+    "horizonte_de_baryons_invertidos": {
+      "name": "Horizonte de Bárions Invertidos",
+      "kind": "generatorMult",
+      "webp": "upgrades/horizonte_de_baryons_invertidos.webp",
+      "svg": "upgrades/horizonte_de_baryons_invertidos.svg",
+      "size": 128
+    },
+    "oceano_de_dirac_subterraneo": {
+      "name": "Oceano de Dirac Subterrâneo",
+      "kind": "generatorMult",
+      "webp": "upgrades/oceano_de_dirac_subterraneo.webp",
+      "svg": "upgrades/oceano_de_dirac_subterraneo.svg",
+      "size": 128
+    },
+    "coroa_da_nao_existencia": {
+      "name": "Coroa da Não-Existência",
+      "kind": "generatorMult",
+      "webp": "upgrades/coroa_da_nao_existencia.webp",
+      "svg": "upgrades/coroa_da_nao_existencia.svg",
+      "size": 128
+    },
+    "soberania_do_vazio_absoluto": {
+      "name": "Soberania do Vazio Absoluto",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberania_do_vazio_absoluto.webp",
+      "svg": "upgrades/soberania_do_vazio_absoluto.svg",
+      "size": 128
+    },
+    "lente_de_quartzo_estigio": {
+      "name": "Lente de Quartzo Estígio",
+      "kind": "generatorMult",
+      "webp": "upgrades/lente_de_quartzo_estigio.webp",
+      "svg": "upgrades/lente_de_quartzo_estigio.svg",
+      "size": 128
+    },
+    "espelhos_de_obsidiana_polida": {
+      "name": "Espelhos de Obsidiana Polida",
+      "kind": "generatorMult",
+      "webp": "upgrades/espelhos_de_obsidiana_polida.webp",
+      "svg": "upgrades/espelhos_de_obsidiana_polida.svg",
+      "size": 128
+    },
+    "refracao_das_tres_irmas": {
+      "name": "Refração das Três Irmãs",
+      "kind": "generatorMult",
+      "webp": "upgrades/refracao_das_tres_irmas.webp",
+      "svg": "upgrades/refracao_das_tres_irmas.svg",
+      "size": 128
+    },
+    "camera_de_difracao_aurica": {
+      "name": "Câmara de Difração Áurica",
+      "kind": "generatorMult",
+      "webp": "upgrades/camera_de_difracao_aurica.webp",
+      "svg": "upgrades/camera_de_difracao_aurica.svg",
+      "size": 128
+    },
+    "espectro_invisivel_do_acheron": {
+      "name": "Espectro Invisível do Acheron",
+      "kind": "generatorMult",
+      "webp": "upgrades/espectro_invisivel_do_acheron.webp",
+      "svg": "upgrades/espectro_invisivel_do_acheron.svg",
+      "size": 128
+    },
+    "rede_de_cristais_de_atropos": {
+      "name": "Rede de Cristais de Átropos",
+      "kind": "generatorMult",
+      "webp": "upgrades/rede_de_cristais_de_atropos.webp",
+      "svg": "upgrades/rede_de_cristais_de_atropos.svg",
+      "size": 128
+    },
+    "sol_negro_refratado": {
+      "name": "Sol Negro Refratado",
+      "kind": "generatorMult",
+      "webp": "upgrades/sol_negro_refratado.webp",
+      "svg": "upgrades/sol_negro_refratado.svg",
+      "size": 128
+    },
+    "caleidoscopio_das_vidas_passadas": {
+      "name": "Caleidoscópio das Vidas Passadas",
+      "kind": "generatorMult",
+      "webp": "upgrades/caleidoscopio_das_vidas_passadas.webp",
+      "svg": "upgrades/caleidoscopio_das_vidas_passadas.svg",
+      "size": 128
+    },
+    "feixe_coerente_de_lethe": {
+      "name": "Feixe Coerente de Lethe",
+      "kind": "generatorMult",
+      "webp": "upgrades/feixe_coerente_de_lethe.webp",
+      "svg": "upgrades/feixe_coerente_de_lethe.svg",
+      "size": 128
+    },
+    "auroras_de_flegenton": {
+      "name": "Auroras de Flegêton",
+      "kind": "generatorMult",
+      "webp": "upgrades/auroras_de_flegenton.webp",
+      "svg": "upgrades/auroras_de_flegenton.svg",
+      "size": 128
+    },
+    "abobada_de_diamante_astral": {
+      "name": "Abóbada de Diamante Astral",
+      "kind": "generatorMult",
+      "webp": "upgrades/abobada_de_diamante_astral.webp",
+      "svg": "upgrades/abobada_de_diamante_astral.svg",
+      "size": 128
+    },
+    "polarizacao_do_destino_puro": {
+      "name": "Polarização do Destino Puro",
+      "kind": "generatorMult",
+      "webp": "upgrades/polarizacao_do_destino_puro.webp",
+      "svg": "upgrades/polarizacao_do_destino_puro.svg",
+      "size": 128
+    },
+    "arco_iris_do_submundo": {
+      "name": "Arco-Íris do Submundo",
+      "kind": "generatorMult",
+      "webp": "upgrades/arco_iris_do_submundo.webp",
+      "svg": "upgrades/arco_iris_do_submundo.svg",
+      "size": 128
+    },
+    "fulgor_primordial_de_nyx": {
+      "name": "Fulgor Primordial de Nyx",
+      "kind": "generatorMult",
+      "webp": "upgrades/fulgor_primordial_de_nyx.webp",
+      "svg": "upgrades/fulgor_primordial_de_nyx.svg",
+      "size": 128
+    },
+    "onividencia_prismatica_das_moiras": {
+      "name": "Onividência Prismática das Moiras",
+      "kind": "generatorMult",
+      "webp": "upgrades/onividencia_prismatica_das_moiras.webp",
+      "svg": "upgrades/onividencia_prismatica_das_moiras.svg",
+      "size": 128
+    },
+    "dados_de_osso_de_tita": {
+      "name": "Dados de Osso de Titã",
+      "kind": "generatorMult",
+      "webp": "upgrades/dados_de_osso_de_tita.webp",
+      "svg": "upgrades/dados_de_osso_de_tita.svg",
+      "size": 128
+    },
+    "moedas_de_duas_caras_de_caronte": {
+      "name": "Moedas de Duas Caras de Caronte",
+      "kind": "generatorMult",
+      "webp": "upgrades/moedas_de_duas_caras_de_caronte.webp",
+      "svg": "upgrades/moedas_de_duas_caras_de_caronte.svg",
+      "size": 128
+    },
+    "roleta_das_parcas": {
+      "name": "Roleta das Parcas",
+      "kind": "generatorMult",
+      "webp": "upgrades/roleta_das_parcas.webp",
+      "svg": "upgrades/roleta_das_parcas.svg",
+      "size": 128
+    },
+    "bigorna_da_improbabilidade": {
+      "name": "Bigorna da Improbabilidade",
+      "kind": "generatorMult",
+      "webp": "upgrades/bigorna_da_improbabilidade.webp",
+      "svg": "upgrades/bigorna_da_improbabilidade.svg",
+      "size": 128
+    },
+    "tarot_de_ouro_e_enxofre": {
+      "name": "Tarô de Ouro e Enxofre",
+      "kind": "generatorMult",
+      "webp": "upgrades/tarot_de_ouro_e_enxofre.webp",
+      "svg": "upgrades/tarot_de_ouro_e_enxofre.svg",
+      "size": 128
+    },
+    "pendulo_de_tyche_subterranea": {
+      "name": "Pêndulo de Tyche Subterrânea",
+      "kind": "generatorMult",
+      "webp": "upgrades/pendulo_de_tyche_subterranea.webp",
+      "svg": "upgrades/pendulo_de_tyche_subterranea.svg",
+      "size": 128
+    },
+    "fornalha_de_milagres_estatisticos": {
+      "name": "Fornalha de Milagres Estatísticos",
+      "kind": "generatorMult",
+      "webp": "upgrades/fornalha_de_milagres_estatisticos.webp",
+      "svg": "upgrades/fornalha_de_milagres_estatisticos.svg",
+      "size": 128
+    },
+    "colapso_de_onda_favoravel": {
+      "name": "Colapso de Onda Favorável",
+      "kind": "generatorMult",
+      "webp": "upgrades/colapso_de_onda_favoravel.webp",
+      "svg": "upgrades/colapso_de_onda_favoravel.svg",
+      "size": 128
+    },
+    "lei_dos_grandes_numeros_estigios": {
+      "name": "Lei dos Grandes Números Estígios",
+      "kind": "generatorMult",
+      "webp": "upgrades/lei_dos_grandes_numeros_estigios.webp",
+      "svg": "upgrades/lei_dos_grandes_numeros_estigios.svg",
+      "size": 128
+    },
+    "oraculo_de_monte_carlo_ctoniano": {
+      "name": "Oráculo de Monte Carlo Ctoniano",
+      "kind": "generatorMult",
+      "webp": "upgrades/oraculo_de_monte_carlo_ctoniano.webp",
+      "svg": "upgrades/oraculo_de_monte_carlo_ctoniano.svg",
+      "size": 128
+    },
+    "cidadela_do_acaso_soberano": {
+      "name": "Cidadela do Acaso Soberano",
+      "kind": "generatorMult",
+      "webp": "upgrades/cidadela_do_acaso_soberano.webp",
+      "svg": "upgrades/cidadela_do_acaso_soberano.svg",
+      "size": 128
+    },
+    "determinismo_dourado": {
+      "name": "Determinismo Dourado",
+      "kind": "generatorMult",
+      "webp": "upgrades/determinismo_dourado.webp",
+      "svg": "upgrades/determinismo_dourado.svg",
+      "size": 128
+    },
+    "roda_da_fortuna_inapelavel": {
+      "name": "Roda da Fortuna Inapelável",
+      "kind": "generatorMult",
+      "webp": "upgrades/roda_da_fortuna_inapelavel.webp",
+      "svg": "upgrades/roda_da_fortuna_inapelavel.svg",
+      "size": 128
+    },
+    "providencia_abissal": {
+      "name": "Providência Abissal",
+      "kind": "generatorMult",
+      "webp": "upgrades/providencia_abissal.webp",
+      "svg": "upgrades/providencia_abissal.svg",
+      "size": 128
+    },
+    "senhor_de_todas_as_probabilidades": {
+      "name": "Senhor de Todas as Probabilidades",
+      "kind": "generatorMult",
+      "webp": "upgrades/senhor_de_todas_as_probabilidades.webp",
+      "svg": "upgrades/senhor_de_todas_as_probabilidades.svg",
+      "size": 128
+    },
+    "semente_de_mandelbrot_estigia": {
+      "name": "Semente de Mandelbrot Estígia",
+      "kind": "generatorMult",
+      "webp": "upgrades/semente_de_mandelbrot_estigia.webp",
+      "svg": "upgrades/semente_de_mandelbrot_estigia.svg",
+      "size": 128
+    },
+    "triangulo_de_sierpinski_funebre": {
+      "name": "Triângulo de Sierpinski Fúnebre",
+      "kind": "generatorMult",
+      "webp": "upgrades/triangulo_de_sierpinski_funebre.webp",
+      "svg": "upgrades/triangulo_de_sierpinski_funebre.svg",
+      "size": 128
+    },
+    "esponja_de_menger_de_obsidiana": {
+      "name": "Esponja de Menger de Obsidiana",
+      "kind": "generatorMult",
+      "webp": "upgrades/esponja_de_menger_de_obsidiana.webp",
+      "svg": "upgrades/esponja_de_menger_de_obsidiana.svg",
+      "size": 128
+    },
+    "recursao_sem_condicao_de_parada": {
+      "name": "Recursão sem Condição de Parada",
+      "kind": "generatorMult",
+      "webp": "upgrades/recursao_sem_condicao_de_parada.webp",
+      "svg": "upgrades/recursao_sem_condicao_de_parada.svg",
+      "size": 128
+    },
+    "costa_infinita_do_acheron": {
+      "name": "Costa Infinita do Acheron",
+      "kind": "generatorMult",
+      "webp": "upgrades/costa_infinita_do_acheron.webp",
+      "svg": "upgrades/costa_infinita_do_acheron.svg",
+      "size": 128
+    },
+    "floco_de_koch_do_cocytus": {
+      "name": "Floco de Koch do Cocytus",
+      "kind": "generatorMult",
+      "webp": "upgrades/floco_de_koch_do_cocytus.webp",
+      "svg": "upgrades/floco_de_koch_do_cocytus.svg",
+      "size": 128
+    },
+    "autosimilaridade_imperial": {
+      "name": "Autossimilaridade Imperial",
+      "kind": "generatorMult",
+      "webp": "upgrades/autosimilaridade_imperial.webp",
+      "svg": "upgrades/autosimilaridade_imperial.svg",
+      "size": 128
+    },
+    "atrator_estranho_do_tartaro": {
+      "name": "Atrator Estranho do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/atrator_estranho_do_tartaro.webp",
+      "svg": "upgrades/atrator_estranho_do_tartaro.svg",
+      "size": 128
+    },
+    "dimensao_de_hausdorff_ctoniana": {
+      "name": "Dimensão de Hausdorff Ctoniana",
+      "kind": "generatorMult",
+      "webp": "upgrades/dimensao_de_hausdorff_ctoniana.webp",
+      "svg": "upgrades/dimensao_de_hausdorff_ctoniana.svg",
+      "size": 128
+    },
+    "conjunto_de_julia_noturno": {
+      "name": "Conjunto de Julia Noturno",
+      "kind": "generatorMult",
+      "webp": "upgrades/conjunto_de_julia_noturno.webp",
+      "svg": "upgrades/conjunto_de_julia_noturno.svg",
+      "size": 128
+    },
+    "labirinto_de_hilbert_perpetuo": {
+      "name": "Labirinto de Hilbert Perpétuo",
+      "kind": "generatorMult",
+      "webp": "upgrades/labirinto_de_hilbert_perpetuo.webp",
+      "svg": "upgrades/labirinto_de_hilbert_perpetuo.svg",
+      "size": 128
+    },
+    "arvore_de_pitagoras_de_ouro": {
+      "name": "Árvore de Pitágoras de Ouro",
+      "kind": "generatorMult",
+      "webp": "upgrades/arvore_de_pitagoras_de_ouro.webp",
+      "svg": "upgrades/arvore_de_pitagoras_de_ouro.svg",
+      "size": 128
+    },
+    "caleidoscopio_recursivo_do_erebo": {
+      "name": "Caleidoscópio Recursivo do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/caleidoscopio_recursivo_do_erebo.webp",
+      "svg": "upgrades/caleidoscopio_recursivo_do_erebo.svg",
+      "size": 128
+    },
+    "abismo_dentro_do_abismo": {
+      "name": "Abismo Dentro do Abismo",
+      "kind": "generatorMult",
+      "webp": "upgrades/abismo_dentro_do_abismo.webp",
+      "svg": "upgrades/abismo_dentro_do_abismo.svg",
+      "size": 128
+    },
+    "onipotencia_fractal_infindavel": {
+      "name": "Onipotência Fractal Infindável",
+      "kind": "generatorMult",
+      "webp": "upgrades/onipotencia_fractal_infindavel.webp",
+      "svg": "upgrades/onipotencia_fractal_infindavel.svg",
+      "size": 128
+    },
+    "terminal_de_bronze_de_delfos": {
+      "name": "Terminal de Bronze de Delfos",
+      "kind": "generatorMult",
+      "webp": "upgrades/terminal_de_bronze_de_delfos.webp",
+      "svg": "upgrades/terminal_de_bronze_de_delfos.svg",
+      "size": 128
+    },
+    "compilador_de_juramentos_estigios": {
+      "name": "Compilador de Juramentos Estígios",
+      "kind": "generatorMult",
+      "webp": "upgrades/compilador_de_juramentos_estigios.webp",
+      "svg": "upgrades/compilador_de_juramentos_estigios.svg",
+      "size": 128
+    },
+    "laco_while_true_da_eternidade": {
+      "name": "Laço while(true) da Eternidade",
+      "kind": "generatorMult",
+      "webp": "upgrades/laco_while_true_da_eternidade.webp",
+      "svg": "upgrades/laco_while_true_da_eternidade.svg",
+      "size": 128
+    },
+    "ponteiro_direto_para_o_acheron": {
+      "name": "Ponteiro Direto para o Acheron",
+      "kind": "generatorMult",
+      "webp": "upgrades/ponteiro_direto_para_o_acheron.webp",
+      "svg": "upgrades/ponteiro_direto_para_o_acheron.svg",
+      "size": 128
+    },
+    "garbage_collector_do_tartaro": {
+      "name": "Garbage Collector do Tártaro",
+      "kind": "generatorMult",
+      "webp": "upgrades/garbage_collector_do_tartaro.webp",
+      "svg": "upgrades/garbage_collector_do_tartaro.svg",
+      "size": 128
+    },
+    "injecao_de_dependencia_divina": {
+      "name": "Injeção de Dependência Divina",
+      "kind": "generatorMult",
+      "webp": "upgrades/injecao_de_dependencia_divina.webp",
+      "svg": "upgrades/injecao_de_dependencia_divina.svg",
+      "size": 128
+    },
+    "kernel_ctoniano_em_anel_zero": {
+      "name": "Kernel Ctoniano em Anel Zero",
+      "kind": "generatorMult",
+      "webp": "upgrades/kernel_ctoniano_em_anel_zero.webp",
+      "svg": "upgrades/kernel_ctoniano_em_anel_zero.svg",
+      "size": 128
+    },
+    "assincronia_multithread_das_moiras": {
+      "name": "Assincronia Multithread das Moiras",
+      "kind": "generatorMult",
+      "webp": "upgrades/assincronia_multithread_das_moiras.webp",
+      "svg": "upgrades/assincronia_multithread_das_moiras.svg",
+      "size": 128
+    },
+    "bigint_sem_limite_de_precisao": {
+      "name": "BigInt Sem Limite de Precisão",
+      "kind": "generatorMult",
+      "webp": "upgrades/bigint_sem_limite_de_precisao.webp",
+      "svg": "upgrades/bigint_sem_limite_de_precisao.svg",
+      "size": 128
+    },
+    "metaprogramacao_do_erebo": {
+      "name": "Metaprogramação do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/metaprogramacao_do_erebo.webp",
+      "svg": "upgrades/metaprogramacao_do_erebo.svg",
+      "size": 128
+    },
+    "mainframe_da_sibila_de_cumas": {
+      "name": "Mainframe da Sibila de Cumas",
+      "kind": "generatorMult",
+      "webp": "upgrades/mainframe_da_sibila_de_cumas.webp",
+      "svg": "upgrades/mainframe_da_sibila_de_cumas.svg",
+      "size": 128
+    },
+    "patch_ao_vivo_no_cosmos": {
+      "name": "Patch ao Vivo no Cosmos",
+      "kind": "generatorMult",
+      "webp": "upgrades/patch_ao_vivo_no_cosmos.webp",
+      "svg": "upgrades/patch_ao_vivo_no_cosmos.svg",
+      "size": 128
+    },
+    "hypervisor_dos_cinco_rios": {
+      "name": "Hypervisor dos Cinco Rios",
+      "kind": "generatorMult",
+      "webp": "upgrades/hypervisor_dos_cinco_rios.webp",
+      "svg": "upgrades/hypervisor_dos_cinco_rios.svg",
+      "size": 128
+    },
+    "acesso_root_ao_livro_da_vida": {
+      "name": "Acesso Root ao Livro da Vida",
+      "kind": "generatorMult",
+      "webp": "upgrades/acesso_root_ao_livro_da_vida.webp",
+      "svg": "upgrades/acesso_root_ao_livro_da_vida.svg",
+      "size": 128
+    },
+    "arquiteto_supremo_da_simulacao": {
+      "name": "Arquiteto Supremo da Simulação",
+      "kind": "generatorMult",
+      "webp": "upgrades/arquiteto_supremo_da_simulacao.webp",
+      "svg": "upgrades/arquiteto_supremo_da_simulacao.svg",
+      "size": 128
+    },
+    "fenda_para_o_submundo_vizinho": {
+      "name": "Fenda para o Submundo Vizinho",
+      "kind": "generatorMult",
+      "webp": "upgrades/fenda_para_o_submundo_vizinho.webp",
+      "svg": "upgrades/fenda_para_o_submundo_vizinho.svg",
+      "size": 128
+    },
+    "sifao_interdimensional_de_almas": {
+      "name": "Sifão Interdimensional de Almas",
+      "kind": "generatorMult",
+      "webp": "upgrades/sifao_interdimensional_de_almas.webp",
+      "svg": "upgrades/sifao_interdimensional_de_almas.svg",
+      "size": 128
+    },
+    "tratado_dos_dez_hades": {
+      "name": "Tratado dos Dez Hades",
+      "kind": "generatorMult",
+      "webp": "upgrades/tratado_dos_dez_hades.webp",
+      "svg": "upgrades/tratado_dos_dez_hades.svg",
+      "size": 128
+    },
+    "malha_de_branas_ctoniana": {
+      "name": "Malha de Branas Ctoniana",
+      "kind": "generatorMult",
+      "webp": "upgrades/malha_de_branas_ctoniana.webp",
+      "svg": "upgrades/malha_de_branas_ctoniana.svg",
+      "size": 128
+    },
+    "alfandega_do_multiverso": {
+      "name": "Alfândega do Multiverso",
+      "kind": "generatorMult",
+      "webp": "upgrades/alfandega_do_multiverso.webp",
+      "svg": "upgrades/alfandega_do_multiverso.svg",
+      "size": 128
+    },
+    "convergencia_das_infinitas_margens": {
+      "name": "Convergência das Infinitas Margens",
+      "kind": "generatorMult",
+      "webp": "upgrades/convergencia_das_infinitas_margens.webp",
+      "svg": "upgrades/convergencia_das_infinitas_margens.svg",
+      "size": 128
+    },
+    "imperio_transversal_do_erebo": {
+      "name": "Império Transversal do Érebo",
+      "kind": "generatorMult",
+      "webp": "upgrades/imperio_transversal_do_erebo.webp",
+      "svg": "upgrades/imperio_transversal_do_erebo.svg",
+      "size": 128
+    },
+    "colheita_de_linhas_temporais_mortas": {
+      "name": "Colheita de Linhas Temporais Mortas",
+      "kind": "generatorMult",
+      "webp": "upgrades/colheita_de_linhas_temporais_mortas.webp",
+      "svg": "upgrades/colheita_de_linhas_temporais_mortas.svg",
+      "size": 128
+    },
+    "ressoador_de_cordas_cosmicas": {
+      "name": "Ressoador de Cordas Cósmicas",
+      "kind": "generatorMult",
+      "webp": "upgrades/ressoador_de_cordas_cosmicas.webp",
+      "svg": "upgrades/ressoador_de_cordas_cosmicas.svg",
+      "size": 128
+    },
+    "anexacao_de_planos_superiores": {
+      "name": "Anexação de Planos Superiores",
+      "kind": "generatorMult",
+      "webp": "upgrades/anexacao_de_planos_superiores.webp",
+      "svg": "upgrades/anexacao_de_planos_superiores.svg",
+      "size": 128
+    },
+    "parlamento_dos_duzentos_cosmos": {
+      "name": "Parlamento dos Duzentos Cosmos",
+      "kind": "generatorMult",
+      "webp": "upgrades/parlamento_dos_duzentos_cosmos.webp",
+      "svg": "upgrades/parlamento_dos_duzentos_cosmos.svg",
+      "size": 128
+    },
+    "fusao_de_constantes_universais": {
+      "name": "Fusão de Constantes Universais",
+      "kind": "generatorMult",
+      "webp": "upgrades/fusao_de_constantes_universais.webp",
+      "svg": "upgrades/fusao_de_constantes_universais.svg",
+      "size": 128
+    },
+    "biblioteca_de_babel_subterranea": {
+      "name": "Biblioteca de Babel Subterrânea",
+      "kind": "generatorMult",
+      "webp": "upgrades/biblioteca_de_babel_subterranea.webp",
+      "svg": "upgrades/biblioteca_de_babel_subterranea.svg",
+      "size": 128
+    },
+    "hegemonia_omnidirecional": {
+      "name": "Hegemonia Omnidirecional",
+      "kind": "generatorMult",
+      "webp": "upgrades/hegemonia_omnidirecional.webp",
+      "svg": "upgrades/hegemonia_omnidirecional.svg",
+      "size": 128
+    },
+    "soberano_do_omnidominio_ctoniano": {
+      "name": "Soberano do Omnidomínio Ctoniano",
+      "kind": "generatorMult",
+      "webp": "upgrades/soberano_do_omnidominio_ctoniano.webp",
+      "svg": "upgrades/soberano_do_omnidominio_ctoniano.svg",
+      "size": 128
+    },
+    "lobo_frontal_de_tita": {
+      "name": "Lobo Frontal de Titã",
+      "kind": "generatorMult",
+      "webp": "upgrades/lobo_frontal_de_tita.webp",
+      "svg": "upgrades/lobo_frontal_de_tita.svg",
+      "size": 128
+    },
+    "sinapses_de_relampago_estigio": {
+      "name": "Sinapses de Relâmpago Estígio",
+      "kind": "generatorMult",
+      "webp": "upgrades/sinapses_de_relampago_estigio.webp",
+      "svg": "upgrades/sinapses_de_relampago_estigio.svg",
+      "size": 128
+    },
+    "sonho_lucido_coletivo": {
+      "name": "Sonho Lúcido Coletivo",
+      "kind": "generatorMult",
+      "webp": "upgrades/sonho_lucido_coletivo.webp",
+      "svg": "upgrades/sonho_lucido_coletivo.svg",
+      "size": 128
+    },
+    "hemisferios_em_ressonancia_aurica": {
+      "name": "Hemisférios em Ressonância Áurica",
+      "kind": "generatorMult",
+      "webp": "upgrades/hemisferios_em_ressonancia_aurica.webp",
+      "svg": "upgrades/hemisferios_em_ressonancia_aurica.svg",
+      "size": 128
+    },
+    "noosfera_do_submundo": {
+      "name": "Noosfera do Submundo",
+      "kind": "generatorMult",
+      "webp": "upgrades/noosfera_do_submundo.webp",
+      "svg": "upgrades/noosfera_do_submundo.svg",
+      "size": 128
+    },
+    "arquitetura_de_hipnos_e_mnemosyne": {
+      "name": "Arquitetura de Hipnos e Mnemosyne",
+      "kind": "generatorMult",
+      "webp": "upgrades/arquitetura_de_hipnos_e_mnemosyne.webp",
+      "svg": "upgrades/arquitetura_de_hipnos_e_mnemosyne.svg",
+      "size": 128
+    },
+    "cem_luas_pensantes": {
+      "name": "Cem Luas Pensantes",
+      "kind": "generatorMult",
+      "webp": "upgrades/cem_luas_pensantes.webp",
+      "svg": "upgrades/cem_luas_pensantes.svg",
+      "size": 128
+    },
+    "materializacao_psicocinetica": {
+      "name": "Materialização Psicocinética",
+      "kind": "generatorMult",
+      "webp": "upgrades/materializacao_psicocinetica.webp",
+      "svg": "upgrades/materializacao_psicocinetica.svg",
+      "size": 128
+    },
+    "inconsciente_abissal_unificado": {
+      "name": "Inconsciente Abissal Unificado",
+      "kind": "generatorMult",
+      "webp": "upgrades/inconsciente_abissal_unificado.webp",
+      "svg": "upgrades/inconsciente_abissal_unificado.svg",
+      "size": 128
+    },
+    "hipercepcao_transcendental": {
+      "name": "Hipercepção Transcendental",
+      "kind": "generatorMult",
+      "webp": "upgrades/hipercepcao_transcendental.webp",
+      "svg": "upgrades/hipercepcao_transcendental.svg",
+      "size": 128
+    },
+    "panteao_neural_dos_duzentos": {
+      "name": "Panteão Neural dos Duzentos",
+      "kind": "generatorMult",
+      "webp": "upgrades/panteao_neural_dos_duzentos.webp",
+      "svg": "upgrades/panteao_neural_dos_duzentos.svg",
+      "size": 128
+    },
+    "solipsismo_imperial": {
+      "name": "Solipsismo Imperial",
+      "kind": "generatorMult",
+      "webp": "upgrades/solipsismo_imperial.webp",
+      "svg": "upgrades/solipsismo_imperial.svg",
+      "size": 128
+    },
+    "catedral_de_materia_cinzenta_astral": {
+      "name": "Catedral de Matéria Cinzenta Astral",
+      "kind": "generatorMult",
+      "webp": "upgrades/catedral_de_materia_cinzenta_astral.webp",
+      "svg": "upgrades/catedral_de_materia_cinzenta_astral.svg",
+      "size": 128
+    },
+    "vontade_pura_sem_intermediarios": {
+      "name": "Vontade Pura Sem Intermediários",
+      "kind": "generatorMult",
+      "webp": "upgrades/vontade_pura_sem_intermediarios.webp",
+      "svg": "upgrades/vontade_pura_sem_intermediarios.svg",
+      "size": 128
+    },
+    "onisciencia_do_cortex_primordial": {
+      "name": "Onisciência do Córtex Primordial",
+      "kind": "generatorMult",
+      "webp": "upgrades/onisciencia_do_cortex_primordial.webp",
+      "svg": "upgrades/onisciencia_do_cortex_primordial.svg",
+      "size": 128
+    },
+    "reflexo_na_agua_do_styx": {
+      "name": "Reflexo na Água do Styx",
+      "kind": "generatorMult",
+      "webp": "upgrades/reflexo_na_agua_do_styx.webp",
+      "svg": "upgrades/reflexo_na_agua_do_styx.svg",
+      "size": 128
+    },
+    "cinco_sombras_da_coroa": {
+      "name": "Cinco Sombras da Coroa",
+      "kind": "generatorMult",
+      "webp": "upgrades/cinco_sombras_da_coroa.webp",
+      "svg": "upgrades/cinco_sombras_da_coroa.svg",
+      "size": 128
+    },
+    "decemvirato_de_ti_mesmo": {
+      "name": "Decenvirato de Ti Mesmo",
+      "kind": "generatorMult",
+      "webp": "upgrades/decemvirato_de_ti_mesmo.webp",
+      "svg": "upgrades/decemvirato_de_ti_mesmo.svg",
+      "size": 128
+    },
+    "corte_imperial_de_clones_ctonianos": {
+      "name": "Corte Imperial de Clones Ctonianos",
+      "kind": "generatorMult",
+      "webp": "upgrades/corte_imperial_de_clones_ctonianos.webp",
+      "svg": "upgrades/corte_imperial_de_clones_ctonianos.svg",
+      "size": 128
+    },
+    "cinquenta_tronos_para_um_so_nome": {
+      "name": "Cinquenta Tronos para um Só Nome",
+      "kind": "generatorMult",
+      "webp": "upgrades/cinquenta_tronos_para_um_so_nome.webp",
+      "svg": "upgrades/cinquenta_tronos_para_um_so_nome.svg",
+      "size": 128
+    },
+    "coro_unissono_do_soberano": {
+      "name": "Coro Uníssono do Soberano",
+      "kind": "generatorMult",
+      "webp": "upgrades/coro_unissono_do_soberano.webp",
+      "svg": "upgrades/coro_unissono_do_soberano.svg",
+      "size": 128
+    },
+    "centuria_de_imperadores_imortais": {
+      "name": "Centúria de Imperadores Imortais",
+      "kind": "generatorMult",
+      "webp": "upgrades/centuria_de_imperadores_imortais.webp",
+      "svg": "upgrades/centuria_de_imperadores_imortais.svg",
+      "size": 128
+    },
+    "dinastia_autogerada": {
+      "name": "Dinastia Autogerada",
+      "kind": "generatorMult",
+      "webp": "upgrades/dinastia_autogerada.webp",
+      "svg": "upgrades/dinastia_autogerada.svg",
+      "size": 128
+    },
+    "ubiquidade_do_cetro_negro": {
+      "name": "Ubiquidade do Cetro Negro",
+      "kind": "generatorMult",
+      "webp": "upgrades/ubiquidade_do_cetro_negro.webp",
+      "svg": "upgrades/ubiquidade_do_cetro_negro.svg",
+      "size": 128
+    },
+    "espelho_infinito_da_soberania": {
+      "name": "Espelho Infinito da Soberania",
+      "kind": "generatorMult",
+      "webp": "upgrades/espelho_infinito_da_soberania.webp",
+      "svg": "upgrades/espelho_infinito_da_soberania.svg",
+      "size": 128
+    },
+    "duzentos_avatares_do_fim": {
+      "name": "Duzentos Avatares do Fim",
+      "kind": "generatorMult",
+      "webp": "upgrades/duzentos_avatares_do_fim.webp",
+      "svg": "upgrades/duzentos_avatares_do_fim.svg",
+      "size": 128
+    },
+    "identidade_cosmica_absoluta": {
+      "name": "Identidade Cósmica Absoluta",
+      "kind": "generatorMult",
+      "webp": "upgrades/identidade_cosmica_absoluta.webp",
+      "svg": "upgrades/identidade_cosmica_absoluta.svg",
+      "size": 128
+    },
+    "apoteose_multiplicada": {
+      "name": "Apoteose Multiplicada",
+      "kind": "generatorMult",
+      "webp": "upgrades/apoteose_multiplicada.webp",
+      "svg": "upgrades/apoteose_multiplicada.svg",
+      "size": 128
+    },
+    "eu_sou_o_acheron_e_o_lethe": {
+      "name": "Eu Sou o Acheron e o Lethe",
+      "kind": "generatorMult",
+      "webp": "upgrades/eu_sou_o_acheron_e_o_lethe.webp",
+      "svg": "upgrades/eu_sou_o_acheron_e_o_lethe.svg",
+      "size": 128
+    },
+    "o_imperador_eterno_trezentos": {
+      "name": "O Imperador Eterno (Trezentos)",
+      "kind": "generatorMult",
+      "webp": "upgrades/o_imperador_eterno_trezentos.webp",
+      "svg": "upgrades/o_imperador_eterno_trezentos.svg",
+      "size": 128
+    },
+    "cortejo_das_margens_i": {
+      "name": "Cortejo das Margens Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/cortejo_das_margens_i.webp",
+      "svg": "upgrades/cortejo_das_margens_i.svg",
+      "size": 128
+    },
+    "cortejo_das_margens_ii": {
+      "name": "Cortejo das Margens Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/cortejo_das_margens_ii.webp",
+      "svg": "upgrades/cortejo_das_margens_ii.svg",
+      "size": 128
+    },
+    "brasa_cruzada_i": {
+      "name": "Brasa Cruzada Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/brasa_cruzada_i.webp",
+      "svg": "upgrades/brasa_cruzada_i.svg",
+      "size": 128
+    },
+    "brasa_cruzada_ii": {
+      "name": "Brasa Cruzada Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/brasa_cruzada_ii.webp",
+      "svg": "upgrades/brasa_cruzada_ii.svg",
+      "size": 128
+    },
+    "guardiao_dos_umbrais_i": {
+      "name": "Guardião dos Umbrais Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/guardiao_dos_umbrais_i.webp",
+      "svg": "upgrades/guardiao_dos_umbrais_i.svg",
+      "size": 128
+    },
+    "guardiao_dos_umbrais_ii": {
+      "name": "Guardião dos Umbrais Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/guardiao_dos_umbrais_ii.webp",
+      "svg": "upgrades/guardiao_dos_umbrais_ii.svg",
+      "size": 128
+    },
+    "jurisprudencia_arcana_i": {
+      "name": "Jurisprudência Arcana Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/jurisprudencia_arcana_i.webp",
+      "svg": "upgrades/jurisprudencia_arcana_i.svg",
+      "size": 128
+    },
+    "jurisprudencia_arcana_ii": {
+      "name": "Jurisprudência Arcana Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/jurisprudencia_arcana_ii.webp",
+      "svg": "upgrades/jurisprudencia_arcana_ii.svg",
+      "size": 128
+    },
+    "alquimia_estelar_i": {
+      "name": "Alquimia Estelar Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/alquimia_estelar_i.webp",
+      "svg": "upgrades/alquimia_estelar_i.svg",
+      "size": 128
+    },
+    "alquimia_estelar_ii": {
+      "name": "Alquimia Estelar Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/alquimia_estelar_ii.webp",
+      "svg": "upgrades/alquimia_estelar_ii.svg",
+      "size": 128
+    },
+    "trama_do_erebo_i": {
+      "name": "Trama do Érebo Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/trama_do_erebo_i.webp",
+      "svg": "upgrades/trama_do_erebo_i.svg",
+      "size": 128
+    },
+    "trama_do_erebo_ii": {
+      "name": "Trama do Érebo Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/trama_do_erebo_ii.webp",
+      "svg": "upgrades/trama_do_erebo_ii.svg",
+      "size": 128
+    },
+    "refracao_do_vazio_i": {
+      "name": "Refração do Vazio Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/refracao_do_vazio_i.webp",
+      "svg": "upgrades/refracao_do_vazio_i.svg",
+      "size": 128
+    },
+    "refracao_do_vazio_ii": {
+      "name": "Refração do Vazio Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/refracao_do_vazio_ii.webp",
+      "svg": "upgrades/refracao_do_vazio_ii.svg",
+      "size": 128
+    },
+    "geometria_do_acaso_i": {
+      "name": "Geometria do Acaso Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/geometria_do_acaso_i.webp",
+      "svg": "upgrades/geometria_do_acaso_i.svg",
+      "size": 128
+    },
+    "geometria_do_acaso_ii": {
+      "name": "Geometria do Acaso Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/geometria_do_acaso_ii.webp",
+      "svg": "upgrades/geometria_do_acaso_ii.svg",
+      "size": 128
+    },
+    "compilacao_multiversal_i": {
+      "name": "Compilação Multiversal Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/compilacao_multiversal_i.webp",
+      "svg": "upgrades/compilacao_multiversal_i.svg",
+      "size": 128
+    },
+    "compilacao_multiversal_ii": {
+      "name": "Compilação Multiversal Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/compilacao_multiversal_ii.webp",
+      "svg": "upgrades/compilacao_multiversal_ii.svg",
+      "size": 128
+    },
+    "soberania_psiquica_i": {
+      "name": "Soberania Psíquica Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/soberania_psiquica_i.webp",
+      "svg": "upgrades/soberania_psiquica_i.svg",
+      "size": 128
+    },
+    "soberania_psiquica_ii": {
+      "name": "Soberania Psíquica Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/soberania_psiquica_ii.webp",
+      "svg": "upgrades/soberania_psiquica_ii.svg",
+      "size": 128
+    },
+    "servos_do_vazio": {
+      "name": "Servos do Vazio",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_do_vazio.webp",
+      "svg": "upgrades/servos_do_vazio.svg",
+      "size": 128
+    },
+    "servos_prismaticos": {
+      "name": "Servos Prismáticos",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_prismaticos.webp",
+      "svg": "upgrades/servos_prismaticos.svg",
+      "size": 128
+    },
+    "servos_da_fortuna": {
+      "name": "Servos da Fortuna",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_da_fortuna.webp",
+      "svg": "upgrades/servos_da_fortuna.svg",
+      "size": 128
+    },
+    "servos_fractais": {
+      "name": "Servos Fractais",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_fractais.webp",
+      "svg": "upgrades/servos_fractais.svg",
+      "size": 128
+    },
+    "servos_algoritmicos_do_oraculo": {
+      "name": "Servos Algorítmicos do Oráculo",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_algoritmicos_do_oraculo.webp",
+      "svg": "upgrades/servos_algoritmicos_do_oraculo.svg",
+      "size": 128
+    },
+    "servos_transversais": {
+      "name": "Servos Transversais",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_transversais.webp",
+      "svg": "upgrades/servos_transversais.svg",
+      "size": 128
+    },
+    "servos_psionicos": {
+      "name": "Servos Psiônicos",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_psionicos.webp",
+      "svg": "upgrades/servos_psionicos.svg",
+      "size": 128
+    },
+    "servos_da_guarda_imperial": {
+      "name": "Servos da Guarda Imperial",
+      "kind": "synergyMult",
+      "webp": "upgrades/servos_da_guarda_imperial.webp",
+      "svg": "upgrades/servos_da_guarda_imperial.svg",
       "size": 128
     },
     "coroacao_imperador": {
@@ -182,6 +2569,726 @@
       "kind": "allGeneratorsMult",
       "webp": "upgrades/rios_unificados.webp",
       "svg": "upgrades/rios_unificados.svg",
+      "size": 128
+    },
+    "filhote_vigia_estige": {
+      "name": "Filhote Vigia do Estige",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_vigia_estige.webp",
+      "svg": "upgrades/filhote_vigia_estige.svg",
+      "size": 128
+    },
+    "filhote_rastreador_asfodelos": {
+      "name": "Filhote Rastreador de Asfódelos",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_rastreador_asfodelos.webp",
+      "svg": "upgrades/filhote_rastreador_asfodelos.svg",
+      "size": 128
+    },
+    "filhote_forjador_phlegethon": {
+      "name": "Filhote Forjador do Phlegethon",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_forjador_phlegethon.webp",
+      "svg": "upgrades/filhote_forjador_phlegethon.svg",
+      "size": 128
+    },
+    "filhote_supervisor_tartaro": {
+      "name": "Filhote Supervisor do Tártaro",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_supervisor_tartaro.webp",
+      "svg": "upgrades/filhote_supervisor_tartaro.svg",
+      "size": 128
+    },
+    "filhote_intendente_erebo": {
+      "name": "Filhote Intendente do Érebo",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_intendente_erebo.webp",
+      "svg": "upgrades/filhote_intendente_erebo.svg",
+      "size": 128
+    },
+    "filhote_arauto_lethe": {
+      "name": "Filhote Arauto do Lethe",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_arauto_lethe.webp",
+      "svg": "upgrades/filhote_arauto_lethe.svg",
+      "size": 128
+    },
+    "cerbero_conselheiro_tartaro": {
+      "name": "Cérbero Conselheiro do Tártaro",
+      "kind": "veilMult",
+      "webp": "upgrades/cerbero_conselheiro_tartaro.webp",
+      "svg": "upgrades/cerbero_conselheiro_tartaro.svg",
+      "size": 128
+    },
+    "concilio_das_moiras": {
+      "name": "Concílio das Moiras (Arquivo Estígio)",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/concilio_das_moiras.webp",
+      "svg": "upgrades/concilio_das_moiras.svg",
+      "size": 128
+    },
+    "soro_estigio": {
+      "name": "Soro Estígio",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/soro_estigio.webp",
+      "svg": "upgrades/soro_estigio.svg",
+      "size": 128
+    },
+    "despertar_ctoniano": {
+      "name": "Despertar Ctoniano (One Mind)",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/despertar_ctoniano.webp",
+      "svg": "upgrades/despertar_ctoniano.svg",
+      "size": 128
+    },
+    "sinapse_espectral": {
+      "name": "Sinapse Espectral",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/sinapse_espectral.webp",
+      "svg": "upgrades/sinapse_espectral.svg",
+      "size": 128
+    },
+    "comunhao_abissal": {
+      "name": "Comunhão Abissal (Communal Brainsweep)",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/comunhao_abissal.webp",
+      "svg": "upgrades/comunhao_abissal.svg",
+      "size": 128
+    },
+    "pacto_primordial": {
+      "name": "Pacto Primordial (Elder Pact)",
+      "kind": "catabaseResearch",
+      "webp": "upgrades/pacto_primordial.webp",
+      "svg": "upgrades/pacto_primordial.svg",
+      "size": 128
+    },
+    "ninho_do_acheron": {
+      "name": "Ninho do Acheron (Elder Spice)",
+      "kind": "leechCap",
+      "webp": "upgrades/ninho_do_acheron.webp",
+      "svg": "upgrades/ninho_do_acheron.svg",
+      "size": 128
+    },
+    "visceras_sacras": {
+      "name": "Vísceras Sacras (Sacrilegious Corruption)",
+      "kind": "leechPayout",
+      "webp": "upgrades/visceras_sacras.webp",
+      "svg": "upgrades/visceras_sacras.svg",
+      "size": 128
+    },
+    "escama_de_ladao": {
+      "name": "Escama de Ladão (Dragon Scale)",
+      "kind": "dragonScale",
+      "webp": "upgrades/escama_de_ladao.webp",
+      "svg": "upgrades/escama_de_ladao.svg",
+      "size": 128
+    },
+    "ovo_orfico_bronze": {
+      "name": "Ovo Órfico de Bronze",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/ovo_orfico_bronze.webp",
+      "svg": "upgrades/ovo_orfico_bronze.svg",
+      "size": 128
+    },
+    "ovo_orfico_prata": {
+      "name": "Ovo Órfico de Prata",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/ovo_orfico_prata.webp",
+      "svg": "upgrades/ovo_orfico_prata.svg",
+      "size": 128
+    },
+    "ovo_orfico_ouro": {
+      "name": "Ovo Órfico de Ouro",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/ovo_orfico_ouro.webp",
+      "svg": "upgrades/ovo_orfico_ouro.svg",
+      "size": 128
+    },
+    "coroa_de_antesteria": {
+      "name": "Coroa Floral de Antestéria",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/coroa_de_antesteria.webp",
+      "svg": "upgrades/coroa_de_antesteria.svg",
+      "size": 128
+    },
+    "bolacha_espectral_estige": {
+      "name": "Hóstia Espectral do Estige",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/bolacha_espectral_estige.webp",
+      "svg": "upgrades/bolacha_espectral_estige.svg",
+      "size": 128
+    },
+    "obolo_fantasma_lemuria": {
+      "name": "Óbolo Fantasma da Lemúria",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/obolo_fantasma_lemuria.webp",
+      "svg": "upgrades/obolo_fantasma_lemuria.svg",
+      "size": 128
+    },
+    "cranio_de_acucar_ctoniano": {
+      "name": "Crânio de Âmbar Ctoniano",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/cranio_de_acucar_ctoniano.webp",
+      "svg": "upgrades/cranio_de_acucar_ctoniano.svg",
+      "size": 128
+    },
+    "presente_de_saturnalia": {
+      "name": "Presente da Corça de Ártemis",
+      "kind": "seasonalCompound",
+      "webp": "upgrades/presente_de_saturnalia.webp",
+      "svg": "upgrades/presente_de_saturnalia.svg",
+      "size": 128
+    },
+    "bencao_do_rei_saturno": {
+      "name": "Bênção do Rei Saturno",
+      "kind": "saturnaliaMult",
+      "webp": "upgrades/bencao_do_rei_saturno.webp",
+      "svg": "upgrades/bencao_do_rei_saturno.svg",
+      "size": 128
+    },
+    "contrato_de_hermes": {
+      "name": "Contrato Mercantil de Hermes",
+      "kind": "hermesContract",
+      "webp": "upgrades/contrato_de_hermes.webp",
+      "svg": "upgrades/contrato_de_hermes.svg",
+      "size": 128
+    },
+    "fortune_100": {
+      "name": "Fortuna #100 — Sussurro de Mercúrio",
+      "kind": "fortuneGlobal",
+      "webp": "upgrades/fortune_100.webp",
+      "svg": "upgrades/fortune_100.svg",
+      "size": 128
+    },
+    "fortune_101": {
+      "name": "Fortuna #101 — Decreto da Moira Dourada",
+      "kind": "fortuneGlobal",
+      "webp": "upgrades/fortune_101.webp",
+      "svg": "upgrades/fortune_101.svg",
+      "size": 128
+    },
+    "fortune_102": {
+      "name": "Fortuna #102 — Balança de Caronte",
+      "kind": "fortuneObol",
+      "webp": "upgrades/fortune_102.webp",
+      "svg": "upgrades/fortune_102.svg",
+      "size": 128
+    },
+    "fortune_103": {
+      "name": "Fortuna #103 — Filhote da Fortuna",
+      "kind": "veilMult",
+      "webp": "upgrades/fortune_103.webp",
+      "svg": "upgrades/fortune_103.svg",
+      "size": 128
+    },
+    "fortune_gen_wandering_shade": {
+      "name": "Fortuna #001 — Sorte da Sombra Vagante",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_wandering_shade.webp",
+      "svg": "upgrades/fortune_gen_wandering_shade.svg",
+      "size": 128
+    },
+    "fortune_gen_charon_servants": {
+      "name": "Fortuna #002 — Sorte dos Servos de Caronte",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_charon_servants.webp",
+      "svg": "upgrades/fortune_gen_charon_servants.svg",
+      "size": 128
+    },
+    "fortune_gen_cerberian_hound": {
+      "name": "Fortuna #003 — Sorte do Cão Cerberiano",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_cerberian_hound.webp",
+      "svg": "upgrades/fortune_gen_cerberian_hound.svg",
+      "size": 128
+    },
+    "fortune_gen_tartarus_judge": {
+      "name": "Fortuna #004 — Sorte do Juiz do Tártaro",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_tartarus_judge.webp",
+      "svg": "upgrades/fortune_gen_tartarus_judge.svg",
+      "size": 128
+    },
+    "fortune_gen_phlegethon_forge": {
+      "name": "Fortuna #005 — Sorte da Forja de Phlegethon",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_phlegethon_forge.webp",
+      "svg": "upgrades/fortune_gen_phlegethon_forge.svg",
+      "size": 128
+    },
+    "fortune_gen_obsidian_throne": {
+      "name": "Fortuna #006 — Sorte do Trono de Obsidiana",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_obsidian_throne.webp",
+      "svg": "upgrades/fortune_gen_obsidian_throne.svg",
+      "size": 128
+    },
+    "fortune_gen_mnemosyne_temple": {
+      "name": "Fortuna #007 — Sorte do Templo de Mnemosyne",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_mnemosyne_temple.webp",
+      "svg": "upgrades/fortune_gen_mnemosyne_temple.svg",
+      "size": 128
+    },
+    "fortune_gen_styx_tower": {
+      "name": "Fortuna #008 — Sorte da Torre do Estige",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_styx_tower.webp",
+      "svg": "upgrades/fortune_gen_styx_tower.svg",
+      "size": 128
+    },
+    "fortune_gen_star_barge": {
+      "name": "Fortuna #009 — Sorte da Barca das Estrelas",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_star_barge.webp",
+      "svg": "upgrades/fortune_gen_star_barge.svg",
+      "size": 128
+    },
+    "fortune_gen_tartarus_lab": {
+      "name": "Fortuna #010 — Sorte do Laboratório do Tártaro",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_tartarus_lab.webp",
+      "svg": "upgrades/fortune_gen_tartarus_lab.svg",
+      "size": 128
+    },
+    "fortune_gen_erebus_portal": {
+      "name": "Fortuna #011 — Sorte do Portal do Érebo",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_erebus_portal.webp",
+      "svg": "upgrades/fortune_gen_erebus_portal.svg",
+      "size": 128
+    },
+    "fortune_gen_chronos_loom": {
+      "name": "Fortuna #012 — Sorte do Tear de Cronos",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_chronos_loom.webp",
+      "svg": "upgrades/fortune_gen_chronos_loom.svg",
+      "size": 128
+    },
+    "fortune_gen_void_condenser": {
+      "name": "Fortuna #013 — Sorte do Condensador do Vazio",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_void_condenser.webp",
+      "svg": "upgrades/fortune_gen_void_condenser.svg",
+      "size": 128
+    },
+    "fortune_gen_moirai_prism": {
+      "name": "Fortuna #014 — Sorte do Prisma das Moiras",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_moirai_prism.webp",
+      "svg": "upgrades/fortune_gen_moirai_prism.svg",
+      "size": 128
+    },
+    "fortune_gen_fate_forge": {
+      "name": "Fortuna #015 — Sorte da Forja do Destino",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_fate_forge.webp",
+      "svg": "upgrades/fortune_gen_fate_forge.svg",
+      "size": 128
+    },
+    "fortune_gen_fractal_engine": {
+      "name": "Fortuna #016 — Sorte do Motor Fractal",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_fractal_engine.webp",
+      "svg": "upgrades/fortune_gen_fractal_engine.svg",
+      "size": 128
+    },
+    "fortune_gen_oracle_console": {
+      "name": "Fortuna #017 — Sorte do Console do Oráculo",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_oracle_console.webp",
+      "svg": "upgrades/fortune_gen_oracle_console.svg",
+      "size": 128
+    },
+    "fortune_gen_chthonic_idleverse": {
+      "name": "Fortuna #018 — Sorte do Idleverso Ctoniano",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_chthonic_idleverse.webp",
+      "svg": "upgrades/fortune_gen_chthonic_idleverse.svg",
+      "size": 128
+    },
+    "fortune_gen_cortex_baker": {
+      "name": "Fortuna #019 — Sorte do Padeiro do Córtex",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_cortex_baker.webp",
+      "svg": "upgrades/fortune_gen_cortex_baker.svg",
+      "size": 128
+    },
+    "fortune_gen_the_emperor": {
+      "name": "Fortuna #020 — Sorte d’O Imperador",
+      "kind": "fortuneLine",
+      "webp": "upgrades/fortune_gen_the_emperor.webp",
+      "svg": "upgrades/fortune_gen_the_emperor.svg",
+      "size": 128
+    }
+  },
+  "shimmers": {
+    "eco_dourado": {
+      "name": "Eco Dourado do Acheron",
+      "variant": "golden",
+      "webp": "shimmers/eco_dourado.webp",
+      "svg": "shimmers/eco_dourado.svg",
+      "size": 128
+    },
+    "eco_colerico": {
+      "name": "Eco Colérico do Acheron",
+      "variant": "wrath",
+      "webp": "shimmers/eco_colerico.webp",
+      "svg": "shimmers/eco_colerico.svg",
+      "size": 128
+    }
+  },
+  "minigames": {
+    "nectar_normal": {
+      "name": "Néctar do Lethe",
+      "category": "nectar",
+      "webp": "minigames/nectar_normal.webp",
+      "svg": "minigames/nectar_normal.svg",
+      "size": 128
+    },
+    "nectar_bifurcado": {
+      "name": "Néctar Bifurcado",
+      "category": "nectar",
+      "webp": "minigames/nectar_bifurcado.webp",
+      "svg": "minigames/nectar_bifurcado.svg",
+      "size": 128
+    },
+    "nectar_dourado": {
+      "name": "Néctar Dourado",
+      "category": "nectar",
+      "webp": "minigames/nectar_dourado.webp",
+      "svg": "minigames/nectar_dourado.svg",
+      "size": 128
+    },
+    "nectar_colerico": {
+      "name": "Néctar Colérico",
+      "category": "nectar",
+      "webp": "minigames/nectar_colerico.webp",
+      "svg": "minigames/nectar_colerico.svg",
+      "size": 128
+    },
+    "nectar_caramelizado": {
+      "name": "Néctar Caramelizado",
+      "category": "nectar",
+      "webp": "minigames/nectar_caramelizado.webp",
+      "svg": "minigames/nectar_caramelizado.svg",
+      "size": 128
+    },
+    "seed_asfodelo_cinzento": {
+      "name": "Asfódelo Cinzento",
+      "category": "seed",
+      "webp": "minigames/seed_asfodelo_cinzento.webp",
+      "svg": "minigames/seed_asfodelo_cinzento.svg",
+      "size": 128
+    },
+    "seed_roma_de_persefone": {
+      "name": "Romã de Perséfone",
+      "category": "seed",
+      "webp": "minigames/seed_roma_de_persefone.webp",
+      "svg": "minigames/seed_roma_de_persefone.svg",
+      "size": 128
+    },
+    "seed_lirio_do_lethe": {
+      "name": "Lírio do Lethe",
+      "category": "seed",
+      "webp": "minigames/seed_lirio_do_lethe.webp",
+      "svg": "minigames/seed_lirio_do_lethe.svg",
+      "size": 128
+    },
+    "seed_papoula_de_hipnos": {
+      "name": "Papoula de Hipnos",
+      "category": "seed",
+      "webp": "minigames/seed_papoula_de_hipnos.webp",
+      "svg": "minigames/seed_papoula_de_hipnos.svg",
+      "size": 128
+    },
+    "spirit_nyx": {
+      "name": "Nyx, Senhora do Véu",
+      "category": "spirit",
+      "webp": "minigames/spirit_nyx.webp",
+      "svg": "minigames/spirit_nyx.svg",
+      "size": 128
+    },
+    "spirit_thanatos": {
+      "name": "Tânatos, Lâmina Silente",
+      "category": "spirit",
+      "webp": "minigames/spirit_thanatos.webp",
+      "svg": "minigames/spirit_thanatos.svg",
+      "size": 128
+    },
+    "spirit_hypnos": {
+      "name": "Hipnos, Vigia do Repouso",
+      "category": "spirit",
+      "webp": "minigames/spirit_hypnos.webp",
+      "svg": "minigames/spirit_hypnos.svg",
+      "size": 128
+    },
+    "spirit_persephone": {
+      "name": "Perséfone, Rainha das Estações",
+      "category": "spirit",
+      "webp": "minigames/spirit_persephone.webp",
+      "svg": "minigames/spirit_persephone.svg",
+      "size": 128
+    },
+    "spell_mao_do_destino": {
+      "name": "Mão do Destino",
+      "category": "spell",
+      "webp": "minigames/spell_mao_do_destino.webp",
+      "svg": "minigames/spell_mao_do_destino.svg",
+      "size": 128
+    },
+    "spell_conjurar_almas": {
+      "name": "Conjurar Almas",
+      "category": "spell",
+      "webp": "minigames/spell_conjurar_almas.webp",
+      "svg": "minigames/spell_conjurar_almas.svg",
+      "size": 128
+    },
+    "good_obolo_cobre": {
+      "name": "Óbolos de Cobre",
+      "category": "good",
+      "webp": "minigames/good_obolo_cobre.webp",
+      "svg": "minigames/good_obolo_cobre.svg",
+      "size": 128
+    },
+    "good_ferro_estigio": {
+      "name": "Ferro Estígio",
+      "category": "good",
+      "webp": "minigames/good_ferro_estigio.webp",
+      "svg": "minigames/good_ferro_estigio.svg",
+      "size": 128
+    },
+    "good_incenso_sombrio": {
+      "name": "Incenso Sombrio",
+      "category": "good",
+      "webp": "minigames/good_incenso_sombrio.webp",
+      "svg": "minigames/good_incenso_sombrio.svg",
+      "size": 128
+    },
+    "good_eter_condensado": {
+      "name": "Éter Condensado",
+      "category": "good",
+      "webp": "minigames/good_eter_condensado.webp",
+      "svg": "minigames/good_eter_condensado.svg",
+      "size": 128
+    },
+    "good_amalgama_aurica": {
+      "name": "Amálgama Áurica",
+      "category": "good",
+      "webp": "minigames/good_amalgama_aurica.webp",
+      "svg": "minigames/good_amalgama_aurica.svg",
+      "size": 128
+    },
+    "good_areia_de_cronos": {
+      "name": "Areia de Cronos",
+      "category": "good",
+      "webp": "minigames/good_areia_de_cronos.webp",
+      "svg": "minigames/good_areia_de_cronos.svg",
+      "size": 128
+    }
+  },
+  "veil": {
+    "veu_nevoa_cinzenta": {
+      "id": "nevoa_cinzenta",
+      "name": "Névoa Cinzenta",
+      "minVeilPercent": 0,
+      "color": "#64748b",
+      "webp": "veil/veu_nevoa_cinzenta.webp",
+      "svg": "veil/veu_nevoa_cinzenta.svg",
+      "size": 128
+    },
+    "veu_aguas_estige": {
+      "id": "aguas_estige",
+      "name": "Águas do Estige",
+      "minVeilPercent": 52,
+      "color": "#00a896",
+      "webp": "veil/veu_aguas_estige.webp",
+      "svg": "veil/veu_aguas_estige.svg",
+      "size": 128
+    },
+    "veu_corrente_lethe": {
+      "id": "corrente_lethe",
+      "name": "Corrente do Lethe",
+      "minVeilPercent": 100,
+      "color": "#7209b7",
+      "webp": "veil/veu_corrente_lethe.webp",
+      "svg": "veil/veu_corrente_lethe.svg",
+      "size": 128
+    },
+    "veu_chama_phlegethon": {
+      "id": "chama_phlegethon",
+      "name": "Chama de Flegêton",
+      "minVeilPercent": 200,
+      "color": "#d90429",
+      "webp": "veil/veu_chama_phlegethon.webp",
+      "svg": "veil/veu_chama_phlegethon.svg",
+      "size": 128
+    },
+    "veu_ouro_ancestral": {
+      "id": "ouro_ancestral",
+      "name": "Ouro Ancestral",
+      "minVeilPercent": 300,
+      "color": "#cfa759",
+      "webp": "veil/veu_ouro_ancestral.webp",
+      "svg": "veil/veu_ouro_ancestral.svg",
+      "size": 128
+    }
+  },
+  "catabase": {
+    "sanguessuga_normal": {
+      "name": "Sanguessuga do Acheron",
+      "category": "leech",
+      "webp": "catabase/sanguessuga_normal.webp",
+      "svg": "catabase/sanguessuga_normal.svg",
+      "size": 128
+    },
+    "sanguessuga_shiny": {
+      "name": "Sanguessuga Abissal Dourada",
+      "category": "leech_shiny",
+      "webp": "catabase/sanguessuga_shiny.webp",
+      "svg": "catabase/sanguessuga_shiny.svg",
+      "size": 128
+    },
+    "catabase_estagio_1": {
+      "name": "Estágio 1 — Despertar Ctoniano",
+      "category": "stage",
+      "webp": "catabase/catabase_estagio_1.webp",
+      "svg": "catabase/catabase_estagio_1.svg",
+      "size": 128
+    },
+    "catabase_estagio_2": {
+      "name": "Estágio 2 — Comunhão Abissal",
+      "category": "stage",
+      "webp": "catabase/catabase_estagio_2.webp",
+      "svg": "catabase/catabase_estagio_2.svg",
+      "size": 128
+    },
+    "catabase_estagio_3": {
+      "name": "Estágio 3 — Pacto Primordial",
+      "category": "stage",
+      "webp": "catabase/catabase_estagio_3.webp",
+      "svg": "catabase/catabase_estagio_3.svg",
+      "size": 128
+    },
+    "tregua_estigia": {
+      "name": "Juramento de Trégua (Elder Pledge)",
+      "category": "pact",
+      "webp": "catabase/tregua_estigia.webp",
+      "svg": "catabase/tregua_estigia.svg",
+      "size": 128
+    },
+    "alianca_eterna": {
+      "name": "Aliança Eterna (Elder Covenant)",
+      "category": "pact",
+      "webp": "catabase/alianca_eterna.webp",
+      "svg": "catabase/alianca_eterna.svg",
+      "size": 128
+    }
+  },
+  "seasons": {
+    "dragon_stage_0": {
+      "name": "Ovo Primordial",
+      "category": "dragon",
+      "webp": "seasons/dragon_stage_0.webp",
+      "svg": "seasons/dragon_stage_0.svg",
+      "size": 128
+    },
+    "dragon_stage_1": {
+      "name": "Filhote de Pitão",
+      "category": "dragon",
+      "webp": "seasons/dragon_stage_1.webp",
+      "svg": "seasons/dragon_stage_1.svg",
+      "size": 128
+    },
+    "dragon_stage_2": {
+      "name": "Serpente do Tártaro",
+      "category": "dragon",
+      "webp": "seasons/dragon_stage_2.webp",
+      "svg": "seasons/dragon_stage_2.svg",
+      "size": 128
+    },
+    "dragon_stage_3": {
+      "name": "Hidra de Flegêton",
+      "category": "dragon",
+      "webp": "seasons/dragon_stage_3.webp",
+      "svg": "seasons/dragon_stage_3.svg",
+      "size": 128
+    },
+    "dragon_stage_4": {
+      "name": "Ladão de Cem Cabeças",
+      "category": "dragon",
+      "webp": "seasons/dragon_stage_4.webp",
+      "svg": "seasons/dragon_stage_4.svg",
+      "size": 128
+    },
+    "aura_sopro_de_flegeton": {
+      "name": "Sopro de Flegêton (Breath of Milk)",
+      "category": "aura",
+      "webp": "seasons/aura_sopro_de_flegeton.webp",
+      "svg": "seasons/aura_sopro_de_flegeton.svg",
+      "size": 128
+    },
+    "aura_cursor_ancestral": {
+      "name": "Cursor Ancestral (Dragon Cursor)",
+      "category": "aura",
+      "webp": "seasons/aura_cursor_ancestral.webp",
+      "svg": "seasons/aura_cursor_ancestral.svg",
+      "size": 128
+    },
+    "aura_abalo_do_tartaro": {
+      "name": "Abalo do Tártaro (Earth Shatterer)",
+      "category": "aura",
+      "webp": "seasons/aura_abalo_do_tartaro.webp",
+      "svg": "seasons/aura_abalo_do_tartaro.svg",
+      "size": 128
+    },
+    "aura_voo_draconico": {
+      "name": "Voo Dracónico (Dragonflight)",
+      "category": "aura",
+      "webp": "seasons/aura_voo_draconico.webp",
+      "svg": "seasons/aura_voo_draconico.svg",
+      "size": 128
+    },
+    "aura_apetite_radiante": {
+      "name": "Apetite Radiante (Radiant Appetite)",
+      "category": "aura",
+      "webp": "seasons/aura_apetite_radiante.webp",
+      "svg": "seasons/aura_apetite_radiante.svg",
+      "size": 128
+    },
+    "season_antesteria": {
+      "name": "Antestéria (Festival das Flores e Espíritos)",
+      "category": "season",
+      "webp": "seasons/season_antesteria.webp",
+      "svg": "seasons/season_antesteria.svg",
+      "size": 128
+    },
+    "season_lemuria": {
+      "name": "Lemúria (Noite dos Espectros Famintos)",
+      "category": "season",
+      "webp": "seasons/season_lemuria.webp",
+      "svg": "seasons/season_lemuria.svg",
+      "size": 128
+    },
+    "season_saturnalia": {
+      "name": "Saturnália Ctoniana (Solstício no Hades)",
+      "category": "season",
+      "webp": "seasons/season_saturnalia.webp",
+      "svg": "seasons/season_saturnalia.svg",
+      "size": 128
+    },
+    "season_feira_de_hermes": {
+      "name": "Feira de Hermes (Mercadores de Almas)",
+      "category": "season",
+      "webp": "seasons/season_feira_de_hermes.webp",
+      "svg": "seasons/season_feira_de_hermes.svg",
+      "size": 128
+    },
+    "corca_de_artemis": {
+      "name": "Corça Dourada de Ártemis",
+      "category": "season",
+      "webp": "seasons/corca_de_artemis.webp",
+      "svg": "seasons/corca_de_artemis.svg",
       "size": 128
     }
   }

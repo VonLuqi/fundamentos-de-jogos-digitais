@@ -4,6 +4,7 @@
  */
 
 import { formatSouls } from './NumberFormatter.js';
+import { acquirePooledNode, releasePooledNode } from './particles.js';
 
 function prefersReducedMotion(matchMediaFn) {
   try {
@@ -145,21 +146,24 @@ export function playLetheRitualFeel({
  * Float `+N` no altar (Task C1) — teatro; não muda o saldo.
  */
 export function spawnFloatText(layer, options = {}) {
-  if (!layer || resolveReduced(options)) return false;
+  if (!layer || options.particles === false || resolveReduced(options)) return false;
   const doc = layer.ownerDocument || options.root || (typeof document !== 'undefined' ? document : null);
   if (!doc?.createElement) return false;
 
   const amount = options.amount ?? options.gained ?? '1';
-  const node = doc.createElement('span');
-  node.className = 'despertar-float';
-  node.setAttribute('aria-hidden', 'true');
+  const node = acquirePooledNode(doc, 'reap-float', 'despertar-float');
+  if (!node) return false;
   node.textContent = `+${formatSouls(amount)}`;
-  const x = Number.isFinite(options.x) ? options.x : 50 + (Math.random() * 18 - 9);
-  const y = Number.isFinite(options.y) ? options.y : 42 + (Math.random() * 10 - 5);
+  // Origem na foice (coluna Acheron); sobe até o contador sem reiniciar no próximo clique.
+  const x = Number.isFinite(options.x) ? options.x : 50 + (Math.random() * 16 - 8);
+  const y = Number.isFinite(options.y) ? options.y : 62 + (Math.random() * 8 - 4);
   node.style.setProperty('--float-x', `${x}%`);
   node.style.setProperty('--float-y', `${y}%`);
-  node.addEventListener('animationend', () => node.remove(), { once: true });
+  if (node.style) node.style.animation = 'none';
+  node.addEventListener('animationend', () => releasePooledNode(doc, 'reap-float', node), { once: true });
   layer.appendChild(node);
+  try { void node.offsetWidth; } catch { /* mock */ }
+  if (node.style) node.style.animation = '';
   return true;
 }
 
@@ -167,23 +171,25 @@ export function spawnFloatText(layer, options = {}) {
  * Anel de shockwave no Ceifar.
  */
 export function spawnShockwave(stage, options = {}) {
-  if (!stage || resolveReduced(options)) return false;
+  if (!stage || options.particles === false || resolveReduced(options)) return false;
   const doc = stage.ownerDocument || options.root || (typeof document !== 'undefined' ? document : null);
   if (!doc?.createElement) return false;
-  const wave = doc.createElement('span');
-  wave.className = 'despertar-shockwave';
-  wave.setAttribute('aria-hidden', 'true');
-  wave.addEventListener('animationend', () => wave.remove(), { once: true });
+  const wave = acquirePooledNode(doc, 'reap-shockwave', 'despertar-shockwave');
+  if (!wave) return false;
+  wave.addEventListener('animationend', () => releasePooledNode(doc, 'reap-shockwave', wave), { once: true });
   stage.appendChild(wave);
   return true;
 }
 
 /**
- * Screen shake suave no stage do altar (Q17: sim, opt-out reduced-motion).
+ * Screen shake suave na órbita (não no stage — senão alminhas/+N reiniciam).
  */
 export function shakeAltar(stage, options = {}) {
-  if (!stage || resolveReduced(options)) return false;
-  bumpClass(stage, 'is-shaking', options.durationMs ?? 280);
+  if (!stage || options.fancy === false || resolveReduced(options)) return false;
+  const target = options.shakeTarget
+    || stage.querySelector?.('.despertar-reap-orbit')
+    || stage;
+  bumpClass(target, 'is-shaking', options.durationMs ?? 280);
   return true;
 }
 
@@ -197,9 +203,12 @@ export function playReapJuice(options = {}) {
   const stage = options.stage
     || root?.querySelector?.('.despertar-reap-stage')
     || null;
-  const layer = options.floatLayer || options.particleLayer || null;
+  const floatLayer = options.floatLayer
+    || root?.querySelector?.('[data-float-layer]')
+    || options.particleLayer
+    || null;
   let any = false;
-  if (spawnFloatText(layer, options)) any = true;
+  if (spawnFloatText(floatLayer, options)) any = true;
   if (spawnShockwave(stage, options)) any = true;
   if (shakeAltar(stage, options)) any = true;
   return any;

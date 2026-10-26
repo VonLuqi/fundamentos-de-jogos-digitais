@@ -166,7 +166,7 @@ final class DespertarService
     }
 
     /**
-     * @return array{clicks: int, maxBuyBiggest: int, juizoTieWins: int}
+     * @return array{clicks: int, maxBuyBiggest: int, juizoTieWins: int, shimmersClicked: int, shimmersMissed: int, wrathClicked: int}
      */
     public static function normalizeDespertarStats(mixed $raw): array
     {
@@ -175,12 +175,18 @@ final class DespertarService
             'clicks' => self::asNonNegInt($obj['clicks'] ?? $obj['clickCount'] ?? 0),
             'maxBuyBiggest' => self::asNonNegInt($obj['maxBuyBiggest'] ?? $obj['max_buy_biggest'] ?? $obj['maxBuy'] ?? 0),
             'juizoTieWins' => self::asNonNegInt($obj['juizoTieWins'] ?? $obj['juizo_tie_wins'] ?? $obj['tieWins'] ?? 0),
+            'shimmersClicked' => self::asNonNegInt($obj['shimmersClicked'] ?? $obj['shimmers_clicked'] ?? 0),
+            'shimmersMissed' => self::asNonNegInt($obj['shimmersMissed'] ?? $obj['shimmers_missed'] ?? 0),
+            'wrathClicked' => self::asNonNegInt($obj['wrathClicked'] ?? $obj['wrath_clicked'] ?? 0),
+            'leechesPopped' => self::asNonNegInt($obj['leechesPopped'] ?? $obj['leeches_popped'] ?? 0),
+            'shinyLeechesPopped' => self::asNonNegInt($obj['shinyLeechesPopped'] ?? $obj['shiny_leeches_popped'] ?? 0),
+            'generatorsSold' => self::asNonNegInt($obj['generatorsSold'] ?? $obj['generators_sold'] ?? 0),
         ];
     }
 
     /**
      * @param array<string, mixed> $stats
-     * @return array{clicks: int, max_buy_biggest: int, juizo_tie_wins: int}
+     * @return array{clicks: int, max_buy_biggest: int, juizo_tie_wins: int, shimmers_clicked: int, shimmers_missed: int, wrath_clicked: int, leeches_popped: int, shiny_leeches_popped: int, generators_sold: int}
      */
     public static function statsToRowJson(array $stats): array
     {
@@ -189,6 +195,12 @@ final class DespertarService
             'clicks' => $s['clicks'],
             'max_buy_biggest' => $s['maxBuyBiggest'],
             'juizo_tie_wins' => $s['juizoTieWins'],
+            'shimmers_clicked' => $s['shimmersClicked'],
+            'shimmers_missed' => $s['shimmersMissed'],
+            'wrath_clicked' => $s['wrathClicked'],
+            'leeches_popped' => $s['leechesPopped'],
+            'shiny_leeches_popped' => $s['shinyLeechesPopped'],
+            'generators_sold' => $s['generatorsSold'],
         ];
     }
 
@@ -258,6 +270,8 @@ final class DespertarService
             'juizoCurrentStreak' => self::asNonNegInt($r['juizo_current_streak'] ?? $r['juizoCurrentStreak'] ?? 0),
             'juizoMilestonesClaimed' => self::asStringArray($r['juizo_milestones_claimed'] ?? $r['juizoMilestonesClaimed'] ?? []),
             'verdictPurchases' => $verdictPurchases,
+            'activeBuffs' => is_array($r['activeBuffs'] ?? null) ? $r['activeBuffs'] : [],
+            'achievements' => self::asStringArray($r['achievements'] ?? $r['conquistas'] ?? []),
             'juizoRun' => is_array($juizoRun) ? $juizoRun : null,
             'lastSyncAt' => $lastSyncAt,
         ];
@@ -275,8 +289,43 @@ final class DespertarService
         $goldCounts = $goldNorm['goldCounts'] ?? [];
         $shinyNorm = self::normalizeShinyCounts($state['shinyCounts'], $state['generators'], $goldCounts, true);
         $shinyCounts = $shinyNorm['shinyCounts'] ?? [];
+        $activeBuffs = is_array($state['activeBuffs'] ?? null) ? $state['activeBuffs'] : [];
 
-        $sps = DespertarDecimal::money(DespertarFormulas::calculateTotalSPS([
+        $f5Nectar = is_array($state['milestones']['f5Nectar'] ?? null) ? $state['milestones']['f5Nectar'] : [];
+        $f5Minigames = is_array($state['milestones']['f5Minigames'] ?? null) ? $state['milestones']['f5Minigames'] : [];
+        $f6Catabase = is_array($state['catabase'] ?? null)
+            ? $state['catabase']
+            : (is_array($state['milestones']['f6Catabase'] ?? null) ? $state['milestones']['f6Catabase'] : []);
+        $f8Dragon = is_array($state['dragon'] ?? null)
+            ? $state['dragon']
+            : (is_array($state['milestones']['f8Dragon'] ?? null) ? $state['milestones']['f8Dragon'] : []);
+        $f8Seasons = is_array($state['seasons'] ?? null)
+            ? $state['seasons']
+            : (is_array($state['milestones']['f8Seasons'] ?? null) ? $state['milestones']['f8Seasons'] : []);
+        $f8Fortunes = is_array($state['fortunes'] ?? null)
+            ? $state['fortunes']
+            : (is_array($state['milestones']['f8Fortunes'] ?? null) ? $state['milestones']['f8Fortunes'] : []);
+        $generatorLevels = is_array($state['generatorLevels'] ?? null)
+            ? $state['generatorLevels']
+            : (is_array($f5Nectar['generatorLevels'] ?? null) ? $f5Nectar['generatorLevels'] : []);
+        $nectar = (int) ($state['nectar'] ?? $f5Nectar['nectar'] ?? 0);
+        $totalNectarHarvested = (int) ($state['totalNectarHarvested'] ?? $f5Nectar['totalNectarHarvested'] ?? $nectar);
+        $nectarCycleStartedAt = isset($state['nectarCycleStartedAt'])
+            ? $state['nectarCycleStartedAt']
+            : ($f5Nectar['nectarCycleStartedAt'] ?? null);
+        $nectarCurrentVariant = (string) ($state['nectarCurrentVariant'] ?? $f5Nectar['nectarCurrentVariant'] ?? 'nectar_normal');
+        $nectarFrenzyUsedThisRun = !empty($state['nectarFrenzyUsedThisRun'] ?? $f5Nectar['nectarFrenzyUsedThisRun'] ?? false);
+        $minigames = is_array($state['minigames'] ?? null) ? $state['minigames'] : $f5Minigames;
+
+        $baseAchievements = is_array($options['achievements'] ?? null)
+            ? self::asStringArray($options['achievements'])
+            : self::asStringArray($state['achievements'] ?? []);
+        $earnedDespertar = DespertarFormulas::evaluateDespertarAchievementIds($state, $baseAchievements, true);
+        $achievements = array_values(array_unique(array_merge($baseAchievements, $earnedDespertar)));
+        $veilPercent = DespertarFormulas::veilPercent($achievements);
+        $veilFraction = DespertarFormulas::veilFraction($achievements);
+
+        $rawSps = DespertarDecimal::money(DespertarFormulas::calculateRawSPS([
             'generators' => $state['generators'],
             'upgrades' => $state['upgrades'],
             'talents' => $state['talents'],
@@ -284,8 +333,21 @@ final class DespertarService
             'verdictPurchases' => $state['verdictPurchases'],
             'shinyCounts' => $shinyCounts,
             'goldCounts' => $goldCounts,
+            'activeBuffs' => $activeBuffs,
+            'generatorLevels' => $generatorLevels,
+            'nectar' => $nectar,
+            'minigames' => $minigames,
+            'achievements' => $achievements,
+            'catabase' => $f6Catabase,
+            'dragon' => $f8Dragon,
+            'seasons' => $f8Seasons,
         ]));
-        $preview = DespertarFormulas::prestigePreview($state['runSouls'], $state['prestigeCount'], $state['talents']);
+        $effectiveSps = DespertarDecimal::money(DespertarFormulas::calculateEffectiveSPS([
+            'rawSps' => $rawSps,
+            'catabase' => $f6Catabase,
+        ]));
+        $sps = $rawSps;
+        $preview = DespertarFormulas::prestigePreview($state['runSouls'], $state['prestigeCount'], $state['talents'], $state['upgrades']);
 
         $dto = [
             'souls' => DespertarDecimal::decimalString($state['souls']),
@@ -302,8 +364,31 @@ final class DespertarService
             'eduLogsSeen' => $state['eduLogsSeen'],
             'milestones' => (object) $state['milestones'],
             'stats' => $state['stats'],
+            'activeBuffs' => (object) $activeBuffs,
+            'shimmersClicked' => (int) ($state['stats']['shimmersClicked'] ?? 0),
+            'shimmersMissed' => (int) ($state['stats']['shimmersMissed'] ?? 0),
+            'wrathClicked' => (int) ($state['stats']['wrathClicked'] ?? 0),
+            'leechesPopped' => (int) ($state['stats']['leechesPopped'] ?? 0),
+            'shinyLeechesPopped' => (int) ($state['stats']['shinyLeechesPopped'] ?? 0),
+            'generatorsSold' => (int) ($state['stats']['generatorsSold'] ?? 0),
+            'catabase' => (object) $f6Catabase,
+            'dragon' => (object) $f8Dragon,
+            'seasons' => (object) $f8Seasons,
+            'fortunes' => (object) $f8Fortunes,
+            'nectar' => $nectar,
+            'totalNectarHarvested' => $totalNectarHarvested,
+            'nectarCycleStartedAt' => $nectarCycleStartedAt,
+            'nectarCurrentVariant' => $nectarCurrentVariant,
+            'nectarFrenzyUsedThisRun' => $nectarFrenzyUsedThisRun,
+            'generatorLevels' => (object) $generatorLevels,
+            'minigames' => (object) $minigames,
+            'achievements' => $achievements,
+            'veilPercent' => $veilPercent,
+            'veilFraction' => $veilFraction,
             'lastSyncAt' => $state['lastSyncAt'] ?? Database::nowIso(),
             'sps' => DespertarDecimal::decimalString($sps),
+            'rawSps' => DespertarDecimal::decimalString($rawSps),
+            'effectiveSps' => DespertarDecimal::decimalString($effectiveSps),
             'prestigePreview' => [
                 'obolsGain' => (string) $preview['obolsGain'],
                 'mnemosyneGain' => (string) $preview['mnemosyneGain'],
@@ -440,13 +525,19 @@ final class DespertarService
      * @param array<string, mixed> $dbRow
      * @return array<string, mixed>
      */
-    public static function validateSync(array $dbRow, mixed $clientState, ?int $nowMs = null): array
+    public static function validateSync(array $dbRow, mixed $clientState, ?int $nowMs = null, array $userAchievements = []): array
     {
         $db = self::rowToCanonical($dbRow);
+        $baseAchievements = $userAchievements !== []
+            ? self::asStringArray($userAchievements)
+            : self::asStringArray($db['achievements'] ?? []);
         $nowMs = $nowMs ?? (int) round(microtime(true) * 1000);
         $nowIso = Database::nowIso($nowMs);
         $echoEpoch = self::parseClientEpoch($clientState);
         $echoOpts = $echoEpoch !== null ? ['echoEpoch' => $echoEpoch] : [];
+        if ($baseAchievements !== []) {
+            $echoOpts['achievements'] = $baseAchievements;
+        }
 
         $withEcho = static function (array $res) use ($echoEpoch): array {
             if ($echoEpoch !== null) {
@@ -533,11 +624,68 @@ final class DespertarService
             }
         }
 
+        // Fase F2 / F6: Determina se a Catábase está ativa a partir dos upgrades/estado do cliente antes de validar buffs Wrath
+        $rawCatClient = is_array($clientState['catabase'] ?? null)
+            ? $clientState['catabase']
+            : (is_array($clientState['milestones']['f6Catabase'] ?? null) ? $clientState['milestones']['f6Catabase'] : []);
+        $clientUpSet = array_flip($client['upgrades']);
+        $catStructStage = isset($clientUpSet['pacto_primordial'])
+            ? 3
+            : (isset($clientUpSet['comunhao_abissal']) ? 2 : (isset($clientUpSet['despertar_ctoniano']) ? 1 : 0));
+        $catManualStage = isset($rawCatClient['stage']) && is_numeric($rawCatClient['stage'])
+            ? max(0, min(3, (int) $rawCatClient['stage']))
+            : 0;
+        $catSuppressed = !empty($rawCatClient['covenantActive'])
+            || (isset($rawCatClient['pledgeExpiresAt']) && is_numeric($rawCatClient['pledgeExpiresAt']) && (int) $rawCatClient['pledgeExpiresAt'] > $nowMs);
+        $catabaseActive = !$catSuppressed && (
+            !empty($clientState['catabaseActive'])
+            || !empty($mergedMilestones['catabaseActive'])
+            || max($catStructStage, $catManualStage) >= 1
+        );
+        $rawActiveBuffs = $clientState['activeBuffs'] ?? $clientState['active_buffs'] ?? null;
+        $buffRes = DespertarFormulas::validateActiveBuffs($rawActiveBuffs, $nowMs, $catabaseActive);
+        if (!$buffRes['ok']) {
+            return $withEcho([
+                'ok' => false,
+                'status' => 400,
+                'error' => $buffRes['error'] ?? 'Buffs de Eco inválidos.',
+                'state' => self::buildStateDto($db, $echoOpts),
+            ]);
+        }
+        $validatedBuffs = $buffRes['activeBuffs'] ?? [];
+
+        // Fase F5: Validação autoritativa de Néctar, níveis de geradores e minigames (anti-clock-skew)
+        $f5Res = DespertarFormulas::validateNectarAndMinigames($db, $clientState, $nowMs);
+        if (!$f5Res['ok']) {
+            return $withEcho([
+                'ok' => false,
+                'status' => 400,
+                'error' => $f5Res['error'] ?? 'Estado de Néctar ou minigames inválido.',
+                'state' => self::buildStateDto($db, $echoOpts),
+            ]);
+        }
+        $mergedMilestones['f5Nectar'] = [
+            'nectar' => $f5Res['nectar'],
+            'totalNectarHarvested' => $f5Res['totalNectarHarvested'],
+            'nectarCycleStartedAt' => $f5Res['nectarCycleStartedAt'],
+            'nectarCurrentVariant' => $f5Res['nectarCurrentVariant'],
+            'nectarFrenzyUsedThisRun' => $f5Res['nectarFrenzyUsedThisRun'],
+            'generatorLevels' => $f5Res['generatorLevels'],
+        ];
+        $mergedMilestones['f5Minigames'] = $f5Res['minigames'];
+
         $stats = $db['stats'];
         $biggestBuy = (int) ($spend['biggestBuy'] ?? 0);
         if ($biggestBuy > 0) {
             $stats['maxBuyBiggest'] = max((int) ($stats['maxBuyBiggest'] ?? 0), $biggestBuy);
         }
+        $clientStats = self::normalizeDespertarStats($clientState['stats'] ?? []);
+        $clientShimmersClicked = self::asNonNegInt($clientState['shimmersClicked'] ?? $clientStats['shimmersClicked'] ?? 0);
+        $clientShimmersMissed = self::asNonNegInt($clientState['shimmersMissed'] ?? $clientStats['shimmersMissed'] ?? 0);
+        $clientWrathClicked = self::asNonNegInt($clientState['wrathClicked'] ?? $clientStats['wrathClicked'] ?? 0);
+        $stats['shimmersClicked'] = max((int) ($stats['shimmersClicked'] ?? 0), $clientShimmersClicked);
+        $stats['shimmersMissed'] = max((int) ($stats['shimmersMissed'] ?? 0), $clientShimmersMissed);
+        $stats['wrathClicked'] = max((int) ($stats['wrathClicked'] ?? 0), $clientWrathClicked);
 
         $next = array_merge($db, [
             'souls' => $client['souls'],
@@ -550,8 +698,75 @@ final class DespertarService
             'eduLogsSeen' => $mergedLogs,
             'milestones' => $mergedMilestones,
             'stats' => $stats,
+            'activeBuffs' => $validatedBuffs,
+            'nectar' => $f5Res['nectar'],
+            'totalNectarHarvested' => $f5Res['totalNectarHarvested'],
+            'nectarCycleStartedAt' => $f5Res['nectarCycleStartedAt'],
+            'nectarCurrentVariant' => $f5Res['nectarCurrentVariant'],
+            'nectarFrenzyUsedThisRun' => $f5Res['nectarFrenzyUsedThisRun'],
+            'generatorLevels' => $f5Res['generatorLevels'],
+            'minigames' => $f5Res['minigames'],
+            'achievements' => $baseAchievements,
             'lastSyncAt' => $nowIso,
         ]);
+
+        // Fase F8: Validação autoritativa de Dragão Ctoniano, 4 Estações e Fortunas de Hermes
+        $f8Res = DespertarFormulas::validateDragonSeasonsFortunes($db, $clientState, $next, $nowMs);
+        if (!$f8Res['ok']) {
+            return $withEcho([
+                'ok' => false,
+                'status' => 400,
+                'error' => $f8Res['error'] ?? 'Estado de Dragão, Estações ou Fortunas inválido.',
+                'state' => self::buildStateDto($db, $echoOpts),
+            ]);
+        }
+        $next['dragon'] = $f8Res['dragon'];
+        $next['seasons'] = $f8Res['seasons'];
+        $next['fortunes'] = $f8Res['fortunes'];
+        $next['generatorsSold'] = $f8Res['generatorsSold'];
+        $next['stats']['generatorsSold'] = $f8Res['generatorsSold'];
+        $next['milestones']['f8Dragon'] = $f8Res['dragon'];
+        $next['milestones']['f8Seasons'] = $f8Res['seasons'];
+        $next['milestones']['f8Fortunes'] = $f8Res['fortunes'];
+        if ($f8Res['generatorsSold'] >= 1) {
+            $next['milestones']['generatorSold'] = true;
+        }
+
+        // Fase F4: Validação autoritativa de Conquistas, Véu e requisitos dos Filhotes do Cérbero
+        $f4Res = DespertarFormulas::validateVeilAndKittens($db, $clientState, $next, $baseAchievements);
+        if (!$f4Res['ok']) {
+            return $withEcho([
+                'ok' => false,
+                'status' => 400,
+                'error' => $f4Res['error'] ?? 'Estado de Véu ou Filhotes inválido.',
+                'state' => self::buildStateDto($db, $echoOpts),
+            ]);
+        }
+        $next['achievements'] = $f4Res['achievements'] ?? $baseAchievements;
+        $echoOpts['achievements'] = $next['achievements'];
+
+        // Fase F6: Validação autoritativa da Catábase das Avós e das Sanguessugas do Acheron
+        $f6Res = DespertarFormulas::validateCatabaseAndLeeches($db, $clientState, $next, $nowMs);
+        if (!$f6Res['ok']) {
+            return $withEcho([
+                'ok' => false,
+                'status' => 400,
+                'error' => $f6Res['error'] ?? 'Estado da Catábase ou Sanguessugas inválido.',
+                'state' => self::buildStateDto($db, $echoOpts),
+            ]);
+        }
+        $next['catabase'] = $f6Res['catabase'];
+        $next['catabaseActive'] = $f6Res['catabaseActive'];
+        $next['leechesPopped'] = $f6Res['leechesPopped'];
+        $next['shinyLeechesPopped'] = $f6Res['shinyLeechesPopped'];
+        $next['stats']['leechesPopped'] = $f6Res['leechesPopped'];
+        $next['stats']['shinyLeechesPopped'] = $f6Res['shinyLeechesPopped'];
+        $next['milestones']['f6Catabase'] = $f6Res['catabase'];
+        if ($f6Res['catabaseActive']) {
+            $next['milestones']['catabaseActive'] = true;
+        } else {
+            unset($next['milestones']['catabaseActive']);
+        }
 
         // Sanitize edu logs
         $sanitizedLogs = DespertarFormulas::sanitizeEduLogsSeen($next['eduLogsSeen'], $next, true);
@@ -574,7 +789,7 @@ final class DespertarService
     {
         $db = self::rowToCanonical($dbRow);
         $nowIso = Database::nowIso($nowMs);
-        if (!DespertarFormulas::canPrestige($db['runSouls'], $db['prestigeCount'])) {
+        if (!DespertarFormulas::canPrestige($db['runSouls'], $db['prestigeCount'], $db['upgrades'])) {
             return [
                 'ok' => false,
                 'status' => 400,
@@ -583,7 +798,7 @@ final class DespertarService
             ];
         }
 
-        $preview = DespertarFormulas::prestigePreview($db['runSouls'], $db['prestigeCount'], $db['talents']);
+        $preview = DespertarFormulas::prestigePreview($db['runSouls'], $db['prestigeCount'], $db['talents'], $db['upgrades']);
         $effects = DespertarFormulas::talentEffects($db['talents']);
         $nextGenerators = self::normalizeGenerators([]);
         $genById = DespertarCatalog::generatorsById();
@@ -604,6 +819,24 @@ final class DespertarService
             ]);
         }
 
+        $nextMilestones = $db['milestones'];
+        $nextMilestones['f8Dragon'] = ['stage' => 0, 'auraSlot1' => null, 'auraSlot2' => null, 'scaleDropped' => false];
+        $prevSeasons = is_array($nextMilestones['f8Seasons'] ?? null) ? $nextMilestones['f8Seasons'] : [];
+        $nextMilestones['f8Seasons'] = [
+            'activeSeason' => null,
+            'expiresAt' => null,
+            'switchesCount' => 0,
+            'saturnKingLevel' => 0,
+            'deerCaught' => (int) ($prevSeasons['deerCaught'] ?? 0),
+            'unlockedDrops' => [],
+        ];
+        $prevFortunes = is_array($nextMilestones['f8Fortunes'] ?? null) ? $nextMilestones['f8Fortunes'] : [];
+        $nextMilestones['f8Fortunes'] = [
+            'activeFortuneId' => null,
+            'claimedIds' => [],
+            'lifetimeClaimedIds' => is_array($prevFortunes['lifetimeClaimedIds'] ?? null) ? $prevFortunes['lifetimeClaimedIds'] : [],
+        ];
+
         $next = array_merge($db, [
             'obols' => DespertarDecimal::money(DespertarDecimal::add($db['obols'], $preview['obolsGain'])),
             'mnemosyne' => DespertarDecimal::money(DespertarDecimal::add($db['mnemosyne'], $preview['mnemosyneGain'])),
@@ -614,6 +847,7 @@ final class DespertarService
             'goldCounts' => [],
             'souls' => $startingSouls,
             'runSouls' => $startingSouls,
+            'milestones' => $nextMilestones,
             'lastSyncAt' => $nowIso,
         ]);
 

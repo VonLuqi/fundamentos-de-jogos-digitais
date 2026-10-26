@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-09-28",
+  "updated": "2026-10-26",
   "task": "B4+E3",
   "audience": "Mestre",
   "defaults": {
@@ -32,7 +32,7 @@
       "id": "art_foice",
       "listId": "B1",
       "priority": "P0",
-      "status": "open",
+      "status": "delivered",
       "title": "Foice / Portal do Acheron",
       "desc": "Alvo de clique (idle + pressed). Dominante na coluna esquerda.",
       "sizes": [
@@ -42,13 +42,13 @@
         "foice/foice-idle.webp",
         "foice/foice-pressed.webp"
       ],
-      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master."
+      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master. [reconciliado 2026-10-23: foice-idle/pressed.webp em disco]"
     },
     {
       "id": "art_t1",
       "listId": "B2",
       "priority": "P0",
-      "status": "open",
+      "status": "delivered",
       "title": "Sombra Vagante",
       "desc": "Ícone de mercado + sprite de prateleira/órbita.",
       "generatorId": "wandering_shade",
@@ -66,7 +66,7 @@
       "id": "art_t2",
       "listId": "B3",
       "priority": "P0",
-      "status": "open",
+      "status": "delivered",
       "title": "Servos de Caronte",
       "generatorId": "charon_servants",
       "sizes": [
@@ -83,7 +83,7 @@
       "id": "art_t3",
       "listId": "B4",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Cão Cerberiano",
       "generatorId": "cerberian_hound",
       "sizes": [
@@ -99,7 +99,7 @@
       "id": "art_t4",
       "listId": "B5",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Juiz do Tártaro",
       "generatorId": "tartarus_judge",
       "sizes": [
@@ -115,7 +115,7 @@
       "id": "art_t5",
       "listId": "B6",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Forja de Phlegethon",
       "generatorId": "phlegethon_forge",
       "sizes": [
@@ -131,7 +131,7 @@
       "id": "art_t6",
       "listId": "B7",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Trono de Obsidiana",
       "generatorId": "obsidian_throne",
       "sizes": [
@@ -147,9 +147,9 @@
       "id": "art_upgrades",
       "listId": "B8",
       "priority": "P1",
-      "status": "open",
-      "title": "Ícones dos Juramentos do Styx",
-      "desc": "Set completo (19) ou lote prioritário de 8–12 clickMult + T1/T2.",
+      "status": "delivered",
+      "title": "Ícones dos Juramentos do Styx (Grade F1: 112 ícones)",
+      "desc": "Set completo F1 (15 tiers por gerador T1–T6, cadeia Foice, Mil Foices e Sinergias Vol. I/II) via pipeline Gemini → Sharp WebP.",
       "sizes": [
         "48x48",
         "128x128"
@@ -167,15 +167,81 @@
         "frota_de_caronte",
         "trela_cerberiana",
         "tres_cabecas",
-        "veredito_tartaro"
+        "veredito_tartaro",
+        "mil_foices",
+        "milhao_de_foices",
+        "bilhao_de_foices",
+        "trilhao_de_foices",
+        "cortejo_das_margens_i",
+        "cortejo_das_margens_ii",
+        "brasa_cruzada_i",
+        "brasa_cruzada_ii"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg opcional)."
+      "f1UpgradeIds": [
+        "mil_foices",
+        "milhao_de_foices",
+        "bilhao_de_foices",
+        "trilhao_de_foices",
+        "sussurro_dos_juncos",
+        "manto_do_crepusculo",
+        "procissao_silente",
+        "coroa_de_penumbra",
+        "veu_dos_esquecidos",
+        "abismo_sussurrante",
+        "eternidade_cinzenta",
+        "soberania_das_umbras",
+        "remos_de_cipreste",
+        "lanternas_de_estige",
+        "pedagio_inapelavel",
+        "velas_de_mortalha",
+        "bussola_dos_afogados",
+        "esquadra_do_cocytus",
+        "almirantado_das_aguas_negras",
+        "horizonte_de_caronte",
+        "faro_de_enxofre",
+        "coleira_de_bronze_estigio",
+        "presas_de_obsidiana",
+        "juba_de_serpentes",
+        "sentinela_dos_tres_rios",
+        "cacada_infernus",
+        "rugido_do_abismo",
+        "soberania_cerberiana",
+        "balanca_de_ouro_frio",
+        "pergaminhos_de_bronze",
+        "tribunal_dos_cem_ecos",
+        "malhete_de_adamante",
+        "jurisprudencia_eterna",
+        "supremo_conselho_ctoniano",
+        "decreto_irrevogavel",
+        "justica_absoluta_do_tartaro",
+        "foles_de_tifao",
+        "bigornas_ciclopicas",
+        "tempera_de_lagrimas",
+        "martelos_automatos",
+        "veias_de_piropo",
+        "cidadela_da_forja",
+        "sol_subterraneo",
+        "hegemonia_do_phlegethon",
+        "degraus_de_onix",
+        "dossel_de_estrelas_mortas",
+        "diadema_de_sangue_e_ouro",
+        "arautos_da_eternidade",
+        "pacto_das_coroas_negras",
+        "dinastia_do_erebo",
+        "onipresenca_de_obsidiana",
+        "apoteose_do_submundo",
+        "cortejo_das_margens_i",
+        "cortejo_das_margens_ii",
+        "brasa_cruzada_i",
+        "brasa_cruzada_ii"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A (20 upgradeIdsPriority) GenerateImage→process-upgrade-art.mjs; preserveWebp illustrated.json]"
     },
     {
       "id": "art_juizo_chrome",
       "listId": "B9",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Chrome do Juízo (VS / moldura)",
       "desc": "Moldura Higher/Lower, badge VS, faixa de idade do campeão.",
       "sizes": [
@@ -188,13 +254,13 @@
         "juizo/band-rating.svg"
       ],
       "dropPath": "assets/despertar/juizo/",
-      "notes": "Paleta Styx/ouro; não vazar rating do oponente antes do guess."
+      "notes": "Paleta Styx/ouro; não vazar rating do oponente antes do guess. [2026-10-26: delivered — SVG em assets/despertar/juizo/ + modal usa moldura HUD]"
     },
     {
       "id": "art_juizo_covers",
       "listId": "B10",
       "priority": "P2",
-      "status": "open",
+      "status": "delivered",
       "title": "Capas faltantes do pool Juízo",
       "desc": "WebP no filename do stub. Ordem de busca: classind-dle/covers → despertar-juizo/covers.",
       "sizes": [
@@ -213,7 +279,7 @@
         "stardew-valley.webp",
         "super-mario-odyssey.webp"
       ],
-      "notes": "Há ~499 entradas com cover:null no stub — editorial. Esta lista P2 é só arquivo ausente com nome já declarado (npm run despertar:art-requests regenera).",
+      "notes": "Há ~499 entradas com cover:null no stub — editorial. Esta lista P2 é só arquivo ausente com nome já declarado (npm run despertar:art-requests regenera). [reconciliado 2026-10-23: ficheiros em disco]",
       "nullCoverCount": 499
     },
     {
@@ -258,6 +324,303 @@
         "cosmetics/orbit_halo.webp"
       ],
       "notes": "Ver PEDIDOS-MESTRE.md § P3. blade_* / reap_ripple / orbit_halo podem permanecer CSS até entrega. world_vignette fora do P0."
+    },
+    {
+      "id": "art_shimmers",
+      "listId": "B12",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Ecos do Acheron (Shimmers Golden / Wrath — Fase F2)",
+      "desc": "Fragmentos flutuantes clicáveis no Santuário (Eco Dourado e Eco Colérico) gerados via Gemini + Sharp WebP.",
+      "sizes": [
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/shimmers/",
+      "files": [
+        "shimmers/eco_dourado.webp",
+        "shimmers/eco_dourado.svg",
+        "shimmers/eco_colerico.webp",
+        "shimmers/eco_colerico.svg"
+      ],
+      "notes": "Paths: assets/despertar/sprites/shimmers/{eco_dourado,eco_colerico}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]"
+    },
+    {
+      "id": "art_t7",
+      "listId": "F3-T7",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Templo de Mnemosyne (T7)",
+      "generatorId": "mnemosyne_temple",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/mnemosyne_temple.webp",
+        "generators/mnemosyne_temple.svg"
+      ]
+    },
+    {
+      "id": "art_t8",
+      "listId": "F3-T8",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Torre do Estige (T8)",
+      "generatorId": "styx_tower",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/styx_tower.webp",
+        "generators/styx_tower.svg"
+      ]
+    },
+    {
+      "id": "art_t9",
+      "listId": "F3-T9",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Barca das Estrelas (T9)",
+      "generatorId": "star_barge",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/star_barge.webp",
+        "generators/star_barge.svg"
+      ]
+    },
+    {
+      "id": "art_t10",
+      "listId": "F3-T10",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Laboratório do Tártaro (T10)",
+      "generatorId": "tartarus_lab",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/tartarus_lab.webp",
+        "generators/tartarus_lab.svg"
+      ]
+    },
+    {
+      "id": "art_t11",
+      "listId": "F3-T11",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Portal do Érebo (T11)",
+      "generatorId": "erebus_portal",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/erebus_portal.webp",
+        "generators/erebus_portal.svg"
+      ]
+    },
+    {
+      "id": "art_t12",
+      "listId": "F3-T12",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Tear de Cronos (T12)",
+      "generatorId": "chronos_loom",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "files": [
+        "generators/chronos_loom.webp",
+        "generators/chronos_loom.svg"
+      ]
+    },
+    {
+      "id": "art_f3_upgrades",
+      "listId": "F3-UP",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Juramentos e Sinergias T7–T12 (98 ícones F3)",
+      "desc": "90 upgrades de linha (15 tiers × 6 geradores T7–T12) + 8 sinergias cruzadas Vol. I/II via pipeline Gemini → Sharp WebP.",
+      "sizes": [
+        "48x48",
+        "128x128"
+      ],
+      "filesGlob": "upgrades/*.webp",
+      "f3SynergyIds": [
+        "guardiao_dos_umbrais_i",
+        "guardiao_dos_umbrais_ii",
+        "jurisprudencia_arcana_i",
+        "jurisprudencia_arcana_ii",
+        "alquimia_estelar_i",
+        "alquimia_estelar_ii",
+        "trama_do_erebo_i",
+        "trama_do_erebo_ii"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 210 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]"
+    },
+    {
+      "id": "art_f5_minigames",
+      "listId": "F5-MG",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Néctar do Lethe & 4 Minigames Temáticos (21 ícones F5)",
+      "desc": "5 variantes de Néctar (normal, bifurcado, dourado, colérico, caramelizado), 4 sementes do Jardim de Perséfone, 4 espíritos do Panteão Ctoniano, 2 feitiços do Grimório de Hécate e 6 bens do Mercado de Caronte.",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/minigames/",
+      "filesGlob": "minigames/*.webp",
+      "minigameSpriteIds": [
+        "nectar_normal",
+        "nectar_bifurcado",
+        "nectar_dourado",
+        "nectar_colerico",
+        "nectar_caramelizado",
+        "seed_asfodelo_cinzento",
+        "seed_roma_de_persefone",
+        "seed_lirio_do_lethe",
+        "seed_papoula_de_hipnos",
+        "spirit_nyx",
+        "spirit_thanatos",
+        "spirit_hypnos",
+        "spirit_persephone",
+        "spell_mao_do_destino",
+        "spell_conjurar_almas",
+        "good_obolo_cobre",
+        "good_ferro_estigio",
+        "good_incenso_sombrio",
+        "good_eter_condensado",
+        "good_amalgama_aurica",
+        "good_areia_de_cronos"
+      ],
+      "notes": "Paths: assets/despertar/sprites/minigames/{id}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]"
+    },
+    {
+      "id": "art_f4_veil_kittens",
+      "listId": "F4-VK",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Véu do Acheron (5 sabores) & Filhotes do Cérbero (7 juramentos F4)",
+      "desc": "5 estados/sabores de névoa do Véu do Acheron (Névoa Cinzenta, Águas do Estige, Corrente do Lethe, Chama de Flegêton, Ouro Ancestral) e 7 ícones da linhagem Filhotes do Cérbero (do Filhote Vigia do Estige ao Cérbero Conselheiro do Tártaro).",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/upgrades/ & assets/despertar/sprites/veil/",
+      "filesGlob": "upgrades/filhote_*.webp, veil/veu_*.webp",
+      "upgradeIds": [
+        "filhote_vigia_estige",
+        "filhote_rastreador_asfodelos",
+        "filhote_forjador_phlegethon",
+        "filhote_supervisor_tartaro",
+        "filhote_intendente_erebo",
+        "filhote_arauto_lethe",
+        "cerbero_conselheiro_tartaro"
+      ],
+      "veilSpriteIds": [
+        "veu_nevoa_cinzenta",
+        "veu_aguas_estige",
+        "veu_corrente_lethe",
+        "veu_chama_phlegethon",
+        "veu_ouro_ancestral"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp e assets/despertar/sprites/veil/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]"
+    },
+    {
+      "id": "art_f6_catabase_wrinklers",
+      "listId": "F6-CW",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Catábase das Avós & Sanguessugas do Acheron (7 sprites F6 + 8 juramentos)",
+      "desc": "Sanguessuga do Acheron normal e Abissal Dourada (Shiny), ícones dos 3 estágios da Catábase (Despertar Ctoniano, Comunhão Abissal, Pacto Primordial), Juramento de Trégua, Aliança Eterna e 8 ícones da cadeia de pesquisa do Arquivo Estígio.",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/catabase/ & assets/despertar/sprites/upgrades/",
+      "filesGlob": "catabase/*.webp, upgrades/{concilio_das_moiras,soro_estigio,despertar_ctoniano,sinapse_espectral,comunhao_abissal,pacto_primordial,ninho_do_acheron,visceras_sacras}.webp",
+      "catabaseSpriteIds": [
+        "sanguessuga_normal",
+        "sanguessuga_shiny",
+        "catabase_estagio_1",
+        "catabase_estagio_2",
+        "catabase_estagio_3",
+        "tregua_estigia",
+        "alianca_eterna"
+      ],
+      "upgradeIds": [
+        "concilio_das_moiras",
+        "soro_estigio",
+        "despertar_ctoniano",
+        "sinapse_espectral",
+        "comunhao_abissal",
+        "pacto_primordial",
+        "ninho_do_acheron",
+        "visceras_sacras"
+      ],
+      "notes": "Paths: assets/despertar/sprites/catabase/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]"
+    },
+    {
+      "id": "art_f7_generators_t13_t20",
+      "listId": "F7-GEN",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Geradores Late-Game T13–T20 (8 sprites + fundos de prateleira)",
+      "desc": "8 estruturas cósmicas/ctonianas finais (Condensador do Vazio, Prisma das Moiras, Forja do Destino, Motor Fractal, Console do Oráculo, Idleverso Ctoniano, Padeiro do Córtex e O Imperador).",
+      "sizes": [
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/generators/",
+      "filesGlob": "generators/{void_condenser,moirai_prism,fate_forge,fractal_engine,oracle_console,chthonic_idleverse,cortex_baker,the_emperor}.webp",
+      "generatorIds": [
+        "void_condenser",
+        "moirai_prism",
+        "fate_forge",
+        "fractal_engine",
+        "oracle_console",
+        "chthonic_idleverse",
+        "cortex_baker",
+        "the_emperor"
+      ],
+      "notes": "Paths: assets/despertar/sprites/generators/{id}.webp (+ .svg fallback). Total catálogo = 20 geradores (T1–T20)."
+    },
+    {
+      "id": "art_f7_upgrades_late",
+      "listId": "F7-UP",
+      "priority": "P2",
+      "status": "delivered",
+      "title": "Juramentos Styx T13–T20 (120 tiers ×2 + 8 Sinergias Vol. I/II + 8 Tipos de Servos)",
+      "desc": "136 ícones de juramentos late-game cobrindo os 15 marcos (1..300) de T13–T20, os 4 pares finais de sinergia Vol. I/II e os 8 Servos especializados.",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/upgrades/",
+      "filesGlob": "upgrades/*.webp",
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]"
+    },
+    {
+      "id": "art_f8_seasons_dragon_fortunes",
+      "listId": "F8-SD",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Dragão Pitão/Ladão (5 estágios + 5 Auras), 4 Estações Ctonianas e 24 Fortunas de Hermes",
+      "desc": "5 estágios do Dragão Ctoniano (Ovo Primordial → Ladão de Cem Cabeças), 5 ícones de Auras, 4 emblemas de Estações (Antestéria, Lemúria, Saturnália, Feira de Hermes), Corça de Ártemis e 35 juramentos (Escama de Ladão + 10 relíquias sazonais + 24 Fortunas).",
+      "sizes": [
+        "64x64",
+        "128x128"
+      ],
+      "dropPath": "assets/despertar/sprites/seasons/",
+      "filesGlob": "seasons/*.webp",
+      "notes": "Paths: assets/despertar/sprites/seasons/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 396 upgrades. [2026-10-26: arte final upgrades + illustrated.json]"
     }
-  ]
+  ],
+  "auditNote": "Status reconciliado 2026-10-26. Permanecem open: art_cosmetics. art_juizo_chrome + art_foice entregues."
 }

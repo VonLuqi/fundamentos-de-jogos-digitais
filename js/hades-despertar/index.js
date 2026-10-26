@@ -14,11 +14,13 @@ import {
   fetchDespertarPublished,
   getSession,
   leaderboardGet,
+  listClassmates,
   logout,
   requireSession,
   ROUTES,
   setLessonGate,
 } from '../api.js';
+import { seedUnitNamePool } from './ui/unitPersona.js';
 import { GameLoop } from './core/GameLoop.js';
 import { ApiService } from './services/ApiService.js';
 import { bootAuthoritativeSession, resumeFromHidden } from './services/OfflineEngine.js';
@@ -88,7 +90,7 @@ function showSealedState() {
   presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
 }
 
-async function showSeasonClosedState(token) {
+async function showSeasonClosedState(token, { isAdmin = false } = {}) {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   const shell = document.querySelector('[data-shell]');
@@ -100,18 +102,25 @@ async function showSeasonClosedState(token) {
   });
   const link = shell?.querySelector('[data-nav-item="despertar"]');
   if (link) {
-    link.textContent = 'O Despertar · encerrado';
-    link.title = 'Temporada encerrada até o próximo patch';
+    link.textContent = 'O Despertar · aguardando Dia 1';
+    link.title = 'Fechado até a liberação do Dia 1';
   }
   await presentSeasonClosedVeil(main, {
     aulasHref: ROUTES.aulas(),
     rankingHref: ROUTES.ranking(),
     token,
+    isAdmin,
     leaderboardGet,
+    onLiberate: isAdmin
+      ? async () => {
+        await setLessonGate(token, 'despertar', 'published', true);
+        globalThis.location.reload();
+      }
+      : undefined,
   });
 }
 
-/** Admin na tela fechada: sela o Acheron no servidor (API) uma vez. */
+/** Admin na tela fechada: garante Acheron selado até o Dia 1. */
 async function ensureAcheronSealedForSeason(token, isAdmin) {
   if (!DESPERTAR_SEASON_CLOSED || !isAdmin || !token) return;
   try {
@@ -228,14 +237,13 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
   if (!panel) return;
   const steleTab = document.getElementById('tab-stele');
   const stelePanel = document.getElementById('panel-stele');
+  // Perf-4: a aba Estela fica disponível para Opções de Fluidez (admin vê também o painel Debug).
+  if (steleTab) steleTab.hidden = false;
   if (!isAdmin) {
     panel.hidden = true;
-    if (steleTab) steleTab.hidden = true;
-    if (stelePanel) stelePanel.hidden = true;
     return;
   }
   panel.hidden = false;
-  if (steleTab) steleTab.hidden = false;
 
   const setBusy = (busy) => {
     if (resetBtn) resetBtn.disabled = busy;
@@ -466,24 +474,37 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
   });
 }
 
-function bindJuizoCta(api, { onError } = {}) {
+function bindJuizoCta(api, { onError, getState } = {}) {
   const button = document.getElementById('despertar-juizo-open');
   const hint = document.getElementById('despertar-juizo-hint');
   if (!button) return null;
   const cta = getJuizoCtaState();
   button.disabled = !cta.ready;
   button.setAttribute('aria-disabled', String(!cta.ready));
-  button.textContent = cta.label;
   button.title = cta.hint || cta.label;
   if (hint) {
     hint.textContent = cta.hint;
     hint.hidden = !cta.hint;
   }
 
+  const labelEl = button.querySelector('.despertar-juizo-cta__label');
+  if (labelEl) labelEl.textContent = cta.label;
+  else button.textContent = cta.label;
+
   const modal = new JuizoModal(document, {
     start: () => api.juizoStart(),
     guess: (choice) => api.juizoGuess(choice),
     abandon: () => api.juizoAbandon(),
+  }, {
+    hasMercy: () => {
+      const purchases = getState?.()?.verdictPurchases;
+      return Array.isArray(purchases) && purchases.includes('catalogo_vivo');
+    },
+    openBancada: () => {
+      const tab = document.getElementById('tab-bancada');
+      if (tab && typeof tab.click === 'function') tab.click();
+      else tab?.dispatchEvent(new Event('click', { bubbles: true }));
+    },
   }).mount();
 
   button.addEventListener('click', () => {
@@ -613,9 +634,11 @@ async function init() {
     },
   });
 
-  if (DESPERTAR_SEASON_CLOSED) {
+  // Hold até Dia 1: pódio para todos enquanto Acheron estiver selado.
+  // Liberar = Abrir o Acheron (botão no véu ou Painel) — sem redeploy.
+  if (DESPERTAR_SEASON_CLOSED && !published) {
     await ensureAcheronSealedForSeason(token, isAdmin);
-    await showSeasonClosedState(token);
+    await showSeasonClosedState(token, { isAdmin });
     return;
   }
 
@@ -767,13 +790,17 @@ async function init() {
     },
     onSynced: ({ awarded }) => {
       if (awarded?.achievements?.length) {
+        stateRef.current?.unlockAchievements?.(awarded.achievements);
         presentGrimoireAwards(awarded);
       }
     },
     logDiag: diagOn ? logSyncDiag : null,
   });
 
-  bindJuizoCta(api, { onError: showApiWarning });
+  bindJuizoCta(api, {
+    onError: showApiWarning,
+    getState: () => stateRef.current,
+  });
 
   const boot = await bootAuthoritativeSession(user.id, {
     storage,
@@ -922,12 +949,53 @@ async function init() {
     onLetheFirstUnlock: () => {
       api.requestSync();
     },
+    onClickShimmer: () => {
+      const res = state.clickShimmer();
+      if (res?.ok) {
+        const reducedMotion = juicePrefersReducedMotion();
+        const prefs = uiRef.renderer?.getPerfPrefs?.() || { particles: true, fancy: true };
+        uiRef.renderer?._shimmerView?.spawnClickFeedback(res, {
+          reducedMotion,
+          particles: prefs.particles,
+        });
+        uiRef.renderer?.markDirty?.('all');
+        if (!state.isFreeShopping?.()) {
+          api.requestSync();
+        }
+      }
+    },
   });
   uiRef.renderer = renderer;
   renderer.mount(state);
 
+  // Nomes das unidades = mistura dos nomes/usernames da turma (Cookie: grandma names).
+  void (async () => {
+    const people = [];
+    if (user) {
+      people.push({
+        fullName: user.fullName || user.name || '',
+        username: user.username || '',
+      });
+    }
+    if (token) {
+      try {
+        const payload = await listClassmates(token);
+        for (const row of payload.classmates || []) {
+          people.push({
+            fullName: row.fullName || row.name || '',
+            username: row.username || '',
+          });
+        }
+      } catch {
+        /* offline / sem Salão — fallback estático em unitPersona */
+      }
+    }
+    seedUnitNamePool(people);
+  })();
+
   const reap = document.getElementById('despertar-reap');
   const particles = document.querySelector('[data-particle-layer]');
+  const floatLayer = document.querySelector('[data-float-layer]');
   const reapStage = document.querySelector('.despertar-reap-stage');
   const unbindFeel = bindReapFeel(reap);
   const unbindFoice = bindFoiceAsset(reap);
@@ -945,7 +1013,11 @@ async function init() {
           pause: pauseWindowRef.current,
         });
         harvestUi.show(resumed.harvest);
+        renderer.markDirty('all');
         api.requestSync();
+      },
+      onAutoLod: ({ active }) => {
+        if (active) renderer.applyAutoLod(true);
       },
     },
   );
@@ -953,17 +1025,25 @@ async function init() {
   reap?.addEventListener('click', () => {
     const { gained } = state.click();
     const reducedMotion = loop.prefersReducedMotion();
+    const perfPrefs = renderer.getPerfPrefs();
     pulseReapButton(reap, { reducedMotion });
     playFoiceSlash(reap, { reducedMotion });
-    spawnReapParticles(particles, { reducedMotion, clickPower: gained, gained });
+    spawnReapParticles(particles, {
+      reducedMotion,
+      particles: perfPrefs.particles,
+      clickPower: gained,
+      gained,
+    });
     playReapJuice({
       root: document,
       stage: reapStage,
-      particleLayer: particles,
+      floatLayer: floatLayer || particles,
       amount: gained,
       reducedMotion,
+      particles: perfPrefs.particles,
+      fancy: perfPrefs.fancy,
     });
-    if (!reducedMotion) {
+    if (!reducedMotion && perfPrefs.fancy) {
       juiceBumpClass(document.getElementById('despertar-souls'), 'is-bump', 380);
     }
   });

@@ -23,6 +23,35 @@ export const JUIZO_BANCADA_HINT =
 export const JUIZO_MODAL_EDU_HINT =
   'Campeão mostra a faixa. Desafiante esconde com ?. Acerto sobe a sequência; Vereditos só nos marcos do teu recorde.';
 
+/** Marcos de Vereditos (GDD v2 B1 Soft) — UI “próximo marco”; claim é server-side. */
+export const JUIZO_STREAK_MILESTONES = Object.freeze([
+  { streak: 5, verdicts: 1 },
+  { streak: 10, verdicts: 2 },
+  { streak: 15, verdicts: 3 },
+  { streak: 20, verdicts: 4 },
+  { streak: 25, verdicts: 5 },
+  { streak: 40, verdicts: 8 },
+  { streak: 60, verdicts: 12 },
+  { streak: 100, verdicts: 20 },
+]);
+
+/**
+ * Próximo marco ainda não atingido pelo recorde (`best`).
+ * @param {number} best
+ * @returns {{ streak: number, verdicts: number } | null}
+ */
+export function nextJuizoMilestone(best = 0) {
+  const b = Math.max(0, Number(best) || 0);
+  return JUIZO_STREAK_MILESTONES.find((m) => m.streak > b) || null;
+}
+
+/** Copy curta do chip HUD. */
+export function formatJuizoNextMilestone(best = 0) {
+  const next = nextJuizoMilestone(best);
+  if (!next) return 'Marcos: completo';
+  return `Próximo: ${next.streak} → +${next.verdicts}`;
+}
+
 /** Códice log_juizo (J.1). */
 export const JUIZO_CODEX_TITLE = 'A Bancada do Juiz';
 export const JUIZO_CODEX_BODY =

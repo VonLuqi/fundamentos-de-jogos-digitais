@@ -1,5 +1,5 @@
 /**
- * Modal do Juízo do Tartarus — F3: selecionar A/B/Empate → Confirmar; sucessor sempre desafiante.
+ * Modal do Juízo do Tartarus — F3: selecionar A/B/Empate → duplo clique confirma; sucessor sempre desafiante.
  * GameLoop continua; Esc limpa seleção ou abandona sem revelar faixas.
  * Choices canônicos: A | B | tie (aliases higher/lower ainda aceitos no server).
  */
@@ -7,7 +7,13 @@
 'use strict';
 
 import { juiceBumpClass, juicePrefersReducedMotion } from './juice.js';
-import { JUIZO_COVER_FALLBACK_URL, JUIZO_MODAL_EDU_HINT } from '../config/juizo-pool.js';
+import {
+  formatJuizoNextMilestone,
+  JUIZO_COVER_FALLBACK_URL,
+  JUIZO_MODAL_EDU_HINT,
+} from '../config/juizo-pool.js';
+
+const PENDING_PROMPT = 'Duplo clique (ou Enter) para sentenciar.';
 
 function setText(el, value) {
   if (el) el.textContent = value == null ? '' : String(value);
@@ -98,10 +104,15 @@ export class JuizoModal {
    *   guess: (choice: string) => Promise<object>,
    *   abandon: () => Promise<object>,
    * }} api
+   * @param {{
+   *   hasMercy?: () => boolean,
+   *   openBancada?: () => void,
+   * }} [hooks]
    */
-  constructor(doc, api) {
+  constructor(doc, api, hooks = {}) {
     this.doc = doc;
     this.api = api;
+    this.hooks = hooks && typeof hooks === 'object' ? hooks : {};
     this.root = doc.getElementById('despertar-juizo-modal');
     this._busy = false;
     this._pendingChoice = null;
@@ -120,6 +131,9 @@ export class JuizoModal {
     this.hudStreak = this.root.querySelector('[data-juizo-hud="streak"]');
     this.hudBest = this.root.querySelector('[data-juizo-hud="best"]');
     this.hudVerdicts = this.root.querySelector('[data-juizo-hud="verdicts"]');
+    this.hudNext = this.root.querySelector('[data-juizo-hud="next"]');
+    this.mercyBadge = this.root.querySelector('[data-juizo-mercy]');
+    this.prompt = this.root.querySelector('[data-juizo-prompt]');
     this.cardA = cardNodes(this.root, 'A');
     this.cardB = cardNodes(this.root, 'B');
     this.failCardA = failCardNodes(this.root, 'A');
@@ -129,10 +143,10 @@ export class JuizoModal {
     this.revealA = this.root.querySelector('[data-juizo-reveal-a]');
     this.revealB = this.root.querySelector('[data-juizo-reveal-b]');
     this.btnTie = this.root.querySelector('[data-juizo-choice="tie"]');
-    this.btnConfirm = this.root.querySelector('[data-juizo-action="confirm"]');
     this.btnBack = this.root.querySelector('[data-juizo-action="back"]');
     this.btnRestart = this.root.querySelector('[data-juizo-action="restart"]');
     this.btnFailBack = this.root.querySelector('[data-juizo-action="fail-back"]');
+    this.btnBancada = this.root.querySelector('[data-juizo-action="open-bancada"]');
 
     const eduHint = this.root.querySelector('[data-juizo-hint]');
     if (eduHint) eduHint.textContent = JUIZO_MODAL_EDU_HINT;
@@ -140,10 +154,10 @@ export class JuizoModal {
     this.cardA?.root?.addEventListener('click', () => this.#selectChoice('A'));
     this.cardB?.root?.addEventListener('click', () => this.#selectChoice('B'));
     this.btnTie?.addEventListener('click', () => this.#selectChoice('tie'));
-    this.btnConfirm?.addEventListener('click', () => this.#confirmPending());
     this.btnBack?.addEventListener('click', () => this.close({ abandon: true }));
     this.btnFailBack?.addEventListener('click', () => this.close({ abandon: false }));
     this.btnRestart?.addEventListener('click', () => this.open());
+    this.btnBancada?.addEventListener('click', () => this.#openBancada());
     return this;
   }
 
@@ -248,13 +262,35 @@ export class JuizoModal {
     return [this.cardA?.root, this.cardB?.root, this.btnTie].filter(Boolean);
   }
 
+  #setPrompt(text = '') {
+    setText(this.prompt, text);
+  }
+
+  #syncMercyBadge() {
+    const active = typeof this.hooks.hasMercy === 'function'
+      ? Boolean(this.hooks.hasMercy())
+      : false;
+    setHidden(this.mercyBadge, !active);
+    if (this.mercyBadge && active) {
+      this.mercyBadge.title = 'Catálogo Vivo: 1 indulgência por corrida';
+    }
+  }
+
+  #openBancada() {
+    this.close({ abandon: false }).then(() => {
+      if (typeof this.hooks.openBancada === 'function') {
+        this.hooks.openBancada();
+      }
+    });
+  }
+
   #clearPendingChoice() {
     this._pendingChoice = null;
     this.#choiceButtons().forEach((btn) => {
       btn.classList.remove('is-selected');
       btn.setAttribute('aria-pressed', 'false');
     });
-    if (this.btnConfirm) this.btnConfirm.disabled = true;
+    this.#setPrompt('');
   }
 
   #selectChoice(choice) {
@@ -262,24 +298,24 @@ export class JuizoModal {
     if (this.play?.hidden) return;
     if (choice !== 'A' && choice !== 'B' && choice !== 'tie') return;
 
-    // Segundo clique/tecla na mesma escolha confirma.
+    // Duplo clique / segundo toque na mesma escolha confirma.
     if (this._pendingChoice === choice) {
       this.#confirmPending();
       return;
     }
 
     this._pendingChoice = choice;
+    let selectedBtn = null;
     this.#choiceButtons().forEach((btn) => {
       const selected = btn.getAttribute('data-juizo-choice') === choice
         || (choice === 'A' && btn === this.cardA?.root)
         || (choice === 'B' && btn === this.cardB?.root);
       btn.classList.toggle('is-selected', selected);
       btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+      if (selected) selectedBtn = btn;
     });
-    if (this.btnConfirm) {
-      this.btnConfirm.disabled = false;
-      this.btnConfirm.focus();
-    }
+    this.#setPrompt(PENDING_PROMPT);
+    selectedBtn?.focus?.();
   }
 
   #confirmPending() {
@@ -289,9 +325,12 @@ export class JuizoModal {
   }
 
   #renderHud(hud = {}, { bump = false } = {}) {
+    const best = hud.best ?? 0;
     setText(this.hudStreak, `Sequência ${hud.streak ?? 0}`);
-    setText(this.hudBest, `Recorde ${hud.best ?? 0}`);
+    setText(this.hudBest, `Recorde ${best}`);
     setText(this.hudVerdicts, `${hud.verdicts ?? 0} Vereditos`);
+    setText(this.hudNext, formatJuizoNextMilestone(best));
+    this.#syncMercyBadge();
     if (bump && !juicePrefersReducedMotion()) {
       juiceBumpClass(this.hudStreak, 'is-bump', 480);
     }
@@ -336,9 +375,6 @@ export class JuizoModal {
     this.#choiceButtons().forEach((btn) => {
       btn.disabled = Boolean(disabled);
     });
-    if (this.btnConfirm) {
-      this.btnConfirm.disabled = Boolean(disabled) || !this._pendingChoice;
-    }
   }
 
   #clearConfetti() {
@@ -449,6 +485,7 @@ export class JuizoModal {
       this.failBody,
       `Δ ${delta}. Sequência quebrada em ${n}. Recorde: ${best}.`,
     );
+    this.#syncMercyBadge();
     this.btnRestart?.focus();
   }
 

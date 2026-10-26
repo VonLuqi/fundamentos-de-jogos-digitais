@@ -27,6 +27,26 @@ export function toScaled(value) {
   }
   if (typeof value !== 'string' && typeof value !== 'number') fail(value);
   const raw = String(value).trim();
+  const sciMatch = raw.match(/^(-?)(\d+)(?:\.(\d+))?[eE]([+-]?\d+)$/);
+  if (sciMatch) {
+    const neg = sciMatch[1] === '-';
+    const intDigits = sciMatch[2];
+    const fracDigits = sciMatch[3] || '';
+    const exp = Number.parseInt(sciMatch[4], 10);
+    if (!Number.isFinite(exp) || exp < -20 || exp > 300) fail(value);
+    const digits = intDigits + fracDigits;
+    const shift = exp - fracDigits.length;
+    let expanded;
+    if (shift >= 0) {
+      expanded = `${neg ? '-' : ''}${digits}${'0'.repeat(shift)}`;
+    } else {
+      const cut = digits.length + shift;
+      expanded = cut <= 0
+        ? `${neg ? '-' : ''}0.${'0'.repeat(-cut)}${digits}`
+        : `${neg ? '-' : ''}${digits.slice(0, cut)}.${digits.slice(cut)}`;
+    }
+    return toScaled(expanded);
+  }
   const match = raw.match(/^(-?)(\d+)(?:\.(\d+))?$/);
   if (!match) fail(value);
   const negative = match[1] === '-';
@@ -145,6 +165,24 @@ export function floorSqrtRatio(p, q) {
   while (lo < hi) {
     const mid = (lo + hi + 1n) / 2n;
     if (mid * mid * q <= p) lo = mid;
+    else hi = mid - 1n;
+  }
+  return lo;
+}
+
+/**
+ * floor(cbrt(p / q)) para p,q inteiros não negativos (Fase F8 — curva cúbica de prestígio).
+ */
+export function floorCbrtRatio(p, q) {
+  if (q <= 0n) throw new Error('Denominador inválido.');
+  if (p <= 0n) return 0n;
+  const ratio = p / q;
+  if (ratio <= 0n) return 0n;
+  let lo = 0n;
+  let hi = isqrt(ratio) + 1n;
+  while (lo < hi) {
+    const mid = (lo + hi + 1n) / 2n;
+    if (mid * mid * mid <= ratio) lo = mid;
     else hi = mid - 1n;
   }
   return lo;

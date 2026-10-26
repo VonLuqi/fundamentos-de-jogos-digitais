@@ -1,0 +1,257 @@
+/**
+ * LeechRingView (Fase F6 — Sanguessugas do Acheron / Wrinklers + Controles da Catábase).
+ *
+ * Regras de orçamento (Fase Perf & A11y):
+ * - Zero `requestAnimationFrame` próprio e zero `getBoundingClientRect` por frame.
+ * - Pre-aloca os 14 slots radiais de Sanguessugas (`LEECH_MAX_CAP`) na montagem e apenas
+ *   alterna `hidden`, `className` e `title` / `aria-label` na cadência lenta / on-dirty do UIRenderer.
+ * - Respeita `prefers-reduced-motion` e `fancy: false` (aplica classe `.is-static` para congelar contorção).
+ * - Dispara feedback flutuante via Object Pool (`acquirePooledNode` / `releasePooledNode`) ao estourar.
+ */
+
+import { CATABASE_STAGES } from '../../config/catabase.js';
+import { LEECH_MAX_CAP } from '../../config/constants.js';
+import { getUpgrade } from '../../config/upgrades.js';
+import { cmp } from '../../core/decimal.js';
+import { formatSouls } from '../NumberFormatter.js';
+import { acquirePooledNode, releasePooledNode } from '../particles.js';
+
+export function leechSlotPolarPosition(slot = 0, maxSlots = 10) {
+  const cap = Math.max(1, Math.min(LEECH_MAX_CAP, Number(maxSlots) || 10));
+  const idx = Math.max(0, Math.min(cap - 1, Math.floor(Number(slot) || 0)));
+  const angleRad = ((idx / cap) * Math.PI * 2) - (Math.PI / 2);
+  const radiusPct = 36;
+  const xPct = Number((50 + Math.cos(angleRad) * radiusPct).toFixed(2));
+  const yPct = Number((50 + Math.sin(angleRad) * radiusPct).toFixed(2));
+  const deg = Number(((angleRad * 180) / Math.PI + 90).toFixed(1));
+  return { xPct, yPct, deg };
+}
+
+export class LeechRingView {
+  constructor(options = {}) {
+    this._doc = options.document || (typeof document !== 'undefined' ? document : null);
+    this._onPopLeech = typeof options.onPopLeech === 'function' ? options.onPopLeech : null;
+    this._onActivatePledge = typeof options.onActivatePledge === 'function' ? options.onActivatePledge : null;
+    this._onToggleCovenant = typeof options.onToggleCovenant === 'function' ? options.onToggleCovenant : null;
+    this._stageHost = null;
+    this._particleLayer = null;
+    this._ringEl = null;
+    this._pactBar = null;
+    this._stageBadge = null;
+    this._researchBadge = null;
+    this._pledgeBtn = null;
+    this._covenantBtn = null;
+    this._slotButtons = [];
+  }
+
+  mount({ stageHost = null, particleLayer = null, altarCol = null } = {}) {
+    this._stageHost = stageHost;
+    this._particleLayer = particleLayer;
+    if (!this._doc?.createElement) return this;
+
+    if (this._stageHost && !this._ringEl) {
+      const ring = this._doc.createElement('div');
+      ring.className = 'despertar-leech-ring';
+      ring.id = 'despertar-leech-ring';
+      ring.setAttribute('role', 'group');
+      ring.setAttribute('aria-label', 'Sanguessugas do Acheron ancoradas na Foice');
+      ring.hidden = true;
+
+      for (let slot = 0; slot < LEECH_MAX_CAP; slot += 1) {
+        const btn = this._doc.createElement('button');
+        btn.type = 'button';
+        btn.className = 'despertar-leech';
+        btn.dataset.leechSlot = String(slot);
+        btn.hidden = true;
+        btn.addEventListener?.('click', (event) => {
+          event?.stopPropagation?.();
+          this._onPopLeech?.(slot);
+        });
+        ring.append?.(btn);
+        this._slotButtons.push(btn);
+      }
+
+      this._ringEl = ring;
+      this._stageHost.append?.(ring);
+    }
+
+    const pactParent = altarCol || this._stageHost;
+    if (pactParent && !this._pactBar) {
+      const bar = this._doc.createElement('div');
+      bar.className = 'despertar-catabase-bar';
+      bar.id = 'despertar-catabase-bar';
+      bar.hidden = true;
+
+      const stageBadge = this._doc.createElement('p');
+      stageBadge.className = 'despertar-catabase-bar__stage';
+      stageBadge.id = 'despertar-catabase-stage';
+
+      const researchBadge = this._doc.createElement('p');
+      researchBadge.className = 'despertar-catabase-bar__research';
+      researchBadge.id = 'despertar-catabase-research';
+      researchBadge.hidden = true;
+
+      const actions = this._doc.createElement('div');
+      actions.className = 'despertar-catabase-bar__actions';
+
+      const pledgeBtn = this._doc.createElement('button');
+      pledgeBtn.type = 'button';
+      pledgeBtn.className = 'despertar-ghost despertar-catabase-bar__btn';
+      pledgeBtn.id = 'despertar-catabase-pledge';
+      pledgeBtn.hidden = true;
+      pledgeBtn.addEventListener?.('click', () => this._onActivatePledge?.());
+
+      const covenantBtn = this._doc.createElement('button');
+      covenantBtn.type = 'button';
+      covenantBtn.className = 'despertar-ghost despertar-catabase-bar__btn';
+      covenantBtn.id = 'despertar-catabase-covenant';
+      covenantBtn.hidden = true;
+      covenantBtn.addEventListener?.('click', () => this._onToggleCovenant?.());
+
+      actions.append?.(pledgeBtn, covenantBtn);
+      bar.append?.(stageBadge, researchBadge, actions);
+      pactParent.append?.(bar);
+
+      this._pactBar = bar;
+      this._stageBadge = stageBadge;
+      this._researchBadge = researchBadge;
+      this._pledgeBtn = pledgeBtn;
+      this._covenantBtn = covenantBtn;
+    }
+
+    return this;
+  }
+
+  /**
+   * Sincroniza os slots de Sanguessugas e a barra de Trégua/Aliança (apenas na cadência lenta / on-dirty).
+   */
+  sync(state, meta = {}) {
+    if (!state) return;
+    const reducedMotion = Boolean(meta.reducedMotion);
+    const fancy = meta.fancy !== false;
+    const staticMode = reducedMotion || !fancy;
+
+    const leeches = typeof state.leeches === 'function'
+      ? state.leeches()
+      : (state.catabase?.leeches || []);
+    const maxCap = typeof state.maxLeeches === 'function' ? state.maxLeeches() : 10;
+
+    if (this._ringEl) {
+      this._ringEl.hidden = leeches.length === 0;
+      this._ringEl.classList?.toggle?.('is-static', staticMode);
+
+      const bySlot = new Map();
+      for (const l of leeches) {
+        if (l && Number.isFinite(Number(l.slot))) {
+          bySlot.set(Number(l.slot), l);
+        }
+      }
+
+      for (let s = 0; s < this._slotButtons.length; s += 1) {
+        const btn = this._slotButtons[s];
+        const leech = bySlot.get(s);
+        if (!leech) {
+          btn.hidden = true;
+          continue;
+        }
+        btn.hidden = false;
+        const pos = leechSlotPolarPosition(s, maxCap);
+        btn.style?.setProperty?.('--leech-x', `${pos.xPct}%`);
+        btn.style?.setProperty?.('--leech-y', `${pos.yPct}%`);
+        btn.style?.setProperty?.('--leech-deg', `${pos.deg}deg`);
+        btn.classList?.toggle?.('is-shiny', Boolean(leech.shiny));
+        btn.classList?.toggle?.('is-static', staticMode);
+        const digLabel = formatSouls(leech.digested || '0');
+        const kindLabel = leech.shiny ? 'Sanguessuga Abissal Dourada' : 'Sanguessuga do Acheron';
+        const label = `${kindLabel} · Digerido: ${digLabel} almas (clique para estourar)`;
+        btn.setAttribute?.('aria-label', label);
+        btn.title = label;
+        btn.textContent = leech.shiny ? '✨🪱' : '🪱';
+      }
+    }
+
+    if (this._pactBar) {
+      const structStage = typeof state.structuralCatabaseStage === 'function'
+        ? state.structuralCatabaseStage()
+        : Number(state.catabase?.stage || 0);
+      const effStage = typeof state.catabaseStage === 'function'
+        ? state.catabaseStage()
+        : structStage;
+      const hasResearchHub = Array.isArray(state.upgrades) && state.upgrades.includes('concilio_das_moiras');
+      const showBar = hasResearchHub || structStage >= 1;
+      this._pactBar.hidden = !showBar;
+
+      if (showBar) {
+        const stageInfo = CATABASE_STAGES[effStage] || CATABASE_STAGES[0];
+        const covOn = typeof state.isElderCovenantActive === 'function'
+          ? state.isElderCovenantActive()
+          : Boolean(state.catabase?.covenantActive);
+        const pledgeOn = typeof state.isElderPledgeActive === 'function'
+          ? state.isElderPledgeActive()
+          : false;
+
+        let statusText = stageInfo.name;
+        if (covOn) statusText = 'Catábase contida · Aliança Eterna (−5% SPS)';
+        else if (pledgeOn) statusText = 'Catábase suspensa · Juramento de Trégua ativo';
+
+        if (this._stageBadge) {
+          this._stageBadge.textContent = statusText;
+        }
+
+        const resTargetId = state.catabase?.researchTargetId || null;
+        const resRem = Math.ceil(Number(state.catabase?.researchRemainingSec || 0));
+        if (this._researchBadge) {
+          if (resTargetId && resRem > 0) {
+            const upDef = getUpgrade(resTargetId);
+            this._researchBadge.hidden = false;
+            this._researchBadge.textContent = `Pesquisa: ${upDef?.name || resTargetId} (${resRem} s)`;
+          } else {
+            this._researchBadge.hidden = true;
+          }
+        }
+
+        const canUsePacts = structStage >= 3 || (Array.isArray(state.upgrades) && state.upgrades.includes('pacto_primordial'));
+        if (this._pledgeBtn) {
+          this._pledgeBtn.hidden = !canUsePacts || covOn;
+          if (!this._pledgeBtn.hidden) {
+            const pCost = typeof state.pledgeCost === 'function' ? state.pledgeCost() : '1';
+            this._pledgeBtn.textContent = pledgeOn
+              ? `Renovar Trégua (${formatSouls(pCost)})`
+              : `Juramento de Trégua (${formatSouls(pCost)} almas)`;
+            this._pledgeBtn.disabled = cmp(state.souls || '0', pCost) < 0 && !state.debugFlags?.freeShopping;
+          }
+        }
+        if (this._covenantBtn) {
+          this._covenantBtn.hidden = !canUsePacts;
+          if (!this._covenantBtn.hidden) {
+            this._covenantBtn.textContent = covOn
+              ? 'Revogar Aliança Eterna'
+              : 'Aliança Eterna (−5% SPS)';
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Dispara texto flutuante via Object Pool ao estourar uma Sanguessuga.
+   */
+  spawnPopFeedback(result, opts = {}) {
+    if (!result?.ok || !result?.popped) return null;
+    if (opts.reducedMotion || opts.particles === false) return null;
+    const host = this._particleLayer || this._stageHost;
+    const doc = this._doc || host?.ownerDocument;
+    if (!host || !doc?.createElement) return null;
+
+    const node = acquirePooledNode(doc, 'leech-float', 'despertar-reap-float despertar-leech-float');
+    if (!node) return null;
+    const prefix = result.leech?.shiny ? 'Sanguessuga Dourada!' : 'Sanguessuga estourada';
+    node.textContent = `${prefix} · +${formatSouls(result.payout || '0')} almas`;
+    host.appendChild?.(node);
+    const timer = setTimeout(() => {
+      releasePooledNode('leech-float', node);
+    }, 900);
+    if (typeof timer?.unref === 'function') timer.unref();
+    return node;
+  }
+}

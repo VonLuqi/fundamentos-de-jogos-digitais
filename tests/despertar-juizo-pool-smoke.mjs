@@ -86,7 +86,7 @@ staticAssert(indexJs.includes('bindJuizoCta') || indexJs.includes('getJuizoCtaSt
 const eduSrc = read('js/hades-despertar/config/edu-logs.js');
 staticAssert(eduSrc.includes('JUIZO_CODEX_BODY') || eduSrc.includes(JUIZO_CODEX_BODY.slice(0, 40)), 'Códice log_juizo J.1');
 const genSrc = read('js/hades-despertar/config/generators.js');
-staticAssert(genSrc.includes('distinto do minigame Juízo'), 'Juiz do Tártaro blurb Q16');
+staticAssert(genSrc.includes('Minos') || genSrc.includes('malhete'), 'Juiz do Tártaro blurb lore');
 const uiSrc = read('js/hades-despertar/ui/UIRenderer.js');
 staticAssert(uiSrc.includes('Não é Veredito do Juízo'), 'Juramento Styx blurb Q16');
 staticAssert(uiSrc.includes('JUIZO_BANCADA_HINT'), 'Bancada hint wired no renderer');

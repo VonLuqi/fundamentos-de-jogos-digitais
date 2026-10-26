@@ -44,6 +44,19 @@ export function generatorSprite(id) {
   };
 }
 
+/** Pixel art dos habitats (prateleiras e órbita). Não substitui o ícone da loja. */
+export function habitatSprite(id) {
+  const def = GENERATOR_BY_ID[id];
+  const paths = spritePaths('habitats', id);
+  return {
+    id,
+    ...paths,
+    mark: markFrom(def?.name, id),
+    tier: def?.tier ?? 1,
+    pixel: true,
+  };
+}
+
 export function upgradeSprite(id) {
   const def = UPGRADE_BY_ID[id];
   const paths = spritePaths('upgrades', id);
@@ -51,6 +64,16 @@ export function upgradeSprite(id) {
     id,
     ...paths,
     mark: markFrom(def?.name, id),
+  };
+}
+
+export function shimmerSprite(id) {
+  const spriteId = id === 'wrath' || id === 'eco_colerico' ? 'eco_colerico' : 'eco_dourado';
+  const paths = spritePaths('shimmers', spriteId);
+  return {
+    id: spriteId,
+    ...paths,
+    mark: spriteId === 'eco_colerico' ? 'Ψ' : '✦',
   };
 }
 
@@ -131,6 +154,40 @@ export function loadSpriteImage(url, env = {}) {
  */
 export async function loadGeneratorImage(id, env = {}) {
   const sprite = generatorSprite(id);
+  const webpImg = await loadSpriteImage(sprite.webp, env);
+  if (webpImg) return webpImg;
+  return loadSpriteImage(sprite.svg, env);
+}
+
+/** Habitat pixel art. Sem fallback para a ilustração da loja. */
+export async function loadHabitatImage(id, env = {}) {
+  const sprite = habitatSprite(id);
+  const webpImg = await loadSpriteImage(sprite.webp, env);
+  if (webpImg) return webpImg;
+  return loadSpriteImage(sprite.svg, env);
+}
+
+/** Variação de habitat (o upgrade troca o personagem, não desenha um overlay). */
+export function habitatVariantSprite(accessory) {
+  return spritePaths('habitats/variants', accessory);
+}
+
+export async function loadHabitatVariantImage(accessory, env = {}) {
+  const sprite = habitatVariantSprite(accessory);
+  const webpImg = await loadSpriteImage(sprite.webp, env);
+  if (webpImg) return webpImg;
+  return loadSpriteImage(sprite.svg, env);
+}
+
+/** Fundo pixel art da prateleira. O query troca o cache quando o chão muda. */
+export function habitatBackgroundSprite(id) {
+  const sprite = spritePaths('habitats/backgrounds', id);
+  if (sprite.webp) sprite.webp += '?v=floor3';
+  return sprite;
+}
+
+export async function loadHabitatBackgroundImage(id, env = {}) {
+  const sprite = habitatBackgroundSprite(id);
   const webpImg = await loadSpriteImage(sprite.webp, env);
   if (webpImg) return webpImg;
   return loadSpriteImage(sprite.svg, env);

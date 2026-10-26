@@ -3,6 +3,12 @@ declare(strict_types=1);
 
 namespace App\Services\Despertar;
 
+use App\Core\GameCatalog;
+
+if (!class_exists(GameCatalog::class)) {
+    require_once dirname(__DIR__, 2) . '/Core/GameCatalog.php';
+}
+
 /**
  * Fórmulas econômicas e avaliação de conquistas/códice de O Despertar
  * (`js/hades-despertar/core/formulas.js` + `api/_lib/despertar-achievements.js`).
@@ -21,6 +27,84 @@ final class DespertarFormulas
             return DespertarDecimal::money('0');
         }
         return DespertarDecimal::money(DespertarDecimal::geometricSum115($baseCost, $owned, $safeCount, $costMult));
+    }
+
+    /**
+     * Fase F8 — Reembolso exato ao vender `count` unidades quando se possui `owned` unidades:
+     * Referência = custo das unidades `owned - count` até `owned - 1`, multiplicado por `refundRate`
+     * (`0.25` base, ou `0.50` com a aura `abalo_do_tartaro`).
+     */
+    public static function generatorSellRefund(
+        string $baseCost,
+        int $owned,
+        int $count,
+        string $costMult = DespertarCatalog::GENERATOR_COST_MULT_BASE,
+        string $refundRate = DespertarCatalog::GENERATOR_SELL_REFUND_BASE
+    ): string {
+        $currentOwned = max(0, $owned);
+        $safeCount = min($currentOwned, max(0, $count));
+        if ($safeCount <= 0 || $currentOwned <= 0) {
+            return DespertarDecimal::money('0');
+        }
+        $startOwned = $currentOwned - $safeCount;
+        $refBatch = self::generatorBatchCost($baseCost, $startOwned, $safeCount, $costMult);
+        return DespertarDecimal::money(DespertarDecimal::mul($refBatch, $refundRate !== '' ? $refundRate : DespertarCatalog::GENERATOR_SELL_REFUND_BASE));
+    }
+
+    /**
+     * Fase F8 — Multiplicador de custo específico de um gerador considerando `fortune_100` (−1%),
+     * `fortune_gen_{id}` (−7%), Rei Saturno (−1%/lv) e `contrato_de_hermes` (−2%).
+     *
+     * @param array<int, string> $upgrades
+     * @param array<string, mixed> $seasons
+     */
+    public static function generatorCostMultForId(?string $generatorId = null, string $baseCostMult = DespertarCatalog::GENERATOR_COST_MULT_BASE, array $upgrades = [], array $seasons = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgrades));
+        $mult = $baseCostMult !== '' ? $baseCostMult : DespertarCatalog::GENERATOR_COST_MULT_BASE;
+        if (isset($owned['fortune_100'])) {
+            $mult = DespertarDecimal::mul($mult, DespertarCatalog::FORTUNE_100_COST_MULT);
+        }
+        if ($generatorId !== null && $generatorId !== '') {
+            $lineId = 'fortune_gen_' . $generatorId;
+            if (isset($owned[$lineId])) {
+                $mult = DespertarDecimal::mul($mult, DespertarCatalog::FORTUNE_LINE_COST_MULT);
+            }
+        }
+        $saturnLv = max(0, min(DespertarCatalog::SATURN_KING_MAX_LEVEL, (int) ($seasons['saturnKingLevel'] ?? 0)));
+        if ($saturnLv > 0) {
+            $saturnDisc = DespertarDecimal::sub('1', DespertarDecimal::mul(DespertarCatalog::SATURN_KING_DISCOUNT_PER_LEVEL, (string) $saturnLv));
+            $mult = DespertarDecimal::mul($mult, $saturnDisc);
+        }
+        if (isset($owned['contrato_de_hermes'])) {
+            $mult = DespertarDecimal::mul($mult, DespertarCatalog::HERMES_CONTRACT_COST_MULT);
+        }
+        return $mult;
+    }
+
+    /**
+     * Fase F8 — Custo efetivo de um juramento do Styx após descontos de `fortune_101` (−7%)
+     * e Rei Saturno (−1% por nível).
+     *
+     * @param array<int, string> $upgrades
+     * @param array<string, mixed> $seasons
+     */
+    public static function upgradeEffectiveCost(string $baseCost, array $upgrades = [], array $seasons = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgrades));
+        $mult = '1';
+        if (isset($owned['fortune_101'])) {
+            $mult = DespertarDecimal::mul($mult, DespertarCatalog::FORTUNE_101_UPGRADE_COST_MULT);
+        }
+        $saturnLv = max(0, min(DespertarCatalog::SATURN_KING_MAX_LEVEL, (int) ($seasons['saturnKingLevel'] ?? 0)));
+        if ($saturnLv > 0) {
+            $saturnDisc = DespertarDecimal::sub('1', DespertarDecimal::mul(DespertarCatalog::SATURN_KING_DISCOUNT_PER_LEVEL, (string) $saturnLv));
+            $mult = DespertarDecimal::mul($mult, $saturnDisc);
+        }
+        if (DespertarDecimal::cmp($mult, '1') === 0) {
+            return DespertarDecimal::money($baseCost);
+        }
+        return DespertarDecimal::money(DespertarDecimal::mul($baseCost, $mult));
     }
 
     /**
@@ -95,6 +179,15 @@ final class DespertarFormulas
         if (isset($owned['eco_ressonante'])) {
             $softPrestigeStyxCount = max($softPrestigeStyxCount, DespertarCatalog::ECO_STYX_RESSONANTE_COUNT);
         }
+        if (isset($owned['eco_ancestral_iii'])) {
+            $softPrestigeStyxCount = max($softPrestigeStyxCount, 3);
+        }
+        if (isset($owned['eco_ancestral_iv'])) {
+            $softPrestigeStyxCount = max($softPrestigeStyxCount, 4);
+        }
+        if (isset($owned['eco_ancestral_v'])) {
+            $softPrestigeStyxCount = max($softPrestigeStyxCount, 5);
+        }
 
         return [
             'startingSouls' => $startingSouls,
@@ -114,6 +207,10 @@ final class DespertarFormulas
             'softPrestigeStyx' => $softPrestigeStyxCount > 0,
             'softPrestigeStyxCount' => $softPrestigeStyxCount,
             'mnemosyneGainBoost' => isset($owned['calice_da_memoria']),
+            'nectarReserveBonus' => isset($owned['nectar_em_reserva']),
+            'nectarFrenzyUnlock' => isset($owned['frenesi_de_nectar_talento']),
+            'dragonUnlock' => isset($owned['ovo_primordial']),
+            'seasonSwitcherUnlock' => isset($owned['rodizio_das_estacoes']),
         ];
     }
 
@@ -207,8 +304,48 @@ final class DespertarFormulas
                 return false;
             }
         }
+        if (!empty($req['minGenerators']) && is_array($req['minGenerators'])) {
+            foreach ($req['minGenerators'] as $genId => $minQty) {
+                $haveQty = (int) (($ctx['generators'][(string) $genId] ?? 0));
+                if ($haveQty < (int) $minQty) {
+                    return false;
+                }
+            }
+        }
+        if (isset($req['minVeilPercent']) && (int) $req['minVeilPercent'] > 0) {
+            $veilPct = isset($ctx['veilPercent']) && is_numeric($ctx['veilPercent'])
+                ? (int) floor((float) $ctx['veilPercent'])
+                : self::veilPercent(
+                    $ctx['achievements'] ?? $ctx['unlockedAchievements'] ?? [],
+                    isset($ctx['normalAchievementsCount']) && is_numeric($ctx['normalAchievementsCount'])
+                        ? (int) $ctx['normalAchievementsCount']
+                        : null
+                );
+            if ($veilPct < (int) $req['minVeilPercent']) {
+                return false;
+            }
+        }
         if (isset($req['minSouls'])) {
             if (DespertarDecimal::cmp($ctx['souls'] ?? '0', $req['minSouls']) < 0) {
+                return false;
+            }
+        }
+        if (isset($req['dragonStage']) && (int) $req['dragonStage'] > 0 && is_array($ctx['dragon'] ?? null)) {
+            $stg = (int) ($ctx['dragon']['stage'] ?? 0);
+            $scaleDropped = !empty($ctx['dragon']['scaleDropped']);
+            if ($stg < (int) $req['dragonStage'] && !$scaleDropped && !isset($owned[(string) $upgrade['id']])) {
+                return false;
+            }
+        }
+        if (!empty($req['seasonalDropId']) && is_array($ctx['seasons']['unlockedDrops'] ?? null)) {
+            $dropSet = array_flip(array_map('strval', $ctx['seasons']['unlockedDrops']));
+            if (!isset($dropSet[(string) $req['seasonalDropId']]) && !isset($owned[(string) $req['seasonalDropId']])) {
+                return false;
+            }
+        }
+        if (!empty($req['fortuneId']) && is_array($ctx['fortunes']['claimedIds'] ?? null)) {
+            $claimSet = array_flip(array_map('strval', $ctx['fortunes']['claimedIds']));
+            if (!isset($claimSet[(string) $req['fortuneId']]) && !isset($owned[(string) $req['fortuneId']])) {
                 return false;
             }
         }
@@ -261,9 +398,133 @@ final class DespertarFormulas
     }
 
     /**
-     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
      */
-    public static function generatorUpgradeMult(string $generatorId, array $upgradeIds = []): string
+    public static function nonShadeGeneratorsCount(array $generators = []): int
+    {
+        $count = 0;
+        foreach (DespertarCatalog::GENERATORS as $def) {
+            if ($def['id'] === 'wandering_shade') {
+                continue;
+            }
+            $qty = max(0, (int) ($generators[$def['id']] ?? 0));
+            $count += $qty;
+        }
+        return $count;
+    }
+
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     */
+    public static function thousandBladesBonusPerUnit(array $upgradeIds = [], array $generators = []): string
+    {
+        $upgradesById = DespertarCatalog::upgradesById();
+        $basePerBuilding = '0';
+        $mult = '1';
+        foreach ($upgradeIds as $rawId) {
+            $u = $upgradesById[(string) $rawId] ?? null;
+            if (!$u) {
+                continue;
+            }
+            if ($u['kind'] === 'thousandBlades') {
+                $basePerBuilding = DespertarDecimal::add($basePerBuilding, (string) $u['factor']);
+            } elseif ($u['kind'] === 'thousandBladesMult') {
+                $mult = DespertarDecimal::mul($mult, (string) $u['factor']);
+            }
+        }
+        if (DespertarDecimal::cmp($basePerBuilding, '0') <= 0) {
+            return '0';
+        }
+        $nonShadeQty = self::nonShadeGeneratorsCount($generators);
+        if ($nonShadeQty <= 0) {
+            return '0';
+        }
+        $perBuilding = DespertarDecimal::mul($basePerBuilding, $mult);
+        return DespertarDecimal::mul($perBuilding, (string) $nonShadeQty);
+    }
+
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     */
+    public static function nonShadeBonus(array $upgradeIds = [], array $generators = []): string
+    {
+        return self::thousandBladesBonusPerUnit($upgradeIds, $generators);
+    }
+
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     */
+    public static function synergyUpgradeMult(string $generatorId, array $upgradeIds = [], array $generators = []): string
+    {
+        $upgradesById = DespertarCatalog::upgradesById();
+        $mult = '1';
+        foreach ($upgradeIds as $rawId) {
+            $u = $upgradesById[(string) $rawId] ?? null;
+            if (!$u || ($u['kind'] ?? '') !== 'synergyMult') {
+                continue;
+            }
+            if (($u['boostedGeneratorId'] ?? '') === $generatorId) {
+                $baseId = (string) ($u['baseGeneratorId'] ?? '');
+                $baseQty = max(0, (int) ($generators[$baseId] ?? 0));
+                $bonus = DespertarDecimal::mul((string) ($u['boostedBonusPerBase'] ?? '0.05'), (string) $baseQty);
+                $mult = DespertarDecimal::mul($mult, DespertarDecimal::add('1', $bonus));
+            } elseif (($u['baseGeneratorId'] ?? '') === $generatorId) {
+                $boostedId = (string) ($u['boostedGeneratorId'] ?? '');
+                $boostedQty = max(0, (int) ($generators[$boostedId] ?? 0));
+                $bonus = DespertarDecimal::mul((string) ($u['baseBonusPerBoosted'] ?? '0.001'), (string) $boostedQty);
+                $mult = DespertarDecimal::mul($mult, DespertarDecimal::add('1', $bonus));
+            }
+        }
+        return $mult;
+    }
+
+    /**
+     * @param array<string, mixed> $generators
+     */
+    public static function nonServantGeneratorsCount(array $generators = []): int
+    {
+        $count = 0;
+        foreach (DespertarCatalog::GENERATORS as $def) {
+            if ($def['id'] === 'charon_servants') {
+                continue;
+            }
+            $qty = max(0, (int) ($generators[$def['id']] ?? 0));
+            $count += $qty;
+        }
+        return $count;
+    }
+
+    /**
+     * Fase F6 — Bônus base aditivo por unidade em `charon_servants` quando `pacto_primordial` (Elder Pact) está ativo:
+     * `+0.05` por cada unidade de gerador não-Servo.
+     *
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     */
+    public static function elderPactServantFlatBonusPerUnit(array $upgradeIds = [], array $generators = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgradeIds));
+        if (!isset($owned['pacto_primordial'])) {
+            return '0';
+        }
+        $nonServantQty = self::nonServantGeneratorsCount($generators);
+        if ($nonServantQty <= 0) {
+            return '0';
+        }
+        return DespertarDecimal::mul(
+            DespertarCatalog::CATABASE_STAGE3_ELDER_PACT_PER_NON_SERVANT,
+            (string) $nonServantQty
+        );
+    }
+
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     */
+    public static function generatorUpgradeMult(string $generatorId, array $upgradeIds = [], array $generators = []): string
     {
         $upgradesById = DespertarCatalog::upgradesById();
         $mult = '1';
@@ -274,11 +535,198 @@ final class DespertarFormulas
             }
             if ($u['kind'] === 'generatorMult' && ($u['generatorId'] ?? '') === $generatorId) {
                 $mult = DespertarDecimal::mul($mult, $u['factor']);
+            } elseif ($u['kind'] === 'fortuneLine' && ($u['generatorId'] ?? '') === $generatorId) {
+                $mult = DespertarDecimal::mul($mult, $u['factor']);
+            } elseif ($u['kind'] === 'catabaseResearch' && ($u['generatorId'] ?? '') === $generatorId && !empty($u['generatorFactor'])) {
+                $mult = DespertarDecimal::mul($mult, (string) $u['generatorFactor']);
             } elseif ($u['kind'] === 'allGeneratorsMult') {
                 $mult = DespertarDecimal::mul($mult, $u['factor']);
             }
         }
+        return DespertarDecimal::mul($mult, self::synergyUpgradeMult($generatorId, $upgradeIds, $generators));
+    }
+
+    /**
+     * Fase F8 — Produtório composto das Relíquias Sazonais (`seasonalCompound`).
+     *
+     * @param array<int, string> $upgradeIds
+     */
+    public static function seasonalCompoundMult(array $upgradeIds = []): string
+    {
+        $upgradesById = DespertarCatalog::upgradesById();
+        $mult = '1';
+        $seen = [];
+        foreach ($upgradeIds as $rawId) {
+            $id = (string) $rawId;
+            if ($id === '' || isset($seen[$id])) {
+                continue;
+            }
+            $u = $upgradesById[$id] ?? null;
+            if ($u && ($u['kind'] ?? '') === 'seasonalCompound' && !empty($u['factor'])) {
+                $seen[$id] = true;
+                $mult = DespertarDecimal::mul($mult, DespertarDecimal::add('1', (string) $u['factor']));
+            }
+        }
         return $mult;
+    }
+
+    /**
+     * Fase F8 — Multiplicador global de Saturnália (Rei Saturno níveis 1..5 + `bencao_do_rei_saturno`).
+     *
+     * @param array<string, mixed> $seasons
+     * @param array<int, string> $upgradeIds
+     */
+    public static function saturnaliaSpsMult(array $seasons = [], array $upgradeIds = []): string
+    {
+        $lv = max(0, min(DespertarCatalog::SATURN_KING_MAX_LEVEL, (int) ($seasons['saturnKingLevel'] ?? 0)));
+        $saturnSps = $lv > 0
+            ? DespertarDecimal::add('1', DespertarDecimal::mul(DespertarCatalog::SATURN_KING_SPS_PER_LEVEL, (string) $lv))
+            : '1';
+        $owned = array_flip(array_map('strval', $upgradeIds));
+        $upMult = isset($owned['bencao_do_rei_saturno']) ? '1.15' : '1';
+        return DespertarDecimal::mul($saturnSps, $upMult);
+    }
+
+    /**
+     * Fase F8 — Multiplicador global das Fortunas #100 (+1%) e #101 (+7%).
+     *
+     * @param array<int, string> $upgradeIds
+     */
+    public static function fortuneGlobalSpsMult(array $upgradeIds = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgradeIds));
+        $mult = '1';
+        if (isset($owned['fortune_100'])) {
+            $mult = DespertarDecimal::mul($mult, DespertarCatalog::FORTUNE_100_SPS_MULT);
+        }
+        if (isset($owned['fortune_101'])) {
+            $mult = DespertarDecimal::mul($mult, DespertarCatalog::FORTUNE_101_SPS_MULT);
+        }
+        return $mult;
+    }
+
+    /**
+     * Fase F8 — Multiplicador da Escama de Ladão (`escama_de_ladao`: +3% SPS global).
+     *
+     * @param array<int, string> $upgradeIds
+     */
+    public static function dragonScaleSpsMult(array $upgradeIds = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgradeIds));
+        return isset($owned['escama_de_ladao']) ? DespertarCatalog::DRAGON_SCALE_SPS_MULT : '1';
+    }
+
+    /**
+     * Fase F8 — Modificadores ativos das Auras do Dragão Ctoniano.
+     *
+     * @param array<string, mixed> $dragon
+     * @return array{spsMult: string, clickMult: string, veilPupBoost: string, sellRefundRate: string, dragonflightActive: bool}
+     */
+    public static function dragonModifiers(array $dragon = []): array
+    {
+        $stage = max(0, min(DespertarCatalog::DRAGON_MAX_STAGE, (int) ($dragon['stage'] ?? 0)));
+        $maxSlots = $stage >= 4 ? 2 : ($stage >= 1 ? 1 : 0);
+        $activeAuras = [];
+
+        $s1 = isset($dragon['auraSlot1']) ? (string) $dragon['auraSlot1'] : '';
+        $s2 = isset($dragon['auraSlot2']) ? (string) $dragon['auraSlot2'] : '';
+
+        if ($maxSlots >= 1 && isset(DespertarCatalog::DRAGON_AURAS[$s1]) && $stage >= DespertarCatalog::DRAGON_AURAS[$s1]['minStage']) {
+            $activeAuras[$s1] = true;
+        }
+        if ($maxSlots >= 2 && $s2 !== '' && $s2 !== $s1 && isset(DespertarCatalog::DRAGON_AURAS[$s2]) && $stage >= DespertarCatalog::DRAGON_AURAS[$s2]['minStage']) {
+            $activeAuras[$s2] = true;
+        }
+
+        $spsMult = isset($activeAuras['apetite_radiante']) ? DespertarCatalog::DRAGON_RADIANT_APPETITE_MULT : '1';
+        $clickMult = isset($activeAuras['cursor_ancestral']) ? DespertarCatalog::DRAGON_CURSOR_CLICK_MULT : '1';
+        $veilPupBoost = isset($activeAuras['sopro_de_flegeton']) ? DespertarCatalog::DRAGON_BREATH_OF_MILK_BOOST : '1';
+        $sellRefundRate = isset($activeAuras['abalo_do_tartaro'])
+            ? DespertarCatalog::GENERATOR_SELL_REFUND_EARTH_SHATTERER
+            : DespertarCatalog::GENERATOR_SELL_REFUND_BASE;
+        $dragonflightActive = isset($activeAuras['voo_draconico']);
+
+        return [
+            'spsMult' => $spsMult,
+            'clickMult' => $clickMult,
+            'veilPupBoost' => $veilPupBoost,
+            'sellRefundRate' => $sellRefundRate,
+            'dragonflightActive' => $dragonflightActive,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $dragon
+     */
+    public static function dragonAuraSpsMult(array $dragon = []): string
+    {
+        return self::dragonModifiers($dragon)['spsMult'];
+    }
+
+    /**
+     * @param array<string, mixed> $dragon
+     */
+    public static function dragonAuraClickMult(array $dragon = []): string
+    {
+        return self::dragonModifiers($dragon)['clickMult'];
+    }
+
+    /**
+     * Fase F6 — Produtório dos upgrades de pesquisa da Catábase (+1% a +5% SPS global independentes).
+     *
+     * @param array<int, string> $upgradeIds
+     */
+    public static function catabaseResearchSpsMult(array $upgradeIds = []): string
+    {
+        $upgradesById = DespertarCatalog::upgradesById();
+        $mult = '1';
+        $seen = [];
+        foreach ($upgradeIds as $rawId) {
+            $id = (string) $rawId;
+            if ($id === '' || isset($seen[$id])) {
+                continue;
+            }
+            $u = $upgradesById[$id] ?? null;
+            if ($u && ($u['kind'] ?? '') === 'catabaseResearch' && !empty($u['factor'])) {
+                $seen[$id] = true;
+                $mult = DespertarDecimal::mul($mult, (string) $u['factor']);
+            }
+        }
+        return $mult;
+    }
+
+    public static function elderCovenantMult(bool $covenantActive = false): string
+    {
+        return $covenantActive ? DespertarCatalog::CATABASE_COVENANT_SPS_MULT : '1';
+    }
+
+    public static function leechApparentMult(mixed $leechesOrCount = 0): string
+    {
+        $count = is_array($leechesOrCount) ? count($leechesOrCount) : max(0, (int) $leechesOrCount);
+        $clamped = min(DespertarCatalog::LEECH_MAX_CAP, $count);
+        if ($clamped <= 0) {
+            return '1';
+        }
+        $drain = DespertarDecimal::mul((string) $clamped, DespertarCatalog::LEECH_DRAIN_PER_UNIT);
+        return DespertarDecimal::cmp($drain, '1') >= 0 ? '0' : DespertarDecimal::sub('1', $drain);
+    }
+
+    public static function leechPayoutMultiplier(bool $shiny = false, array $upgrades = []): string
+    {
+        if ($shiny) {
+            return DespertarCatalog::LEECH_SHINY_PAYOUT_MULT;
+        }
+        $owned = array_flip(array_map('strval', $upgrades));
+        return isset($owned['visceras_sacras'])
+            ? DespertarCatalog::LEECH_PAYOUT_MULT_SACRA
+            : DespertarCatalog::LEECH_PAYOUT_MULT_BASE;
+    }
+
+    public static function calculateLeechPayout(string $digested, bool $shiny = false, array $upgrades = []): string
+    {
+        $safeDigested = DespertarDecimal::cmp($digested, '0') > 0 ? $digested : '0';
+        $mult = self::leechPayoutMultiplier($shiny, $upgrades);
+        return DespertarDecimal::money(DespertarDecimal::mul($safeDigested, $mult));
     }
 
     /**
@@ -326,7 +774,114 @@ final class DespertarFormulas
         return DespertarDecimal::add('1', $bonus);
     }
 
-    public static function lineSPS(int $qty, int $shiny, int $gold, string $baseRate, string $upgradeMult): string
+    public static function generatorLevelMult(int $level = 0): string
+    {
+        $lv = max(0, $level);
+        if ($lv <= 0) {
+            return '1';
+        }
+        return DespertarDecimal::add('1', DespertarDecimal::mul(DespertarCatalog::NECTAR_LEVEL_BONUS_PER, (string) $lv));
+    }
+
+    /**
+     * @param array<int, string> $talents
+     */
+    public static function nectarReserveMult(int $nectar = 0, array $talents = [], ?bool $nectarReserveActive = null): string
+    {
+        $hasTalent = $nectarReserveActive !== null
+            ? $nectarReserveActive
+            : !empty(self::talentEffects($talents)['nectarReserveBonus']);
+        if (!$hasTalent) {
+            return '1';
+        }
+        $capped = min(DespertarCatalog::NECTAR_RESERVE_CAP, max(0, $nectar));
+        if ($capped <= 0) {
+            return '1';
+        }
+        return DespertarDecimal::add('1', DespertarDecimal::mul(DespertarCatalog::NECTAR_RESERVE_BONUS_PER, (string) $capped));
+    }
+
+    /**
+     * @param array<string, mixed> $generatorLevels
+     * @param array<string, mixed> $minigames
+     * @return array{spsMult: string, clickMult: string}
+     */
+    public static function minigameEffects(array $generatorLevels = [], array $minigames = []): array
+    {
+        $lvTemple = max(0, (int) ($generatorLevels['mnemosyne_temple'] ?? 0));
+        $lvHound = max(0, (int) ($generatorLevels['cerberian_hound'] ?? 0));
+
+        $pantheonSps = '1';
+        $pantheonClick = '1';
+        if ($lvTemple >= 1 && is_array($minigames['pantheon'] ?? null)) {
+            $slots = is_array($minigames['pantheon']['slots'] ?? null) ? $minigames['pantheon']['slots'] : [];
+            $seen = [];
+            foreach (DespertarCatalog::PANTHEON_SLOTS as $slotDef) {
+                $sid = isset($slots[$slotDef['id']]) ? (string) $slots[$slotDef['id']] : '';
+                if ($sid === '' || isset($seen[$sid])) {
+                    continue;
+                }
+                $spirit = DespertarCatalog::PANTHEON_SPIRITS[$sid] ?? null;
+                if (!$spirit) {
+                    continue;
+                }
+                $seen[$sid] = true;
+                $idx = (int) $slotDef['multIndex'];
+                $sMult = (string) ($spirit['spsMultBySlot'][$idx] ?? '1');
+                $cMult = (string) ($spirit['clickMultBySlot'][$idx] ?? '1');
+                $pantheonSps = DespertarDecimal::mul($pantheonSps, $sMult);
+                $pantheonClick = DespertarDecimal::mul($pantheonClick, $cMult);
+            }
+        }
+
+        $gardenSps = '1';
+        $gardenClick = '1';
+        if ($lvHound >= 1 && is_array($minigames['garden'] ?? null)) {
+            $garden = $minigames['garden'];
+            $soilId = (string) ($garden['soilId'] ?? 'barro_acheron');
+            $soil = DespertarCatalog::GARDEN_SOILS[$soilId] ?? DespertarCatalog::GARDEN_SOILS['barro_acheron'];
+            $soilMult = (string) ($soil['passiveEffMult'] ?? '1');
+            $plots = is_array($garden['plots'] ?? null) ? $garden['plots'] : [];
+            $spsBonusSum = '0';
+            $clickBonusSum = '0';
+            foreach ($plots as $cell) {
+                if (!is_array($cell)) {
+                    continue;
+                }
+                $seedId = (string) ($cell['seedId'] ?? '');
+                $seed = DespertarCatalog::GARDEN_SEEDS[$seedId] ?? null;
+                if (!$seed) {
+                    continue;
+                }
+                $age = (int) ($cell['ageTicks'] ?? 0);
+                $mature = !empty($cell['mature']) || $age >= (int) $seed['matureTicks'];
+                if (!$mature || $age >= (int) $seed['lifespanTicks']) {
+                    continue;
+                }
+                if (DespertarDecimal::cmp($seed['spsBonusPerPlot'] ?? '0', '0') > 0) {
+                    $spsBonusSum = DespertarDecimal::add(
+                        $spsBonusSum,
+                        DespertarDecimal::mul((string) $seed['spsBonusPerPlot'], $soilMult)
+                    );
+                }
+                if (DespertarDecimal::cmp($seed['clickBonusPerPlot'] ?? '0', '0') > 0) {
+                    $clickBonusSum = DespertarDecimal::add(
+                        $clickBonusSum,
+                        DespertarDecimal::mul((string) $seed['clickBonusPerPlot'], $soilMult)
+                    );
+                }
+            }
+            $gardenSps = DespertarDecimal::add('1', $spsBonusSum);
+            $gardenClick = DespertarDecimal::add('1', $clickBonusSum);
+        }
+
+        return [
+            'spsMult' => DespertarDecimal::mul($pantheonSps, $gardenSps),
+            'clickMult' => DespertarDecimal::mul($pantheonClick, $gardenClick),
+        ];
+    }
+
+    public static function lineSPS(int $qty, int $shiny, int $gold, string $baseRate, string $upgradeMult, string $flatUnitBonus = '0', int $level = 0): string
     {
         $n = max(0, $qty);
         if ($n <= 0) {
@@ -336,18 +891,881 @@ final class DespertarFormulas
         $shinyN = max(0, min($n - $goldN, $shiny));
         $normal = $n - $shinyN - $goldN;
 
-        $unit = DespertarDecimal::mul($baseRate, $upgradeMult);
+        $unit = DespertarDecimal::add(
+            DespertarDecimal::mul($baseRate, $upgradeMult),
+            $flatUnitBonus !== '' ? $flatUnitBonus : '0'
+        );
         $partNormal = DespertarDecimal::mul((string) $normal, $unit);
         $partShiny = DespertarDecimal::mul(DespertarDecimal::mul((string) $shinyN, $unit), DespertarCatalog::NEGATIVO_MULT);
         $partGold = DespertarDecimal::mul(DespertarDecimal::mul((string) $goldN, $unit), DespertarCatalog::GOLD_MULT);
 
-        return DespertarDecimal::add(DespertarDecimal::add($partNormal, $partShiny), $partGold);
+        $rawLine = DespertarDecimal::add(DespertarDecimal::add($partNormal, $partShiny), $partGold);
+        return DespertarDecimal::mul($rawLine, self::generatorLevelMult($level));
     }
 
     /**
-     * @param array<string, mixed> $opts
+     * @param mixed $activeBuffs
+     * @return array<int, array<string, mixed>>
      */
-    public static function calculateTotalSPS(array $opts = []): string
+    private static function iterActiveBuffEntries(mixed $activeBuffs): array
+    {
+        if (!is_array($activeBuffs)) {
+            return [];
+        }
+        $entries = [];
+        foreach ($activeBuffs as $key => $val) {
+            if (!is_array($val)) {
+                continue;
+            }
+            if (empty($val['id']) && is_string($key)) {
+                $val['id'] = $key;
+            }
+            $entries[] = $val;
+        }
+        return $entries;
+    }
+
+    /**
+     * @param array<string, mixed> $buff
+     */
+    private static function isBuffActiveAt(array $buff, ?int $nowMs = null): bool
+    {
+        if ($nowMs === null) {
+            return true;
+        }
+        if (!isset($buff['expiresAt']) || !is_numeric($buff['expiresAt'])) {
+            return false;
+        }
+        return (int) floor((float) $buff['expiresAt']) > $nowMs;
+    }
+
+    public static function buildingSpecialMultFromQty(int $qty = 0): string
+    {
+        $n = max(0, $qty);
+        if ($n <= 0) {
+            return '1';
+        }
+        $raw = DespertarDecimal::add(DespertarDecimal::div((string) $n, '10'), '1');
+        if (DespertarDecimal::cmp($raw, DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT) > 0) {
+            return DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT;
+        }
+        return $raw;
+    }
+
+    /**
+     * Produto dos buffs de SPS ativos no topo do stack (`mare_acheron`, `clot_acheron`,
+     * `elder_frenzy_acheron`, `selo_juizo`). Deduplica por `id`.
+     */
+    public static function activeSpsBuffMult(mixed $activeBuffs = [], ?int $nowMs = null): string
+    {
+        $shimmersById = DespertarCatalog::shimmersById();
+        $mult = '1';
+        $seen = [];
+        foreach (self::iterActiveBuffEntries($activeBuffs) as $buff) {
+            $id = (string) ($buff['id'] ?? '');
+            if ($id === '' || isset($seen[$id])) {
+                continue;
+            }
+            $def = $shimmersById[$id] ?? null;
+            if (!$def || !self::isBuffActiveAt($buff, $nowMs)) {
+                continue;
+            }
+            $kind = (string) ($def['kind'] ?? '');
+            if ($kind === 'spsBuff') {
+                $seen[$id] = true;
+                $mult = DespertarDecimal::mul($mult, (string) $def['factor']);
+            } elseif ($kind === 'buildingSpecial') {
+                $seen[$id] = true;
+                $rawMult = isset($buff['mult']) ? (string) $buff['mult'] : '1';
+                $clamped = DespertarDecimal::cmp($rawMult, '1') >= 0 ? $rawMult : '1';
+                if (DespertarDecimal::cmp($clamped, DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT) > 0) {
+                    $clamped = DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT;
+                }
+                $mult = DespertarDecimal::mul($mult, $clamped);
+            }
+        }
+        return $mult;
+    }
+
+    /**
+     * Produto dos buffs de clique ativos (`furia_foice`). Deduplica por `id`.
+     */
+    public static function activeClickBuffMult(mixed $activeBuffs = [], ?int $nowMs = null): string
+    {
+        $shimmersById = DespertarCatalog::shimmersById();
+        $mult = '1';
+        $seen = [];
+        foreach (self::iterActiveBuffEntries($activeBuffs) as $buff) {
+            $id = (string) ($buff['id'] ?? '');
+            if ($id === '' || isset($seen[$id])) {
+                continue;
+            }
+            $def = $shimmersById[$id] ?? null;
+            if (!$def || ($def['kind'] ?? '') !== 'clickBuff' || !self::isBuffActiveAt($buff, $nowMs)) {
+                continue;
+            }
+            $seen[$id] = true;
+            $mult = DespertarDecimal::mul($mult, (string) $def['factor']);
+        }
+        return $mult;
+    }
+
+    /**
+     * Recompensa instantânea da *Colheita do Acheron* (paridade *Lucky*):
+     * `min(15% da carteira atual, 15 min de SPS atual) + 13`.
+     */
+    public static function calculateLuckyReward(string $souls = '0', string $sps = '0'): string
+    {
+        $walletCap = DespertarDecimal::mul($souls !== '' ? $souls : '0', DespertarCatalog::SHIMMER_LUCKY_WALLET_FRACTION);
+        $spsCap = DespertarDecimal::mul($sps !== '' ? $sps : '0', DespertarCatalog::SHIMMER_LUCKY_SPS_SECONDS);
+        $core = DespertarDecimal::cmp($walletCap, $spsCap) <= 0 ? $walletCap : $spsCap;
+        $safeCore = DespertarDecimal::cmp($core, '0') > 0 ? $core : '0';
+        return DespertarDecimal::money(
+            DespertarDecimal::add($safeCore, DespertarCatalog::SHIMMER_LUCKY_FLAT_BONUS)
+        );
+    }
+
+    /**
+     * Valida e sanitiza `activeBuffs` autoritativamente no servidor:
+     * - Rejeita IDs de buff desconhecidos ou não-buff
+     * - Rejeita buffs Wrath (`requiresCatabase: true`) quando Catábase está inativa
+     * - Rejeita buffs com `expiresAt` expirado ou inválido
+     * - Aplica cap de sobreposição (`SHIMMER_MAX_ACTIVE_BUFFS`)
+     *
+     * @return array{ok: bool, activeBuffs?: array<string, array<string, mixed>>, error?: string}
+     */
+    public static function validateActiveBuffs(mixed $rawBuffs, int $nowMs, bool $catabaseActive = false): array
+    {
+        if ($rawBuffs === null || $rawBuffs === [] || $rawBuffs === '') {
+            return ['ok' => true, 'activeBuffs' => []];
+        }
+        if (!is_array($rawBuffs)) {
+            return ['ok' => false, 'error' => 'Formato de activeBuffs inválido.'];
+        }
+
+        $shimmersById = DespertarCatalog::shimmersById();
+        $valid = [];
+        $seen = [];
+
+        foreach ($rawBuffs as $key => $val) {
+            if (!is_array($val)) {
+                return ['ok' => false, 'error' => 'Entrada de buff inválida.'];
+            }
+            $id = (string) ($val['id'] ?? (is_string($key) ? $key : ''));
+            if ($id === '' || !isset($shimmersById[$id])) {
+                return ['ok' => false, 'error' => "Buff de Eco desconhecido: {$id}"];
+            }
+            $def = $shimmersById[$id];
+            $kind = (string) ($def['kind'] ?? '');
+            if ($kind !== 'spsBuff' && $kind !== 'clickBuff' && $kind !== 'buildingSpecial') {
+                return ['ok' => false, 'error' => "Efeito instantâneo não pode permanecer como buff ativo: {$id}"];
+            }
+            if (!empty($def['requiresCatabase']) && !$catabaseActive) {
+                return ['ok' => false, 'error' => "Buff Colérico exige Catábase ativa: {$id}"];
+            }
+
+            if (!isset($val['expiresAt']) || !is_numeric($val['expiresAt'])) {
+                return ['ok' => false, 'error' => "Timestamp expiresAt ausente ou inválido em {$id}"];
+            }
+            $expiresAt = (int) floor((float) $val['expiresAt']);
+            if ($expiresAt <= $nowMs) {
+                return ['ok' => false, 'error' => "Buff de Eco já expirado: {$id}"];
+            }
+
+            $durationSec = (int) ($def['durationSec'] ?? 0);
+            $maxDurationMs = ($durationSec * 1000) + DespertarCatalog::SHIMMER_SYNC_TOLERANCE_MS;
+            if ($expiresAt > $nowMs + $maxDurationMs) {
+                $expiresAt = $nowMs + $maxDurationMs;
+            }
+            $startedAt = isset($val['startedAt']) && is_numeric($val['startedAt'])
+                ? (int) floor((float) $val['startedAt'])
+                : ($expiresAt - ($durationSec * 1000));
+
+            $mult = (string) ($def['factor'] ?? '1');
+            if ($kind === 'buildingSpecial') {
+                $rawMult = isset($val['mult']) ? (string) $val['mult'] : '2';
+                $mult = DespertarDecimal::cmp($rawMult, '1') >= 0 ? $rawMult : '1';
+                if (DespertarDecimal::cmp($mult, DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT) > 0) {
+                    $mult = DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT;
+                }
+            }
+
+            // Se já viu o mesmo id no payload, renova pelo maior expiresAt (sem empilhar cópias).
+            if (isset($seen[$id])) {
+                if ($expiresAt > $valid[$seen[$id]]['expiresAt']) {
+                    $valid[$seen[$id]]['expiresAt'] = $expiresAt;
+                }
+                continue;
+            }
+
+            $seen[$id] = count($valid);
+            $valid[] = [
+                'id' => $id,
+                'name' => $def['name'],
+                'kind' => $kind,
+                'variant' => $def['variant'],
+                'mult' => $mult,
+                'startedAt' => $startedAt,
+                'expiresAt' => $expiresAt,
+                'durationSec' => $durationSec,
+            ];
+        }
+
+        usort($valid, static fn(array $a, array $b): int => $b['expiresAt'] <=> $a['expiresAt']);
+        $capped = array_slice($valid, 0, DespertarCatalog::SHIMMER_MAX_ACTIVE_BUFFS);
+        $out = [];
+        foreach ($capped as $b) {
+            $out[$b['id']] = $b;
+        }
+
+        return ['ok' => true, 'activeBuffs' => $out];
+    }
+
+    /**
+     * Valida e sanitiza o estado de Néctar, níveis de geradores e minigames no servidor,
+     * impedindo manipulação de relógio (anti-clock-skew) para gerar Néctares infinitos.
+     *
+     * @param array<string, mixed> $dbCanonical
+     * @param array<string, mixed> $clientState
+     * @return array{ok: bool, error?: string, nectar?: int, totalNectarHarvested?: int, nectarCycleStartedAt?: int|null, nectarCurrentVariant?: string, nectarFrenzyUsedThisRun?: bool, generatorLevels?: array<string, int>, minigames?: array<string, mixed>}
+     */
+    public static function validateNectarAndMinigames(array $dbCanonical, array $clientState, int $nowMs): array
+    {
+        $genById = DespertarCatalog::generatorsById();
+        $dbMilestones = is_array($dbCanonical['milestones'] ?? null) ? $dbCanonical['milestones'] : [];
+        $dbNectarMeta = is_array($dbMilestones['f5Nectar'] ?? null) ? $dbMilestones['f5Nectar'] : [];
+
+        $rawClientMeta = is_array($clientState['nectarMeta'] ?? null)
+            ? $clientState['nectarMeta']
+            : (is_array($clientState['milestones']['f5Nectar'] ?? null) ? $clientState['milestones']['f5Nectar'] : []);
+
+        $rawLevels = $clientState['generatorLevels'] ?? $clientState['generator_levels'] ?? $rawClientMeta['generatorLevels'] ?? [];
+        if (!is_array($rawLevels)) {
+            return ['ok' => false, 'error' => 'Formato de generatorLevels inválido.'];
+        }
+        $levels = [];
+        $spentNectar = 0;
+        foreach ($rawLevels as $gid => $lvRaw) {
+            $idStr = (string) $gid;
+            if (!isset($genById[$idStr])) {
+                return ['ok' => false, 'error' => "Gerador desconhecido em generatorLevels: {$idStr}"];
+            }
+            if (!is_numeric($lvRaw) || (int) $lvRaw < 0 || (int) $lvRaw > DespertarCatalog::NECTAR_MAX_GENERATOR_LEVEL) {
+                return ['ok' => false, 'error' => "Nível inválido para {$idStr}"];
+            }
+            $lv = (int) floor((float) $lvRaw);
+            if ($lv > 0) {
+                $levels[$idStr] = $lv;
+                $spentNectar += (int) (($lv * ($lv + 1)) / 2);
+            }
+        }
+
+        $clientCycleStart = $clientState['nectarCycleStartedAt'] ?? $rawClientMeta['nectarCycleStartedAt'] ?? null;
+        if ($clientCycleStart !== null && $clientCycleStart !== '') {
+            if (!is_numeric($clientCycleStart)) {
+                return ['ok' => false, 'error' => 'nectarCycleStartedAt inválido.'];
+            }
+            $cs = (int) floor((float) $clientCycleStart);
+            if ($cs > $nowMs + DespertarCatalog::NECTAR_SYNC_SKEW_TOLERANCE_MS) {
+                return ['ok' => false, 'error' => 'Relógio de Néctar no futuro (clock-skew rejeitado).'];
+            }
+            $clientCycleStart = $cs;
+        } else {
+            $clientCycleStart = null;
+        }
+
+        // Anti-clock-skew sobre o ganho de Néctares desde o último sync no banco
+        $dbCycleStart = isset($dbNectarMeta['nectarCycleStartedAt']) && is_numeric($dbNectarMeta['nectarCycleStartedAt'])
+            ? (int) $dbNectarMeta['nectarCycleStartedAt']
+            : null;
+        $dbTotalHarvested = isset($dbNectarMeta['totalNectarHarvested']) && is_numeric($dbNectarMeta['totalNectarHarvested'])
+            ? max(0, (int) $dbNectarMeta['totalNectarHarvested'])
+            : 0;
+
+        $clientNectar = (int) floor((float) ($clientState['nectar'] ?? $rawClientMeta['nectar'] ?? 0));
+        $clientTotalHarvested = (int) floor((float) ($clientState['totalNectarHarvested'] ?? $rawClientMeta['totalNectarHarvested'] ?? $clientNectar));
+        if ($clientNectar < 0 || $clientTotalHarvested < 0) {
+            return ['ok' => false, 'error' => 'Saldo de Néctar negativo inválido.'];
+        }
+
+        if ($dbCycleStart !== null && $dbCycleStart > 0 && $clientTotalHarvested > $dbTotalHarvested) {
+            $elapsedServerMs = max(0, $nowMs - $dbCycleStart + DespertarCatalog::NECTAR_SYNC_SKEW_TOLERANCE_MS);
+            // Cada ciclo permite no máximo ~1 colheita manual em >=20h + ciclos completos de 24h (com teto de variante dourada +7 por ciclo)
+            $maxPossibleCycles = (int) floor($elapsedServerMs / DespertarCatalog::NECTAR_MATURE_MS);
+            $maxAllowedGain = $maxPossibleCycles * 7;
+            $claimedGain = $clientTotalHarvested - $dbTotalHarvested;
+            if ($claimedGain > $maxAllowedGain) {
+                return ['ok' => false, 'error' => 'Colheita de Néctar incompatível com o tempo do servidor (clock-skew rejeitado).'];
+            }
+        }
+
+        $rawMg = is_array($clientState['minigames'] ?? null)
+            ? $clientState['minigames']
+            : (is_array($clientState['milestones']['f5Minigames'] ?? null) ? $clientState['milestones']['f5Minigames'] : []);
+
+        return [
+            'ok' => true,
+            'nectar' => $clientNectar,
+            'totalNectarHarvested' => max($clientTotalHarvested, $clientNectar + $spentNectar),
+            'nectarCycleStartedAt' => $clientCycleStart,
+            'nectarCurrentVariant' => (string) ($clientState['nectarCurrentVariant'] ?? $rawClientMeta['nectarCurrentVariant'] ?? 'nectar_normal'),
+            'nectarFrenzyUsedThisRun' => !empty($clientState['nectarFrenzyUsedThisRun'] ?? $rawClientMeta['nectarFrenzyUsedThisRun'] ?? false),
+            'generatorLevels' => $levels,
+            'minigames' => $rawMg,
+        ];
+    }
+
+    /**
+     * Fase F4 — Verifica se o ID pertence a uma conquista Shadow (que não concede Véu).
+     */
+    public static function isShadowAchievementId(string $id): bool
+    {
+        $entry = GameCatalog::getAchievementById($id);
+        if (!$entry) {
+            return false;
+        }
+        return !empty($entry['shadow']) || !empty($entry['meta']['shadow']);
+    }
+
+    /**
+     * Fase F4 — Conquista elegível para o Véu (+4% Milk): existe no catálogo e NÃO é Shadow.
+     */
+    public static function isNormalAchievementId(string $id): bool
+    {
+        $entry = GameCatalog::getAchievementById($id);
+        if (!$entry) {
+            return false;
+        }
+        return empty($entry['shadow']) && empty($entry['meta']['shadow']);
+    }
+
+    /**
+     * Fase F4 — Conta quantas conquistas normais (`!shadow`) estão desbloqueadas.
+     */
+    public static function countNormalAchievements(mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null): int
+    {
+        if ($normalAchievementsCount !== null) {
+            return max(0, $normalAchievementsCount);
+        }
+        if (is_int($achievementsOrCount) || is_float($achievementsOrCount)) {
+            return max(0, (int) floor((float) $achievementsOrCount));
+        }
+        if (is_array($achievementsOrCount) && !array_is_list($achievementsOrCount)) {
+            if (isset($achievementsOrCount['normalAchievementsCount']) && is_numeric($achievementsOrCount['normalAchievementsCount'])) {
+                return max(0, (int) floor((float) $achievementsOrCount['normalAchievementsCount']));
+            }
+            $list = $achievementsOrCount['achievements'] ?? $achievementsOrCount['unlockedAchievements'] ?? [];
+            return self::countNormalAchievements(is_array($list) ? array_values($list) : [], null);
+        }
+        if (!is_array($achievementsOrCount)) {
+            return 0;
+        }
+        $seen = [];
+        foreach ($achievementsOrCount as $rawId) {
+            $id = (string) $rawId;
+            if ($id === '' || isset($seen[$id])) {
+                continue;
+            }
+            if (self::isNormalAchievementId($id)) {
+                $seen[$id] = true;
+            }
+        }
+        return count($seen);
+    }
+
+    /**
+     * Fase F4 — Fração canónica de Véu (+0.04 por conquista normal; Shadow = +0).
+     */
+    public static function veilFraction(mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null): string
+    {
+        $count = self::countNormalAchievements($achievementsOrCount, $normalAchievementsCount);
+        if ($count <= 0) {
+            return '0';
+        }
+        return DespertarDecimal::mul((string) $count, DespertarCatalog::VEIL_PER_ACHIEVEMENT);
+    }
+
+    /**
+     * Fase F4 — Percentagem económica de Véu (+4% por conquista normal; Shadow = +0%).
+     */
+    public static function veilPercent(mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null): int
+    {
+        $count = self::countNormalAchievements($achievementsOrCount, $normalAchievementsCount);
+        return $count * DespertarCatalog::VEIL_PERCENT_PER_ACHIEVEMENT;
+    }
+
+    /**
+     * Fase F4 — Retorna o Tier Visual (Sabor do Acheron) correspondente a `veilPercent`.
+     *
+     * @return array<string, mixed>
+     */
+    public static function veilTier(mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null): array
+    {
+        $pct = self::veilPercent($achievementsOrCount, $normalAchievementsCount);
+        $active = DespertarCatalog::VEIL_TIERS[0];
+        foreach (DespertarCatalog::VEIL_TIERS as $tier) {
+            if ($pct >= (int) $tier['minVeilPercent']) {
+                $active = $tier;
+            }
+        }
+        return $active;
+    }
+
+    /**
+     * Fase F4 + F8 — Produtório composto da linhagem *Filhotes do Cérbero* (Paridade *Kitten Upgrades*):
+     * `∏ (1 + veilFraction × factor_i × dragonMilkBoost)` sobre todos os upgrades `veilMult` / `kittenMult` comprados.
+     *
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $dragon
+     */
+    public static function cerberusPupMult(array $upgradeIds = [], mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null, array $dragon = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgradeIds));
+        if ($owned === []) {
+            return '1';
+        }
+        $vFrac = self::veilFraction($achievementsOrCount, $normalAchievementsCount);
+        if (DespertarDecimal::cmp($vFrac, '0') <= 0) {
+            return '1';
+        }
+        $veilPupBoost = self::dragonModifiers($dragon)['veilPupBoost'];
+
+        $mult = '1';
+        foreach (DespertarCatalog::UPGRADES as $def) {
+            $id = (string) $def['id'];
+            if (!isset($owned[$id])) {
+                continue;
+            }
+            $kind = (string) ($def['kind'] ?? '');
+            if ($kind !== 'veilMult' && $kind !== 'kittenMult') {
+                continue;
+            }
+            $effFactor = DespertarDecimal::cmp($veilPupBoost, '1') === 0
+                ? (string) $def['factor']
+                : DespertarDecimal::mul((string) $def['factor'], $veilPupBoost);
+            $term = DespertarDecimal::add('1', DespertarDecimal::mul($vFrac, $effFactor));
+            $mult = DespertarDecimal::mul($mult, $term);
+        }
+        return $mult;
+    }
+
+    /**
+     * @param array<int, string> $upgradeIds
+     */
+    public static function kittenMult(array $upgradeIds = [], mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null): string
+    {
+        return self::cerberusPupMult($upgradeIds, $achievementsOrCount, $normalAchievementsCount);
+    }
+
+    /**
+     * Fase F4 — Valida autoritativamente conquistas e requisitos de Véu dos upgrades `veilMult` no sync.
+     * Impede injeção de conquistas falsas/não elegíveis ou compra de Filhotes do Cérbero sem o Véu necessário.
+     *
+     * @param array<string, mixed> $dbCanonical
+     * @param array<string, mixed> $clientState
+     * @param array<string, mixed> $nextCanonical
+     * @param array<int, string> $serverUnlockedAchievements
+     * @return array{ok: bool, error?: string, achievements?: array<int, string>, veilPercent?: int, veilFraction?: string}
+     */
+    public static function validateVeilAndKittens(
+        array $dbCanonical,
+        array $clientState,
+        array $nextCanonical,
+        array $serverUnlockedAchievements = []
+    ): array {
+        $knownMap = GameCatalog::achievementsById();
+        $despertarSet = array_flip(DespertarCatalog::DESPERTAR_ACHIEVEMENT_IDS);
+
+        $baseUnlocked = array_values(array_unique(array_filter(
+            array_map('strval', $serverUnlockedAchievements),
+            static fn(string $id): bool => isset($knownMap[$id])
+        )));
+        $baseSet = array_flip($baseUnlocked);
+
+        // Conquistas do Despertar legitimamente ganhas pelo estado atual no servidor
+        $earnedNow = self::evaluateDespertarAchievementIds($nextCanonical, $baseUnlocked, true);
+        $earnedSet = array_flip($earnedNow);
+
+        $authoritative = array_values(array_unique(array_merge($baseUnlocked, $earnedNow)));
+        $authSet = array_flip($authoritative);
+
+        // Se o cliente enviou lista explícita de conquistas, rejeitar IDs falsos ou não conquistados
+        $rawClientAch = $clientState['achievements'] ?? $clientState['unlockedAchievements'] ?? null;
+        if ($rawClientAch !== null) {
+            if (!is_array($rawClientAch)) {
+                return ['ok' => false, 'error' => 'Formato de achievements inválido no sync.'];
+            }
+            foreach ($rawClientAch as $rawId) {
+                $cid = (string) $rawId;
+                if ($cid === '' || !isset($knownMap[$cid])) {
+                    return ['ok' => false, 'error' => "Conquista desconhecida ou inválida no sync: {$cid}"];
+                }
+                if (isset($despertarSet[$cid]) && !isset($authSet[$cid])) {
+                    return ['ok' => false, 'error' => "Conquista não elegível para o estado atual (anti-cheat): {$cid}"];
+                }
+                if (!isset($despertarSet[$cid]) && !isset($baseSet[$cid])) {
+                    return ['ok' => false, 'error' => "Conquista de plataforma não autorizada no perfil: {$cid}"];
+                }
+            }
+        }
+
+        $veilPct = self::veilPercent($authoritative);
+        $veilFrac = self::veilFraction($authoritative);
+
+        // Verificar se algum upgrade Filhote do Cérbero (`veilMult` / `kittenMult`) foi enviado sem o Véu exigido
+        $dbUpgradesSet = array_flip(array_map('strval', is_array($dbCanonical['upgrades'] ?? null) ? $dbCanonical['upgrades'] : []));
+        $upById = DespertarCatalog::upgradesById();
+        foreach (($nextCanonical['upgrades'] ?? []) as $uidRaw) {
+            $uid = (string) $uidRaw;
+            if (isset($dbUpgradesSet[$uid])) {
+                continue;
+            }
+            $def = $upById[$uid] ?? null;
+            if (!$def) {
+                continue;
+            }
+            $kind = (string) ($def['kind'] ?? '');
+            if ($kind !== 'veilMult' && $kind !== 'kittenMult') {
+                continue;
+            }
+            $minVeil = (int) ($def['requires']['minVeilPercent'] ?? 0);
+            if ($veilPct < $minVeil) {
+                return [
+                    'ok' => false,
+                    'error' => "Véu insuficiente ({$veilPct}%) para selar {$uid} (exige {$minVeil}% de Véu).",
+                ];
+            }
+        }
+
+        return [
+            'ok' => true,
+            'achievements' => $authoritative,
+            'veilPercent' => $veilPct,
+            'veilFraction' => $veilFrac,
+        ];
+    }
+
+    /**
+     * Fase F6 — Valida o estado da Catábase das Avós, capacidade de Sanguessugas (≤10 base / ≤14 com Ninho do Acheron)
+     * e teto matemático de digestão em relação ao `rawSPS × elapsed`.
+     *
+     * @param array<string, mixed> $dbCanonical
+     * @param array<string, mixed> $clientState
+     * @param array<string, mixed> $nextCanonical
+     * @return array{ok: bool, error?: string, catabase?: array<string, mixed>, catabaseActive?: bool, leechesPopped?: int, shinyLeechesPopped?: int}
+     */
+    public static function validateCatabaseAndLeeches(array $dbCanonical, array $clientState, array $nextCanonical, int $nowMs): array
+    {
+        $upgrades = is_array($nextCanonical['upgrades'] ?? null) ? array_values($nextCanonical['upgrades']) : [];
+        $owned = array_flip(array_map('strval', $upgrades));
+
+        $rawCat = is_array($clientState['catabase'] ?? null)
+            ? $clientState['catabase']
+            : (is_array($clientState['milestones']['f6Catabase'] ?? null) ? $clientState['milestones']['f6Catabase'] : []);
+
+        $structuralStage = isset($owned['pacto_primordial'])
+            ? 3
+            : (isset($owned['comunhao_abissal']) ? 2 : (isset($owned['despertar_ctoniano']) ? 1 : 0));
+        $manualStage = isset($rawCat['stage']) && is_numeric($rawCat['stage'])
+            ? max(0, min(3, (int) floor((float) $rawCat['stage'])))
+            : 0;
+        if (!empty($clientState['catabaseActive']) && $structuralStage < 1 && $manualStage < 1) {
+            $manualStage = 1;
+        }
+        $stage = max($structuralStage, $manualStage);
+
+        $covenantActive = !empty($rawCat['covenantActive']);
+        $pledgeExpiresAt = isset($rawCat['pledgeExpiresAt']) && is_numeric($rawCat['pledgeExpiresAt']) && (int) $rawCat['pledgeExpiresAt'] > $nowMs
+            ? (int) floor((float) $rawCat['pledgeExpiresAt'])
+            : null;
+        $pledgesCount = isset($rawCat['pledgesCount']) && is_numeric($rawCat['pledgesCount'])
+            ? max(0, (int) floor((float) $rawCat['pledgesCount']))
+            : 0;
+
+        $maxCap = isset($owned['ninho_do_acheron'])
+            ? DespertarCatalog::LEECH_MAX_CAP
+            : DespertarCatalog::LEECH_BASE_CAP;
+
+        $rawLeeches = $rawCat['leeches'] ?? [];
+        if (!is_array($rawLeeches)) {
+            return ['ok' => false, 'error' => 'Formato de leeches inválido.'];
+        }
+        if (count($rawLeeches) > $maxCap) {
+            return [
+                'ok' => false,
+                'error' => 'Quantidade de Sanguessugas (' . count($rawLeeches) . ") excede a capacidade máxima permitida ({$maxCap}).",
+            ];
+        }
+
+        // Calcula o teto matemático de digestão caso o cliente envie digested
+        $rawSps = self::calculateRawSPS([
+            'generators' => $nextCanonical['generators'] ?? [],
+            'upgrades' => $upgrades,
+            'talents' => $nextCanonical['talents'] ?? [],
+            'obols' => (string) ($nextCanonical['obols'] ?? '0'),
+            'verdictPurchases' => $nextCanonical['verdictPurchases'] ?? [],
+            'shinyCounts' => $nextCanonical['shinyCounts'] ?? [],
+            'goldCounts' => $nextCanonical['goldCounts'] ?? [],
+            'activeBuffs' => $nextCanonical['activeBuffs'] ?? [],
+            'nowMs' => $nowMs,
+            'generatorLevels' => $nextCanonical['generatorLevels'] ?? [],
+            'nectar' => (int) ($nextCanonical['nectar'] ?? 0),
+            'minigames' => $nextCanonical['minigames'] ?? [],
+            'achievements' => $nextCanonical['achievements'] ?? [],
+            'covenantActive' => $covenantActive,
+            'dragon' => is_array($nextCanonical['dragon'] ?? null) ? $nextCanonical['dragon'] : [],
+            'seasons' => is_array($nextCanonical['seasons'] ?? null) ? $nextCanonical['seasons'] : [],
+        ]);
+
+        $leeches = [];
+        foreach ($rawLeeches as $idx => $lRaw) {
+            if (!is_array($lRaw)) {
+                return ['ok' => false, 'error' => 'Entrada de Sanguessuga inválida.'];
+            }
+            $digested = DespertarDecimal::decimalString($lRaw['digested'] ?? '0', '0');
+            if (DespertarDecimal::cmp($digested, '0') < 0) {
+                return ['ok' => false, 'error' => 'Sanguessuga com digested negativo inválido.'];
+            }
+            $spawnedAt = isset($lRaw['spawnedAt']) && is_numeric($lRaw['spawnedAt']) && (int) $lRaw['spawnedAt'] > 0
+                ? (int) floor((float) $lRaw['spawnedAt'])
+                : 0;
+            if ($spawnedAt > 0 && $nowMs > $spawnedAt && DespertarDecimal::cmp($digested, '0') > 0) {
+                $elapsedSec = max(1.0, (($nowMs - $spawnedAt) / 1000.0) + 60.0);
+                // Dreno máximo possível por segundo = rawSPS * (14 * 0.05 = 0.70) * tolerância de Frenzy/buffs (×10)
+                $maxRatePerSec = DespertarDecimal::mul($rawSps, '7');
+                $maxPossibleDigested = DespertarDecimal::add(
+                    DespertarDecimal::mul($maxRatePerSec, number_format($elapsedSec, 2, '.', '')),
+                    '1000'
+                );
+                if (DespertarDecimal::cmp($digested, $maxPossibleDigested) > 0) {
+                    return [
+                        'ok' => false,
+                        'error' => "Montante digerido pela Sanguessuga ({$digested}) excede o limite matemático de rawSPS × tempo.",
+                    ];
+                }
+            }
+            $slot = isset($lRaw['slot']) && is_numeric($lRaw['slot'])
+                ? max(0, min($maxCap - 1, (int) floor((float) $lRaw['slot'])))
+                : min($maxCap - 1, (int) $idx);
+            $leeches[] = [
+                'id' => (string) ($lRaw['id'] ?? "leech_{$slot}_{$spawnedAt}"),
+                'slot' => $slot,
+                'shiny' => !empty($lRaw['shiny']),
+                'digested' => DespertarDecimal::money($digested),
+                'clicks' => max(0, (int) ($lRaw['clicks'] ?? 0)),
+                'spawnedAt' => $spawnedAt,
+            ];
+        }
+
+        $suppressed = $covenantActive || ($pledgeExpiresAt !== null && $pledgeExpiresAt > $nowMs);
+        if ($suppressed) {
+            $leeches = [];
+        }
+
+        $effectiveStage = $suppressed ? 0 : $stage;
+        $catabaseActive = $effectiveStage >= 1;
+
+        $dbStats = is_array($dbCanonical['stats'] ?? null) ? $dbCanonical['stats'] : [];
+        $clientStats = is_array($clientState['stats'] ?? null) ? $clientState['stats'] : [];
+        $leechesPopped = max(
+            (int) ($dbStats['leechesPopped'] ?? $dbStats['leeches_popped'] ?? 0),
+            (int) ($clientState['leechesPopped'] ?? $rawCat['leechesPopped'] ?? $clientStats['leechesPopped'] ?? 0)
+        );
+        $shinyLeechesPopped = max(
+            (int) ($dbStats['shinyLeechesPopped'] ?? $dbStats['shiny_leeches_popped'] ?? 0),
+            (int) ($clientState['shinyLeechesPopped'] ?? $rawCat['shinyLeechesPopped'] ?? $clientStats['shinyLeechesPopped'] ?? 0)
+        );
+
+        $unlockedResearchIds = [];
+        if (is_array($rawCat['unlockedResearchIds'] ?? null)) {
+            foreach ($rawCat['unlockedResearchIds'] as $rid) {
+                $unlockedResearchIds[] = (string) $rid;
+            }
+        }
+
+        return [
+            'ok' => true,
+            'catabaseActive' => $catabaseActive,
+            'leechesPopped' => $leechesPopped,
+            'shinyLeechesPopped' => $shinyLeechesPopped,
+            'catabase' => [
+                'stage' => $stage,
+                'covenantActive' => $covenantActive,
+                'pledgeExpiresAt' => $pledgeExpiresAt,
+                'pledgesCount' => $pledgesCount,
+                'leeches' => $leeches,
+                'leechesPopped' => $leechesPopped,
+                'shinyLeechesPopped' => $shinyLeechesPopped,
+                'unlockedResearchIds' => array_values(array_unique($unlockedResearchIds)),
+                'researchTargetId' => isset($rawCat['researchTargetId']) ? (string) $rawCat['researchTargetId'] : null,
+                'researchRemainingSec' => isset($rawCat['researchRemainingSec']) && is_numeric($rawCat['researchRemainingSec'])
+                    ? max(0, (int) floor((float) $rawCat['researchRemainingSec']))
+                    : 0,
+            ],
+        ];
+    }
+
+    /**
+     * Fase F8 — Valida e sanitiza o estado de Dragão Ctoniano, 4 Estações e Fortunas de Hermes no servidor.
+     *
+     * @param array<string, mixed> $dbCanonical
+     * @param array<string, mixed> $clientState
+     * @param array<string, mixed> $nextCanonical
+     * @return array{ok: bool, error?: string, dragon?: array<string, mixed>, seasons?: array<string, mixed>, fortunes?: array<string, mixed>, generatorsSold?: int}
+     */
+    public static function validateDragonSeasonsFortunes(array $dbCanonical, array $clientState, array $nextCanonical, int $nowMs): array
+    {
+        $upgrades = is_array($nextCanonical['upgrades'] ?? null) ? array_values($nextCanonical['upgrades']) : [];
+        $ownedUp = array_flip(array_map('strval', $upgrades));
+
+        // 1. Dragão Ctoniano
+        $rawDragon = is_array($clientState['dragon'] ?? null)
+            ? $clientState['dragon']
+            : (is_array($clientState['milestones']['f8Dragon'] ?? null) ? $clientState['milestones']['f8Dragon'] : []);
+        $dStage = isset($rawDragon['stage']) && is_numeric($rawDragon['stage'])
+            ? max(0, min(DespertarCatalog::DRAGON_MAX_STAGE, (int) floor((float) $rawDragon['stage'])))
+            : 0;
+        $maxSlots = $dStage >= 4 ? 2 : ($dStage >= 1 ? 1 : 0);
+
+        $aura1 = isset($rawDragon['auraSlot1']) && $rawDragon['auraSlot1'] !== '' ? (string) $rawDragon['auraSlot1'] : null;
+        $aura2 = isset($rawDragon['auraSlot2']) && $rawDragon['auraSlot2'] !== '' ? (string) $rawDragon['auraSlot2'] : null;
+
+        if ($aura1 !== null) {
+            if (!isset(DespertarCatalog::DRAGON_AURAS[$aura1])) {
+                return ['ok' => false, 'error' => "Aura do Dragão desconhecida: {$aura1}"];
+            }
+            if ($maxSlots < 1 || $dStage < DespertarCatalog::DRAGON_AURAS[$aura1]['minStage']) {
+                return ['ok' => false, 'error' => "Aura {$aura1} exige estágio superior do Dragão."];
+            }
+        }
+        if ($aura2 !== null) {
+            if (!isset(DespertarCatalog::DRAGON_AURAS[$aura2])) {
+                return ['ok' => false, 'error' => "Aura do Dragão desconhecida: {$aura2}"];
+            }
+            if ($maxSlots < 2 || $dStage < DespertarCatalog::DRAGON_AURAS[$aura2]['minStage'] || $aura2 === $aura1) {
+                return ['ok' => false, 'error' => "Slot 2 de Aura inválido ou bloqueado para {$aura2}."];
+            }
+        }
+
+        $dragon = [
+            'stage' => $dStage,
+            'auraSlot1' => $aura1,
+            'auraSlot2' => $aura2,
+            'scaleDropped' => !empty($rawDragon['scaleDropped']) || $dStage >= 1 || isset($ownedUp['escama_de_ladao']),
+        ];
+
+        // 2. 4 Estações do Submundo
+        $rawSeasons = is_array($clientState['seasons'] ?? null)
+            ? $clientState['seasons']
+            : (is_array($clientState['milestones']['f8Seasons'] ?? null) ? $clientState['milestones']['f8Seasons'] : []);
+        $activeSeason = isset($rawSeasons['activeSeason']) && $rawSeasons['activeSeason'] !== ''
+            ? (string) $rawSeasons['activeSeason']
+            : null;
+        if ($activeSeason !== null && !isset(DespertarCatalog::SEASONS[$activeSeason])) {
+            return ['ok' => false, 'error' => "Estação desconhecida: {$activeSeason}"];
+        }
+        $sExpiresAt = isset($rawSeasons['expiresAt']) && is_numeric($rawSeasons['expiresAt']) && (int) $rawSeasons['expiresAt'] > $nowMs
+            ? (int) floor((float) $rawSeasons['expiresAt'])
+            : null;
+        if ($activeSeason !== null && $sExpiresAt === null && isset($rawSeasons['expiresAt'])) {
+            $activeSeason = null;
+        }
+        $saturnLv = isset($rawSeasons['saturnKingLevel']) && is_numeric($rawSeasons['saturnKingLevel'])
+            ? max(0, min(DespertarCatalog::SATURN_KING_MAX_LEVEL, (int) floor((float) $rawSeasons['saturnKingLevel'])))
+            : 0;
+        $knownDropsSet = array_flip(DespertarCatalog::ALL_SEASONAL_DROP_UPGRADE_IDS);
+        $unlockedDrops = [];
+        if (is_array($rawSeasons['unlockedDrops'] ?? null)) {
+            foreach ($rawSeasons['unlockedDrops'] as $did) {
+                $dStr = (string) $did;
+                if (isset($knownDropsSet[$dStr])) {
+                    $unlockedDrops[$dStr] = true;
+                }
+            }
+        }
+        foreach ($upgrades as $uid) {
+            if (isset($knownDropsSet[(string) $uid])) {
+                $unlockedDrops[(string) $uid] = true;
+            }
+        }
+
+        $seasons = [
+            'activeSeason' => $activeSeason,
+            'expiresAt' => $sExpiresAt,
+            'switchesCount' => isset($rawSeasons['switchesCount']) && is_numeric($rawSeasons['switchesCount'])
+                ? max(0, (int) floor((float) $rawSeasons['switchesCount']))
+                : 0,
+            'saturnKingLevel' => $saturnLv,
+            'deerCaught' => isset($rawSeasons['deerCaught']) && is_numeric($rawSeasons['deerCaught'])
+                ? max(0, (int) floor((float) $rawSeasons['deerCaught']))
+                : 0,
+            'unlockedDrops' => array_keys($unlockedDrops),
+        ];
+
+        // 3. Fortunas de Hermes
+        $rawFortunes = is_array($clientState['fortunes'] ?? null)
+            ? $clientState['fortunes']
+            : (is_array($clientState['milestones']['f8Fortunes'] ?? null) ? $clientState['milestones']['f8Fortunes'] : []);
+        $knownFortunes = array_flip(DespertarCatalog::FORTUNE_IDS);
+        $claimedSet = [];
+        if (is_array($rawFortunes['claimedIds'] ?? null)) {
+            foreach ($rawFortunes['claimedIds'] as $fid) {
+                $fStr = (string) $fid;
+                if (isset($knownFortunes[$fStr])) {
+                    $claimedSet[$fStr] = true;
+                }
+            }
+        }
+        foreach ($upgrades as $uid) {
+            if (isset($knownFortunes[(string) $uid])) {
+                $claimedSet[(string) $uid] = true;
+            }
+        }
+        $lifetimeSet = $claimedSet;
+        if (is_array($rawFortunes['lifetimeClaimedIds'] ?? null)) {
+            foreach ($rawFortunes['lifetimeClaimedIds'] as $fid) {
+                $fStr = (string) $fid;
+                if (isset($knownFortunes[$fStr])) {
+                    $lifetimeSet[$fStr] = true;
+                }
+            }
+        }
+        $activeFortuneId = isset($rawFortunes['activeFortuneId']) && $rawFortunes['activeFortuneId'] !== ''
+            ? (string) $rawFortunes['activeFortuneId']
+            : null;
+        if ($activeFortuneId !== null && (!isset($knownFortunes[$activeFortuneId]) || isset($claimedSet[$activeFortuneId]))) {
+            $activeFortuneId = null;
+        }
+
+        $fortunes = [
+            'activeFortuneId' => $activeFortuneId,
+            'claimedIds' => array_keys($claimedSet),
+            'lifetimeClaimedIds' => array_keys($lifetimeSet),
+        ];
+
+        $dbStats = is_array($dbCanonical['stats'] ?? null) ? $dbCanonical['stats'] : [];
+        $clientStats = is_array($clientState['stats'] ?? null) ? $clientState['stats'] : [];
+        $generatorsSold = max(
+            (int) ($dbStats['generatorsSold'] ?? $dbStats['generators_sold'] ?? 0),
+            (int) ($clientState['generatorsSold'] ?? $clientStats['generatorsSold'] ?? 0)
+        );
+
+        return [
+            'ok' => true,
+            'dragon' => $dragon,
+            'seasons' => $seasons,
+            'fortunes' => $fortunes,
+            'generatorsSold' => $generatorsSold,
+        ];
+    }
+
+    /**
+     * Fase F8 — Auditoria completa do Stack SPS (Ordem Canónica da Wiki § 4.1).
+     *
+     * @param array<string, mixed> $opts
+     * @return array<string, string>
+     */
+    public static function calculateSpsBreakdown(array $opts = []): array
     {
         $generators = is_array($opts['generators'] ?? null) ? $opts['generators'] : [];
         $upgrades = is_array($opts['upgrades'] ?? null) ? $opts['upgrades'] : [];
@@ -356,24 +1774,140 @@ final class DespertarFormulas
         $verdictPurchases = is_array($opts['verdictPurchases'] ?? null) ? $opts['verdictPurchases'] : [];
         $shinyCounts = is_array($opts['shinyCounts'] ?? null) ? $opts['shinyCounts'] : [];
         $goldCounts = is_array($opts['goldCounts'] ?? null) ? $opts['goldCounts'] : [];
+        $activeBuffs = $opts['activeBuffs'] ?? [];
+        $nowMs = isset($opts['nowMs']) && is_numeric($opts['nowMs']) ? (int) $opts['nowMs'] : null;
+        $generatorLevels = is_array($opts['generatorLevels'] ?? null) ? $opts['generatorLevels'] : [];
+        $nectar = (int) ($opts['nectar'] ?? 0);
+        $nectarReserveActive = isset($opts['nectarReserveActive']) && is_bool($opts['nectarReserveActive'])
+            ? $opts['nectarReserveActive']
+            : null;
+        $minigames = is_array($opts['minigames'] ?? null) ? $opts['minigames'] : [];
+        $achievements = $opts['achievements'] ?? $opts['unlockedAchievements'] ?? [];
+        $normalAchievementsCount = isset($opts['normalAchievementsCount']) && is_numeric($opts['normalAchievementsCount'])
+            ? (int) floor((float) $opts['normalAchievementsCount'])
+            : null;
+        $catabase = is_array($opts['catabase'] ?? null) ? $opts['catabase'] : [];
+        $covenantActive = isset($opts['covenantActive']) && is_bool($opts['covenantActive'])
+            ? $opts['covenantActive']
+            : !empty($catabase['covenantActive']);
+        $dragon = is_array($opts['dragon'] ?? null) ? $opts['dragon'] : [];
+        $seasons = is_array($opts['seasons'] ?? null) ? $opts['seasons'] : [];
 
-        $sum = '0';
+        $baseLinesSps = '0';
+        $shadeFlatBonus = self::thousandBladesBonusPerUnit($upgrades, $generators);
+        $servantFlatBonus = self::elderPactServantFlatBonusPerUnit($upgrades, $generators);
         foreach (DespertarCatalog::GENERATORS as $def) {
             $id = $def['id'];
             $qty = (int) ($generators[$id] ?? 0);
             if ($qty <= 0) {
                 continue;
             }
-            $upMult = self::generatorUpgradeMult($id, $upgrades);
+            $upMult = self::generatorUpgradeMult($id, $upgrades, $generators);
             $shiny = (int) ($shinyCounts[$id] ?? 0);
             $gold = (int) ($goldCounts[$id] ?? 0);
-            $line = self::lineSPS($qty, $shiny, $gold, $def['baseRate'], $upMult);
-            $sum = DespertarDecimal::add($sum, $line);
+            $level = (int) ($generatorLevels[$id] ?? 0);
+            $flatBonus = '0';
+            if ($id === 'wandering_shade') {
+                $flatBonus = $shadeFlatBonus;
+            } elseif ($id === 'charon_servants') {
+                $flatBonus = $servantFlatBonus;
+            }
+            $line = self::lineSPS($qty, $shiny, $gold, $def['baseRate'], $upMult, $flatBonus, $level);
+            $baseLinesSps = DespertarDecimal::add($baseLinesSps, $line);
         }
 
-        $withPrestige = DespertarDecimal::mul($sum, self::prestigeBonus($obols, $talents));
+        $prestigeMult = self::prestigeBonus($obols, $talents);
         $econ = self::economyEffects($talents, $verdictPurchases);
-        return DespertarDecimal::mul($withPrestige, (string) $econ['spsVerdictMult']);
+        $verdictMult = (string) $econ['spsVerdictMult'];
+        $mg = self::minigameEffects($generatorLevels, $minigames);
+        $minigamesMult = $mg['spsMult'];
+        $seasonalMult = self::seasonalCompoundMult($upgrades);
+        $researchMult = self::catabaseResearchSpsMult($upgrades);
+        $saturnMult = self::saturnaliaSpsMult($seasons, $upgrades);
+        $fortuneMult = self::fortuneGlobalSpsMult($upgrades);
+        $scaleMult = self::dragonScaleSpsMult($upgrades);
+        $pupMult = self::cerberusPupMult($upgrades, $achievements, $normalAchievementsCount, $dragon);
+        $reserveMult = self::nectarReserveMult($nectar, $talents, $nectarReserveActive);
+        $auraMult = self::dragonAuraSpsMult($dragon);
+        $covenantMult = self::elderCovenantMult($covenantActive);
+        $buffsMult = self::activeSpsBuffMult($activeBuffs, $nowMs);
+
+        $layers = [
+            $prestigeMult,
+            $verdictMult,
+            $minigamesMult,
+            $seasonalMult,
+            $researchMult,
+            $saturnMult,
+            $fortuneMult,
+            $scaleMult,
+            $pupMult,
+            $reserveMult,
+            $auraMult,
+            $covenantMult,
+            $buffsMult,
+        ];
+
+        $rawMultiplier = '1';
+        $running = $baseLinesSps;
+        foreach ($layers as $m) {
+            $rawMultiplier = DespertarDecimal::mul($rawMultiplier, $m);
+            $running = DespertarDecimal::mul($running, $m);
+        }
+        $rawSps = $running;
+        $leechesSource = $opts['leeches'] ?? $catabase['leeches'] ?? $opts['leechesCount'] ?? 0;
+        $leechMult = self::leechApparentMult($leechesSource);
+        $effectiveSps = DespertarDecimal::mul($rawSps, $leechMult);
+
+        return [
+            'baseLinesSps' => $baseLinesSps,
+            'prestigeMult' => $prestigeMult,
+            'verdictMult' => $verdictMult,
+            'minigamesMult' => $minigamesMult,
+            'seasonalCompoundMult' => $seasonalMult,
+            'catabaseResearchMult' => $researchMult,
+            'saturnaliaMult' => $saturnMult,
+            'fortuneGlobalMult' => $fortuneMult,
+            'dragonScaleMult' => $scaleMult,
+            'cerberusPupMult' => $pupMult,
+            'nectarReserveMult' => $reserveMult,
+            'dragonAuraMult' => $auraMult,
+            'elderCovenantMult' => $covenantMult,
+            'activeBuffsMult' => $buffsMult,
+            'rawMultiplier' => $rawMultiplier,
+            'rawSps' => $rawSps,
+            'leechApparentMult' => $leechMult,
+            'effectiveSps' => $effectiveSps,
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $opts
+     */
+    public static function calculateRawSPS(array $opts = []): string
+    {
+        return self::calculateSpsBreakdown($opts)['rawSps'];
+    }
+
+    /**
+     * @param array<string, mixed> $opts
+     */
+    public static function calculateTotalSPS(array $opts = []): string
+    {
+        return self::calculateRawSPS($opts);
+    }
+
+    /**
+     * @param array<string, mixed> $opts
+     */
+    public static function calculateEffectiveSPS(array $opts = []): string
+    {
+        $raw = isset($opts['rawSps']) && $opts['rawSps'] !== null
+            ? (string) $opts['rawSps']
+            : self::calculateRawSPS($opts);
+        $catabase = is_array($opts['catabase'] ?? null) ? $opts['catabase'] : [];
+        $leechesSource = $opts['leeches'] ?? $catabase['leeches'] ?? $opts['leechesCount'] ?? 0;
+        return DespertarDecimal::mul($raw, self::leechApparentMult($leechesSource));
     }
 
     /**
@@ -384,23 +1918,42 @@ final class DespertarFormulas
         $sps = isset($opts['sps']) && $opts['sps'] !== null
             ? (string) $opts['sps']
             : self::calculateTotalSPS($opts);
+        $generators = is_array($opts['generators'] ?? null) ? $opts['generators'] : [];
         $upgrades = is_array($opts['upgrades'] ?? null) ? $opts['upgrades'] : [];
         $talents = is_array($opts['talents'] ?? null) ? $opts['talents'] : [];
         $verdictPurchases = is_array($opts['verdictPurchases'] ?? null) ? $opts['verdictPurchases'] : [];
+        $activeBuffs = $opts['activeBuffs'] ?? [];
+        $nowMs = isset($opts['nowMs']) && is_numeric($opts['nowMs']) ? (int) $opts['nowMs'] : null;
+        $generatorLevels = is_array($opts['generatorLevels'] ?? null) ? $opts['generatorLevels'] : [];
+        $minigames = is_array($opts['minigames'] ?? null) ? $opts['minigames'] : [];
+        $dragon = is_array($opts['dragon'] ?? null) ? $opts['dragon'] : [];
 
         $econ = self::economyEffects($talents, $verdictPurchases);
-        $clickMult = DespertarDecimal::mul(self::clickMultiplier($upgrades), (string) $econ['clickVerdictMult']);
+        $mg = self::minigameEffects($generatorLevels, $minigames);
+        $dClickMult = self::dragonAuraClickMult($dragon);
+        $clickMult = DespertarDecimal::mul(
+            DespertarDecimal::mul(
+                DespertarDecimal::mul(self::clickMultiplier($upgrades), (string) $econ['clickVerdictMult']),
+                $mg['clickMult']
+            ),
+            $dClickMult
+        );
         $kSps = DespertarDecimal::add((string) $econ['kSps'], self::styxClickKSps($upgrades));
 
         $flatPart = DespertarDecimal::mul(
             DespertarDecimal::add(DespertarCatalog::CLICK_BASE, DespertarCatalog::CLICK_FLAT_BASE),
             $clickMult
         );
+        $bladesPart = self::thousandBladesBonusPerUnit($upgrades, $generators);
         $spsPart = DespertarDecimal::mul($kSps, $sps);
-        return DespertarDecimal::add($flatPart, $spsPart);
+        $basePower = DespertarDecimal::add(DespertarDecimal::add($flatPart, $bladesPart), $spsPart);
+        return DespertarDecimal::mul($basePower, self::activeClickBuffMult($activeBuffs, $nowMs));
     }
 
-    public static function obolsFromRunSouls(string $runSouls, int $prestigeCount = 0): string
+    /**
+     * @param array<int, string> $upgrades
+     */
+    public static function obolsFromRunSouls(string $runSouls, int $prestigeCount = 0, array $upgrades = []): string
     {
         $p = DespertarDecimal::toScaled($runSouls !== '' ? $runSouls : '0');
         $q = DespertarDecimal::toScaled(DespertarCatalog::PRESTIGE_RUN_DIVISOR);
@@ -412,7 +1965,62 @@ final class DespertarFormulas
             return '0';
         }
         $denom = (string) (1 + max(0, $prestigeCount));
-        return DespertarDecimal::intDiv($raw, $denom);
+        $gain = DespertarDecimal::intDiv($raw, $denom);
+        if (DespertarDecimal::intCmp($gain, '0') <= 0) {
+            return '0';
+        }
+        $owned = array_flip(array_map('strval', $upgrades));
+        if (isset($owned['fortune_102'])) {
+            $boosted = DespertarDecimal::intDiv(DespertarDecimal::intMul($gain, '101'), '100');
+            $gain = DespertarDecimal::intCmp($boosted, $gain) > 0
+                ? $boosted
+                : DespertarDecimal::intAdd($gain, '1');
+        }
+        return $gain;
+    }
+
+    /**
+     * Fase F8 — Referência canónica de prestígio cúbico (Cookie Clicker § 8.1): `floor(cbrt(lifetimeSouls / 1e12))`.
+     */
+    public static function obolsFromLifetimeCubic(string $lifetimeSouls = '0'): string
+    {
+        $p = DespertarDecimal::toScaled($lifetimeSouls !== '' ? $lifetimeSouls : '0');
+        $q = DespertarDecimal::toScaled(DespertarCatalog::PRESTIGE_CUBIC_DIVISOR);
+        if (DespertarDecimal::intCmp($p, '0') <= 0 || DespertarDecimal::intCmp($q, '0') <= 0) {
+            return '0';
+        }
+        return DespertarDecimal::floorCbrtRatio($p, $q);
+    }
+
+    /**
+     * Fase F8 — Migração segura (*Save Heal*) de saves legados (F0–F7) para F8.
+     *
+     * @param array<string, mixed> $state
+     * @return array<string, mixed>
+     */
+    public static function healLegacySave(array $state): array
+    {
+        $milestones = is_array($state['milestones'] ?? null) ? $state['milestones'] : [];
+        $currentObols = DespertarDecimal::toBigIntFloor($state['obols'] ?? '0');
+        $currentMnemosyne = DespertarDecimal::toBigIntFloor($state['mnemosyne'] ?? '0');
+        $prestigeCount = max(0, (int) ($state['prestigeCount'] ?? $state['prestige_count'] ?? 0));
+        $lifetimeSouls = (string) ($state['lifetimeSouls'] ?? $state['lifetime_souls'] ?? '0');
+
+        $healedObols = DespertarDecimal::intCmp($currentObols, '0') > 0 ? $currentObols : '0';
+        $healedMnemosyne = DespertarDecimal::intCmp($currentMnemosyne, '0') > 0 ? $currentMnemosyne : '0';
+
+        if ($prestigeCount > 0) {
+            $cubicFloor = self::obolsFromLifetimeCubic($lifetimeSouls);
+            if (DespertarDecimal::intCmp($cubicFloor, $currentObols) > 0) {
+                $healedObols = $cubicFloor;
+            }
+        }
+
+        $milestones['f8SaveHealed'] = true;
+        $state['obols'] = DespertarDecimal::money($healedObols);
+        $state['mnemosyne'] = DespertarDecimal::money($healedMnemosyne);
+        $state['milestones'] = $milestones;
+        return $state;
     }
 
     /**
@@ -435,18 +2043,22 @@ final class DespertarFormulas
         return $gain;
     }
 
-    public static function canPrestige(string $runSouls, int $prestigeCount = 0): bool
+    /**
+     * @param array<int, string> $upgrades
+     */
+    public static function canPrestige(string $runSouls, int $prestigeCount = 0, array $upgrades = []): bool
     {
-        return DespertarDecimal::cmp(self::obolsFromRunSouls($runSouls, $prestigeCount), '0') > 0;
+        return DespertarDecimal::cmp(self::obolsFromRunSouls($runSouls, $prestigeCount, $upgrades), '0') > 0;
     }
 
     /**
      * @param array<int, string> $talents
+     * @param array<int, string> $upgrades
      * @return array{obolsGain: string, mnemosyneGain: string, unlocked: bool}
      */
-    public static function prestigePreview(string $runSouls, int $prestigeCount = 0, array $talents = []): array
+    public static function prestigePreview(string $runSouls, int $prestigeCount = 0, array $talents = [], array $upgrades = []): array
     {
-        $obolsGain = self::obolsFromRunSouls($runSouls, $prestigeCount);
+        $obolsGain = self::obolsFromRunSouls($runSouls, $prestigeCount, $upgrades);
         $unlocked = DespertarDecimal::cmp($obolsGain, '0') > 0;
         return [
             'obolsGain' => $obolsGain,
@@ -772,6 +2384,136 @@ final class DespertarFormulas
         if ($prestigeCount >= 1 || DespertarDecimal::cmp($obols, '0') > 0) {
             $eligible['log_obols_bonus'] = true;
         }
+        $upById = DespertarCatalog::upgradesById();
+        $hasF1Upgrade = false;
+        foreach ($upgrades as $uid) {
+            $k = $upById[(string) $uid]['kind'] ?? '';
+            if ($k === 'synergyMult' || $k === 'thousandBlades' || $k === 'thousandBladesMult') {
+                $hasF1Upgrade = true;
+                break;
+            }
+        }
+        $pairs15Count = 0;
+        foreach ($generators as $qty) {
+            if ((int) $qty >= 15) {
+                $pairs15Count++;
+            }
+        }
+        if ($hasF1Upgrade || $pairs15Count >= 2 || ($ownedFive && count($upgrades) >= 1)) {
+            $eligible['log_synergy_blades'] = true;
+        }
+        $stats = is_array($state['stats'] ?? null) ? $state['stats'] : [];
+        $shimmersClicked = (int) ($state['shimmersClicked'] ?? $stats['shimmersClicked'] ?? $stats['shimmers_clicked'] ?? 0);
+        $activeBuffs = is_array($state['activeBuffs'] ?? null) ? $state['activeBuffs'] : [];
+        if (
+            $shimmersClicked >= 1
+            || !empty($milestones['shimmerClicked'])
+            || count($activeBuffs) > 0
+            || ($ownedFive && count($upgrades) >= 1 && $prestigeCount >= 1)
+        ) {
+            $eligible['log_shimmer_echo'] = true;
+        }
+        $hasT7Plus = false;
+        foreach (['mnemosyne_temple', 'styx_tower', 'star_barge', 'tartarus_lab', 'erebus_portal', 'chronos_loom'] as $gid) {
+            if (((int) ($generators[$gid] ?? 0)) >= 1) {
+                $hasT7Plus = true;
+                break;
+            }
+        }
+        if (
+            $hasT7Plus
+            || !empty($milestones['temple'])
+            || DespertarDecimal::cmp($lifetime, '5000000') >= 0
+            || ($ownedFive && count($upgrades) >= 1 && $prestigeCount >= 1)
+        ) {
+            $eligible['log_midgame_payoff'] = true;
+        }
+        $generatorLevels = is_array($state['generatorLevels'] ?? null)
+            ? $state['generatorLevels']
+            : (is_array($milestones['f5Nectar']['generatorLevels'] ?? null) ? $milestones['f5Nectar']['generatorLevels'] : []);
+        $hasAnyLevel = false;
+        foreach ($generatorLevels as $lv) {
+            if ((int) $lv >= 1) {
+                $hasAnyLevel = true;
+                break;
+            }
+        }
+        $totalNectar = (int) ($state['totalNectarHarvested'] ?? $milestones['f5Nectar']['totalNectarHarvested'] ?? 0);
+        if (
+            $hasAnyLevel
+            || $totalNectar >= 1
+            || !empty($milestones['nectarUnlocked'])
+            || DespertarDecimal::cmp($lifetime, DespertarCatalog::NECTAR_UNLOCK_LIFETIME_SOULS) >= 0
+            || ($ownedFive && count($upgrades) >= 1 && $prestigeCount >= 1)
+        ) {
+            $eligible['log_nectar_minigames'] = true;
+        }
+        $hasPupUpgrade = false;
+        foreach ($upgrades as $uid) {
+            $k = $upById[(string) $uid]['kind'] ?? '';
+            if ($k === 'veilMult' || $k === 'kittenMult') {
+                $hasPupUpgrade = true;
+                break;
+            }
+        }
+        $achList = is_array($state['achievements'] ?? null) ? $state['achievements'] : [];
+        if (
+            $hasPupUpgrade
+            || self::veilPercent($achList) >= 12
+            || DespertarDecimal::cmp($lifetime, '100') >= 0
+            || ($ownedFive && count($upgrades) >= 1)
+        ) {
+            $eligible['log_veil_kittens'] = true;
+        }
+        $f6Cat = is_array($state['catabase'] ?? null)
+            ? $state['catabase']
+            : (is_array($milestones['f6Catabase'] ?? null) ? $milestones['f6Catabase'] : []);
+        $leechesPoppedLog = (int) ($state['leechesPopped'] ?? $f6Cat['leechesPopped'] ?? $stats['leechesPopped'] ?? $stats['leeches_popped'] ?? 0);
+        if (
+            ((int) ($f6Cat['stage'] ?? 0)) >= 1
+            || count(is_array($f6Cat['leeches'] ?? null) ? $f6Cat['leeches'] : []) >= 1
+            || $leechesPoppedLog >= 1
+            || in_array('concilio_das_moiras', $upgrades, true)
+            || (((int) ($generators['charon_servants'] ?? 0)) >= 7 && count($upgrades) >= 1)
+        ) {
+            $eligible['log_catabase_wrinklers'] = true;
+        }
+        $hasT13Plus = false;
+        foreach (['void_condenser', 'moirai_prism', 'fate_forge', 'fractal_engine', 'oracle_console', 'chthonic_idleverse', 'cortex_baker', 'the_emperor'] as $gid) {
+            if (((int) ($generators[$gid] ?? 0)) >= 1) {
+                $hasT13Plus = true;
+                break;
+            }
+        }
+        if (
+            $hasT13Plus
+            || DespertarDecimal::cmp($lifetime, '100000000000000') >= 0
+            || ($ownedFive && count($upgrades) >= 1 && $prestigeCount >= 1)
+        ) {
+            $eligible['log_late_bignum_payoff'] = true;
+        }
+        $f8Dragon = is_array($state['dragon'] ?? null)
+            ? $state['dragon']
+            : (is_array($milestones['f8Dragon'] ?? null) ? $milestones['f8Dragon'] : []);
+        $f8Seasons = is_array($state['seasons'] ?? null)
+            ? $state['seasons']
+            : (is_array($milestones['f8Seasons'] ?? null) ? $milestones['f8Seasons'] : []);
+        $f8Fortunes = is_array($state['fortunes'] ?? null)
+            ? $state['fortunes']
+            : (is_array($milestones['f8Fortunes'] ?? null) ? $milestones['f8Fortunes'] : []);
+        $talents = is_array($state['talents'] ?? null) ? $state['talents'] : [];
+        if (
+            ((int) ($f8Dragon['stage'] ?? 0)) >= 1
+            || !empty($f8Seasons['activeSeason'])
+            || count(is_array($f8Fortunes['claimedIds'] ?? null) ? $f8Fortunes['claimedIds'] : []) >= 1
+            || !empty($milestones['generatorSold'])
+            || ((int) ($state['generatorsSold'] ?? $stats['generatorsSold'] ?? 0)) >= 1
+            || in_array('ovo_primordial', $talents, true)
+            || in_array('rodizio_das_estacoes', $talents, true)
+            || ($ownedFive && count($upgrades) >= 1 && $prestigeCount >= 1)
+        ) {
+            $eligible['log_incremental_architecture_f8'] = true;
+        }
 
         $out = [];
         foreach (DespertarCatalog::EDU_LOG_IDS as $id) {
@@ -825,6 +2567,9 @@ final class DespertarFormulas
             'verdictPurchases' => $verdictPurchases,
             'shinyCounts' => $shinyCounts,
             'goldCounts' => $goldCounts,
+            'achievements' => $unlocked,
+            'dragon' => is_array($state['dragon'] ?? null) ? $state['dragon'] : (is_array($milestones['f8Dragon'] ?? null) ? $milestones['f8Dragon'] : []),
+            'seasons' => is_array($state['seasons'] ?? null) ? $state['seasons'] : (is_array($milestones['f8Seasons'] ?? null) ? $milestones['f8Seasons'] : []),
         ]);
 
         $earned = [];
@@ -843,14 +2588,45 @@ final class DespertarFormulas
         $take('despertar_catabase', $prestigeCount >= 1);
         $take('despertar_mnemosyne', count($talents) >= 1);
 
-        $allGens = true;
+        $allGensT1T6 = true;
+        $allGensT1T20 = true;
         foreach (DespertarCatalog::GENERATORS as $def) {
             if (((int) ($generators[$def['id']] ?? 0)) < 1) {
-                $allGens = false;
-                break;
+                $allGensT1T20 = false;
+                if ((int) ($def['tier'] ?? 0) <= 6) {
+                    $allGensT1T6 = false;
+                }
             }
         }
-        $take('despertar_soberania', $allGens);
+        $take('despertar_soberania', $allGensT1T6);
+        $take('despertar_vinte_rios', $allGensT1T20);
+
+        foreach (DespertarCatalog::DESPERTAR_GENERATOR_MILESTONE_ACHIEVEMENTS as $genId => $thresholds) {
+            $haveQty = (int) ($generators[$genId] ?? 0);
+            foreach ($thresholds as $minQty => $achId) {
+                $take($achId, $haveQty >= (int) $minQty);
+            }
+        }
+
+        // --- Fase F5: Conquistas de Néctar, Níveis de Gerador e Minigames ---
+        $f5Nectar = is_array($milestones['f5Nectar'] ?? null) ? $milestones['f5Nectar'] : [];
+        $generatorLevels = is_array($state['generatorLevels'] ?? null)
+            ? $state['generatorLevels']
+            : (is_array($f5Nectar['generatorLevels'] ?? null) ? $f5Nectar['generatorLevels'] : []);
+        $totalNectarHarvested = (int) ($state['totalNectarHarvested'] ?? $f5Nectar['totalNectarHarvested'] ?? 0);
+        $maxGenLevel = 0;
+        foreach ($generatorLevels as $lv) {
+            if ((int) $lv > $maxGenLevel) {
+                $maxGenLevel = (int) $lv;
+            }
+        }
+        $take('despertar_nectar_primeiro', $totalNectarHarvested >= 1 || !empty($milestones['nectarHarvested']));
+        $take('despertar_nivel_1', $maxGenLevel >= 1);
+        $take('despertar_nivel_10', $maxGenLevel >= 10);
+        $take('despertar_minigame_panteao', ((int) ($generatorLevels['mnemosyne_temple'] ?? 0)) >= 1);
+        $take('despertar_minigame_grimorio', ((int) ($generatorLevels['styx_tower'] ?? 0)) >= 1);
+        $take('despertar_minigame_jardim', ((int) ($generatorLevels['cerberian_hound'] ?? 0)) >= 1);
+        $take('despertar_minigame_mercado', ((int) ($generatorLevels['obsidian_throne'] ?? 0)) >= 1);
 
         $juizoBest = (int) ($state['juizoBestStreak'] ?? 0);
         foreach (DespertarCatalog::DESPERTAR_JUIZO_STREAK_THRESHOLDS as $id => $threshold) {
@@ -861,6 +2637,30 @@ final class DespertarFormulas
         $take('despertar_cem_almas', DespertarDecimal::cmp($lifetime, '100') >= 0);
         $take('despertar_mil_almas', DespertarDecimal::cmp($lifetime, '1000') >= 0);
         $take('despertar_milhao', DespertarDecimal::cmp($lifetime, '1000000') >= 0);
+        $take('despertar_bilhao', DespertarDecimal::cmp($lifetime, '1000000000') >= 0);
+        $take('despertar_trilhao', DespertarDecimal::cmp($lifetime, '1000000000000') >= 0);
+        $take('despertar_almas_1e21', DespertarDecimal::cmp($lifetime, '1000000000000000000000') >= 0);
+        $take('despertar_almas_1e30', DespertarDecimal::cmp($lifetime, '1000000000000000000000000000000') >= 0);
+
+        $take('despertar_sps_100', DespertarDecimal::cmp($sps, '100') >= 0);
+        $take('despertar_sps_10k', DespertarDecimal::cmp($sps, '10000') >= 0);
+        $take('despertar_sps_1m', DespertarDecimal::cmp($sps, '1000000') >= 0);
+        $take('despertar_sps_1b', DespertarDecimal::cmp($sps, '1000000000') >= 0);
+        $take('despertar_sps_1e15', DespertarDecimal::cmp($sps, '1000000000000000') >= 0);
+        $take('despertar_sps_1e21', DespertarDecimal::cmp($sps, '1000000000000000000000') >= 0);
+
+        $stats = is_array($state['stats'] ?? null) ? $state['stats'] : [];
+        $clicks = (int) ($state['clickCount'] ?? $stats['clicks'] ?? 0);
+        $shimmersClicked = (int) ($state['shimmersClicked'] ?? $stats['shimmersClicked'] ?? $stats['shimmers_clicked'] ?? 0);
+        $wrathClicked = (int) ($state['wrathClicked'] ?? $stats['wrathClicked'] ?? $stats['wrath_clicked'] ?? 0);
+
+        $take('despertar_cliques_100', $clicks >= 100);
+        $take('despertar_cliques_1000', $clicks >= 1000);
+        $take('despertar_eco_1', $shimmersClicked >= 1 || !empty($milestones['shimmerClicked']));
+        $take('despertar_eco_7', $shimmersClicked >= 7);
+        $take('despertar_eco_27', $shimmersClicked >= 27);
+        $take('despertar_eco_colerico', $wrathClicked >= 1);
+
         $take('despertar_styx_primeiro', count($upgrades) >= 1);
         $take('despertar_styx_cinco', count($upgrades) >= 5);
 
@@ -869,6 +2669,46 @@ final class DespertarFormulas
         $take('despertar_shiny', $shinySum >= 1);
         $take('despertar_gold', $goldSum >= 1);
         $take('despertar_catabase_3', $prestigeCount >= 3);
+        $take('despertar_catabase_5', $prestigeCount >= 5);
+
+        $upById = DespertarCatalog::upgradesById();
+        $hasPupUpgrade = false;
+        foreach ($upgrades as $uid) {
+            $k = $upById[(string) $uid]['kind'] ?? '';
+            if ($k === 'veilMult' || $k === 'kittenMult') {
+                $hasPupUpgrade = true;
+                break;
+            }
+        }
+        $take('despertar_filhote_primeiro', $hasPupUpgrade);
+
+        // --- Fase F6: Catábase das Avós & Sanguessugas do Acheron ---
+        $f6Cat = is_array($state['catabase'] ?? null)
+            ? $state['catabase']
+            : (is_array($milestones['f6Catabase'] ?? null) ? $milestones['f6Catabase'] : []);
+        $ownedUpSet = array_flip(array_map('strval', $upgrades));
+        $structStage = isset($ownedUpSet['pacto_primordial'])
+            ? 3
+            : (isset($ownedUpSet['comunhao_abissal']) ? 2 : (isset($ownedUpSet['despertar_ctoniano']) ? 1 : 0));
+        $catStage = max((int) ($f6Cat['stage'] ?? 0), $structStage);
+        $leechesPopped = max(
+            0,
+            (int) ($state['leechesPopped'] ?? $f6Cat['leechesPopped'] ?? $stats['leechesPopped'] ?? $stats['leeches_popped'] ?? 0)
+        );
+        $shinyLeechesPopped = max(
+            0,
+            (int) ($state['shinyLeechesPopped'] ?? $f6Cat['shinyLeechesPopped'] ?? $stats['shinyLeechesPopped'] ?? $stats['shiny_leeches_popped'] ?? 0)
+        );
+        $pledgesCount = (int) ($f6Cat['pledgesCount'] ?? 0);
+        $covenantActive = !empty($f6Cat['covenantActive']);
+
+        $take('despertar_catabase_avos_1', $catStage >= 1);
+        $take('despertar_catabase_avos_3', $catStage >= 3);
+        $take('despertar_sanguessuga_1', $leechesPopped >= 1);
+        $take('despertar_sanguessuga_50', $leechesPopped >= 50);
+        $take('despertar_sanguessuga_200', $leechesPopped >= 200);
+        $take('despertar_sanguessuga_shiny', $shinyLeechesPopped >= 1);
+        $take('despertar_tregua_estigia', $pledgesCount >= 1 || $covenantActive);
 
         $ownedVerdictSet = array_flip(array_map('strval', $verdictPurchases));
         $fullBench = true;
@@ -880,6 +2720,49 @@ final class DespertarFormulas
         }
         $take('despertar_bancada_cheia', $fullBench);
         $take('despertar_paciencia', !empty($milestones['offline']));
+
+        // --- Fase F8: Dragão Ctoniano, 4 Estações, Fortunas de Hermes e Venda ---
+        $f8Dragon = is_array($state['dragon'] ?? null)
+            ? $state['dragon']
+            : (is_array($milestones['f8Dragon'] ?? null) ? $milestones['f8Dragon'] : []);
+        $dragonStage = max(0, (int) ($f8Dragon['stage'] ?? 0));
+        $take('despertar_dragao_filhote', $dragonStage >= 1);
+        $take('despertar_dragao_ladao', $dragonStage >= 4);
+
+        $f8Seasons = is_array($state['seasons'] ?? null)
+            ? $state['seasons']
+            : (is_array($milestones['f8Seasons'] ?? null) ? $milestones['f8Seasons'] : []);
+        $seasonSwitches = max(0, (int) ($f8Seasons['switchesCount'] ?? 0));
+        $saturnLv = max(0, (int) ($f8Seasons['saturnKingLevel'] ?? 0));
+        $allSeasonalDropsOwned = true;
+        foreach (DespertarCatalog::ALL_SEASONAL_DROP_UPGRADE_IDS as $did) {
+            if (!isset($ownedUpSet[$did])) {
+                $allSeasonalDropsOwned = false;
+                break;
+            }
+        }
+        $take('despertar_estacoes_4', $seasonSwitches >= 4);
+        $take('despertar_reliquias_sazonais', $allSeasonalDropsOwned);
+        $take('despertar_rei_saturno_5', $saturnLv >= 5);
+
+        $f8Fortunes = is_array($state['fortunes'] ?? null)
+            ? $state['fortunes']
+            : (is_array($milestones['f8Fortunes'] ?? null) ? $milestones['f8Fortunes'] : []);
+        $claimedFortunes = is_array($f8Fortunes['claimedIds'] ?? null) ? $f8Fortunes['claimedIds'] : [];
+        $lifetimeFortunes = is_array($f8Fortunes['lifetimeClaimedIds'] ?? null) ? $f8Fortunes['lifetimeClaimedIds'] : $claimedFortunes;
+        $ownedFortuneCount = 0;
+        foreach (DespertarCatalog::FORTUNE_IDS as $fid) {
+            if (isset($ownedUpSet[$fid])) {
+                $ownedFortuneCount++;
+            }
+        }
+        $totalFortunes = max(count($claimedFortunes), count($lifetimeFortunes), $ownedFortuneCount);
+        $take('despertar_fortuna_1', $totalFortunes >= 1);
+        $take('despertar_o_fortuna', $totalFortunes >= count(DespertarCatalog::FORTUNE_IDS));
+        $take(
+            'despertar_mercador_acheron',
+            !empty($milestones['generatorSold']) || ((int) ($state['generatorsSold'] ?? $stats['generatorsSold'] ?? 0)) >= 1
+        );
 
         $eligible = self::computeEligibleEduLogs($state, $syncOk);
         $seen = self::sanitizeEduLogsSeen($state['eduLogsSeen'] ?? [], $state, $syncOk);

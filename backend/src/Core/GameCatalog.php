@@ -130,7 +130,8 @@ final class GameCatalog
         if (self::$rawCatalog !== null) {
             return self::$rawCatalog;
         }
-        $path = FJD_ROOT . '/data/game-catalog.json';
+        $root = defined('FJD_ROOT') ? FJD_ROOT : dirname(__DIR__, 3);
+        $path = $root . '/data/game-catalog.json';
         if (!is_file($path)) {
             self::$rawCatalog = ['levels' => [], 'achievements' => []];
             return self::$rawCatalog;
@@ -165,6 +166,7 @@ final class GameCatalog
                 'id' => $id,
                 'xp' => (int) ($raw['xp'] ?? 0),
                 'hidden' => (bool) ($raw['hidden'] ?? false),
+                'shadow' => (bool) (($raw['shadow'] ?? false) || ($raw['meta']['shadow'] ?? false)),
                 'difficulty' => $difficulty,
                 'rarity' => $rarity,
             ]);

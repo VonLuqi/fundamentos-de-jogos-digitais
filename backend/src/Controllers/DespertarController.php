@@ -229,7 +229,7 @@ final class DespertarController
             $row = DespertarService::getOrCreateStateRow($userId);
             Http::json(200, [
                 'ok' => true,
-                'state' => DespertarService::buildStateDto($row),
+                'state' => DespertarService::buildStateDto($row, ['achievements' => $user['conquistas'] ?? []]),
                 'awarded' => self::emptyAwarded(),
                 'published' => true,
                 'pause' => $pauseDto,
@@ -271,7 +271,7 @@ final class DespertarController
 
             $row = DespertarService::getOrCreateStateRow($userId);
             $clientState = $body['clientState'] ?? null;
-            $result = DespertarService::validateSync($row, $clientState, $nowMs);
+            $result = DespertarService::validateSync($row, $clientState, $nowMs, is_array($user['conquistas'] ?? null) ? $user['conquistas'] : []);
 
             if (!$result['ok']) {
                 $resp = [
@@ -289,6 +289,10 @@ final class DespertarController
             $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], true);
             $echoEpoch = $result['echoEpoch'] ?? DespertarService::parseClientEpoch($clientState);
             $echoOpts = $echoEpoch !== null ? ['echoEpoch' => $echoEpoch] : [];
+            $echoOpts['achievements'] = array_values(array_unique(array_merge(
+                is_array($user['conquistas'] ?? null) ? $user['conquistas'] : [],
+                $persisted['awarded']['achievements'] ?? []
+            )));
 
             $resp = [
                 'ok' => true,

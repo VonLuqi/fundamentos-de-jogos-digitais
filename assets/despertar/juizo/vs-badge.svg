@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" role="img" aria-label="VS">
+  <defs>
+    <radialGradient id="vsCore" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#2a1a12"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </radialGradient>
+    <linearGradient id="vsRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d4a8"/>
+      <stop offset="55%" stop-color="#cfa759"/>
+      <stop offset="100%" stop-color="#8a6a2e"/>
+    </linearGradient>
+  </defs>
+  <circle cx="48" cy="48" r="44" fill="url(#vsCore)" stroke="url(#vsRing)" stroke-width="4"/>
+  <circle cx="48" cy="48" r="34" fill="none" stroke="#00a896" stroke-opacity="0.55" stroke-width="2"/>
+  <path d="M22 48 H74" stroke="#cfa759" stroke-opacity="0.35" stroke-width="2"/>
+  <text x="48" y="56" text-anchor="middle" font-family="Georgia, 'Cinzel', serif" font-size="28" font-weight="700" letter-spacing="0.08em" fill="#e8d4a8">VS</text>
+</svg>

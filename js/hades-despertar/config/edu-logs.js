@@ -115,6 +115,46 @@ export const EDU_LOGS = freezeAll([
     title: 'Óbolos e memória',
     body: 'Óbolos vêm do Lethe; alimentam bônus permanente entre corridas.',
   },
+  {
+    id: 'log_synergy_blades',
+    title: 'Sinergias e Mil Foices',
+    body: 'Sinergias acoplam pares de geradores (+5% no maior por unidade da base e +0,1% na base por unidade do maior), enquanto Mil Foices soma bônus linear por estrutura não-Sombra ao clique e às Sombras.',
+  },
+  {
+    id: 'log_shimmer_echo',
+    title: 'Eco do Acheron e Razão Variável',
+    body: 'Recompensas de razão variável (Variable Ratio Schedule) quebram a monotonia exponencial: a Colheita usa min(15% da carteira, 15 min de SPS) + 13 para premiar sem inflacionar a curva, enquanto Maré (×7 SPS) e Fúria da Foice (×777 clique) criam janelas de pico ativo.',
+  },
+  {
+    id: 'log_midgame_payoff',
+    title: 'Payoff do Mid-Game (T7–T12)',
+    body: 'Do Templo de Mnemosyne (T7) ao Tear de Cronos (T12), o tempo de retorno puro (BaseCost / BaseSPS) salta de minutos para horas e dias: são os multiplicadores empilhados e as sinergias cruzadas que comprimem esse horizonte de volta para minutos reais.',
+  },
+  {
+    id: 'log_nectar_minigames',
+    title: 'Néctar do Lethe, Time-Gating e Minigames',
+    body: 'O Néctar do Lethe (~24 h por gota, desbloqueado em 1B de almas) cria retenção de longo prazo e custo de oportunidade: gastar 1 Néctar no Nível 1 de Cão, Templo, Torre ou Trono abre os 4 minigames (+1% SPS da linha/nível), enquanto reter até 100 Néctares com Néctar em Reserva dobra todo o SPS global.',
+  },
+  {
+    id: 'log_veil_kittens',
+    title: 'Véu do Acheron e Produtório Cerberiano',
+    body: 'Cada conquista normal (+4% de Véu, incluindo conquistas das Aulas e do Grimório; conquistas Shadow somam +0%) deixa de ser mero troféu extrínseco e alimenta a linhagem Filhotes do Cérbero via produtório composto ∏(1 + m·f_i), onde cada novo filhote multiplica todo o SPS global.',
+  },
+  {
+    id: 'log_catabase_wrinklers',
+    title: 'Catábase das Avós e o Paradoxo das Sanguessugas',
+    body: 'Cada Sanguessuga do Acheron reduz o SPS imediato em 5% (10 unidades drenam 50%), mas acumula individualmente todo o dreno coletivo em paralelo e devolve ×1,1 ao estourar: com 10 Sanguessugas ativas, o multiplicador efetivo sobre o SPS passivo salta para ×6,0 (0,5 + 10 × 0,5 × 1,1 = 6,0).',
+  },
+  {
+    id: 'log_late_bignum_payoff',
+    title: 'Escala Exponencial Extrema, IEEE 754 e o Payoff de T13–T20',
+    body: 'Acima de 2^53 − 1 (~9×10^15, entre o Prisma das Moiras T14 e a Forja do Destino T15), o tipo Number IEEE 754 perde precisão inteira: por isso a economia usa aritmética BigInt/BCMath em string decimal até a casa dos Decilhões/Vigintilhões, onde o payoff teórico de anos d’O Imperador (T20, 540 Sp) é vencido pela composição exponencial de F1–F6.',
+  },
+  {
+    id: 'log_incremental_architecture_f8',
+    title: 'Arquitetura Completa de um Jogo Incremental (Stack, Sinks de Sacrifício e Loops Sazonais)',
+    body: 'No ápice de um jogo incremental, o SPS nasce da composição ordenada de ~15–19 camadas multiplicativas independentes (Linhas → Prestígio → Vereditos → Minigames → Relíquias Sazonais → Catábase → Saturnália → Fortunas → Escama Dracónica → Filhotes/Véu → Néctar em Reserva → Auras do Dragão → Aliança → Buffs Ativos), enquanto sinks não-monetários (sacrificar 50–200 geradores ao Dragão Pitão/Ladão, vender estruturas com 25%/50% de reembolso e caçar Fortunas de 2%/4% no ciclo natural do Ticker) evitam a inflação estática.',
+  },
 ]);
 
 export const EDU_LOG_IDS = Object.freeze(EDU_LOGS.map((item) => item.id));
@@ -147,6 +187,14 @@ export const EDU_LOG_TIP = Object.freeze({
   log_sealed_juramentos: 'Juramentos selados abrem conforme a máquina cresce.',
   log_verdicts_milestone: 'Vereditos do Juízo compram sentenças na Bancada.',
   log_obols_bonus: 'Óbolos do Lethe são memória entre catábases.',
+  log_synergy_blades: 'Sinergias e Mil Foices acoplam geradores entre si.',
+  log_shimmer_echo: 'Ecos do Acheron trazem picos estocásticos (Maré, Colheita e Fúria).',
+  log_midgame_payoff: 'Multiplicadores e sinergias comprimem o payoff de horas/dias em T7–T12.',
+  log_nectar_minigames: 'O Néctar (24 h) nivela geradores, abre 4 minigames e acumula até +100% SPS.',
+  log_veil_kittens: 'Cada conquista normal (+4% Véu) multiplica o SPS via Filhotes do Cérbero.',
+  log_catabase_wrinklers: '10 Sanguessugas drenam 50% do SPS, mas devolvem ×6,0 ao estourar (0,5 + 10×0,5×1,1).',
+  log_late_bignum_payoff: 'T13–T20 ultrapassam 2^53−1 (IEEE 754): precisão BigInt/Decimal e stack composto vencem payoffs de anos.',
+  log_incremental_architecture_f8: 'Stack completo (14+ camadas), sacrifícios do Dragão, 4 Estações, Fortunas (2%/4%) e Venda (25%/50%).',
 });
 
 export const EDU_LOG_TIP_IDS = Object.freeze(Object.keys(EDU_LOG_TIP));

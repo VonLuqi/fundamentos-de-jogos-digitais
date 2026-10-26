@@ -117,22 +117,27 @@
   >
     <div class="despertar-juizo-modal__panel">
       <header class="despertar-juizo-modal__header">
-        <h2 class="despertar-juizo-modal__title" id="despertar-juizo-title">Juízo do Tartarus</h2>
+        <div class="despertar-juizo-modal__header-row">
+          <h2 class="despertar-juizo-modal__title" id="despertar-juizo-title">Juízo do Tartarus</h2>
+          <p class="despertar-juizo-modal__mercy" data-juizo-mercy hidden>Catálogo Vivo</p>
+        </div>
         <p class="despertar-juizo-modal__hud">
           <span data-juizo-hud="streak">Sequência 0</span>
           <span data-juizo-hud="best">Recorde 0</span>
           <span data-juizo-hud="verdicts">0 Vereditos</span>
+          <span data-juizo-hud="next">Próximo: 5 → +1</span>
         </p>
       </header>
 
       <div data-juizo-view="play">
         <p class="despertar-juizo-modal__question">
           Qual exige a faixa ClassInd <strong>mais alta</strong>?
-          Selecione o card ou <strong>Empate</strong>, depois <strong>Confirmar veredito</strong>.
+          <strong>Duplo clique</strong> no card ou em <strong>Empate</strong> para sentenciar.
         </p>
         <p class="despertar-juizo-modal__hint" data-juizo-hint>
           Campeão mostra a faixa. Desafiante esconde com ?. Acerto sobe a sequência; Vereditos só nos marcos do teu recorde.
         </p>
+        <p class="despertar-juizo-modal__prompt" data-juizo-prompt aria-live="polite"></p>
         <div class="despertar-juizo-modal__stage" data-juizo-stage>
           <button
             class="despertar-juizo-card despertar-juizo-card--champion"
@@ -140,7 +145,7 @@
             data-juizo-card="A"
             data-juizo-choice="A"
             aria-pressed="false"
-            aria-label="Selecionar o campeão como faixa mais alta"
+            aria-label="Campeão: duplo clique se a faixa for a mais alta"
           >
             <p class="despertar-juizo-card__role">Campeão</p>
             <img class="despertar-juizo-card__cover" data-juizo-cover="A" alt="" hidden />
@@ -148,14 +153,16 @@
             <p class="despertar-juizo-card__blurb" data-juizo-blurb="A"></p>
             <p class="despertar-juizo-card__rating" data-juizo-rating="A" aria-label="Faixa do campeão">—</p>
           </button>
-          <div class="despertar-juizo-modal__vs" aria-hidden="true">VS</div>
+          <div class="despertar-juizo-modal__vs" aria-hidden="true">
+            <img class="despertar-juizo-modal__vs-badge" src="../assets/despertar/juizo/vs-badge.svg" alt="" width="72" height="72" />
+          </div>
           <button
             class="despertar-juizo-card despertar-juizo-card--challenger"
             type="button"
             data-juizo-card="B"
             data-juizo-choice="B"
             aria-pressed="false"
-            aria-label="Selecionar o desafiante como faixa mais alta"
+            aria-label="Desafiante: duplo clique se a faixa for a mais alta"
           >
             <p class="despertar-juizo-card__role">Desafiante</p>
             <img class="despertar-juizo-card__cover" data-juizo-cover="B" alt="" hidden />
@@ -169,12 +176,17 @@
           </button>
         </div>
         <div class="despertar-juizo-modal__confetti" data-juizo-confetti aria-hidden="true"></div>
-        <div class="despertar-juizo-modal__choices" role="group" aria-label="Julgamento">
-          <button class="despertar-ghost" type="button" data-juizo-choice="tie" aria-pressed="false">Empate</button>
-          <button class="btn-gold" type="button" data-juizo-action="confirm" disabled>Confirmar veredito</button>
-        </div>
-        <div class="despertar-juizo-modal__actions">
-          <button class="despertar-ghost" type="button" data-juizo-action="back">Voltar ao Despertar</button>
+        <div class="despertar-juizo-modal__footer">
+          <div class="despertar-juizo-modal__choices" role="group" aria-label="Julgamento">
+            <button class="despertar-juizo-modal__tie" type="button" data-juizo-choice="tie" aria-pressed="false" aria-label="Selecionar empate; duplo clique para confirmar">
+              <span class="despertar-juizo-modal__tie-icon" aria-hidden="true">⚖</span>
+              Empate
+            </button>
+          </div>
+          <p class="despertar-juizo-modal__confirm-hint">Duplo clique confirma · Enter também sentenciar</p>
+          <div class="despertar-juizo-modal__actions">
+            <button class="despertar-ghost" type="button" data-juizo-action="back">Voltar ao Despertar</button>
+          </div>
         </div>
       </div>
 
@@ -187,7 +199,9 @@
             <h3 class="despertar-juizo-card__title" data-juizo-fail-title="A">—</h3>
             <p class="despertar-juizo-card__rating" data-juizo-fail-rating="A">—</p>
           </article>
-          <div class="despertar-juizo-modal__vs" aria-hidden="true">VS</div>
+          <div class="despertar-juizo-modal__vs" aria-hidden="true">
+            <img class="despertar-juizo-modal__vs-badge" src="../assets/despertar/juizo/vs-badge.svg" alt="" width="72" height="72" />
+          </div>
           <article class="despertar-juizo-card despertar-juizo-card--challenger" data-juizo-fail-card="B">
             <p class="despertar-juizo-card__role">Desafiante</p>
             <img class="despertar-juizo-card__cover" data-juizo-fail-cover="B" alt="" hidden />
@@ -201,8 +215,10 @@
           <span data-juizo-reveal-b>—</span>
         </div>
         <p class="despertar-juizo-modal__fail-body" data-juizo-fail-body></p>
+        <p class="despertar-juizo-modal__fail-note">Vereditos vêm do <strong>recorde</strong>, não desta sequência.</p>
         <div class="despertar-juizo-modal__actions">
           <button class="btn-gold" type="button" data-juizo-action="restart">Novo julgamento</button>
+          <button class="despertar-ghost" type="button" data-juizo-action="open-bancada">Abrir Bancada</button>
           <button class="despertar-ghost" type="button" data-juizo-action="fail-back">Voltar ao Despertar</button>
         </div>
       </div>
@@ -269,24 +285,35 @@
                 <span class="despertar-num" id="despertar-sps">0</span>
               </p>
             </div>
+            <div
+              class="despertar-active-buffs"
+              id="despertar-active-buffs"
+              role="status"
+              aria-live="polite"
+              aria-label="Buffs ativos de Ecos do Acheron"
+              hidden
+            ></div>
             <div class="despertar-reap-stage">
               <div class="despertar-reap-orbit" id="despertar-reap-orbit" aria-hidden="true"></div>
               <button class="despertar-reap" type="button" id="despertar-reap" aria-label="Ceifar almas no Acheron">
                 <img
                   class="despertar-reap__foice"
-                  src="../assets/despertar/sprites/Foice.png"
+                  src="../assets/despertar/sprites/foice/foice-idle.webp"
                   alt=""
-                  width="256"
-                  height="256"
+                  width="512"
+                  height="512"
                   decoding="async"
                   data-reap-foice
                 />
                 <span class="despertar-reap__glyph" aria-hidden="true" data-reap-glyph hidden>⚔</span>
                 <span class="despertar-reap__label">Ceifar</span>
               </button>
+              <div class="despertar-shimmer-layer" id="despertar-shimmer-layer"></div>
               <div class="despertar-particles" data-particle-layer aria-hidden="true"></div>
               <div class="despertar-veil" id="despertar-veil" aria-hidden="true"></div>
             </div>
+            <!-- Floats +N fora do stage: não reiniciam com shake/órbita -->
+            <div class="despertar-float-layer" data-float-layer aria-hidden="true"></div>
             <dl class="despertar-hud despertar-hud--secondary">
               <div class="despertar-hud__item">
                 <dt>Almas / clique</dt>
@@ -300,18 +327,21 @@
             <p class="despertar-col__hint">A Foice de Hades espera o primeiro corte no Acheron.</p>
             <div class="despertar-juizo-cta">
               <button
-                class="btn-gold"
+                class="btn-gold despertar-juizo-cta__btn"
                 type="button"
                 id="despertar-juizo-open"
                 disabled
                 aria-disabled="true"
                 title="O Juízo ainda cataloga as almas."
               >
-                Juízo · ClassInd
+                <img class="despertar-juizo-cta__badge" src="../assets/despertar/juizo/vs-badge.svg" alt="" width="28" height="28" />
+                <span class="despertar-juizo-cta__label">Juízo · ClassInd</span>
               </button>
               <p class="despertar-juizo-cta__hint" id="despertar-juizo-hint">O Juízo ainda cataloga as almas.</p>
             </div>
           </section>
+
+          <div class="despertar-frame-rail despertar-frame-rail--v" data-frame="acheron-realm" aria-hidden="true"></div>
 
           <!-- CENTRO — Mundo / Stats / Legacy (Cookie: shelves + Options) -->
           <section class="despertar-col despertar-col--realm" id="despertar-tabs" aria-labelledby="tabs-heading">
@@ -347,6 +377,18 @@
                 <div class="despertar-stats__row"><dt>Essência</dt><dd class="despertar-num" data-stat="mnemosyne">0</dd></div>
                 <div class="despertar-stats__row"><dt>Vereditos</dt><dd class="despertar-num" data-stat="verdicts">0</dd></div>
                 <div class="despertar-stats__row"><dt>Juízo (recorde)</dt><dd class="despertar-num" data-stat="juizoBest">0</dd></div>
+                <div class="despertar-stats__row"><dt>Ecos ceifados</dt><dd class="despertar-num" data-stat="shimmersClicked">0</dd></div>
+                <div class="despertar-stats__row"><dt>Ecos dissipados</dt><dd class="despertar-num" data-stat="shimmersMissed">0</dd></div>
+                <div class="despertar-stats__row"><dt>Néctar em reserva</dt><dd class="despertar-num" data-stat="nectar">0</dd></div>
+                <div class="despertar-stats__row"><dt>Néctares colhidos</dt><dd class="despertar-num" data-stat="totalNectar">0</dd></div>
+                <div class="despertar-stats__row despertar-stats__row--veil"><dt>Véu do Acheron</dt><dd class="despertar-num" data-stat="veil">Véu: 0% (Névoa Cinzenta) · Mult Cerberiano: ×1</dd></div>
+                <div class="despertar-stats__row"><dt>SPS Efetivo (Catábase)</dt><dd class="despertar-num" data-stat="effectiveSps">0 (Bruto: 0 · 0 Sanguessugas: −0%)</dd></div>
+                <div class="despertar-stats__row"><dt>Multiplicador Bruto</dt><dd class="despertar-num" data-stat="rawMultiplier">×1</dd></div>
+                <div class="despertar-stats__row"><dt>Stack SPS (Camadas)</dt><dd class="despertar-num" data-stat="stackBreakdown">Base ×1 · Prestígio ×1</dd></div>
+                <div class="despertar-stats__row"><dt>Dragão Ctoniano</dt><dd class="despertar-num" data-stat="dragonSummary">Ovo Adormecido · Auras: nenhuma</dd></div>
+                <div class="despertar-stats__row"><dt>Estação &amp; Fortunas</dt><dd class="despertar-num" data-stat="seasonSummary">Estação: neutra · Fortunas: 0/24</dd></div>
+                <div class="despertar-stats__row"><dt>Sanguessugas (retido)</dt><dd class="despertar-num" data-stat="leechesDigested">0 almas retidas (retorno no pop: +0)</dd></div>
+                <div class="despertar-stats__row"><dt>Sanguessugas estouradas</dt><dd class="despertar-num" data-stat="leechesPopped">0</dd></div>
               </dl>
               <section class="despertar-sealed" id="despertar-sealed-juramentos" aria-labelledby="sealed-heading">
                 <h3 class="despertar-subsection" id="sealed-heading">Juramentos selados</h3>
@@ -523,10 +565,31 @@
                   <ul class="despertar-market-list" id="bancada-list-owned"></ul>
                 </div>
               </div>
+              <div id="despertar-minigames-root" class="despertar-minigames-root"></div>
             </div>
 
             <div class="despertar-tabpanel" role="tabpanel" id="panel-stele" aria-labelledby="tab-stele" hidden>
               <p class="despertar-empty">A Estela local guarda a corrida até o Submundo reconhecer teu estado.</p>
+              <section class="despertar-prefs" id="despertar-prefs" aria-labelledby="stele-prefs-heading">
+                <h3 class="despertar-subsection" id="stele-prefs-heading">Opções de Fluidez</h3>
+                <div class="despertar-debug__flags" role="group" aria-label="Preferências visuais e orçamento de render">
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-perf-pref="cursors" id="despertar-pref-cursors" checked />
+                    Cursores na órbita (Sombras)
+                  </label>
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-perf-pref="particles" id="despertar-pref-particles" checked />
+                    Partículas e chuva de almas
+                  </label>
+                  <label class="despertar-debug__flag">
+                    <input type="checkbox" data-perf-pref="fancy" id="despertar-pref-fancy" checked />
+                    Animações detalhadas (Fancy)
+                  </label>
+                </div>
+                <p class="despertar-debug__hint" id="despertar-prefs-lod-status" hidden>
+                  Modo leve ativado automaticamente para preservar a fluidez (&lt; 28 FPS).
+                </p>
+              </section>
               <div class="despertar-debug" id="despertar-debug" hidden>
                 <h3 class="despertar-subsection">Debug do Mestre</h3>
                 <p class="despertar-empty">
@@ -616,6 +679,20 @@
                     <option value="tartarus_judge">Juiz do Tártaro</option>
                     <option value="phlegethon_forge">Forja de Phlegethon</option>
                     <option value="obsidian_throne">Trono de Obsidiana</option>
+                    <option value="mnemosyne_temple">Templo de Mnemosyne</option>
+                    <option value="styx_tower">Torre do Estige</option>
+                    <option value="star_barge">Barca das Estrelas</option>
+                    <option value="tartarus_lab">Laboratório do Tártaro</option>
+                    <option value="erebus_portal">Portal do Érebo</option>
+                    <option value="chronos_loom">Tear de Cronos</option>
+                    <option value="void_condenser">Condensador do Vazio</option>
+                    <option value="moirai_prism">Prisma das Moiras</option>
+                    <option value="fate_forge">Forja do Destino</option>
+                    <option value="fractal_engine">Motor Fractal</option>
+                    <option value="oracle_console">Console do Oráculo</option>
+                    <option value="chthonic_idleverse">Idleverso Ctoniano</option>
+                    <option value="cortex_baker">Padeiro do Córtex</option>
+                    <option value="the_emperor">O Imperador (You)</option>
                   </select>
                   <button class="despertar-debug__grant" type="button" id="despertar-debug-shiny-half" data-debug-action="shinyHalf">
                     Marcar 50% negativo
@@ -630,21 +707,30 @@
             </div>
           </section>
 
+          <div class="despertar-frame-rail despertar-frame-rail--v" data-frame="realm-store" aria-hidden="true"></div>
+
           <!-- DIREITA — Store (Cookie: upgrades + buildings) -->
           <section class="despertar-col despertar-col--store" id="river-market" aria-labelledby="market-heading">
             <p class="despertar-col__river">Cocytus</p>
             <h2 class="despertar-col__title" id="market-heading">Mercado</h2>
+            <div class="despertar-frame-rail despertar-frame-rail--h" aria-hidden="true"></div>
 
             <div class="despertar-upgrade-strip" id="styx-upgrade-strip" aria-label="Juramentos do Styx">
               <p class="despertar-empty" id="styx-empty">Os juramentos do Styx exigem servos — ou um punhado de almas.</p>
               <ul class="despertar-upgrade-icons" id="styx-list" hidden></ul>
             </div>
 
-            <div class="despertar-buy-modes" role="group" aria-label="Lote de compra">
-              <button class="despertar-buy-modes__btn is-active" type="button" data-buy-mode="1">1</button>
-              <button class="despertar-buy-modes__btn" type="button" data-buy-mode="10">10</button>
-              <button class="despertar-buy-modes__btn" type="button" data-buy-mode="100">100</button>
-              <button class="despertar-buy-modes__btn" type="button" data-buy-mode="max">Máx</button>
+            <div class="despertar-buy-modes" role="group" aria-label="Modo e lote de mercado">
+              <div class="despertar-buy-modes__line">
+                <span class="despertar-buy-modes__verbs">
+                  <button class="despertar-buy-modes__verb is-active" type="button" data-trade-action="buy">Comprar</button>
+                  <button class="despertar-buy-modes__verb" type="button" data-trade-action="sell">Vender</button>
+                </span>
+                <button class="despertar-buy-modes__num is-active" type="button" data-buy-mode="1">1</button>
+                <button class="despertar-buy-modes__num" type="button" data-buy-mode="10">10</button>
+                <button class="despertar-buy-modes__num" type="button" data-buy-mode="100">100</button>
+                <button class="despertar-buy-modes__num" type="button" data-buy-mode="max">Máx</button>
+              </div>
             </div>
             <ul class="despertar-market-list despertar-market-list--store" id="despertar-market-list"></ul>
           </section>

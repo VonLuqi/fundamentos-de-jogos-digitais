@@ -473,7 +473,7 @@ Máscara cinza com copy narrativa (“O rio ainda não aceita teu nome”) — n
 | Id | Tier | Nome | BaseCost | BaseRate (SPS) | Mult |
 | --- | ---: | --- | ---: | ---: | ---: |
 | `wandering_shade` | 1 | Sombra Vagante | 15 | 0.1 | 1.15 |
-| `charon_servants` | 2 | Servos de Caronte | 100 | 0.8 | 1.15 |
+| `charon_servants` | 2 | Servos de Caronte | 100 | 1.0 | 1.15 |
 | `cerberian_hound` | 3 | Cão Cerberiano | 1_100 | 8.0 | 1.15 |
 | `tartarus_judge` | 4 | Juiz do Tártaro | 12_000 | 47.0 | 1.15 |
 | `phlegethon_forge` | 5 | Forja de Phlegethon | 130_000 | 260.0 | 1.15 |

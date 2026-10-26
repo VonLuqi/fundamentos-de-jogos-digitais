@@ -270,12 +270,15 @@ function renderSeasonBoardRows(entries, category) {
 
 /**
  * Temporada encerrada: jogo fechado + top 3 por categoria do placar.
+ * Admin vê CTA para liberar no Dia 1 (abre o Acheron).
  *
  * @param {ParentNode & { innerHTML?: string }} container
  * @param {{
  *   aulasHref?: string,
  *   rankingHref?: string,
  *   token?: string|null,
+ *   isAdmin?: boolean,
+ *   onLiberate?: () => Promise<void>|void,
  *   leaderboardGet?: (token: string, opts: object) => Promise<object>,
  *   scope?: 'turma'|'global',
  * }} [opts]
@@ -285,6 +288,7 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   const aulasHref = String(opts.aulasHref || '#');
   const rankingHref = String(opts.rankingHref || '#');
   const scope = opts.scope === 'turma' ? 'turma' : 'global';
+  const isAdmin = Boolean(opts.isAdmin);
 
   const boardSlots = SEASON_CLOSED_CATEGORIES.map((category) => `
     <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">
@@ -294,6 +298,10 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       </ol>
     </section>
   `).join('');
+
+  const liberateHtml = isAdmin
+    ? `<button class="btn-gold" type="button" data-season-liberate>${escapeHtml(SEASON_CLOSED_COPY.ctaLiberate)}</button>`
+    : '';
 
   container.innerHTML = `
     <article class="despertar-classroom-veil despertar-classroom-veil--season hades-frame" data-despertar-season-closed-veil>
@@ -307,11 +315,37 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       </div>
       <p class="despertar-season-tablet" data-season-tablet>${escapeHtml(SEASON_CLOSED_COPY.tabletNote)}</p>
       <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
-        <a class="btn-gold" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
+        ${liberateHtml}
+        <a class="${isAdmin ? 'despertar-ghost' : 'btn-gold'}" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
         <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaRanking)}</a>
       </p>
+      <p class="despertar-season-liberate-error" data-season-liberate-error hidden></p>
     </article>
   `;
+
+  const liberateBtn = container.querySelector('[data-season-liberate]');
+  const liberateError = container.querySelector('[data-season-liberate-error]');
+  if (liberateBtn && typeof opts.onLiberate === 'function') {
+    liberateBtn.addEventListener('click', async () => {
+      if (liberateBtn.disabled) return;
+      liberateBtn.disabled = true;
+      liberateBtn.textContent = SEASON_CLOSED_COPY.liberating;
+      if (liberateError) {
+        liberateError.hidden = true;
+        liberateError.textContent = '';
+      }
+      try {
+        await opts.onLiberate();
+      } catch (error) {
+        liberateBtn.disabled = false;
+        liberateBtn.textContent = SEASON_CLOSED_COPY.ctaLiberate;
+        if (liberateError) {
+          liberateError.hidden = false;
+          liberateError.textContent = error?.message || SEASON_CLOSED_COPY.liberateError;
+        }
+      }
+    });
+  }
 
   const token = opts.token;
   const fetchBoard = typeof opts.leaderboardGet === 'function' ? opts.leaderboardGet : null;

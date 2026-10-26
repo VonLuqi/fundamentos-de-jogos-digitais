@@ -7,7 +7,9 @@ import { INTERNAL_DECIMALS, toScaled } from '../core/decimal.js';
 
 const SCALE = 10n ** BigInt(INTERNAL_DECIMALS);
 const SUFFIXES = Object.freeze([
-  '', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc',
+  '', 'K', 'M', 'B', 'T',
+  'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc',
+  'UDc', 'DDc', 'TDc', 'QaDc', 'QiDc', 'SxDc', 'SpDc', 'OcDc', 'NoDc', 'Vg',
 ]);
 
 function trimFrac(whole, fracRaw, maxFrac) {
@@ -29,10 +31,14 @@ export function formatGameNumber(value) {
   }
 
   const digits = whole.toString();
-  const suffixIndex = Math.min(
-    Math.floor((digits.length - 1) / 3),
-    SUFFIXES.length - 1,
-  );
+  const groupIdx = Math.floor((digits.length - 1) / 3);
+  if (groupIdx >= SUFFIXES.length) {
+    const exp = digits.length - 1;
+    const head = digits[0];
+    const mant = digits.slice(1, 3).replace(/0+$/, '');
+    return `${sign}${mant ? `${head}.${mant}` : head}e${exp}`;
+  }
+  const suffixIndex = groupIdx;
   const headLen = digits.length - suffixIndex * 3;
   const head = digits.slice(0, headLen);
   const rest = digits.slice(headLen, headLen + 2).replace(/0+$/, '');

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 160" width="128" height="160" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="frameGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8d4a8"/>
+      <stop offset="50%" stop-color="#cfa759"/>
+      <stop offset="100%" stop-color="#7a5a28"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer plaque; center left transparent for cover content via CSS border-image / mask -->
+  <rect x="3" y="3" width="122" height="154" rx="6" fill="none" stroke="url(#frameGold)" stroke-width="3"/>
+  <rect x="8" y="8" width="112" height="144" rx="4" fill="none" stroke="#00a896" stroke-opacity="0.35" stroke-width="1.5"/>
+  <!-- Corner ornaments -->
+  <path d="M10 22 V12 H20" fill="none" stroke="#e8d4a8" stroke-width="2"/>
+  <path d="M118 22 V12 H108" fill="none" stroke="#e8d4a8" stroke-width="2"/>
+  <path d="M10 138 V148 H20" fill="none" stroke="#e8d4a8" stroke-width="2"/>
+  <path d="M118 138 V148 H108" fill="none" stroke="#e8d4a8" stroke-width="2"/>
+  <circle cx="14" cy="14" r="2.5" fill="#cfa759"/>
+  <circle cx="114" cy="14" r="2.5" fill="#cfa759"/>
+  <circle cx="14" cy="146" r="2.5" fill="#cfa759"/>
+  <circle cx="114" cy="146" r="2.5" fill="#cfa759"/>
+</svg>

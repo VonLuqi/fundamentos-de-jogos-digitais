@@ -8,7 +8,10 @@ import {
   BUY_MAX_CAP,
   BUY_MODES,
   COCYTUS_T2_SOULS,
+  DEFAULT_PERF_PREFS,
   LETHE_PREVIEW_RUN_SOULS,
+  PERF_PREFS_STORAGE_KEY,
+  PERF_UI_SLOW_INTERVAL_MS,
   PHLEGETHON_SOULS,
   GOLD_MULT,
   NEGATIVO_MULT,
@@ -33,19 +36,45 @@ import { JUIZO_BANCADA_HINT } from '../config/juizo-pool.js';
 import { add, cmp, div, mul } from '../core/decimal.js';
 import {
   amortizationSeconds,
+  calculateSpsBreakdown,
+  catabaseResearchSpsMult,
+  cerberusPupMult,
+  dragonAuraSpsMult,
+  dragonScaleSpsMult,
   economyEffects,
   effectiveUnitSPS,
+  elderCovenantMult,
+  elderPactServantFlatBonusPerUnit,
+  fortuneGlobalSpsMult,
+  generatorCostMultForId,
   lineSPS,
   meetsUpgradeRequirement,
+  minigameEffects,
+  nectarReserveMult,
   prestigeBonus,
+  saturnaliaSpsMult,
+  seasonalCompoundMult,
   talentEffects,
+  thousandBladesBonusPerUnit,
+  upgradeEffectiveCost,
+  veilFraction as economicVeilFraction,
+  veilPercent as economicVeilPercent,
+  veilTier as economicVeilTier,
 } from '../core/formulas.js';
+import { getDragonAura, getDragonStage } from '../config/dragon.js';
+import { getSeason } from '../config/seasons.js';
+import { FORTUNES, getFortune } from '../config/fortunes.js';
 import { formatAmortSeconds, formatOwned, formatRate, formatSouls } from './NumberFormatter.js';
-import { AltarOrbit, veilPercent } from './world/AltarOrbit.js';
-import { createSpriteNode, generatorSprite, upgradeSprite } from './world/SpriteAtlas.js';
+import { AltarOrbit, applyVeilElementStyle, veilPercent } from './world/AltarOrbit.js';
+import { LeechRingView } from './world/LeechRingView.js';
+import { createSpriteNode, generatorSprite, habitatSprite, upgradeSprite } from './world/SpriteAtlas.js';
+import { describeUnitPersona } from './unitPersona.js';
 import { WorldView } from './world/WorldView.js';
+import { ShimmerView } from './ShimmerView.js';
+import { MinigamesView } from './minigames/MinigamesView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
+import { withPerfMeasure } from './perfTelemetry.js';
 import { CodexBook, describeCodex, describeCodexEntry } from './CodexBook.js';
 import { LoopLeaderboard } from './LoopLeaderboard.js';
 import {
@@ -86,7 +115,7 @@ const LETHE_TUTORIAL_TOAST =
   'O Lethe se abre. Confira a aba Lethe — o livro do Códice também ganhou uma página.';
 const PANTHEON_EMPTY = 'Mnemosyne ainda não bebeu tua memória.';
 
-/** Copy do tip de NPC (G3.2) — shelf/órbita = uma unidade. */
+/** Copy do tip de NPC (G3.2) — shelf/órbita = uma unidade (rodapé de produção). */
 export const NPC_UNIT_PRODUCTION_BLURB = 'produção desta unidade';
 
 const TALENT_BLURB = Object.freeze({
@@ -108,6 +137,13 @@ const TALENT_BLURB = Object.freeze({
   calice_da_memoria: 'O Ritual do Lethe rende 50% a mais de Essência.',
   mnemosyne_tripla: 'A memória de Mnemosyne rende o dobro no bônus de Óbolos.',
   forja_despertada: 'A próxima corrida começa com 1 Forja de Phlegethon.',
+  nectar_em_reserva: 'Cada Néctar não gasto concede +1% SPS global (até 100 Néctares = ×2 SPS).',
+  frenesi_de_nectar_talento: 'Permite consagrar 1 Néctar por corrida para ×3 SPS durante 1 hora.',
+  ovo_primordial: 'Desperta o Ovo Primordial do Dragão Ctoniano Pitão / Ladão e suas Auras.',
+  rodizio_das_estacoes: 'Desbloqueia a Roda das Estações para invocar Antestéria, Lemúria, Saturnália ou Feira de Hermes por 24 h.',
+  eco_ancestral_iii: 'Após o Lethe, 3 Juramentos Styx revelados começam selados.',
+  eco_ancestral_iv: 'Após o Lethe, 4 Juramentos Styx revelados começam selados.',
+  eco_ancestral_v: 'Após o Lethe, 5 Juramentos Styx revelados começam selados.',
 });
 
 const TALENT_NEXT_RUN = Object.freeze(new Set([
@@ -118,6 +154,9 @@ const TALENT_NEXT_RUN = Object.freeze(new Set([
   'eco_do_styx',
   'matilha_cerberiana',
   'eco_ressonante',
+  'eco_ancestral_iii',
+  'eco_ancestral_iv',
+  'eco_ancestral_v',
   'forja_despertada',
 ]));
 
@@ -177,12 +216,47 @@ export function interpolatedSouls(souls, sps, alpha, reducedMotion = false) {
  * T1 sempre; T2 ≥ 50 almas ou 1× T1; T3 1× T2 ou almas ≥ BaseCost/4;
  * T4 1× T3 ou almas ≥ BaseCost/4; T5–T6 Phlegethon (1× T4 ou ≥ PHLEGETHON_SOULS).
  */
+/**
+ * Próximos N geradores ainda fechados (prévia Cookie `???`).
+ * @param {{ souls?: string, generators?: Record<string, number> }} ctx
+ * @param {number} [limit]
+ */
+export function listMarketPreviewIds(ctx = {}, limit = 2) {
+  const souls = ctx.souls ?? '0';
+  const generators = ctx.generators && typeof ctx.generators === 'object' ? ctx.generators : {};
+  const cap = Math.max(0, Math.floor(Number(limit) || 0));
+  if (cap <= 0) return [];
+  const out = [];
+  for (const def of GENERATORS) {
+    if (isGeneratorRevealed(def.id, { souls, generators })) continue;
+    out.push(def.id);
+    if (out.length >= cap) break;
+  }
+  return out;
+}
+
+/**
+ * @returns {'open'|'preview'|'hidden'}
+ */
+export function marketRowVisibility(id, ctx = {}) {
+  if (isGeneratorRevealed(id, ctx)) return 'open';
+  const preview = listMarketPreviewIds(ctx, 2);
+  if (preview.includes(id)) return 'preview';
+  return 'hidden';
+}
+
 export function isGeneratorRevealed(id, { souls = '0', generators = {} } = {}) {
   const qty = generators && typeof generators === 'object' ? generators : {};
   const t1 = Number(qty.wandering_shade || 0);
   const t2 = Number(qty.charon_servants || 0);
   const t3 = Number(qty.cerberian_hound || 0);
   const t4 = Number(qty.tartarus_judge || 0);
+  const t6 = Number(qty.obsidian_throne || 0);
+  const t7 = Number(qty.mnemosyne_temple || 0);
+  const t8 = Number(qty.styx_tower || 0);
+  const t9 = Number(qty.star_barge || 0);
+  const t10 = Number(qty.tartarus_lab || 0);
+  const t11 = Number(qty.erebus_portal || 0);
 
   switch (id) {
     case 'wandering_shade':
@@ -202,19 +276,81 @@ export function isGeneratorRevealed(id, { souls = '0', generators = {} } = {}) {
     case 'phlegethon_forge':
     case 'obsidian_throne':
       return t4 >= 1 || cmp(souls, PHLEGETHON_SOULS) >= 0;
+    case 'mnemosyne_temple': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '5000000';
+      return t6 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'styx_tower': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '82500000';
+      return t7 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'star_barge': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '1275000000';
+      return t8 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'tartarus_lab': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '18750000000';
+      return t9 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'erebus_portal': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '250000000000';
+      return t10 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'chronos_loom': {
+      const def = getGenerator(id);
+      const threshold = def ? div(def.baseCost, '4') : '3500000000000';
+      return t11 >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
+    case 'void_condenser':
+    case 'moirai_prism':
+    case 'fate_forge':
+    case 'fractal_engine':
+    case 'oracle_console':
+    case 'chthonic_idleverse':
+    case 'cortex_baker':
+    case 'the_emperor': {
+      const def = getGenerator(id);
+      if (!def) return false;
+      const prevDef = GENERATORS.find((g) => g.tier === def.tier - 1);
+      const prevQty = prevDef ? Number(qty[prevDef.id] || 0) : 0;
+      const threshold = div(def.baseCost, '4');
+      return prevQty >= 1 || Number(qty[id] || 0) >= 1 || cmp(souls, threshold) >= 0;
+    }
     default:
       return false;
   }
 }
 
-export function describeGeneratorCard(state, id, buyMode = '1') {
+function resolveSellCount(mode, entity) {
+  const owned = Math.max(0, Math.floor(Number(entity?.quantity) || 0));
+  if (owned <= 0) return 0;
+  const raw = String(mode ?? '1').trim().toLowerCase();
+  if (raw === 'max' || raw === 'máx' || raw === 'maximo' || raw === 'máximo') {
+    return owned;
+  }
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(owned, n);
+}
+
+export function describeGeneratorCard(state, id, buyMode = '1', tradeAction = 'buy') {
   const entity = state.generators.get(id);
   const def = getGenerator(id);
   if (!entity || !def) return null;
 
   const quantities = state.quantities();
   const revealed = isGeneratorRevealed(id, { souls: state.souls, generators: quantities });
-  const costMult = state.costMult();
+  const costMult = typeof state.costMult === 'function'
+    ? state.costMult(id)
+    : generatorCostMultForId(id, {
+      upgrades: state.upgrades || [],
+      seasons: state.seasons || null,
+    });
   const upgradeMult = state.generatorUpgradeMult(id);
   const bonus = prestigeBonus(state.obols, state.talents);
   const { spsVerdictMult } = economyEffects(state.talents, state.verdictPurchases);
@@ -226,22 +362,98 @@ export function describeGeneratorCard(state, id, buyMode = '1') {
     : (state.goldCounts || {});
   const shiny = Number(shinyMap?.[id] || 0);
   const gold = Number(goldMap?.[id] || 0);
+  let flatUnitBonus = '0';
+  if (id === 'wandering_shade') {
+    flatUnitBonus = thousandBladesBonusPerUnit(state.upgrades || [], quantities);
+  } else if (id === 'charon_servants') {
+    flatUnitBonus = elderPactServantFlatBonusPerUnit(state.upgrades || [], quantities);
+  }
+  const genLevels = state.generatorLevels || {};
+  const level = Number(genLevels[id] || 0);
   const baseLine = lineSPS({
     qty: entity.quantity,
     shiny,
     gold,
     baseRate: def.baseRate,
     upgradeMult,
+    flatUnitBonus,
+    level,
   });
-  const lineRate = mul(mul(baseLine, bonus), spsVerdictMult);
+  const { spsMult: mgSpsMult } = minigameEffects({
+    generatorLevels: genLevels,
+    minigames: state.minigames || {},
+  });
+  const seasonalMult = seasonalCompoundMult(state.upgrades || []);
+  const researchMult = catabaseResearchSpsMult(state.upgrades || []);
+  const saturnMult = saturnaliaSpsMult(state.seasons || null, state.upgrades || []);
+  const fortuneMult = fortuneGlobalSpsMult(state.upgrades || []);
+  const scaleMult = dragonScaleSpsMult(state.upgrades || []);
+  const pupMult = cerberusPupMult(state.upgrades || [], state.achievements || [], null, state.dragon || null);
+  const reserveMult = nectarReserveMult(state.nectar || 0, state.talents || []);
+  const auraMult = dragonAuraSpsMult(state.dragon || null);
+  const covMult = elderCovenantMult(Boolean(state.catabase?.covenantActive));
+  let lineRate = baseLine;
+  for (const m of [
+    bonus,
+    spsVerdictMult,
+    mgSpsMult,
+    seasonalMult,
+    researchMult,
+    saturnMult,
+    fortuneMult,
+    scaleMult,
+    pupMult,
+    reserveMult,
+    auraMult,
+    covMult,
+  ]) {
+    lineRate = mul(lineRate, m);
+  }
+
   const unitRate = effectiveUnitSPS({
     generatorId: id,
+    generators: quantities,
     upgrades: state.upgrades || [],
     talents: state.talents || [],
     obols: state.obols ?? '0',
     verdictPurchases: state.verdictPurchases || [],
     rarity: 'normal',
+    generatorLevels: genLevels,
+    nectar: state.nectar || 0,
+    minigames: state.minigames || {},
+    achievements: state.achievements || [],
+    catabase: state.catabase || null,
+    dragon: state.dragon || null,
+    seasons: state.seasons || null,
   });
+
+  const action = String(tradeAction || 'buy').toLowerCase() === 'sell' ? 'sell' : 'buy';
+  if (action === 'sell') {
+    const sellLot = revealed ? resolveSellCount(buyMode, entity) : 0;
+    const refundRate = typeof state.sellRefundRate === 'function' ? state.sellRefundRate() : '0.25';
+    const refund = sellLot > 0 ? entity.sellRefund(sellLot, costMult, refundRate) : '0';
+    const canSell = revealed && sellLot > 0;
+    return {
+      id,
+      name: def.name,
+      blurb: def.blurb,
+      tier: def.tier,
+      river: def.tier >= 5 ? 'phlegethon' : 'cocytus',
+      revealed,
+      quantity: entity.quantity,
+      rate: lineRate,
+      unitRate,
+      tradeAction: 'sell',
+      cost: refund,
+      refund,
+      refundRate,
+      lot: sellLot,
+      canBuy: canSell,
+      canSell,
+      amort: null,
+    };
+  }
+
   const free = Boolean(state.debugFlags?.freeShopping);
   const count = revealed
     ? (free ? resolveLotCountFree(buyMode) : resolveLotCount(buyMode, entity, state.souls, costMult))
@@ -264,6 +476,7 @@ export function describeGeneratorCard(state, id, buyMode = '1') {
     rate: lineRate,
     /** SPS de uma unidade normal (amortização / tip base). */
     unitRate,
+    tradeAction: 'buy',
     cost,
     lot: count,
     canBuy,
@@ -272,34 +485,122 @@ export function describeGeneratorCard(state, id, buyMode = '1') {
 }
 
 /**
+ * Tooltip do Mercado (3 casos Cookie):
+ * 1. `owned` — já comprou: frase + SPS unitário + linha + lifetime
+ * 2. `unbought` — revelado, qty 0: só frase
+ * 3. `mystery` — prévia `???`: mistério
+ *
+ * @param {object} state
+ * @param {string} id
+ */
+export function describeProductTip(state, id) {
+  const def = getGenerator(id);
+  if (!def || !state) return null;
+  const quantities = typeof state.quantities === 'function'
+    ? state.quantities()
+    : (state.generators || {});
+  const visibility = marketRowVisibility(id, { souls: state.souls, generators: quantities });
+  if (visibility === 'hidden') return null;
+
+  const view = describeGeneratorCard(state, id, '1', 'buy');
+  if (!view) return null;
+
+  if (visibility === 'preview') {
+    return {
+      kind: 'mystery',
+      id,
+      name: '???',
+      blurb: '“???”',
+      quantity: 0,
+      cost: view.cost,
+      spriteId: id,
+    };
+  }
+
+  const qty = Math.max(0, Math.floor(Number(view.quantity) || 0));
+  const lifetime = typeof state.generatorLifetime === 'function'
+    ? state.generatorLifetime(id)
+    : (state.generatorLifetimeSouls?.[id] || '0');
+
+  if (qty <= 0) {
+    return {
+      kind: 'unbought',
+      id,
+      name: def.name,
+      blurb: def.blurb,
+      quantity: 0,
+      cost: view.cost,
+      spriteId: id,
+    };
+  }
+
+  const totalSps = typeof state.effectiveSps === 'function'
+    ? state.effectiveSps()
+    : (typeof state.sps === 'function' ? state.sps() : '0');
+  let sharePct = '0';
+  if (cmp(totalSps, '0') > 0 && cmp(view.rate, '0') > 0) {
+    sharePct = mul(div(view.rate, totalSps), '100');
+  }
+
+  return {
+    kind: 'owned',
+    id,
+    name: def.name,
+    blurb: def.blurb,
+    quantity: qty,
+    cost: view.cost,
+    unitRate: view.unitRate,
+    lineRate: view.rate,
+    sharePct,
+    lifetime,
+    spriteId: id,
+  };
+}
+
+/**
  * Tooltip de NPC (órbita / prateleira) — SPS efetiva da **unidade** (G3.1–G3.2 / Q7).
  * Distinto do card do mercado, que mostra a linha total.
+ * Nome = persona misturada da turma; tempo de existência estável por índice (Cookie: “Memaw, idade 89”).
  *
  * @param {object} state
  * @param {string} generatorId
- * @param {{ shiny?: boolean, gold?: boolean, rarity?: 'normal'|'negativo'|'gold' }} [opts]
+ * @param {{ shiny?: boolean, gold?: boolean, rarity?: 'normal'|'negativo'|'gold', index?: number }} [opts]
  */
 export function describeNpcUnit(state, generatorId, opts = {}) {
   const def = getGenerator(generatorId);
   if (!def || !state) return null;
   const rarity = opts.rarity
     || (opts.gold ? 'gold' : (opts.shiny ? 'negativo' : 'normal'));
+  const index = Number.isFinite(Number(opts.index)) ? Math.max(0, Math.floor(Number(opts.index))) : 0;
+  const persona = describeUnitPersona(generatorId, index, { rarity });
+  const quantities = typeof state.quantities === 'function'
+    ? state.quantities()
+    : (state.generators || {});
   const rate = effectiveUnitSPS({
     generatorId,
+    generators: quantities,
     upgrades: state.upgrades || [],
     talents: state.talents || [],
     obols: state.obols ?? '0',
     verdictPurchases: state.verdictPurchases || [],
     rarity,
+    generatorLevels: state.generatorLevels || {},
+    nectar: state.nectar || 0,
+    minigames: state.minigames || {},
+    achievements: state.achievements || [],
   });
   return {
     id: generatorId,
-    name: def.name,
+    name: persona.name,
+    typeName: def.name,
+    age: persona.age,
+    index,
     rate,
     rarity,
     shiny: rarity === 'negativo',
     gold: rarity === 'gold',
-    blurb: NPC_UNIT_PRODUCTION_BLURB,
+    blurb: `tempo de existência: ${persona.age}`,
+    productionBlurb: NPC_UNIT_PRODUCTION_BLURB,
   };
 }
 
@@ -320,47 +621,238 @@ export function isLetheOpen(state) {
   return cmp(state.runSouls, LETHE_PREVIEW_RUN_SOULS) >= 0;
 }
 
-function upgradeBlurb(upgrade) {
+export function upgradeBlurb(upgrade) {
+  if (!upgrade) return '';
+  const flavor = upgrade.blurb ? ` ${upgrade.blurb}` : '';
   // Q16 / J.1 — Juramentos T4 ≠ Vereditos do minigame Juízo.
   if (upgrade.id === 'veredito_tartaro' || upgrade.id === 'lei_inquebravel') {
-    return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.`;
+    return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.${flavor}`;
   }
-  if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.`;
+  if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.${flavor}`;
   if (upgrade.kind === 'clickKSps') {
     const pct = mul(upgrade.factor, '100');
-    return `O clique ganha ${pct}% das Almas / s.`;
+    return `O clique ganha ${pct}% das Almas / s.${flavor}`;
+  }
+  if (upgrade.kind === 'thousandBlades') {
+    return `A Foice e cada Sombra Vagante ganham +${upgrade.factor} por gerador não-Sombra.${flavor}`;
+  }
+  if (upgrade.kind === 'thousandBladesMult') {
+    return `Multiplica o bônus de Mil Foices por ×${upgrade.factor}.${flavor}`;
+  }
+  if (upgrade.kind === 'synergyMult') {
+    const baseGen = getGenerator(upgrade.baseGeneratorId);
+    const boostedGen = getGenerator(upgrade.boostedGeneratorId);
+    const baseName = baseGen?.name ?? upgrade.baseGeneratorId;
+    const boostedName = boostedGen?.name ?? upgrade.boostedGeneratorId;
+    const boostedPct = mul(upgrade.boostedBonusPerBase || '0.05', '100');
+    const basePct = mul(upgrade.baseBonusPerBoosted || '0.001', '100');
+    return `${boostedName} ganha +${boostedPct}% SPS por ${baseName}; ${baseName} ganha +${basePct}% SPS por ${boostedName}.${flavor}`;
   }
   if (upgrade.kind === 'generatorMult') {
     const gen = getGenerator(upgrade.generatorId);
-    return `${gen?.name ?? 'O gerador'} rende ×${upgrade.factor}.`;
+    return `${gen?.name ?? 'O gerador'} rende ×${upgrade.factor}.${flavor}`;
   }
-  if (upgrade.kind === 'allGeneratorsMult') return `Todos os geradores rendem ×${upgrade.factor}.`;
-  return '';
+  if (upgrade.kind === 'allGeneratorsMult') return `Todos os geradores rendem ×${upgrade.factor}.${flavor}`;
+  if (upgrade.kind === 'veilMult' || upgrade.kind === 'kittenMult') {
+    return `Multiplica o SPS global em 1 + (Véu × ${upgrade.factor}).${flavor}`;
+  }
+  if (upgrade.kind === 'catabaseResearch') {
+    return `Pesquisa do Arquivo Estígio (×${upgrade.factor} SPS global).${flavor}`;
+  }
+  if (upgrade.kind === 'leechCap') {
+    return `Aumenta a capacidade de Sanguessugas em +${upgrade.factor} slots.${flavor}`;
+  }
+  if (upgrade.kind === 'leechPayout') {
+    return `Aumenta o retorno ao estourar Sanguessugas em ×${upgrade.factor}.${flavor}`;
+  }
+  if (upgrade.kind === 'dragonScale') {
+    return `Escama Dracónica (×${upgrade.factor} SPS global).${flavor}`;
+  }
+  if (upgrade.kind === 'seasonalCompound') {
+    const pct = mul(upgrade.factor || '0.01', '100');
+    return `Relíquia Sazonal (+${pct}% SPS composto).${flavor}`;
+  }
+  if (upgrade.kind === 'saturnaliaMult') {
+    return `Bênção da Saturnália (×${upgrade.factor} SPS global).${flavor}`;
+  }
+  if (upgrade.kind === 'hermesContract') {
+    return `Contrato de Hermes (−2% custo de todos os geradores).${flavor}`;
+  }
+  if (upgrade.kind === 'fortuneGlobal') {
+    return `Fortuna de Hermes (×${upgrade.factor} SPS global).${flavor}`;
+  }
+  if (upgrade.kind === 'fortuneObol') {
+    return `Fortuna de Hermes (+1% ganho de Óbolos no Lethe).${flavor}`;
+  }
+  if (upgrade.kind === 'fortuneLine') {
+    const gen = getGenerator(upgrade.generatorId);
+    return `Fortuna de ${gen?.name ?? upgrade.generatorId}: +7% SPS e −7% custo.${flavor}`;
+  }
+  return upgrade.blurb || '';
 }
 
 export function upgradeRequirementText(upgrade) {
   if (!upgrade) return '';
   const req = upgrade.requires || {};
+  const parts = [];
   if (req.upgradeId) {
     const prev = getUpgrade(req.upgradeId);
-    return `Exige ${prev?.name ?? 'juramento anterior'}`;
+    parts.push(prev?.name ?? 'juramento anterior');
   }
   if (Array.isArray(req.allUpgradeIds) && req.allUpgradeIds.length > 0) {
     const names = req.allUpgradeIds
       .map((id) => getUpgrade(id)?.name ?? String(id))
       .join(', ');
-    return `Exige ${names}`;
+    parts.push(names);
   }
   if (req.generatorId) {
     const gen = getGenerator(req.generatorId);
     const qty = Number(req.quantity || 0);
     const label = gen?.name ?? 'servo';
-    return qty <= 1 ? `Exige ${label}` : `Exige ${qty}× ${label}`;
+    parts.push(qty <= 1 ? label : `${qty}× ${label}`);
+  }
+  if (req.minGenerators && typeof req.minGenerators === 'object') {
+    for (const [genId, minQty] of Object.entries(req.minGenerators)) {
+      const gen = getGenerator(genId);
+      const qty = Number(minQty || 0);
+      const label = gen?.name ?? genId;
+      parts.push(qty <= 1 ? label : `${qty}× ${label}`);
+    }
+  }
+  if (req.minVeilPercent != null && Number(req.minVeilPercent) > 0) {
+    parts.push(`Véu ${Number(req.minVeilPercent)}%`);
+  }
+  if (req.researchId) {
+    parts.push('Pesquisa concluída no Arquivo Estígio');
+  }
+  if (req.dragonStage) {
+    parts.push(`Dragão estágio ${Number(req.dragonStage)}`);
+  }
+  if (req.seasonalDropId) {
+    parts.push('Relíquia revelada na Estação');
+  }
+  if (req.fortuneId) {
+    parts.push('Fortuna reivindicada no Ticker');
+  }
+  if (parts.length > 0) {
+    return `Exige ${parts.join(' · ')}`;
   }
   if (req.minSouls != null && cmp(req.minSouls, '0') > 0) {
     return `Exige ${formatSouls(req.minSouls)} almas`;
   }
   return 'Sem requisito especial';
+}
+
+export function describeSpsBreakdownSummary(state = {}) {
+  const bd = typeof state?.spsBreakdown === 'function'
+    ? state.spsBreakdown()
+    : calculateSpsBreakdown({
+      generators: typeof state?.quantities === 'function' ? state.quantities() : (state?.generators || {}),
+      upgrades: state?.upgrades || [],
+      talents: state?.talents || [],
+      obols: state?.obols ?? '0',
+      verdictPurchases: state?.verdictPurchases || [],
+      shinyCounts: typeof state?.shinyCounts === 'function' ? state.shinyCounts() : (state?.shinyCounts || {}),
+      goldCounts: typeof state?.goldCounts === 'function' ? state.goldCounts() : (state?.goldCounts || {}),
+      activeBuffs: state?.activeBuffs || {},
+      generatorLevels: state?.generatorLevels || {},
+      nectar: state?.nectar || 0,
+      minigames: state?.minigames || {},
+      achievements: state?.achievements || [],
+      catabase: state?.catabase || null,
+      dragon: state?.dragon || null,
+      seasons: state?.seasons || null,
+    });
+
+  const parts = [
+    `Linhas ${formatRate(bd.baseLinesSps)}`,
+    `Prestígio ${formatMultiplier(bd.prestigeMult)}`,
+  ];
+  if (cmp(bd.verdictMult, '1') !== 0) parts.push(`Vereditos ${formatMultiplier(bd.verdictMult)}`);
+  if (cmp(bd.minigamesMult, '1') !== 0) parts.push(`Minigames ${formatMultiplier(bd.minigamesMult)}`);
+  if (cmp(bd.seasonalCompoundMult, '1') !== 0) parts.push(`Relíquias ${formatMultiplier(bd.seasonalCompoundMult)}`);
+  if (cmp(bd.catabaseResearchMult, '1') !== 0) parts.push(`Catábase ${formatMultiplier(bd.catabaseResearchMult)}`);
+  if (cmp(bd.saturnaliaMult, '1') !== 0) parts.push(`Saturnália ${formatMultiplier(bd.saturnaliaMult)}`);
+  if (cmp(bd.fortuneGlobalMult, '1') !== 0) parts.push(`Fortunas ${formatMultiplier(bd.fortuneGlobalMult)}`);
+  if (cmp(bd.dragonScaleMult, '1') !== 0) parts.push(`Escama ${formatMultiplier(bd.dragonScaleMult)}`);
+  if (cmp(bd.cerberusPupMult, '1') !== 0) parts.push(`Filhotes ${formatMultiplier(bd.cerberusPupMult)}`);
+  if (cmp(bd.nectarReserveMult, '1') !== 0) parts.push(`Néctar ${formatMultiplier(bd.nectarReserveMult)}`);
+  if (cmp(bd.dragonAuraMult, '1') !== 0) parts.push(`Auras ${formatMultiplier(bd.dragonAuraMult)}`);
+  if (cmp(bd.elderCovenantMult, '1') !== 0) parts.push(`Aliança ${formatMultiplier(bd.elderCovenantMult)}`);
+  if (cmp(bd.activeBuffsMult, '1') !== 0) parts.push(`Buffs ${formatMultiplier(bd.activeBuffsMult)}`);
+
+  const dragonStageDef = getDragonStage(state?.dragon?.stage || 0);
+  const auraNames = [];
+  if (state?.dragon?.auraSlot1) auraNames.push(getDragonAura(state.dragon.auraSlot1)?.name || state.dragon.auraSlot1);
+  if (state?.dragon?.auraSlot2) auraNames.push(getDragonAura(state.dragon.auraSlot2)?.name || state.dragon.auraSlot2);
+  const dragonLabel = `${dragonStageDef.name} (Estágio ${dragonStageDef.stage}/4) · Auras: ${auraNames.length ? auraNames.join(' + ') : 'nenhuma'}`;
+
+  const activeSeasonDef = state?.seasons?.activeSeason ? getSeason(state.seasons.activeSeason) : null;
+  const saturnLv = Number(state?.seasons?.saturnKingLevel || 0);
+  const claimedCount = Math.max(
+    state?.fortunes?.claimedIds?.length || 0,
+    state?.fortunes?.lifetimeClaimedIds?.length || 0,
+  );
+  const seasonLabel = `${activeSeasonDef ? activeSeasonDef.name : 'Neutra'}${saturnLv > 0 ? ` · Rei Saturno Nv.${saturnLv}` : ''} · Fortunas: ${claimedCount}/${FORTUNES.length}`;
+
+  return {
+    ...bd,
+    rawMultiplierLabel: formatMultiplier(bd.rawMultiplier),
+    stackBreakdownLabel: parts.join(' · '),
+    dragonLabel,
+    seasonLabel,
+  };
+}
+
+export function describeVeilSummary(state = {}) {
+  const econPct = typeof state?.veilPercent === 'function'
+    ? state.veilPercent()
+    : economicVeilPercent(state?.achievements || [], state?.normalAchievementsCount);
+  const econFrac = typeof state?.veilFraction === 'function'
+    ? state.veilFraction()
+    : economicVeilFraction(state?.achievements || [], state?.normalAchievementsCount);
+  const tier = typeof state?.veilTier === 'function'
+    ? state.veilTier()
+    : economicVeilTier(state?.achievements || [], state?.normalAchievementsCount);
+  const pupMult = typeof state?.cerberusPupMult === 'function'
+    ? state.cerberusPupMult()
+    : cerberusPupMult(state?.upgrades || [], state?.achievements || [], state?.normalAchievementsCount);
+  return {
+    veilPercent: econPct,
+    veilFraction: econFrac,
+    tier,
+    pupMult,
+    label: `Véu: ${econPct}% (${tier.name}) · Mult Cerberiano: ${formatMultiplier(pupMult)}`,
+  };
+}
+
+export function describeCatabaseSummary(state = {}) {
+  const rawSps = typeof state?.rawSps === 'function'
+    ? state.rawSps()
+    : (typeof state?.sps === 'function' ? state.sps() : (state?.sps || '0'));
+  const effectiveSps = typeof state?.effectiveSps === 'function'
+    ? state.effectiveSps()
+    : rawSps;
+  const drainInfo = typeof state?.leechDrainInfo === 'function'
+    ? state.leechDrainInfo()
+    : { count: state?.catabase?.leeches?.length || 0, drainPercent: (state?.catabase?.leeches?.length || 0) * 5 };
+  const leechSummary = typeof state?.leechSummary === 'function'
+    ? state.leechSummary()
+    : { totalDigested: '0', totalPayout: '0', count: drainInfo.count };
+  const spsLine = drainInfo.count > 0
+    ? `${formatRate(effectiveSps)} (Bruto: ${formatRate(rawSps)} · ${drainInfo.count} Sanguessugas: −${drainInfo.drainPercent}%)`
+    : `${formatRate(rawSps)} (Bruto: ${formatRate(rawSps)} · 0 Sanguessugas: −0%)`;
+  const digestedLine = `${formatSouls(leechSummary.totalDigested)} almas retidas (retorno no pop: +${formatSouls(leechSummary.totalPayout)})`;
+  return {
+    rawSps,
+    effectiveSps,
+    leechesCount: drainInfo.count,
+    drainPercent: drainInfo.drainPercent,
+    totalDigested: leechSummary.totalDigested,
+    totalPayout: leechSummary.totalPayout,
+    spsLine,
+    digestedLine,
+  };
 }
 
 export function describeUpgradeCard(state, id) {
@@ -373,18 +865,30 @@ export function describeUpgradeCard(state, id) {
     souls: state.souls,
     generators: quantities,
     upgrades: state.upgrades,
+    achievements: state.achievements || [],
+    veilPercent: typeof state.veilPercent === 'function' ? state.veilPercent() : undefined,
+    catabase: state.catabase || null,
+    dragon: state.dragon || null,
+    seasons: state.seasons || null,
+    fortunes: state.fortunes || null,
   });
   // D-D1: owned N+1 sem N continua visível como owned (selados/efeitos);
   // só o reveal da strip exige meets (N+1 hidden até comprar N).
   const revealed = styx && (owned || meets);
   const free = Boolean(state.debugFlags?.freeShopping);
-  const canBuy = revealed && !owned && meets && (free || cmp(state.souls, upgrade.cost) >= 0);
+  const effCost = typeof state.upgradeCost === 'function'
+    ? state.upgradeCost(upgrade)
+    : upgradeEffectiveCost(upgrade, {
+      upgrades: state.upgrades || [],
+      seasons: state.seasons || null,
+    });
+  const canBuy = revealed && !owned && meets && (free || cmp(state.souls, effCost) >= 0);
   return {
     id,
     name: upgrade.name,
     blurb: upgradeBlurb(upgrade),
     requirement: upgradeRequirementText(upgrade),
-    cost: free ? '0' : upgrade.cost,
+    cost: free ? '0' : effCost,
     owned,
     revealed,
     canBuy,
@@ -507,22 +1011,63 @@ export function formatLetheMemoryToast({ talentCount = 0, verdictCount = 0 } = {
   return `Memória preservada: ${talentCount} talentos · ${verdictCount} sentenças`;
 }
 
+export function loadPerfPrefs(storage = globalThis?.localStorage) {
+  const out = { ...DEFAULT_PERF_PREFS };
+  if (!storage || typeof storage.getItem !== 'function') return out;
+  try {
+    const raw = storage.getItem(PERF_PREFS_STORAGE_KEY);
+    if (!raw) return out;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      if (typeof parsed.cursors === 'boolean') out.cursors = parsed.cursors;
+      if (typeof parsed.particles === 'boolean') out.particles = parsed.particles;
+      if (typeof parsed.fancy === 'boolean') out.fancy = parsed.fancy;
+    }
+  } catch {
+    /* ignore */
+  }
+  return out;
+}
+
+export function savePerfPrefs(prefs, storage = globalThis?.localStorage) {
+  if (!storage || typeof storage.setItem !== 'function') return;
+  try {
+    storage.setItem(PERF_PREFS_STORAGE_KEY, JSON.stringify({
+      cursors: Boolean(prefs?.cursors ?? true),
+      particles: Boolean(prefs?.particles ?? true),
+      fancy: Boolean(prefs?.fancy ?? true),
+    }));
+  } catch {
+    /* ignore */
+  }
+}
+
 export class UIRenderer {
   constructor(root, options = {}) {
     this.root = root;
     this.state = options.state ?? null;
     this.buyMode = BUY_MODES.includes(options.buyMode) ? options.buyMode : '1';
+    this.tradeAction = String(options.tradeAction || 'buy').toLowerCase() === 'sell' ? 'sell' : 'buy';
     this.onBuy = typeof options.onBuy === 'function' ? options.onBuy : null;
+    this.onSell = typeof options.onSell === 'function' ? options.onSell : null;
     this.onBuyMode = typeof options.onBuyMode === 'function' ? options.onBuyMode : null;
+    this.onTradeAction = typeof options.onTradeAction === 'function' ? options.onTradeAction : null;
     this.onBuyUpgrade = typeof options.onBuyUpgrade === 'function' ? options.onBuyUpgrade : null;
     this.onBuyTalent = typeof options.onBuyTalent === 'function' ? options.onBuyTalent : null;
     this.onBuyVerdict = typeof options.onBuyVerdict === 'function' ? options.onBuyVerdict : null;
     this.onOpenLethe = typeof options.onOpenLethe === 'function' ? options.onOpenLethe : null;
+    this.onClickShimmer = typeof options.onClickShimmer === 'function' ? options.onClickShimmer : null;
     this.onAmortSeen = typeof options.onAmortSeen === 'function' ? options.onAmortSeen : null;
     this.onLetheFirstUnlock =
       typeof options.onLetheFirstUnlock === 'function' ? options.onLetheFirstUnlock : null;
     this.getUserId = typeof options.getUserId === 'function' ? options.getUserId : () => null;
     this.getToken = typeof options.getToken === 'function' ? options.getToken : () => null;
+    this._perfStorage = 'perfStorage' in options ? options.perfStorage : (globalThis?.localStorage ?? null);
+    this._prefs = {
+      ...loadPerfPrefs(this._perfStorage),
+      ...(options.prefs && typeof options.prefs === 'object' ? options.prefs : {}),
+    };
+    this._autoLodActive = false;
     this._hud = null;
     this._cards = new Map();
     this._upgrades = new Map();
@@ -552,8 +1097,29 @@ export class UIRenderer {
     this._bancadaSubUserPicked = false;
     this._world = null;
     this._altar = null;
+    this._shimmerView = null;
+    this._minigamesView = null;
     this._modeButtons = [];
+    this._actionButtons = [];
+    this._prefInputs = new Map();
+    this._lodStatusEl = null;
     this._mounted = false;
+    /**
+     * Perf-2: controle de cadência e dirty flags explícitos.
+     */
+    this._uiDirty = {
+      market: true,
+      styx: true,
+      world: true,
+      stats: true,
+      lethe: true,
+      bancada: true,
+    };
+    this._lastStructureVersion = -1;
+    this._lastSlowSyncAt = -Infinity;
+    this.slowSyncIntervalMs = Number(options.slowSyncIntervalMs) > 0
+      ? Number(options.slowSyncIntervalMs)
+      : PERF_UI_SLOW_INTERVAL_MS;
     /** @type {number|null} última OoM do SPS (G5.1 bump) */
     this._lastSpsMag = null;
     /** @type {{ id: string, text: string }[]} */
@@ -588,10 +1154,15 @@ export class UIRenderer {
     this.#mountAltar();
     this.#mountLethe();
     this.#mountBancada();
+    this.#mountMinigames();
     this.#mountCodexBook();
     this.#mountLoopBoard();
+    this.#mountPerfPrefs();
     this._ticker = this.root.getElementById('despertar-ticker');
-    if (this._ticker) bindMarquee(this._ticker);
+    if (this._ticker) {
+      bindMarquee(this._ticker);
+      this._ticker.addEventListener?.('click', () => this.#handleTickerClick());
+    }
     this._stats = this.root.getElementById('despertar-stats');
     this._sealed = {
       empty: this.root.getElementById('sealed-empty'),
@@ -604,8 +1175,106 @@ export class UIRenderer {
       this._mundoHint = this.root.getElementById('mundo-hint');
     }
     this._mounted = true;
-    if (this.state) this.render(0, { reducedMotion: true });
+    this.markDirty('all');
+    if (this.state) this.render(0, { reducedMotion: true, forceFull: true, nowMs: 0 });
     return this;
+  }
+
+  /**
+   * Marca seções da UI como sujas (Perf-2: event-driven).
+   * @param {'all'|'market'|'styx'|'world'|'stats'|'lethe'|'bancada'} [section]
+   */
+  markDirty(section = 'all') {
+    if (section === 'all') {
+      this._uiDirty.market = true;
+      this._uiDirty.styx = true;
+      this._uiDirty.world = true;
+      this._uiDirty.stats = true;
+      this._uiDirty.lethe = true;
+      this._uiDirty.bancada = true;
+      return;
+    }
+    if (section in this._uiDirty) {
+      this._uiDirty[section] = true;
+    }
+  }
+
+  /**
+   * Retorna preferências efetivas de performance (respeitando auto-LOD).
+   */
+  getPerfPrefs() {
+    return {
+      cursors: Boolean(this._prefs.cursors),
+      particles: Boolean(this._prefs.particles && !this._autoLodActive),
+      fancy: Boolean(this._prefs.fancy && !this._autoLodActive),
+    };
+  }
+
+  /**
+   * Define uma ou mais preferências na Estela (Perf-4).
+   * @param {{ cursors?: boolean, particles?: boolean, fancy?: boolean }} patch
+   * @param {{ persist?: boolean }} [opts]
+   */
+  setPerfPrefs(patch = {}, opts = {}) {
+    if (!patch || typeof patch !== 'object') return this.getPerfPrefs();
+    if (typeof patch.cursors === 'boolean') this._prefs.cursors = patch.cursors;
+    if (typeof patch.particles === 'boolean') this._prefs.particles = patch.particles;
+    if (typeof patch.fancy === 'boolean') this._prefs.fancy = patch.fancy;
+    if (opts.persist !== false) {
+      savePerfPrefs(this._prefs, this._perfStorage);
+    }
+    for (const [key, input] of this._prefInputs.entries()) {
+      if (input && key in this._prefs) {
+        input.checked = Boolean(this._prefs[key]);
+      }
+    }
+    const effective = this.getPerfPrefs();
+    this._world?.setPrefs?.(effective);
+    this._altar?.setPrefs?.(effective);
+    this.markDirty('world');
+    if (this.state && this._mounted) {
+      this.#renderShelves(this.state, { reducedMotion: false });
+      this.#syncAltarState(this.state, { reducedMotion: false });
+    }
+    return effective;
+  }
+
+  /**
+   * Ativa/desativa degradação automática quando FPS < 28 (Perf-4).
+   */
+  applyAutoLod(active = true) {
+    const next = Boolean(active);
+    if (this._autoLodActive === next) return this.getPerfPrefs();
+    this._autoLodActive = next;
+    if (this._lodStatusEl) {
+      setHidden(this._lodStatusEl, !next);
+    }
+    const effective = this.getPerfPrefs();
+    this._world?.setPrefs?.(effective);
+    this._altar?.setPrefs?.(effective);
+    this.markDirty('world');
+    return effective;
+  }
+
+  #mountPerfPrefs() {
+    this._prefInputs.clear();
+    const host = this.root.getElementById?.('despertar-prefs') || this.root;
+    this._lodStatusEl = this.root.getElementById?.('despertar-prefs-lod-status') || null;
+    const inputs = host?.querySelectorAll
+      ? [...host.querySelectorAll('[data-perf-pref]')]
+      : [];
+    for (const input of inputs) {
+      const key = input.getAttribute?.('data-perf-pref');
+      if (!key) continue;
+      input.checked = Boolean(this._prefs[key]);
+      this._prefInputs.set(key, input);
+      input.addEventListener?.('change', () => {
+        if (this._autoLodActive && input.checked) {
+          this.applyAutoLod(false);
+        }
+        this.setPerfPrefs({ [key]: Boolean(input.checked) });
+      });
+    }
   }
 
   setBuyMode(mode) {
@@ -617,43 +1286,129 @@ export class UIRenderer {
       toggleClass(button, 'is-active', button.getAttribute('data-buy-mode') === next);
     });
     this.onBuyMode?.(next);
+    this.markDirty('market');
+    if (this.state) this.#renderMarket(this.state);
+    return next;
+  }
+
+  setTradeAction(action = 'buy') {
+    const next = String(action ?? 'buy').trim().toLowerCase() === 'sell' ? 'sell' : 'buy';
+    this.tradeAction = next;
+    this._actionButtons.forEach((button) => {
+      toggleClass(button, 'is-active', button.getAttribute('data-trade-action') === next);
+    });
+    this.onTradeAction?.(next);
+    this.markDirty('market');
     if (this.state) this.#renderMarket(this.state);
     return next;
   }
 
   render(alpha = 0, meta = {}) {
-    const state = this.state;
-    if (!state || !this._mounted) return;
-    const reducedMotion = Boolean(meta.reducedMotion);
-    // Cookie Clicker: o número grande é o saldo real (ticks a 60 Hz já suavizam).
-    // Interpolação agressiva dava a sensação de tempo acelerado.
-    void alpha;
-    setText(this._hud?.souls, formatSouls(state.souls));
-    const sps = state.sps();
-    setText(this._hud?.sps, formatRate(sps));
-    if (!reducedMotion && this._hud?.sps) {
-      const mag = spsOrderOfMagnitude(sps);
-      if (this._lastSpsMag != null && mag > this._lastSpsMag) {
-        juiceBumpClass(this._hud.sps, 'is-bump', 380);
+    return withPerfMeasure('UIRenderer.render', () => {
+      const state = this.state;
+      if (!state || !this._mounted) return;
+      const reducedMotion = Boolean(meta.reducedMotion);
+      if (meta.autoLod && !this._autoLodActive) {
+        this.applyAutoLod(true);
       }
-      this._lastSpsMag = mag;
-    } else if (this._hud?.sps) {
-      this._lastSpsMag = spsOrderOfMagnitude(sps);
-    }
-    setText(this._hud?.click, formatSouls(state.clickPower()));
-    setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents)));
-    this.#renderHint(state);
-    this.#renderTicker(state, { reducedMotion });
-    this.#renderVeil(state);
-    this.#renderMarket(state);
-    this.#renderStyx(state);
-    this.#renderShelves(state, { reducedMotion });
-    this.#renderAltar(state, { reducedMotion });
-    this.#renderStats(state);
-    this.#renderLethe(state, { reducedMotion });
-    this.#renderBancada(state);
-    this._codexBook?.sync(state);
-    this.#announceEduLogTickers(state, { reducedMotion });
+      const effectivePrefs = this.getPerfPrefs();
+      const nowMs = Number.isFinite(meta.nowMs)
+        ? meta.nowMs
+        : (typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now());
+      const dtSeconds = Number.isFinite(meta.dt) ? meta.dt : 1 / TICK_FPS;
+
+      // Detecta mutação estrutural (compra de gerador/upgrade/talento/veredito/prestígio).
+      const structVer = Number(state.structureVersion) || 0;
+      if (structVer !== this._lastStructureVersion) {
+        this._lastStructureVersion = structVer;
+        this.markDirty('all');
+      }
+
+      // --- Caminho Rápido (60 Hz): HUD de Almas, SPS, Clique e frame de animação ---
+      void alpha;
+      setText(this._hud?.souls, formatSouls(state.souls));
+      const sps = state.sps();
+      setText(this._hud?.sps, formatRate(sps));
+      if (!reducedMotion && effectivePrefs.fancy && this._hud?.sps) {
+        const mag = spsOrderOfMagnitude(sps);
+        if (this._lastSpsMag != null && mag > this._lastSpsMag) {
+          juiceBumpClass(this._hud.sps, 'is-bump', 380);
+        }
+        this._lastSpsMag = mag;
+      } else if (this._hud?.sps) {
+        this._lastSpsMag = spsOrderOfMagnitude(sps);
+      }
+      setText(this._hud?.click, formatSouls(state.clickPower()));
+
+      // --- Caminho Lento (~4–10 Hz) ou Event-Driven (Dirty Flags) ---
+      const slowDue = Boolean(meta.forceFull)
+        || (nowMs - this._lastSlowSyncAt >= this.slowSyncIntervalMs);
+      const anyDirty = this._uiDirty.market
+        || this._uiDirty.styx
+        || this._uiDirty.world
+        || this._uiDirty.stats
+        || this._uiDirty.lethe
+        || this._uiDirty.bancada;
+
+      if (slowDue || anyDirty) {
+        if (slowDue) this._lastSlowSyncAt = nowMs;
+        setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents)));
+        this.#renderHint(state);
+        this.#renderTicker(state, { reducedMotion });
+        this.#renderVeil(state, { reducedMotion, prefs: effectivePrefs });
+
+        if (slowDue || this._uiDirty.market) {
+          this.#renderMarket(state);
+          this._uiDirty.market = false;
+        }
+        if (slowDue || this._uiDirty.styx) {
+          this.#renderStyx(state);
+          this._uiDirty.styx = false;
+        }
+        if (this._uiDirty.world) {
+          this.#renderShelves(state, { reducedMotion });
+          this.#syncAltarState(state, { reducedMotion });
+          this._uiDirty.world = false;
+        }
+        if (slowDue || this._uiDirty.stats) {
+          this.#renderStats(state);
+          this._uiDirty.stats = false;
+        }
+        if (slowDue || this._uiDirty.lethe) {
+          this.#renderLethe(state, { reducedMotion });
+          this._uiDirty.lethe = false;
+        }
+        if (slowDue || this._uiDirty.bancada) {
+          this.#renderBancada(state);
+          this._minigamesView?.sync(state);
+          this._uiDirty.bancada = false;
+        }
+        this._shimmerView?.sync(state, {
+          reducedMotion,
+          fancy: effectivePrefs.fancy,
+          nowMs: typeof state.nowMs === 'function' ? state.nowMs() : nowMs,
+        });
+        this._leechRingView?.sync(state, {
+          reducedMotion,
+          fancy: effectivePrefs.fancy,
+        });
+        this._codexBook?.sync(state);
+        this.#announceEduLogTickers(state, { reducedMotion });
+      }
+
+      // --- Teatro Visual (1 único RAF conduz WorldView.frame + AltarOrbit.frame) ---
+      this._world?.frame(dtSeconds, {
+        reducedMotion,
+        fancy: effectivePrefs.fancy,
+        particles: effectivePrefs.particles,
+      });
+      this._altar?.frame(nowMs, {
+        reducedMotion,
+        cursors: effectivePrefs.cursors,
+        particles: effectivePrefs.particles,
+        fancy: effectivePrefs.fancy,
+      });
+    });
   }
 
   #renderHint(state) {
@@ -674,6 +1429,8 @@ export class UIRenderer {
       || this.root.querySelector('.despertar-market-list');
     if (!list) return;
     list.replaceChildren();
+    this.#mountProductTip(list);
+
     for (const def of GENERATORS) {
       const item = this.root.createElement('li');
       item.className = 'despertar-card despertar-card--store';
@@ -699,21 +1456,21 @@ export class UIRenderer {
 
       const meta = this.root.createElement('p');
       meta.className = 'despertar-card__meta';
-      const rate = this.root.createElement('span');
-      rate.className = 'despertar-num';
-      rate.dataset.rate = '';
-      rate.textContent = '0';
-      meta.append(rate, '/s · ');
       const price = this.root.createElement('span');
       price.className = 'despertar-num';
       price.dataset.price = '';
       price.textContent = formatSouls(def.baseCost);
-      meta.append(price);
       const amort = this.root.createElement('span');
       amort.className = 'despertar-card__amort';
       amort.dataset.amort = '';
       amort.hidden = true;
-      meta.append(amort);
+      meta.append(price, amort);
+
+      const rate = this.root.createElement('span');
+      rate.className = 'despertar-card__rate despertar-num';
+      rate.dataset.rate = '';
+      rate.hidden = true;
+      rate.textContent = '0';
 
       const owned = this.root.createElement('span');
       owned.className = 'despertar-card__owned despertar-num';
@@ -721,20 +1478,166 @@ export class UIRenderer {
       owned.textContent = '0';
 
       const buy = this.root.createElement('button');
-      buy.className = 'btn-gold';
+      buy.className = 'despertar-product';
       buy.type = 'button';
       buy.dataset.buy = def.id;
-      buy.textContent = 'Contratar';
       buy.disabled = true;
       buy.addEventListener('click', () => {
         if (buy.disabled) return;
+        if (this.tradeAction === 'sell') {
+          if (this.onSell) {
+            this.onSell(def.id, this.buyMode);
+          } else if (this.state?.sellGenerator) {
+            this.state.sellGenerator(def.id, this.buyMode);
+            this.markDirty('all');
+          }
+          return;
+        }
         this.onBuy?.(def.id, this.buyMode);
       });
 
-      item.append(icon, name, meta, owned, blurb, veil, buy);
+      buy.append(icon, name, meta, owned, blurb, veil, rate);
+      item.append(buy);
+      // Hover no <li>: botão :disabled não recebe pointer events (Cookie ainda tipa).
+      item.addEventListener('pointerenter', () => this.#showProductTip(def.id, item));
+      item.addEventListener('pointerleave', (event) => {
+        if (item.contains(event.relatedTarget)) return;
+        this.#hideProductTip(def.id);
+      });
+      buy.addEventListener('focus', () => this.#showProductTip(def.id, item));
+      buy.addEventListener('blur', () => this.#hideProductTip(def.id));
       list.append(item);
-      this._cards.set(def.id, { item, blurb, veil, meta, qty: owned, rate, price, amort, buy });
+      this._cards.set(def.id, { item, blurb, veil, meta, qty: owned, rate, price, amort, buy, icon });
     }
+
+    list.addEventListener('pointerleave', (event) => {
+      if (event.currentTarget?.contains?.(event.relatedTarget)) return;
+      this.#hideProductTip();
+    });
+  }
+
+  #mountProductTip(list) {
+    let tip = this.root.getElementById('despertar-product-tooltip');
+    if (!tip) {
+      tip = this.root.createElement('div');
+      tip.id = 'despertar-product-tooltip';
+      tip.className = 'despertar-product-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      tip.hidden = true;
+      tip.innerHTML = `
+        <div class="despertar-product-tooltip__head">
+          <div class="despertar-product-tooltip__icon despertar-sprite" data-tip="icon"></div>
+          <div class="despertar-product-tooltip__titles">
+            <p class="despertar-product-tooltip__name" data-tip="name"></p>
+            <p class="despertar-product-tooltip__owned" data-tip="owned"></p>
+          </div>
+          <p class="despertar-product-tooltip__cost despertar-num" data-tip="cost"></p>
+        </div>
+        <p class="despertar-product-tooltip__blurb" data-tip="blurb"></p>
+        <div class="despertar-product-tooltip__stats" data-tip="stats" hidden>
+          <p data-tip="unit"></p>
+          <p data-tip="line"></p>
+          <p data-tip="life"></p>
+        </div>
+      `.trim();
+      const mountParent = this.root.body || this.root.documentElement || list;
+      mountParent?.append?.(tip);
+    }
+    this._productTip = {
+      root: tip,
+      icon: tip.querySelector('[data-tip="icon"]'),
+      name: tip.querySelector('[data-tip="name"]'),
+      owned: tip.querySelector('[data-tip="owned"]'),
+      cost: tip.querySelector('[data-tip="cost"]'),
+      blurb: tip.querySelector('[data-tip="blurb"]'),
+      stats: tip.querySelector('[data-tip="stats"]'),
+      unit: tip.querySelector('[data-tip="unit"]'),
+      line: tip.querySelector('[data-tip="line"]'),
+      life: tip.querySelector('[data-tip="life"]'),
+      activeId: null,
+    };
+  }
+
+  #showProductTip(id, anchor) {
+    const tip = this._productTip;
+    if (!tip?.root || !anchor || !this.state) return;
+    const view = describeProductTip(this.state, id);
+    if (!view) return;
+
+    const mystery = view.kind === 'mystery';
+    toggleClass(tip.root, 'is-mystery', mystery);
+    setText(tip.name, view.name);
+    setText(tip.owned, `obtidos: ${formatOwned(view.quantity)}`);
+    setText(tip.cost, formatSouls(view.cost));
+    setText(tip.blurb, view.kind === 'mystery' ? view.blurb : `“${view.blurb}”`);
+
+    if (tip.icon) {
+      tip.icon.replaceChildren();
+      const sprite = createSpriteNode(this.root, generatorSprite(view.spriteId || id), {
+        className: 'despertar-sprite',
+      });
+      tip.icon.append(sprite);
+      toggleClass(tip.icon, 'is-mystery', mystery);
+    }
+
+    if (view.kind === 'owned') {
+      setHidden(tip.stats, false);
+      setText(tip.unit, `cada ${view.name} produz ${formatRate(view.unitRate)} almas por segundo`);
+      const pct = formatRate(view.sharePct);
+      setText(
+        tip.line,
+        `${formatOwned(view.quantity)}× ${view.name} produzindo ${formatRate(view.lineRate)} almas por segundo (${pct}% do total)`,
+      );
+      setText(tip.life, `${formatSouls(view.lifetime)} almas produzidas até agora`);
+    } else {
+      setHidden(tip.stats, true);
+      setText(tip.unit, '');
+      setText(tip.line, '');
+      setText(tip.life, '');
+    }
+
+    tip.activeId = id;
+    tip.root.hidden = false;
+    anchor.setAttribute('aria-describedby', 'despertar-product-tooltip');
+    this.#positionProductTip(tip.root, anchor);
+  }
+
+  #hideProductTip(id = null) {
+    const tip = this._productTip;
+    if (!tip?.root) return;
+    if (id != null && tip.activeId && tip.activeId !== id) return;
+    tip.root.hidden = true;
+    tip.activeId = null;
+    for (const nodes of this._cards.values()) {
+      nodes.item?.removeAttribute('aria-describedby');
+    }
+  }
+
+  /** Tip à esquerda da loja (Cookie); cai abaixo se faltar espaço. */
+  #positionProductTip(tipRoot, anchor) {
+    if (!tipRoot || !anchor) return;
+    tipRoot.classList.add('is-fixed');
+    tipRoot.classList.remove('is-below');
+
+    const box = anchor.getBoundingClientRect?.();
+    if (!box) return;
+
+    const tipWidth = tipRoot.offsetWidth || 280;
+    const tipHeight = tipRoot.offsetHeight || 140;
+    const gap = 10;
+    const vw = typeof globalThis.innerWidth === 'number' ? globalThis.innerWidth : box.right + tipWidth;
+    const vh = typeof globalThis.innerHeight === 'number' ? globalThis.innerHeight : box.bottom + tipHeight;
+
+    let left = box.left - tipWidth - gap;
+    if (left < 8) left = Math.min(box.right + gap, vw - tipWidth - 8);
+    left = Math.max(8, Math.min(left, vw - tipWidth - 8));
+
+    let top = box.top;
+    if (top + tipHeight > vh - 8) top = Math.max(8, vh - tipHeight - 8);
+    if (top < 8) top = 8;
+
+    tipRoot.style.left = `${Math.round(left)}px`;
+    tipRoot.style.top = `${Math.round(top)}px`;
   }
 
   #bindBuyModes() {
@@ -746,51 +1649,72 @@ export class UIRenderer {
         this.setBuyMode(button.getAttribute('data-buy-mode'));
       });
     });
+    this._actionButtons = [...root.querySelectorAll('[data-trade-action]')];
+    this._actionButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        this.setTradeAction(button.getAttribute('data-trade-action'));
+      });
+    });
     this.setBuyMode(this.buyMode);
+    this.setTradeAction(this.tradeAction);
   }
 
   #renderMarket(state) {
     const richAmort = Boolean(talentEffects(state.talents || []).richAmort);
+    const isSell = this.tradeAction === 'sell';
+    const quantities = state.quantities();
+    const revealCtx = { souls: state.souls, generators: quantities };
     for (const def of GENERATORS) {
       const nodes = this._cards.get(def.id);
       if (!nodes) continue;
-      const view = describeGeneratorCard(state, def.id, this.buyMode);
+      const view = describeGeneratorCard(state, def.id, this.buyMode, this.tradeAction);
       if (!view) continue;
 
-      toggleClass(nodes.item, 'is-masked', !view.revealed);
-      toggleClass(nodes.item, 'is-affordable', view.revealed && view.canBuy);
-      nodes.item.setAttribute('aria-disabled', String(!view.revealed));
-      if (view.revealed) {
+      const row = marketRowVisibility(def.id, revealCtx);
+      const isOpen = row === 'open';
+      const isPreview = row === 'preview';
+      const show = isOpen || isPreview;
+
+      toggleClass(nodes.item, 'is-masked', isPreview);
+      toggleClass(nodes.item, 'is-preview', isPreview);
+      toggleClass(nodes.item, 'is-affordable', isOpen && view.canBuy);
+      nodes.item.setAttribute('aria-disabled', String(!isOpen));
+      setHidden(nodes.item, !show);
+
+      const nameNode = nodes.item.querySelector('.despertar-card__name');
+      if (isOpen) {
         nodes.item.removeAttribute('title');
-        const nameNode = nodes.item.querySelector('.despertar-card__name');
-        if (nameNode) nameNode.textContent = def.name;
-      } else {
-        nodes.item.setAttribute('title', RIVER_VEIL);
-        const nameNode = nodes.item.querySelector('.despertar-card__name');
-        if (nameNode) nameNode.textContent = '???';
+        if (nameNode) {
+          nameNode.textContent = def.name;
+          nameNode.title = def.name;
+        }
+      } else if (isPreview) {
+        nodes.item.removeAttribute('title');
+        if (nameNode) {
+          nameNode.textContent = '???';
+          nameNode.removeAttribute('title');
+        }
       }
-      if (view.revealed && view.amort != null) {
+
+      if (isOpen && view.amort != null && !isSell) {
         const amortLabel = formatAmortSeconds(view.amort);
         if (richAmort) {
-          // Olho da Curva: amortização visível + tip sem SPS.
-          nodes.item.title = `Próxima unidade se paga em ~ ${amortLabel} (amortização)`;
           if (nodes.amort) {
             setHidden(nodes.amort, false);
             setText(nodes.amort, ` · paga em ~ ${amortLabel}`);
           }
-        } else {
-          nodes.item.title = `Linha total · Amortização ~ ${amortLabel}`;
-          if (nodes.amort) setHidden(nodes.amort, true);
+        } else if (nodes.amort) {
+          setHidden(nodes.amort, true);
         }
         this.onAmortSeen?.();
       } else if (nodes.amort) {
         setHidden(nodes.amort, true);
       }
 
-      setHidden(nodes.blurb, !view.revealed);
-      setHidden(nodes.veil, view.revealed);
-      setHidden(nodes.meta, !view.revealed);
-      setText(nodes.qty, formatOwned(view.quantity));
+      setHidden(nodes.blurb, true);
+      setHidden(nodes.veil, true);
+      setHidden(nodes.meta, !show);
+      setText(nodes.qty, formatOwned(isOpen ? view.quantity : 0));
       setText(nodes.rate, formatRate(view.rate));
       if (nodes.rate) {
         nodes.rate.setAttribute?.(
@@ -798,8 +1722,19 @@ export class UIRenderer {
           `Almas por segundo da linha: ${formatRate(view.rate)}`,
         );
       }
-      setText(nodes.price, formatSouls(view.cost));
-      setDisabled(nodes.buy, !view.canBuy);
+      setText(nodes.price, isSell && isOpen ? `+${formatSouls(view.cost)}` : formatSouls(view.cost));
+      // Prévia ??? não compra; disabled ainda tipa via <li> + pointer-events:none no botão.
+      setDisabled(nodes.buy, !view.canBuy || isPreview);
+      if (nodes.buy) nodes.buy.removeAttribute('title');
+    }
+
+    if (this._productTip?.activeId) {
+      const active = this._cards.get(this._productTip.activeId);
+      if (active?.item && !active.item.hidden) {
+        this.#showProductTip(this._productTip.activeId, active.item);
+      } else {
+        this.#hideProductTip();
+      }
     }
   }
 
@@ -858,6 +1793,7 @@ export class UIRenderer {
       if (event.key === 'Escape') {
         this.#hideStyxTip();
         this.#hideSealedTip();
+        this.#hideProductTip();
       }
     };
     this.root.addEventListener?.('keydown', this._styxKeyHandler);
@@ -1030,39 +1966,109 @@ export class UIRenderer {
       tip.className = 'despertar-upgrade-tooltip despertar-npc-tooltip';
       tip.setAttribute('role', 'tooltip');
       tip.hidden = true;
+      const head = this.root.createElement('div');
+      head.className = 'despertar-npc-tooltip__head';
+      const portrait = this.root.createElement('div');
+      portrait.className = 'despertar-npc-tooltip__portrait';
+      portrait.dataset.tip = 'portrait';
+      const titles = this.root.createElement('div');
+      titles.className = 'despertar-npc-tooltip__titles';
       const nameEl = this.root.createElement('p');
-      nameEl.className = 'despertar-upgrade-tooltip__name';
+      nameEl.className = 'despertar-upgrade-tooltip__name despertar-npc-tooltip__name';
       nameEl.dataset.tip = 'name';
-      const blurbEl = this.root.createElement('p');
-      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
-      blurbEl.dataset.tip = 'blurb';
+      const ageEl = this.root.createElement('p');
+      ageEl.className = 'despertar-npc-tooltip__age';
+      ageEl.dataset.tip = 'blurb';
+      const typeEl = this.root.createElement('p');
+      typeEl.className = 'despertar-npc-tooltip__type';
+      typeEl.dataset.tip = 'type';
+      titles.append(nameEl, ageEl, typeEl);
+      head.append(portrait, titles);
       const rateEl = this.root.createElement('p');
       rateEl.className = 'despertar-upgrade-tooltip__cost';
       rateEl.dataset.tip = 'rate';
       const shinyEl = this.root.createElement('p');
       shinyEl.className = 'despertar-upgrade-tooltip__shiny';
       shinyEl.dataset.tip = 'shiny';
-      tip.append(nameEl, blurbEl, rateEl, shinyEl);
+      tip.append(head, rateEl, shinyEl);
       const mountParent = this.root.body || this.root.documentElement || this.root;
       mountParent?.append?.(tip);
-    } else if (!tip.querySelector('[data-tip="blurb"]')) {
-      const blurbEl = this.root.createElement('p');
-      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
-      blurbEl.dataset.tip = 'blurb';
-      const nameNode = tip.querySelector('[data-tip="name"]');
-      if (nameNode?.nextSibling) tip.insertBefore(blurbEl, nameNode.nextSibling);
-      else tip.append(blurbEl);
+    } else {
+      if (!tip.querySelector('[data-tip="portrait"]')) {
+        const head = this.root.createElement('div');
+        head.className = 'despertar-npc-tooltip__head';
+        const portrait = this.root.createElement('div');
+        portrait.className = 'despertar-npc-tooltip__portrait';
+        portrait.dataset.tip = 'portrait';
+        const titles = this.root.createElement('div');
+        titles.className = 'despertar-npc-tooltip__titles';
+        const nameNode = tip.querySelector('[data-tip="name"]');
+        const blurbNode = tip.querySelector('[data-tip="blurb"]');
+        if (nameNode) titles.append(nameNode);
+        if (blurbNode) {
+          blurbNode.classList.add('despertar-npc-tooltip__age');
+          titles.append(blurbNode);
+        }
+        let typeEl = tip.querySelector('[data-tip="type"]');
+        if (!typeEl) {
+          typeEl = this.root.createElement('p');
+          typeEl.className = 'despertar-npc-tooltip__type';
+          typeEl.dataset.tip = 'type';
+          titles.append(typeEl);
+        }
+        head.append(portrait, titles);
+        tip.insertBefore(head, tip.firstChild);
+      }
     }
     this._npcTip = tip
       ? {
         root: tip,
+        portrait: tip.querySelector('[data-tip="portrait"]'),
         name: tip.querySelector('[data-tip="name"]'),
         blurb: tip.querySelector('[data-tip="blurb"]'),
+        type: tip.querySelector('[data-tip="type"]'),
         rate: tip.querySelector('[data-tip="rate"]'),
         shiny: tip.querySelector('[data-tip="shiny"]'),
         activeKey: null,
+        portraitKey: null,
       }
       : null;
+  }
+
+  /**
+   * Preview = exatamente a unidade do habitat (chapéu / negativo / gold).
+   * @param {{ generatorId: string, index: number, rarity?: string, shiny?: boolean, gold?: boolean, source?: string }} hit
+   */
+  #ensureNpcPortrait(hit) {
+    const tip = this._npcTip;
+    if (!tip?.portrait || !hit?.generatorId) return;
+    const rarity = hit.rarity
+      || (hit.gold ? 'gold' : (hit.shiny ? 'negativo' : 'normal'));
+    const key = `${hit.source || 'shelf'}:${hit.generatorId}:${hit.index}:${rarity}`;
+    if (tip.portraitKey === key && tip.portrait.querySelector?.('canvas')) return;
+
+    let canvas = tip.portrait.querySelector?.('canvas');
+    if (!canvas) {
+      while (tip.portrait.firstChild) tip.portrait.removeChild(tip.portrait.firstChild);
+      canvas = this.root.createElement('canvas');
+      canvas.className = 'despertar-npc-tooltip__sprite';
+      canvas.setAttribute('aria-hidden', 'true');
+      tip.portrait.append(canvas);
+    }
+
+    const painted = hit.source === 'orbit'
+      ? this._altar?.paintNpcPortrait?.(canvas, hit)
+      : this._world?.paintNpcPortrait?.(canvas, hit);
+
+    if (!painted) {
+      // Fallback estático se o mundo ainda não montou sprites.
+      while (tip.portrait.firstChild) tip.portrait.removeChild(tip.portrait.firstChild);
+      const sprite = createSpriteNode(this.root, habitatSprite(hit.generatorId), {
+        className: 'despertar-sprite despertar-npc-tooltip__sprite',
+      });
+      tip.portrait.append(sprite);
+    }
+    tip.portraitKey = key;
   }
 
   #showNpcTip(hit, event = null) {
@@ -1072,14 +2078,18 @@ export class UIRenderer {
       rarity: hit.rarity,
       shiny: hit.shiny,
       gold: hit.gold,
+      index: hit.index,
     });
     if (!view) {
       this.#hideNpcTip();
       return;
     }
+    this.#ensureNpcPortrait(hit);
     setText(tip.name, view.name);
-    setText(tip.blurb, view.blurb || NPC_UNIT_PRODUCTION_BLURB);
+    setText(tip.blurb, view.blurb || `tempo de existência: ${view.age}`);
     setHidden(tip.blurb, false);
+    setText(tip.type, view.typeName || '');
+    setHidden(tip.type, !view.typeName);
     setText(tip.rate, `Almas / s: ${formatRate(view.rate)}`);
     let rarityLabel = '';
     if (view.rarity === 'gold') rarityLabel = `gold ×${GOLD_MULT}`;
@@ -1091,8 +2101,8 @@ export class UIRenderer {
     tip.root.classList.remove('is-below');
     tip.root.classList.add('is-fixed');
 
-    const tipWidth = tip.root.offsetWidth || 180;
-    const tipHeight = tip.root.offsetHeight || 72;
+    const tipWidth = tip.root.offsetWidth || 220;
+    const tipHeight = tip.root.offsetHeight || 110;
     const gap = 12;
     const clientX = Number(event?.clientX);
     const clientY = Number(event?.clientY);
@@ -1138,35 +2148,113 @@ export class UIRenderer {
     this._world = new WorldView({
       document: this.root,
       isGeneratorRevealed,
+      prefs: this.getPerfPrefs(),
       onNpcHover: (hit, event) => this.#onNpcHover(hit, event),
     }).mount(host, this._mundoHint);
   }
 
   #mountAltar() {
+    const particleLayer = this.root.querySelector('[data-particle-layer]');
     this._altar = new AltarOrbit({
       document: this.root,
+      prefs: this.getPerfPrefs(),
       onNpcHover: (hit, event) => this.#onNpcHover(hit, event),
     }).mount({
       orbitHost: this.root.getElementById('despertar-reap-orbit'),
-      particleLayer: this.root.querySelector('[data-particle-layer]'),
+      particleLayer,
       veil: this.root.getElementById('despertar-veil'),
       reapButton: this.root.getElementById('despertar-reap'),
     });
+
+    const shimmerHost = this.root.getElementById('despertar-shimmer-layer')
+      || this.root.querySelector('.despertar-reap-stage');
+    const buffsHost = this.root.getElementById('despertar-active-buffs');
+    this._shimmerView = new ShimmerView({
+      document: this.root,
+      onClickShimmer: () => this.#handleShimmerClick(),
+    }).mount({
+      shimmerHost,
+      buffsHost,
+      particleLayer,
+    });
+
+    const reapStage = this.root.querySelector?.('.despertar-reap-stage') || shimmerHost;
+    const altarCol = this.root.getElementById?.('acheron-altar') || null;
+    this._leechRingView = new LeechRingView({
+      document: this.root,
+      onPopLeech: (slot) => this.#handlePopLeech(slot),
+      onActivatePledge: () => this.#handleActivatePledge(),
+      onToggleCovenant: () => this.#handleToggleCovenant(),
+    }).mount({
+      stageHost: reapStage,
+      particleLayer,
+      altarCol,
+    });
+  }
+
+  #handlePopLeech(slot) {
+    if (!this.state?.popLeech) return;
+    const res = this.state.popLeech(slot);
+    if (res?.ok && res.popped) {
+      const prefs = this.getPerfPrefs();
+      this._leechRingView?.spawnPopFeedback(res, {
+        reducedMotion: juicePrefersReducedMotion(),
+        particles: prefs.particles,
+      });
+      this.markDirty('all');
+    }
+  }
+
+  #handleActivatePledge() {
+    if (!this.state?.activateElderPledge) return;
+    const res = this.state.activateElderPledge();
+    if (res?.ok) {
+      this.markDirty('all');
+    }
+  }
+
+  #handleToggleCovenant() {
+    if (!this.state?.setElderCovenant) return;
+    const currentlyActive = typeof this.state.isElderCovenantActive === 'function'
+      ? this.state.isElderCovenantActive()
+      : Boolean(this.state.catabase?.covenantActive);
+    const res = this.state.setElderCovenant(!currentlyActive);
+    if (res?.ok) {
+      this.markDirty('all');
+    }
+  }
+
+  #handleShimmerClick() {
+    if (this.onClickShimmer) {
+      this.onClickShimmer();
+      return;
+    }
+    if (!this.state?.clickShimmer) return;
+    const res = this.state.clickShimmer();
+    if (res?.ok) {
+      const prefs = this.getPerfPrefs();
+      this._shimmerView?.spawnClickFeedback(res, {
+        reducedMotion: juicePrefersReducedMotion(),
+        particles: prefs.particles,
+      });
+      this.markDirty('all');
+    }
   }
 
   #renderShelves(state, meta = {}) {
     if (!this._world) return;
     this._world.sync(state, {
       reducedMotion: Boolean(meta.reducedMotion),
+      prefs: this.getPerfPrefs(),
     });
   }
 
-  #renderAltar(state, meta = {}) {
+  #syncAltarState(state, meta = {}) {
     if (!this._altar) return;
     this._altar.sync(state, {
       reducedMotion: Boolean(meta.reducedMotion),
+      prefs: this.getPerfPrefs(),
     });
-    this._altar.frame();
   }
 
   /**
@@ -1235,6 +2323,30 @@ export class UIRenderer {
     this._goldRumorUsed = false;
   }
 
+  #handleTickerClick() {
+    if (!this.state) return false;
+    const activeFortuneId = this.state.fortunes?.activeFortuneId;
+    if (activeFortuneId && typeof this.state.claimTickerFortune === 'function') {
+      const res = this.state.claimTickerFortune(activeFortuneId);
+      if (res?.ok) {
+        toggleClass(this._ticker, 'is-fortune', false);
+        this.markDirty('all');
+        return true;
+      }
+    }
+    // Avanço manual do ticker: NUNCA gera Fortuna (naturalCycle: false, paridade Wiki §11.1)
+    if (typeof this.state.rollTickerFortune === 'function') {
+      this.state.rollTickerFortune({ naturalCycle: false });
+    }
+    if (this._rumorPool.length > 0) {
+      this._rumorIndex = (this._rumorIndex + 1) % this._rumorPool.length;
+      const picked = pickRumor(this._rumorPool, this._rumorIndex);
+      this._rumorIndex = picked.index;
+      this._rumorCurrent = picked.text;
+    }
+    return false;
+  }
+
   #renderTicker(state, meta = {}) {
     if (!this._ticker) return;
     const reducedMotion = Boolean(meta.reducedMotion);
@@ -1243,9 +2355,21 @@ export class UIRenderer {
       : Date.now();
 
     if (this._rumorHoldUntil > now && this._rumorCurrent) {
+      toggleClass(this._ticker, 'is-fortune', false);
       setMarqueeText(this._ticker, this._rumorCurrent, { reducedMotion });
       return;
     }
+
+    const activeFortuneId = state?.fortunes?.activeFortuneId;
+    if (activeFortuneId) {
+      const fortuneDef = getFortune(activeFortuneId);
+      if (fortuneDef) {
+        toggleClass(this._ticker, 'is-fortune', true);
+        setMarqueeText(this._ticker, fortuneDef.tickerText, { reducedMotion });
+        return;
+      }
+    }
+    toggleClass(this._ticker, 'is-fortune', false);
 
     const sig = rumorPoolSignature(state);
     if (sig !== this._rumorSig || !this._rumorPool.length) {
@@ -1263,6 +2387,16 @@ export class UIRenderer {
         this._rumorNextAt = now + RUMOR_ROTATE_MS;
       }
     } else if (now >= this._rumorNextAt) {
+      // No ciclo natural automático do ticker, sorteia Fortuna (2% base / 4% com O Fortuna)
+      if (typeof state?.rollTickerFortune === 'function') {
+        const fRoll = state.rollTickerFortune({ naturalCycle: true });
+        if (fRoll?.spawned && fRoll.fortune) {
+          this._rumorNextAt = now + RUMOR_ROTATE_MS;
+          toggleClass(this._ticker, 'is-fortune', true);
+          setMarqueeText(this._ticker, fRoll.fortune.tickerText, { reducedMotion });
+          return;
+        }
+      }
       this._rumorIndex = (this._rumorIndex + 1) % this._rumorPool.length;
       const picked = pickRumor(this._rumorPool, this._rumorIndex);
       this._rumorIndex = picked.index;
@@ -1273,12 +2407,14 @@ export class UIRenderer {
     setMarqueeText(this._ticker, this._rumorCurrent, { reducedMotion });
   }
 
-  #renderVeil(state) {
+  #renderVeil(state, meta = {}) {
     if (!this._veil) return;
-    const pct = veilPercent(state);
-    this._veil.style.setProperty('--despertar-veil', `${pct}%`);
-    toggleClass(this._veil, 'is-milk', pct > 10);
-    this._veil.hidden = false;
+    const prefs = meta.prefs || this.getPerfPrefs();
+    applyVeilElementStyle(this._veil, state, {
+      reducedMotion: Boolean(meta.reducedMotion),
+      fancy: prefs.fancy,
+      particles: prefs.particles,
+    });
   }
 
   #renderStats(state) {
@@ -1298,6 +2434,21 @@ export class UIRenderer {
     set('mnemosyne', formatSouls(state.mnemosyne));
     set('verdicts', formatOwned(state.verdicts));
     set('juizoBest', formatOwned(state.juizoBestStreak));
+    set('shimmersClicked', formatOwned(state.shimmersClicked || 0));
+    set('shimmersMissed', formatOwned(state.shimmersMissed || 0));
+    set('nectar', formatOwned(state.nectar || 0));
+    set('totalNectar', formatOwned(state.totalNectarHarvested || 0));
+    const veilSummary = describeVeilSummary(state);
+    set('veil', veilSummary.label);
+    const catSummary = describeCatabaseSummary(state);
+    set('effectiveSps', catSummary.spsLine);
+    const bdSummary = describeSpsBreakdownSummary(state);
+    set('rawMultiplier', bdSummary.rawMultiplierLabel);
+    set('stackBreakdown', bdSummary.stackBreakdownLabel);
+    set('dragonSummary', bdSummary.dragonLabel);
+    set('seasonSummary', bdSummary.seasonLabel);
+    set('leechesDigested', catSummary.digestedLine);
+    set('leechesPopped', formatOwned(state.leechesPopped || 0));
     this.#renderSealed(state);
   }
 
@@ -1954,6 +3105,52 @@ export class UIRenderer {
       onOpen: () => this._loopBoard?.close(),
     });
     this._codexBook.mount();
+  }
+
+  #mountMinigames() {
+    const host = this.root.getElementById?.('despertar-minigames-root')
+      || this.root.getElementById?.('panel-bancada');
+    if (!host || !this.root.createElement) return;
+    let container = this.root.getElementById?.('despertar-minigames-root');
+    if (!container) {
+      container = this.root.createElement('div');
+      container.id = 'despertar-minigames-root';
+      container.className = 'despertar-minigames-root';
+      host.append?.(container);
+    }
+    this._minigamesView = new MinigamesView({
+      document: this.root,
+      onHarvestNectar: () => {
+        if (this.state?.harvestNectar?.()?.ok) this.markDirty('all');
+      },
+      onLevelUpGenerator: (genId) => {
+        if (this.state?.levelUpGenerator?.(genId)?.ok) this.markDirty('all');
+      },
+      onActivateFrenzy: () => {
+        if (this.state?.activateNectarFrenzy?.()?.ok) this.markDirty('all');
+      },
+      onAssignPantheon: (slotId, spiritId) => {
+        if (this.state?.assignPantheonSlot?.(slotId, spiritId)?.ok) this.markDirty('all');
+      },
+      onCastSpell: (spellId) => {
+        if (this.state?.castSpell?.(spellId)?.ok) this.markDirty('all');
+      },
+      onPlantSeed: (plotIdx, seedId) => {
+        if (this.state?.plantSeed?.(plotIdx, seedId)?.ok) this.markDirty('all');
+      },
+      onHarvestPlot: (plotIdx) => {
+        if (this.state?.harvestPlot?.(plotIdx)?.ok) this.markDirty('all');
+      },
+      onSelectSoil: (soilId) => {
+        if (this.state?.setGardenSoil?.(soilId)?.ok) this.markDirty('all');
+      },
+      onBuyGood: (goodId, qty) => {
+        if (this.state?.buyMarketStock?.(goodId, qty)?.ok) this.markDirty('all');
+      },
+      onSellGood: (goodId, qty) => {
+        if (this.state?.sellMarketStock?.(goodId, qty)?.ok) this.markDirty('all');
+      },
+    }).mount(container);
   }
 
   #mountLoopBoard() {

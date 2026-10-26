@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="g" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1a1a26"/>
+      <stop offset="100%" stop-color="#0a0a0f"/>
+    </radialGradient>
+  </defs>
+  <rect width="128" height="128" fill="url(#g)"/>
+  
+  <rect x="8" y="8" width="112" height="112" rx="18" fill="#1a1510" fill-opacity="0.72" stroke="#8b7355" stroke-width="3"/>
+  <path d="M14 20 H114" stroke="#a89070" stroke-opacity="0.15" stroke-width="2"/>
+  <path d="M14 108 H114" stroke="#000" stroke-opacity="0.35" stroke-width="3"/>
+  <circle cx="93" cy="47" r="1" fill="#a89070" opacity="0.10"/><circle cx="110" cy="76" r="2" fill="#a89070" opacity="0.04"/><circle cx="23" cy="105" r="1" fill="#a89070" opacity="0.05"/><circle cx="40" cy="30" r="2" fill="#a89070" opacity="0.06"/><circle cx="57" cy="59" r="1" fill="#a89070" opacity="0.07"/><circle cx="74" cy="88" r="2" fill="#a89070" opacity="0.08"/><circle cx="91" cy="13" r="1" fill="#a89070" opacity="0.09"/><circle cx="108" cy="42" r="2" fill="#a89070" opacity="0.10"/><circle cx="21" cy="71" r="1" fill="#a89070" opacity="0.04"/><circle cx="38" cy="100" r="2" fill="#a89070" opacity="0.05"/><circle cx="55" cy="25" r="1" fill="#a89070" opacity="0.06"/><circle cx="72" cy="54" r="2" fill="#a89070" opacity="0.07"/><circle cx="89" cy="83" r="1" fill="#a89070" opacity="0.08"/><circle cx="106" cy="112" r="2" fill="#a89070" opacity="0.09"/><circle cx="19" cy="37" r="1" fill="#a89070" opacity="0.10"/><circle cx="36" cy="66" r="2" fill="#a89070" opacity="0.04"/><circle cx="53" cy="95" r="1" fill="#a89070" opacity="0.05"/><circle cx="70" cy="20" r="2" fill="#a89070" opacity="0.06"/><circle cx="87" cy="49" r="1" fill="#a89070" opacity="0.07"/><circle cx="104" cy="78" r="2" fill="#a89070" opacity="0.08"/><circle cx="17" cy="107" r="1" fill="#a89070" opacity="0.09"/><circle cx="34" cy="32" r="2" fill="#a89070" opacity="0.10"/><circle cx="51" cy="61" r="1" fill="#a89070" opacity="0.04"/><circle cx="68" cy="90" r="2" fill="#a89070" opacity="0.05"/><circle cx="85" cy="15" r="1" fill="#a89070" opacity="0.06"/><circle cx="102" cy="44" r="2" fill="#a89070" opacity="0.07"/><circle cx="15" cy="73" r="1" fill="#a89070" opacity="0.08"/><circle cx="32" cy="102" r="2" fill="#a89070" opacity="0.09"/><circle cx="49" cy="27" r="1" fill="#a89070" opacity="0.10"/><circle cx="66" cy="56" r="2" fill="#a89070" opacity="0.04"/><circle cx="83" cy="85" r="1" fill="#a89070" opacity="0.05"/><circle cx="100" cy="114" r="2" fill="#a89070" opacity="0.06"/><circle cx="13" cy="39" r="1" fill="#a89070" opacity="0.07"/><circle cx="30" cy="68" r="2" fill="#a89070" opacity="0.08"/><circle cx="47" cy="97" r="1" fill="#a89070" opacity="0.09"/><circle cx="64" cy="22" r="2" fill="#a89070" opacity="0.10"/><circle cx="81" cy="51" r="1" fill="#a89070" opacity="0.04"/><circle cx="98" cy="80" r="2" fill="#a89070" opacity="0.05"/><circle cx="115" cy="109" r="1" fill="#a89070" opacity="0.06"/><circle cx="28" cy="34" r="2" fill="#a89070" opacity="0.07"/><circle cx="45" cy="63" r="1" fill="#a89070" opacity="0.08"/><circle cx="62" cy="92" r="2" fill="#a89070" opacity="0.09"/><circle cx="79" cy="17" r="1" fill="#a89070" opacity="0.10"/><circle cx="96" cy="46" r="2" fill="#a89070" opacity="0.04"/><circle cx="113" cy="75" r="1" fill="#a89070" opacity="0.05"/><circle cx="26" cy="104" r="2" fill="#a89070" opacity="0.06"/><circle cx="43" cy="29" r="1" fill="#a89070" opacity="0.07"/><circle cx="60" cy="58" r="2" fill="#a89070" opacity="0.08"/>
+  <path d="M54 88 Q64 40 94 32" fill="none" stroke="#00a896" stroke-opacity="0.44999999999999996" stroke-width="3"/><path d="M60 88 Q70 40 100 32" fill="none" stroke="#00a896" stroke-opacity="0.55" stroke-width="3"/><path d="M66 88 Q76 40 106 32" fill="none" stroke="#00a896" stroke-opacity="0.65" stroke-width="3"/>
+    <path d="M40 92 L52 36" stroke="#00a896" stroke-width="5" stroke-linecap="round"/>
+    <path d="M52 36 Q78 28 96 48 Q78 44 58 48 Z" fill="#00a896" fill-opacity="0.85" stroke="#00a896" stroke-width="2"/>
+    <circle cx="50" cy="88" r="6" fill="#00a896" fill-opacity="0.5"/>
+  <circle cx="22.2" cy="60.3" r="1.6" fill="#a89070" opacity="0.7"/>
+  <rect x="10" y="10" width="108" height="108" rx="16" fill="none" stroke="#a89070" stroke-opacity="0.28" stroke-width="1"/>
+  <!-- wave:B kind:clickMult -->
+
+</svg>
