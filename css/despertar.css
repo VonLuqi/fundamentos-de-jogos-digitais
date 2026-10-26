@@ -891,7 +891,7 @@
 .despertar-upgrade-icon.is-sealing {
   animation: despertarSealUpgrade 700ms ease-out;
   opacity: 1;
-  border-color: var(--despertar-styx);
+  filter: brightness(1.25) saturate(1.2);
 }
 
 .despertar-particles {
@@ -1720,20 +1720,23 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, 2.85rem);
-  grid-auto-rows: 2.85rem;
-  gap: 0.45rem;
-  justify-content: start;
+  /* Cookie: uma fila de 5 crates a encher a loja; o resto só no hover da strip. */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: auto;
+  gap: var(--ugap, 0.18rem);
+  justify-content: stretch;
   align-content: start;
+  width: 100%;
 }
 
 .despertar-upgrade-icons > li {
-  width: 2.85rem;
-  height: 2.85rem;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
   margin: 0;
   padding: 0;
   line-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .despertar-upgrade-icons > li[hidden] {
@@ -1744,41 +1747,50 @@
   position: relative;
   box-sizing: border-box;
   display: block;
-  width: 2.85rem;
-  height: 2.85rem;
+  width: 100%;
+  height: 100%;
   margin: 0;
-  padding: 0.2rem;
-  border: 1px solid rgba(120, 140, 140, 0.45);
-  background: rgba(10, 10, 15, 0.75);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--hades-gold-bright);
   font-family: var(--font-title);
   font-size: 0.72rem;
   cursor: pointer;
   appearance: none;
+  box-shadow: none;
+  outline: none;
+  filter: brightness(0.92);
+  transition: filter 0.12s ease, transform 0.12s ease;
 }
 
 .despertar-upgrade-icon.is-affordable {
-  border-color: color-mix(in srgb, var(--despertar-styx) 75%, white);
-  background: rgba(0, 168, 150, 0.14);
-  box-shadow: inset 0 0 0 1px rgba(0, 168, 150, 0.2);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: brightness(1.08) saturate(1.08);
 }
 
 .despertar-upgrade-icon.is-locked {
-  border-color: rgba(90, 100, 105, 0.55);
-  background: rgba(8, 10, 12, 0.65);
-  opacity: 0.55;
+  border: 0;
+  background: transparent;
+  opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(0.35) brightness(0.7);
 }
 
 .despertar-upgrade-icon:disabled {
   cursor: not-allowed;
 }
 
-.despertar-upgrade-icon.is-affordable:not(:disabled):hover,
-.despertar-upgrade-icon.is-affordable:not(:disabled):focus-visible {
-  border-color: var(--despertar-styx);
-  outline: 2px solid color-mix(in srgb, var(--despertar-styx) 50%, transparent);
-  outline-offset: 1px;
+.despertar-upgrade-icon:not(:disabled):hover,
+.despertar-upgrade-icon:not(:disabled):focus-visible {
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  filter: brightness(1.22) saturate(1.12);
+  transform: scale(1.06);
+  z-index: 1;
 }
 
 .despertar-upgrade-icon__sprite {
@@ -1791,7 +1803,8 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 0.1rem;
+  border-radius: 0;
+  image-rendering: auto;
 }
 
 .despertar-upgrade-tooltip {
@@ -1985,15 +1998,18 @@
 .despertar-sealed-icons .despertar-upgrade-icon {
   width: 2rem;
   height: 2rem;
-  padding: 0.1rem;
+  padding: 0;
   cursor: default;
+  filter: brightness(1);
+  transform: none;
 }
 
 .despertar-sealed-icons .despertar-upgrade-icon:hover,
 .despertar-sealed-icons .despertar-upgrade-icon:focus-visible {
-  border-color: var(--despertar-styx);
-  outline: 2px solid color-mix(in srgb, var(--despertar-styx) 50%, transparent);
-  outline-offset: 1px;
+  border: 0;
+  outline: none;
+  filter: brightness(1.15);
+  transform: scale(1.05);
 }
 
 .despertar-col--store .despertar-col__river,
@@ -2009,16 +2025,44 @@
   margin-right: 0;
 }
 
+/* Cookie upgradeBox: 1 fila visível; hover/focus expande o resto. */
 .despertar-col--store .despertar-upgrade-strip {
-  flex-shrink: 0;
-  max-height: 8.25rem;
+  --ugap: 0.16rem;
+  --upad: 0.2rem;
+  position: relative;
+  z-index: 28;
+  flex: 0 0 auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  width: 100%;
   margin: 0;
-  padding: 0.5rem 0.55rem;
-  overflow-x: hidden;
-  overflow-y: auto;
+  padding: var(--upad);
+  /*
+   * 1 fila de 5 quadrados + padding/gaps.
+   * aspect ≈ W / (2·pad + (W − 2·pad − 4·gap)/5) ≈ 4.7
+   */
+  aspect-ratio: 4.7 / 1;
+  height: auto;
+  max-height: none;
+  overflow: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  border: 0;
   border-bottom: 1px solid rgba(207, 167, 89, 0.16);
+  background:
+    linear-gradient(180deg, rgba(8, 12, 16, 0.55), rgba(8, 12, 16, 0.28));
+}
+
+.despertar-col--store .despertar-upgrade-strip:hover,
+.despertar-col--store .despertar-upgrade-strip:focus-within {
+  aspect-ratio: auto;
+  height: auto;
+  max-height: min(42vh, 15.5rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.55);
+  background:
+    linear-gradient(180deg, rgba(10, 14, 18, 0.94), rgba(8, 12, 16, 0.9));
 }
 
 .despertar-col--store .despertar-upgrade-strip::-webkit-scrollbar {
