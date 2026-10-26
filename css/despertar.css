@@ -1720,9 +1720,20 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, 2.75rem);
-  gap: 0.35rem;
+  grid-template-columns: repeat(auto-fill, 2.85rem);
+  grid-auto-rows: 2.85rem;
+  gap: 0.45rem;
   justify-content: start;
+  align-content: start;
+}
+
+.despertar-upgrade-icons > li {
+  width: 2.85rem;
+  height: 2.85rem;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  overflow: hidden;
 }
 
 .despertar-upgrade-icons > li[hidden] {
@@ -1732,8 +1743,9 @@
 .despertar-upgrade-icon {
   position: relative;
   box-sizing: border-box;
-  width: 2.75rem;
-  height: 2.75rem;
+  display: block;
+  width: 2.85rem;
+  height: 2.85rem;
   margin: 0;
   padding: 0.2rem;
   border: 1px solid rgba(120, 140, 140, 0.45);
@@ -1999,9 +2011,9 @@
 
 .despertar-col--store .despertar-upgrade-strip {
   flex-shrink: 0;
-  max-height: 7.5rem;
+  max-height: 8.25rem;
   margin: 0;
-  padding: 0.4rem 0.55rem;
+  padding: 0.5rem 0.55rem;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: none;
@@ -2024,7 +2036,11 @@
 
 .despertar-market-list.despertar-market-list--store {
   flex: 1 1 auto;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-content: stretch;
+  align-items: stretch;
   min-height: 0;
   gap: 0;
   margin: 0;
@@ -2045,28 +2061,37 @@
 }
 
 .despertar-col--store .despertar-card.despertar-card--store {
+  display: block;
+  flex: 0 0 3.6rem;
+  width: 100%;
+  height: 3.6rem;
+  min-height: 3.6rem;
+  max-height: 3.6rem;
   margin: 0;
   padding: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
-  min-height: 0;
+  overflow: hidden;
+  line-height: 0;
 }
 
 .despertar-product {
   display: grid;
-  grid-template-columns: 3.1rem minmax(0, 1fr) auto;
+  grid-template-columns: 3.2rem minmax(0, 1fr) 3.25rem;
+  grid-template-rows: 1fr 1fr;
   grid-template-areas:
     "icon name owned"
     "icon price owned";
-  gap: 0 0.35rem;
+  column-gap: 0.4rem;
+  row-gap: 0;
   align-items: center;
   width: 100%;
-  height: 3.35rem;
-  min-height: 3.35rem;
-  max-height: 3.35rem;
+  height: 3.6rem;
+  min-height: 3.6rem;
+  max-height: 3.6rem;
   margin: 0;
-  padding: 0.12rem 0.65rem 0.12rem 0.12rem;
+  padding: 0.2rem 0.55rem 0.2rem 0.15rem;
   border: none;
   border-bottom: 1px solid rgba(0, 0, 0, 0.55);
   border-radius: 0;
@@ -2109,8 +2134,9 @@
 
 .despertar-card--store .despertar-card__icon {
   grid-area: icon;
-  width: 3.1rem;
-  height: 3.1rem;
+  grid-row: 1 / -1;
+  width: 3.2rem;
+  height: 3.2rem;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -2149,9 +2175,10 @@
   align-self: end;
   min-width: 0;
   max-width: 100%;
-  font-size: 1.05rem;
+  padding-bottom: 0.05rem;
+  font-size: 0.98rem;
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.1;
   letter-spacing: 0;
   text-transform: none;
   color: #f7f4ee;
@@ -2167,6 +2194,7 @@
   align-self: start;
   min-width: 0;
   max-width: 100%;
+  padding-top: 0.05rem;
   font-size: 0.78rem;
   line-height: 1.1;
   color: #c4a06a;
@@ -2190,13 +2218,17 @@
 
 .despertar-card--store .despertar-card__owned {
   grid-area: owned;
+  grid-row: 1 / -1;
   align-self: center;
   justify-self: end;
-  min-width: 1.6rem;
-  font-size: 1.85rem;
+  min-width: 2.4rem;
+  width: 100%;
+  font-size: 1.7rem;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.34);
   line-height: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
   pointer-events: none;
   text-shadow: none;
 }
