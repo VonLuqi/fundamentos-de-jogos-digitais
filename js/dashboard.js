@@ -829,6 +829,7 @@ async function renderDespertarPreview(token) {
   if (!host) return;
 
   const isAdmin = currentUser?.role === 'admin';
+  // published efetivo: bootstrap/API forçam false durante o hold de temporada.
   const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && !despertarPublished);
   const open = Boolean(isAdmin || despertarPublished || seasonHold);
 

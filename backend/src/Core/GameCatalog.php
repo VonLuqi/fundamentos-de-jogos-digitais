@@ -79,7 +79,12 @@ final class GameCatalog
         'aula6' => ['published' => false],
         'aula7' => ['published' => false],
         'aula8' => ['published' => false],
-        'despertar' => ['published' => false, 'classroom_pause' => false],
+        'despertar' => [
+            'published' => false,
+            'classroom_pause' => false,
+            // Dia 1: Liberar no véu marca true e abre o Acheron sem redeploy do hold JS.
+            'season_liberated' => false,
+        ],
     ];
 
     public const ACTIVITY_CATALOG = [

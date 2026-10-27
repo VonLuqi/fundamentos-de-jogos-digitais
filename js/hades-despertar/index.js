@@ -12,6 +12,7 @@ import {
   DESPERTAR_SEALED_ERROR,
   despertarStateGet,
   fetchDespertarPublished,
+  fetchDespertarSeasonHold,
   getSession,
   leaderboardGet,
   listClassmates,
@@ -92,8 +93,22 @@ function pushJudgesTickerHint() {
 }
 
 function showSealedState(token = null, { isAdmin = false } = {}) {
+  const resolvedToken = token || getSession()?.token || null;
   if (DESPERTAR_SEASON_CLOSED) {
-    void showSeasonClosedState(token || getSession()?.token || null, { isAdmin });
+    void (async () => {
+      try {
+        const season = await fetchDespertarSeasonHold(resolvedToken);
+        if (season.seasonHold) {
+          await showSeasonClosedState(resolvedToken, { isAdmin });
+          return;
+        }
+      } catch {
+        /* cai no véu selado genérico */
+      }
+      const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+      if (!main) return;
+      presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
+    })();
     return;
   }
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
@@ -147,6 +162,7 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
       : undefined,
     onLiberate: isAdmin
       ? async () => {
+        await setLessonGate(token, 'despertar', 'season_liberated', true);
         await setLessonGate(token, 'despertar', 'published', true);
         globalThis.location.reload();
       }
@@ -158,6 +174,7 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
 async function ensureAcheronSealedForSeason(token, isAdmin) {
   if (!DESPERTAR_SEASON_CLOSED || !isAdmin || !token) return;
   try {
+    await setLessonGate(token, 'despertar', 'season_liberated', false);
     await setLessonGate(token, 'despertar', 'published', false);
   } catch (error) {
     console.warn('[Despertar] não foi possível selar o Acheron:', error);
@@ -659,7 +676,9 @@ async function init() {
   const user = result.user;
   const token = getSession()?.token ?? null;
   const isAdmin = user?.role === 'admin';
-  const published = await fetchDespertarPublished(token);
+  const season = await fetchDespertarSeasonHold(token);
+  const published = season.published;
+  const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && season.seasonHold);
 
   initAppShell({
     route: 'despertar',
@@ -670,21 +689,21 @@ async function init() {
     },
   });
 
-  // Hold até Dia 1: pódio para todos enquanto Acheron estiver selado.
-  // Liberar = Abrir o Acheron (turma). Pré-visualizar = só este admin (sessionStorage).
+  // Hold até Dia 1: pódio para todos até Liberar (season_liberated).
+  // Pré-visualizar = só este admin (sessionStorage).
   const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin });
-  if (DESPERTAR_SEASON_CLOSED && !published && !adminPreview) {
+  if (seasonHold && !adminPreview) {
     await ensureAcheronSealedForSeason(token, isAdmin);
     await showSeasonClosedState(token, { isAdmin });
     return;
   }
 
   if (!isAdmin && !published) {
-    showSealedState();
+    showSealedState(token, { isAdmin });
     return;
   }
 
-  if (adminPreview && !published) {
+  if (adminPreview && seasonHold) {
     mountAdminPreviewBanner();
   }
 

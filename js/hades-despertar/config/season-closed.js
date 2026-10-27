@@ -1,14 +1,14 @@
 /**
  * Hold do Despertar até o Dia 1.
- * Com `true` + Acheron selado (`published=false`), todos veem o pódio.
- * O Mestre libera no Dia 1 pelo botão do véu (ou “Abrir o Acheron” no Painel).
+ * Com `true`, todos veem o pódio até o Mestre marcar o gate `season_liberated`.
+ * O botão Liberar no véu (ou Painel) abre o Acheron sem redeploy deste flag.
  */
 
 'use strict';
 
 /**
- * Enquanto true, `published=false` mostra o véu de temporada (com top 3).
- * No Dia 1, liberar o Acheron abre o jogo sem precisar redeployar este flag.
+ * Enquanto true e `season_liberated=false`, mostra o véu de temporada (com top 3).
+ * No Dia 1, Liberar grava `season_liberated=true` + `published=true` — sem redeploy.
  * @type {boolean}
  */
 export const DESPERTAR_SEASON_CLOSED = true;

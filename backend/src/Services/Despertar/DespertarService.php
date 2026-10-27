@@ -1486,8 +1486,30 @@ final class DespertarService
     // Gate e Pausa de Sala (`lesson_gates` lesson_id='despertar')
     // -------------------------------------------------------------------------
 
+    /**
+     * Hold de fim de temporada (espelha js/hades-despertar/config/season-closed.js).
+     * Enquanto true e o gate `season_liberated` não foi marcado, o Acheron fica selado.
+     */
+    public const SEASON_CLOSED_HOLD = true;
+
+    public static function isSeasonLiberated(): bool
+    {
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare(
+            'SELECT `released` FROM `lesson_gates`
+             WHERE `lesson_id` = \'despertar\' AND `gate_key` = \'season_liberated\' LIMIT 1'
+        );
+        $stmt->execute();
+        $val = $stmt->fetchColumn();
+        return $val !== false && (bool) $val;
+    }
+
     public static function isDespertarPublished(): bool
     {
+        if (self::SEASON_CLOSED_HOLD && !self::isSeasonLiberated()) {
+            return false;
+        }
+
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
             'SELECT `released` FROM `lesson_gates`

@@ -109,6 +109,7 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
   const link = root.querySelector('[data-nav-item="despertar"]');
   if (!link) return;
 
+  // published já vem “efetivo” (bootstrap/API forçam false durante o hold de temporada).
   const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && !published);
   const open = Boolean(isAdmin || published || seasonHold);
   link.classList.toggle('is-locked', !open);
@@ -170,8 +171,13 @@ async function syncDespertarNavFromToken(shell, token, role, despertarPublished)
   try {
     const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
     const published = Boolean(result?.gates?.published);
-    applyDespertarNavState(shell, { published, isAdmin });
-    return published;
+    const seasonLiberated = Boolean(result?.gates?.season_liberated);
+    // Durante o hold, trate como selado mesmo se o gate published ficou true.
+    const effectivePublished = DESPERTAR_SEASON_CLOSED && !seasonLiberated
+      ? false
+      : published;
+    applyDespertarNavState(shell, { published: effectivePublished, isAdmin });
+    return effectivePublished;
   } catch {
     applyDespertarNavState(shell, { published: false, isAdmin });
     return false;

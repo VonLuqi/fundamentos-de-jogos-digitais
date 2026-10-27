@@ -1005,11 +1005,38 @@ export function setLessonGate(token, lessonId, gateKey, released) {
   });
 }
 
-/** Lê se o Acheron está aberto para a turma. Default: selado. */
-export async function fetchDespertarPublished(token) {
+/**
+ * Hold de fim de temporada: true até o Mestre marcar `season_liberated` no Dia 1.
+ * @returns {Promise<{ published: boolean, seasonLiberated: boolean, seasonHold: boolean, effectivePublished: boolean }>}
+ */
+export async function fetchDespertarSeasonHold(token) {
   try {
     const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
-    return Boolean(result?.gates?.published);
+    const published = Boolean(result?.gates?.published);
+    const seasonLiberated = Boolean(result?.gates?.season_liberated);
+    const seasonHold = !seasonLiberated;
+    return {
+      published,
+      seasonLiberated,
+      seasonHold,
+      // UI/nav: durante o hold o Acheron conta como selado.
+      effectivePublished: seasonHold ? false : published,
+    };
+  } catch {
+    return {
+      published: false,
+      seasonLiberated: false,
+      seasonHold: true,
+      effectivePublished: false,
+    };
+  }
+}
+
+/** Lê se o Acheron está aberto para a turma. Default: selado. Respeita hold de temporada. */
+export async function fetchDespertarPublished(token) {
+  try {
+    const season = await fetchDespertarSeasonHold(token);
+    return season.effectivePublished;
   } catch {
     return false;
   }
@@ -1935,6 +1962,13 @@ export function despertarTalentBuy(token, talentId) {
   return request('/despertar', {
     method: 'POST',
     body: JSON.stringify({ token, action: 'talentBuy', talentId }),
+  });
+}
+
+export function despertarCloseAscension(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'closeAscension' }),
   });
 }
 

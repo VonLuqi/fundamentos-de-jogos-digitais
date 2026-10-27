@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Core\Database;
 use App\Core\GameCatalog;
 use App\Core\Http;
+use App\Services\Despertar\DespertarService;
 use App\Services\SessionService;
 use PDO;
 use Throwable;
@@ -18,15 +19,7 @@ final class SessionBootstrapController
     public static function isDespertarPublished(): bool
     {
         try {
-            $pdo = Database::pdo();
-            $stmt = $pdo->prepare(
-                'SELECT `released` FROM `lesson_gates`
-                 WHERE `lesson_id` = \'despertar\' AND `gate_key` = \'published\'
-                 LIMIT 1'
-            );
-            $stmt->execute();
-            $val = $stmt->fetchColumn();
-            return $val !== false && (bool) $val;
+            return DespertarService::isDespertarPublished();
         } catch (Throwable) {
             return false;
         }
@@ -92,6 +85,12 @@ final class SessionBootstrapController
         }
 
         $published = self::isDespertarPublished();
+        $seasonLiberated = false;
+        try {
+            $seasonLiberated = DespertarService::isSeasonLiberated();
+        } catch (Throwable) {
+            $seasonLiberated = false;
+        }
         $provaGate = ($user['role'] ?? '') !== 'admin'
             ? self::loadProvaGateForUser((int) $user['id'])
             : ['inProgress' => false];
@@ -102,6 +101,7 @@ final class SessionBootstrapController
             'gates' => [
                 'despertar' => [
                     'published' => $published,
+                    'seasonLiberated' => $seasonLiberated,
                 ],
                 'prova' => [
                     'inProgress' => (bool) ($provaGate['inProgress'] ?? false),
