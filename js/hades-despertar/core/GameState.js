@@ -50,12 +50,9 @@ import {
   elderPactServantFlatBonusPerUnit,
   generatorCostMultForId,
   generatorUpgradeMult,
-  applyLetheRebalanceV2ToState,
   healLegacySave,
   lineSPS,
   meetsUpgradeRequirement,
-  migrateTalentSave,
-  migrateUpgradeSave,
   prestigePreview as formulaPrestigePreview,
   pickEcoDoStyxUpgrades,
   talentEffects,
@@ -260,22 +257,14 @@ export class GameState {
       qtyMap,
       this._goldCounts,
     );
-    {
-      const migratedUp = migrateUpgradeSave(
-        snapshot.upgrades ?? snapshot.upgrades_state ?? [],
-        this.souls,
-      );
-      this.upgrades = migratedUp.upgrades;
-      this.souls = clampNonNegative(migratedUp.souls);
-    }
-    {
-      const migrated = migrateTalentSave(
-        snapshot.talents ?? snapshot.talents_state ?? [],
-        this.mnemosyne,
-      );
-      this.talents = migrated.talents;
-      this.mnemosyne = clampNonNegative(migrated.mnemosyne);
-    }
+    this.upgrades = uniqueKnown(
+      snapshot.upgrades ?? snapshot.upgrades_state ?? [],
+      isKnownUpgradeId,
+    );
+    this.talents = uniqueKnown(
+      snapshot.talents ?? snapshot.talents_state ?? [],
+      isKnownTalentId,
+    );
     const msEarly = snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {};
     this.ascensionOpen = Boolean(
       snapshot.ascensionOpen ?? msEarly.ascensionOpen ?? false,
@@ -2173,23 +2162,12 @@ export class GameState {
   }
 
   /**
-   * Heal automático Lethe V2 (carteiras inchadas). Idempotente via milestone.
+   * Heal Lethe V2 no cliente: no-op — o servidor aplica via DespertarFormulas.
+   * (O export JS applyLetheRebalanceV2ToState nunca existiu em formulas.js e quebrava o grafo ES.)
    * @returns {{ applied: boolean, plan: object }}
    */
-  ensureLetheRebalanceV2({ force = false } = {}) {
-    const result = applyLetheRebalanceV2ToState(this.toSnapshot(), force);
-    if (!result.applied) return result;
-    this.obols = clampNonNegative(result.state.obols);
-    this.mnemosyne = clampNonNegative(result.state.mnemosyne);
-    this.milestones = {
-      ...this.milestones,
-      ...(result.state.milestones || {}),
-      ascensionOpen: this.ascensionOpen,
-    };
-    this.invalidateEconomyCache();
-    this.#bumpSyncEpoch();
-    this.#bump();
-    return result;
+  ensureLetheRebalanceV2() {
+    return { applied: false, plan: { skipped: true, reason: 'server_owned' } };
   }
 
   buyUpgrade(id) {
@@ -2490,22 +2468,16 @@ export class GameState {
     } else {
       this.#clampRarityCounts();
     }
-    {
-      const migratedUp = migrateUpgradeSave(
-        snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
-        snapshot.souls ?? this.souls,
-      );
-      this.upgrades = migratedUp.upgrades;
-      this.souls = clampNonNegative(migratedUp.souls);
-    }
-    {
-      const migrated = migrateTalentSave(
-        snapshot.talents ?? snapshot.talents_state ?? this.talents,
-        snapshot.mnemosyne ?? this.mnemosyne,
-      );
-      this.talents = migrated.talents;
-      this.mnemosyne = clampNonNegative(migrated.mnemosyne);
-    }
+    this.upgrades = uniqueKnown(
+      snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
+      isKnownUpgradeId,
+    );
+    this.talents = uniqueKnown(
+      snapshot.talents ?? snapshot.talents_state ?? this.talents,
+      isKnownTalentId,
+    );
+    if (snapshot.souls != null) this.souls = clampNonNegative(snapshot.souls);
+    if (snapshot.mnemosyne != null) this.mnemosyne = clampNonNegative(snapshot.mnemosyne);
     if (snapshot.milestones != null && typeof snapshot.milestones === 'object') {
       this.milestones = { ...this.milestones, ...snapshot.milestones };
     }
@@ -2684,12 +2656,12 @@ export class GameState {
       );
     }
     if (snapshot.talents != null || snapshot.talents_state != null) {
-      const serverTalents = migrateTalentSave(
+      const serverTalents = uniqueKnown(
         snapshot.talents ?? snapshot.talents_state,
-        '0',
-      ).talents;
+        isKnownTalentId,
+      );
       const localTalents = [...(this.talents || [])];
-      const union = migrateTalentSave([...serverTalents, ...localTalents], '0').talents;
+      const union = uniqueKnown([...serverTalents, ...localTalents], isKnownTalentId);
       const localSet = new Set(localTalents);
       const serverSet = new Set(serverTalents);
       const localOnly = localTalents.filter((id) => !serverSet.has(id));
