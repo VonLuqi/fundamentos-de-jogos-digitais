@@ -21,24 +21,24 @@
 
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/despertar.css?v=mil-foices-12" />
+  <link rel="stylesheet" href="../css/despertar.css?v=heavenly-129" />
   <script src="../js/devtools-guard.boot.js"></script>
   <!-- Import map: força a mesma URL versionada em todo o grafo ES
        (CF cacheava js sem query com max-age=14400 e quebrava o boot do véu). -->
   <script type="importmap">
   {
     "imports": {
-      "../js/api.js": "../js/api.js?v=mil-foices-12",
-      "../js/app-shell.js": "../js/app-shell.js?v=mil-foices-12",
-      "../js/grimorio-awards.js": "../js/grimorio-awards.js?v=mil-foices-12",
-      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=mil-foices-12",
-      "../js/hades-despertar/config/admin-preview.js": "../js/hades-despertar/config/admin-preview.js?v=mil-foices-12",
-      "../js/hades-despertar/ui/pauseVeil.js": "../js/hades-despertar/ui/pauseVeil.js?v=mil-foices-12",
-      "../js/hades-despertar/core/GameState.js": "../js/hades-despertar/core/GameState.js?v=mil-foices-12",
-      "../js/hades-despertar/core/formulas.js": "../js/hades-despertar/core/formulas.js?v=mil-foices-12",
-      "../js/hades-despertar/services/OfflineEngine.js": "../js/hades-despertar/services/OfflineEngine.js?v=mil-foices-12",
-      "../js/hades-despertar/ui/world/SpriteAtlas.js": "../js/hades-despertar/ui/world/SpriteAtlas.js?v=mil-foices-12",
-      "../js/hades-despertar/ui/LetheRiverTree.js": "../js/hades-despertar/ui/LetheRiverTree.js?v=mil-foices-12"
+      "../js/api.js": "../js/api.js?v=heavenly-129",
+      "../js/app-shell.js": "../js/app-shell.js?v=heavenly-129",
+      "../js/grimorio-awards.js": "../js/grimorio-awards.js?v=heavenly-129",
+      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=heavenly-129",
+      "../js/hades-despertar/config/admin-preview.js": "../js/hades-despertar/config/admin-preview.js?v=heavenly-129",
+      "../js/hades-despertar/ui/pauseVeil.js": "../js/hades-despertar/ui/pauseVeil.js?v=heavenly-129",
+      "../js/hades-despertar/core/GameState.js": "../js/hades-despertar/core/GameState.js?v=heavenly-129",
+      "../js/hades-despertar/core/formulas.js": "../js/hades-despertar/core/formulas.js?v=heavenly-129",
+      "../js/hades-despertar/services/OfflineEngine.js": "../js/hades-despertar/services/OfflineEngine.js?v=heavenly-129",
+      "../js/hades-despertar/ui/world/SpriteAtlas.js": "../js/hades-despertar/ui/world/SpriteAtlas.js?v=heavenly-129",
+      "../js/hades-despertar/ui/LetheRiverTree.js": "../js/hades-despertar/ui/LetheRiverTree.js?v=heavenly-129"
     }
   }
   </script>
@@ -82,7 +82,7 @@
   </div>
 
   <div
-    class="despertar-modal"
+    class="despertar-modal despertar-harvest"
     id="despertar-harvest-modal"
     role="dialog"
     aria-modal="true"
@@ -90,15 +90,34 @@
     aria-describedby="despertar-harvest-body"
     hidden
   >
-    <div class="despertar-modal__panel">
-      <h2 class="despertar-modal__title" id="despertar-harvest-title">Colheita na ausência</h2>
-      <p class="despertar-modal__body" id="despertar-harvest-body">
+    <div class="despertar-modal__panel despertar-harvest__panel">
+      <p class="despertar-harvest__eyebrow">Ausência</p>
+      <h2 class="despertar-modal__title despertar-harvest__title" id="despertar-harvest-title">
+        Colheita na ausência
+      </h2>
+      <p class="visually-hidden" id="despertar-harvest-body">
         O Submundo trabalhou 0 s. 0 almas chegaram à margem.
       </p>
-      <p class="despertar-modal__cap" id="despertar-harvest-cap" hidden>
+      <div class="despertar-harvest__hero">
+        <p class="despertar-harvest__souls despertar-num" id="despertar-harvest-souls">0</p>
+        <p class="despertar-harvest__souls-label">almas à margem</p>
+      </div>
+      <dl class="despertar-harvest__stats">
+        <div class="despertar-harvest__stat">
+          <dt>Tempo</dt>
+          <dd class="despertar-num" id="despertar-harvest-duration">0 s</dd>
+        </div>
+        <div class="despertar-harvest__stat" id="despertar-harvest-rate-row" hidden>
+          <dt>Ritmo</dt>
+          <dd class="despertar-num" id="despertar-harvest-rate">0/s</dd>
+        </div>
+      </dl>
+      <p class="despertar-modal__cap despertar-harvest__cap" id="despertar-harvest-cap" hidden>
         O véu fechou após 8 h — o restante da ausência não foi colhido.
       </p>
-      <button class="btn-gold" type="button" id="despertar-harvest-ok">Retomar o trono</button>
+      <div class="despertar-modal__actions despertar-harvest__actions">
+        <button class="btn-gold" type="button" id="despertar-harvest-ok">Retomar o trono</button>
+      </div>
     </div>
   </div>
 
@@ -942,6 +961,6 @@
     <p class="despertar-upgrade-tooltip__mark" data-tip="mark">Selado</p>
   </div>
 
-  <script type="module" src="../js/hades-despertar/index.js?v=mil-foices-12"></script>
+  <script type="module" src="../js/hades-despertar/index.js?v=heavenly-129"></script>
 </body>
 </html>

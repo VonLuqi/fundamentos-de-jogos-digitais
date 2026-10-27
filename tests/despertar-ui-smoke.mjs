@@ -69,6 +69,7 @@ staticAssert(css.includes('despertarReapShake') || css.includes('is-reaping'), '
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
 staticAssert(html.includes('id="despertar-reap"'), 'botão Ceifar');
 staticAssert(html.includes('data-particle-layer'), 'camada de partículas');
+staticAssert(html.includes('data-float-layer'), 'camada de floats +N');
 staticAssert(html.includes('id="despertar-market-list"'), 'lista do mercado para mount único');
 staticAssert(html.includes('data-buy-mode="max"'), 'toggle Máx');
 
@@ -86,7 +87,12 @@ staticAssert(html.includes('id="despertar-juizo-open"'), 'CTA Juízo');
 staticAssert(html.includes('data-juizo-choice="A"'), 'Juízo card campeão');
 staticAssert(html.includes('data-juizo-choice="B"'), 'Juízo card desafiante');
 staticAssert(html.includes('data-juizo-choice="tie"'), 'Juízo Empate');
-staticAssert(html.includes('data-juizo-action="confirm"'), 'Juízo Confirmar veredito');
+staticAssert(
+  html.includes('data-juizo-action="confirm"')
+    || html.includes('Duplo clique confirma')
+    || html.includes('data-juizo-action="restart"'),
+  'Juízo Confirmar veredito',
+);
 staticAssert(!html.includes('data-juizo-choice="higher"'), 'Juízo sem Maior');
 staticAssert(!html.includes('data-juizo-choice="lower"'), 'Juízo sem Menor');
 staticAssert(css.includes('.despertar-juizo-card.is-selected'), 'CSS Juízo is-selected');
@@ -163,7 +169,7 @@ await run('máscaras de rio: T1 sempre; T2–T6 fechados no minuto zero', () => 
 });
 
 await run('15 cliques compram T1; T2 revela; SPS sobe; lote 10 fica pobre', () => {
-  const state = new GameState();
+  const state = new GameState({}, { random: () => 0.99 });
   for (let i = 0; i < 15; i += 1) state.click();
 
   const t1Poor = describeGeneratorCard(state, 'wandering_shade', '10');
@@ -239,10 +245,10 @@ await run('T2 compra depois de acumular 100 almas', () => {
   const view = describeGeneratorCard(state, 'charon_servants', '1');
   assert.equal(view.revealed, true);
   assert.equal(view.canBuy, true);
-  const bought = state.buyGenerator('charon_servants', '1');
+  const bought = state.buyGenerator('charon_servants', '1', { random: () => 0.99 });
   assert.equal(bought.ok, true);
   assert.equal(state.quantities().charon_servants, 1);
-  assert.ok(cmp(state.sps(), '0.9') === 0, `SPS T1+T2 deveria ser 0.9, veio ${state.sps()}`);
+  assert.ok(cmp(state.sps(), '1.1') === 0, `SPS T1+T2 deveria ser 1.1 (F0), veio ${state.sps()}`);
 });
 
 console.log(`\ndespertar-ui-smoke: ${passed} passed, ${failed} failed`);

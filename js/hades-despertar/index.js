@@ -632,8 +632,17 @@ function bindHarvestModal() {
     show(harvest) {
       if (!harvest?.show) return;
       const body = document.getElementById('despertar-harvest-body');
+      const souls = document.getElementById('despertar-harvest-souls');
+      const duration = document.getElementById('despertar-harvest-duration');
+      const rate = document.getElementById('despertar-harvest-rate');
+      const rateRow = document.getElementById('despertar-harvest-rate-row');
       const cap = document.getElementById('despertar-harvest-cap');
-      if (body) body.textContent = harvest.body;
+      if (body) body.textContent = harvest.body || '';
+      if (souls) souls.textContent = harvest.soulsLabel || '0';
+      if (duration) duration.textContent = harvest.durationLabel || '0 s';
+      const showRate = Boolean(harvest.rateLabel);
+      if (rateRow) rateRow.hidden = !showRate;
+      if (rate && showRate) rate.textContent = harvest.rateLabel;
       if (cap) {
         cap.hidden = !harvest.capNote;
         if (harvest.capNote) cap.textContent = harvest.capNote;

@@ -35,9 +35,6 @@ import {
   SYNC_GAIN_TOLERANCE,
   TALENT_CALICE_MNEMOSYNE_DEN,
   TALENT_CALICE_MNEMOSYNE_NUM,
-  TALENT_JURAMENTO_ETERNO_MULT,
-  TALENT_MNEMOSYNE_PROFUNDA_MULT,
-  TALENT_MNEMOSYNE_TRIPLA_MULT,
   ECO_STYX_RESSONANTE_COUNT,
   SHIMMER_BUILDING_SPECIAL_MAX_MULT,
   SHIMMER_LUCKY_FLAT_BONUS,
@@ -81,7 +78,12 @@ import {
   UPGRADES,
   getUpgrade,
 } from '../config/upgrades.js';
-import { TALENT_BY_ID, getTalent } from '../config/talents.js';
+import {
+  LEGACY_TALENT_COSTS,
+  LEGACY_TALENT_MAP,
+  TALENT_BY_ID,
+  getTalent,
+} from '../config/talents.js';
 import { VERDICT_SHOP_BY_ID, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import { pantheonModifiers } from './minigames/PantheonSystem.js';
 import { gardenModifiers } from './minigames/GardenSystem.js';
@@ -93,6 +95,7 @@ import {
   floorSqrtRatio,
   geometricSum115,
   isZero,
+  min,
   money,
   mul,
   mulPow115,
@@ -203,68 +206,160 @@ export function maxAffordableCount(baseCost, owned, wallet, costMult = GENERATOR
   return lo;
 }
 
+/**
+ * Agrega efeitos dos talentos a partir do catálogo (data-driven).
+ * Espelho de DespertarFormulas::talentEffects.
+ */
 export function talentEffects(talentIds = []) {
-  const owned = new Set((talentIds || []).filter((id) => TALENT_BY_ID[id]));
   let mnemosyneMult = MNEMOSYNE_MULT_BASE;
-  if (owned.has('juramento_eterno')) mnemosyneMult = mul(mnemosyneMult, TALENT_JURAMENTO_ETERNO_MULT);
-  if (owned.has('mnemosyne_profunda')) mnemosyneMult = mul(mnemosyneMult, TALENT_MNEMOSYNE_PROFUNDA_MULT);
-  if (owned.has('mnemosyne_tripla')) mnemosyneMult = mul(mnemosyneMult, TALENT_MNEMOSYNE_TRIPLA_MULT);
-
   let startingSouls = '0';
-  if (owned.has('memoria_das_sombras')) startingSouls = add(startingSouls, STARTING_SOULS_MEMORY);
-  if (owned.has('margem_generosa')) startingSouls = add(startingSouls, STARTING_SOULS_MARGIN);
-
-  // Max-rule: Rebanho ⊇ Segundo Fôlego — nunca soma.
-  let shadeQty = 0;
-  if (owned.has('segundo_folego')) shadeQty = Math.max(shadeQty, STARTING_SHADE_FOLEGO);
-  if (owned.has('rebanho_despertado')) shadeQty = Math.max(shadeQty, STARTING_SHADE_REBANHO);
-  const startingGenerators = {};
-  if (shadeQty > 0) startingGenerators.wandering_shade = shadeQty;
-  if (owned.has('matilha_cerberiana')) {
-    startingGenerators.cerberian_hound = Math.max(
-      Number(startingGenerators.cerberian_hound) || 0,
-      STARTING_HOUND_MATILHA,
-    );
-  }
-  if (owned.has('forja_despertada')) {
-    startingGenerators.phlegethon_forge = Math.max(
-      Number(startingGenerators.phlegethon_forge) || 0,
-      STARTING_FORGE_DESPERTADA,
-    );
-  }
-
-  let offlineHours = owned.has('noite_prolongada')
-    ? OFFLINE_MAX_HOURS_TALENT
-    : OFFLINE_MAX_HOURS_BASE;
-  if (owned.has('pacto_do_silencio')) offlineHours += OFFLINE_EXTRA_HOURS_SILENCIO;
-
-  // Eco do Styx I..V (max-rule no contador).
+  let offlineHours = OFFLINE_MAX_HOURS_BASE;
+  let offlineExtra = 0;
+  let offlineEfficiency = OFFLINE_EFFICIENCY_BASE;
+  let offlineRate = '0';
+  let kSps = CLICK_K_SPS_BASE;
+  let generatorCostMult = GENERATOR_COST_MULT_BASE;
+  let upgradeCostMult = '1';
   let softPrestigeStyxCount = 0;
-  if (owned.has('eco_do_styx')) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 1);
-  if (owned.has('eco_ressonante')) {
-    softPrestigeStyxCount = Math.max(softPrestigeStyxCount, ECO_STYX_RESSONANTE_COUNT);
+  let mnemosyneGainMult = '1';
+  let permanentSlot = 0;
+  let synergyVolUnlock = 0;
+  let shimmerLuckMult = '1';
+  let prestigeEffectMult = '1';
+  let clickTalentMult = '1';
+  let allGeneratorsMult = '1';
+  let unshackleFingers = false;
+  const unshackledGenerators = {};
+  const startingGenerators = {};
+  const generatorBonus = {};
+  const cosmetics = [];
+  let richAmort = false;
+  let nectarReserveBonus = false;
+  let nectarFrenzyUnlock = false;
+  let dragonUnlock = false;
+  let seasonSwitcherUnlock = false;
+  let goldenSwitchUnlock = false;
+  let buyAllUnlock = false;
+  let vaultUnlock = false;
+  let labelPrinter = false;
+
+  for (const rawId of talentIds || []) {
+    const talent = TALENT_BY_ID[String(rawId)];
+    if (!talent) continue;
+    const fx = talent.effects && typeof talent.effects === 'object' ? talent.effects : {};
+
+    if (fx.startingSouls != null) startingSouls = add(startingSouls, String(fx.startingSouls));
+    if (fx.mnemosyneMult != null) mnemosyneMult = mul(mnemosyneMult, String(fx.mnemosyneMult));
+    if (fx.mnemosyneGainMult != null) {
+      mnemosyneGainMult = mul(mnemosyneGainMult, String(fx.mnemosyneGainMult));
+    }
+    if (fx.kSps != null && cmp(String(fx.kSps), kSps) > 0) kSps = String(fx.kSps);
+    if (fx.generatorCostMult != null && cmp(String(fx.generatorCostMult), generatorCostMult) < 0) {
+      generatorCostMult = String(fx.generatorCostMult);
+    }
+    if (fx.upgradeCostMult != null) {
+      upgradeCostMult = mul(upgradeCostMult, String(fx.upgradeCostMult));
+    }
+    if (fx.offlineEfficiency != null && cmp(String(fx.offlineEfficiency), offlineEfficiency) > 0) {
+      offlineEfficiency = String(fx.offlineEfficiency);
+    }
+    if (fx.offlineHours != null) {
+      offlineHours = Math.max(offlineHours, Number(fx.offlineHours) || 0);
+    }
+    if (fx.offlineExtraHours != null) {
+      offlineExtra += Number(fx.offlineExtraHours) || 0;
+    }
+    if (fx.offlineRate != null) {
+      offlineRate = add(offlineRate, String(fx.offlineRate));
+    }
+    if (fx.startingGeneratorId && fx.startingGeneratorQty != null) {
+      const gid = String(fx.startingGeneratorId);
+      const qty = Math.max(0, Math.floor(Number(fx.startingGeneratorQty) || 0));
+      startingGenerators[gid] = Math.max(Number(startingGenerators[gid] || 0), qty);
+    }
+    if (fx.startingGeneratorBonus && typeof fx.startingGeneratorBonus === 'object') {
+      for (const [gid, raw] of Object.entries(fx.startingGeneratorBonus)) {
+        generatorBonus[gid] = (Number(generatorBonus[gid] || 0)) + (Number(raw) || 0);
+      }
+    }
+    if (fx.softPrestigeStyx) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 1);
+    if (fx.softPrestigeStyxCount != null) {
+      softPrestigeStyxCount = Math.max(softPrestigeStyxCount, Number(fx.softPrestigeStyxCount) || 0);
+    }
+    if (fx.permanentSlot != null) {
+      permanentSlot = Math.max(permanentSlot, Number(fx.permanentSlot) || 0);
+    }
+    if (fx.synergyVolUnlock != null) {
+      synergyVolUnlock = Math.max(synergyVolUnlock, Number(fx.synergyVolUnlock) || 0);
+    }
+    if (fx.shimmerLuckMult != null) {
+      shimmerLuckMult = mul(shimmerLuckMult, String(fx.shimmerLuckMult));
+    }
+    if (fx.prestigeEffectMult != null) {
+      prestigeEffectMult = mul(prestigeEffectMult, String(fx.prestigeEffectMult));
+    }
+    if (fx.clickTalentMult != null) {
+      clickTalentMult = mul(clickTalentMult, String(fx.clickTalentMult));
+    }
+    if (fx.allGeneratorsMult != null) {
+      allGeneratorsMult = mul(allGeneratorsMult, String(fx.allGeneratorsMult));
+    }
+    if (fx.unshackleFingers) unshackleFingers = true;
+    if (fx.unshackleGeneratorId) {
+      unshackledGenerators[String(fx.unshackleGeneratorId)] = true;
+    }
+    if (fx.unshackleBonus != null && fx.unshackleGeneratorId) {
+      // flag only — bonus applied in generatorUpgradeMult via catalog later
+      unshackledGenerators[String(fx.unshackleGeneratorId)] = fx.unshackleBonus;
+    }
+    if (fx.cosmeticId) cosmetics.push(String(fx.cosmeticId));
+    if (fx.richAmort) richAmort = true;
+    if (fx.nectarReserveBonus) nectarReserveBonus = true;
+    if (fx.nectarFrenzyUnlock) nectarFrenzyUnlock = true;
+    if (fx.dragonUnlock) dragonUnlock = true;
+    if (fx.seasonSwitcherUnlock) seasonSwitcherUnlock = true;
+    if (fx.goldenSwitchUnlock) goldenSwitchUnlock = true;
+    if (fx.buyAllUnlock) buyAllUnlock = true;
+    if (fx.vaultUnlock) vaultUnlock = true;
+    if (fx.labelPrinter) labelPrinter = true;
   }
-  if (owned.has('eco_ancestral_iii')) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 3);
-  if (owned.has('eco_ancestral_iv')) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 4);
-  if (owned.has('eco_ancestral_v')) softPrestigeStyxCount = Math.max(softPrestigeStyxCount, 5);
+
+  for (const [gid, bonus] of Object.entries(generatorBonus)) {
+    startingGenerators[gid] = (Number(startingGenerators[gid] || 0)) + Number(bonus);
+  }
 
   return {
     startingSouls,
     mnemosyneMult,
-    offlineHours,
-    offlineEfficiency: owned.has('veu_eficiente') ? OFFLINE_EFFICIENCY_TALENT : OFFLINE_EFFICIENCY_BASE,
-    kSps: owned.has('foice_ancestral') ? CLICK_K_SPS_ANCESTRAL : CLICK_K_SPS_BASE,
-    generatorCostMult: owned.has('favor_de_caronte') ? GENERATOR_COST_MULT_CHARON : GENERATOR_COST_MULT_BASE,
+    offlineHours: offlineHours + offlineExtra,
+    offlineEfficiency,
+    offlineRate,
+    kSps,
+    generatorCostMult,
+    upgradeCostMult,
     startingGenerators,
-    richAmort: owned.has('olho_da_curva'),
+    richAmort,
     softPrestigeStyx: softPrestigeStyxCount > 0,
     softPrestigeStyxCount,
-    mnemosyneGainBoost: owned.has('calice_da_memoria'),
-    mnemosyneGainMult: mnemosyneMult,
-    nectarReserveBonus: owned.has('nectar_em_reserva'),
-    nectarFrenzyUnlock: owned.has('frenesi_de_nectar_talento'),
-    dragonUnlock: owned.has('ovo_primordial'),
-    seasonSwitcherUnlock: owned.has('rodizio_das_estacoes'),
+    permanentSlot,
+    synergyVolUnlock,
+    mnemosyneGainBoost: cmp(mnemosyneGainMult, '1') > 0,
+    mnemosyneGainMult,
+    nectarReserveBonus,
+    nectarFrenzyUnlock,
+    dragonUnlock,
+    seasonSwitcherUnlock,
+    shimmerLuckMult,
+    prestigeEffectMult,
+    clickTalentMult,
+    allGeneratorsMult,
+    unshackleFingers,
+    unshackledGenerators,
+    cosmetics,
+    goldenSwitchUnlock,
+    buyAllUnlock,
+    vaultUnlock,
+    labelPrinter,
   };
 }
 
@@ -363,7 +458,7 @@ export function nonShadeGeneratorsCount(generators = {}) {
   return count;
 }
 
-export function thousandBladesBonusPerUnit(upgradeIds = [], generators = {}) {
+export function thousandBladesBonusPerUnit(upgradeIds = [], generators = {}, talentIds = []) {
   let basePerBuilding = '0';
   let mult = '1';
   for (const id of upgradeIds || []) {
@@ -376,6 +471,8 @@ export function thousandBladesBonusPerUnit(upgradeIds = [], generators = {}) {
     }
   }
   if (cmp(basePerBuilding, '0') <= 0) return '0';
+  const { unshackleFingers } = talentEffects(talentIds);
+  if (unshackleFingers) mult = mul(mult, '25');
   const nonShadeQty = nonShadeGeneratorsCount(generators);
   if (nonShadeQty <= 0) return '0';
   const perBuilding = mul(basePerBuilding, mult);
@@ -424,7 +521,7 @@ export function elderPactServantFlatBonusPerUnit(upgradeIds = [], generators = {
   return mul(CATABASE_STAGE3_ELDER_PACT_PER_NON_SERVANT, String(nonServantQty));
 }
 
-export function generatorUpgradeMult(generatorId, upgradeIds = [], generators = {}) {
+export function generatorUpgradeMult(generatorId, upgradeIds = [], generators = {}, talentIds = []) {
   let mult = '1';
   for (const id of upgradeIds || []) {
     const upgrade = UPGRADE_BY_ID[id];
@@ -438,6 +535,11 @@ export function generatorUpgradeMult(generatorId, upgradeIds = [], generators = 
     } else if (upgrade.kind === 'allGeneratorsMult') {
       mult = mul(mult, upgrade.factor);
     }
+  }
+  const fx = talentEffects(talentIds);
+  if (fx.unshackledGenerators?.[generatorId]) mult = mul(mult, '25');
+  if (fx.allGeneratorsMult && cmp(fx.allGeneratorsMult, '1') !== 0) {
+    mult = mul(mult, fx.allGeneratorsMult);
   }
   return mul(mult, synergyUpgradeMult(generatorId, upgradeIds, generators));
 }
@@ -553,13 +655,35 @@ export function styxClickKSps(upgradeIds = []) {
 }
 
 /**
+ * Fração do bônus de prestígio desbloqueada na corrida (escada heavenlyPower, 0→1).
+ * Saves com milestone `heavenlyPowerLegacy` ou `opts.heavenlyPower` forçado usam 1.
+ */
+export function heavenlyPowerFromUpgrades(upgradeIds = [], opts = {}) {
+  if (opts.heavenlyPower != null) return String(opts.heavenlyPower);
+  if (opts.milestones?.heavenlyPowerLegacy || opts.legacyFullPower) return '1';
+  let power = '0';
+  for (const id of upgradeIds || []) {
+    const u = UPGRADE_BY_ID[id];
+    if (u?.kind === 'heavenlyPower' && u.factor != null) {
+      power = add(power, String(u.factor));
+    }
+  }
+  if (cmp(power, '1') > 0) return '1';
+  return power;
+}
+
+/**
  * Bônus SPS por óbolos: linear até PRESTIGE_SOFTCAP_START, depois log10.
- * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult
+ * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult × heavenlyPower × prestigeEffectMult
  * Espelho de DespertarFormulas::prestigeBonus.
  */
-export function prestigeBonus(obols, talentIds = []) {
-  const { mnemosyneMult } = talentEffects(talentIds);
-  const raw = mul(mul(obols || '0', OBOL_BONUS_PER), mnemosyneMult);
+export function prestigeBonus(obols, talentIds = [], opts = {}) {
+  const { mnemosyneMult, prestigeEffectMult } = talentEffects(talentIds);
+  const power = heavenlyPowerFromUpgrades(opts.upgrades || opts.upgradeIds || [], opts);
+  const raw = mul(
+    mul(mul(mul(obols || '0', OBOL_BONUS_PER), mnemosyneMult), power),
+    prestigeEffectMult || '1',
+  );
   if (cmp(raw, PRESTIGE_SOFTCAP_START) <= 0) {
     return add('1', raw);
   }
@@ -822,14 +946,15 @@ export function calculateSpsBreakdown({
   dragon = null,
   seasons = null,
   leeches = null,
+  milestones = null,
 } = {}) {
   let baseLinesSps = '0';
-  const shadeFlatBonus = thousandBladesBonusPerUnit(upgrades, generators);
+  const shadeFlatBonus = thousandBladesBonusPerUnit(upgrades, generators, talents);
   const servantFlatBonus = elderPactServantFlatBonusPerUnit(upgrades, generators);
   for (const def of GENERATORS) {
     const qty = Number(generators[def.id] || 0);
     if (!Number.isFinite(qty) || qty <= 0) continue;
-    const upgradeMult = generatorUpgradeMult(def.id, upgrades, generators);
+    const upgradeMult = generatorUpgradeMult(def.id, upgrades, generators, talents);
     const shiny = Number(shinyCounts?.[def.id] || 0);
     const gold = Number(goldCounts?.[def.id] || 0);
     const level = Number(generatorLevels?.[def.id] || 0);
@@ -848,7 +973,7 @@ export function calculateSpsBreakdown({
     baseLinesSps = add(baseLinesSps, line);
   }
 
-  const prestigeMult = prestigeBonus(obols, talents);
+  const prestigeMult = prestigeBonus(obols, talents, { upgrades, milestones });
   const { spsVerdictMult: verdictMult } = economyEffects(talents, verdictPurchases);
   const { spsMult: minigamesMult } = minigameEffects({ generatorLevels, minigames });
   const seasonalMult = seasonalCompoundMult(upgrades);
@@ -1022,7 +1147,7 @@ export function effectiveUnitSPS({
   }
   const level = Number(generatorLevels?.[generatorId] || 0);
   const unit = mul(add(mul(def.baseRate, upgradeMult), flatUnitBonus), generatorLevelMult(level));
-  const withPrestige = mul(unit, prestigeBonus(obols, talents));
+  const withPrestige = mul(unit, prestigeBonus(obols, talents, { upgrades }));
   const { spsVerdictMult } = economyEffects(talents, verdictPurchases);
   const { spsMult: mgSpsMult } = minigameEffects({ generatorLevels, minigames });
   const withSeasonal = mul(mul(mul(withPrestige, spsVerdictMult), mgSpsMult), seasonalCompoundMult(upgrades));
@@ -1149,6 +1274,46 @@ export function obolsFromLifetimeCubic(lifetimeSouls = '0') {
  * @param {string|number} [souls='0']
  * @returns {{ upgrades: string[], souls: string, refunded: string }}
  */
+/**
+ * Migra talentos do Rio do Lethe → Heavenly (map + refund).
+ * @returns {{ talents: string[], mnemosyne: string, refunded: string }}
+ */
+export function migrateTalentSave(rawTalents = [], mnemosyne = '0') {
+  let refund = '0';
+  const next = [];
+  const seen = new Set();
+  for (const raw of rawTalents || []) {
+    const id = String(raw);
+    let mapped = null;
+    let hasMap = false;
+    if (Object.prototype.hasOwnProperty.call(LEGACY_TALENT_MAP, id)) {
+      hasMap = true;
+      mapped = LEGACY_TALENT_MAP[id];
+    } else if (TALENT_BY_ID[id]) {
+      mapped = id;
+    }
+    if (mapped && TALENT_BY_ID[mapped]) {
+      if (!seen.has(mapped)) {
+        seen.add(mapped);
+        next.push(mapped);
+      }
+      continue;
+    }
+    const cost = LEGACY_TALENT_COSTS[id] ?? '0';
+    if (hasMap && mapped === null && cmp(cost, '0') > 0) {
+      refund = add(refund, cost);
+    } else if (!hasMap && !TALENT_BY_ID[id] && cmp(cost, '0') > 0) {
+      refund = add(refund, cost);
+    }
+  }
+  const baseMn = mnemosyne !== '' && mnemosyne != null ? String(mnemosyne) : '0';
+  return {
+    talents: next,
+    mnemosyne: money(add(baseMn, refund)),
+    refunded: money(refund),
+  };
+}
+
 export function migrateUpgradeSave(rawUpgrades = [], souls = '0') {
   let refund = '0';
   const next = [];
@@ -1185,12 +1350,17 @@ export function healLegacySave(snapshot = {}) {
   const src = snapshot && typeof snapshot === 'object' ? { ...snapshot } : {};
   const milestones = src.milestones && typeof src.milestones === 'object' ? { ...src.milestones } : {};
   const currentObols = toBigIntFloor(src.obols ?? '0');
-  const currentMnemosyne = toBigIntFloor(src.mnemosyne ?? '0');
+  let healedMnemosyne = currentMnemosyneToStr(src.mnemosyne);
   const prestigeCount = Math.max(0, Number.parseInt(src.prestigeCount ?? src.prestige_count, 10) || 0);
   const lifetimeSouls = String(src.lifetimeSouls ?? src.lifetime_souls ?? '0');
 
+  const migrated = migrateTalentSave(
+    Array.isArray(src.talents) ? src.talents : [],
+    healedMnemosyne,
+  );
+  healedMnemosyne = migrated.mnemosyne;
+
   let healedObols = currentObols > 0n ? currentObols.toString() : '0';
-  let healedMnemosyne = currentMnemosyne > 0n ? currentMnemosyne.toString() : '0';
 
   if (prestigeCount > 0) {
     const cubicFloor = BigInt(obolsFromLifetimeCubic(lifetimeSouls));
@@ -1199,23 +1369,41 @@ export function healLegacySave(snapshot = {}) {
     }
   }
 
+  if (!Object.prototype.hasOwnProperty.call(milestones, 'heavenlyPowerLegacy')) {
+    if (
+      prestigeCount > 0
+      || cmp(healedObols, '0') > 0
+      || (migrated.talents?.length ?? 0) > 0
+    ) {
+      milestones.heavenlyPowerLegacy = true;
+    }
+  }
+  if (!milestones.heavenlyPowerSeen && !milestones.heavenlyPowerLegacy) {
+    milestones.heavenlyPowerSeen = true;
+  }
+
   milestones.f8SaveHealed = true;
   return {
     ...src,
     obols: money(healedObols),
     mnemosyne: money(healedMnemosyne),
+    talents: migrated.talents,
     milestones,
   };
+}
+
+function currentMnemosyneToStr(v) {
+  const n = toBigIntFloor(v ?? '0');
+  return n > 0n ? n.toString() : '0';
 }
 
 export function mnemosyneFromObolsGain(obolsGain, talents = []) {
   const baseObols = toBigIntFloor(obolsGain || '0');
   if (baseObols <= 0n) return '0';
-  // 2 óbolos desta corrida → 1 essência.
   let gain = baseObols / 2n;
-  const owned = new Set((talents || []).filter((id) => TALENT_BY_ID[id]));
-  if (owned.has('calice_da_memoria') && gain > 0n) {
-    gain = (gain * BigInt(TALENT_CALICE_MNEMOSYNE_NUM)) / BigInt(TALENT_CALICE_MNEMOSYNE_DEN);
+  const { mnemosyneGainMult } = talentEffects(talents);
+  if (gain > 0n && cmp(mnemosyneGainMult, '1') > 0) {
+    gain = toBigIntFloor(mul(String(gain), mnemosyneGainMult));
   }
   return gain.toString();
 }
@@ -1250,7 +1438,13 @@ export function calculateOfflineProgress({
     };
   }
 
-  const { offlineHours, offlineEfficiency } = economyEffects(talents, verdictPurchases);
+  const econ = economyEffects(talents, verdictPurchases);
+  let offlineHours = Number(econ.offlineHours) || 0;
+  let offlineEfficiency = String(econ.offlineEfficiency ?? OFFLINE_EFFICIENCY_BASE);
+  const offlineRate = String(econ.offlineRate ?? '0');
+  if (cmp(offlineRate, '0') > 0) {
+    offlineEfficiency = min('1', add(offlineEfficiency, offlineRate));
+  }
   const maxAllowedSeconds = offlineHours * 3600;
   const effectiveSeconds = Math.min(elapsed, maxAllowedSeconds);
   const offlineSouls = mul(mul(String(effectiveSeconds), sps), offlineEfficiency);

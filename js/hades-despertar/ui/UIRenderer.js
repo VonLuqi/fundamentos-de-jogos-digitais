@@ -353,7 +353,10 @@ export function describeGeneratorCard(state, id, buyMode = '1', tradeAction = 'b
       seasons: state.seasons || null,
     });
   const upgradeMult = state.generatorUpgradeMult(id);
-  const bonus = prestigeBonus(state.obols, state.talents);
+  const bonus = prestigeBonus(state.obols, state.talents, {
+    upgrades: state.upgrades,
+    milestones: state.milestones,
+  });
   const { spsVerdictMult } = economyEffects(state.talents, state.verdictPurchases);
   const shinyMap = typeof state.shinyCounts === 'function'
     ? state.shinyCounts()
@@ -974,7 +977,10 @@ export function describeLethe(state) {
   const preview = state.prestigePreview();
   const open = isLetheOpen(state);
   const canDrink = state.canPrestige();
-  const bonus = prestigeBonus(state.obols, state.talents);
+  const bonus = prestigeBonus(state.obols, state.talents, {
+    upgrades: state.upgrades,
+    milestones: state.milestones,
+  });
   const pantheonOpen = open && (
     state.prestigeCount >= 1
     || cmp(state.mnemosyne, '0') > 0
@@ -1364,7 +1370,10 @@ export class UIRenderer {
 
       if (slowDue || anyDirty) {
         if (slowDue) this._lastSlowSyncAt = nowMs;
-        setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents)));
+        setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents, {
+          upgrades: state.upgrades,
+          milestones: state.milestones,
+        })));
         this.#renderHint(state);
         this.#renderTicker(state, { reducedMotion });
         this.#renderVeil(state, { reducedMotion, prefs: effectivePrefs });
@@ -1536,22 +1545,37 @@ export class UIRenderer {
       tip.className = 'despertar-product-tooltip';
       tip.setAttribute('role', 'tooltip');
       tip.hidden = true;
-      tip.innerHTML = `
-        <div class="despertar-product-tooltip__head">
-          <div class="despertar-product-tooltip__icon despertar-sprite" data-tip="icon"></div>
-          <div class="despertar-product-tooltip__titles">
-            <p class="despertar-product-tooltip__name" data-tip="name"></p>
-            <p class="despertar-product-tooltip__owned" data-tip="owned"></p>
-          </div>
-          <p class="despertar-product-tooltip__cost despertar-num" data-tip="cost"></p>
-        </div>
-        <p class="despertar-product-tooltip__blurb" data-tip="blurb"></p>
-        <div class="despertar-product-tooltip__stats" data-tip="stats" hidden>
-          <p data-tip="unit"></p>
-          <p data-tip="line"></p>
-          <p data-tip="life"></p>
-        </div>
-      `.trim();
+      const head = this.root.createElement('div');
+      head.className = 'despertar-product-tooltip__head';
+      const tipIcon = this.root.createElement('div');
+      tipIcon.className = 'despertar-product-tooltip__icon despertar-sprite';
+      tipIcon.setAttribute('data-tip', 'icon');
+      const titles = this.root.createElement('div');
+      titles.className = 'despertar-product-tooltip__titles';
+      const tipName = this.root.createElement('p');
+      tipName.className = 'despertar-product-tooltip__name';
+      tipName.setAttribute('data-tip', 'name');
+      const tipOwned = this.root.createElement('p');
+      tipOwned.className = 'despertar-product-tooltip__owned';
+      tipOwned.setAttribute('data-tip', 'owned');
+      titles.append(tipName, tipOwned);
+      const tipCost = this.root.createElement('p');
+      tipCost.className = 'despertar-product-tooltip__cost despertar-num';
+      tipCost.setAttribute('data-tip', 'cost');
+      head.append(tipIcon, titles, tipCost);
+      const tipBlurb = this.root.createElement('p');
+      tipBlurb.className = 'despertar-product-tooltip__blurb';
+      tipBlurb.setAttribute('data-tip', 'blurb');
+      const tipStats = this.root.createElement('div');
+      tipStats.className = 'despertar-product-tooltip__stats';
+      tipStats.setAttribute('data-tip', 'stats');
+      tipStats.hidden = true;
+      for (const key of ['unit', 'line', 'life']) {
+        const row = this.root.createElement('p');
+        row.setAttribute('data-tip', key);
+        tipStats.append(row);
+      }
+      tip.append(head, tipBlurb, tipStats);
       const mountParent = this.root.body || this.root.documentElement || list;
       mountParent?.append?.(tip);
     }

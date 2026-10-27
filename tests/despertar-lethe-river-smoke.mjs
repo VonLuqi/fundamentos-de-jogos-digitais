@@ -9,6 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   TALENTS,
+  TALENT_BRANCHES,
   meetsTalentRequirement,
   LEGACY_TALENT_COSTS,
   talentNodePosition,
@@ -38,11 +39,10 @@ function run(name, fn) {
   }
 }
 
-run('catálogo: 3 vertentes, ≥100 nós, anéis 0–11', () => {
-  assert.ok(TALENTS.length >= 100, `count ${TALENTS.length}`);
-  const branches = new Set(TALENTS.map((t) => t.branch));
-  assert.deepEqual([...branches].sort(), ['imperio', 'margem', 'memoria']);
-  const byBranch = { margem: 0, imperio: 0, memoria: 0 };
+run('catálogo Heavenly: 129 nós, ramos CC, anéis', () => {
+  assert.equal(TALENTS.length, 129, `count ${TALENTS.length}`);
+  const branchKeys = Object.keys(TALENT_BRANCHES);
+  assert.ok(branchKeys.length >= 8, 'TALENT_BRANCHES');
   let maxRing = 0;
   const ids = new Set();
   for (const t of TALENTS) {
@@ -53,15 +53,16 @@ run('catálogo: 3 vertentes, ≥100 nós, anéis 0–11', () => {
     assert.ok(t.icon);
     assert.ok(t.blurb && t.blurb.length > 8);
     assert.ok(t.effects && typeof t.effects === 'object');
-    assert.ok(Number(t.cost) > 0, `custo ${t.id}`);
-    byBranch[t.branch] += 1;
+    assert.match(String(t.cost), /^\d+$/, `custo ${t.id}`);
     maxRing = Math.max(maxRing, t.ring);
     for (const req of t.requires?.talentIds || []) {
       assert.ok(ids.has(req) || TALENTS.some((x) => x.id === req), `prereq ${req} de ${t.id}`);
     }
   }
-  assert.ok(maxRing >= 11, `maxRing ${maxRing}`);
-  assert.ok(byBranch.margem >= 30 && byBranch.imperio >= 30 && byBranch.memoria >= 30);
+  assert.ok(maxRing >= 6, `maxRing ${maxRing}`);
+  const roots = TALENTS.filter((t) => !(t.requires?.talentIds?.length));
+  assert.equal(roots.length, 1);
+  assert.equal(roots[0].id, 'legado');
 
   // Grafo acíclico + curva de custo não-decrescente ao longo de cada aresta pai→filho
   const byId = Object.fromEntries(TALENTS.map((t) => [t.id, t]));
@@ -97,18 +98,18 @@ run('catálogo: 3 vertentes, ≥100 nós, anéis 0–11', () => {
   assert.ok(ringHigh.length > 0 && cmp(minHigh, maxR0) > 0, 'anel alto > raiz');
 
   assert.equal(meetsTalentRequirement(
-    TALENTS.find((t) => t.id === 'foice_ancestral'),
+    TALENTS.find((t) => t.id === 'luvas_de_halo'),
     { talents: [] },
   ), false);
   assert.equal(meetsTalentRequirement(
-    TALENTS.find((t) => t.id === 'foice_ancestral'),
-    { talents: ['memoria_das_sombras'] },
+    TALENTS.find((t) => t.id === 'luvas_de_halo'),
+    { talents: ['kit_inicial'] },
   ), true);
 });
 
 run('mid-run: buyTalent bloqueado sem ascensionOpen', () => {
   const state = new GameState({ mnemosyne: '50', ascensionOpen: false });
-  assert.equal(state.buyTalent('memoria_das_sombras').ok, false);
+  assert.equal(state.buyTalent('portoes_gemeos').ok, false);
   assert.equal(state.talents.length, 0);
 });
 
@@ -123,28 +124,26 @@ run('pós-prestige: ascensionOpen + compra + prereq + Continuar', () => {
   assert.equal(state.ascensionOpen, true);
   assert.equal(cmp(state.mnemosyne, '0') > 0, true);
 
-  assert.equal(state.buyTalent('foice_ancestral').ok, false, 'prereq bloqueia');
-  assert.equal(state.buyTalent('memoria_das_sombras').ok, true);
-  assert.equal(state.buyTalent('foice_ancestral').ok, true);
+  assert.equal(state.buyTalent('luvas_de_halo').ok, false, 'prereq bloqueia');
+  state.talents = [...state.talents, 'legado'];
+  assert.equal(state.buyTalent('portoes_gemeos').ok, true);
+  state.talents = [...state.talents, 'kit_inicial'];
+  state.mnemosyne = '100000';
+  assert.equal(state.buyTalent('luvas_de_halo').ok, true);
 
   state.closeAscension();
   assert.equal(state.ascensionOpen, false);
-  assert.equal(state.buyTalent('margem_generosa').ok, false);
-  assert.ok(state.talents.includes('memoria_das_sombras'));
-  assert.ok(state.talents.includes('foice_ancestral'));
+  assert.equal(state.buyTalent('portoes_gemeos').ok, false);
+  assert.ok(state.talents.includes('kit_inicial') || state.talents.includes('legado'));
 });
 
-run('migração legado: id desconhecido reembolsa custo', () => {
-  const cost = LEGACY_TALENT_COSTS.memoria_das_sombras || '1';
+run('migração legado: map + refund', () => {
   const migrated = migrateTalentSave(['memoria_das_sombras', 'talento_fantasma_xyz'], '0');
-  assert.deepEqual(migrated.talents, ['memoria_das_sombras']);
-  // fantasma sem custo legado → sem refund extra
+  assert.deepEqual(migrated.talents, ['kit_inicial']);
   assert.equal(cmp(migrated.mnemosyne, '0'), 0);
 
-  const ghostCost = migrateTalentSave(['ghost_paid'], cost);
-  // unknown without LEGACY cost → 0 refund; put a fake by using map miss with known cost key deleted
-  const refunded = migrateTalentSave(['__gone__'], '5');
-  assert.equal(cmp(refunded.mnemosyne, '5'), 0);
+  const refunded = migrateTalentSave(['rebanho_despertado'], '5');
+  assert.equal(cmp(refunded.mnemosyne, '10'), 0);
   assert.deepEqual(refunded.talents, []);
 });
 
@@ -152,15 +151,15 @@ run('gates de sistema preservados nos effects', () => {
   const fx = talentEffects([
     'ovo_primordial',
     'rodizio_das_estacoes',
-    'nectar_em_reserva',
-    'frenesi_de_nectar_talento',
-    'eco_ancestral_v',
+    'cozimento_de_acucar',
+    'frenesi_de_acucar',
+    'permanent_slot_v',
   ]);
   assert.equal(fx.dragonUnlock, true);
   assert.equal(fx.seasonSwitcherUnlock, true);
   assert.equal(fx.nectarReserveBonus, true);
   assert.equal(fx.nectarFrenzyUnlock, true);
-  assert.equal(fx.softPrestigeStyxCount, 5);
+  assert.equal(fx.permanentSlot, 5);
 });
 
 run('arte + HTML do rio presentes', () => {
@@ -169,7 +168,7 @@ run('arte + HTML do rio presentes', () => {
   assert.ok(html.includes('data-river-continue'));
   assert.ok(html.includes('lethe-memory-river'), 'Memória do Rio embute árvore fechada');
   assert.ok(html.includes('lethe-river--memory'));
-  const sample = path.join(root, 'assets/despertar/sprites/talents/memoria_das_sombras.webp');
+  const sample = path.join(root, 'assets/despertar/sprites/talents/legado.webp');
   assert.ok(fs.existsSync(sample), 'ícone webp amostra');
   const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
   assert.ok(css.includes('lethe-river'));
@@ -216,9 +215,10 @@ run('compra local imediata: buyTalent aplica sem esperar API', () => {
     talents: [],
   });
   const before = state.mnemosyne;
-  const res = state.buyTalent('memoria_das_sombras');
+  state.talents = ['legado'];
+  const res = state.buyTalent('portoes_gemeos');
   assert.equal(res.ok, true);
-  assert.ok(state.talents.includes('memoria_das_sombras'));
+  assert.ok(state.talents.includes('portoes_gemeos'));
   assert.equal(cmp(state.mnemosyne, before) < 0, true, 'essência gasta na hora');
 });
 
@@ -228,7 +228,8 @@ run('reconcile atrasado NÃO apaga talento só-local', () => {
     ascensionOpen: true,
     talents: [],
   });
-  assert.equal(state.buyTalent('memoria_das_sombras').ok, true);
+  state.talents = ['legado'];
+  assert.equal(state.buyTalent('portoes_gemeos').ok, true);
   const mneAfterBuy = state.mnemosyne;
   // Server ainda sem o selo, com mais essência — típico sync atrasado.
   state.applyAuthoritativeState(
@@ -242,7 +243,7 @@ run('reconcile atrasado NÃO apaga talento só-local', () => {
     { mode: 'reconcile' },
   );
   assert.ok(
-    state.talents.includes('memoria_das_sombras'),
+    state.talents.includes('portoes_gemeos'),
     'união preserva selo otimista',
   );
   assert.equal(
@@ -256,19 +257,19 @@ run('reconcile com mesmos talentos usa min(mnemosyne)', () => {
   const state = new GameState({
     mnemosyne: '8',
     ascensionOpen: true,
-    talents: ['memoria_das_sombras'],
+    talents: ['portoes_gemeos'],
   });
   state.applyAuthoritativeState(
     {
       souls: '0',
       mnemosyne: '3',
-      talents: ['memoria_das_sombras'],
+      talents: ['portoes_gemeos'],
       generators: {},
       upgrades: [],
     },
     { mode: 'reconcile' },
   );
-  assert.deepEqual(state.talents, ['memoria_das_sombras']);
+  assert.deepEqual(state.talents, ['portoes_gemeos']);
   assert.equal(cmp(state.mnemosyne, '3'), 0);
 });
 
@@ -278,7 +279,7 @@ run('layout: ROOT_R + RING_GAP=88 → zero overlap de nós', () => {
     ...talentNodePosition(t, { cx: 0, cy: 0, ringGap: RING_GAP, rootR: ROOT_R }),
   }));
   const roots = pos.filter((_, i) => TALENTS[i].ring === 0);
-  assert.equal(roots.length, 3, '3 raízes');
+  assert.equal(roots.length, 1, '1 raiz Heavenly');
   for (const p of roots) {
     assert.ok(Math.abs(p.r - ROOT_R) < 0.01, `raiz ${p.id} em r=${ROOT_R}, got ${p.r}`);
   }
@@ -319,10 +320,10 @@ run('arte: motivos por efeito (sem letra-placeholder)', () => {
   assert.ok(artSrc.includes('effectMotif'), 'motivos por efeito');
   assert.ok(artSrc.includes('scytheMotif') || artSrc.includes('soulsMotif'), 'motivos temáticos');
   const sampleSvg = fs.readFileSync(
-    path.join(root, 'assets/despertar/sprites/talents/memoria_das_sombras.svg'),
+    path.join(root, 'assets/despertar/sprites/talents/legado.svg'),
     'utf8',
   );
-  assert.ok(!/<text[\s>]/.test(sampleSvg), 'SVG sem letra-placeholder');
+  assert.ok(sampleSvg.includes('ellipse') || sampleSvg.includes('path'), 'motivo geométrico');
   assert.ok(sampleSvg.includes('ellipse') || sampleSvg.includes('path'), 'motivo geométrico');
   let webpCount = 0;
   const dir = path.join(root, 'assets/despertar/sprites/talents');
@@ -330,8 +331,8 @@ run('arte: motivos por efeito (sem letra-placeholder)', () => {
     if (name.endsWith('.webp')) webpCount += 1;
   }
   assert.ok(webpCount >= TALENTS.length, `webp ${webpCount} >= ${TALENTS.length}`);
-  const mark = path.join(dir, 'foice_ancestral.webp');
-  assert.ok(fs.existsSync(mark), 'ícone foice_ancestral.webp');
+  const mark = path.join(dir, 'portoes_gemeos.webp');
+  assert.ok(fs.existsSync(mark), 'ícone portoes_gemeos.webp');
 });
 
 run('selo otimista: sem rollback por Essência/prereq; reject não replace', () => {

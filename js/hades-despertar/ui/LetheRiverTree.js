@@ -495,7 +495,7 @@ export function bindLetheRiverTree({
       // Ângulo mediano da vertente × raio externo ao anel 3 — acompanha o leque real.
       const LABEL_RING = 3.6;
       const labelR = LABEL_RING * RING_GAP + ROOT_R;
-      for (const key of /** @type {const} */ (['margem', 'imperio', 'memoria'])) {
+      for (const key of Object.keys(TALENT_BRANCHES)) {
         const branchTalents = TALENTS.filter((t) => t.branch === key);
         if (!branchTalents.length) continue;
         const angles = branchTalents.map((t) => Number(t.angle) || 0).sort((a, b) => a - b);

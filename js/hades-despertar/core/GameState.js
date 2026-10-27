@@ -54,6 +54,7 @@ import {
   lineSPS,
   meetsUpgradeRequirement,
   migrateUpgradeSave,
+  migrateTalentSave,
   prestigePreview as formulaPrestigePreview,
   pickEcoDoStyxUpgrades,
   talentEffects,
@@ -147,6 +148,13 @@ import {
   sellMarketGood,
   stepMarketTick,
 } from './minigames/MarketSystem.js';
+
+function normalizePermanentUpgradeIds(raw) {
+  const src = Array.isArray(raw) ? raw : [];
+  const out = src.slice(0, 5).map((id) => (id ? String(id) : null));
+  while (out.length < 5) out.push(null);
+  return out;
+}
 
 function uniqueKnown(ids, isKnown) {
   const out = [];
@@ -266,9 +274,17 @@ export class GameState {
       this.upgrades = migratedUp.upgrades;
       this.souls = clampNonNegative(migratedUp.souls);
     }
-    this.talents = uniqueKnown(
-      snapshot.talents ?? snapshot.talents_state ?? [],
-      isKnownTalentId,
+    {
+      const rawTalents = (Array.isArray(snapshot.talents ?? snapshot.talents_state)
+        ? (snapshot.talents ?? snapshot.talents_state)
+        : []
+      ).map((id) => String(id));
+      const talentMig = migrateTalentSave(rawTalents, this.mnemosyne);
+      this.talents = talentMig.talents.filter((id) => isKnownTalentId(id));
+      this.mnemosyne = clampNonNegative(talentMig.mnemosyne);
+    }
+    this.permanentUpgradeIds = normalizePermanentUpgradeIds(
+      snapshot.permanentUpgradeIds ?? snapshot.permanent_upgrade_ids,
     );
     const msEarly = snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {};
     this.ascensionOpen = Boolean(
@@ -623,6 +639,7 @@ export class GameState {
       catabase: this.catabase,
       dragon: this.dragon,
       seasons: this.seasons,
+      milestones: this.milestones,
     });
     this._cachedSps = val;
     this._cachedSpsVersion = this.structureVersion;
@@ -651,6 +668,7 @@ export class GameState {
       catabase: this.catabase,
       dragon: this.dragon,
       seasons: this.seasons,
+      milestones: this.milestones,
     });
   }
 
@@ -1338,7 +1356,7 @@ export class GameState {
   #attributeGeneratorLifetime(gained) {
     if (cmp(gained, '0') <= 0) return;
     const qty = this.quantities();
-    const shadeFlat = thousandBladesBonusPerUnit(this.upgrades, qty);
+    const shadeFlat = thousandBladesBonusPerUnit(this.upgrades, qty, this.talents);
     const servantFlat = elderPactServantFlatBonusPerUnit(this.upgrades, qty);
     const lines = {};
     let total = '0';
@@ -2158,7 +2176,9 @@ export class GameState {
     const healed = healLegacySave(this.toSnapshot());
     this.obols = clampNonNegative(healed.obols);
     this.mnemosyne = clampNonNegative(healed.mnemosyne);
-    if (Array.isArray(healed.talents)) this.talents = [...healed.talents];
+    if (Array.isArray(healed.talents)) {
+      this.talents = healed.talents.filter((id) => isKnownTalentId(id));
+    }
     this.ascensionOpen = Boolean(healed.ascensionOpen);
     this.milestones = { ...this.milestones, ...healed.milestones, ascensionOpen: this.ascensionOpen };
     this.invalidateEconomyCache();
@@ -2232,6 +2252,28 @@ export class GameState {
     this.#bumpSyncEpoch();
     this.#bump();
     return { ok: true, cost: talent.cost };
+  }
+
+  /** Atribui juramento permanente (slot Heavenly I–V). */
+  setPermanentUpgradeSlot(slotIndex, upgradeId = null) {
+    const slots = Number(talentEffects(this.talents).permanentSlot) || 0;
+    const idx = Number(slotIndex);
+    if (!Number.isFinite(idx) || idx < 0 || idx >= slots) return { ok: false, error: 'slot' };
+    const next = normalizePermanentUpgradeIds(this.permanentUpgradeIds);
+    if (upgradeId == null || upgradeId === '') {
+      next[idx] = null;
+    } else {
+      const id = String(upgradeId);
+      if (!isKnownUpgradeId(id)) return { ok: false, error: 'unknown' };
+      const owned = this.upgrades.includes(id);
+      const alreadySlotted = next.includes(id);
+      if (!owned && !alreadySlotted) return { ok: false, error: 'not_owned' };
+      next[idx] = id;
+    }
+    this.permanentUpgradeIds = next;
+    this.#bumpSyncEpoch();
+    this.#bump();
+    return { ok: true };
   }
 
   closeAscension() {
@@ -2315,7 +2357,13 @@ export class GameState {
     this._shinyCounts = {};
     this._goldCounts = {};
 
-    // Eco do Styx / Eco Ressonante — N juramentos revelados elegíveis (pós starting).
+    const permCount = Number(effects.permanentSlot) || 0;
+    const permanent = this.permanentUpgradeIds
+      .slice(0, permCount)
+      .filter((id) => id && isKnownUpgradeId(id));
+    const upgradeSet = new Set(permanent);
+    this.upgrades = [...permanent];
+
     let ecoStyxId = null;
     let ecoStyxIds = [];
     const ecoCount = Number(effects.softPrestigeStyxCount) || 0;
@@ -2324,9 +2372,11 @@ export class GameState {
         souls: this.souls,
         generators: this.quantities(),
         upgrades: this.upgrades,
-      }).filter((id) => isKnownUpgradeId(id));
+      }).filter((id) => isKnownUpgradeId(id) && !upgradeSet.has(id));
       ecoStyxId = ecoStyxIds[0] || null;
-      if (ecoStyxIds.length) this.upgrades = ecoStyxIds;
+      if (ecoStyxIds.length) {
+        this.upgrades = [...this.upgrades, ...ecoStyxIds];
+      }
     }
 
     this.invalidateEconomyCache();
@@ -2957,6 +3007,7 @@ export class GameState {
       goldCounts: this.goldCounts(),
       upgrades: [...this.upgrades],
       talents: [...this.talents],
+      permanentUpgradeIds: [...this.permanentUpgradeIds],
       ascensionOpen: Boolean(this.ascensionOpen),
       verdictPurchases: [...this.verdictPurchases],
       verdicts: this.verdicts,

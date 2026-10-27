@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
+  <rect width="128" height="128" rx="16" fill="hsl(263 35% 18%)"/>
+  <circle cx="64" cy="56" r="28" fill="none" stroke="hsl(263 55% 58%)" stroke-width="6"/>
+  <path d="M40 88 Q64 72 88 88" fill="none" stroke="hsl(263 50% 65%)" stroke-width="4"/>
+  <text x="64" y="116" text-anchor="middle" font-size="10" fill="#cfa759">Delicate Tou</text>
+</svg>

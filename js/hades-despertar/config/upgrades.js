@@ -3272,6 +3272,61 @@ export const UPGRADES = freezeAll([
     generatorCostMult: '0.93',
     requires: { fortuneId: 'fortune_gen_the_emperor' },
   },
+  {
+      id: "segredo_do_obolo",
+      name: "Segredo do Óbolo",
+      blurb: "Desbloqueia 5% da potência de prestígio na corrida.",
+      cost: "11",
+      kind: "heavenlyPower",
+      factor: "0.05",
+      requires: {
+        talentId: "legado",
+      },
+    },
+  {
+      id: "banca_do_obolo",
+      name: "Banca do Óbolo",
+      blurb: "Potência de prestígio +20% (acumula).",
+      cost: "1111",
+      kind: "heavenlyPower",
+      factor: "0.20",
+      requires: {
+        upgradeId: "segredo_do_obolo",
+      },
+    },
+  {
+      id: "forja_do_obolo",
+      name: "Forja do Óbolo",
+      blurb: "Potência de prestígio +25%.",
+      cost: "111111",
+      kind: "heavenlyPower",
+      factor: "0.25",
+      requires: {
+        upgradeId: "banca_do_obolo",
+      },
+    },
+  {
+      id: "confeitaria_do_obolo",
+      name: "Confeitaria do Óbolo",
+      blurb: "Potência de prestígio +25%.",
+      cost: "11111111",
+      kind: "heavenlyPower",
+      factor: "0.25",
+      requires: {
+        upgradeId: "forja_do_obolo",
+      },
+    },
+  {
+      id: "chave_do_obolo",
+      name: "Chave do Óbolo",
+      blurb: "Potência de prestígio +25% — escada completa.",
+      cost: "1111111111",
+      kind: "heavenlyPower",
+      factor: "0.25",
+      requires: {
+        upgradeId: "confeitaria_do_obolo",
+      },
+    },
 ]);
 
 export const UPGRADE_IDS = Object.freeze(UPGRADES.map((item) => item.id));

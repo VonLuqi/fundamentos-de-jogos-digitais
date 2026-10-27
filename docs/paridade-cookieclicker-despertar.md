@@ -27,7 +27,7 @@
 | 6 | Sinergias Vol. I / II | +5% / +0.1% cruzado (malha densa) | **36 Vol. I/II canónicas + 8 Servos (`44` `synergyMult`) — template Synergy wiki** | **100%** | **F1+F3+F7+malha** |
 | 7 | Clique / Cursor scaling | Thousand fingers + tiers longos | **`clickMult` + `clickKSps` + Mil Foices (12 elos: mil→undecilhão)** | **100%** | **F1+F7+escada** |
 | 8 | Prestígio / Ascensão | ∛(lifetime/1e12) · +1%/nível | **√(run/4e9)/(1+k) + Fortune #102 (+1%) + piso cúbico ∛(lifetime/1e12) c/ Save Heal** | **100%** | **F8 ✓** |
-| 9 | Heavenly tree / talentos | Árvore HC completa (centenas) | **Panteão de Mnemosyne (25 talentos) — subset jogável, não árvore HC plena** | **~35%** | **F5+F8** |
+| 9 | Heavenly tree / talentos | Árvore HC completa (centenas) | **129 juramentos Heavenly (PrestigeUpgrades CC 1:1) + migração Rio do Lethe** | **100%** | **F5+F8 ✓** |
 | 10 | Soft keep (permanent slots / starters) | Slots + starter kit/kitchen | **Eco do Styx I–V (5 slots permanentes) + starters de Sombra, Cão e Forja** | **100%** | **Base+F8 ✓** |
 | 11 | Golden / Wrath shimmers | Frenzy, Lucky, Click Frenzy, Wrath | **Eco do Acheron (Maré ×7, Colheita, Fúria ×777, Voo Dracónico ×1111, Selo + Wrath v2)** | **100%** | **F2+F8 ✓** |
 | 12 | Milk → Kittens → CpS | 4%/achiev. + kitten ladder longa | **Véu (+4%/normal) + 8 `veilMult` (7 Filhotes + `fortune_103`) `∏(1+m·f_i)` — ladder curta vs CC** | **~75%** | **F4+F8** |
@@ -85,14 +85,14 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 | Pilar | Medida | Resultado |
 | --- | --- | --- |
 | Código/fórmulas | 20 gens dígito-a-dígito · 300 tiers · Lucky/1.15/sell/leech · JS≡PHP | **100% / PASS** |
-| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 8 veilMult · 25 talentos · 138 `despertar_*` | **~75%** vs wiki densa |
+| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 8 veilMult · 129 talentos Heavenly · 138 `despertar_*` | **~75%** vs wiki densa |
 | Arte WebP | ~519 ficheiros · manifest ok · Foice idle/pressed WebP · cosméticos/juízo chrome open | **~84%** |
 
 **Divergências explícitas (backlog, não bugs JS≠PHP):**
 1. ~~Sinergias Vol. I/II~~ — malha canónica 36 + 8 Servos (item 6 = 100%).
 2. ~~Mil Foices~~ — escada canónica 12 elos (mil→undecilhão; item 7 = 100%).
 3. Filhotes: ladder curta (fatores 0.1…0.2 ×7 + fortune_103).
-4. Heavenly: 25 talentos ≠ árvore HC wiki.
+4. ~~Heavenly: crescer árvore HC~~ · ~~25 talentos~~ → **129 Heavenly CC 1:1 entregue (2026-10).**
 5. Digestão Sanguessuga escala **n²** (cada leech acumula o drain total) — documentada no código.
 6. Arte ainda `open`: cosméticos + juízo chrome (`art-requests.json`).
 7. 138 conquistas `despertar_*` reutilizam **24** ficheiros WebP únicos.

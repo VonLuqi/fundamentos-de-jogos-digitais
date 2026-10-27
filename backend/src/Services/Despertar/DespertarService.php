@@ -265,6 +265,11 @@ final class DespertarService
             'shinyCounts' => $shinyCounts,
             'upgrades' => $upgrades,
             'talents' => $talents,
+            'permanentUpgradeIds' => self::normalizePermanentUpgradeIds(
+                $r['permanent_upgrade_ids']
+                    ?? $r['permanentUpgradeIds']
+                    ?? (self::asObject($r['milestones'] ?? [])['permanentUpgradeIds'] ?? [])
+            ),
             'ascensionOpen' => (bool) (self::asObject($r['milestones'] ?? [])['ascensionOpen'] ?? false),
             'eduLogsSeen' => $eduLogsSeen,
             'milestones' => self::asObject($r['milestones'] ?? []),
@@ -365,6 +370,7 @@ final class DespertarService
             'goldCounts' => (object) $goldCounts,
             'upgrades' => $state['upgrades'],
             'talents' => $state['talents'],
+            'permanentUpgradeIds' => self::normalizePermanentUpgradeIds($state['permanentUpgradeIds'] ?? []),
             'ascensionOpen' => (bool) ($state['ascensionOpen'] ?? ($state['milestones']['ascensionOpen'] ?? false)),
             'eduLogsSeen' => $state['eduLogsSeen'],
             'milestones' => (object) array_merge(
@@ -414,6 +420,21 @@ final class DespertarService
         }
 
         return $dto;
+    }
+
+    /**
+     * @param mixed $raw
+     * @return array<int, string|null>
+     */
+    public static function normalizePermanentUpgradeIds(mixed $raw): array
+    {
+        $src = is_array($raw) ? $raw : [];
+        $out = [];
+        for ($i = 0; $i < 5; $i++) {
+            $v = $src[$i] ?? null;
+            $out[] = ($v !== null && $v !== '') ? (string) $v : null;
+        }
+        return $out;
     }
 
     public static function parseClientEpoch(mixed $clientState): ?int
@@ -887,14 +908,31 @@ final class DespertarService
         }
 
         $startingSouls = DespertarDecimal::money($effects['startingSouls'] ?? '0');
+        $permCount = (int) ($effects['permanentSlot'] ?? 0);
+        $permIds = self::normalizePermanentUpgradeIds($db['permanentUpgradeIds'] ?? []);
+        $upgradesById = DespertarCatalog::upgradesById();
         $nextUpgrades = [];
+        $upgradeSet = [];
+        for ($i = 0; $i < $permCount && $i < 5; $i++) {
+            $pid = $permIds[$i] ?? null;
+            if ($pid !== null && $pid !== '' && isset($upgradesById[$pid])) {
+                $nextUpgrades[] = $pid;
+                $upgradeSet[$pid] = true;
+            }
+        }
         $ecoCount = (int) ($effects['softPrestigeStyxCount'] ?? 0);
         if ($ecoCount > 0) {
-            $nextUpgrades = DespertarFormulas::pickEcoDoStyxUpgrades($ecoCount, [
+            $picked = DespertarFormulas::pickEcoDoStyxUpgrades($ecoCount, [
                 'souls' => $startingSouls,
                 'generators' => $nextGenerators,
-                'upgrades' => [],
+                'upgrades' => $nextUpgrades,
             ]);
+            foreach ($picked as $id) {
+                if (!isset($upgradeSet[$id])) {
+                    $nextUpgrades[] = $id;
+                    $upgradeSet[$id] = true;
+                }
+            }
         }
 
         $nextMilestones = $db['milestones'];

@@ -165,7 +165,10 @@ await run('Óbolos: runSouls 4e9 → 1; 1e9 → 0; Catábase divide o yield', ()
   assert.equal(mnemosyneFromObolsGain('2'), '1');
   assert.equal(mnemosyneFromObolsGain('1'), '0');
   assert.equal(mnemosyneFromObolsGain('0'), '0');
-  eqMoney(prestigeBonus('1'), '1.01');
+  // Sem escada heavenlyPower / milestone legado → potência 0 (SPS = 1×).
+  eqMoney(prestigeBonus('1'), '1');
+  eqMoney(prestigeBonus('1', [], { legacyFullPower: true }), '1.01');
+  eqMoney(prestigeBonus('1', [], { upgrades: ['segredo_do_obolo'] }), '1.0005');
 });
 
 await run('Offline 10 s a SPS 1, 80% → 8 almas', () => {

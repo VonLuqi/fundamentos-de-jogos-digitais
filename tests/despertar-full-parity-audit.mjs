@@ -239,7 +239,7 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   assert.ok((byKind.veilMult || 0) >= 7, 'Filhotes do Cérbero');
   const tf = (byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0);
   assert.equal(tf, 12, `cadeia Mil Foices = 12 (got ${tf})`);
-  assert.ok(TALENTS.length >= 100, `≥100 talentos rio (got ${TALENTS.length})`);
+  assert.equal(TALENTS.length, 129, `129 talentos Heavenly (got ${TALENTS.length})`);
   assert.ok(SHIMMER_EFFECTS.length >= 6, 'efeitos Eco do Acheron');
   assert.equal(DESPERTAR_ACHIEVEMENT_IDS.length, 138, `138 despertar_* (got ${DESPERTAR_ACHIEVEMENT_IDS.length})`);
 
@@ -253,9 +253,6 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   }
   if ((byKind.veilMult || 0) < 10) {
     warn(`Filhotes (veilMult): ${byKind.veilMult || 0} (CC kitten ladder é mais longa)`);
-  }
-  if (TALENTS.length < 200) {
-    warn(`Talentos/HC: ${TALENTS.length} (árvore Heavenly do CC ainda é maior)`);
   }
 });
 
@@ -528,7 +525,7 @@ const summary = {
         Math.min(100, ((byKind.synergyMult || 0) / 100) * 100) +
         Math.min(100, ((byKind.veilMult || 0) / 13) * 100) +
         Math.min(100, (((byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0)) / 12) * 100) +
-        Math.min(100, (TALENTS.length / 80) * 100)
+        Math.min(100, (TALENTS.length / 129) * 100)
       ) / 6,
     ),
     artWebpPct: Math.round(

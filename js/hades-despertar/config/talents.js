@@ -1,7 +1,7 @@
 /**
- * Rio do Lethe — árvore permanente de Mnemosyne (3 vertentes).
- * Compra só com ascensionOpen (pós-Ritual). Sem reset no Lethe.
- * Gerado por scripts/gen-talent-river-catalog.mjs — não editar à mão o array TALENTS.
+ * Árvore Heavenly — paridade Cookie Clicker PrestigeUpgrades (129).
+ * Compra com Essência de Mnemosyne pós-Ritual. Permanece após Lethe.
+ * Gerado por scripts/gen-heavenly-talent-catalog.mjs — não editar TALENTS à mão.
  */
 
 function freezeRequires(requires = {}) {
@@ -29,7 +29,7 @@ function freezeAll(list) {
 }
 
 /**
- * @typedef {'margem'|'imperio'|'memoria'} TalentBranch
+ * @typedef {'persistent'|'angel'|'demon'|'production'|'golden'|'discount'|'cookie'|'season'|'nectar'|'unshackled'|'misc'} TalentBranch
  * @typedef {{
  *   id: string,
  *   name: string,
@@ -47,523 +47,83 @@ function freezeAll(list) {
 /** @type {TalentDef[]} */
 export const TALENTS = freezeAll([
   {
-    id: "memoria_das_sombras",
-    name: "Memória das Sombras",
-    blurb: "Começa cada corrida com 5 000 almas na margem.",
+    id: "legado",
+    name: "Legado",
+    blurb: "Desbloqueia o sistema de Essência de Mnemosyne e juramentos permanentes.",
     cost: "1",
-    branch: "margem",
+    branch: "persistent",
     ring: 0,
-    angle: -95,
-    icon: "memoria_das_sombras",
+    angle: -20,
+    icon: "legado",
     requires: {},
-    effects: {
-      startingSouls: "5000",
-    },
+    effects: {},
   },
   {
-    id: "foice_ancestral",
-    name: "Foice Ancestral",
-    blurb: "Cada clique rouba +1% do teu SPS.",
-    cost: "15",
-    branch: "margem",
+    id: "portoes_gemeos",
+    name: "Portões Gêmeos",
+    blurb: "Offline rende 5% do SPS enquanto o rio dorme.",
+    cost: "1",
+    branch: "misc",
     ring: 1,
-    angle: -115,
-    icon: "foice_ancestral",
+    angle: -78.56,
+    icon: "portoes_gemeos",
     requires: {
       talentIds: [
-        "memoria_das_sombras",
+        "legado",
       ],
     },
     effects: {
-      kSps: "0.01",
+      offlineRate: "0.05",
     },
   },
   {
-    id: "margem_generosa",
-    name: "Margem Generosa",
-    blurb: "+25 000 almas ao despertar de cada corrida.",
-    cost: "15",
-    branch: "margem",
-    ring: 1,
-    angle: -75,
-    icon: "margem_generosa",
-    requires: {
-      talentIds: [
-        "memoria_das_sombras",
-      ],
-    },
-    effects: {
-      startingSouls: "25000",
-    },
-  },
-  {
-    id: "preludio_ctoniano",
-    name: "Prelúdio Ctoniano",
-    blurb: "+15 000 almas iniciais — o rio reconhece teu nome.",
-    cost: "100",
-    branch: "margem",
-    ring: 2,
-    angle: -95,
-    icon: "preludio_ctoniano",
-    requires: {
-      talentIds: [
-        "memoria_das_sombras",
-      ],
-    },
-    effects: {
-      startingSouls: "15000",
-    },
-  },
-  {
-    id: "segundo_folego",
-    name: "Segundo Fôlego",
-    blurb: "Acorda com 5 Sombras Vagantes já na margem.",
-    cost: "125",
-    branch: "margem",
-    ring: 2,
-    angle: -70,
-    icon: "segundo_folego",
-    requires: {
-      talentIds: [
-        "margem_generosa",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 5,
-    },
-  },
-  {
-    id: "lamina_viva",
-    name: "Lâmina Viva",
-    blurb: "+50 000 almas iniciais — a foice canta antes do primeiro corte.",
-    cost: "125",
-    branch: "margem",
-    ring: 2,
-    angle: -120,
-    icon: "lamina_viva",
-    requires: {
-      talentIds: [
-        "foice_ancestral",
-      ],
-    },
-    effects: {
-      startingSouls: "50000",
-    },
-  },
-  {
-    id: "rebanho_despertado",
-    name: "Rebanho",
-    blurb: "25 Sombras Vagantes ao começar a corrida (substitui o Fôlego).",
-    cost: "500",
-    branch: "margem",
-    ring: 3,
-    angle: -65,
-    icon: "rebanho_despertado",
-    requires: {
-      talentIds: [
-        "segundo_folego",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 25,
-    },
-  },
-  {
-    id: "mare_inicial",
-    name: "Maré Inicial",
-    blurb: "+75 000 almas iniciais se a foice e o prelúdio já fluem.",
-    cost: "700",
-    branch: "margem",
-    ring: 3,
-    angle: -105,
-    icon: "mare_inicial",
-    requires: {
-      talentIds: [
-        "preludio_ctoniano",
-        "foice_ancestral",
-      ],
-    },
-    effects: {
-      startingSouls: "75000",
-    },
-  },
-  {
-    id: "torrente_das_umbras",
-    name: "Torrente das Umbras",
-    blurb: "50 Sombras Vagantes no despertar — a margem vira legião.",
-    cost: "5000",
-    branch: "margem",
-    ring: 4,
-    angle: -85,
-    icon: "torrente_das_umbras",
-    requires: {
-      talentIds: [
-        "rebanho_despertado",
-        "lamina_viva",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 50,
-    },
-  },
-  {
-    id: "favor_de_caronte",
-    name: "Favor de Caronte",
-    blurb: "Geradores custam 15% menos almas.",
+    id: "bolachas_celestes",
+    name: "Bolachas Celestes",
+    blurb: "Todos os geradores produzem +10% para sempre.",
     cost: "3",
-    branch: "imperio",
-    ring: 0,
-    angle: 0,
-    icon: "favor_de_caronte",
-    requires: {},
-    effects: {
-      generatorCostMult: "0.85",
-    },
-  },
-  {
-    id: "olho_da_curva",
-    name: "Olho da Curva",
-    blurb: "Revela a amortização rica na Estela.",
-    cost: "20",
-    branch: "imperio",
+    branch: "cookie",
     ring: 1,
-    angle: -27.59,
-    icon: "olho_da_curva",
+    angle: 59.39,
+    icon: "bolachas_celestes",
     requires: {
       talentIds: [
-        "favor_de_caronte",
+        "legado",
       ],
     },
     effects: {
-      richAmort: true,
+      allGeneratorsMult: "1.10",
     },
   },
   {
-    id: "nectar_em_reserva",
-    name: "Néctar em Reserva",
-    blurb: "Ativa o bônus de Reserva de Néctar no SPS.",
-    cost: "25",
-    branch: "imperio",
-    ring: 1,
-    angle: 27.59,
-    icon: "nectar_em_reserva",
-    requires: {
-      talentIds: [
-        "favor_de_caronte",
-      ],
-    },
-    effects: {
-      nectarReserveBonus: true,
-    },
-  },
-  {
-    id: "servo_das_margens",
-    name: "Servo das Margens",
-    blurb: "Começa com 3 Servos de Caronte.",
-    cost: "20",
-    branch: "imperio",
-    ring: 1,
-    angle: 0,
-    icon: "servo_das_margens",
-    requires: {
-      talentIds: [
-        "favor_de_caronte",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "charon_servants",
-      startingGeneratorQty: 3,
-    },
-  },
-  {
-    id: "matilha_cerberiana",
-    name: "Matilha Cerberiana",
-    blurb: "3 Cães Cerberianos no despertar.",
-    cost: "150",
-    branch: "imperio",
+    id: "angels",
+    name: "Anjos",
+    blurb: "Mensageiros das receitas proibidas — +10% offline.",
+    cost: "7",
+    branch: "angel",
     ring: 2,
-    angle: -23.02,
-    icon: "matilha_cerberiana",
+    angle: -100,
+    icon: "angels",
     requires: {
       talentIds: [
-        "olho_da_curva",
+        "portoes_gemeos",
       ],
     },
     effects: {
-      startingGeneratorId: "cerberian_hound",
-      startingGeneratorQty: 3,
+      offlineRate: "0.10",
     },
   },
   {
-    id: "ovo_primordial",
-    name: "Ovo Primordial",
-    blurb: "Desbloqueia o Dragão Ctoniano (Pitão → Ladão).",
-    cost: "125",
-    branch: "imperio",
+    id: "belphegor",
+    name: "Belphegor",
+    blurb: "Daemon da preguiça — estende a maré offline.",
+    cost: "7",
+    branch: "demon",
     ring: 2,
-    angle: 22,
-    icon: "ovo_primordial",
+    angle: 80.07,
+    icon: "belphegor",
     requires: {
       talentIds: [
-        "favor_de_caronte",
-      ],
-    },
-    effects: {
-      dragonUnlock: true,
-    },
-  },
-  {
-    id: "forja_despertada",
-    name: "Forja Despertada",
-    blurb: "1 Forja do Flegetonte no início da corrida.",
-    cost: "250",
-    branch: "imperio",
-    ring: 2,
-    angle: -6.98,
-    icon: "forja_despertada",
-    requires: {
-      talentIds: [
-        "matilha_cerberiana",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "phlegethon_forge",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "frenesi_de_nectar_talento",
-    name: "Cálice do Frenesi",
-    blurb: "Desbloqueia o Frenesi de Néctar manual.",
-    cost: "800",
-    branch: "imperio",
-    ring: 3,
-    angle: 20,
-    icon: "frenesi_de_nectar_talento",
-    requires: {
-      talentIds: [
-        "nectar_em_reserva",
-      ],
-    },
-    effects: {
-      nectarFrenzyUnlock: true,
-    },
-  },
-  {
-    id: "trono_sombrio",
-    name: "Trono Sombrio",
-    blurb: "1 Trono de Obsidiana ao despertar.",
-    cost: "1200",
-    branch: "imperio",
-    ring: 3,
-    angle: -15,
-    icon: "trono_sombrio",
-    requires: {
-      talentIds: [
-        "forja_despertada",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "obsidian_throne",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "imperio_fluvial",
-    name: "Império Fluvial",
-    blurb: "O rio carrega forja e matilha: +2 Cães e +1 Forja no despertar.",
-    cost: "7500",
-    branch: "imperio",
-    ring: 4,
-    angle: 0,
-    icon: "imperio_fluvial",
-    requires: {
-      talentIds: [
-        "frenesi_de_nectar_talento",
-        "ovo_primordial",
-      ],
-    },
-    effects: {
-      startingGeneratorBonus: {
-        cerberian_hound: 2,
-        phlegethon_forge: 1,
-      },
-    },
-  },
-  {
-    id: "juramento_eterno",
-    name: "Juramento Eterno",
-    blurb: "Óbolos rendem +25% no multiplicador de prestígio.",
-    cost: "1",
-    branch: "memoria",
-    ring: 0,
-    angle: 95,
-    icon: "juramento_eterno",
-    requires: {},
-    effects: {
-      mnemosyneMult: "1.25",
-    },
-  },
-  {
-    id: "noite_prolongada",
-    name: "Noite Prolongada",
-    blurb: "Teto base offline sobe para 12h (em vez de 8). Extras ainda somam.",
-    cost: "10",
-    branch: "memoria",
-    ring: 1,
-    angle: 67.41,
-    icon: "noite_prolongada",
-    requires: {
-      talentIds: [
-        "juramento_eterno",
-      ],
-    },
-    effects: {
-      offlineHours: 12,
-    },
-  },
-  {
-    id: "veu_eficiente",
-    name: "Véu Eficiente",
-    blurb: "Offline rende 100% do SPS (em vez de 80%).",
-    cost: "10",
-    branch: "memoria",
-    ring: 1,
-    angle: 122.59,
-    icon: "veu_eficiente",
-    requires: {
-      talentIds: [
-        "juramento_eterno",
-      ],
-    },
-    effects: {
-      offlineEfficiency: "1.00",
-    },
-  },
-  {
-    id: "eco_do_styx",
-    name: "Eco do Styx",
-    blurb: "Após o Lethe, 1 juramento Styx elegível volta selado.",
-    cost: "20",
-    branch: "memoria",
-    ring: 1,
-    angle: 95,
-    icon: "eco_do_styx",
-    requires: {
-      talentIds: [
-        "juramento_eterno",
-      ],
-    },
-    effects: {
-      softPrestigeStyx: true,
-    },
-  },
-  {
-    id: "pacto_do_silencio",
-    name: "Pacto do Silêncio",
-    blurb: "+6h ao teto offline (soma com a base).",
-    cost: "75",
-    branch: "memoria",
-    ring: 2,
-    angle: 64.52,
-    icon: "pacto_do_silencio",
-    requires: {
-      talentIds: [
-        "noite_prolongada",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 6,
-    },
-  },
-  {
-    id: "mnemosyne_profunda",
-    name: "Mnemosyne Profunda",
-    blurb: "Óbolos ×1,5 no bônus de prestígio.",
-    cost: "125",
-    branch: "memoria",
-    ring: 2,
-    angle: 96.6,
-    icon: "mnemosyne_profunda",
-    requires: {
-      talentIds: [
-        "juramento_eterno",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "1.50",
-    },
-  },
-  {
-    id: "sinergias_vol_i",
-    name: "Sinergias Vol. I",
-    blurb: "Desbloqueia a malha Styx de sinergias Vol. I (qty ≥ 15 nos pares).",
-    cost: "200",
-    branch: "memoria",
-    ring: 2,
-    angle: 80.56,
-    icon: "sinergias_vol_i",
-    requires: {
-      talentIds: [
-        "juramento_eterno",
-      ],
-    },
-    effects: {
-      synergyVolUnlock: 1,
-    },
-  },
-  {
-    id: "eco_ressonante",
-    name: "Eco Ressonante",
-    blurb: "Eco do Styx guarda 2 juramentos após o Lethe.",
-    cost: "150",
-    branch: "memoria",
-    ring: 2,
-    angle: 128.68,
-    icon: "eco_ressonante",
-    requires: {
-      talentIds: [
-        "eco_do_styx",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 2,
-    },
-  },
-  {
-    id: "rodizio_das_estacoes",
-    name: "Roda das Estações",
-    blurb: "Desbloqueia o seletor de Estações do Submundo.",
-    cost: "125",
-    branch: "memoria",
-    ring: 2,
-    angle: 112.64,
-    icon: "rodizio_das_estacoes",
-    requires: {
-      talentIds: [
-        "veu_eficiente",
-      ],
-    },
-    effects: {
-      seasonSwitcherUnlock: true,
-    },
-  },
-  {
-    id: "legado_do_rio",
-    name: "Legado do Rio",
-    blurb: "+4h ao teto offline se o véu e o pacto já fluem.",
-    cost: "600",
-    branch: "memoria",
-    ring: 3,
-    angle: 80,
-    icon: "legado_do_rio",
-    requires: {
-      talentIds: [
-        "pacto_do_silencio",
-        "veu_eficiente",
+        "portoes_gemeos",
       ],
     },
     effects: {
@@ -571,1129 +131,972 @@ export const TALENTS = freezeAll([
     },
   },
   {
-    id: "calice_da_memoria",
-    name: "Cálice da Memória",
-    blurb: "Essência ganha no ritual ×1,5.",
-    cost: "700",
-    branch: "memoria",
-    ring: 3,
-    angle: 94.34,
-    icon: "calice_da_memoria",
+    id: "classic_dairy_selection",
+    name: "Classic Dairy Selection",
+    blurb: "Eco celestial espelhado: Classic dairy selection.",
+    cost: "9",
+    branch: "misc",
+    ring: 1,
+    angle: -23.38,
+    icon: "classic_dairy_selection",
     requires: {
       talentIds: [
-        "mnemosyne_profunda",
+        "legado",
       ],
     },
     effects: {
-      mnemosyneGainMult: "1.5",
+      cosmeticId: "classic_dairy_selection",
     },
   },
   {
-    id: "eco_ancestral_iii",
-    name: "Eco do Styx III",
-    blurb: "3 juramentos Styx sobrevivem ao Lethe.",
-    cost: "900",
-    branch: "memoria",
-    ring: 3,
-    angle: 125,
-    icon: "eco_ancestral_iii",
+    id: "ovo_primordial",
+    name: "Ovo Primordial",
+    blurb: "Desperta o Dragão Ctoniano.",
+    cost: "9",
+    branch: "misc",
+    ring: 1,
+    angle: 31.8,
+    icon: "ovo_primordial",
     requires: {
       talentIds: [
-        "eco_ressonante",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 3,
-    },
-  },
-  {
-    id: "mnemosyne_tripla",
-    name: "Mnemosyne Tripla",
-    blurb: "Óbolos ×2 no bônus de prestígio.",
-    cost: "800",
-    branch: "memoria",
-    ring: 3,
-    angle: 105.66,
-    icon: "mnemosyne_tripla",
-    requires: {
-      talentIds: [
-        "calice_da_memoria",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "2",
-    },
-  },
-  {
-    id: "eco_ancestral_iv",
-    name: "Eco do Styx IV",
-    blurb: "4 juramentos Styx após cada Catábase.",
-    cost: "6000",
-    branch: "memoria",
-    ring: 4,
-    angle: 120,
-    icon: "eco_ancestral_iv",
-    requires: {
-      talentIds: [
-        "eco_ancestral_iii",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 4,
-    },
-  },
-  {
-    id: "eco_ancestral_v",
-    name: "Eco do Styx V",
-    blurb: "5 juramentos Styx — memória máxima do rio.",
-    cost: "7500",
-    branch: "memoria",
-    ring: 4,
-    angle: 130,
-    icon: "eco_ancestral_v",
-    requires: {
-      talentIds: [
-        "eco_ancestral_iv",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 5,
-    },
-  },
-  {
-    id: "mnemosyne_raiz",
-    name: "Raiz de Mnemosyne",
-    blurb: "Óbolos ×2,5 no bônus — a raiz do rio.",
-    cost: "10000",
-    branch: "memoria",
-    ring: 4,
-    angle: 100,
-    icon: "mnemosyne_raiz",
-    requires: {
-      talentIds: [
-        "mnemosyne_tripla",
-        "calice_da_memoria",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "2.5",
-    },
-  },
-  {
-    id: "foice_afilada_rio",
-    name: "Foice Afilada",
-    blurb: "Clique rouba +2% do SPS.",
-    cost: "1800",
-    branch: "margem",
-    ring: 3,
-    angle: -125,
-    icon: "foice_afilada_rio",
-    requires: {
-      talentIds: [
-        "lamina_viva",
-      ],
-    },
-    effects: {
-      kSps: "0.02",
-    },
-  },
-  {
-    id: "almas_centenas",
-    name: "Almas das Centenas",
-    blurb: "+100 000 almas ao despertar.",
-    cost: "11000",
-    branch: "margem",
-    ring: 4,
-    angle: -110,
-    icon: "almas_centenas",
-    requires: {
-      talentIds: [
-        "mare_inicial",
-      ],
-    },
-    effects: {
-      startingSouls: "100000",
-    },
-  },
-  {
-    id: "sombra_centuria",
-    name: "Centúria de Sombras",
-    blurb: "100 Sombras Vagantes no despertar.",
-    cost: "70000",
-    branch: "margem",
-    ring: 5,
-    angle: -80,
-    icon: "sombra_centuria",
-    requires: {
-      talentIds: [
-        "torrente_das_umbras",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 100,
-    },
-  },
-  {
-    id: "foice_profunda",
-    name: "Foice Profunda",
-    blurb: "Clique rouba +5% do SPS.",
-    cost: "80000",
-    branch: "margem",
-    ring: 5,
-    angle: -120,
-    icon: "foice_profunda",
-    requires: {
-      talentIds: [
-        "foice_afilada_rio",
-      ],
-    },
-    effects: {
-      kSps: "0.05",
-    },
-  },
-  {
-    id: "almas_milhao",
-    name: "Maré do Milhão",
-    blurb: "+1 000 000 almas iniciais.",
-    cost: "90000",
-    branch: "margem",
-    ring: 5,
-    angle: -100,
-    icon: "almas_milhao",
-    requires: {
-      talentIds: [
-        "almas_centenas",
-      ],
-    },
-    effects: {
-      startingSouls: "1000000",
-    },
-  },
-  {
-    id: "eco_da_foice_rio",
-    name: "Eco da Foice",
-    blurb: "+250 000 almas iniciais — eco da lâmina na margem.",
-    cost: "100000",
-    branch: "margem",
-    ring: 5,
-    angle: -130,
-    icon: "eco_da_foice_rio",
-    requires: {
-      talentIds: [
-        "foice_profunda",
-      ],
-    },
-    effects: {
-      startingSouls: "250000",
-    },
-  },
-  {
-    id: "legiao_das_umbras",
-    name: "Legião das Umbras",
-    blurb: "200 Sombras no despertar.",
-    cost: "700000",
-    branch: "margem",
-    ring: 6,
-    angle: -75,
-    icon: "legiao_das_umbras",
-    requires: {
-      talentIds: [
-        "sombra_centuria",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 200,
-    },
-  },
-  {
-    id: "foice_voraz",
-    name: "Foice Voraz",
-    blurb: "Clique rouba +8% do SPS.",
-    cost: "750000",
-    branch: "margem",
-    ring: 6,
-    angle: -118,
-    icon: "foice_voraz",
-    requires: {
-      talentIds: [
-        "foice_profunda",
-      ],
-    },
-    effects: {
-      kSps: "0.08",
-    },
-  },
-  {
-    id: "almas_dezena_milhao",
-    name: "Dez Milhões",
-    blurb: "+10 000 000 almas iniciais.",
-    cost: "800000",
-    branch: "margem",
-    ring: 6,
-    angle: -98,
-    icon: "almas_dezena_milhao",
-    requires: {
-      talentIds: [
-        "almas_milhao",
-      ],
-    },
-    effects: {
-      startingSouls: "10000000",
-    },
-  },
-  {
-    id: "preludio_eterno",
-    name: "Prelúdio Eterno",
-    blurb: "+5 000 000 almas se a maré do milhão flui.",
-    cost: "650000",
-    branch: "margem",
-    ring: 6,
-    angle: -88,
-    icon: "preludio_eterno",
-    requires: {
-      talentIds: [
-        "almas_milhao",
-        "preludio_ctoniano",
-      ],
-    },
-    effects: {
-      startingSouls: "5000000",
-    },
-  },
-  {
-    id: "margem_abundante",
-    name: "Margem Abundante",
-    blurb: "+50 000 000 almas iniciais.",
-    cost: "6000000",
-    branch: "margem",
-    ring: 7,
-    angle: -95,
-    icon: "margem_abundante",
-    requires: {
-      talentIds: [
-        "almas_dezena_milhao",
-      ],
-    },
-    effects: {
-      startingSouls: "50000000",
-    },
-  },
-  {
-    id: "sombra_mil",
-    name: "Mil Sombras",
-    blurb: "1 000 Sombras Vagantes ao despertar.",
-    cost: "7000000",
-    branch: "margem",
-    ring: 7,
-    angle: -70,
-    icon: "sombra_mil",
-    requires: {
-      talentIds: [
-        "legiao_das_umbras",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 1000,
-    },
-  },
-  {
-    id: "foice_absoluta",
-    name: "Foice Absoluta",
-    blurb: "Clique rouba +12% do SPS.",
-    cost: "7500000",
-    branch: "margem",
-    ring: 7,
-    angle: -122,
-    icon: "foice_absoluta",
-    requires: {
-      talentIds: [
-        "foice_voraz",
-      ],
-    },
-    effects: {
-      kSps: "0.12",
-    },
-  },
-  {
-    id: "almas_cem_milhao",
-    name: "Cem Milhões",
-    blurb: "+100 000 000 almas iniciais.",
-    cost: "44000000",
-    branch: "margem",
-    ring: 8,
-    angle: -100,
-    icon: "almas_cem_milhao",
-    requires: {
-      talentIds: [
-        "margem_abundante",
-      ],
-    },
-    effects: {
-      startingSouls: "100000000",
-    },
-  },
-  {
-    id: "torrente_eterna",
-    name: "Torrente Eterna",
-    blurb: "2 000 Sombras no despertar.",
-    cost: "50000000",
-    branch: "margem",
-    ring: 8,
-    angle: -72,
-    icon: "torrente_eterna",
-    requires: {
-      talentIds: [
-        "sombra_mil",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 2000,
-    },
-  },
-  {
-    id: "corte_do_abismo",
-    name: "Corte do Abismo",
-    blurb: "Clique rouba +15% do SPS.",
-    cost: "56000000",
-    branch: "margem",
-    ring: 8,
-    angle: -125,
-    icon: "corte_do_abismo",
-    requires: {
-      talentIds: [
-        "foice_absoluta",
-      ],
-    },
-    effects: {
-      kSps: "0.15",
-    },
-  },
-  {
-    id: "mare_titanica",
-    name: "Maré Titânica",
-    blurb: "+500 000 000 almas iniciais.",
-    cost: "350000000",
-    branch: "margem",
-    ring: 9,
-    angle: -98,
-    icon: "mare_titanica",
-    requires: {
-      talentIds: [
-        "almas_cem_milhao",
-      ],
-    },
-    effects: {
-      startingSouls: "500000000",
-    },
-  },
-  {
-    id: "umbras_infinitas",
-    name: "Umbras Infinitas",
-    blurb: "5 000 Sombras Vagantes no despertar.",
-    cost: "380000000",
-    branch: "margem",
-    ring: 9,
-    angle: -68,
-    icon: "umbras_infinitas",
-    requires: {
-      talentIds: [
-        "torrente_eterna",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 5000,
-    },
-  },
-  {
-    id: "foice_do_lethe",
-    name: "Foice do Lethe",
-    blurb: "Clique rouba +20% do SPS.",
-    cost: "400000000",
-    branch: "margem",
-    ring: 9,
-    angle: -128,
-    icon: "foice_do_lethe",
-    requires: {
-      talentIds: [
-        "corte_do_abismo",
-      ],
-    },
-    effects: {
-      kSps: "0.20",
-    },
-  },
-  {
-    id: "raiz_da_margem",
-    name: "Raiz da Margem",
-    blurb: "+1 000 000 000 almas — capstone da margem.",
-    cost: "4000000000",
-    branch: "margem",
-    ring: 10,
-    angle: -100,
-    icon: "raiz_da_margem",
-    requires: {
-      talentIds: [
-        "mare_titanica",
-        "foice_do_lethe",
-      ],
-    },
-    effects: {
-      startingSouls: "1000000000",
-    },
-  },
-  {
-    id: "abismo_das_sombras",
-    name: "Abismo das Sombras",
-    blurb: "10 000 Sombras no despertar — legião final.",
-    cost: "5000000000",
-    branch: "margem",
-    ring: 10,
-    angle: -70,
-    icon: "abismo_das_sombras",
-    requires: {
-      talentIds: [
-        "umbras_infinitas",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 10000,
-    },
-  },
-  {
-    id: "lamina_do_esquecimento",
-    name: "Lâmina do Esquecimento",
-    blurb: "Clique rouba +25% do SPS — foice final.",
-    cost: "6000000000",
-    branch: "margem",
-    ring: 10,
-    angle: -130,
-    icon: "lamina_do_esquecimento",
-    requires: {
-      talentIds: [
-        "foice_do_lethe",
-      ],
-    },
-    effects: {
-      kSps: "0.25",
-    },
-  },
-  {
-    id: "coroa_da_margem",
-    name: "Coroa da Margem",
-    blurb: "+5 000 000 000 almas — o rio te coroa.",
-    cost: "40000000000",
-    branch: "margem",
-    ring: 11,
-    angle: -95,
-    icon: "coroa_da_margem",
-    requires: {
-      talentIds: [
-        "raiz_da_margem",
-        "abismo_das_sombras",
-      ],
-    },
-    effects: {
-      startingSouls: "5000000000",
-    },
-  },
-  {
-    id: "ceifa_absoluta",
-    name: "Ceifa Absoluta",
-    blurb: "Clique rouba +30% do SPS — ceifa do abismo.",
-    cost: "50000000000",
-    branch: "margem",
-    ring: 11,
-    angle: -125,
-    icon: "ceifa_absoluta",
-    requires: {
-      talentIds: [
-        "lamina_do_esquecimento",
-        "raiz_da_margem",
-      ],
-    },
-    effects: {
-      kSps: "0.30",
-    },
-  },
-  {
-    id: "legiao_final",
-    name: "Legião Final",
-    blurb: "25 000 Sombras — a margem esvazia o Lethe.",
-    cost: "50000000000",
-    branch: "margem",
-    ring: 11,
-    angle: -72,
-    icon: "legiao_final",
-    requires: {
-      talentIds: [
-        "abismo_das_sombras",
-        "ceifa_absoluta",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "wandering_shade",
-      startingGeneratorQty: 25000,
-    },
-  },
-  {
-    id: "pacto_barato",
-    name: "Pacto Barato",
-    blurb: "Geradores custam 25% menos (melhor que Favor).",
-    cost: "2500",
-    branch: "imperio",
-    ring: 3,
-    angle: 8,
-    icon: "pacto_barato",
-    requires: {
-      talentIds: [
-        "favor_de_caronte",
-        "olho_da_curva",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.75",
-    },
-  },
-  {
-    id: "juizes_iniciais",
-    name: "Juízes Iniciais",
-    blurb: "2 Juízes do Tártaro ao despertar.",
-    cost: "15000",
-    branch: "imperio",
-    ring: 4,
-    angle: -20,
-    icon: "juizes_iniciais",
-    requires: {
-      talentIds: [
-        "trono_sombrio",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "tartarus_judge",
-      startingGeneratorQty: 2,
-    },
-  },
-  {
-    id: "templo_inicial",
-    name: "Templo Inicial",
-    blurb: "1 Templo de Mnemosyne no despertar.",
-    cost: "20000",
-    branch: "imperio",
-    ring: 4,
-    angle: 15,
-    icon: "templo_inicial",
-    requires: {
-      talentIds: [
-        "imperio_fluvial",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "mnemosyne_temple",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "desconto_profundo",
-    name: "Desconto Profundo",
-    blurb: "Geradores custam 40% menos.",
-    cost: "110000",
-    branch: "imperio",
-    ring: 5,
-    angle: 5,
-    icon: "desconto_profundo",
-    requires: {
-      talentIds: [
-        "pacto_barato",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.60",
-    },
-  },
-  {
-    id: "matilha_ampliada",
-    name: "Matilha Ampliada",
-    blurb: "8 Cães Cerberianos no despertar.",
-    cost: "100000",
-    branch: "imperio",
-    ring: 5,
-    angle: -25,
-    icon: "matilha_ampliada",
-    requires: {
-      talentIds: [
-        "matilha_cerberiana",
-        "imperio_fluvial",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "cerberian_hound",
-      startingGeneratorQty: 8,
-    },
-  },
-  {
-    id: "forja_dupla",
-    name: "Forja Dupla",
-    blurb: "3 Forjas do Flegetonte no despertar.",
-    cost: "120000",
-    branch: "imperio",
-    ring: 5,
-    angle: -4.94,
-    icon: "forja_dupla",
-    requires: {
-      talentIds: [
-        "forja_despertada",
-        "imperio_fluvial",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "phlegethon_forge",
-      startingGeneratorQty: 3,
-    },
-  },
-  {
-    id: "torre_do_styx_start",
-    name: "Torre Semeada",
-    blurb: "1 Torre do Styx ao despertar.",
-    cost: "140000",
-    branch: "imperio",
-    ring: 5,
-    angle: 22,
-    icon: "torre_do_styx_start",
-    requires: {
-      talentIds: [
-        "templo_inicial",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "styx_tower",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "servos_dobrados",
-    name: "Servos Dobrados",
-    blurb: "10 Servos de Caronte no despertar.",
-    cost: "90000",
-    branch: "imperio",
-    ring: 5,
-    angle: -12.06,
-    icon: "servos_dobrados",
-    requires: {
-      talentIds: [
-        "servo_das_margens",
-        "pacto_barato",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "charon_servants",
-      startingGeneratorQty: 10,
-    },
-  },
-  {
-    id: "trono_reforcado",
-    name: "Trono Reforçado",
-    blurb: "3 Tronos de Obsidiana no despertar.",
-    cost: "900000",
-    branch: "imperio",
-    ring: 6,
-    angle: -18,
-    icon: "trono_reforcado",
-    requires: {
-      talentIds: [
-        "trono_sombrio",
-        "desconto_profundo",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "obsidian_throne",
-      startingGeneratorQty: 3,
-    },
-  },
-  {
-    id: "barganha_abissal",
-    name: "Barganha Abissal",
-    blurb: "Geradores custam 50% menos.",
-    cost: "1000000",
-    branch: "imperio",
-    ring: 6,
-    angle: 0,
-    icon: "barganha_abissal",
-    requires: {
-      talentIds: [
-        "desconto_profundo",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.50",
-    },
-  },
-  {
-    id: "barco_estelar_start",
-    name: "Barcaça Semeada",
-    blurb: "1 Barcaça Estelar no despertar.",
-    cost: "1100000",
-    branch: "imperio",
-    ring: 6,
-    angle: 20,
-    icon: "barco_estelar_start",
-    requires: {
-      talentIds: [
-        "torre_do_styx_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "star_barge",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "nectar_imperial",
-    name: "Néctar Imperial",
-    blurb: "Reserva e Frenesi já fluem: bônus de império consolidado.",
-    cost: "850000",
-    branch: "imperio",
-    ring: 6,
-    angle: 28,
-    icon: "nectar_imperial",
-    requires: {
-      talentIds: [
-        "frenesi_de_nectar_talento",
-        "desconto_profundo",
-      ],
-    },
-    effects: {
-      nectarReserveBonus: true,
-      nectarFrenzyUnlock: true,
-    },
-  },
-  {
-    id: "lab_tartaro_start",
-    name: "Labirinto Semeado",
-    blurb: "1 Labirinto do Tártaro no despertar.",
-    cost: "8000000",
-    branch: "imperio",
-    ring: 7,
-    angle: 18,
-    icon: "lab_tartaro_start",
-    requires: {
-      talentIds: [
-        "barco_estelar_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "tartarus_lab",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "matilha_imperial",
-    name: "Matilha Imperial",
-    blurb: "20 Cães Cerberianos no despertar.",
-    cost: "7500000",
-    branch: "imperio",
-    ring: 7,
-    angle: -28,
-    icon: "matilha_imperial",
-    requires: {
-      talentIds: [
-        "matilha_ampliada",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "cerberian_hound",
-      startingGeneratorQty: 20,
-    },
-  },
-  {
-    id: "forja_imperial",
-    name: "Forja Imperial",
-    blurb: "8 Forjas no despertar.",
-    cost: "8500000",
-    branch: "imperio",
-    ring: 7,
-    angle: -8,
-    icon: "forja_imperial",
-    requires: {
-      talentIds: [
-        "forja_dupla",
-        "barganha_abissal",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "phlegethon_forge",
-      startingGeneratorQty: 8,
-    },
-  },
-  {
-    id: "portal_erebus_start",
-    name: "Portal Semeado",
-    blurb: "1 Portal de Érebo no despertar.",
-    cost: "50000000",
-    branch: "imperio",
-    ring: 8,
-    angle: 16,
-    icon: "portal_erebus_start",
-    requires: {
-      talentIds: [
-        "lab_tartaro_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "erebus_portal",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "desconto_absoluto",
-    name: "Desconto Absoluto",
-    blurb: "Geradores custam 60% menos.",
-    cost: "56000000",
-    branch: "imperio",
-    ring: 8,
-    angle: 0,
-    icon: "desconto_absoluto",
-    requires: {
-      talentIds: [
-        "barganha_abissal",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.40",
-    },
-  },
-  {
-    id: "tear_chronos_start",
-    name: "Tear Semeado",
-    blurb: "1 Tear de Chronos no despertar.",
-    cost: "64000000",
-    branch: "imperio",
-    ring: 8,
-    angle: 24,
-    icon: "tear_chronos_start",
-    requires: {
-      talentIds: [
-        "portal_erebus_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "chronos_loom",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "trono_imperial",
-    name: "Trono Imperial",
-    blurb: "10 Tronos no despertar.",
-    cost: "60000000",
-    branch: "imperio",
-    ring: 8,
-    angle: -20,
-    icon: "trono_imperial",
-    requires: {
-      talentIds: [
-        "trono_reforcado",
-        "desconto_absoluto",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "obsidian_throne",
-      startingGeneratorQty: 10,
-    },
-  },
-  {
-    id: "condensador_start",
-    name: "Condensador Semeado",
-    blurb: "1 Condensador do Vazio no despertar.",
-    cost: "450000000",
-    branch: "imperio",
-    ring: 9,
-    angle: 14,
-    icon: "condensador_start",
-    requires: {
-      talentIds: [
-        "tear_chronos_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "void_condenser",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "pacto_do_abismo",
-    name: "Pacto do Abismo",
-    blurb: "Geradores custam 70% menos.",
-    cost: "500000000",
-    branch: "imperio",
-    ring: 9,
-    angle: -2,
-    icon: "pacto_do_abismo",
-    requires: {
-      talentIds: [
-        "desconto_absoluto",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.30",
-    },
-  },
-  {
-    id: "prisma_start",
-    name: "Prisma Semeado",
-    blurb: "1 Prisma das Moiras no despertar.",
-    cost: "600000000",
-    branch: "imperio",
-    ring: 9,
-    angle: 22,
-    icon: "prisma_start",
-    requires: {
-      talentIds: [
-        "condensador_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "moirai_prism",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "imperio_do_abismo",
-    name: "Império do Abismo",
-    blurb: "+5 Cães e +3 Forjas — capstone de estrutura.",
-    cost: "4500000000",
-    branch: "imperio",
-    ring: 10,
-    angle: -15,
-    icon: "imperio_do_abismo",
-    requires: {
-      talentIds: [
-        "matilha_imperial",
-        "forja_imperial",
-        "pacto_do_abismo",
-      ],
-    },
-    effects: {
-      startingGeneratorBonus: {
-        cerberian_hound: 5,
-        phlegethon_forge: 3,
-      },
-    },
-  },
-  {
-    id: "forja_do_destino",
-    name: "Forja do Destino",
-    blurb: "1 Forja do Destino no despertar.",
-    cost: "5500000000",
-    branch: "imperio",
-    ring: 10,
-    angle: 18,
-    icon: "forja_do_destino",
-    requires: {
-      talentIds: [
-        "prisma_start",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "fate_forge",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "mercado_do_lethe",
-    name: "Mercado do Lethe",
-    blurb: "Geradores custam 75% menos — barganha final.",
-    cost: "7500000000",
-    branch: "imperio",
-    ring: 10,
-    angle: 0,
-    icon: "mercado_do_lethe",
-    requires: {
-      talentIds: [
-        "pacto_do_abismo",
-        "imperio_do_abismo",
-      ],
-    },
-    effects: {
-      generatorCostMult: "0.25",
-    },
-  },
-  {
-    id: "coroa_do_imperio",
-    name: "Coroa do Império",
-    blurb: "1 Motor Fractal no despertar — capstone.",
-    cost: "40000000000",
-    branch: "imperio",
-    ring: 11,
-    angle: 8,
-    icon: "coroa_do_imperio",
-    requires: {
-      talentIds: [
-        "forja_do_destino",
-        "mercado_do_lethe",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "fractal_engine",
-      startingGeneratorQty: 1,
-    },
-  },
-  {
-    id: "trono_do_esquecimento",
-    name: "Trono do Esquecimento",
-    blurb: "25 Tronos no despertar — poder imperial final.",
-    cost: "44000000000",
-    branch: "imperio",
-    ring: 11,
-    angle: -22,
-    icon: "trono_do_esquecimento",
-    requires: {
-      talentIds: [
-        "trono_imperial",
-        "coroa_do_imperio",
-      ],
-    },
-    effects: {
-      startingGeneratorId: "obsidian_throne",
-      startingGeneratorQty: 25,
-    },
-  },
-  {
-    id: "dragao_coroado",
-    name: "Dragão Coroado",
-    blurb: "Ovo + Mercado: o dragão reina no abismo.",
-    cost: "36000000000",
-    branch: "imperio",
-    ring: 11,
-    angle: 28,
-    icon: "dragao_coroado",
-    requires: {
-      talentIds: [
-        "ovo_primordial",
-        "mercado_do_lethe",
+        "legado",
       ],
     },
     effects: {
       dragonUnlock: true,
-      generatorCostMult: "0.25",
+    },
+  },
+  {
+    id: "box_of_brand_biscuits",
+    name: "Box Of Brand Biscuits",
+    blurb: "Eco celestial espelhado: Box of brand biscuits.",
+    cost: "25",
+    branch: "cookie",
+    ring: 2,
+    angle: 15.99,
+    icon: "box_of_brand_biscuits",
+    requires: {
+      talentIds: [
+        "bolachas_celestes",
+      ],
+    },
+    effects: {
+      cosmeticId: "box_of_brand_biscuits",
+    },
+  },
+  {
+    id: "box_of_macarons",
+    name: "Box Of Macarons",
+    blurb: "Eco celestial espelhado: Box of macarons.",
+    cost: "25",
+    branch: "cookie",
+    ring: 2,
+    angle: 31.99,
+    icon: "box_of_macarons",
+    requires: {
+      talentIds: [
+        "bolachas_celestes",
+      ],
+    },
+    effects: {
+      cosmeticId: "box_of_macarons",
+    },
+  },
+  {
+    id: "tin_of_british_tea_biscuits",
+    name: "Tin Of British Tea Biscuits",
+    blurb: "Eco celestial espelhado: Tin of british tea biscuits.",
+    cost: "25",
+    branch: "cookie",
+    ring: 2,
+    angle: 48.01,
+    icon: "tin_of_british_tea_biscuits",
+    requires: {
+      talentIds: [
+        "bolachas_celestes",
+      ],
+    },
+    effects: {
+      cosmeticId: "tin_of_british_tea_biscuits",
+    },
+  },
+  {
+    id: "tin_of_butter_cookies",
+    name: "Tin Of Butter Cookies",
+    blurb: "Eco celestial espelhado: Tin of butter cookies.",
+    cost: "25",
+    branch: "cookie",
+    ring: 2,
+    angle: 64.03,
+    icon: "tin_of_butter_cookies",
+    requires: {
+      talentIds: [
+        "bolachas_celestes",
+      ],
+    },
+    effects: {
+      cosmeticId: "tin_of_butter_cookies",
+    },
+  },
+  {
+    id: "archangels",
+    name: "Archangels",
+    blurb: "Eco celestial espelhado: Archangels.",
+    cost: "49",
+    branch: "angel",
+    ring: 3,
+    angle: -94.44,
+    icon: "archangels",
+    requires: {
+      talentIds: [
+        "angels",
+      ],
+    },
+    effects: {
+      offlineRate: "0.10",
+    },
+  },
+  {
+    id: "mamon",
+    name: "Mamon",
+    blurb: "Eco celestial espelhado: Mammon.",
+    cost: "49",
+    branch: "demon",
+    ring: 3,
+    angle: 53.57,
+    icon: "mamon",
+    requires: {
+      talentIds: [
+        "belphegor",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 8,
+    },
+  },
+  {
+    id: "kit_inicial",
+    name: "Kit Inicial",
+    blurb: "Eco celestial espelhado: Starter kit.",
+    cost: "50",
+    branch: "cookie",
+    ring: 3,
+    angle: 26.37,
+    icon: "kit_inicial",
+    requires: {
+      talentIds: [
+        "tin_of_british_tea_biscuits",
+        "box_of_macarons",
+        "box_of_brand_biscuits",
+        "tin_of_butter_cookies",
+      ],
+    },
+    effects: {
+      startingGeneratorId: "wandering_shade",
+      startingGeneratorQty: 10,
+    },
+  },
+  {
+    id: "heavenly_luck",
+    name: "Heavenly Luck",
+    blurb: "Eco celestial espelhado: Heavenly luck.",
+    cost: "77",
+    branch: "golden",
+    ring: 1,
+    angle: -106.15,
+    icon: "heavenly_luck",
+    requires: {
+      talentIds: [
+        "legado",
+      ],
+    },
+    effects: {
+      shimmerLuckMult: "1.05",
+    },
+  },
+  {
+    id: "basic_wallpaper_assortment",
+    name: "Basic Wallpaper Assortment",
+    blurb: "Eco celestial espelhado: Basic wallpaper assortment.",
+    cost: "99",
+    branch: "misc",
+    ring: 2,
+    angle: -15.98,
+    icon: "basic_wallpaper_assortment",
+    requires: {
+      talentIds: [
+        "classic_dairy_selection",
+      ],
+    },
+    effects: {
+      cosmeticId: "basic_wallpaper_assortment",
+    },
+  },
+  {
+    id: "heralds",
+    name: "Eco da Turma",
+    blurb: "Todos os geradores +1% — os arautos sussurram.",
+    cost: "100",
+    branch: "cookie",
+    ring: 1,
+    angle: 86.98,
+    icon: "heralds",
+    requires: {
+      talentIds: [
+        "legado",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.01",
+    },
+  },
+  {
+    id: "permanent_slot_i",
+    name: "Eco do Styx I",
+    blurb: "Um juramento Styx permanece selado entre corridas.",
+    cost: "100",
+    branch: "persistent",
+    ring: 1,
+    angle: -50.97,
+    icon: "permanent_slot_i",
+    requires: {
+      talentIds: [
+        "legado",
+      ],
+    },
+    effects: {
+      permanentSlot: 1,
+    },
+  },
+  {
+    id: "abadao",
+    name: "Abadao",
+    blurb: "Eco celestial espelhado: Abaddon.",
+    cost: "343",
+    branch: "demon",
+    ring: 4,
+    angle: 57.14,
+    icon: "abadao",
+    requires: {
+      talentIds: [
+        "mamon",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 16,
+    },
+  },
+  {
+    id: "virtues",
+    name: "Virtues",
+    blurb: "Eco celestial espelhado: Virtues.",
+    cost: "343",
+    branch: "angel",
+    ring: 4,
+    angle: -88.89,
+    icon: "virtues",
+    requires: {
+      talentIds: [
+        "archangels",
+      ],
+    },
+    effects: {
+      offlineRate: "0.10",
+    },
+  },
+  {
+    id: "persistent_memory",
+    name: "Persistent Memory",
+    blurb: "Eco celestial espelhado: Persistent memory.",
+    cost: "500",
+    branch: "persistent",
+    ring: 1,
+    angle: 4.21,
+    icon: "persistent_memory",
+    requires: {
+      talentIds: [
+        "legado",
+      ],
+    },
+    effects: {
+      buyAllUnlock: true,
+    },
+  },
+  {
+    id: "lasting_fortune",
+    name: "Lasting Fortune",
+    blurb: "Eco celestial espelhado: Lasting fortune.",
+    cost: "777",
+    branch: "golden",
+    ring: 2,
+    angle: -79.94,
+    icon: "lasting_fortune",
+    requires: {
+      talentIds: [
+        "heavenly_luck",
+      ],
+    },
+    effects: {
+      shimmerLuckMult: "1.02",
+    },
+  },
+  {
+    id: "lucky_digit",
+    name: "Lucky Digit",
+    blurb: "Eco celestial espelhado: Lucky digit.",
+    cost: "777",
+    branch: "golden",
+    ring: 2,
+    angle: -63.94,
+    icon: "lucky_digit",
+    requires: {
+      talentIds: [
+        "heavenly_luck",
+      ],
+    },
+    effects: {
+      prestigeEffectMult: "1.01",
+      shimmerLuckMult: "1.01",
+    },
+  },
+  {
+    id: "golden_switch",
+    name: "Golden Switch",
+    blurb: "Eco celestial espelhado: Golden switch.",
+    cost: "999",
+    branch: "golden",
+    ring: 2,
+    angle: -47.95,
+    icon: "golden_switch",
+    requires: {
+      talentIds: [
+        "heavenly_luck",
+      ],
+    },
+    effects: {
+      goldenSwitchUnlock: true,
+    },
+  },
+  {
+    id: "rodizio_das_estacoes",
+    name: "Roda das Estações",
+    blurb: "Seletor de estações do Submundo.",
+    cost: "1111",
+    branch: "season",
+    ring: 2,
+    angle: 110,
+    icon: "rodizio_das_estacoes",
+    requires: {
+      talentIds: [
+        "heralds",
+      ],
+    },
+    effects: {
+      seasonSwitcherUnlock: true,
+    },
+  },
+  {
+    id: "dominions",
+    name: "Dominions",
+    blurb: "Eco celestial espelhado: Dominions.",
+    cost: "2401",
+    branch: "angel",
+    ring: 5,
+    angle: -83.33,
+    icon: "dominions",
+    requires: {
+      talentIds: [
+        "virtues",
+      ],
+    },
+    effects: {
+      offlineRate: "0.10",
+    },
+  },
+  {
+    id: "satan",
+    name: "Satan",
+    blurb: "Eco celestial espelhado: Satan.",
+    cost: "2401",
+    branch: "demon",
+    ring: 5,
+    angle: 60.71,
+    icon: "satan",
+    requires: {
+      talentIds: [
+        "abadao",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 32,
+    },
+  },
+  {
+    id: "cozinha_inicial",
+    name: "Cozinha Inicial",
+    blurb: "Eco celestial espelhado: Starter kitchen.",
+    cost: "5000",
+    branch: "cookie",
+    ring: 4,
+    angle: 29.54,
+    icon: "cozinha_inicial",
+    requires: {
+      talentIds: [
+        "kit_inicial",
+      ],
+    },
+    effects: {
+      startingGeneratorId: "charon_servants",
+      startingGeneratorQty: 5,
+    },
+  },
+  {
+    id: "decisive_fate",
+    name: "Decisive Fate",
+    blurb: "Eco celestial espelhado: Decisive fate.",
+    cost: "7777",
+    branch: "golden",
+    ring: 3,
+    angle: -41.53,
+    icon: "decisive_fate",
+    requires: {
+      talentIds: [
+        "lasting_fortune",
+      ],
+    },
+    effects: {
+      shimmerLuckMult: "1.02",
+    },
+  },
+  {
+    id: "kitten_angels",
+    name: "Kitten Angels",
+    blurb: "Eco celestial espelhado: Kitten angels.",
+    cost: "9000",
+    branch: "angel",
+    ring: 6,
+    angle: -78.01,
+    icon: "kitten_angels",
+    requires: {
+      talentIds: [
+        "dominions",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.05",
+    },
+  },
+  {
+    id: "asmodeus",
+    name: "Asmodeus",
+    blurb: "Eco celestial espelhado: Asmodeus.",
+    cost: "16807",
+    branch: "demon",
+    ring: 6,
+    angle: 64.29,
+    icon: "asmodeus",
+    requires: {
+      talentIds: [
+        "satan",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 64,
+    },
+  },
+  {
+    id: "cherubim",
+    name: "Cherubim",
+    blurb: "Eco celestial espelhado: Cherubim.",
+    cost: "16807",
+    branch: "angel",
+    ring: 6,
+    angle: -71.99,
+    icon: "cherubim",
+    requires: {
+      talentIds: [
+        "dominions",
+      ],
+    },
+    effects: {
+      offlineRate: "0.10",
+    },
+  },
+  {
+    id: "permanent_slot_ii",
+    name: "Eco do Styx II",
+    blurb: "Dois juramentos permanentes na margem.",
+    cost: "20000",
+    branch: "persistent",
+    ring: 2,
+    angle: -31.96,
+    icon: "permanent_slot_ii",
+    requires: {
+      talentIds: [
+        "permanent_slot_i",
+      ],
+    },
+    effects: {
+      permanentSlot: 2,
+    },
+  },
+  {
+    id: "unholy_bait",
+    name: "Unholy Bait",
+    blurb: "Eco celestial espelhado: Unholy bait.",
+    cost: "44444",
+    branch: "demon",
+    ring: 5,
+    angle: 67.86,
+    icon: "unholy_bait",
+    requires: {
+      talentIds: [
+        "cozinha_inicial",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "luvas_de_halo",
+    name: "Luvas De Halo",
+    blurb: "Eco celestial espelhado: Halo gloves.",
+    cost: "55555",
+    branch: "discount",
+    ring: 4,
+    angle: -45.37,
+    icon: "luvas_de_halo",
+    requires: {
+      talentIds: [
+        "kit_inicial",
+      ],
+    },
+    effects: {
+      clickTalentMult: "1.10",
+    },
+  },
+  {
+    id: "numero_da_sorte",
+    name: "Numero Da Sorte",
+    blurb: "Eco celestial espelhado: Lucky number.",
+    cost: "77777",
+    branch: "golden",
+    ring: 3,
+    angle: -30.21,
+    icon: "numero_da_sorte",
+    requires: {
+      talentIds: [
+        "lucky_digit",
+        "lasting_fortune",
+      ],
+    },
+    effects: {
+      prestigeEffectMult: "1.01",
+      shimmerLuckMult: "1.01",
+    },
+  },
+  {
+    id: "desconto_divino",
+    name: "Desconto Divino",
+    blurb: "Eco celestial espelhado: Divine discount.",
+    cost: "99999",
+    branch: "discount",
+    ring: 4,
+    angle: -36.62,
+    icon: "desconto_divino",
+    requires: {
+      talentIds: [
+        "decisive_fate",
+      ],
+    },
+    effects: {
+      generatorCostMult: "0.99",
+    },
+  },
+  {
+    id: "vendas_divinas",
+    name: "Vendas Divinas",
+    blurb: "Eco celestial espelhado: Divine sales.",
+    cost: "99999",
+    branch: "discount",
+    ring: 4,
+    angle: -27.88,
+    icon: "vendas_divinas",
+    requires: {
+      talentIds: [
+        "decisive_fate",
+      ],
+    },
+    effects: {
+      upgradeCostMult: "0.99",
+    },
+  },
+  {
+    id: "residual_luck",
+    name: "Residual Luck",
+    blurb: "Eco celestial espelhado: Residual luck.",
+    cost: "99999",
+    branch: "golden",
+    ring: 3,
+    angle: -18.9,
+    icon: "residual_luck",
+    requires: {
+      talentIds: [
+        "golden_switch",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "starlove",
+    name: "Starlove",
+    blurb: "Eco celestial espelhado: Starlove.",
+    cost: "111111",
+    branch: "season",
+    ring: 3,
+    angle: 100.22,
+    icon: "starlove",
+    requires: {
+      talentIds: [
+        "rodizio_das_estacoes",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "starsnow",
+    name: "Starsnow",
+    blurb: "Eco celestial espelhado: Starsnow.",
+    cost: "111111",
+    branch: "season",
+    ring: 3,
+    angle: 111.54,
+    icon: "starsnow",
+    requires: {
+      talentIds: [
+        "rodizio_das_estacoes",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "starspawn",
+    name: "Starspawn",
+    blurb: "Eco celestial espelhado: Starspawn.",
+    cost: "111111",
+    branch: "season",
+    ring: 3,
+    angle: 122.86,
+    icon: "starspawn",
+    requires: {
+      talentIds: [
+        "rodizio_das_estacoes",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "starterror",
+    name: "Starterror",
+    blurb: "Eco celestial espelhado: Starterror.",
+    cost: "111111",
+    branch: "season",
+    ring: 3,
+    angle: 134.17,
+    icon: "starterror",
+    requires: {
+      talentIds: [
+        "rodizio_das_estacoes",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "startrade",
+    name: "Startrade",
+    blurb: "Eco celestial espelhado: Startrade.",
+    cost: "111111",
+    branch: "season",
+    ring: 3,
+    angle: 145.49,
+    icon: "startrade",
+    requires: {
+      talentIds: [
+        "rodizio_das_estacoes",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "beelzebub",
+    name: "Beelzebub",
+    blurb: "Eco celestial espelhado: Beelzebub.",
+    cost: "117649",
+    branch: "demon",
+    ring: 7,
+    angle: 71.43,
+    icon: "beelzebub",
+    requires: {
+      talentIds: [
+        "asmodeus",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 128,
+    },
+  },
+  {
+    id: "seraphim",
+    name: "Seraphim",
+    blurb: "Eco celestial espelhado: Seraphim.",
+    cost: "117649",
+    branch: "angel",
+    ring: 7,
+    angle: -66.67,
+    icon: "seraphim",
+    requires: {
+      talentIds: [
+        "cherubim",
+      ],
+    },
+    effects: {
+      offlineRate: "0.10",
+    },
+  },
+  {
+    id: "sinergias_vol_i",
+    name: "Sinergias Vol. I",
+    blurb: "Malha Styx Vol. I (pares ≥ 15).",
+    cost: "222222",
+    branch: "production",
+    ring: 6,
+    angle: 10,
+    icon: "sinergias_vol_i",
+    requires: {
+      talentIds: [
+        "satan",
+        "dominions",
+      ],
+    },
+    effects: {
+      synergyVolUnlock: 1,
+    },
+  },
+  {
+    id: "divine_bakeries",
+    name: "Divine Bakeries",
+    blurb: "Eco celestial espelhado: Divine bakeries.",
+    cost: "399999",
+    branch: "discount",
+    ring: 5,
+    angle: -27.13,
+    icon: "divine_bakeries",
+    requires: {
+      talentIds: [
+        "vendas_divinas",
+        "desconto_divino",
+      ],
+    },
+    effects: {
+      generatorCostMult: "0.99",
+      upgradeCostMult: "0.99",
+    },
+  },
+  {
+    id: "elder_spice",
+    name: "Elder Spice",
+    blurb: "Eco celestial espelhado: Elder spice.",
+    cost: "444444",
+    branch: "demon",
+    ring: 6,
+    angle: 73.78,
+    icon: "elder_spice",
+    requires: {
+      talentIds: [
+        "unholy_bait",
+      ],
+    },
+    effects: {
+      nectarReserveBonus: true,
+    },
+  },
+  {
+    id: "sacrilegious_corruption",
+    name: "Sacrilegious Corruption",
+    blurb: "Eco celestial espelhado: Sacrilegious corruption.",
+    cost: "444444",
+    branch: "demon",
+    ring: 6,
+    angle: 79.79,
+    icon: "sacrilegious_corruption",
+    requires: {
+      talentIds: [
+        "unholy_bait",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.05",
+    },
+  },
+  {
+    id: "five_finger_discount",
+    name: "Five Finger Discount",
+    blurb: "Eco celestial espelhado: Five-finger discount.",
+    cost: "555555",
+    branch: "discount",
+    ring: 5,
+    angle: -20,
+    icon: "five_finger_discount",
+    requires: {
+      talentIds: [
+        "luvas_de_halo",
+        "abadao",
+      ],
+    },
+    effects: {
+      generatorCostMult: "0.99",
+    },
+  },
+  {
+    id: "god",
+    name: "God",
+    blurb: "Eco celestial espelhado: God.",
+    cost: "823543",
+    branch: "angel",
+    ring: 8,
+    angle: -61.11,
+    icon: "god",
+    requires: {
+      talentIds: [
+        "seraphim",
+      ],
+    },
+    effects: {
+      offlineRate: "0.05",
+    },
+  },
+  {
+    id: "lucifer",
+    name: "Lucifer",
+    blurb: "Eco celestial espelhado: Lucifer.",
+    cost: "823543",
+    branch: "demon",
+    ring: 8,
+    angle: 82.14,
+    icon: "lucifer",
+    requires: {
+      talentIds: [
+        "beelzebub",
+      ],
+    },
+    effects: {
+      offlineExtraHours: 256,
+    },
+  },
+  {
+    id: "inspired_checklist",
+    name: "Inspired Checklist",
+    blurb: "Eco celestial espelhado: Inspired checklist.",
+    cost: "900000",
+    branch: "persistent",
+    ring: 3,
+    angle: -7.58,
+    icon: "inspired_checklist",
+    requires: {
+      talentIds: [
+        "persistent_memory",
+        "permanent_slot_ii",
+      ],
+    },
+    effects: {
+      buyAllUnlock: true,
+      vaultUnlock: true,
+    },
+  },
+  {
+    id: "golden_cookie_alert_sound",
+    name: "Golden Cookie Alert Sound",
+    blurb: "Eco celestial espelhado: Golden cookie alert sound.",
+    cost: "999999",
+    branch: "misc",
+    ring: 4,
+    angle: -5.43,
+    icon: "golden_cookie_alert_sound",
+    requires: {
+      talentIds: [
+        "residual_luck",
+      ],
+    },
+    effects: {
+      cosmeticId: "golden_cookie_alert_sound",
+    },
+  },
+  {
+    id: "wrapping_paper",
+    name: "Wrapping Paper",
+    blurb: "Eco celestial espelhado: Wrapping paper.",
+    cost: "999999",
+    branch: "season",
+    ring: 2,
+    angle: 135.71,
+    icon: "wrapping_paper",
+    requires: {
+      talentIds: [
+        "heralds",
+      ],
+    },
+    effects: {
+      cosmeticId: "wrapping_paper",
+    },
+  },
+  {
+    id: "fanciful_dairy_selection",
+    name: "Fanciful Dairy Selection",
+    blurb: "Eco celestial espelhado: Fanciful dairy selection.",
+    cost: "1000000",
+    branch: "misc",
+    ring: 2,
+    angle: 0,
+    icon: "fanciful_dairy_selection",
+    requires: {
+      talentIds: [
+        "classic_dairy_selection",
+      ],
+    },
+    effects: {
+      cosmeticId: "fanciful_dairy_selection",
+    },
+  },
+  {
+    id: "contabilidade_genial",
+    name: "Contabilidade Genial",
+    blurb: "Eco celestial espelhado: Genius accounting.",
+    cost: "2000000",
+    branch: "persistent",
+    ring: 4,
+    angle: 3.31,
+    icon: "contabilidade_genial",
+    requires: {
+      talentIds: [
+        "inspired_checklist",
+      ],
+    },
+    effects: {
+      richAmort: true,
     },
   },
   {
     id: "sinergias_vol_ii",
     name: "Sinergias Vol. II",
-    blurb: "Desbloqueia a malha Styx de sinergias Vol. II (qty ≥ 75 nos pares).",
-    cost: "12500",
-    branch: "memoria",
-    ring: 4,
-    angle: 88,
+    blurb: "Malha Styx Vol. II (pares ≥ 75).",
+    cost: "2222222",
+    branch: "production",
+    ring: 8,
+    angle: 40,
     icon: "sinergias_vol_ii",
     requires: {
       talentIds: [
+        "beelzebub",
+        "seraphim",
         "sinergias_vol_i",
       ],
     },
@@ -1702,462 +1105,1255 @@ export const TALENTS = freezeAll([
     },
   },
   {
-    id: "noite_profunda",
-    name: "Noite Profunda",
-    blurb: "+8h ao teto offline (soma — não substitui extras).",
-    cost: "14000",
-    branch: "memoria",
+    id: "permanent_slot_iii",
+    name: "Eco do Styx III",
+    blurb: "Três juramentos atravessam o Lethe.",
+    cost: "3000000",
+    branch: "persistent",
+    ring: 3,
+    angle: 3.74,
+    icon: "permanent_slot_iii",
+    requires: {
+      talentIds: [
+        "permanent_slot_ii",
+      ],
+    },
+    effects: {
+      permanentSlot: 3,
+    },
+  },
+  {
+    id: "label_printer",
+    name: "Label Printer",
+    blurb: "Eco celestial espelhado: Label printer.",
+    cost: "5000000",
+    branch: "persistent",
+    ring: 5,
+    angle: 9.91,
+    icon: "label_printer",
+    requires: {
+      talentIds: [
+        "contabilidade_genial",
+      ],
+    },
+    effects: {
+      labelPrinter: true,
+    },
+  },
+  {
+    id: "wrinkly_cookies",
+    name: "Wrinkly Cookies",
+    blurb: "Eco celestial espelhado: Wrinkly cookies.",
+    cost: "6666666",
+    branch: "demon",
+    ring: 7,
+    angle: 85.71,
+    icon: "wrinkly_cookies",
+    requires: {
+      talentIds: [
+        "sacrilegious_corruption",
+        "elder_spice",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.10",
+    },
+  },
+  {
+    id: "distilled_essence_of_redoubled_luck",
+    name: "Distilled Essence Of Redoubled Luck",
+    blurb: "Eco celestial espelhado: Distilled essence of redoubled luck.",
+    cost: "7777777",
+    branch: "golden",
+    ring: 6,
+    angle: -26,
+    icon: "distilled_essence_of_redoubled_luck",
+    requires: {
+      talentIds: [
+        "divine_bakeries",
+        "residual_luck",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "distinguished_wallpaper_assortment",
+    name: "Distinguished Wallpaper Assortment",
+    blurb: "Eco celestial espelhado: Distinguished wallpaper assortment.",
+    cost: "10000000",
+    branch: "misc",
+    ring: 3,
+    angle: 15.05,
+    icon: "distinguished_wallpaper_assortment",
+    requires: {
+      talentIds: [
+        "basic_wallpaper_assortment",
+      ],
+    },
+    effects: {
+      cosmeticId: "distinguished_wallpaper_assortment",
+    },
+  },
+  {
+    id: "unshackled_flavor",
+    name: "Unshackled Flavor",
+    blurb: "Eco celestial espelhado: Unshackled flavor.",
+    cost: "10000000",
+    branch: "unshackled",
+    ring: 6,
+    angle: -140,
+    icon: "unshackled_flavor",
+    requires: {
+      talentIds: [
+        "label_printer",
+      ],
+    },
+    effects: {
+      cosmeticId: "sabor_liberado",
+    },
+  },
+  {
+    id: "unshackled_cursors",
+    name: "Unshackled Cursors",
+    blurb: "Eco celestial espelhado: Unshackled cursors.",
+    cost: "15000000",
+    branch: "unshackled",
+    ring: 7,
+    angle: 110.88,
+    icon: "unshackled_cursors",
+    requires: {
+      talentIds: [
+        "unshackled_flavor",
+      ],
+    },
+    effects: {
+      unshackleFingers: true,
+    },
+  },
+  {
+    id: "quimera",
+    name: "Quimera",
+    blurb: "Eco celestial espelhado: Chimera.",
+    cost: "40353607",
+    branch: "cookie",
+    ring: 9,
+    angle: 30,
+    icon: "quimera",
+    requires: {
+      talentIds: [
+        "god",
+        "lucifer",
+        "sinergias_vol_ii",
+      ],
+    },
+    effects: {
+      offlineRate: "0.05",
+      offlineExtraHours: 48,
+      upgradeCostMult: "0.99",
+    },
+  },
+  {
+    id: "pagamento_da_sorte",
+    name: "Pagamento Da Sorte",
+    blurb: "Eco celestial espelhado: Lucky payout.",
+    cost: "77777777",
+    branch: "golden",
     ring: 4,
-    angle: 72,
-    icon: "noite_profunda",
+    angle: -19.13,
+    icon: "pagamento_da_sorte",
     requires: {
       talentIds: [
-        "legado_do_rio",
+        "numero_da_sorte",
+        "decisive_fate",
       ],
     },
     effects: {
-      offlineExtraHours: 8,
+      prestigeEffectMult: "1.01",
+      shimmerLuckMult: "1.01",
     },
   },
   {
-    id: "eco_ancestral_vi",
-    name: "Eco do Styx VI",
-    blurb: "6 juramentos Styx sobrevivem ao Lethe.",
-    cost: "70000",
-    branch: "memoria",
-    ring: 5,
-    angle: 128,
-    icon: "eco_ancestral_vi",
-    requires: {
-      talentIds: [
-        "eco_ancestral_v",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 6,
-    },
-  },
-  {
-    id: "mnemosyne_quintupla",
-    name: "Mnemosyne Quíntupla",
-    blurb: "Óbolos ×3 no bônus de prestígio.",
-    cost: "80000",
-    branch: "memoria",
-    ring: 5,
-    angle: 100,
-    icon: "mnemosyne_quintupla",
-    requires: {
-      talentIds: [
-        "mnemosyne_raiz",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "3",
-    },
-  },
-  {
-    id: "calice_dourado",
-    name: "Cálice Dourado",
-    blurb: "Essência do ritual ×2.",
-    cost: "100000",
-    branch: "memoria",
-    ring: 5,
-    angle: 90,
-    icon: "calice_dourado",
-    requires: {
-      talentIds: [
-        "calice_da_memoria",
-        "mnemosyne_raiz",
-      ],
-    },
-    effects: {
-      mnemosyneGainMult: "2",
-    },
-  },
-  {
-    id: "silencio_eterno",
-    name: "Silêncio Eterno",
-    blurb: "+8h ao teto offline.",
-    cost: "90000",
-    branch: "memoria",
-    ring: 5,
-    angle: 68,
-    icon: "silencio_eterno",
-    requires: {
-      talentIds: [
-        "noite_profunda",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 8,
-    },
-  },
-  {
-    id: "eco_ancestral_vii",
-    name: "Eco do Styx VII",
-    blurb: "7 juramentos Styx após Catábase.",
-    cost: "700000",
-    branch: "memoria",
-    ring: 6,
-    angle: 132,
-    icon: "eco_ancestral_vii",
-    requires: {
-      talentIds: [
-        "eco_ancestral_vi",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 7,
-    },
-  },
-  {
-    id: "mnemosyne_sestupla",
-    name: "Mnemosyne Sêxtupla",
-    blurb: "Óbolos ×4 no bônus.",
-    cost: "800000",
-    branch: "memoria",
-    ring: 6,
-    angle: 102,
-    icon: "mnemosyne_sestupla",
-    requires: {
-      talentIds: [
-        "mnemosyne_quintupla",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "4",
-    },
-  },
-  {
-    id: "legado_profundo",
-    name: "Legado Profundo",
-    blurb: "+10h ao teto offline.",
-    cost: "750000",
-    branch: "memoria",
-    ring: 6,
-    angle: 78,
-    icon: "legado_profundo",
-    requires: {
-      talentIds: [
-        "silencio_eterno",
-        "legado_do_rio",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 10,
-    },
-  },
-  {
-    id: "veu_absoluto",
-    name: "Véu Absoluto",
-    blurb: "Offline 100% — selo reforçado.",
-    cost: "600000",
-    branch: "memoria",
-    ring: 6,
-    angle: 115,
-    icon: "veu_absoluto",
-    requires: {
-      talentIds: [
-        "veu_eficiente",
-        "noite_profunda",
-      ],
-    },
-    effects: {
-      offlineEfficiency: "1.00",
-    },
-  },
-  {
-    id: "eco_ancestral_viii",
-    name: "Eco do Styx VIII",
-    blurb: "8 juramentos Styx sobrevivem.",
-    cost: "6000000",
-    branch: "memoria",
-    ring: 7,
-    angle: 135,
-    icon: "eco_ancestral_viii",
-    requires: {
-      talentIds: [
-        "eco_ancestral_vii",
-      ],
-    },
-    effects: {
-      softPrestigeStyxCount: 8,
-    },
-  },
-  {
-    id: "mnemosyne_setupla",
-    name: "Mnemosyne Sétupla",
-    blurb: "Óbolos ×5 no bônus.",
-    cost: "7000000",
-    branch: "memoria",
-    ring: 7,
-    angle: 98,
-    icon: "mnemosyne_setupla",
-    requires: {
-      talentIds: [
-        "mnemosyne_sestupla",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "5",
-    },
-  },
-  {
-    id: "calice_abissal",
-    name: "Cálice Abissal",
-    blurb: "Essência do ritual ×2,5.",
-    cost: "8000000",
-    branch: "memoria",
-    ring: 7,
-    angle: 88,
-    icon: "calice_abissal",
-    requires: {
-      talentIds: [
-        "calice_dourado",
-      ],
-    },
-    effects: {
-      mnemosyneGainMult: "2.5",
-    },
-  },
-  {
-    id: "noite_abissal",
-    name: "Noite Abissal",
-    blurb: "+16h ao teto offline.",
-    cost: "7500000",
-    branch: "memoria",
-    ring: 7,
-    angle: 70,
-    icon: "noite_abissal",
-    requires: {
-      talentIds: [
-        "legado_profundo",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 16,
-    },
-  },
-  {
-    id: "eco_ancestral_ix",
-    name: "Eco do Styx IX",
-    blurb: "9 juramentos Styx após o Lethe.",
-    cost: "44000000",
-    branch: "memoria",
+    id: "eye_of_the_wrinkler",
+    name: "Eye Of The Wrinkler",
+    blurb: "Eco celestial espelhado: Eye of the wrinkler.",
+    cost: "99999999",
+    branch: "demon",
     ring: 8,
-    angle: 138,
-    icon: "eco_ancestral_ix",
+    angle: 88.78,
+    icon: "eye_of_the_wrinkler",
     requires: {
       talentIds: [
-        "eco_ancestral_viii",
+        "wrinkly_cookies",
       ],
     },
     effects: {
-      softPrestigeStyxCount: 9,
+      allGeneratorsMult: "1.05",
     },
   },
   {
-    id: "mnemosyne_octupla",
-    name: "Mnemosyne Óctupla",
-    blurb: "Óbolos ×6 no bônus.",
-    cost: "52000000",
-    branch: "memoria",
+    id: "stevia_caelestis",
+    name: "Stevia Caelestis",
+    blurb: "Eco celestial espelhado: Stevia Caelestis.",
+    cost: "100000000",
+    branch: "demon",
     ring: 8,
-    angle: 100,
-    icon: "mnemosyne_octupla",
+    angle: 93.36,
+    icon: "stevia_caelestis",
     requires: {
       talentIds: [
-        "mnemosyne_setupla",
+        "wrinkly_cookies",
       ],
     },
-    effects: {
-      mnemosyneMult: "6",
-    },
+    effects: {},
   },
   {
-    id: "memoria_viva",
-    name: "Memória Viva",
-    blurb: "+12h ao teto offline.",
-    cost: "48000000",
-    branch: "memoria",
-    ring: 8,
-    angle: 75,
-    icon: "memoria_viva",
-    requires: {
-      talentIds: [
-        "noite_abissal",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 12,
-    },
-  },
-  {
-    id: "eco_ancestral_x",
-    name: "Eco do Styx X",
-    blurb: "10 juramentos Styx — eco do abismo.",
-    cost: "350000000",
-    branch: "memoria",
+    id: "cozimento_de_acucar",
+    name: "Cozimento De Acucar",
+    blurb: "Eco celestial espelhado: Sugar baking.",
+    cost: "200000000",
+    branch: "nectar",
     ring: 9,
-    angle: 140,
-    icon: "eco_ancestral_x",
+    angle: 110,
+    icon: "cozimento_de_acucar",
     requires: {
       talentIds: [
-        "eco_ancestral_ix",
+        "stevia_caelestis",
       ],
     },
     effects: {
-      softPrestigeStyxCount: 10,
+      nectarReserveBonus: true,
     },
   },
   {
-    id: "mnemosyne_nonupla",
-    name: "Mnemosyne Nônupla",
-    blurb: "Óbolos ×8 no bônus.",
+    id: "diabetica_daemonicus",
+    name: "Diabetica Daemonicus",
+    blurb: "Eco celestial espelhado: Diabetica Daemonicus.",
+    cost: "300000000",
+    branch: "demon",
+    ring: 9,
+    angle: 96.43,
+    icon: "diabetica_daemonicus",
+    requires: {
+      talentIds: [
+        "stevia_caelestis",
+        "lucifer",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "permanent_slot_iv",
+    name: "Eco do Styx IV",
+    blurb: "Quatro juramentos sobrevivem à Catábase.",
     cost: "400000000",
-    branch: "memoria",
-    ring: 9,
-    angle: 102,
-    icon: "mnemosyne_nonupla",
+    branch: "persistent",
+    ring: 4,
+    angle: 20.8,
+    icon: "permanent_slot_iv",
     requires: {
       talentIds: [
-        "mnemosyne_octupla",
+        "permanent_slot_iii",
       ],
     },
     effects: {
-      mnemosyneMult: "8",
+      permanentSlot: 4,
     },
   },
   {
-    id: "calice_do_esquecimento",
-    name: "Cálice do Esquecimento",
-    blurb: "Essência do ritual ×3.",
-    cost: "380000000",
-    branch: "memoria",
-    ring: 9,
-    angle: 88,
-    icon: "calice_do_esquecimento",
+    id: "frenesi_de_acucar",
+    name: "Frenesi De Acucar",
+    blurb: "Eco celestial espelhado: Sugar craving.",
+    cost: "400000000",
+    branch: "nectar",
+    ring: 10,
+    angle: 120.82,
+    icon: "frenesi_de_acucar",
     requires: {
       talentIds: [
-        "calice_abissal",
-        "mnemosyne_octupla",
+        "cozimento_de_acucar",
       ],
     },
     effects: {
-      mnemosyneGainMult: "3",
+      nectarFrenzyUnlock: true,
     },
   },
   {
-    id: "raiz_da_memoria",
-    name: "Raiz da Memória",
-    blurb: "Óbolos ×10 — capstone de prestígio.",
-    cost: "4500000000",
-    branch: "memoria",
+    id: "aura_gloves",
+    name: "Aura Gloves",
+    blurb: "Eco celestial espelhado: Aura gloves.",
+    cost: "555555555",
+    branch: "discount",
+    ring: 5,
+    angle: -12.87,
+    icon: "aura_gloves",
+    requires: {
+      talentIds: [
+        "luvas_de_halo",
+      ],
+    },
+    effects: {
+      clickTalentMult: "1.05",
+    },
+  },
+  {
+    id: "sugar_aging_process",
+    name: "Sugar Aging Process",
+    blurb: "Eco celestial espelhado: Sugar aging process.",
+    cost: "600000000",
+    branch: "nectar",
+    ring: 11,
+    angle: 130,
+    icon: "sugar_aging_process",
+    requires: {
+      talentIds: [
+        "frenesi_de_acucar",
+        "diabetica_daemonicus",
+      ],
+    },
+    effects: {
+      nectarReserveBonus: true,
+      nectarFrenzyUnlock: true,
+    },
+  },
+  {
+    id: "shimmering_veil",
+    name: "Shimmering Veil",
+    blurb: "Eco celestial espelhado: Shimmering veil.",
+    cost: "999999999",
+    branch: "golden",
+    ring: 7,
+    angle: -22,
+    icon: "shimmering_veil",
+    requires: {
+      talentIds: [
+        "distilled_essence_of_redoubled_luck",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "sucralosia_inutilis",
+    name: "Sucralosia Inutilis",
+    blurb: "Eco celestial espelhado: Sucralosia Inutilis.",
+    cost: "1000000000",
+    branch: "demon",
     ring: 10,
     angle: 100,
-    icon: "raiz_da_memoria",
+    icon: "sucralosia_inutilis",
     requires: {
       talentIds: [
-        "mnemosyne_nonupla",
-        "calice_do_esquecimento",
+        "diabetica_daemonicus",
       ],
     },
-    effects: {
-      mnemosyneMult: "10",
-    },
+    effects: {},
   },
   {
-    id: "eco_infinito",
-    name: "Eco Infinito",
-    blurb: "12 juramentos Styx sobrevivem ao Lethe.",
-    cost: "5000000000",
-    branch: "memoria",
+    id: "sugar_crystal_cookies",
+    name: "Sugar Crystal Cookies",
+    blurb: "Eco celestial espelhado: Sugar crystal cookies.",
+    cost: "1000000000",
+    branch: "cookie",
     ring: 10,
-    angle: 135,
-    icon: "eco_infinito",
+    angle: 32.5,
+    icon: "sugar_crystal_cookies",
     requires: {
       talentIds: [
-        "eco_ancestral_x",
+        "cozimento_de_acucar",
       ],
     },
-    effects: {
-      softPrestigeStyxCount: 12,
-    },
+    effects: {},
   },
   {
-    id: "noite_do_lethe",
-    name: "Noite do Lethe",
-    blurb: "+24h ao teto offline — a noite longa do rio.",
-    cost: "5500000000",
-    branch: "memoria",
-    ring: 10,
-    angle: 72,
-    icon: "noite_do_lethe",
-    requires: {
-      talentIds: [
-        "memoria_viva",
-        "noite_abissal",
-      ],
-    },
-    effects: {
-      offlineExtraHours: 24,
-    },
-  },
-  {
-    id: "coroa_da_memoria",
-    name: "Coroa da Memória",
-    blurb: "Óbolos ×15 — a memória coroa o rio.",
-    cost: "40000000000",
-    branch: "memoria",
-    ring: 11,
-    angle: 98,
-    icon: "coroa_da_memoria",
-    requires: {
-      talentIds: [
-        "raiz_da_memoria",
-        "eco_infinito",
-      ],
-    },
-    effects: {
-      mnemosyneMult: "15",
-    },
-  },
-  {
-    id: "calice_final",
-    name: "Cálice Final",
-    blurb: "Essência do ritual ×5 — capstone.",
-    cost: "44000000000",
-    branch: "memoria",
-    ring: 11,
-    angle: 85,
-    icon: "calice_final",
-    requires: {
-      talentIds: [
-        "calice_do_esquecimento",
-        "raiz_da_memoria",
-      ],
-    },
-    effects: {
-      mnemosyneGainMult: "5",
-    },
-  },
-  {
-    id: "eco_do_abismo",
-    name: "Eco do Abismo",
-    blurb: "15 juramentos Styx — memória máxima.",
-    cost: "50000000000",
-    branch: "memoria",
-    ring: 11,
+    id: "keepsakes",
+    name: "Keepsakes",
+    blurb: "Eco celestial espelhado: Keepsakes.",
+    cost: "1111111111",
+    branch: "season",
+    ring: 4,
     angle: 140,
-    icon: "eco_do_abismo",
+    icon: "keepsakes",
     requires: {
       talentIds: [
-        "eco_infinito",
-        "coroa_da_memoria",
+        "starsnow",
+        "starlove",
+        "starterror",
+        "startrade",
+        "starspawn",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "unshackled_berrylium",
+    name: "Unshackled Berrylium",
+    blurb: "Eco celestial espelhado: Unshackled berrylium.",
+    cost: "1810193360",
+    branch: "unshackled",
+    ring: 7,
+    angle: -138.24,
+    icon: "unshackled_berrylium",
+    requires: {
+      talentIds: [
+        "unshackled_flavor",
       ],
     },
     effects: {
-      softPrestigeStyxCount: 15,
+      cosmeticId: "berrylium",
+    },
+  },
+  {
+    id: "unshackled_grandmas",
+    name: "Unshackled Grandmas",
+    blurb: "Eco celestial espelhado: Unshackled grandmas.",
+    cost: "1920000000",
+    branch: "unshackled",
+    ring: 8,
+    angle: 111.24,
+    icon: "unshackled_grandmas",
+    requires: {
+      talentIds: [
+        "unshackled_cursors",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "charon_servants",
+    },
+  },
+  {
+    id: "cat_ladies",
+    name: "Cat Ladies",
+    blurb: "Eco celestial espelhado: Cat ladies.",
+    cost: "9000000000",
+    branch: "angel",
+    ring: 7,
+    angle: -55.56,
+    icon: "cat_ladies",
+    requires: {
+      talentIds: [
+        "kitten_angels",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.10",
+    },
+  },
+  {
+    id: "kitten_wages",
+    name: "Kitten Wages",
+    blurb: "Eco celestial espelhado: Kitten wages.",
+    cost: "9000000000",
+    branch: "angel",
+    ring: 7,
+    angle: -50,
+    icon: "kitten_wages",
+    requires: {
+      talentIds: [
+        "kitten_angels",
+      ],
+    },
+    effects: {
+      upgradeCostMult: "0.90",
+    },
+  },
+  {
+    id: "cosmic_beginner_s_luck",
+    name: "Cosmic Beginner S Luck",
+    blurb: "Eco celestial espelhado: Cosmic beginner's luck.",
+    cost: "14999999985",
+    branch: "golden",
+    ring: 8,
+    angle: -21.29,
+    icon: "cosmic_beginner_s_luck",
+    requires: {
+      talentIds: [
+        "shimmering_veil",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "reinforced_membrane",
+    name: "Reinforced Membrane",
+    blurb: "Eco celestial espelhado: Reinforced membrane.",
+    cost: "14999999985",
+    branch: "golden",
+    ring: 8,
+    angle: -16.71,
+    icon: "reinforced_membrane",
+    requires: {
+      talentIds: [
+        "shimmering_veil",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "unshackled_farms",
+    name: "Unshackled Farms",
+    blurb: "Eco celestial espelhado: Unshackled farms.",
+    cost: "32805000000",
+    branch: "unshackled",
+    ring: 9,
+    angle: -136.47,
+    icon: "unshackled_farms",
+    requires: {
+      talentIds: [
+        "unshackled_grandmas",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "cerberian_hound",
+    },
+  },
+  {
+    id: "unshackled_blueberrylium",
+    name: "Unshackled Blueberrylium",
+    blurb: "Eco celestial espelhado: Unshackled blueberrylium.",
+    cost: "37879951162",
+    branch: "unshackled",
+    ring: 8,
+    angle: 115.82,
+    icon: "unshackled_blueberrylium",
+    requires: {
+      talentIds: [
+        "unshackled_berrylium",
+      ],
+    },
+    effects: {
+      cosmeticId: "blueberrylium",
+    },
+  },
+  {
+    id: "permanent_slot_v",
+    name: "Eco do Styx V",
+    blurb: "Cinco juramentos — memória máxima do rio.",
+    cost: "50000000000",
+    branch: "persistent",
+    ring: 5,
+    angle: 17.04,
+    icon: "permanent_slot_v",
+    requires: {
+      talentIds: [
+        "permanent_slot_iv",
+      ],
+    },
+    effects: {
+      permanentSlot: 5,
+    },
+  },
+  {
+    id: "luminous_gloves",
+    name: "Luminous Gloves",
+    blurb: "Eco celestial espelhado: Luminous gloves.",
+    cost: "55555555555",
+    branch: "discount",
+    ring: 6,
+    angle: -10,
+    icon: "luminous_gloves",
+    requires: {
+      talentIds: [
+        "aura_gloves",
+      ],
+    },
+    effects: {
+      clickTalentMult: "1.05",
+    },
+  },
+  {
+    id: "fortune_cookies",
+    name: "Fortune Cookies",
+    blurb: "Eco celestial espelhado: Fortune cookies.",
+    cost: "77777777777",
+    branch: "golden",
+    ring: 7,
+    angle: -16,
+    icon: "fortune_cookies",
+    requires: {
+      talentIds: [
+        "distilled_essence_of_redoubled_luck",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "pet_the_dragon",
+    name: "Pet The Dragon",
+    blurb: "Eco celestial espelhado: Pet the dragon.",
+    cost: "99999999999",
+    branch: "misc",
+    ring: 4,
+    angle: 12.06,
+    icon: "pet_the_dragon",
+    requires: {
+      talentIds: [
+        "ovo_primordial",
+        "residual_luck",
+      ],
+    },
+    effects: {
+      dragonUnlock: true,
+    },
+  },
+  {
+    id: "sound_test",
+    name: "Sound Test",
+    blurb: "Eco celestial espelhado: Sound test.",
+    cost: "99999999999",
+    branch: "misc",
+    ring: 5,
+    angle: 24.16,
+    icon: "sound_test",
+    requires: {
+      talentIds: [
+        "fanciful_dairy_selection",
+        "distinguished_wallpaper_assortment",
+        "golden_cookie_alert_sound",
+      ],
+    },
+    effects: {
+      cosmeticId: "sound_test",
+    },
+  },
+  {
+    id: "delicate_touch",
+    name: "Delicate Touch",
+    blurb: "Eco celestial espelhado: Delicate touch.",
+    cost: "149999999985",
+    branch: "golden",
+    ring: 9,
+    angle: -14,
+    icon: "delicate_touch",
+    requires: {
+      talentIds: [
+        "reinforced_membrane",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "unshackled_mines",
+    name: "Unshackled Mines",
+    blurb: "Eco celestial espelhado: Unshackled mines.",
+    cost: "245760000000",
+    branch: "unshackled",
+    ring: 10,
+    angle: -134.71,
+    icon: "unshackled_mines",
+    requires: {
+      talentIds: [
+        "unshackled_farms",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "tartarus_judge",
+    },
+  },
+  {
+    id: "unshackled_chalcedhoney",
+    name: "Unshackled Chalcedhoney",
+    blurb: "Eco celestial espelhado: Unshackled chalcedhoney.",
+    cost: "327680000000",
+    branch: "unshackled",
+    ring: 9,
+    angle: 116.18,
+    icon: "unshackled_chalcedhoney",
+    requires: {
+      talentIds: [
+        "unshackled_blueberrylium",
+      ],
+    },
+    effects: {
+      cosmeticId: "chalcedhoney",
+    },
+  },
+  {
+    id: "box_of_maybe_cookies",
+    name: "Box Of Maybe Cookies",
+    blurb: "Eco celestial espelhado: Box of maybe cookies.",
+    cost: "333000000000",
+    branch: "cookie",
+    ring: 11,
+    angle: 34.12,
+    icon: "box_of_maybe_cookies",
+    requires: {
+      talentIds: [
+        "sugar_crystal_cookies",
+      ],
+    },
+    effects: {
+      cosmeticId: "box_of_maybe_cookies",
+    },
+  },
+  {
+    id: "box_of_not_cookies",
+    name: "Box Of Not Cookies",
+    blurb: "Eco celestial espelhado: Box of not cookies.",
+    cost: "333000000000",
+    branch: "cookie",
+    ring: 11,
+    angle: 37.5,
+    icon: "box_of_not_cookies",
+    requires: {
+      talentIds: [
+        "sugar_crystal_cookies",
+      ],
+    },
+    effects: {
+      cosmeticId: "box_of_not_cookies",
+    },
+  },
+  {
+    id: "box_of_pastries",
+    name: "Box Of Pastries",
+    blurb: "Eco celestial espelhado: Box of pastries.",
+    cost: "333000000000",
+    branch: "cookie",
+    ring: 11,
+    angle: 40.88,
+    icon: "box_of_pastries",
+    requires: {
+      talentIds: [
+        "sugar_crystal_cookies",
+      ],
+    },
+    effects: {
+      cosmeticId: "box_of_pastries",
+    },
+  },
+  {
+    id: "comprimidos_milkhelp",
+    name: "Comprimidos Milkhelp",
+    blurb: "Eco celestial espelhado: Milkhelp® lactose intolerance relief tablets.",
+    cost: "900000000000",
+    branch: "nectar",
+    ring: 8,
+    angle: 140,
+    icon: "comprimidos_milkhelp",
+    requires: {
+      talentIds: [
+        "cat_ladies",
+      ],
+    },
+    effects: {
+      allGeneratorsMult: "1.05",
+    },
+  },
+  {
+    id: "unshackled_factories",
+    name: "Unshackled Factories",
+    blurb: "Eco celestial espelhado: Unshackled factories.",
+    cost: "1171875000000",
+    branch: "unshackled",
+    ring: 11,
+    angle: -132.94,
+    icon: "unshackled_factories",
+    requires: {
+      talentIds: [
+        "unshackled_mines",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "phlegethon_forge",
+    },
+  },
+  {
+    id: "unshackled_buttergold",
+    name: "Unshackled Buttergold",
+    blurb: "Eco celestial espelhado: Unshackled buttergold.",
+    cost: "1746928107422",
+    branch: "unshackled",
+    ring: 10,
+    angle: 117.12,
+    icon: "unshackled_buttergold",
+    requires: {
+      talentIds: [
+        "unshackled_chalcedhoney",
+      ],
+    },
+    effects: {
+      cosmeticId: "buttergold",
+    },
+  },
+  {
+    id: "unshackled_banks",
+    name: "Unshackled Banks",
+    blurb: "Eco celestial espelhado: Unshackled banks.",
+    cost: "4199040000000",
+    branch: "unshackled",
+    ring: 12,
+    angle: -131.18,
+    icon: "unshackled_banks",
+    requires: {
+      talentIds: [
+        "unshackled_factories",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "obsidian_throne",
+    },
+  },
+  {
+    id: "unshackled_sugarmuck",
+    name: "Unshackled Sugarmuck",
+    blurb: "Eco celestial espelhado: Unshackled sugarmuck.",
+    cost: "6857003606358",
+    branch: "unshackled",
+    ring: 11,
+    angle: 119.71,
+    icon: "unshackled_sugarmuck",
+    requires: {
+      talentIds: [
+        "unshackled_buttergold",
+      ],
+    },
+    effects: {
+      cosmeticId: "sugarmuck",
+    },
+  },
+  {
+    id: "unshackled_temples",
+    name: "Unshackled Temples",
+    blurb: "Eco celestial espelhado: Unshackled temples.",
+    cost: "12353145000000",
+    branch: "unshackled",
+    ring: 13,
+    angle: -129.41,
+    icon: "unshackled_temples",
+    requires: {
+      talentIds: [
+        "unshackled_banks",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "mnemosyne_temple",
+    },
+  },
+  {
+    id: "steadfast_murmur",
+    name: "Steadfast Murmur",
+    blurb: "Eco celestial espelhado: Steadfast murmur.",
+    cost: "14999999999985",
+    branch: "golden",
+    ring: 10,
+    angle: -12,
+    icon: "steadfast_murmur",
+    requires: {
+      talentIds: [
+        "delicate_touch",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "unshackled_jetmint",
+    name: "Unshackled Jetmint",
+    blurb: "Eco celestial espelhado: Unshackled jetmint.",
+    cost: "21788899719681",
+    branch: "unshackled",
+    ring: 12,
+    angle: 121.47,
+    icon: "unshackled_jetmint",
+    requires: {
+      talentIds: [
+        "unshackled_sugarmuck",
+      ],
+    },
+    effects: {
+      cosmeticId: "jetmint",
+    },
+  },
+  {
+    id: "unshackled_wizard_towers",
+    name: "Unshackled Wizard Towers",
+    blurb: "Eco celestial espelhado: Unshackled wizard towers.",
+    cost: "31457280000000",
+    branch: "unshackled",
+    ring: 14,
+    angle: -127.65,
+    icon: "unshackled_wizard_towers",
+    requires: {
+      talentIds: [
+        "unshackled_temples",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "styx_tower",
+    },
+  },
+  {
+    id: "unshackled_cherrysilver",
+    name: "Unshackled Cherrysilver",
+    blurb: "Eco celestial espelhado: Unshackled cherrysilver.",
+    cost: "59316416015158",
+    branch: "unshackled",
+    ring: 13,
+    angle: 123.24,
+    icon: "unshackled_cherrysilver",
+    requires: {
+      talentIds: [
+        "unshackled_jetmint",
+      ],
+    },
+    effects: {
+      cosmeticId: "cherrysilver",
+    },
+  },
+  {
+    id: "unshackled_shipments",
+    name: "Unshackled Shipments",
+    blurb: "Eco celestial espelhado: Unshackled shipments.",
+    cost: "71744535000000",
+    branch: "unshackled",
+    ring: 15,
+    angle: -125.88,
+    icon: "unshackled_shipments",
+    requires: {
+      talentIds: [
+        "unshackled_wizard_towers",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "star_barge",
+    },
+  },
+  {
+    id: "unshackled_hazelrald",
+    name: "Unshackled Hazelrald",
+    blurb: "Eco celestial espelhado: Unshackled hazelrald.",
+    cost: "143489070000000",
+    branch: "unshackled",
+    ring: 14,
+    angle: 125,
+    icon: "unshackled_hazelrald",
+    requires: {
+      talentIds: [
+        "unshackled_cherrysilver",
+      ],
+    },
+    effects: {
+      cosmeticId: "hazelrald",
+    },
+  },
+  {
+    id: "unshackled_alchemy_labs",
+    name: "Unshackled Alchemy Labs",
+    blurb: "Eco celestial espelhado: Unshackled alchemy labs.",
+    cost: "150000000000000",
+    branch: "unshackled",
+    ring: 16,
+    angle: -124.12,
+    icon: "unshackled_alchemy_labs",
+    requires: {
+      talentIds: [
+        "unshackled_shipments",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "tartarus_lab",
+    },
+  },
+  {
+    id: "unshackled_portals",
+    name: "Unshackled Portals",
+    blurb: "Eco celestial espelhado: Unshackled portals.",
+    cost: "292307565000000",
+    branch: "unshackled",
+    ring: 17,
+    angle: 126.76,
+    icon: "unshackled_portals",
+    requires: {
+      talentIds: [
+        "unshackled_alchemy_labs",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "erebus_portal",
+    },
+  },
+  {
+    id: "unshackled_mooncandy",
+    name: "Unshackled Mooncandy",
+    blurb: "Eco celestial espelhado: Unshackled mooncandy.",
+    cost: "316227766016838",
+    branch: "unshackled",
+    ring: 15,
+    angle: -122.35,
+    icon: "unshackled_mooncandy",
+    requires: {
+      talentIds: [
+        "unshackled_hazelrald",
+      ],
+    },
+    effects: {
+      cosmeticId: "mooncandy",
+    },
+  },
+  {
+    id: "unshackled_time_machines",
+    name: "Unshackled Time Machines",
+    blurb: "Eco celestial espelhado: Unshackled time machines.",
+    cost: "537477120000000",
+    branch: "unshackled",
+    ring: 18,
+    angle: 128.53,
+    icon: "unshackled_time_machines",
+    requires: {
+      talentIds: [
+        "unshackled_portals",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "chronos_loom",
+    },
+  },
+  {
+    id: "unshackled_astrofudge",
+    name: "Unshackled Astrofudge",
+    blurb: "Eco celestial espelhado: Unshackled astrofudge.",
+    cost: "646316344324949",
+    branch: "unshackled",
+    ring: 16,
+    angle: -120.59,
+    icon: "unshackled_astrofudge",
+    requires: {
+      talentIds: [
+        "unshackled_mooncandy",
+      ],
+    },
+    effects: {
+      cosmeticId: "astrofudge",
+    },
+  },
+  {
+    id: "unshackled_antimatter_condensers",
+    name: "Unshackled Antimatter Condensers",
+    blurb: "Eco celestial espelhado: Unshackled antimatter condensers.",
+    cost: "941227755000000",
+    branch: "unshackled",
+    ring: 19,
+    angle: 130.29,
+    icon: "unshackled_antimatter_condensers",
+    requires: {
+      talentIds: [
+        "unshackled_time_machines",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "void_condenser",
+    },
+  },
+  {
+    id: "unshackled_alabascream",
+    name: "Unshackled Alabascream",
+    blurb: "Eco celestial espelhado: Unshackled alabascream.",
+    cost: "1241250239661060",
+    branch: "unshackled",
+    ring: 17,
+    angle: -118.82,
+    icon: "unshackled_alabascream",
+    requires: {
+      talentIds: [
+        "unshackled_astrofudge",
+      ],
+    },
+    effects: {
+      cosmeticId: "alabascream",
+    },
+  },
+  {
+    id: "glittering_edge",
+    name: "Glittering Edge",
+    blurb: "Eco celestial espelhado: Glittering edge.",
+    cost: "1499999999999985",
+    branch: "golden",
+    ring: 11,
+    angle: -10,
+    icon: "glittering_edge",
+    requires: {
+      talentIds: [
+        "steadfast_murmur",
+      ],
+    },
+    effects: {},
+  },
+  {
+    id: "unshackled_prisms",
+    name: "Unshackled Prisms",
+    blurb: "Eco celestial espelhado: Unshackled prisms.",
+    cost: "1581202560000000",
+    branch: "unshackled",
+    ring: 20,
+    angle: 132.06,
+    icon: "unshackled_prisms",
+    requires: {
+      talentIds: [
+        "unshackled_antimatter_condensers",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "moirai_prism",
+    },
+  },
+  {
+    id: "unshackled_iridyum",
+    name: "Unshackled Iridyum",
+    blurb: "Eco celestial espelhado: Unshackled iridyum.",
+    cost: "2262429955028239",
+    branch: "unshackled",
+    ring: 18,
+    angle: -117.06,
+    icon: "unshackled_iridyum",
+    requires: {
+      talentIds: [
+        "unshackled_alabascream",
+      ],
+    },
+    effects: {
+      cosmeticId: "iridyum",
+    },
+  },
+  {
+    id: "unshackled_chancemakers",
+    name: "Unshackled Chancemakers",
+    blurb: "Eco celestial espelhado: Unshackled chancemakers.",
+    cost: "2562890625000000",
+    branch: "unshackled",
+    ring: 21,
+    angle: 133.8235294117647,
+    icon: "unshackled_chancemakers",
+    requires: {
+      talentIds: [
+        "unshackled_prisms",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "fate_forge",
+    },
+  },
+  {
+    id: "unshackled_glucosmium",
+    name: "Unshackled Glucosmium",
+    blurb: "Eco celestial espelhado: Unshackled glucosmium.",
+    cost: "3944212159073245",
+    branch: "unshackled",
+    ring: 19,
+    angle: -115.29,
+    icon: "unshackled_glucosmium",
+    requires: {
+      talentIds: [
+        "unshackled_iridyum",
+      ],
+    },
+    effects: {
+      cosmeticId: "glucosmium",
+    },
+  },
+  {
+    id: "unshackled_fractal_engines",
+    name: "Unshackled Fractal Engines",
+    blurb: "Eco celestial espelhado: Unshackled fractal engines.",
+    cost: "4026531840000000",
+    branch: "unshackled",
+    ring: 22,
+    angle: 135.58823529411765,
+    icon: "unshackled_fractal_engines",
+    requires: {
+      talentIds: [
+        "unshackled_chancemakers",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "fractal_engine",
+    },
+  },
+  {
+    id: "unshackled_javascript_consoles",
+    name: "Unshackled Javascript Consoles",
+    blurb: "Eco celestial espelhado: Unshackled javascript consoles.",
+    cost: "6155080095000000",
+    branch: "unshackled",
+    ring: 23,
+    angle: -113.52941176470588,
+    icon: "unshackled_javascript_consoles",
+    requires: {
+      talentIds: [
+        "unshackled_fractal_engines",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "oracle_console",
+    },
+  },
+  {
+    id: "unshackled_glimmeringue",
+    name: "Unshackled Glimmeringue",
+    blurb: "Eco celestial espelhado: Unshackled glimmeringue.",
+    cost: "6617355139184080",
+    branch: "unshackled",
+    ring: 20,
+    angle: 137.35,
+    icon: "unshackled_glimmeringue",
+    requires: {
+      talentIds: [
+        "unshackled_glucosmium",
+      ],
+    },
+    effects: {
+      cosmeticId: "glimmeringue",
+    },
+  },
+  {
+    id: "unshackled_idleverses",
+    name: "Unshackled Idleverses",
+    blurb: "Eco celestial espelhado: Unshackled idleverses.",
+    cost: "9183300480000000",
+    branch: "unshackled",
+    ring: 24,
+    angle: -111.76470588235294,
+    icon: "unshackled_idleverses",
+    requires: {
+      talentIds: [
+        "unshackled_javascript_consoles",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "chthonic_idleverse",
+    },
+  },
+  {
+    id: "unshackled_cortex_bakers",
+    name: "Unshackled Cortex Bakers",
+    blurb: "Eco celestial espelhado: Unshackled cortex bakers.",
+    cost: "13408076085000000",
+    branch: "unshackled",
+    ring: 25,
+    angle: 139.11764705882354,
+    icon: "unshackled_cortex_bakers",
+    requires: {
+      talentIds: [
+        "unshackled_idleverses",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "cortex_baker",
+    },
+  },
+  {
+    id: "unshackled_you",
+    name: "Unshackled You",
+    blurb: "Eco celestial espelhado: Unshackled You.",
+    cost: "19200000000000000",
+    branch: "unshackled",
+    ring: 26,
+    angle: -110,
+    icon: "unshackled_you",
+    requires: {
+      talentIds: [
+        "unshackled_cortex_bakers",
+      ],
+    },
+    effects: {
+      unshackleGeneratorId: "the_emperor",
     },
   },
 ]);
@@ -2169,53 +2365,93 @@ export const TALENT_BY_ID = Object.freeze(
 );
 
 export const TALENT_BRANCHES = Object.freeze({
-  margem: Object.freeze({ id: 'margem', label: 'MARGEM' }),
-  imperio: Object.freeze({ id: 'imperio', label: 'IMPÉRIO' }),
-  memoria: Object.freeze({ id: 'memoria', label: 'MEMÓRIA' }),
+  persistent: Object.freeze({ id: 'persistent', label: 'PERSISTENTE' }),
+  angel: Object.freeze({ id: 'angel', label: 'ANJOS' }),
+  demon: Object.freeze({ id: 'demon', label: 'DAEMÔNIO' }),
+  production: Object.freeze({ id: 'production', label: 'PRODUÇÃO' }),
+  golden: Object.freeze({ id: 'golden', label: 'DOURADO' }),
+  discount: Object.freeze({ id: 'discount', label: 'DESCONTO' }),
+  cookie: Object.freeze({ id: 'cookie', label: 'BOLACHAS' }),
+  season: Object.freeze({ id: 'season', label: 'ESTAÇÕES' }),
+  nectar: Object.freeze({ id: 'nectar', label: 'NÉCTAR' }),
+  unshackled: Object.freeze({ id: 'unshackled', label: 'LIBERTO' }),
+  misc: Object.freeze({ id: 'misc', label: 'MISC' }),
 });
 
-/** Custos legados para refund se um id sumir do catálogo. */
+/** Custos legados (Rio do Lethe) para refund quando id sumir ou mapear para null. */
 export const LEGACY_TALENT_COSTS = Object.freeze({
   memoria_das_sombras: "1",
-  foice_ancestral: "3",
-  margem_generosa: "3",
-  preludio_ctoniano: "4",
-  segundo_folego: "5",
-  lamina_viva: "5",
-  rebanho_despertado: "5",
-  mare_inicial: "7",
-  torrente_das_umbras: "10",
-  favor_de_caronte: "3",
-  olho_da_curva: "4",
-  nectar_em_reserva: "5",
-  servo_das_margens: "4",
-  matilha_cerberiana: "6",
-  ovo_primordial: "5",
-  forja_despertada: "10",
-  frenesi_de_nectar_talento: "8",
-  trono_sombrio: "12",
-  imperio_fluvial: "15",
   juramento_eterno: "1",
   noite_prolongada: "2",
   veu_eficiente: "2",
-  eco_do_styx: "4",
+  foice_ancestral: "3",
+  favor_de_caronte: "3",
+  margem_generosa: "3",
   pacto_do_silencio: "3",
+  olho_da_curva: "4",
+  eco_do_styx: "4",
   mnemosyne_profunda: "5",
-  sinergias_vol_i: "8",
+  segundo_folego: "5",
+  nectar_em_reserva: "5",
+  ovo_primordial: "5",
+  rebanho_despertado: "5",
+  matilha_cerberiana: "6",
   eco_ressonante: "6",
-  rodizio_das_estacoes: "5",
-  legado_do_rio: "6",
   calice_da_memoria: "7",
-  eco_ancestral_iii: "9",
   mnemosyne_tripla: "8",
+  frenesi_de_nectar_talento: "8",
+  eco_ancestral_iii: "9",
+  forja_despertada: "10",
   eco_ancestral_iv: "12",
   eco_ancestral_v: "15",
-  mnemosyne_raiz: "20",
+  rodizio_das_estacoes: "5",
+  preludio_ctoniano: "4",
+  lamina_viva: "5",
+  mare_inicial: "7",
+  legado_do_rio: "6",
+  sinergias_vol_i: "8",
+  sinergias_vol_ii: "25",
 });
 
-/** IDs antigos → novos (identidade enquanto os gates estáveis permanecem). */
+/** IDs antigos do Rio → nós Heavenly (null = só refund). */
 export const LEGACY_TALENT_MAP = Object.freeze({
-  ...Object.fromEntries(Object.keys(LEGACY_TALENT_COSTS).map((id) => [id, id])),
+  legado: "legado",
+  sinergias_vol_i: "sinergias_vol_i",
+  sinergias_vol_ii: "sinergias_vol_ii",
+  ovo_primordial: "ovo_primordial",
+  rodizio_das_estacoes: "rodizio_das_estacoes",
+  juramento_eterno: "legado",
+  memoria_das_sombras: "kit_inicial",
+  margem_generosa: "kit_inicial",
+  foice_ancestral: "luvas_de_halo",
+  favor_de_caronte: "desconto_divino",
+  olho_da_curva: "contabilidade_genial",
+  eco_do_styx: "permanent_slot_i",
+  eco_ressonante: "permanent_slot_ii",
+  eco_ancestral_iii: "permanent_slot_iii",
+  eco_ancestral_iv: "permanent_slot_iv",
+  eco_ancestral_v: "permanent_slot_v",
+  noite_prolongada: "mamon",
+  veu_eficiente: "portoes_gemeos",
+  pacto_do_silencio: "abadao",
+  mnemosyne_profunda: "numero_da_sorte",
+  mnemosyne_tripla: "pagamento_da_sorte",
+  mnemosyne_raiz: "quimera",
+  nectar_em_reserva: "cozimento_de_acucar",
+  frenesi_de_nectar_talento: "frenesi_de_acucar",
+  preludio_ctoniano: null,
+  segundo_folego: null,
+  lamina_viva: null,
+  rebanho_despertado: null,
+  mare_inicial: null,
+  torrente_das_umbras: null,
+  servo_das_margens: null,
+  matilha_cerberiana: null,
+  forja_despertada: null,
+  trono_sombrio: null,
+  imperio_fluvial: null,
+  legado_do_rio: null,
+  calice_da_memoria: null,
 });
 
 export function getTalent(id) {

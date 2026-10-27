@@ -128,17 +128,32 @@ final class DespertarFormulas
         $offlineHours = DespertarCatalog::OFFLINE_MAX_HOURS_BASE;
         $offlineExtra = 0;
         $offlineEfficiency = DespertarCatalog::OFFLINE_EFFICIENCY_BASE;
+        $offlineRate = '0';
         $kSps = DespertarCatalog::CLICK_K_SPS_BASE;
         $generatorCostMult = DespertarCatalog::GENERATOR_COST_MULT_BASE;
+        $upgradeCostMult = '1';
         $softPrestigeStyxCount = 0;
         $mnemosyneGainMult = '1';
+        $permanentSlot = 0;
+        $synergyVolUnlock = 0;
+        $shimmerLuckMult = '1';
+        $prestigeEffectMult = '1';
+        $clickTalentMult = '1';
+        $allGeneratorsMult = '1';
+        $unshackleFingers = false;
+        $unshackledGenerators = [];
         $startingGenerators = [];
         $generatorBonus = [];
+        $cosmetics = [];
         $richAmort = false;
         $nectarReserveBonus = false;
         $nectarFrenzyUnlock = false;
         $dragonUnlock = false;
         $seasonSwitcherUnlock = false;
+        $goldenSwitchUnlock = false;
+        $buyAllUnlock = false;
+        $vaultUnlock = false;
+        $labelPrinter = false;
 
         foreach ($talentIds as $rawId) {
             $k = (string) $rawId;
@@ -164,6 +179,9 @@ final class DespertarFormulas
                 && DespertarDecimal::cmp((string) $fx['generatorCostMult'], $generatorCostMult) < 0) {
                 $generatorCostMult = (string) $fx['generatorCostMult'];
             }
+            if (isset($fx['upgradeCostMult'])) {
+                $upgradeCostMult = DespertarDecimal::mul($upgradeCostMult, (string) $fx['upgradeCostMult']);
+            }
             if (isset($fx['offlineEfficiency'])
                 && DespertarDecimal::cmp((string) $fx['offlineEfficiency'], $offlineEfficiency) > 0) {
                 $offlineEfficiency = (string) $fx['offlineEfficiency'];
@@ -173,6 +191,9 @@ final class DespertarFormulas
             }
             if (isset($fx['offlineExtraHours'])) {
                 $offlineExtra += (int) $fx['offlineExtraHours'];
+            }
+            if (isset($fx['offlineRate'])) {
+                $offlineRate = DespertarDecimal::add($offlineRate, (string) $fx['offlineRate']);
             }
             if (!empty($fx['startingGeneratorId']) && isset($fx['startingGeneratorQty'])) {
                 $gid = (string) $fx['startingGeneratorId'];
@@ -190,6 +211,36 @@ final class DespertarFormulas
             if (isset($fx['softPrestigeStyxCount'])) {
                 $softPrestigeStyxCount = max($softPrestigeStyxCount, (int) $fx['softPrestigeStyxCount']);
             }
+            if (isset($fx['permanentSlot'])) {
+                $permanentSlot = max($permanentSlot, (int) $fx['permanentSlot']);
+            }
+            if (isset($fx['synergyVolUnlock'])) {
+                $synergyVolUnlock = max($synergyVolUnlock, (int) $fx['synergyVolUnlock']);
+            }
+            if (isset($fx['shimmerLuckMult'])) {
+                $shimmerLuckMult = DespertarDecimal::mul($shimmerLuckMult, (string) $fx['shimmerLuckMult']);
+            }
+            if (isset($fx['prestigeEffectMult'])) {
+                $prestigeEffectMult = DespertarDecimal::mul($prestigeEffectMult, (string) $fx['prestigeEffectMult']);
+            }
+            if (isset($fx['clickTalentMult'])) {
+                $clickTalentMult = DespertarDecimal::mul($clickTalentMult, (string) $fx['clickTalentMult']);
+            }
+            if (isset($fx['allGeneratorsMult'])) {
+                $allGeneratorsMult = DespertarDecimal::mul($allGeneratorsMult, (string) $fx['allGeneratorsMult']);
+            }
+            if (!empty($fx['unshackleFingers'])) {
+                $unshackleFingers = true;
+            }
+            if (!empty($fx['unshackleGeneratorId'])) {
+                $ugid = (string) $fx['unshackleGeneratorId'];
+                $unshackledGenerators[$ugid] = isset($fx['unshackleBonus'])
+                    ? $fx['unshackleBonus']
+                    : true;
+            }
+            if (!empty($fx['cosmeticId'])) {
+                $cosmetics[] = (string) $fx['cosmeticId'];
+            }
             if (!empty($fx['richAmort'])) {
                 $richAmort = true;
             }
@@ -205,6 +256,18 @@ final class DespertarFormulas
             if (!empty($fx['seasonSwitcherUnlock'])) {
                 $seasonSwitcherUnlock = true;
             }
+            if (!empty($fx['goldenSwitchUnlock'])) {
+                $goldenSwitchUnlock = true;
+            }
+            if (!empty($fx['buyAllUnlock'])) {
+                $buyAllUnlock = true;
+            }
+            if (!empty($fx['vaultUnlock'])) {
+                $vaultUnlock = true;
+            }
+            if (!empty($fx['labelPrinter'])) {
+                $labelPrinter = true;
+            }
         }
 
         foreach ($generatorBonus as $gid => $bonus) {
@@ -216,18 +279,33 @@ final class DespertarFormulas
             'mnemosyneMult' => $mnemosyneMult,
             'offlineHours' => $offlineHours + $offlineExtra,
             'offlineEfficiency' => $offlineEfficiency,
+            'offlineRate' => $offlineRate,
             'kSps' => $kSps,
             'generatorCostMult' => $generatorCostMult,
+            'upgradeCostMult' => $upgradeCostMult,
             'startingGenerators' => $startingGenerators,
             'richAmort' => $richAmort,
             'softPrestigeStyx' => $softPrestigeStyxCount > 0,
             'softPrestigeStyxCount' => $softPrestigeStyxCount,
+            'permanentSlot' => $permanentSlot,
+            'synergyVolUnlock' => $synergyVolUnlock,
             'mnemosyneGainBoost' => DespertarDecimal::cmp($mnemosyneGainMult, '1') > 0,
             'mnemosyneGainMult' => $mnemosyneGainMult,
             'nectarReserveBonus' => $nectarReserveBonus,
             'nectarFrenzyUnlock' => $nectarFrenzyUnlock,
             'dragonUnlock' => $dragonUnlock,
             'seasonSwitcherUnlock' => $seasonSwitcherUnlock,
+            'shimmerLuckMult' => $shimmerLuckMult,
+            'prestigeEffectMult' => $prestigeEffectMult,
+            'clickTalentMult' => $clickTalentMult,
+            'allGeneratorsMult' => $allGeneratorsMult,
+            'unshackleFingers' => $unshackleFingers,
+            'unshackledGenerators' => $unshackledGenerators,
+            'cosmetics' => $cosmetics,
+            'goldenSwitchUnlock' => $goldenSwitchUnlock,
+            'buyAllUnlock' => $buyAllUnlock,
+            'vaultUnlock' => $vaultUnlock,
+            'labelPrinter' => $labelPrinter,
         ];
     }
 
@@ -449,8 +527,16 @@ final class DespertarFormulas
      * @param array<int, string> $upgradeIds
      * @param array<string, mixed> $generators
      */
-    public static function thousandBladesBonusPerUnit(array $upgradeIds = [], array $generators = []): string
-    {
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     * @param array<int, string> $talentIds
+     */
+    public static function thousandBladesBonusPerUnit(
+        array $upgradeIds = [],
+        array $generators = [],
+        array $talentIds = []
+    ): string {
         $upgradesById = DespertarCatalog::upgradesById();
         $basePerBuilding = '0';
         $mult = '1';
@@ -468,12 +554,49 @@ final class DespertarFormulas
         if (DespertarDecimal::cmp($basePerBuilding, '0') <= 0) {
             return '0';
         }
+        $fx = self::talentEffects($talentIds);
+        if (!empty($fx['unshackleFingers'])) {
+            $mult = DespertarDecimal::mul($mult, '25');
+        }
         $nonShadeQty = self::nonShadeGeneratorsCount($generators);
         if ($nonShadeQty <= 0) {
             return '0';
         }
         $perBuilding = DespertarDecimal::mul($basePerBuilding, $mult);
         return DespertarDecimal::mul($perBuilding, (string) $nonShadeQty);
+    }
+
+    /**
+     * Fração do bônus de prestígio desbloqueada na corrida (escada heavenlyPower).
+     * Saves com milestone heavenlyPowerLegacy usam 1.0.
+     *
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $opts
+     */
+    public static function heavenlyPowerFromUpgrades(array $upgradeIds = [], array $opts = []): string
+    {
+        if (isset($opts['heavenlyPower'])) {
+            return (string) $opts['heavenlyPower'];
+        }
+        $ms = is_array($opts['milestones'] ?? null) ? $opts['milestones'] : [];
+        if (!empty($ms['heavenlyPowerLegacy']) || !empty($opts['legacyFullPower'])) {
+            return '1';
+        }
+        $upgradesById = DespertarCatalog::upgradesById();
+        $power = '0';
+        foreach ($upgradeIds as $rawId) {
+            $u = $upgradesById[(string) $rawId] ?? null;
+            if (!$u || ($u['kind'] ?? '') !== 'heavenlyPower') {
+                continue;
+            }
+            if (isset($u['factor'])) {
+                $power = DespertarDecimal::add($power, (string) $u['factor']);
+            }
+        }
+        if (DespertarDecimal::cmp($power, '1') > 0) {
+            return '1';
+        }
+        return $power;
     }
 
     /**
@@ -556,8 +679,17 @@ final class DespertarFormulas
      * @param array<int, string> $upgradeIds
      * @param array<string, mixed> $generators
      */
-    public static function generatorUpgradeMult(string $generatorId, array $upgradeIds = [], array $generators = []): string
-    {
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     * @param array<int, string> $talentIds
+     */
+    public static function generatorUpgradeMult(
+        string $generatorId,
+        array $upgradeIds = [],
+        array $generators = [],
+        array $talentIds = []
+    ): string {
         $upgradesById = DespertarCatalog::upgradesById();
         $mult = '1';
         foreach ($upgradeIds as $rawId) {
@@ -574,6 +706,13 @@ final class DespertarFormulas
             } elseif ($u['kind'] === 'allGeneratorsMult') {
                 $mult = DespertarDecimal::mul($mult, $u['factor']);
             }
+        }
+        $fx = self::talentEffects($talentIds);
+        if (!empty($fx['unshackledGenerators'][$generatorId])) {
+            $mult = DespertarDecimal::mul($mult, '25');
+        }
+        if (isset($fx['allGeneratorsMult']) && DespertarDecimal::cmp((string) $fx['allGeneratorsMult'], '1') !== 0) {
+            $mult = DespertarDecimal::mul($mult, (string) $fx['allGeneratorsMult']);
         }
         return DespertarDecimal::mul($mult, self::synergyUpgradeMult($generatorId, $upgradeIds, $generators));
     }
@@ -798,18 +937,27 @@ final class DespertarFormulas
      */
     /**
      * Bônus SPS por óbolos: linear até PRESTIGE_SOFTCAP_START, depois log10.
-     * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult
-     * raw ≤ 100 → 1 + raw
-     * raw > 100 → 1 + 100 + 25 × log10(raw / 100)
+     * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult × heavenlyPower × prestigeEffectMult
      *
      * @param array<int, string> $talentIds
+     * @param array<string, mixed> $opts
      */
-    public static function prestigeBonus(string $obols, array $talentIds = []): string
+    public static function prestigeBonus(string $obols, array $talentIds = [], array $opts = []): string
     {
         $eff = self::talentEffects($talentIds);
+        $power = self::heavenlyPowerFromUpgrades(
+            is_array($opts['upgrades'] ?? null) ? $opts['upgrades'] : ($opts['upgradeIds'] ?? []),
+            $opts
+        );
         $raw = DespertarDecimal::mul(
-            DespertarDecimal::mul($obols !== '' ? $obols : '0', DespertarCatalog::OBOL_BONUS_PER),
-            $eff['mnemosyneMult']
+            DespertarDecimal::mul(
+                DespertarDecimal::mul(
+                    DespertarDecimal::mul($obols !== '' ? $obols : '0', DespertarCatalog::OBOL_BONUS_PER),
+                    $eff['mnemosyneMult']
+                ),
+                $power
+            ),
+            (string) ($eff['prestigeEffectMult'] ?? '1')
         );
         if (DespertarDecimal::cmp($raw, DespertarCatalog::PRESTIGE_SOFTCAP_START) <= 0) {
             return DespertarDecimal::add('1', $raw);
@@ -1847,7 +1995,7 @@ final class DespertarFormulas
         $seasons = is_array($opts['seasons'] ?? null) ? $opts['seasons'] : [];
 
         $baseLinesSps = '0';
-        $shadeFlatBonus = self::thousandBladesBonusPerUnit($upgrades, $generators);
+        $shadeFlatBonus = self::thousandBladesBonusPerUnit($upgrades, $generators, $talents);
         $servantFlatBonus = self::elderPactServantFlatBonusPerUnit($upgrades, $generators);
         foreach (DespertarCatalog::GENERATORS as $def) {
             $id = $def['id'];
@@ -1855,7 +2003,7 @@ final class DespertarFormulas
             if ($qty <= 0) {
                 continue;
             }
-            $upMult = self::generatorUpgradeMult($id, $upgrades, $generators);
+            $upMult = self::generatorUpgradeMult($id, $upgrades, $generators, $talents);
             $shiny = (int) ($shinyCounts[$id] ?? 0);
             $gold = (int) ($goldCounts[$id] ?? 0);
             $level = (int) ($generatorLevels[$id] ?? 0);
@@ -1869,7 +2017,11 @@ final class DespertarFormulas
             $baseLinesSps = DespertarDecimal::add($baseLinesSps, $line);
         }
 
-        $prestigeMult = self::prestigeBonus($obols, $talents);
+        $milestones = is_array($opts['milestones'] ?? null) ? $opts['milestones'] : [];
+        $prestigeMult = self::prestigeBonus($obols, $talents, [
+            'upgrades' => $upgrades,
+            'milestones' => $milestones,
+        ]);
         $econ = self::economyEffects($talents, $verdictPurchases);
         $verdictMult = (string) $econ['spsVerdictMult'];
         $mg = self::minigameEffects($generatorLevels, $minigames);
@@ -2056,11 +2208,19 @@ final class DespertarFormulas
         $seen = [];
         foreach ($rawTalents as $raw) {
             $id = (string) $raw;
-            $mapped = $id; // LEGACY_TALENT_MAP is identity for stable gates
-            if (isset(DespertarCatalog::TALENTS[$mapped])) {
+            $hasMap = array_key_exists($id, DespertarCatalog::LEGACY_TALENT_MAP);
+            $mapped = $hasMap ? DespertarCatalog::LEGACY_TALENT_MAP[$id] : $id;
+            if ($mapped !== null && isset(DespertarCatalog::TALENTS[$mapped])) {
                 if (!isset($seen[$mapped])) {
                     $seen[$mapped] = true;
                     $next[] = $mapped;
+                }
+                continue;
+            }
+            if (!$hasMap && isset(DespertarCatalog::TALENTS[$id])) {
+                if (!isset($seen[$id])) {
+                    $seen[$id] = true;
+                    $next[] = $id;
                 }
                 continue;
             }
@@ -2139,6 +2299,19 @@ final class DespertarFormulas
         );
         $healedMnemosyne = $migrated['mnemosyne'];
 
+        if (!array_key_exists('heavenlyPowerLegacy', $milestones)) {
+            if (
+                $prestigeCount > 0
+                || DespertarDecimal::cmp(DespertarDecimal::money($healedObols), '0') > 0
+                || count($migrated['talents']) > 0
+            ) {
+                $milestones['heavenlyPowerLegacy'] = true;
+            }
+        }
+        if (empty($milestones['heavenlyPowerSeen']) && empty($milestones['heavenlyPowerLegacy'])) {
+            $milestones['heavenlyPowerSeen'] = true;
+        }
+
         $milestones['f8SaveHealed'] = true;
         if (!array_key_exists('ascensionOpen', $milestones)) {
             $milestones['ascensionOpen'] = false;
@@ -2165,14 +2338,7 @@ final class DespertarFormulas
         $eff = self::talentEffects($talents);
         $gainMult = (string) ($eff['mnemosyneGainMult'] ?? '1');
         if (DespertarDecimal::intCmp($gain, '0') > 0 && DespertarDecimal::cmp($gainMult, '1') > 0) {
-            if ($gainMult === '1.5' || $gainMult === '1.50') {
-                $gain = DespertarDecimal::intDiv(
-                    DespertarDecimal::intMul($gain, DespertarCatalog::TALENT_CALICE_MNEMOSYNE_NUM),
-                    DespertarCatalog::TALENT_CALICE_MNEMOSYNE_DEN
-                );
-            } else {
-                $gain = DespertarDecimal::toBigIntFloor(DespertarDecimal::mul($gain, $gainMult));
-            }
+            $gain = DespertarDecimal::toBigIntFloor(DespertarDecimal::mul($gain, $gainMult));
         }
         return $gain;
     }

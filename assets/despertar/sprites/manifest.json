@@ -3088,6 +3088,41 @@
       "webp": "upgrades/undecilhao_de_foices.webp",
       "svg": "upgrades/undecilhao_de_foices.svg",
       "size": 128
+    },
+    "segredo_do_obolo": {
+      "name": "Segredo do Óbolo",
+      "kind": "heavenlyPower",
+      "webp": "upgrades/segredo_do_obolo.webp",
+      "svg": "upgrades/segredo_do_obolo.svg",
+      "size": 128
+    },
+    "banca_do_obolo": {
+      "name": "Banca do Óbolo",
+      "kind": "heavenlyPower",
+      "webp": "upgrades/banca_do_obolo.webp",
+      "svg": "upgrades/banca_do_obolo.svg",
+      "size": 128
+    },
+    "forja_do_obolo": {
+      "name": "Forja do Óbolo",
+      "kind": "heavenlyPower",
+      "webp": "upgrades/forja_do_obolo.webp",
+      "svg": "upgrades/forja_do_obolo.svg",
+      "size": 128
+    },
+    "confeitaria_do_obolo": {
+      "name": "Confeitaria do Óbolo",
+      "kind": "heavenlyPower",
+      "webp": "upgrades/confeitaria_do_obolo.webp",
+      "svg": "upgrades/confeitaria_do_obolo.svg",
+      "size": 128
+    },
+    "chave_do_obolo": {
+      "name": "Chave do Óbolo",
+      "kind": "heavenlyPower",
+      "webp": "upgrades/chave_do_obolo.webp",
+      "svg": "upgrades/chave_do_obolo.svg",
+      "size": 128
     }
   },
   "shimmers": {
@@ -3561,7 +3596,7 @@
     },
     "ovo_primordial": {
       "name": "Ovo Primordial",
-      "branch": "imperio",
+      "branch": "misc",
       "webp": "talents/ovo_primordial.webp",
       "svg": "talents/ovo_primordial.svg",
       "size": 128
@@ -3645,7 +3680,7 @@
     },
     "rodizio_das_estacoes": {
       "name": "Roda das Estações",
-      "branch": "memoria",
+      "branch": "season",
       "webp": "talents/rodizio_das_estacoes.webp",
       "svg": "talents/rodizio_das_estacoes.svg",
       "size": 128
@@ -4247,16 +4282,891 @@
     },
     "sinergias_vol_i": {
       "name": "Sinergias Vol. I",
-      "branch": "memoria",
+      "branch": "production",
       "webp": "talents/sinergias_vol_i.webp",
       "svg": "talents/sinergias_vol_i.svg",
       "size": 128
     },
     "sinergias_vol_ii": {
       "name": "Sinergias Vol. II",
-      "branch": "memoria",
+      "branch": "production",
       "webp": "talents/sinergias_vol_ii.webp",
       "svg": "talents/sinergias_vol_ii.svg",
+      "size": 128
+    },
+    "legado": {
+      "name": "Legado",
+      "branch": "persistent",
+      "webp": "talents/legado.webp",
+      "svg": "talents/legado.svg",
+      "size": 128
+    },
+    "portoes_gemeos": {
+      "name": "Portões Gêmeos",
+      "branch": "misc",
+      "webp": "talents/portoes_gemeos.webp",
+      "svg": "talents/portoes_gemeos.svg",
+      "size": 128
+    },
+    "bolachas_celestes": {
+      "name": "Bolachas Celestes",
+      "branch": "cookie",
+      "webp": "talents/bolachas_celestes.webp",
+      "svg": "talents/bolachas_celestes.svg",
+      "size": 128
+    },
+    "angels": {
+      "name": "Anjos",
+      "branch": "angel",
+      "webp": "talents/angels.webp",
+      "svg": "talents/angels.svg",
+      "size": 128
+    },
+    "belphegor": {
+      "name": "Belphegor",
+      "branch": "demon",
+      "webp": "talents/belphegor.webp",
+      "svg": "talents/belphegor.svg",
+      "size": 128
+    },
+    "classic_dairy_selection": {
+      "name": "Classic Dairy Selection",
+      "branch": "misc",
+      "webp": "talents/classic_dairy_selection.webp",
+      "svg": "talents/classic_dairy_selection.svg",
+      "size": 128
+    },
+    "box_of_brand_biscuits": {
+      "name": "Box Of Brand Biscuits",
+      "branch": "cookie",
+      "webp": "talents/box_of_brand_biscuits.webp",
+      "svg": "talents/box_of_brand_biscuits.svg",
+      "size": 128
+    },
+    "box_of_macarons": {
+      "name": "Box Of Macarons",
+      "branch": "cookie",
+      "webp": "talents/box_of_macarons.webp",
+      "svg": "talents/box_of_macarons.svg",
+      "size": 128
+    },
+    "tin_of_british_tea_biscuits": {
+      "name": "Tin Of British Tea Biscuits",
+      "branch": "cookie",
+      "webp": "talents/tin_of_british_tea_biscuits.webp",
+      "svg": "talents/tin_of_british_tea_biscuits.svg",
+      "size": 128
+    },
+    "tin_of_butter_cookies": {
+      "name": "Tin Of Butter Cookies",
+      "branch": "cookie",
+      "webp": "talents/tin_of_butter_cookies.webp",
+      "svg": "talents/tin_of_butter_cookies.svg",
+      "size": 128
+    },
+    "archangels": {
+      "name": "Archangels",
+      "branch": "angel",
+      "webp": "talents/archangels.webp",
+      "svg": "talents/archangels.svg",
+      "size": 128
+    },
+    "mamon": {
+      "name": "Mamon",
+      "branch": "demon",
+      "webp": "talents/mamon.webp",
+      "svg": "talents/mamon.svg",
+      "size": 128
+    },
+    "kit_inicial": {
+      "name": "Kit Inicial",
+      "branch": "cookie",
+      "webp": "talents/kit_inicial.webp",
+      "svg": "talents/kit_inicial.svg",
+      "size": 128
+    },
+    "heavenly_luck": {
+      "name": "Heavenly Luck",
+      "branch": "golden",
+      "webp": "talents/heavenly_luck.webp",
+      "svg": "talents/heavenly_luck.svg",
+      "size": 128
+    },
+    "basic_wallpaper_assortment": {
+      "name": "Basic Wallpaper Assortment",
+      "branch": "misc",
+      "webp": "talents/basic_wallpaper_assortment.webp",
+      "svg": "talents/basic_wallpaper_assortment.svg",
+      "size": 128
+    },
+    "heralds": {
+      "name": "Eco da Turma",
+      "branch": "cookie",
+      "webp": "talents/heralds.webp",
+      "svg": "talents/heralds.svg",
+      "size": 128
+    },
+    "permanent_slot_i": {
+      "name": "Eco do Styx I",
+      "branch": "persistent",
+      "webp": "talents/permanent_slot_i.webp",
+      "svg": "talents/permanent_slot_i.svg",
+      "size": 128
+    },
+    "abadao": {
+      "name": "Abadao",
+      "branch": "demon",
+      "webp": "talents/abadao.webp",
+      "svg": "talents/abadao.svg",
+      "size": 128
+    },
+    "virtues": {
+      "name": "Virtues",
+      "branch": "angel",
+      "webp": "talents/virtues.webp",
+      "svg": "talents/virtues.svg",
+      "size": 128
+    },
+    "persistent_memory": {
+      "name": "Persistent Memory",
+      "branch": "persistent",
+      "webp": "talents/persistent_memory.webp",
+      "svg": "talents/persistent_memory.svg",
+      "size": 128
+    },
+    "lasting_fortune": {
+      "name": "Lasting Fortune",
+      "branch": "golden",
+      "webp": "talents/lasting_fortune.webp",
+      "svg": "talents/lasting_fortune.svg",
+      "size": 128
+    },
+    "lucky_digit": {
+      "name": "Lucky Digit",
+      "branch": "golden",
+      "webp": "talents/lucky_digit.webp",
+      "svg": "talents/lucky_digit.svg",
+      "size": 128
+    },
+    "golden_switch": {
+      "name": "Golden Switch",
+      "branch": "golden",
+      "webp": "talents/golden_switch.webp",
+      "svg": "talents/golden_switch.svg",
+      "size": 128
+    },
+    "dominions": {
+      "name": "Dominions",
+      "branch": "angel",
+      "webp": "talents/dominions.webp",
+      "svg": "talents/dominions.svg",
+      "size": 128
+    },
+    "satan": {
+      "name": "Satan",
+      "branch": "demon",
+      "webp": "talents/satan.webp",
+      "svg": "talents/satan.svg",
+      "size": 128
+    },
+    "cozinha_inicial": {
+      "name": "Cozinha Inicial",
+      "branch": "cookie",
+      "webp": "talents/cozinha_inicial.webp",
+      "svg": "talents/cozinha_inicial.svg",
+      "size": 128
+    },
+    "decisive_fate": {
+      "name": "Decisive Fate",
+      "branch": "golden",
+      "webp": "talents/decisive_fate.webp",
+      "svg": "talents/decisive_fate.svg",
+      "size": 128
+    },
+    "kitten_angels": {
+      "name": "Kitten Angels",
+      "branch": "angel",
+      "webp": "talents/kitten_angels.webp",
+      "svg": "talents/kitten_angels.svg",
+      "size": 128
+    },
+    "asmodeus": {
+      "name": "Asmodeus",
+      "branch": "demon",
+      "webp": "talents/asmodeus.webp",
+      "svg": "talents/asmodeus.svg",
+      "size": 128
+    },
+    "cherubim": {
+      "name": "Cherubim",
+      "branch": "angel",
+      "webp": "talents/cherubim.webp",
+      "svg": "talents/cherubim.svg",
+      "size": 128
+    },
+    "permanent_slot_ii": {
+      "name": "Eco do Styx II",
+      "branch": "persistent",
+      "webp": "talents/permanent_slot_ii.webp",
+      "svg": "talents/permanent_slot_ii.svg",
+      "size": 128
+    },
+    "unholy_bait": {
+      "name": "Unholy Bait",
+      "branch": "demon",
+      "webp": "talents/unholy_bait.webp",
+      "svg": "talents/unholy_bait.svg",
+      "size": 128
+    },
+    "luvas_de_halo": {
+      "name": "Luvas De Halo",
+      "branch": "discount",
+      "webp": "talents/luvas_de_halo.webp",
+      "svg": "talents/luvas_de_halo.svg",
+      "size": 128
+    },
+    "numero_da_sorte": {
+      "name": "Numero Da Sorte",
+      "branch": "golden",
+      "webp": "talents/numero_da_sorte.webp",
+      "svg": "talents/numero_da_sorte.svg",
+      "size": 128
+    },
+    "desconto_divino": {
+      "name": "Desconto Divino",
+      "branch": "discount",
+      "webp": "talents/desconto_divino.webp",
+      "svg": "talents/desconto_divino.svg",
+      "size": 128
+    },
+    "vendas_divinas": {
+      "name": "Vendas Divinas",
+      "branch": "discount",
+      "webp": "talents/vendas_divinas.webp",
+      "svg": "talents/vendas_divinas.svg",
+      "size": 128
+    },
+    "residual_luck": {
+      "name": "Residual Luck",
+      "branch": "golden",
+      "webp": "talents/residual_luck.webp",
+      "svg": "talents/residual_luck.svg",
+      "size": 128
+    },
+    "starlove": {
+      "name": "Starlove",
+      "branch": "season",
+      "webp": "talents/starlove.webp",
+      "svg": "talents/starlove.svg",
+      "size": 128
+    },
+    "starsnow": {
+      "name": "Starsnow",
+      "branch": "season",
+      "webp": "talents/starsnow.webp",
+      "svg": "talents/starsnow.svg",
+      "size": 128
+    },
+    "starspawn": {
+      "name": "Starspawn",
+      "branch": "season",
+      "webp": "talents/starspawn.webp",
+      "svg": "talents/starspawn.svg",
+      "size": 128
+    },
+    "starterror": {
+      "name": "Starterror",
+      "branch": "season",
+      "webp": "talents/starterror.webp",
+      "svg": "talents/starterror.svg",
+      "size": 128
+    },
+    "startrade": {
+      "name": "Startrade",
+      "branch": "season",
+      "webp": "talents/startrade.webp",
+      "svg": "talents/startrade.svg",
+      "size": 128
+    },
+    "beelzebub": {
+      "name": "Beelzebub",
+      "branch": "demon",
+      "webp": "talents/beelzebub.webp",
+      "svg": "talents/beelzebub.svg",
+      "size": 128
+    },
+    "seraphim": {
+      "name": "Seraphim",
+      "branch": "angel",
+      "webp": "talents/seraphim.webp",
+      "svg": "talents/seraphim.svg",
+      "size": 128
+    },
+    "divine_bakeries": {
+      "name": "Divine Bakeries",
+      "branch": "discount",
+      "webp": "talents/divine_bakeries.webp",
+      "svg": "talents/divine_bakeries.svg",
+      "size": 128
+    },
+    "elder_spice": {
+      "name": "Elder Spice",
+      "branch": "demon",
+      "webp": "talents/elder_spice.webp",
+      "svg": "talents/elder_spice.svg",
+      "size": 128
+    },
+    "sacrilegious_corruption": {
+      "name": "Sacrilegious Corruption",
+      "branch": "demon",
+      "webp": "talents/sacrilegious_corruption.webp",
+      "svg": "talents/sacrilegious_corruption.svg",
+      "size": 128
+    },
+    "five_finger_discount": {
+      "name": "Five Finger Discount",
+      "branch": "discount",
+      "webp": "talents/five_finger_discount.webp",
+      "svg": "talents/five_finger_discount.svg",
+      "size": 128
+    },
+    "god": {
+      "name": "God",
+      "branch": "angel",
+      "webp": "talents/god.webp",
+      "svg": "talents/god.svg",
+      "size": 128
+    },
+    "lucifer": {
+      "name": "Lucifer",
+      "branch": "demon",
+      "webp": "talents/lucifer.webp",
+      "svg": "talents/lucifer.svg",
+      "size": 128
+    },
+    "inspired_checklist": {
+      "name": "Inspired Checklist",
+      "branch": "persistent",
+      "webp": "talents/inspired_checklist.webp",
+      "svg": "talents/inspired_checklist.svg",
+      "size": 128
+    },
+    "golden_cookie_alert_sound": {
+      "name": "Golden Cookie Alert Sound",
+      "branch": "misc",
+      "webp": "talents/golden_cookie_alert_sound.webp",
+      "svg": "talents/golden_cookie_alert_sound.svg",
+      "size": 128
+    },
+    "wrapping_paper": {
+      "name": "Wrapping Paper",
+      "branch": "season",
+      "webp": "talents/wrapping_paper.webp",
+      "svg": "talents/wrapping_paper.svg",
+      "size": 128
+    },
+    "fanciful_dairy_selection": {
+      "name": "Fanciful Dairy Selection",
+      "branch": "misc",
+      "webp": "talents/fanciful_dairy_selection.webp",
+      "svg": "talents/fanciful_dairy_selection.svg",
+      "size": 128
+    },
+    "contabilidade_genial": {
+      "name": "Contabilidade Genial",
+      "branch": "persistent",
+      "webp": "talents/contabilidade_genial.webp",
+      "svg": "talents/contabilidade_genial.svg",
+      "size": 128
+    },
+    "permanent_slot_iii": {
+      "name": "Eco do Styx III",
+      "branch": "persistent",
+      "webp": "talents/permanent_slot_iii.webp",
+      "svg": "talents/permanent_slot_iii.svg",
+      "size": 128
+    },
+    "label_printer": {
+      "name": "Label Printer",
+      "branch": "persistent",
+      "webp": "talents/label_printer.webp",
+      "svg": "talents/label_printer.svg",
+      "size": 128
+    },
+    "wrinkly_cookies": {
+      "name": "Wrinkly Cookies",
+      "branch": "demon",
+      "webp": "talents/wrinkly_cookies.webp",
+      "svg": "talents/wrinkly_cookies.svg",
+      "size": 128
+    },
+    "distilled_essence_of_redoubled_luck": {
+      "name": "Distilled Essence Of Redoubled Luck",
+      "branch": "golden",
+      "webp": "talents/distilled_essence_of_redoubled_luck.webp",
+      "svg": "talents/distilled_essence_of_redoubled_luck.svg",
+      "size": 128
+    },
+    "distinguished_wallpaper_assortment": {
+      "name": "Distinguished Wallpaper Assortment",
+      "branch": "misc",
+      "webp": "talents/distinguished_wallpaper_assortment.webp",
+      "svg": "talents/distinguished_wallpaper_assortment.svg",
+      "size": 128
+    },
+    "unshackled_flavor": {
+      "name": "Unshackled Flavor",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_flavor.webp",
+      "svg": "talents/unshackled_flavor.svg",
+      "size": 128
+    },
+    "unshackled_cursors": {
+      "name": "Unshackled Cursors",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_cursors.webp",
+      "svg": "talents/unshackled_cursors.svg",
+      "size": 128
+    },
+    "quimera": {
+      "name": "Quimera",
+      "branch": "cookie",
+      "webp": "talents/quimera.webp",
+      "svg": "talents/quimera.svg",
+      "size": 128
+    },
+    "pagamento_da_sorte": {
+      "name": "Pagamento Da Sorte",
+      "branch": "golden",
+      "webp": "talents/pagamento_da_sorte.webp",
+      "svg": "talents/pagamento_da_sorte.svg",
+      "size": 128
+    },
+    "eye_of_the_wrinkler": {
+      "name": "Eye Of The Wrinkler",
+      "branch": "demon",
+      "webp": "talents/eye_of_the_wrinkler.webp",
+      "svg": "talents/eye_of_the_wrinkler.svg",
+      "size": 128
+    },
+    "stevia_caelestis": {
+      "name": "Stevia Caelestis",
+      "branch": "demon",
+      "webp": "talents/stevia_caelestis.webp",
+      "svg": "talents/stevia_caelestis.svg",
+      "size": 128
+    },
+    "cozimento_de_acucar": {
+      "name": "Cozimento De Acucar",
+      "branch": "nectar",
+      "webp": "talents/cozimento_de_acucar.webp",
+      "svg": "talents/cozimento_de_acucar.svg",
+      "size": 128
+    },
+    "diabetica_daemonicus": {
+      "name": "Diabetica Daemonicus",
+      "branch": "demon",
+      "webp": "talents/diabetica_daemonicus.webp",
+      "svg": "talents/diabetica_daemonicus.svg",
+      "size": 128
+    },
+    "permanent_slot_iv": {
+      "name": "Eco do Styx IV",
+      "branch": "persistent",
+      "webp": "talents/permanent_slot_iv.webp",
+      "svg": "talents/permanent_slot_iv.svg",
+      "size": 128
+    },
+    "frenesi_de_acucar": {
+      "name": "Frenesi De Acucar",
+      "branch": "nectar",
+      "webp": "talents/frenesi_de_acucar.webp",
+      "svg": "talents/frenesi_de_acucar.svg",
+      "size": 128
+    },
+    "aura_gloves": {
+      "name": "Aura Gloves",
+      "branch": "discount",
+      "webp": "talents/aura_gloves.webp",
+      "svg": "talents/aura_gloves.svg",
+      "size": 128
+    },
+    "sugar_aging_process": {
+      "name": "Sugar Aging Process",
+      "branch": "nectar",
+      "webp": "talents/sugar_aging_process.webp",
+      "svg": "talents/sugar_aging_process.svg",
+      "size": 128
+    },
+    "shimmering_veil": {
+      "name": "Shimmering Veil",
+      "branch": "golden",
+      "webp": "talents/shimmering_veil.webp",
+      "svg": "talents/shimmering_veil.svg",
+      "size": 128
+    },
+    "sucralosia_inutilis": {
+      "name": "Sucralosia Inutilis",
+      "branch": "demon",
+      "webp": "talents/sucralosia_inutilis.webp",
+      "svg": "talents/sucralosia_inutilis.svg",
+      "size": 128
+    },
+    "sugar_crystal_cookies": {
+      "name": "Sugar Crystal Cookies",
+      "branch": "cookie",
+      "webp": "talents/sugar_crystal_cookies.webp",
+      "svg": "talents/sugar_crystal_cookies.svg",
+      "size": 128
+    },
+    "keepsakes": {
+      "name": "Keepsakes",
+      "branch": "season",
+      "webp": "talents/keepsakes.webp",
+      "svg": "talents/keepsakes.svg",
+      "size": 128
+    },
+    "unshackled_berrylium": {
+      "name": "Unshackled Berrylium",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_berrylium.webp",
+      "svg": "talents/unshackled_berrylium.svg",
+      "size": 128
+    },
+    "unshackled_grandmas": {
+      "name": "Unshackled Grandmas",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_grandmas.webp",
+      "svg": "talents/unshackled_grandmas.svg",
+      "size": 128
+    },
+    "cat_ladies": {
+      "name": "Cat Ladies",
+      "branch": "angel",
+      "webp": "talents/cat_ladies.webp",
+      "svg": "talents/cat_ladies.svg",
+      "size": 128
+    },
+    "kitten_wages": {
+      "name": "Kitten Wages",
+      "branch": "angel",
+      "webp": "talents/kitten_wages.webp",
+      "svg": "talents/kitten_wages.svg",
+      "size": 128
+    },
+    "cosmic_beginner_s_luck": {
+      "name": "Cosmic Beginner S Luck",
+      "branch": "golden",
+      "webp": "talents/cosmic_beginner_s_luck.webp",
+      "svg": "talents/cosmic_beginner_s_luck.svg",
+      "size": 128
+    },
+    "reinforced_membrane": {
+      "name": "Reinforced Membrane",
+      "branch": "golden",
+      "webp": "talents/reinforced_membrane.webp",
+      "svg": "talents/reinforced_membrane.svg",
+      "size": 128
+    },
+    "unshackled_farms": {
+      "name": "Unshackled Farms",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_farms.webp",
+      "svg": "talents/unshackled_farms.svg",
+      "size": 128
+    },
+    "unshackled_blueberrylium": {
+      "name": "Unshackled Blueberrylium",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_blueberrylium.webp",
+      "svg": "talents/unshackled_blueberrylium.svg",
+      "size": 128
+    },
+    "permanent_slot_v": {
+      "name": "Eco do Styx V",
+      "branch": "persistent",
+      "webp": "talents/permanent_slot_v.webp",
+      "svg": "talents/permanent_slot_v.svg",
+      "size": 128
+    },
+    "luminous_gloves": {
+      "name": "Luminous Gloves",
+      "branch": "discount",
+      "webp": "talents/luminous_gloves.webp",
+      "svg": "talents/luminous_gloves.svg",
+      "size": 128
+    },
+    "fortune_cookies": {
+      "name": "Fortune Cookies",
+      "branch": "golden",
+      "webp": "talents/fortune_cookies.webp",
+      "svg": "talents/fortune_cookies.svg",
+      "size": 128
+    },
+    "pet_the_dragon": {
+      "name": "Pet The Dragon",
+      "branch": "misc",
+      "webp": "talents/pet_the_dragon.webp",
+      "svg": "talents/pet_the_dragon.svg",
+      "size": 128
+    },
+    "sound_test": {
+      "name": "Sound Test",
+      "branch": "misc",
+      "webp": "talents/sound_test.webp",
+      "svg": "talents/sound_test.svg",
+      "size": 128
+    },
+    "delicate_touch": {
+      "name": "Delicate Touch",
+      "branch": "golden",
+      "webp": "talents/delicate_touch.webp",
+      "svg": "talents/delicate_touch.svg",
+      "size": 128
+    },
+    "unshackled_mines": {
+      "name": "Unshackled Mines",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_mines.webp",
+      "svg": "talents/unshackled_mines.svg",
+      "size": 128
+    },
+    "unshackled_chalcedhoney": {
+      "name": "Unshackled Chalcedhoney",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_chalcedhoney.webp",
+      "svg": "talents/unshackled_chalcedhoney.svg",
+      "size": 128
+    },
+    "box_of_maybe_cookies": {
+      "name": "Box Of Maybe Cookies",
+      "branch": "cookie",
+      "webp": "talents/box_of_maybe_cookies.webp",
+      "svg": "talents/box_of_maybe_cookies.svg",
+      "size": 128
+    },
+    "box_of_not_cookies": {
+      "name": "Box Of Not Cookies",
+      "branch": "cookie",
+      "webp": "talents/box_of_not_cookies.webp",
+      "svg": "talents/box_of_not_cookies.svg",
+      "size": 128
+    },
+    "box_of_pastries": {
+      "name": "Box Of Pastries",
+      "branch": "cookie",
+      "webp": "talents/box_of_pastries.webp",
+      "svg": "talents/box_of_pastries.svg",
+      "size": 128
+    },
+    "comprimidos_milkhelp": {
+      "name": "Comprimidos Milkhelp",
+      "branch": "nectar",
+      "webp": "talents/comprimidos_milkhelp.webp",
+      "svg": "talents/comprimidos_milkhelp.svg",
+      "size": 128
+    },
+    "unshackled_factories": {
+      "name": "Unshackled Factories",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_factories.webp",
+      "svg": "talents/unshackled_factories.svg",
+      "size": 128
+    },
+    "unshackled_buttergold": {
+      "name": "Unshackled Buttergold",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_buttergold.webp",
+      "svg": "talents/unshackled_buttergold.svg",
+      "size": 128
+    },
+    "unshackled_banks": {
+      "name": "Unshackled Banks",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_banks.webp",
+      "svg": "talents/unshackled_banks.svg",
+      "size": 128
+    },
+    "unshackled_sugarmuck": {
+      "name": "Unshackled Sugarmuck",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_sugarmuck.webp",
+      "svg": "talents/unshackled_sugarmuck.svg",
+      "size": 128
+    },
+    "unshackled_temples": {
+      "name": "Unshackled Temples",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_temples.webp",
+      "svg": "talents/unshackled_temples.svg",
+      "size": 128
+    },
+    "steadfast_murmur": {
+      "name": "Steadfast Murmur",
+      "branch": "golden",
+      "webp": "talents/steadfast_murmur.webp",
+      "svg": "talents/steadfast_murmur.svg",
+      "size": 128
+    },
+    "unshackled_jetmint": {
+      "name": "Unshackled Jetmint",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_jetmint.webp",
+      "svg": "talents/unshackled_jetmint.svg",
+      "size": 128
+    },
+    "unshackled_wizard_towers": {
+      "name": "Unshackled Wizard Towers",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_wizard_towers.webp",
+      "svg": "talents/unshackled_wizard_towers.svg",
+      "size": 128
+    },
+    "unshackled_cherrysilver": {
+      "name": "Unshackled Cherrysilver",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_cherrysilver.webp",
+      "svg": "talents/unshackled_cherrysilver.svg",
+      "size": 128
+    },
+    "unshackled_shipments": {
+      "name": "Unshackled Shipments",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_shipments.webp",
+      "svg": "talents/unshackled_shipments.svg",
+      "size": 128
+    },
+    "unshackled_hazelrald": {
+      "name": "Unshackled Hazelrald",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_hazelrald.webp",
+      "svg": "talents/unshackled_hazelrald.svg",
+      "size": 128
+    },
+    "unshackled_alchemy_labs": {
+      "name": "Unshackled Alchemy Labs",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_alchemy_labs.webp",
+      "svg": "talents/unshackled_alchemy_labs.svg",
+      "size": 128
+    },
+    "unshackled_portals": {
+      "name": "Unshackled Portals",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_portals.webp",
+      "svg": "talents/unshackled_portals.svg",
+      "size": 128
+    },
+    "unshackled_mooncandy": {
+      "name": "Unshackled Mooncandy",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_mooncandy.webp",
+      "svg": "talents/unshackled_mooncandy.svg",
+      "size": 128
+    },
+    "unshackled_time_machines": {
+      "name": "Unshackled Time Machines",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_time_machines.webp",
+      "svg": "talents/unshackled_time_machines.svg",
+      "size": 128
+    },
+    "unshackled_astrofudge": {
+      "name": "Unshackled Astrofudge",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_astrofudge.webp",
+      "svg": "talents/unshackled_astrofudge.svg",
+      "size": 128
+    },
+    "unshackled_antimatter_condensers": {
+      "name": "Unshackled Antimatter Condensers",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_antimatter_condensers.webp",
+      "svg": "talents/unshackled_antimatter_condensers.svg",
+      "size": 128
+    },
+    "unshackled_alabascream": {
+      "name": "Unshackled Alabascream",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_alabascream.webp",
+      "svg": "talents/unshackled_alabascream.svg",
+      "size": 128
+    },
+    "glittering_edge": {
+      "name": "Glittering Edge",
+      "branch": "golden",
+      "webp": "talents/glittering_edge.webp",
+      "svg": "talents/glittering_edge.svg",
+      "size": 128
+    },
+    "unshackled_prisms": {
+      "name": "Unshackled Prisms",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_prisms.webp",
+      "svg": "talents/unshackled_prisms.svg",
+      "size": 128
+    },
+    "unshackled_iridyum": {
+      "name": "Unshackled Iridyum",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_iridyum.webp",
+      "svg": "talents/unshackled_iridyum.svg",
+      "size": 128
+    },
+    "unshackled_chancemakers": {
+      "name": "Unshackled Chancemakers",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_chancemakers.webp",
+      "svg": "talents/unshackled_chancemakers.svg",
+      "size": 128
+    },
+    "unshackled_glucosmium": {
+      "name": "Unshackled Glucosmium",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_glucosmium.webp",
+      "svg": "talents/unshackled_glucosmium.svg",
+      "size": 128
+    },
+    "unshackled_fractal_engines": {
+      "name": "Unshackled Fractal Engines",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_fractal_engines.webp",
+      "svg": "talents/unshackled_fractal_engines.svg",
+      "size": 128
+    },
+    "unshackled_javascript_consoles": {
+      "name": "Unshackled Javascript Consoles",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_javascript_consoles.webp",
+      "svg": "talents/unshackled_javascript_consoles.svg",
+      "size": 128
+    },
+    "unshackled_glimmeringue": {
+      "name": "Unshackled Glimmeringue",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_glimmeringue.webp",
+      "svg": "talents/unshackled_glimmeringue.svg",
+      "size": 128
+    },
+    "unshackled_idleverses": {
+      "name": "Unshackled Idleverses",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_idleverses.webp",
+      "svg": "talents/unshackled_idleverses.svg",
+      "size": 128
+    },
+    "unshackled_cortex_bakers": {
+      "name": "Unshackled Cortex Bakers",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_cortex_bakers.webp",
+      "svg": "talents/unshackled_cortex_bakers.svg",
+      "size": 128
+    },
+    "unshackled_you": {
+      "name": "Unshackled You",
+      "branch": "unshackled",
+      "webp": "talents/unshackled_you.webp",
+      "svg": "talents/unshackled_you.svg",
       "size": 128
     }
   }

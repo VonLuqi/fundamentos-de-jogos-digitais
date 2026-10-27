@@ -9,6 +9,7 @@ import { OFFLINE_MAX_HOURS_BASE } from '../config/constants.js';
 import { GameState } from '../core/GameState.js';
 import { money } from '../core/decimal.js';
 import { calculateOfflineProgress, economyEffects } from '../core/formulas.js';
+import { formatRate, formatSouls } from '../ui/NumberFormatter.js';
 
 export function formatDuration(seconds) {
   const total = Math.max(0, Math.round(Number(seconds) || 0));
@@ -34,10 +35,18 @@ export function formatHarvest(result) {
   const cappedOut = Boolean(result?.cappedOut);
   const maxHours = result?.maxHours ?? OFFLINE_MAX_HOURS_BASE;
   const show = Boolean(result?.ok) && !result?.ignored;
+  const durationLabel = formatDuration(effective);
+  const soulsLabel = formatSouls(result?.offlineSouls ?? '0');
+  const spsRaw = result?.sps;
+  const hasRate = spsRaw != null && spsRaw !== '' && Number.isFinite(Number(spsRaw));
+  const rateLabel = hasRate ? `${formatRate(spsRaw)}/s` : null;
   return {
     show,
     title: 'Colheita na ausência',
-    body: `O Submundo trabalhou ${formatDuration(effective)}. ${formatAlmas(result?.offlineSouls ?? '0')} almas chegaram à margem.`,
+    durationLabel,
+    soulsLabel,
+    rateLabel,
+    body: `O Submundo trabalhou ${durationLabel}. ${soulsLabel} almas chegaram à margem.`,
     capNote: cappedOut
       ? `O véu fechou após ${maxHours} h — o restante da ausência não foi colhido.`
       : null,
@@ -196,7 +205,8 @@ export function resumeFromHidden(gameState, elapsedSeconds, { pause = null, now 
     ...applied,
     elapsedSeconds: seconds,
     maxHours,
-    harvest: formatHarvest({ ...applied, maxHours }),
+    sps: gameState.sps(),
+    harvest: formatHarvest({ ...applied, maxHours, sps: gameState.sps() }),
     pauseExcluded: Boolean(normalizePauseWindow(pause)),
   };
 }
