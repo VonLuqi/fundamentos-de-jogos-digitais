@@ -351,6 +351,17 @@ final class DespertarController
             ]);
         }
 
+        if ($action === 'closeAscension') {
+            $row = DespertarService::getOrCreateStateRow($userId);
+            $result = DespertarService::applyCloseAscension($row, $nowMs);
+            $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], true);
+            Http::json(200, [
+                'ok' => true,
+                'state' => DespertarService::buildStateDto($persisted['row']),
+                'awarded' => $persisted['awarded'],
+            ]);
+        }
+
         if ($action === 'verdictBuy') {
             $row = DespertarService::getOrCreateStateRow($userId);
             $result = DespertarService::applyVerdictBuy($row, $body['purchaseId'] ?? null, $nowMs);

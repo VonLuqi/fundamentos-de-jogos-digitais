@@ -111,106 +111,123 @@ final class DespertarFormulas
      * @param array<int, string> $talentIds
      * @return array<string, mixed>
      */
+    /**
+     * Aplica `effects` do catálogo (data-driven).
+     * Regras: startingSouls soma; mnemosyneMult produto; kSps/offlineEfficiency max;
+     * generatorCostMult min; offlineHours max + offlineExtraHours soma;
+     * startingGeneratorId/qty max-rule; startingGeneratorBonus soma; flags OR;
+     * softPrestigeStyxCount max; mnemosyneGainMult produto.
+     *
+     * @param array<int, string> $talentIds
+     * @return array<string, mixed>
+     */
     public static function talentEffects(array $talentIds = []): array
     {
-        $owned = [];
-        foreach ($talentIds as $id) {
-            $k = (string) $id;
-            if (isset(DespertarCatalog::TALENTS[$k])) {
-                $owned[$k] = true;
+        $mnemosyneMult = DespertarCatalog::MNEMOSYNE_MULT_BASE;
+        $startingSouls = '0';
+        $offlineHours = DespertarCatalog::OFFLINE_MAX_HOURS_BASE;
+        $offlineExtra = 0;
+        $offlineEfficiency = DespertarCatalog::OFFLINE_EFFICIENCY_BASE;
+        $kSps = DespertarCatalog::CLICK_K_SPS_BASE;
+        $generatorCostMult = DespertarCatalog::GENERATOR_COST_MULT_BASE;
+        $softPrestigeStyxCount = 0;
+        $mnemosyneGainMult = '1';
+        $startingGenerators = [];
+        $generatorBonus = [];
+        $richAmort = false;
+        $nectarReserveBonus = false;
+        $nectarFrenzyUnlock = false;
+        $dragonUnlock = false;
+        $seasonSwitcherUnlock = false;
+
+        foreach ($talentIds as $rawId) {
+            $k = (string) $rawId;
+            $talent = DespertarCatalog::TALENTS[$k] ?? null;
+            if ($talent === null) {
+                continue;
+            }
+            $fx = is_array($talent['effects'] ?? null) ? $talent['effects'] : [];
+
+            if (isset($fx['startingSouls'])) {
+                $startingSouls = DespertarDecimal::add($startingSouls, (string) $fx['startingSouls']);
+            }
+            if (isset($fx['mnemosyneMult'])) {
+                $mnemosyneMult = DespertarDecimal::mul($mnemosyneMult, (string) $fx['mnemosyneMult']);
+            }
+            if (isset($fx['mnemosyneGainMult'])) {
+                $mnemosyneGainMult = DespertarDecimal::mul($mnemosyneGainMult, (string) $fx['mnemosyneGainMult']);
+            }
+            if (isset($fx['kSps']) && DespertarDecimal::cmp((string) $fx['kSps'], $kSps) > 0) {
+                $kSps = (string) $fx['kSps'];
+            }
+            if (isset($fx['generatorCostMult'])
+                && DespertarDecimal::cmp((string) $fx['generatorCostMult'], $generatorCostMult) < 0) {
+                $generatorCostMult = (string) $fx['generatorCostMult'];
+            }
+            if (isset($fx['offlineEfficiency'])
+                && DespertarDecimal::cmp((string) $fx['offlineEfficiency'], $offlineEfficiency) > 0) {
+                $offlineEfficiency = (string) $fx['offlineEfficiency'];
+            }
+            if (isset($fx['offlineHours'])) {
+                $offlineHours = max($offlineHours, (int) $fx['offlineHours']);
+            }
+            if (isset($fx['offlineExtraHours'])) {
+                $offlineExtra += (int) $fx['offlineExtraHours'];
+            }
+            if (!empty($fx['startingGeneratorId']) && isset($fx['startingGeneratorQty'])) {
+                $gid = (string) $fx['startingGeneratorId'];
+                $qty = max(0, (int) $fx['startingGeneratorQty']);
+                $startingGenerators[$gid] = max((int) ($startingGenerators[$gid] ?? 0), $qty);
+            }
+            if (!empty($fx['startingGeneratorBonus']) && is_array($fx['startingGeneratorBonus'])) {
+                foreach ($fx['startingGeneratorBonus'] as $gid => $raw) {
+                    $generatorBonus[(string) $gid] = ((int) ($generatorBonus[(string) $gid] ?? 0)) + (int) $raw;
+                }
+            }
+            if (!empty($fx['softPrestigeStyx'])) {
+                $softPrestigeStyxCount = max($softPrestigeStyxCount, 1);
+            }
+            if (isset($fx['softPrestigeStyxCount'])) {
+                $softPrestigeStyxCount = max($softPrestigeStyxCount, (int) $fx['softPrestigeStyxCount']);
+            }
+            if (!empty($fx['richAmort'])) {
+                $richAmort = true;
+            }
+            if (!empty($fx['nectarReserveBonus'])) {
+                $nectarReserveBonus = true;
+            }
+            if (!empty($fx['nectarFrenzyUnlock'])) {
+                $nectarFrenzyUnlock = true;
+            }
+            if (!empty($fx['dragonUnlock'])) {
+                $dragonUnlock = true;
+            }
+            if (!empty($fx['seasonSwitcherUnlock'])) {
+                $seasonSwitcherUnlock = true;
             }
         }
 
-        $mnemosyneMult = DespertarCatalog::MNEMOSYNE_MULT_BASE;
-        if (isset($owned['juramento_eterno'])) {
-            $mnemosyneMult = DespertarDecimal::mul($mnemosyneMult, DespertarCatalog::TALENT_JURAMENTO_ETERNO_MULT);
-        }
-        if (isset($owned['mnemosyne_profunda'])) {
-            $mnemosyneMult = DespertarDecimal::mul($mnemosyneMult, DespertarCatalog::TALENT_MNEMOSYNE_PROFUNDA_MULT);
-        }
-        if (isset($owned['mnemosyne_tripla'])) {
-            $mnemosyneMult = DespertarDecimal::mul($mnemosyneMult, DespertarCatalog::TALENT_MNEMOSYNE_TRIPLA_MULT);
-        }
-
-        $startingSouls = '0';
-        if (isset($owned['memoria_das_sombras'])) {
-            $startingSouls = DespertarDecimal::add($startingSouls, DespertarCatalog::STARTING_SOULS_MEMORY);
-        }
-        if (isset($owned['margem_generosa'])) {
-            $startingSouls = DespertarDecimal::add($startingSouls, DespertarCatalog::STARTING_SOULS_MARGIN);
-        }
-
-        $shadeQty = 0;
-        if (isset($owned['segundo_folego'])) {
-            $shadeQty = max($shadeQty, DespertarCatalog::STARTING_SHADE_FOLEGO);
-        }
-        if (isset($owned['rebanho_despertado'])) {
-            $shadeQty = max($shadeQty, DespertarCatalog::STARTING_SHADE_REBANHO);
-        }
-
-        $startingGenerators = [];
-        if ($shadeQty > 0) {
-            $startingGenerators['wandering_shade'] = $shadeQty;
-        }
-        if (isset($owned['matilha_cerberiana'])) {
-            $startingGenerators['cerberian_hound'] = max(
-                (int) ($startingGenerators['cerberian_hound'] ?? 0),
-                DespertarCatalog::STARTING_HOUND_MATILHA
-            );
-        }
-        if (isset($owned['forja_despertada'])) {
-            $startingGenerators['phlegethon_forge'] = max(
-                (int) ($startingGenerators['phlegethon_forge'] ?? 0),
-                DespertarCatalog::STARTING_FORGE_DESPERTADA
-            );
-        }
-
-        $offlineHours = isset($owned['noite_prolongada'])
-            ? DespertarCatalog::OFFLINE_MAX_HOURS_TALENT
-            : DespertarCatalog::OFFLINE_MAX_HOURS_BASE;
-        if (isset($owned['pacto_do_silencio'])) {
-            $offlineHours += DespertarCatalog::OFFLINE_EXTRA_HOURS_SILENCIO;
-        }
-
-        $softPrestigeStyxCount = 0;
-        if (isset($owned['eco_do_styx'])) {
-            $softPrestigeStyxCount = max($softPrestigeStyxCount, 1);
-        }
-        if (isset($owned['eco_ressonante'])) {
-            $softPrestigeStyxCount = max($softPrestigeStyxCount, DespertarCatalog::ECO_STYX_RESSONANTE_COUNT);
-        }
-        if (isset($owned['eco_ancestral_iii'])) {
-            $softPrestigeStyxCount = max($softPrestigeStyxCount, 3);
-        }
-        if (isset($owned['eco_ancestral_iv'])) {
-            $softPrestigeStyxCount = max($softPrestigeStyxCount, 4);
-        }
-        if (isset($owned['eco_ancestral_v'])) {
-            $softPrestigeStyxCount = max($softPrestigeStyxCount, 5);
+        foreach ($generatorBonus as $gid => $bonus) {
+            $startingGenerators[$gid] = ((int) ($startingGenerators[$gid] ?? 0)) + (int) $bonus;
         }
 
         return [
             'startingSouls' => $startingSouls,
             'mnemosyneMult' => $mnemosyneMult,
-            'offlineHours' => $offlineHours,
-            'offlineEfficiency' => isset($owned['veu_eficiente'])
-                ? DespertarCatalog::OFFLINE_EFFICIENCY_TALENT
-                : DespertarCatalog::OFFLINE_EFFICIENCY_BASE,
-            'kSps' => isset($owned['foice_ancestral'])
-                ? DespertarCatalog::CLICK_K_SPS_ANCESTRAL
-                : DespertarCatalog::CLICK_K_SPS_BASE,
-            'generatorCostMult' => isset($owned['favor_de_caronte'])
-                ? DespertarCatalog::GENERATOR_COST_MULT_CHARON
-                : DespertarCatalog::GENERATOR_COST_MULT_BASE,
+            'offlineHours' => $offlineHours + $offlineExtra,
+            'offlineEfficiency' => $offlineEfficiency,
+            'kSps' => $kSps,
+            'generatorCostMult' => $generatorCostMult,
             'startingGenerators' => $startingGenerators,
-            'richAmort' => isset($owned['olho_da_curva']),
+            'richAmort' => $richAmort,
             'softPrestigeStyx' => $softPrestigeStyxCount > 0,
             'softPrestigeStyxCount' => $softPrestigeStyxCount,
-            'mnemosyneGainBoost' => isset($owned['calice_da_memoria']),
-            'nectarReserveBonus' => isset($owned['nectar_em_reserva']),
-            'nectarFrenzyUnlock' => isset($owned['frenesi_de_nectar_talento']),
-            'dragonUnlock' => isset($owned['ovo_primordial']),
-            'seasonSwitcherUnlock' => isset($owned['rodizio_das_estacoes']),
+            'mnemosyneGainBoost' => DespertarDecimal::cmp($mnemosyneGainMult, '1') > 0,
+            'mnemosyneGainMult' => $mnemosyneGainMult,
+            'nectarReserveBonus' => $nectarReserveBonus,
+            'nectarFrenzyUnlock' => $nectarFrenzyUnlock,
+            'dragonUnlock' => $dragonUnlock,
+            'seasonSwitcherUnlock' => $seasonSwitcherUnlock,
         ];
     }
 
@@ -297,6 +314,20 @@ final class DespertarFormulas
                 }
             }
         }
+        $ownedTalents = [];
+        foreach (($ctx['talents'] ?? []) as $t) {
+            $ownedTalents[(string) $t] = true;
+        }
+        if (!empty($req['talentId']) && !isset($ownedTalents[(string) $req['talentId']])) {
+            return false;
+        }
+        if (!empty($req['allTalentIds']) && is_array($req['allTalentIds'])) {
+            foreach ($req['allTalentIds'] as $tid) {
+                if (!isset($ownedTalents[(string) $tid])) {
+                    return false;
+                }
+            }
+        }
         if (!empty($req['generatorId'])) {
             $genId = (string) $req['generatorId'];
             $haveQty = (int) (($ctx['generators'][$genId] ?? 0));
@@ -376,6 +407,7 @@ final class DespertarFormulas
                     'souls' => $souls,
                     'generators' => $generators,
                     'upgrades' => $upgrades,
+                    'talents' => is_array($ctx['talents'] ?? null) ? $ctx['talents'] : [],
                 ])) {
                     continue;
                 }
@@ -764,14 +796,33 @@ final class DespertarFormulas
     /**
      * @param array<int, string> $talentIds
      */
+    /**
+     * Bônus SPS por óbolos: linear até PRESTIGE_SOFTCAP_START, depois log10.
+     * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult
+     * raw ≤ 100 → 1 + raw
+     * raw > 100 → 1 + 100 + 25 × log10(raw / 100)
+     *
+     * @param array<int, string> $talentIds
+     */
     public static function prestigeBonus(string $obols, array $talentIds = []): string
     {
         $eff = self::talentEffects($talentIds);
-        $bonus = DespertarDecimal::mul(
+        $raw = DespertarDecimal::mul(
             DespertarDecimal::mul($obols !== '' ? $obols : '0', DespertarCatalog::OBOL_BONUS_PER),
             $eff['mnemosyneMult']
         );
-        return DespertarDecimal::add('1', $bonus);
+        if (DespertarDecimal::cmp($raw, DespertarCatalog::PRESTIGE_SOFTCAP_START) <= 0) {
+            return DespertarDecimal::add('1', $raw);
+        }
+        $ratio = (float) DespertarDecimal::div($raw, DespertarCatalog::PRESTIGE_SOFTCAP_START);
+        if ($ratio < 1.0) {
+            $ratio = 1.0;
+        }
+        $logPart = (float) DespertarCatalog::PRESTIGE_SOFTCAP_LOG_COEFF * log10($ratio);
+        return DespertarDecimal::add(
+            DespertarDecimal::add('1', DespertarCatalog::PRESTIGE_SOFTCAP_START),
+            (string) $logPart
+        );
     }
 
     public static function generatorLevelMult(int $level = 0): string
@@ -1993,6 +2044,70 @@ final class DespertarFormulas
     }
 
     /**
+     * @param array<int, string> $rawTalents
+     * @return array{talents: array<int, string>, mnemosyne: string, refunded: string}
+     */
+    public static function migrateTalentSave(array $rawTalents = [], string $mnemosyne = '0'): array
+    {
+        $refund = '0';
+        $next = [];
+        $seen = [];
+        foreach ($rawTalents as $raw) {
+            $id = (string) $raw;
+            $mapped = $id; // LEGACY_TALENT_MAP is identity for stable gates
+            if (isset(DespertarCatalog::TALENTS[$mapped])) {
+                if (!isset($seen[$mapped])) {
+                    $seen[$mapped] = true;
+                    $next[] = $mapped;
+                }
+                continue;
+            }
+            $cost = DespertarCatalog::LEGACY_TALENT_COSTS[$id] ?? '0';
+            if (DespertarDecimal::cmp($cost, '0') > 0) {
+                $refund = DespertarDecimal::add($refund, $cost);
+            }
+        }
+        return [
+            'talents' => $next,
+            'mnemosyne' => DespertarDecimal::money(DespertarDecimal::add($mnemosyne !== '' ? $mnemosyne : '0', $refund)),
+            'refunded' => DespertarDecimal::money($refund),
+        ];
+    }
+
+    /**
+     * Remove sinergias temáticas órfãs (pré-malha wiki) e reembolsa o custo em almas.
+     *
+     * @param array<int, string> $rawUpgrades
+     * @return array{upgrades: array<int, string>, souls: string, refunded: string}
+     */
+    public static function migrateUpgradeSave(array $rawUpgrades = [], string $souls = '0'): array
+    {
+        $refund = '0';
+        $next = [];
+        $seen = [];
+        $upById = DespertarCatalog::upgradesById();
+        foreach ($rawUpgrades as $raw) {
+            $id = (string) $raw;
+            if (isset($upById[$id])) {
+                if (!isset($seen[$id])) {
+                    $seen[$id] = true;
+                    $next[] = $id;
+                }
+                continue;
+            }
+            $cost = DespertarCatalog::LEGACY_SYNERGY_COSTS[$id] ?? '0';
+            if (DespertarDecimal::cmp($cost, '0') > 0) {
+                $refund = DespertarDecimal::add($refund, $cost);
+            }
+        }
+        return [
+            'upgrades' => $next,
+            'souls' => DespertarDecimal::money(DespertarDecimal::add($souls !== '' ? $souls : '0', $refund)),
+            'refunded' => DespertarDecimal::money($refund),
+        ];
+    }
+
+    /**
      * Fase F8 — Migração segura (*Save Heal*) de saves legados (F0–F7) para F8.
      *
      * @param array<string, mixed> $state
@@ -2016,9 +2131,21 @@ final class DespertarFormulas
             }
         }
 
+        $migrated = self::migrateTalentSave(
+            is_array($state['talents'] ?? null) ? $state['talents'] : [],
+            DespertarDecimal::money($healedMnemosyne)
+        );
+        $healedMnemosyne = $migrated['mnemosyne'];
+
         $milestones['f8SaveHealed'] = true;
+        if (!array_key_exists('ascensionOpen', $milestones)) {
+            $milestones['ascensionOpen'] = false;
+        }
         $state['obols'] = DespertarDecimal::money($healedObols);
         $state['mnemosyne'] = DespertarDecimal::money($healedMnemosyne);
+        $state['talents'] = $migrated['talents'];
+        $state['ascensionOpen'] = (bool) ($state['ascensionOpen'] ?? $milestones['ascensionOpen']);
+        $milestones['ascensionOpen'] = $state['ascensionOpen'];
         $state['milestones'] = $milestones;
         return $state;
     }
@@ -2033,12 +2160,17 @@ final class DespertarFormulas
             return '0';
         }
         $gain = DespertarDecimal::intDiv($baseObols, '2');
-        $owned = array_flip(array_map('strval', $talents));
-        if (isset($owned['calice_da_memoria']) && DespertarDecimal::intCmp($gain, '0') > 0) {
-            $gain = DespertarDecimal::intDiv(
-                DespertarDecimal::intMul($gain, DespertarCatalog::TALENT_CALICE_MNEMOSYNE_NUM),
-                DespertarCatalog::TALENT_CALICE_MNEMOSYNE_DEN
-            );
+        $eff = self::talentEffects($talents);
+        $gainMult = (string) ($eff['mnemosyneGainMult'] ?? '1');
+        if (DespertarDecimal::intCmp($gain, '0') > 0 && DespertarDecimal::cmp($gainMult, '1') > 0) {
+            if ($gainMult === '1.5' || $gainMult === '1.50') {
+                $gain = DespertarDecimal::intDiv(
+                    DespertarDecimal::intMul($gain, DespertarCatalog::TALENT_CALICE_MNEMOSYNE_NUM),
+                    DespertarCatalog::TALENT_CALICE_MNEMOSYNE_DEN
+                );
+            } else {
+                $gain = DespertarDecimal::toBigIntFloor(DespertarDecimal::mul($gain, $gainMult));
+            }
         }
         return $gain;
     }
@@ -2132,8 +2264,9 @@ final class DespertarFormulas
             'earnedEssenceTarget' => '0',
         ];
 
-        if (!$force && !empty($milestones[DespertarCatalog::LETHE_REBALANCE_MILESTONE])) {
-            return array_merge($base, ['skipped' => true, 'reason' => 'already_rebalanced']);
+        // V2: ignora skip só-V1 — saves com letheRebalanceV1 ainda passam pelo heal.
+        if (!$force && !empty($milestones[DespertarCatalog::LETHE_REBALANCE_V2_MILESTONE])) {
+            return array_merge($base, ['skipped' => true, 'reason' => 'already_rebalanced_v2']);
         }
 
         if ($prestigeCount <= 0 && DespertarDecimal::cmp($obolsBefore, '0') <= 0) {
@@ -2231,6 +2364,34 @@ final class DespertarFormulas
             'talentSpend' => $spend,
             'earnedEssenceTarget' => $targetEarned,
         ];
+    }
+
+    /**
+     * Aplica heal Lethe V2 no estado canónico (só reduz carteiras; grava milestone V2).
+     *
+     * @param array<string, mixed> $state
+     * @return array{state: array<string, mixed>, applied: bool, plan: array<string, mixed>}
+     */
+    public static function applyLetheRebalanceV2ToState(array $state, bool $force = false): array
+    {
+        $plan = self::planLetheWalletRebalance($state, $force);
+        if (!$force && !empty($plan['skipped']) && ($plan['reason'] ?? '') === 'already_rebalanced_v2') {
+            return ['state' => $state, 'applied' => false, 'plan' => $plan];
+        }
+
+        $milestones = is_array($state['milestones'] ?? null) ? $state['milestones'] : [];
+        $milestones[DespertarCatalog::LETHE_REBALANCE_V2_MILESTONE] = true;
+        $milestones[DespertarCatalog::LETHE_REBALANCE_MILESTONE] = true;
+
+        $next = $state;
+        $next['milestones'] = $milestones;
+
+        if (empty($plan['skipped']) || $force) {
+            $next['obols'] = $plan['obolsAfter'];
+            $next['mnemosyne'] = $plan['mnemosyneAfter'];
+        }
+
+        return ['state' => $next, 'applied' => true, 'plan' => $plan];
     }
 
     public static function theoreticalMaxGain(string $sps, string $clickPower, float $deltaSeconds): string
