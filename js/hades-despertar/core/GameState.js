@@ -17,7 +17,7 @@ import {
   isNormalAchievementId,
 } from '../config/achievements.js';
 import { GENERATORS, GENERATOR_BY_ID } from '../config/generators.js';
-import { isKnownTalentId, getTalent } from '../config/talents.js';
+import { isKnownTalentId, getTalent, meetsTalentRequirement } from '../config/talents.js';
 import { isKnownUpgradeId, getUpgrade } from '../config/upgrades.js';
 import { getVerdictShopItem, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import {
@@ -27,6 +27,7 @@ import {
   div,
   isZero,
   max,
+  min,
   money,
   mul,
   normalize,
@@ -48,9 +49,12 @@ import {
   elderPactServantFlatBonusPerUnit,
   generatorCostMultForId,
   generatorUpgradeMult,
+  applyLetheRebalanceV2ToState,
   healLegacySave,
   lineSPS,
   meetsUpgradeRequirement,
+  migrateTalentSave,
+  migrateUpgradeSave,
   prestigePreview as formulaPrestigePreview,
   pickEcoDoStyxUpgrades,
   talentEffects,
@@ -255,8 +259,26 @@ export class GameState {
       qtyMap,
       this._goldCounts,
     );
-    this.upgrades = uniqueKnown(snapshot.upgrades ?? snapshot.upgrades_state, isKnownUpgradeId);
-    this.talents = uniqueKnown(snapshot.talents ?? snapshot.talents_state, isKnownTalentId);
+    {
+      const migratedUp = migrateUpgradeSave(
+        snapshot.upgrades ?? snapshot.upgrades_state ?? [],
+        this.souls,
+      );
+      this.upgrades = migratedUp.upgrades;
+      this.souls = clampNonNegative(migratedUp.souls);
+    }
+    {
+      const migrated = migrateTalentSave(
+        snapshot.talents ?? snapshot.talents_state ?? [],
+        this.mnemosyne,
+      );
+      this.talents = migrated.talents;
+      this.mnemosyne = clampNonNegative(migrated.mnemosyne);
+    }
+    const msEarly = snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {};
+    this.ascensionOpen = Boolean(
+      snapshot.ascensionOpen ?? msEarly.ascensionOpen ?? false,
+    );
     this.verdictPurchases = uniqueKnown(
       snapshot.verdictPurchases ?? snapshot.verdict_purchases,
       isKnownVerdictPurchase,
@@ -265,7 +287,10 @@ export class GameState {
     this.juizoBestStreak = Math.max(0, Number.parseInt(snapshot.juizoBestStreak ?? snapshot.juizo_best_streak, 10) || 0);
     this.juizoCurrentStreak = Math.max(0, Number.parseInt(snapshot.juizoCurrentStreak ?? snapshot.juizo_current_streak, 10) || 0);
     this.eduLogsSeen = uniqueKnown(snapshot.eduLogsSeen ?? snapshot.edu_logs_seen, (id) => EDU_LOG_IDS.includes(id));
-    this.milestones = { ...(snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {}) };
+    this.milestones = {
+      ...(snapshot.milestones && typeof snapshot.milestones === 'object' ? snapshot.milestones : {}),
+      ascensionOpen: this.ascensionOpen,
+    };
     this.lastSyncAt = snapshot.lastSyncAt ?? snapshot.last_sync_at ?? null;
     this.sessionSeconds = Number(snapshot.sessionSeconds) || 0;
     this.clickCount = Math.max(0, Number.parseInt(snapshot.clickCount, 10) || 0);
@@ -2131,10 +2156,32 @@ export class GameState {
     const healed = healLegacySave(this.toSnapshot());
     this.obols = clampNonNegative(healed.obols);
     this.mnemosyne = clampNonNegative(healed.mnemosyne);
-    this.milestones = { ...this.milestones, ...healed.milestones };
+    if (Array.isArray(healed.talents)) this.talents = [...healed.talents];
+    this.ascensionOpen = Boolean(healed.ascensionOpen);
+    this.milestones = { ...this.milestones, ...healed.milestones, ascensionOpen: this.ascensionOpen };
     this.invalidateEconomyCache();
     this.#bump();
     return healed;
+  }
+
+  /**
+   * Heal automático Lethe V2 (carteiras inchadas). Idempotente via milestone.
+   * @returns {{ applied: boolean, plan: object }}
+   */
+  ensureLetheRebalanceV2({ force = false } = {}) {
+    const result = applyLetheRebalanceV2ToState(this.toSnapshot(), force);
+    if (!result.applied) return result;
+    this.obols = clampNonNegative(result.state.obols);
+    this.mnemosyne = clampNonNegative(result.state.mnemosyne);
+    this.milestones = {
+      ...this.milestones,
+      ...(result.state.milestones || {}),
+      ascensionOpen: this.ascensionOpen,
+    };
+    this.invalidateEconomyCache();
+    this.#bumpSyncEpoch();
+    this.#bump();
+    return result;
   }
 
   buyUpgrade(id) {
@@ -2145,6 +2192,7 @@ export class GameState {
       souls: this.souls,
       generators: this.quantities(),
       upgrades: this.upgrades,
+      talents: this.talents,
       achievements: this.achievements,
       veilPercent: this.veilPercent(),
       catabase: this.catabase,
@@ -2180,14 +2228,26 @@ export class GameState {
   buyTalent(id) {
     const talent = getTalent(id);
     if (!talent) return { ok: false };
+    if (!this.ascensionOpen) return { ok: false, error: 'ascension_closed' };
     if (this.talents.includes(id)) return { ok: false };
+    if (!meetsTalentRequirement(talent, { talents: this.talents })) {
+      return { ok: false, error: 'requires' };
+    }
     if (cmp(this.mnemosyne, talent.cost) < 0) return { ok: false };
     this.mnemosyne = clampNonNegative(sub(this.mnemosyne, talent.cost));
     this.talents = [...this.talents, id];
     this.invalidateEconomyCache();
     this.unlockLogs();
+    this.#bumpSyncEpoch();
     this.#bump();
     return { ok: true, cost: talent.cost };
+  }
+
+  closeAscension() {
+    this.ascensionOpen = false;
+    this.milestones = { ...this.milestones, ascensionOpen: false };
+    this.#bump();
+    return { ok: true };
   }
 
   buyVerdict(id) {
@@ -2211,6 +2271,8 @@ export class GameState {
     this.obols = add(this.obols, preview.obolsGain);
     this.mnemosyne = add(this.mnemosyne, preview.mnemosyneGain);
     this.prestigeCount += 1;
+    this.ascensionOpen = true;
+    this.milestones = { ...this.milestones, ascensionOpen: true };
     this.upgrades = [];
     this.generators.applyQuantities({});
     this._shinyCounts = {};
@@ -2369,6 +2431,7 @@ export class GameState {
 
     this.syncOk = true;
     // syncEpoch é client-owned — apply NÃO zera.
+    this.ensureLetheRebalanceV2();
     this.invalidateEconomyCache();
     this.#refreshMilestones();
     this.unlockLogs();
@@ -2419,14 +2482,29 @@ export class GameState {
     } else {
       this.#clampRarityCounts();
     }
-    this.upgrades = uniqueKnown(
-      snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
-      isKnownUpgradeId,
+    {
+      const migratedUp = migrateUpgradeSave(
+        snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
+        snapshot.souls ?? this.souls,
+      );
+      this.upgrades = migratedUp.upgrades;
+      this.souls = clampNonNegative(migratedUp.souls);
+    }
+    {
+      const migrated = migrateTalentSave(
+        snapshot.talents ?? snapshot.talents_state ?? this.talents,
+        snapshot.mnemosyne ?? this.mnemosyne,
+      );
+      this.talents = migrated.talents;
+      this.mnemosyne = clampNonNegative(migrated.mnemosyne);
+    }
+    if (snapshot.milestones != null && typeof snapshot.milestones === 'object') {
+      this.milestones = { ...this.milestones, ...snapshot.milestones };
+    }
+    this.ascensionOpen = Boolean(
+      snapshot.ascensionOpen ?? this.milestones?.ascensionOpen ?? this.ascensionOpen,
     );
-    this.talents = uniqueKnown(
-      snapshot.talents ?? snapshot.talents_state ?? this.talents,
-      isKnownTalentId,
-    );
+    this.milestones = { ...this.milestones, ascensionOpen: this.ascensionOpen };
     this.verdictPurchases = uniqueKnown(
       snapshot.verdictPurchases ?? snapshot.verdict_purchases ?? this.verdictPurchases,
       isKnownVerdictPurchase,
@@ -2454,6 +2532,7 @@ export class GameState {
       ...(snapshot.milestones && typeof snapshot.milestones === 'object'
         ? snapshot.milestones
         : this.milestones),
+      ascensionOpen: this.ascensionOpen,
     };
     this.catabaseActive = Boolean(
       snapshot.catabaseActive ?? this.milestones?.catabaseActive ?? this.catabaseActive,
@@ -2586,7 +2665,8 @@ export class GameState {
    * Economia: max/união + souls com tolerância de ticks.
    */
   #reconcileFromSnapshot(snapshot, options = {}) {
-    // Always-server (A-D1)
+    // Always-server (A-D1) — óbolos always-server; talentos unem (selo otimista).
+    const localMnemosyne = this.mnemosyne;
     if (snapshot.obols != null) this.obols = clampNonNegative(snapshot.obols);
     if (snapshot.mnemosyne != null) this.mnemosyne = clampNonNegative(snapshot.mnemosyne);
     if (snapshot.prestigeCount != null || snapshot.prestige_count != null) {
@@ -2596,10 +2676,35 @@ export class GameState {
       );
     }
     if (snapshot.talents != null || snapshot.talents_state != null) {
-      this.talents = uniqueKnown(
+      const serverTalents = migrateTalentSave(
         snapshot.talents ?? snapshot.talents_state,
-        isKnownTalentId,
+        '0',
+      ).talents;
+      const localTalents = [...(this.talents || [])];
+      const union = migrateTalentSave([...serverTalents, ...localTalents], '0').talents;
+      const localSet = new Set(localTalents);
+      const serverSet = new Set(serverTalents);
+      const localOnly = localTalents.filter((id) => !serverSet.has(id));
+      const serverOnly = serverTalents.filter((id) => !localSet.has(id));
+      const equalSets = localOnly.length === 0 && serverOnly.length === 0;
+      this.talents = union;
+      const serverMne = snapshot.mnemosyne != null
+        ? clampNonNegative(snapshot.mnemosyne)
+        : localMnemosyne;
+      if (equalSets) {
+        this.mnemosyne = clampNonNegative(min(localMnemosyne, serverMne));
+      } else if (localOnly.length > 0) {
+        // Selos só-locais (otimista / offline): preserva essência já gasta.
+        this.mnemosyne = clampNonNegative(localMnemosyne);
+      } else {
+        this.mnemosyne = serverMne;
+      }
+    }
+    if (snapshot.ascensionOpen != null || snapshot.milestones?.ascensionOpen != null) {
+      this.ascensionOpen = Boolean(
+        snapshot.ascensionOpen ?? snapshot.milestones?.ascensionOpen,
       );
+      this.milestones = { ...this.milestones, ascensionOpen: this.ascensionOpen };
     }
     if (snapshot.verdictPurchases != null || snapshot.verdict_purchases != null) {
       this.verdictPurchases = uniqueKnown(
@@ -2674,7 +2779,11 @@ export class GameState {
     }
     if (snapshot.milestones && typeof snapshot.milestones === 'object') {
       this.milestones = { ...this.milestones, ...snapshot.milestones };
+      if (snapshot.milestones.ascensionOpen != null) {
+        this.ascensionOpen = Boolean(snapshot.milestones.ascensionOpen);
+      }
     }
+    this.milestones = { ...this.milestones, ascensionOpen: Boolean(this.ascensionOpen) };
     this.catabaseActive = Boolean(
       snapshot.catabaseActive ?? this.milestones?.catabaseActive ?? this.catabaseActive,
     );
@@ -2860,12 +2969,13 @@ export class GameState {
       goldCounts: this.goldCounts(),
       upgrades: [...this.upgrades],
       talents: [...this.talents],
+      ascensionOpen: Boolean(this.ascensionOpen),
       verdictPurchases: [...this.verdictPurchases],
       verdicts: this.verdicts,
       juizoBestStreak: this.juizoBestStreak,
       juizoCurrentStreak: this.juizoCurrentStreak,
       eduLogsSeen: [...this.eduLogsSeen],
-      milestones: { ...this.milestones },
+      milestones: { ...this.milestones, ascensionOpen: Boolean(this.ascensionOpen) },
       shimmer: this.shimmer ? { ...this.shimmer } : null,
       activeBuffs: { ...this.activeBuffs },
       shimmersClicked: this.shimmersClicked,

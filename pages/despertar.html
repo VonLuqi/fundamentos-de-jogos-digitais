@@ -21,7 +21,7 @@
 
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/despertar.css?v=styx-crate-5-1" />
+  <link rel="stylesheet" href="../css/despertar.css?v=lethe-memory-tree-1" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page despertar-shell" data-route="despertar" data-role-scope="protected">
@@ -104,6 +104,49 @@
         <button class="despertar-ghost" type="button" id="despertar-lethe-cancel">Recuar</button>
       </div>
     </div>
+  </div>
+
+  <div
+    id="despertar-lethe-river"
+    class="lethe-river"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="lethe-river-title"
+    aria-hidden="true"
+    hidden
+  >
+    <p class="lethe-river__watermark" aria-hidden="true">Rio do Lethe</p>
+    <h2 class="visually-hidden" id="lethe-river-title">Rio do Lethe</h2>
+    <div class="lethe-river__tip" data-river-tip hidden role="tooltip">
+      <p class="lethe-river__tip-name" data-river-name></p>
+      <p class="lethe-river__tip-cost" data-river-cost></p>
+      <p class="lethe-river__tip-blurb" data-river-blurb></p>
+      <p class="lethe-river__tip-hint" data-river-hint></p>
+    </div>
+    <svg
+      class="lethe-river__svg"
+      data-river-svg
+      viewBox="0 0 1600 1200"
+      role="img"
+      aria-label="Árvore de talentos do Rio do Lethe"
+    >
+      <defs>
+        <linearGradient id="lethe-river-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="rgba(120,180,200,0.15)" />
+          <stop offset="50%" stop-color="rgba(200,230,240,0.55)" />
+          <stop offset="100%" stop-color="rgba(120,180,200,0.15)" />
+        </linearGradient>
+      </defs>
+      <g data-river-branches></g>
+      <g data-river-stage></g>
+    </svg>
+    <footer class="lethe-river__footer">
+      <p class="lethe-river__essence">
+        <span class="lethe-river__essence-value despertar-num" data-river-essence>0</span>
+        <span class="lethe-river__essence-label">ESSÊNCIA DISPONÍVEL</span>
+      </p>
+      <button class="btn-gold lethe-river__continue" type="button" data-river-continue>Despertar</button>
+    </footer>
   </div>
 
   <div
@@ -454,57 +497,50 @@
                 <p class="despertar-lethe-preview" id="lethe-preview">A parede ainda não cedeu — o ritual não rende Óbolos.</p>
                 <p class="despertar-lethe-memory" id="lethe-memory" hidden></p>
                 <button class="btn-gold" type="button" id="lethe-ritual" disabled>Ritual do Lethe</button>
-                <h3 class="despertar-subsection" id="pantheon-heading">Panteão de Mnemosyne</h3>
+                <h3 class="despertar-subsection" id="pantheon-heading">Memória do Rio</h3>
                 <p class="despertar-empty" id="pantheon-empty">Mnemosyne ainda não bebeu tua memória.</p>
                 <div id="pantheon-shop" class="despertar-shop-block" hidden>
+                  <p class="despertar-lethe-memory" id="pantheon-readonly-hint">
+                    Os selos só se compram no Rio do Lethe, logo após o ritual. Aqui resta a memória.
+                  </p>
                   <div
-                    class="despertar-subtabs"
-                    id="pantheon-subtabs"
-                    role="tablist"
-                    aria-label="Panteão de Mnemosyne"
+                    id="lethe-memory-river"
+                    class="lethe-river lethe-river--memory"
+                    aria-labelledby="pantheon-heading"
+                    aria-hidden="false"
                   >
-                    <button
-                      class="despertar-subtab"
-                      type="button"
-                      role="tab"
-                      id="pantheon-tab-available"
-                      aria-controls="pantheon-panel-available"
-                      aria-selected="true"
-                      tabindex="0"
+                    <p class="lethe-river__watermark" aria-hidden="true">Memória</p>
+                    <div class="lethe-river__tip" data-river-tip hidden role="tooltip">
+                      <p class="lethe-river__tip-name" data-river-name></p>
+                      <p class="lethe-river__tip-cost" data-river-cost></p>
+                      <p class="lethe-river__tip-blurb" data-river-blurb></p>
+                      <p class="lethe-river__tip-hint" data-river-hint></p>
+                    </div>
+                    <svg
+                      class="lethe-river__svg"
+                      data-river-svg
+                      viewBox="0 0 1600 1200"
+                      role="img"
+                      aria-label="Árvore fechada de talentos de Mnemosyne"
                     >
-                      Disponíveis (0)
-                    </button>
-                    <button
-                      class="despertar-subtab"
-                      type="button"
-                      role="tab"
-                      id="pantheon-tab-owned"
-                      aria-controls="pantheon-panel-owned"
-                      aria-selected="false"
-                      tabindex="-1"
-                    >
-                      Comprados (0)
-                    </button>
+                      <defs>
+                        <linearGradient id="lethe-memory-flow" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stop-color="rgba(120,180,200,0.15)" />
+                          <stop offset="50%" stop-color="rgba(200,230,240,0.55)" />
+                          <stop offset="100%" stop-color="rgba(120,180,200,0.15)" />
+                        </linearGradient>
+                      </defs>
+                      <g data-river-stage></g>
+                    </svg>
                   </div>
-                  <div
-                    class="despertar-subtabpanel"
-                    role="tabpanel"
-                    id="pantheon-panel-available"
-                    aria-labelledby="pantheon-tab-available"
-                  >
-                    <p class="despertar-empty" id="pantheon-empty-available" hidden></p>
-                    <ul class="despertar-market-list" id="pantheon-list-available"></ul>
-                  </div>
-                  <div
-                    class="despertar-subtabpanel"
-                    role="tabpanel"
-                    id="pantheon-panel-owned"
-                    aria-labelledby="pantheon-tab-owned"
-                    hidden
-                  >
-                    <p class="despertar-empty" id="pantheon-empty-owned" hidden></p>
-                    <ul class="despertar-market-list" id="pantheon-list-owned"></ul>
-                  </div>
+                  <p class="despertar-empty" id="pantheon-empty-owned" hidden></p>
+                  <ul class="despertar-market-list" id="pantheon-list-owned" hidden></ul>
+                  <!-- legado (hidden): subtabs/available mantidos para não quebrar mount antigo -->
+                  <div id="pantheon-subtabs" hidden></div>
+                  <ul id="pantheon-list-available" hidden></ul>
+                  <button type="button" id="pantheon-tab-available" hidden></button>
+                  <button type="button" id="pantheon-tab-owned" hidden></button>
+                  <p id="pantheon-empty-available" hidden></p>
                 </div>
               </div>
             </div>

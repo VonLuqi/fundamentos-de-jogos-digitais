@@ -26,6 +26,7 @@ import { ApiService } from './services/ApiService.js';
 import { bootAuthoritativeSession, resumeFromHidden } from './services/OfflineEngine.js';
 import { StorageService } from './services/StorageService.js';
 import { UIRenderer, countLethePermanents, formatLetheMemoryPreview, formatLetheMemoryToast } from './ui/UIRenderer.js';
+import { bindLetheRiverTree } from './ui/LetheRiverTree.js';
 import { applyHarnessGrant, harnessEnabled, logSyncDiag, syncDiagEnabled } from './ui/harness.js';
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
@@ -44,6 +45,8 @@ import {
   JUDGES_REFUSED_TICKER,
 } from './config/constants.js';
 import { presentGrimoireAwards } from '../grimorio-awards.js';
+import { add } from './core/decimal.js';
+import { getTalent } from './config/talents.js';
 
 let apiWarningTimer = null;
 /** Preenchido após montar o UIRenderer — interrupts do ticker. */
@@ -566,7 +569,7 @@ function bindHarvestModal() {
   };
 }
 
-function bindLetheModal(state, { onConfirm } = {}) {
+function bindLetheModal(state, { onConfirm, onAfterPrestige } = {}) {
   const modal = document.getElementById('despertar-lethe-modal');
   const confirm = document.getElementById('despertar-lethe-confirm');
   const cancel = document.getElementById('despertar-lethe-cancel');
@@ -617,12 +620,14 @@ function bindLetheModal(state, { onConfirm } = {}) {
         if (ok) {
           celebrateRitual(gainPreview, permanents);
           close();
+          onAfterPrestige?.();
         }
       } else {
         const result = state.applyPrestige();
         if (result.ok) {
           celebrateRitual(gainPreview, permanents);
           close();
+          onAfterPrestige?.();
         }
       }
     } finally {
@@ -736,13 +741,26 @@ async function init() {
   const storage = new StorageService();
   /** Preenchido após o boot; ApiService usa getters estáveis. */
   const stateRef = { current: null };
+  const riverOpenRef = { current: false };
+  const riverUiRef = { current: null };
   const diagOn = syncDiagEnabled();
   const api = new ApiService({
     getToken: () => getSession()?.token ?? null,
     getSnapshot: () => stateRef.current?.toSnapshot?.() ?? {},
     applyServerState: (serverState, meta = {}) => {
       if (!stateRef.current) return;
-      const mode = meta.mode === 'reconcile' ? 'reconcile' : 'replace';
+      const keepAscension = Boolean(riverOpenRef.current);
+      const incomingTalents = serverState?.talents ?? serverState?.talents_state;
+      const localTalents = stateRef.current.talents || [];
+      const wouldDropLocalSeal = Array.isArray(incomingTalents)
+        && localTalents.some((tid) => !incomingTalents.map(String).includes(String(tid)));
+      // Rio aberto, reconcile explícito, reject, ou selo só-local → nunca replace.
+      const mode = (
+        keepAscension
+        || meta.mode === 'reconcile'
+        || meta.ok === false
+        || wouldDropLocalSeal
+      ) ? 'reconcile' : 'replace';
       if (diagOn) {
         logSyncDiag('apply:before', {
           mode,
@@ -760,6 +778,14 @@ async function init() {
         sps: stateRef.current.sps(),
         elapsedMs: meta.elapsedMs,
       });
+      // Sync atrasado não pode fechar a janela do Rio enquanto a overlay está aberta.
+      if (keepAscension && !stateRef.current.ascensionOpen) {
+        stateRef.current.ascensionOpen = true;
+        stateRef.current.milestones = {
+          ...stateRef.current.milestones,
+          ascensionOpen: true,
+        };
+      }
       if (diagOn) {
         logSyncDiag('apply:after', {
           mode,
@@ -770,6 +796,8 @@ async function init() {
         });
       }
       storage.scheduleSave(user.id, stateRef.current);
+      // Não refresh a cada sync — evita nó “voltar” durante selo otimista.
+      // Refresh explícito em onBuyTalent / open / close.
     },
     onRejected: ({ error, pause, serverNow, payload }) => {
       if (error === DESPERTAR_PAUSED_ERROR) {
@@ -879,16 +907,156 @@ async function init() {
     api.requestSync();
   }
 
+  /**
+   * Selo otimista: UI na hora; flush grava pais/carteira; talentBuy confirma.
+   * Nunca rollback por Essência/prereq de sync — só por talento desconhecido.
+   * @param {string} id
+   * @returns {Promise<boolean>}
+   */
+  async function sealTalentOptimistic(id) {
+    const s = stateRef.current || state;
+    riverOpenRef.current = true;
+    s.ascensionOpen = true;
+    s.milestones = { ...s.milestones, ascensionOpen: true };
+
+    const local = s.buyTalent(id);
+    if (!local.ok) return false;
+    riverUiRef.current?.refresh?.();
+    uiRef.renderer?.markDirty?.('lethe');
+    storage.scheduleSave(user.id, s);
+
+    const cost = local.cost;
+
+    const rollbackUnknown = (msg) => {
+      if (!s.talents.includes(id)) return;
+      s.talents = s.talents.filter((tid) => tid !== id);
+      if (cost != null) s.mnemosyne = add(s.mnemosyne, cost);
+      s.invalidateEconomyCache?.();
+      s.unlockLogs?.();
+      riverUiRef.current?.refresh?.();
+      uiRef.renderer?.markDirty?.('lethe');
+      showApiWarning(msg || 'Não foi possível selar o talento.');
+    };
+
+    const softFail = (msg) => {
+      // Mantém selo local; tenta de novo no próximo ciclo.
+      showApiWarning(msg || 'O Submundo ainda sincroniza o selo…');
+      api.markDirty();
+      riverUiRef.current?.refresh?.();
+      api.requestSync?.();
+    };
+
+    const persist = async () => {
+      s.ascensionOpen = true;
+      s.milestones = { ...s.milestones, ascensionOpen: true };
+      api.markDirty();
+      // Flush primeiro: grava pais otimistas no DB (Catábase aceita newSpend ≤ mne).
+      try {
+        await api.flush();
+      } catch {
+        /* reject agora é reconcile — segue para talentBuy */
+      }
+      try {
+        await api.talentBuy(id);
+      } catch (buyErr) {
+        const buyMsg = buyErr instanceof ApiError
+          ? buyErr.message
+          : String(buyErr?.message || '');
+        if (/já está na memória/i.test(buyMsg)) return;
+        // Pais/carteira atrasados: flush de novo + 1 retry.
+        if (
+          /faltam vertentes|essência insuficiente|catábase|lethe só aceita/i.test(buyMsg)
+        ) {
+          api.markDirty();
+          try {
+            await api.flush();
+          } catch { /* ignore */ }
+          await api.talentBuy(id);
+          return;
+        }
+        throw buyErr;
+      }
+      riverUiRef.current?.refresh?.();
+      uiRef.renderer?.markDirty?.('lethe');
+    };
+
+    void (async () => {
+      try {
+        await persist();
+      } catch (error) {
+        const msg = error instanceof ApiError ? error.message : String(error?.message || '');
+        if (/já está na memória/i.test(msg)) {
+          riverUiRef.current?.refresh?.();
+          return;
+        }
+        if (/talento desconhecido|unknown talent/i.test(msg)) {
+          // Se o client conhece o id, o catálogo do server está atrasado — não reverte o selo.
+          if (getTalent(id)) {
+            softFail(
+              `Selo local ok, mas o Submundo ainda não conhece «${id}». Publique o catálogo PHP do Rio.`,
+            );
+            return;
+          }
+          rollbackUnknown(msg);
+          return;
+        }
+        softFail(msg);
+      }
+    })();
+
+    return true;
+  }
+
+  const riverUi = bindLetheRiverTree({
+    getState: () => stateRef.current || state,
+    onBuyTalent: sealTalentOptimistic,
+    onClose: async () => {
+      riverOpenRef.current = false;
+      state.closeAscension();
+      try {
+        await api.flush();
+        await api.closeAscension();
+      } catch {
+        /* local close already applied */
+      }
+      uiRef.renderer?.markDirty?.('lethe');
+    },
+  });
+  riverUiRef.current = riverUi;
+  const _riverOpen = riverUi.open.bind(riverUi);
+  riverUi.open = (...args) => {
+    riverOpenRef.current = true;
+    return _riverOpen(...args);
+  };
+  const _riverClose = riverUi.close.bind(riverUi);
+  riverUi.close = (...args) => {
+    riverOpenRef.current = false;
+    return _riverClose(...args);
+  };
+
   const letheUi = bindLetheModal(state, {
     onConfirm: async () => {
       try {
         await api.flush();
-        await api.prestige();
+        const remote = await api.prestige();
+        // Sem token / resposta vazia: aplica Catábase local para abrir o Rio.
+        if (!remote?.state && !state.ascensionOpen) {
+          const local = state.applyPrestige();
+          if (!local.ok) {
+            showApiWarning('O Ritual falhou.');
+            return false;
+          }
+        }
+        // Garante a sessão de selo mesmo se o sync atrasar o flag.
+        state.ascensionOpen = true;
+        state.milestones = { ...state.milestones, ascensionOpen: true };
         uiRef.renderer?.resetShinyRumor?.();
         return true;
       } catch (error) {
         const local = state.applyPrestige();
         if (local.ok) {
+          state.ascensionOpen = true;
+          state.milestones = { ...state.milestones, ascensionOpen: true };
           uiRef.renderer?.resetShinyRumor?.();
           showApiWarning(
             error instanceof ApiError
@@ -901,7 +1069,16 @@ async function init() {
         return false;
       }
     },
+    onAfterPrestige: () => {
+      state.ascensionOpen = true;
+      state.milestones = { ...state.milestones, ascensionOpen: true };
+      riverUi.open();
+    },
   });
+
+  if (state.ascensionOpen) {
+    queueMicrotask(() => riverUi.open());
+  }
 
   const renderer = new UIRenderer(document, {
     state,
@@ -938,23 +1115,7 @@ async function init() {
         api.requestSync();
       }
     },
-    onBuyTalent: async (id) => {
-      try {
-        await api.flush();
-        await api.talentBuy(id);
-      } catch (error) {
-        const local = state.buyTalent(id);
-        if (!local.ok) {
-          showApiWarning(error instanceof ApiError ? error.message : 'Não foi possível selar o talento.');
-        } else {
-          showApiWarning(
-            error instanceof ApiError
-              ? error.message
-              : 'O Submundo não responde… o talento ficou só na Estela local.'
-          );
-        }
-      }
-    },
+    onBuyTalent: sealTalentOptimistic,
     onBuyVerdict: async (id) => {
       try {
         await api.flush();

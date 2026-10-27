@@ -220,16 +220,19 @@ final class DespertarService
         $shinyParsed = $shinyRaw !== null ? self::normalizeShinyCounts($shinyRaw, $generators, $goldCounts, true) : ['ok' => true, 'shinyCounts' => []];
         $shinyCounts = $shinyParsed['shinyCounts'] ?? [];
 
-        $upById = DespertarCatalog::upgradesById();
-        $upgrades = array_values(array_filter(
+        $soulsRaw = DespertarDecimal::money(DespertarDecimal::decimalString($r['souls'] ?? '0.00'));
+        $upgradeMigrate = DespertarFormulas::migrateUpgradeSave(
             self::asStringArray($r['upgrades_state'] ?? $r['upgrades'] ?? []),
-            static fn(string $id): bool => isset($upById[$id])
-        ));
+            $soulsRaw
+        );
+        $upgrades = $upgradeMigrate['upgrades'];
 
-        $talents = array_values(array_filter(
+        $talentMigrate = DespertarFormulas::migrateTalentSave(
             self::asStringArray($r['talents_state'] ?? $r['talents'] ?? []),
-            static fn(string $id): bool => isset(DespertarCatalog::TALENTS[$id])
-        ));
+            DespertarDecimal::money(DespertarDecimal::decimalString($r['mnemosyne'] ?? '0.00'))
+        );
+        $talents = $talentMigrate['talents'];
+        // mnemosyne/souls may include refunds for dropped legacy ids — applied below.
 
         $eduLogSet = array_flip(DespertarCatalog::EDU_LOG_IDS);
         $eduLogsSeen = array_values(array_filter(
@@ -251,9 +254,9 @@ final class DespertarService
         $lastSyncAt = $lastSyncRaw ? Database::sqlToIso((string) $lastSyncRaw) : null;
 
         return [
-            'souls' => DespertarDecimal::money(DespertarDecimal::decimalString($r['souls'] ?? '0.00')),
+            'souls' => DespertarDecimal::money($upgradeMigrate['souls']),
             'obols' => DespertarDecimal::money(DespertarDecimal::decimalString($r['obols'] ?? '0.00')),
-            'mnemosyne' => DespertarDecimal::money(DespertarDecimal::decimalString($r['mnemosyne'] ?? '0.00')),
+            'mnemosyne' => DespertarDecimal::money($talentMigrate['mnemosyne']),
             'lifetimeSouls' => DespertarDecimal::money(DespertarDecimal::decimalString($r['lifetime_souls'] ?? $r['lifetimeSouls'] ?? '0.00')),
             'runSouls' => DespertarDecimal::money(DespertarDecimal::decimalString($r['run_souls'] ?? $r['runSouls'] ?? '0.00')),
             'prestigeCount' => self::asNonNegInt($r['prestige_count'] ?? $r['prestigeCount'] ?? 0),
@@ -262,6 +265,7 @@ final class DespertarService
             'shinyCounts' => $shinyCounts,
             'upgrades' => $upgrades,
             'talents' => $talents,
+            'ascensionOpen' => (bool) (self::asObject($r['milestones'] ?? [])['ascensionOpen'] ?? false),
             'eduLogsSeen' => $eduLogsSeen,
             'milestones' => self::asObject($r['milestones'] ?? []),
             'stats' => self::normalizeDespertarStats($r['stats'] ?? []),
@@ -361,8 +365,12 @@ final class DespertarService
             'goldCounts' => (object) $goldCounts,
             'upgrades' => $state['upgrades'],
             'talents' => $state['talents'],
+            'ascensionOpen' => (bool) ($state['ascensionOpen'] ?? ($state['milestones']['ascensionOpen'] ?? false)),
             'eduLogsSeen' => $state['eduLogsSeen'],
-            'milestones' => (object) $state['milestones'],
+            'milestones' => (object) array_merge(
+                is_array($state['milestones']) ? $state['milestones'] : [],
+                ['ascensionOpen' => (bool) ($state['ascensionOpen'] ?? ($state['milestones']['ascensionOpen'] ?? false))]
+            ),
             'stats' => $state['stats'],
             'activeBuffs' => (object) $activeBuffs,
             'shimmersClicked' => (int) ($state['stats']['shimmersClicked'] ?? 0),
@@ -501,6 +509,7 @@ final class DespertarService
                 'souls' => $client['souls'],
                 'generators' => $client['generators'],
                 'upgrades' => $client['upgrades'],
+                'talents' => $client['talents'] ?? $db['talents'] ?? [],
             ])) {
                 return ['ok' => false, 'error' => "Juramento sem requisito: {$id}"];
             }
@@ -619,9 +628,22 @@ final class DespertarService
 
         $mergedMilestones = $db['milestones'];
         foreach ($client['milestones'] as $k => $v) {
-            if ($v) {
-                $mergedMilestones[(string) $k] = true;
+            $key = (string) $k;
+            // Flags booleanas (ex.: ascensionOpen) precisam aceitar true/false —
+            // o antigo `if ($v) = true` nunca gravava false e quebrava o Rio.
+            if ($key === 'ascensionOpen') {
+                $mergedMilestones[$key] = (bool) $v;
+                continue;
             }
+            if ($v) {
+                $mergedMilestones[$key] = true;
+            }
+        }
+        // Top-level do cliente também conta (toSnapshot manda os dois).
+        if (array_key_exists('ascensionOpen', $clientState)) {
+            $mergedMilestones['ascensionOpen'] = (bool) $clientState['ascensionOpen'];
+        } elseif (!array_key_exists('ascensionOpen', $mergedMilestones)) {
+            $mergedMilestones['ascensionOpen'] = (bool) ($db['ascensionOpen'] ?? false);
         }
 
         // Fase F2 / F6: Determina se a Catábase está ativa a partir dos upgrades/estado do cliente antes de validar buffs Wrath
@@ -687,16 +709,68 @@ final class DespertarService
         $stats['shimmersMissed'] = max((int) ($stats['shimmersMissed'] ?? 0), $clientShimmersMissed);
         $stats['wrathClicked'] = max((int) ($stats['wrathClicked'] ?? 0), $clientWrathClicked);
 
+        // Talentos: união db ∪ client quando o spend é coerente (selo otimista offline).
+        // Conservação usa spend do CLIENT (não da união) — união inflava o total e rejeitava selos.
+        $dbTalents = is_array($db['talents'] ?? null) ? array_values(array_map('strval', $db['talents'])) : [];
+        $clientTalentsRaw = self::asStringArray($clientState['talents'] ?? $clientState['talents_state'] ?? []);
+        $clientTalentMig = DespertarFormulas::migrateTalentSave($clientTalentsRaw, '0');
+        $clientTalents = $clientTalentMig['talents'];
+        $talentUnionMap = [];
+        foreach (array_merge($dbTalents, $clientTalents) as $tid) {
+            $talentUnionMap[(string) $tid] = true;
+        }
+        $talentUnion = array_keys($talentUnionMap);
+        $dbMne = DespertarDecimal::money(DespertarDecimal::decimalString($db['mnemosyne'] ?? '0'));
+        $clientMne = DespertarDecimal::money(DespertarDecimal::decimalString(
+            $clientState['mnemosyne'] ?? $db['mnemosyne'] ?? '0'
+        ));
+        $dbSpend = DespertarFormulas::talentSpend($dbTalents);
+        $clientSpend = DespertarFormulas::talentSpend($clientTalents);
+        $totalDb = DespertarDecimal::add($dbMne, $dbSpend);
+        $totalClient = DespertarDecimal::add($clientMne, $clientSpend);
+        $mergedTalents = $dbTalents;
+        $mergedMnemosyne = $dbMne;
+        $ascensionForMerge = (bool) ($mergedMilestones['ascensionOpen'] ?? false)
+            || (bool) ($clientState['ascensionOpen'] ?? false)
+            || (bool) ($db['ascensionOpen'] ?? false);
+        if (DespertarDecimal::cmp($totalClient, $totalDb) <= 0) {
+            $mergedTalents = array_values($talentUnion);
+            $mergedMnemosyne = DespertarDecimal::cmp($dbMne, $clientMne) <= 0
+                ? $dbMne
+                : $clientMne;
+            $mergedMnemosyne = DespertarDecimal::money($mergedMnemosyne);
+        } elseif ($ascensionForMerge) {
+            // Catábase: aceita selos só-client se o custo dos NOVOS cabe na essência do DB.
+            $newOnly = [];
+            $dbSet = array_fill_keys($dbTalents, true);
+            foreach ($clientTalents as $tid) {
+                if (!isset($dbSet[(string) $tid])) {
+                    $newOnly[] = (string) $tid;
+                }
+            }
+            $newSpend = DespertarFormulas::talentSpend($newOnly);
+            if (DespertarDecimal::cmp($newSpend, $dbMne) <= 0) {
+                $mergedTalents = array_values($talentUnion);
+                $afterCharge = DespertarDecimal::sub($dbMne, $newSpend);
+                $mergedMnemosyne = DespertarDecimal::money(
+                    DespertarDecimal::cmp($clientMne, $afterCharge) <= 0 ? $clientMne : $afterCharge
+                );
+            }
+        }
+
         $next = array_merge($db, [
             'souls' => $client['souls'],
             'generators' => $client['generators'],
             'shinyCounts' => $client['shinyCounts'],
             'goldCounts' => $client['goldCounts'],
             'upgrades' => $client['upgrades'],
+            'talents' => $mergedTalents,
+            'mnemosyne' => $mergedMnemosyne,
             'runSouls' => $client['runSouls'],
             'lifetimeSouls' => $client['lifetimeSouls'],
             'eduLogsSeen' => $mergedLogs,
             'milestones' => $mergedMilestones,
+            'ascensionOpen' => (bool) ($mergedMilestones['ascensionOpen'] ?? false),
             'stats' => $stats,
             'activeBuffs' => $validatedBuffs,
             'nectar' => $f5Res['nectar'],
@@ -771,6 +845,10 @@ final class DespertarService
         // Sanitize edu logs
         $sanitizedLogs = DespertarFormulas::sanitizeEduLogsSeen($next['eduLogsSeen'], $next, true);
         $next['eduLogsSeen'] = $sanitizedLogs;
+
+        // Heal automático Lethe V2 (carteiras inchadas pós-softcap / árvore cara).
+        $letheV2 = DespertarFormulas::applyLetheRebalanceV2ToState($next);
+        $next = $letheV2['state'];
 
         return $withEcho([
             'ok' => true,
@@ -862,6 +940,8 @@ final class DespertarService
             $nextMilestones['f5Nectar']['nectarFrenzyUsedThisRun'] = false;
         }
 
+        $nextMilestones['ascensionOpen'] = true;
+
         $next = array_merge($db, [
             'obols' => DespertarDecimal::money(DespertarDecimal::add($db['obols'], $preview['obolsGain'])),
             'mnemosyne' => DespertarDecimal::money(DespertarDecimal::add($db['mnemosyne'], $preview['mnemosyneGain'])),
@@ -873,6 +953,7 @@ final class DespertarService
             'souls' => $startingSouls,
             'runSouls' => $startingSouls,
             'milestones' => $nextMilestones,
+            'ascensionOpen' => true,
             'activeBuffs' => [],
             'catabase' => $resetCatabase,
             'catabaseActive' => false,
@@ -898,24 +979,54 @@ final class DespertarService
     {
         $db = self::rowToCanonical($dbRow);
         $nowIso = Database::nowIso($nowMs);
-        $tid = is_string($talentId) ? trim($talentId) : '';
-        $talent = DespertarCatalog::TALENTS[$tid] ?? null;
+        if (is_string($talentId)) {
+            $tid = trim($talentId);
+        } elseif (is_int($talentId) || is_float($talentId)) {
+            $tid = trim((string) $talentId);
+        } else {
+            $tid = '';
+        }
+        $talent = ($tid !== '' && isset(DespertarCatalog::TALENTS[$tid]))
+            ? DespertarCatalog::TALENTS[$tid]
+            : null;
 
         if (!$talent) {
+            $hint = $tid !== '' ? " (id: {$tid})" : ' (id vazio)';
             return [
                 'ok' => false,
                 'status' => 400,
-                'error' => 'Talento desconhecido.',
+                'error' => 'Talento desconhecido.' . $hint,
                 'state' => self::buildStateDto($db),
             ];
         }
+        $ascensionOpen = (bool) ($db['ascensionOpen'] ?? ($db['milestones']['ascensionOpen'] ?? false));
+        // Client só chama talentBuy com o Rio aberto; se o flush do flag atrasou, abre aqui.
+        if (!$ascensionOpen) {
+            $milestones = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+            $milestones['ascensionOpen'] = true;
+            $db['ascensionOpen'] = true;
+            $db['milestones'] = $milestones;
+        }
         if (in_array($tid, $db['talents'], true)) {
+            // Idempotente: já selado = sucesso (evita rollback otimista no client).
             return [
-                'ok' => false,
-                'status' => 400,
-                'error' => 'Talento já está na memória.',
+                'ok' => true,
+                'status' => 200,
                 'state' => self::buildStateDto($db),
+                'patch' => [],
+                'next' => $db,
             ];
+        }
+        $requires = is_array($talent['requires'] ?? null) ? $talent['requires'] : [];
+        foreach ($requires as $needId) {
+            if (!in_array((string) $needId, $db['talents'], true)) {
+                return [
+                    'ok' => false,
+                    'status' => 400,
+                    'error' => 'Ainda faltam vertentes no rio para este selo.',
+                    'state' => self::buildStateDto($db),
+                ];
+            }
         }
         if (DespertarDecimal::cmp($db['mnemosyne'], $talent['cost']) < 0) {
             return [
@@ -932,6 +1043,32 @@ final class DespertarService
             'lastSyncAt' => $nowIso,
         ]);
 
+        return [
+            'ok' => true,
+            'status' => 200,
+            'state' => self::buildStateDto($next),
+            'patch' => self::canonicalToRowPatch($next, $nowIso),
+            'next' => $next,
+        ];
+    }
+
+    /**
+     * Fecha a tela do Rio do Lethe (pós-ascensão) — não cobra essência.
+     *
+     * @param array<string, mixed> $dbRow
+     * @return array<string, mixed>
+     */
+    public static function applyCloseAscension(array $dbRow, ?int $nowMs = null): array
+    {
+        $db = self::rowToCanonical($dbRow);
+        $nowIso = Database::nowIso($nowMs);
+        $milestones = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+        $milestones['ascensionOpen'] = false;
+        $next = array_merge($db, [
+            'ascensionOpen' => false,
+            'milestones' => $milestones,
+            'lastSyncAt' => $nowIso,
+        ]);
         return [
             'ok' => true,
             'status' => 200,
@@ -1764,7 +1901,8 @@ final class DespertarService
                 $aligned++;
             }
 
-            if (count($samples) < 12 && ($plan['changed'] || ($plan['skipped'] && $plan['reason'] === 'already_rebalanced'))) {
+            $sampleReasons = ['already_rebalanced', 'already_rebalanced_v2'];
+            if (count($samples) < 12 && ($plan['changed'] || ($plan['skipped'] && in_array($plan['reason'], $sampleReasons, true)))) {
                 $samples[] = [
                     'userId' => $uid,
                     'prestigeCount' => $plan['prestigeCount'],
@@ -1782,27 +1920,17 @@ final class DespertarService
                 continue;
             }
 
-            $milestones = is_array($canonical['milestones'] ?? null) ? $canonical['milestones'] : [];
-            $milestones[DespertarCatalog::LETHE_REBALANCE_MILESTONE] = true;
-
-            if ($plan['skipped'] && !$force) {
+            $healed = DespertarFormulas::applyLetheRebalanceV2ToState($canonical, $force);
+            if (!$healed['applied'] && !$force) {
                 continue;
             }
 
-            $patch = [
-                'obols' => $plan['obolsAfter'],
-                'mnemosyne' => $plan['mnemosyneAfter'],
-                'milestones' => $milestones,
+            self::persistPatch($uid, [
+                'obols' => $healed['state']['obols'],
+                'mnemosyne' => $healed['state']['mnemosyne'],
+                'milestones' => $healed['state']['milestones'],
                 'updated_at' => $nowIso,
-            ];
-            // Mesmo alinhado: grava milestone para não reprocessar.
-            if (!$plan['changed'] && !$force) {
-                $patch = [
-                    'milestones' => $milestones,
-                    'updated_at' => $nowIso,
-                ];
-            }
-            self::persistPatch($uid, $patch);
+            ]);
         }
 
         return [
@@ -1830,7 +1958,7 @@ final class DespertarService
         $stmt->execute([':uid' => $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         if ($row) {
-            return self::hydrateStateRow($row);
+            return self::persistLetheRebalanceV2IfNeeded(self::hydrateStateRow($row));
         }
 
         $nowSql = Database::nowSql();
@@ -1849,7 +1977,38 @@ final class DespertarService
 
         $stmt->execute([':uid' => $userId]);
         $created = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['user_id' => $userId];
-        return self::hydrateStateRow($created);
+        return self::persistLetheRebalanceV2IfNeeded(self::hydrateStateRow($created));
+    }
+
+    /**
+     * Heal automático Lethe V2 no load (stateGet / sync bootstrap).
+     *
+     * @param array<string, mixed> $row
+     * @return array<string, mixed>
+     */
+    private static function persistLetheRebalanceV2IfNeeded(array $row): array
+    {
+        $uid = (int) ($row['user_id'] ?? 0);
+        if ($uid <= 0) {
+            return $row;
+        }
+        $canonical = self::rowToCanonical($row);
+        $healed = DespertarFormulas::applyLetheRebalanceV2ToState($canonical);
+        if (!$healed['applied']) {
+            return $row;
+        }
+        $nowIso = Database::nowIso();
+        self::persistPatch($uid, [
+            'obols' => $healed['state']['obols'],
+            'mnemosyne' => $healed['state']['mnemosyne'],
+            'milestones' => $healed['state']['milestones'],
+            'updated_at' => $nowIso,
+        ]);
+        $row['obols'] = $healed['state']['obols'];
+        $row['mnemosyne'] = $healed['state']['mnemosyne'];
+        $row['milestones'] = $healed['state']['milestones'];
+        $row['updated_at'] = $nowIso;
+        return $row;
     }
 
     /**

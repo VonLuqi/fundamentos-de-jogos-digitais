@@ -9,6 +9,7 @@ import {
   despertarJuizoAbandon,
   despertarJuizoGuess,
   despertarJuizoStart,
+  despertarCloseAscension,
   despertarPrestige,
   despertarStateGet,
   despertarStateSync,
@@ -53,8 +54,25 @@ export class ApiService {
     this._timer = null;
     this._flushTimer = null;
     this._inFlight = null;
+    /** Fila serial: flush / talentBuy / prestige não se sobrepõem (anti lost-update). */
+    this._mutQueue = Promise.resolve();
     this._lastSyncAt = 0;
     this._dirty = false;
+  }
+
+  /**
+   * Enfileira mutação de rede. Erros propagam ao caller; a fila continua.
+   * @template T
+   * @param {() => Promise<T>} fn
+   * @returns {Promise<T>}
+   */
+  _enqueueMutation(fn) {
+    const run = this._mutQueue.then(() => fn());
+    this._mutQueue = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
   }
 
   /** @param {string} phase @param {Record<string, unknown>} [extra] */
@@ -145,6 +163,10 @@ export class ApiService {
   }
 
   async flush() {
+    return this._enqueueMutation(() => this._flushNow());
+  }
+
+  async _flushNow() {
     if (this._inFlight) {
       this._diag('flush:reuse-in-flight');
       return this._inFlight;
@@ -155,6 +177,7 @@ export class ApiService {
     const token = this.getToken();
     if (!token) return null;
 
+    // Snapshot na hora da execução (após talentBuy enfileirado antes).
     const snapshot = this.getSnapshot();
     const epochAtSend = Number(snapshot?.clientEpoch ?? snapshot?.syncEpoch) || 0;
     const soulsAtSend = snapshot?.souls != null ? String(snapshot.souls) : null;
@@ -221,8 +244,9 @@ export class ApiService {
           elapsedMs,
         });
         if (payload.state) {
+          // Nunca replace no reject: apagava selos otimistas do Rio (flash comprou→voltou).
           this.applyServerState(payload.state, {
-            mode: 'replace',
+            mode: 'reconcile',
             ok: false,
             epochAtSend,
             elapsedMs,
@@ -237,7 +261,7 @@ export class ApiService {
           payload,
         });
         if (status === 400 || status === 409) {
-          this._dirty = false;
+          // Mantém dirty se ainda há mutação local — próximo flush/talentBuy tenta de novo.
           this._lastSyncAt = this.now();
         }
         this._diag('flush:reject-after-apply', { status, dirty: this._dirty });
@@ -252,42 +276,64 @@ export class ApiService {
   }
 
   async prestige() {
-    const token = this.getToken();
-    if (!token) return null;
-    const result = await despertarPrestige(token);
-    if (result?.state) {
-      this.applyServerState(result.state, { mode: 'replace', ok: true });
-      this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
-      this._lastSyncAt = this.now();
-      this._dirty = false;
-    }
-    return result;
+    return this._enqueueMutation(async () => {
+      const token = this.getToken();
+      if (!token) return null;
+      const result = await despertarPrestige(token);
+      if (result?.state) {
+        this.applyServerState(result.state, { mode: 'replace', ok: true });
+        this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
+        this._lastSyncAt = this.now();
+        this._dirty = false;
+      }
+      return result;
+    });
   }
 
   async talentBuy(talentId) {
-    const token = this.getToken();
-    if (!token) return null;
-    const result = await despertarTalentBuy(token, talentId);
-    if (result?.state) {
-      this.applyServerState(result.state, { mode: 'replace', ok: true });
-      this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
-      this._lastSyncAt = this.now();
-      this._dirty = false;
-    }
-    return result;
+    return this._enqueueMutation(async () => {
+      const token = this.getToken();
+      if (!token) return null;
+      const result = await despertarTalentBuy(token, talentId);
+      if (result?.state) {
+        // reconcile: não apaga outros selos otimistas ainda só-locais
+        this.applyServerState(result.state, { mode: 'reconcile', ok: true });
+        this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
+        this._lastSyncAt = this.now();
+        this._dirty = false;
+      }
+      return result;
+    });
+  }
+
+  async closeAscension() {
+    return this._enqueueMutation(async () => {
+      const token = this.getToken();
+      if (!token) return null;
+      const result = await despertarCloseAscension(token);
+      if (result?.state) {
+        this.applyServerState(result.state, { mode: 'replace', ok: true });
+        this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
+        this._lastSyncAt = this.now();
+        this._dirty = false;
+      }
+      return result;
+    });
   }
 
   async verdictBuy(purchaseId) {
-    const token = this.getToken();
-    if (!token) return null;
-    const result = await despertarVerdictBuy(token, purchaseId);
-    if (result?.state) {
-      this.applyServerState(result.state, { mode: 'replace', ok: true });
-      this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
-      this._lastSyncAt = this.now();
-      this._dirty = false;
-    }
-    return result;
+    return this._enqueueMutation(async () => {
+      const token = this.getToken();
+      if (!token) return null;
+      const result = await despertarVerdictBuy(token, purchaseId);
+      if (result?.state) {
+        this.applyServerState(result.state, { mode: 'replace', ok: true });
+        this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });
+        this._lastSyncAt = this.now();
+        this._dirty = false;
+      }
+      return result;
+    });
   }
 
   async debugSandbox() {

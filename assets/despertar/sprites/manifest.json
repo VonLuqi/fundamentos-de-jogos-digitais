@@ -2361,146 +2361,6 @@
       "svg": "upgrades/o_imperador_eterno_trezentos.svg",
       "size": 128
     },
-    "cortejo_das_margens_i": {
-      "name": "Cortejo das Margens Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/cortejo_das_margens_i.webp",
-      "svg": "upgrades/cortejo_das_margens_i.svg",
-      "size": 128
-    },
-    "cortejo_das_margens_ii": {
-      "name": "Cortejo das Margens Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/cortejo_das_margens_ii.webp",
-      "svg": "upgrades/cortejo_das_margens_ii.svg",
-      "size": 128
-    },
-    "brasa_cruzada_i": {
-      "name": "Brasa Cruzada Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/brasa_cruzada_i.webp",
-      "svg": "upgrades/brasa_cruzada_i.svg",
-      "size": 128
-    },
-    "brasa_cruzada_ii": {
-      "name": "Brasa Cruzada Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/brasa_cruzada_ii.webp",
-      "svg": "upgrades/brasa_cruzada_ii.svg",
-      "size": 128
-    },
-    "guardiao_dos_umbrais_i": {
-      "name": "Guardião dos Umbrais Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/guardiao_dos_umbrais_i.webp",
-      "svg": "upgrades/guardiao_dos_umbrais_i.svg",
-      "size": 128
-    },
-    "guardiao_dos_umbrais_ii": {
-      "name": "Guardião dos Umbrais Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/guardiao_dos_umbrais_ii.webp",
-      "svg": "upgrades/guardiao_dos_umbrais_ii.svg",
-      "size": 128
-    },
-    "jurisprudencia_arcana_i": {
-      "name": "Jurisprudência Arcana Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/jurisprudencia_arcana_i.webp",
-      "svg": "upgrades/jurisprudencia_arcana_i.svg",
-      "size": 128
-    },
-    "jurisprudencia_arcana_ii": {
-      "name": "Jurisprudência Arcana Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/jurisprudencia_arcana_ii.webp",
-      "svg": "upgrades/jurisprudencia_arcana_ii.svg",
-      "size": 128
-    },
-    "alquimia_estelar_i": {
-      "name": "Alquimia Estelar Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/alquimia_estelar_i.webp",
-      "svg": "upgrades/alquimia_estelar_i.svg",
-      "size": 128
-    },
-    "alquimia_estelar_ii": {
-      "name": "Alquimia Estelar Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/alquimia_estelar_ii.webp",
-      "svg": "upgrades/alquimia_estelar_ii.svg",
-      "size": 128
-    },
-    "trama_do_erebo_i": {
-      "name": "Trama do Érebo Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/trama_do_erebo_i.webp",
-      "svg": "upgrades/trama_do_erebo_i.svg",
-      "size": 128
-    },
-    "trama_do_erebo_ii": {
-      "name": "Trama do Érebo Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/trama_do_erebo_ii.webp",
-      "svg": "upgrades/trama_do_erebo_ii.svg",
-      "size": 128
-    },
-    "refracao_do_vazio_i": {
-      "name": "Refração do Vazio Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/refracao_do_vazio_i.webp",
-      "svg": "upgrades/refracao_do_vazio_i.svg",
-      "size": 128
-    },
-    "refracao_do_vazio_ii": {
-      "name": "Refração do Vazio Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/refracao_do_vazio_ii.webp",
-      "svg": "upgrades/refracao_do_vazio_ii.svg",
-      "size": 128
-    },
-    "geometria_do_acaso_i": {
-      "name": "Geometria do Acaso Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/geometria_do_acaso_i.webp",
-      "svg": "upgrades/geometria_do_acaso_i.svg",
-      "size": 128
-    },
-    "geometria_do_acaso_ii": {
-      "name": "Geometria do Acaso Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/geometria_do_acaso_ii.webp",
-      "svg": "upgrades/geometria_do_acaso_ii.svg",
-      "size": 128
-    },
-    "compilacao_multiversal_i": {
-      "name": "Compilação Multiversal Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/compilacao_multiversal_i.webp",
-      "svg": "upgrades/compilacao_multiversal_i.svg",
-      "size": 128
-    },
-    "compilacao_multiversal_ii": {
-      "name": "Compilação Multiversal Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/compilacao_multiversal_ii.webp",
-      "svg": "upgrades/compilacao_multiversal_ii.svg",
-      "size": 128
-    },
-    "soberania_psiquica_i": {
-      "name": "Soberania Psíquica Vol. I",
-      "kind": "synergyMult",
-      "webp": "upgrades/soberania_psiquica_i.webp",
-      "svg": "upgrades/soberania_psiquica_i.svg",
-      "size": 128
-    },
-    "soberania_psiquica_ii": {
-      "name": "Soberania Psíquica Vol. II",
-      "kind": "synergyMult",
-      "webp": "upgrades/soberania_psiquica_ii.webp",
-      "svg": "upgrades/soberania_psiquica_ii.svg",
-      "size": 128
-    },
     "servos_do_vazio": {
       "name": "Servos do Vazio",
       "kind": "synergyMult",
@@ -2920,6 +2780,258 @@
       "webp": "upgrades/fortune_gen_the_emperor.webp",
       "svg": "upgrades/fortune_gen_the_emperor.svg",
       "size": 128
+    },
+    "almanaques_do_destino_i": {
+      "name": "Almanaques do Destino Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/almanaques_do_destino_i.webp",
+      "svg": "upgrades/almanaques_do_destino_i.svg",
+      "size": 128
+    },
+    "magia_sismica_i": {
+      "name": "Magia Sísmica Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/magia_sismica_i.webp",
+      "svg": "upgrades/magia_sismica_i.svg",
+      "size": 128
+    },
+    "eletronica_quantica_i": {
+      "name": "Eletrônica Quântica Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/eletronica_quantica_i.webp",
+      "svg": "upgrades/eletronica_quantica_i.svg",
+      "size": 128
+    },
+    "contratos_do_alem_i": {
+      "name": "Contratos do Além Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/contratos_do_alem_i.webp",
+      "svg": "upgrades/contratos_do_alem_i.svg",
+      "size": 128
+    },
+    "paganismo_erebo_i": {
+      "name": "Paganismo do Érebo Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/paganismo_erebo_i.webp",
+      "svg": "upgrades/paganismo_erebo_i.svg",
+      "size": 128
+    },
+    "saber_arcano_i": {
+      "name": "Saber Arcano Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/saber_arcano_i.webp",
+      "svg": "upgrades/saber_arcano_i.svg",
+      "size": 128
+    },
+    "combustivel_fossilisado_i": {
+      "name": "Combustível Fossilizado Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/combustivel_fossilisado_i.webp",
+      "svg": "upgrades/combustivel_fossilisado_i.svg",
+      "size": 128
+    },
+    "minerios_primordiais_i": {
+      "name": "Minérios Primordiais Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/minerios_primordiais_i.webp",
+      "svg": "upgrades/minerios_primordiais_i.svg",
+      "size": 128
+    },
+    "colheitas_infernais_i": {
+      "name": "Colheitas Infernais Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/colheitas_infernais_i.webp",
+      "svg": "upgrades/colheitas_infernais_i.svg",
+      "size": 128
+    },
+    "salto_parsec_i": {
+      "name": "Salto de Parsec Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/salto_parsec_i.webp",
+      "svg": "upgrades/salto_parsec_i.svg",
+      "size": 128
+    },
+    "verba_da_fisica_i": {
+      "name": "Verba da Física Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/verba_da_fisica_i.webp",
+      "svg": "upgrades/verba_da_fisica_i.svg",
+      "size": 128
+    },
+    "magia_luminosa_i": {
+      "name": "Magia Luminosa Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/magia_luminosa_i.webp",
+      "svg": "upgrades/magia_luminosa_i.svg",
+      "size": 128
+    },
+    "talismas_cravejados_i": {
+      "name": "Talismãs Cravejados Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/talismas_cravejados_i.webp",
+      "svg": "upgrades/talismas_cravejados_i.svg",
+      "size": 128
+    },
+    "espelhos_recursivos_i": {
+      "name": "Espelhos Recursivos Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/espelhos_recursivos_i.webp",
+      "svg": "upgrades/espelhos_recursivos_i.svg",
+      "size": 128
+    },
+    "avoas_script_i": {
+      "name": "Avós de Script Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/avoas_script_i.webp",
+      "svg": "upgrades/avoas_script_i.svg",
+      "size": 128
+    },
+    "cosmos_mil_folhas_i": {
+      "name": "Cosmos Mil-Folhas Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/cosmos_mil_folhas_i.webp",
+      "svg": "upgrades/cosmos_mil_folhas_i.svg",
+      "size": 128
+    },
+    "pensamentos_e_preces_i": {
+      "name": "Pensamentos e Preces Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/pensamentos_e_preces_i.webp",
+      "svg": "upgrades/pensamentos_e_preces_i.svg",
+      "size": 128
+    },
+    "desenvolvimento_acelerado_i": {
+      "name": "Desenvolvimento Acelerado Vol. I",
+      "kind": "synergyMult",
+      "webp": "upgrades/desenvolvimento_acelerado_i.webp",
+      "svg": "upgrades/desenvolvimento_acelerado_i.svg",
+      "size": 128
+    },
+    "oracao_da_chuva_ii": {
+      "name": "Oração da Chuva Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/oracao_da_chuva_ii.webp",
+      "svg": "upgrades/oracao_da_chuva_ii.svg",
+      "size": 128
+    },
+    "mineracao_asteroide_ii": {
+      "name": "Mineração de Asteroides Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/mineracao_asteroide_ii.webp",
+      "svg": "upgrades/mineracao_asteroide_ii.svg",
+      "size": 128
+    },
+    "overclock_temporal_ii": {
+      "name": "Overclock Temporal Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/overclock_temporal_ii.webp",
+      "svg": "upgrades/overclock_temporal_ii.svg",
+      "size": 128
+    },
+    "prensas_de_obolo_ii": {
+      "name": "Prensas de Óbolo Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/prensas_de_obolo_ii.webp",
+      "svg": "upgrades/prensas_de_obolo_ii.svg",
+      "size": 128
+    },
+    "particula_divina_ii": {
+      "name": "Partícula Divina Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/particula_divina_ii.webp",
+      "svg": "upgrades/particula_divina_ii.svg",
+      "size": 128
+    },
+    "botanica_magica_ii": {
+      "name": "Botânica Mágica Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/botanica_magica_ii.webp",
+      "svg": "upgrades/botanica_magica_ii.svg",
+      "size": 128
+    },
+    "estaleiros_estigios_ii": {
+      "name": "Estaleiros Estígios Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/estaleiros_estigios_ii.webp",
+      "svg": "upgrades/estaleiros_estigios_ii.svg",
+      "size": 128
+    },
+    "fundo_de_ouro_ii": {
+      "name": "Fundo de Ouro Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/fundo_de_ouro_ii.webp",
+      "svg": "upgrades/fundo_de_ouro_ii.svg",
+      "size": 128
+    },
+    "brilho_abissal_ii": {
+      "name": "Brilho Abissal Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/brilho_abissal_ii.webp",
+      "svg": "upgrades/brilho_abissal_ii.svg",
+      "size": 128
+    },
+    "fulgor_primitivo_ii": {
+      "name": "Fulgor Primitivo Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/fulgor_primitivo_ii.webp",
+      "svg": "upgrades/fulgor_primitivo_ii.svg",
+      "size": 128
+    },
+    "pericia_quimica_ii": {
+      "name": "Perícia Química Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/pericia_quimica_ii.webp",
+      "svg": "upgrades/pericia_quimica_ii.svg",
+      "size": 128
+    },
+    "energias_misticas_ii": {
+      "name": "Energias Místicas Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/energias_misticas_ii.webp",
+      "svg": "upgrades/energias_misticas_ii.svg",
+      "size": 128
+    },
+    "quarks_encantados_ii": {
+      "name": "Quarks Encantados Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/quarks_encantados_ii.webp",
+      "svg": "upgrades/quarks_encantados_ii.svg",
+      "size": 128
+    },
+    "camundongos_clicando_ii": {
+      "name": "Camundongos Clicando Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/camundongos_clicando_ii.webp",
+      "svg": "upgrades/camundongos_clicando_ii.svg",
+      "size": 128
+    },
+    "tombola_oracular_ii": {
+      "name": "Tômbola Oracular Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/tombola_oracular_ii.webp",
+      "svg": "upgrades/tombola_oracular_ii.svg",
+      "size": 128
+    },
+    "infraversos_ii": {
+      "name": "Infraversos e Superversos Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/infraversos_ii.webp",
+      "svg": "upgrades/infraversos_ii.svg",
+      "size": 128
+    },
+    "mentes_ferteis_ii": {
+      "name": "Mentes Férteis Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/mentes_ferteis_ii.webp",
+      "svg": "upgrades/mentes_ferteis_ii.svg",
+      "size": 128
+    },
+    "revisao_por_pares_ii": {
+      "name": "Revisão por Pares Vol. II",
+      "kind": "synergyMult",
+      "webp": "upgrades/revisao_por_pares_ii.webp",
+      "svg": "upgrades/revisao_por_pares_ii.svg",
+      "size": 128
     }
   },
   "shimmers": {
@@ -3290,6 +3402,464 @@
       "webp": "seasons/corca_de_artemis.webp",
       "svg": "seasons/corca_de_artemis.svg",
       "size": 128
+    }
+  },
+  "talents": {
+    "memoria_das_sombras": {
+      "webp": "talents/memoria_das_sombras.webp",
+      "svg": "talents/memoria_das_sombras.svg"
+    },
+    "foice_ancestral": {
+      "webp": "talents/foice_ancestral.webp",
+      "svg": "talents/foice_ancestral.svg"
+    },
+    "margem_generosa": {
+      "webp": "talents/margem_generosa.webp",
+      "svg": "talents/margem_generosa.svg"
+    },
+    "preludio_ctoniano": {
+      "webp": "talents/preludio_ctoniano.webp",
+      "svg": "talents/preludio_ctoniano.svg"
+    },
+    "segundo_folego": {
+      "webp": "talents/segundo_folego.webp",
+      "svg": "talents/segundo_folego.svg"
+    },
+    "lamina_viva": {
+      "webp": "talents/lamina_viva.webp",
+      "svg": "talents/lamina_viva.svg"
+    },
+    "rebanho_despertado": {
+      "webp": "talents/rebanho_despertado.webp",
+      "svg": "talents/rebanho_despertado.svg"
+    },
+    "mare_inicial": {
+      "webp": "talents/mare_inicial.webp",
+      "svg": "talents/mare_inicial.svg"
+    },
+    "torrente_das_umbras": {
+      "webp": "talents/torrente_das_umbras.webp",
+      "svg": "talents/torrente_das_umbras.svg"
+    },
+    "favor_de_caronte": {
+      "webp": "talents/favor_de_caronte.webp",
+      "svg": "talents/favor_de_caronte.svg"
+    },
+    "olho_da_curva": {
+      "webp": "talents/olho_da_curva.webp",
+      "svg": "talents/olho_da_curva.svg"
+    },
+    "nectar_em_reserva": {
+      "webp": "talents/nectar_em_reserva.webp",
+      "svg": "talents/nectar_em_reserva.svg"
+    },
+    "servo_das_margens": {
+      "webp": "talents/servo_das_margens.webp",
+      "svg": "talents/servo_das_margens.svg"
+    },
+    "matilha_cerberiana": {
+      "webp": "talents/matilha_cerberiana.webp",
+      "svg": "talents/matilha_cerberiana.svg"
+    },
+    "ovo_primordial": {
+      "webp": "talents/ovo_primordial.webp",
+      "svg": "talents/ovo_primordial.svg"
+    },
+    "forja_despertada": {
+      "webp": "talents/forja_despertada.webp",
+      "svg": "talents/forja_despertada.svg"
+    },
+    "frenesi_de_nectar_talento": {
+      "webp": "talents/frenesi_de_nectar_talento.webp",
+      "svg": "talents/frenesi_de_nectar_talento.svg"
+    },
+    "trono_sombrio": {
+      "webp": "talents/trono_sombrio.webp",
+      "svg": "talents/trono_sombrio.svg"
+    },
+    "imperio_fluvial": {
+      "webp": "talents/imperio_fluvial.webp",
+      "svg": "talents/imperio_fluvial.svg"
+    },
+    "juramento_eterno": {
+      "webp": "talents/juramento_eterno.webp",
+      "svg": "talents/juramento_eterno.svg"
+    },
+    "noite_prolongada": {
+      "webp": "talents/noite_prolongada.webp",
+      "svg": "talents/noite_prolongada.svg"
+    },
+    "veu_eficiente": {
+      "webp": "talents/veu_eficiente.webp",
+      "svg": "talents/veu_eficiente.svg"
+    },
+    "eco_do_styx": {
+      "webp": "talents/eco_do_styx.webp",
+      "svg": "talents/eco_do_styx.svg"
+    },
+    "pacto_do_silencio": {
+      "webp": "talents/pacto_do_silencio.webp",
+      "svg": "talents/pacto_do_silencio.svg"
+    },
+    "mnemosyne_profunda": {
+      "webp": "talents/mnemosyne_profunda.webp",
+      "svg": "talents/mnemosyne_profunda.svg"
+    },
+    "eco_ressonante": {
+      "webp": "talents/eco_ressonante.webp",
+      "svg": "talents/eco_ressonante.svg"
+    },
+    "rodizio_das_estacoes": {
+      "webp": "talents/rodizio_das_estacoes.webp",
+      "svg": "talents/rodizio_das_estacoes.svg"
+    },
+    "legado_do_rio": {
+      "webp": "talents/legado_do_rio.webp",
+      "svg": "talents/legado_do_rio.svg"
+    },
+    "calice_da_memoria": {
+      "webp": "talents/calice_da_memoria.webp",
+      "svg": "talents/calice_da_memoria.svg"
+    },
+    "eco_ancestral_iii": {
+      "webp": "talents/eco_ancestral_iii.webp",
+      "svg": "talents/eco_ancestral_iii.svg"
+    },
+    "mnemosyne_tripla": {
+      "webp": "talents/mnemosyne_tripla.webp",
+      "svg": "talents/mnemosyne_tripla.svg"
+    },
+    "eco_ancestral_iv": {
+      "webp": "talents/eco_ancestral_iv.webp",
+      "svg": "talents/eco_ancestral_iv.svg"
+    },
+    "eco_ancestral_v": {
+      "webp": "talents/eco_ancestral_v.webp",
+      "svg": "talents/eco_ancestral_v.svg"
+    },
+    "mnemosyne_raiz": {
+      "webp": "talents/mnemosyne_raiz.webp",
+      "svg": "talents/mnemosyne_raiz.svg"
+    },
+    "foice_afilada_rio": {
+      "webp": "talents/foice_afilada_rio.webp",
+      "svg": "talents/foice_afilada_rio.svg"
+    },
+    "almas_centenas": {
+      "webp": "talents/almas_centenas.webp",
+      "svg": "talents/almas_centenas.svg"
+    },
+    "sombra_centuria": {
+      "webp": "talents/sombra_centuria.webp",
+      "svg": "talents/sombra_centuria.svg"
+    },
+    "foice_profunda": {
+      "webp": "talents/foice_profunda.webp",
+      "svg": "talents/foice_profunda.svg"
+    },
+    "almas_milhao": {
+      "webp": "talents/almas_milhao.webp",
+      "svg": "talents/almas_milhao.svg"
+    },
+    "eco_da_foice_rio": {
+      "webp": "talents/eco_da_foice_rio.webp",
+      "svg": "talents/eco_da_foice_rio.svg"
+    },
+    "legiao_das_umbras": {
+      "webp": "talents/legiao_das_umbras.webp",
+      "svg": "talents/legiao_das_umbras.svg"
+    },
+    "foice_voraz": {
+      "webp": "talents/foice_voraz.webp",
+      "svg": "talents/foice_voraz.svg"
+    },
+    "almas_dezena_milhao": {
+      "webp": "talents/almas_dezena_milhao.webp",
+      "svg": "talents/almas_dezena_milhao.svg"
+    },
+    "preludio_eterno": {
+      "webp": "talents/preludio_eterno.webp",
+      "svg": "talents/preludio_eterno.svg"
+    },
+    "margem_abundante": {
+      "webp": "talents/margem_abundante.webp",
+      "svg": "talents/margem_abundante.svg"
+    },
+    "sombra_mil": {
+      "webp": "talents/sombra_mil.webp",
+      "svg": "talents/sombra_mil.svg"
+    },
+    "foice_absoluta": {
+      "webp": "talents/foice_absoluta.webp",
+      "svg": "talents/foice_absoluta.svg"
+    },
+    "almas_cem_milhao": {
+      "webp": "talents/almas_cem_milhao.webp",
+      "svg": "talents/almas_cem_milhao.svg"
+    },
+    "torrente_eterna": {
+      "webp": "talents/torrente_eterna.webp",
+      "svg": "talents/torrente_eterna.svg"
+    },
+    "corte_do_abismo": {
+      "webp": "talents/corte_do_abismo.webp",
+      "svg": "talents/corte_do_abismo.svg"
+    },
+    "mare_titanica": {
+      "webp": "talents/mare_titanica.webp",
+      "svg": "talents/mare_titanica.svg"
+    },
+    "umbras_infinitas": {
+      "webp": "talents/umbras_infinitas.webp",
+      "svg": "talents/umbras_infinitas.svg"
+    },
+    "foice_do_lethe": {
+      "webp": "talents/foice_do_lethe.webp",
+      "svg": "talents/foice_do_lethe.svg"
+    },
+    "raiz_da_margem": {
+      "webp": "talents/raiz_da_margem.webp",
+      "svg": "talents/raiz_da_margem.svg"
+    },
+    "abismo_das_sombras": {
+      "webp": "talents/abismo_das_sombras.webp",
+      "svg": "talents/abismo_das_sombras.svg"
+    },
+    "lamina_do_esquecimento": {
+      "webp": "talents/lamina_do_esquecimento.webp",
+      "svg": "talents/lamina_do_esquecimento.svg"
+    },
+    "coroa_da_margem": {
+      "webp": "talents/coroa_da_margem.webp",
+      "svg": "talents/coroa_da_margem.svg"
+    },
+    "ceifa_absoluta": {
+      "webp": "talents/ceifa_absoluta.webp",
+      "svg": "talents/ceifa_absoluta.svg"
+    },
+    "legiao_final": {
+      "webp": "talents/legiao_final.webp",
+      "svg": "talents/legiao_final.svg"
+    },
+    "pacto_barato": {
+      "webp": "talents/pacto_barato.webp",
+      "svg": "talents/pacto_barato.svg"
+    },
+    "juizes_iniciais": {
+      "webp": "talents/juizes_iniciais.webp",
+      "svg": "talents/juizes_iniciais.svg"
+    },
+    "templo_inicial": {
+      "webp": "talents/templo_inicial.webp",
+      "svg": "talents/templo_inicial.svg"
+    },
+    "desconto_profundo": {
+      "webp": "talents/desconto_profundo.webp",
+      "svg": "talents/desconto_profundo.svg"
+    },
+    "matilha_ampliada": {
+      "webp": "talents/matilha_ampliada.webp",
+      "svg": "talents/matilha_ampliada.svg"
+    },
+    "forja_dupla": {
+      "webp": "talents/forja_dupla.webp",
+      "svg": "talents/forja_dupla.svg"
+    },
+    "torre_do_styx_start": {
+      "webp": "talents/torre_do_styx_start.webp",
+      "svg": "talents/torre_do_styx_start.svg"
+    },
+    "servos_dobrados": {
+      "webp": "talents/servos_dobrados.webp",
+      "svg": "talents/servos_dobrados.svg"
+    },
+    "trono_reforcado": {
+      "webp": "talents/trono_reforcado.webp",
+      "svg": "talents/trono_reforcado.svg"
+    },
+    "barganha_abissal": {
+      "webp": "talents/barganha_abissal.webp",
+      "svg": "talents/barganha_abissal.svg"
+    },
+    "barco_estelar_start": {
+      "webp": "talents/barco_estelar_start.webp",
+      "svg": "talents/barco_estelar_start.svg"
+    },
+    "nectar_imperial": {
+      "webp": "talents/nectar_imperial.webp",
+      "svg": "talents/nectar_imperial.svg"
+    },
+    "lab_tartaro_start": {
+      "webp": "talents/lab_tartaro_start.webp",
+      "svg": "talents/lab_tartaro_start.svg"
+    },
+    "matilha_imperial": {
+      "webp": "talents/matilha_imperial.webp",
+      "svg": "talents/matilha_imperial.svg"
+    },
+    "forja_imperial": {
+      "webp": "talents/forja_imperial.webp",
+      "svg": "talents/forja_imperial.svg"
+    },
+    "portal_erebus_start": {
+      "webp": "talents/portal_erebus_start.webp",
+      "svg": "talents/portal_erebus_start.svg"
+    },
+    "desconto_absoluto": {
+      "webp": "talents/desconto_absoluto.webp",
+      "svg": "talents/desconto_absoluto.svg"
+    },
+    "tear_chronos_start": {
+      "webp": "talents/tear_chronos_start.webp",
+      "svg": "talents/tear_chronos_start.svg"
+    },
+    "trono_imperial": {
+      "webp": "talents/trono_imperial.webp",
+      "svg": "talents/trono_imperial.svg"
+    },
+    "condensador_start": {
+      "webp": "talents/condensador_start.webp",
+      "svg": "talents/condensador_start.svg"
+    },
+    "pacto_do_abismo": {
+      "webp": "talents/pacto_do_abismo.webp",
+      "svg": "talents/pacto_do_abismo.svg"
+    },
+    "prisma_start": {
+      "webp": "talents/prisma_start.webp",
+      "svg": "talents/prisma_start.svg"
+    },
+    "imperio_do_abismo": {
+      "webp": "talents/imperio_do_abismo.webp",
+      "svg": "talents/imperio_do_abismo.svg"
+    },
+    "forja_do_destino": {
+      "webp": "talents/forja_do_destino.webp",
+      "svg": "talents/forja_do_destino.svg"
+    },
+    "mercado_do_lethe": {
+      "webp": "talents/mercado_do_lethe.webp",
+      "svg": "talents/mercado_do_lethe.svg"
+    },
+    "coroa_do_imperio": {
+      "webp": "talents/coroa_do_imperio.webp",
+      "svg": "talents/coroa_do_imperio.svg"
+    },
+    "trono_do_esquecimento": {
+      "webp": "talents/trono_do_esquecimento.webp",
+      "svg": "talents/trono_do_esquecimento.svg"
+    },
+    "dragao_coroado": {
+      "webp": "talents/dragao_coroado.webp",
+      "svg": "talents/dragao_coroado.svg"
+    },
+    "noite_profunda": {
+      "webp": "talents/noite_profunda.webp",
+      "svg": "talents/noite_profunda.svg"
+    },
+    "eco_ancestral_vi": {
+      "webp": "talents/eco_ancestral_vi.webp",
+      "svg": "talents/eco_ancestral_vi.svg"
+    },
+    "mnemosyne_quintupla": {
+      "webp": "talents/mnemosyne_quintupla.webp",
+      "svg": "talents/mnemosyne_quintupla.svg"
+    },
+    "calice_dourado": {
+      "webp": "talents/calice_dourado.webp",
+      "svg": "talents/calice_dourado.svg"
+    },
+    "silencio_eterno": {
+      "webp": "talents/silencio_eterno.webp",
+      "svg": "talents/silencio_eterno.svg"
+    },
+    "eco_ancestral_vii": {
+      "webp": "talents/eco_ancestral_vii.webp",
+      "svg": "talents/eco_ancestral_vii.svg"
+    },
+    "mnemosyne_sestupla": {
+      "webp": "talents/mnemosyne_sestupla.webp",
+      "svg": "talents/mnemosyne_sestupla.svg"
+    },
+    "legado_profundo": {
+      "webp": "talents/legado_profundo.webp",
+      "svg": "talents/legado_profundo.svg"
+    },
+    "veu_absoluto": {
+      "webp": "talents/veu_absoluto.webp",
+      "svg": "talents/veu_absoluto.svg"
+    },
+    "eco_ancestral_viii": {
+      "webp": "talents/eco_ancestral_viii.webp",
+      "svg": "talents/eco_ancestral_viii.svg"
+    },
+    "mnemosyne_setupla": {
+      "webp": "talents/mnemosyne_setupla.webp",
+      "svg": "talents/mnemosyne_setupla.svg"
+    },
+    "calice_abissal": {
+      "webp": "talents/calice_abissal.webp",
+      "svg": "talents/calice_abissal.svg"
+    },
+    "noite_abissal": {
+      "webp": "talents/noite_abissal.webp",
+      "svg": "talents/noite_abissal.svg"
+    },
+    "eco_ancestral_ix": {
+      "webp": "talents/eco_ancestral_ix.webp",
+      "svg": "talents/eco_ancestral_ix.svg"
+    },
+    "mnemosyne_octupla": {
+      "webp": "talents/mnemosyne_octupla.webp",
+      "svg": "talents/mnemosyne_octupla.svg"
+    },
+    "memoria_viva": {
+      "webp": "talents/memoria_viva.webp",
+      "svg": "talents/memoria_viva.svg"
+    },
+    "eco_ancestral_x": {
+      "webp": "talents/eco_ancestral_x.webp",
+      "svg": "talents/eco_ancestral_x.svg"
+    },
+    "mnemosyne_nonupla": {
+      "webp": "talents/mnemosyne_nonupla.webp",
+      "svg": "talents/mnemosyne_nonupla.svg"
+    },
+    "calice_do_esquecimento": {
+      "webp": "talents/calice_do_esquecimento.webp",
+      "svg": "talents/calice_do_esquecimento.svg"
+    },
+    "raiz_da_memoria": {
+      "webp": "talents/raiz_da_memoria.webp",
+      "svg": "talents/raiz_da_memoria.svg"
+    },
+    "eco_infinito": {
+      "webp": "talents/eco_infinito.webp",
+      "svg": "talents/eco_infinito.svg"
+    },
+    "noite_do_lethe": {
+      "webp": "talents/noite_do_lethe.webp",
+      "svg": "talents/noite_do_lethe.svg"
+    },
+    "coroa_da_memoria": {
+      "webp": "talents/coroa_da_memoria.webp",
+      "svg": "talents/coroa_da_memoria.svg"
+    },
+    "calice_final": {
+      "webp": "talents/calice_final.webp",
+      "svg": "talents/calice_final.svg"
+    },
+    "eco_do_abismo": {
+      "webp": "talents/eco_do_abismo.webp",
+      "svg": "talents/eco_do_abismo.svg"
+    },
+    "sinergias_vol_i": {
+      "webp": "talents/sinergias_vol_i.webp",
+      "svg": "talents/sinergias_vol_i.svg"
+    },
+    "sinergias_vol_ii": {
+      "webp": "talents/sinergias_vol_ii.webp",
+      "svg": "talents/sinergias_vol_ii.svg"
     }
   }
 }

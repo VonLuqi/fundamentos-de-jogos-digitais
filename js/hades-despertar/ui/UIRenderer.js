@@ -29,7 +29,7 @@ import {
   pickRumor,
   rumorPoolSignature,
 } from '../config/rumors.js';
-import { TALENTS } from '../config/talents.js';
+import { TALENTS, getTalent, meetsTalentRequirement } from '../config/talents.js';
 import { UPGRADES, getUpgrade } from '../config/upgrades.js';
 import { VERDICT_SHOP } from '../config/verdict-shop.js';
 import { JUIZO_BANCADA_HINT } from '../config/juizo-pool.js';
@@ -77,6 +77,7 @@ import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutori
 import { withPerfMeasure } from './perfTelemetry.js';
 import { CodexBook, describeCodex, describeCodexEntry } from './CodexBook.js';
 import { LoopLeaderboard } from './LoopLeaderboard.js';
+import { bindLetheRiverTree } from './LetheRiverTree.js';
 import {
   BANCADA_EMPTY_AVAILABLE,
   BANCADA_EMPTY_OWNED,
@@ -705,6 +706,10 @@ export function upgradeRequirementText(upgrade) {
       .join(', ');
     parts.push(names);
   }
+  if (req.talentId) {
+    const talent = getTalent(req.talentId);
+    parts.push(talent?.name ?? String(req.talentId));
+  }
   if (req.generatorId) {
     const gen = getGenerator(req.generatorId);
     const qty = Number(req.quantity || 0);
@@ -865,6 +870,7 @@ export function describeUpgradeCard(state, id) {
     souls: state.souls,
     generators: quantities,
     upgrades: state.upgrades,
+    talents: state.talents || [],
     achievements: state.achievements || [],
     veilPercent: typeof state.veilPercent === 'function' ? state.veilPercent() : undefined,
     catabase: state.catabase || null,
@@ -925,11 +931,15 @@ export function describeTalentCard(state, id) {
   const talent = TALENTS.find((item) => item.id === id) ?? null;
   if (!talent) return null;
   const owned = state.talents.includes(id);
-  const canBuy = !owned && cmp(state.mnemosyne, talent.cost) >= 0;
+  const ascensionOpen = Boolean(state.ascensionOpen);
+  const canBuy = ascensionOpen
+    && !owned
+    && cmp(state.mnemosyne, talent.cost) >= 0
+    && meetsTalentRequirement(talent, { talents: state.talents });
   return {
     id,
     name: talent.name,
-    blurb: TALENT_BLURB[id] ?? '',
+    blurb: talent.blurb || TALENT_BLURB[id] || '',
     cost: talent.cost,
     owned,
     canBuy,
@@ -1079,6 +1089,8 @@ export class UIRenderer {
     this._sealed = null;
     this._sealedTip = null;
     this._lethe = null;
+    /** @type {{ open: Function, close: Function, refresh: Function, isOpen: Function }|null} */
+    this._memoryRiver = null;
     this._bancada = null;
     this._bancadaTip = null;
     this._bancadaOrderSig = '';
@@ -1922,7 +1934,9 @@ export class UIRenderer {
         });
       }
       toggleClass(nodes.buy, 'is-affordable', show && view.canBuy);
-      toggleClass(nodes.buy, 'is-locked', show && !view.canBuy && !view.owned);
+      // Revelado sem almas ≠ locked: locked lia como “ainda não pode comprar” na foice escura.
+      toggleClass(nodes.buy, 'is-unaffordable', show && !view.canBuy && !view.owned);
+      toggleClass(nodes.buy, 'is-locked', false);
       toggleClass(nodes.buy, 'is-owned', false);
       setDisabled(nodes.buy, !view.canBuy);
     }
@@ -2576,6 +2590,7 @@ export class UIRenderer {
       pantheonEmptyOwned: this.root.getElementById('pantheon-empty-owned'),
       pantheonListAvailable: this.root.getElementById('pantheon-list-available'),
       pantheonListOwned: this.root.getElementById('pantheon-list-owned'),
+      memoryRiver: this.root.getElementById('lethe-memory-river'),
     };
     if (this._lethe.locked && !this._lethe.locked.textContent.trim()) {
       this._lethe.locked.textContent = LETHE_EMPTY;
@@ -2585,61 +2600,22 @@ export class UIRenderer {
       this.onOpenLethe?.();
     });
 
-    const tablist = this.root.getElementById('pantheon-subtabs');
-    this._pantheonSubTabs = bindSubTabs(tablist, {
-      doc: this.root,
-      onActivate: (_tab, key) => {
-        this._pantheonSubKey = key;
-        this._pantheonSubUserPicked = true;
-      },
-    });
-
-    const listA = this._lethe.pantheonListAvailable;
-    const listB = this._lethe.pantheonListOwned;
-    if (!listA || !listB) return;
-    listA.replaceChildren();
-    listB.replaceChildren();
+    this._pantheonSubTabs = null;
     this._talents.clear();
-    for (const def of TALENTS) {
-      const item = this.root.createElement('li');
-      item.className = 'despertar-card';
-      item.dataset.talentId = def.id;
 
-      const name = this.root.createElement('p');
-      name.className = 'despertar-card__name';
-      name.textContent = def.name;
+    // Legado: listas de cards ficam ocultas — Memória do Rio usa a árvore fechada.
+    setHidden(this._lethe.pantheonListOwned, true);
+    setHidden(this._lethe.pantheonListAvailable, true);
+    setHidden(this._lethe.pantheonEmptyOwned, true);
 
-      const blurb = this.root.createElement('p');
-      blurb.className = 'despertar-card__blurb';
-      blurb.textContent = TALENT_BLURB[def.id] ?? '';
-
-      const meta = this.root.createElement('p');
-      meta.className = 'despertar-card__meta';
-      const price = this.root.createElement('span');
-      price.className = 'despertar-num';
-      price.dataset.price = '';
-      price.textContent = formatSouls(def.cost);
-      meta.append(price, ' essência');
-
-      const badge = this.root.createElement('p');
-      badge.className = 'despertar-card__badge';
-      badge.textContent = SHOP_OWNED_BADGE;
-      badge.hidden = true;
-
-      const buy = this.root.createElement('button');
-      buy.className = 'btn-gold';
-      buy.type = 'button';
-      buy.dataset.buyTalent = def.id;
-      buy.textContent = 'Selar';
-      buy.disabled = true;
-      buy.addEventListener('click', () => {
-        if (buy.disabled) return;
-        this.onBuyTalent?.(def.id);
+    const memoryRoot = this._lethe.memoryRiver;
+    if (memoryRoot && !this._memoryRiver) {
+      this._memoryRiver = bindLetheRiverTree({
+        root: memoryRoot,
+        readonly: true,
+        getState: () => this.state,
       });
-
-      item.append(name, blurb, meta, badge, buy);
-      listA.append(item);
-      this._talents.set(def.id, { item, blurb, price, buy, badge });
+      this._memoryRiver.open();
     }
   }
 
@@ -2675,75 +2651,19 @@ export class UIRenderer {
     if (!view.pantheonOpen && this._lethe.pantheonEmpty) {
       setText(this._lethe.pantheonEmpty, PANTHEON_EMPTY);
     }
+
+    const letheTab = this.root.getElementById('tab-lethe');
+    const letheTabActive = letheTab?.getAttribute('aria-selected') === 'true';
+    // Pausa rAF da Memória quando a aba Lethe não está ativa.
+    this._memoryRiver?.setMotionPaused?.(!view.open || !letheTabActive || !view.pantheonOpen);
+
     if (!view.pantheonOpen) return;
 
-    const cards = TALENTS.map((def) => describeTalentCard(state, def.id)).filter(Boolean);
-    const partitioned = partitionShopCatalog(cards, {
-      isOwned: (card) => Boolean(card.owned),
-      canBuy: (card) => Boolean(card.canBuy),
-    });
-
-    setText(
-      this._lethe.pantheonTabAvailable,
-      shopTabLabel('Disponíveis', partitioned.counts.available),
-    );
-    setText(
-      this._lethe.pantheonTabOwned,
-      shopTabLabel('Comprados', partitioned.counts.owned),
-    );
-
-    const listA = this._lethe.pantheonListAvailable;
-    const listB = this._lethe.pantheonListOwned;
-    const orderSig = [
-      partitioned.available.map((card) => card.id).join('\0'),
-      partitioned.owned.map((card) => card.id).join('\0'),
-    ].join('|');
-    const remount = orderSig !== this._pantheonOrderSig;
-    if (remount) {
-      this._pantheonOrderSig = orderSig;
-      if (listA) listA.replaceChildren();
-      if (listB) listB.replaceChildren();
-    }
-
-    for (const card of partitioned.available) {
-      const nodes = this._talents.get(card.id);
-      if (!nodes) continue;
-      toggleClass(nodes.item, 'is-owned', false);
-      setText(nodes.price, formatSouls(card.cost));
-      setText(nodes.buy, 'Selar');
-      setDisabled(nodes.buy, !card.canBuy);
-      setHidden(nodes.buy, false);
-      setHidden(nodes.badge, true);
-      if (remount) listA?.append(nodes.item);
-    }
-
-    for (const card of partitioned.owned) {
-      const nodes = this._talents.get(card.id);
-      if (!nodes) continue;
-      toggleClass(nodes.item, 'is-owned', true);
-      setText(nodes.price, formatSouls(card.cost));
-      setText(nodes.buy, 'Na memória');
-      setDisabled(nodes.buy, true);
-      setHidden(nodes.buy, true);
-      setHidden(nodes.badge, false);
-      setText(nodes.badge, SHOP_OWNED_BADGE);
-      if (remount) listB?.append(nodes.item);
-    }
-
-    const emptyA = partitioned.counts.available === 0;
-    const emptyB = partitioned.counts.owned === 0;
-    setHidden(this._lethe.pantheonEmptyAvailable, !emptyA);
-    setHidden(this._lethe.pantheonListAvailable, emptyA);
-    setHidden(this._lethe.pantheonEmptyOwned, !emptyB);
-    setHidden(this._lethe.pantheonListOwned, emptyB);
-    if (emptyA && this._lethe.pantheonEmptyAvailable) {
-      setText(this._lethe.pantheonEmptyAvailable, PANTHEON_EMPTY_AVAILABLE);
-    }
-    if (emptyB && this._lethe.pantheonEmptyOwned) {
-      setText(this._lethe.pantheonEmptyOwned, PANTHEON_EMPTY_OWNED);
-    }
-
-    this.#syncPantheonSubTab(partitioned.counts.available);
+    // Árvore fechada (readonly) — sem cards; listas legado permanecem ocultas.
+    setHidden(this._lethe.pantheonListOwned, true);
+    setHidden(this._lethe.pantheonEmptyOwned, true);
+    this.state = state;
+    if (letheTabActive) this._memoryRiver?.refresh?.();
   }
 
   #syncPantheonSubTab(availableCount) {

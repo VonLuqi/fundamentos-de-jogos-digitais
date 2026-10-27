@@ -1750,33 +1750,44 @@
   width: 100%;
   height: 100%;
   margin: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: 0.06rem;
+  border: 1px solid color-mix(in srgb, var(--hades-gold, #cfa759) 42%, transparent);
+  border-radius: 0.35rem;
+  background:
+    linear-gradient(165deg, rgba(36, 28, 18, 0.95) 0%, rgba(12, 10, 14, 0.98) 100%);
   color: var(--hades-gold-bright);
   font-family: var(--font-title);
   font-size: 0.72rem;
   cursor: pointer;
   appearance: none;
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
   outline: none;
-  filter: brightness(0.92);
-  transition: filter 0.12s ease, transform 0.12s ease;
+  /* Artes escuras (foice) precisam de lift ? tile preto lia como bloqueado. */
+  filter: brightness(1.04) saturate(1.04);
+  transition: filter 0.12s ease, transform 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
 }
 
 .despertar-upgrade-icon.is-affordable {
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  filter: brightness(1.08) saturate(1.08);
+  border-color: color-mix(in srgb, var(--hades-gold, #cfa759) 72%, transparent);
+  box-shadow:
+    inset 0 0 0 1px rgba(207, 167, 89, 0.18),
+    0 0 10px rgba(0, 168, 150, 0.18);
+  filter: brightness(1.14) saturate(1.1);
+}
+
+/* Revelado, sem almas: monocromático = ?não dá para comprar agora?. */
+.despertar-upgrade-icon.is-unaffordable {
+  opacity: 0.78;
+  filter: grayscale(1) brightness(0.92);
+  cursor: pointer;
+  border-color: rgba(140, 138, 136, 0.4);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 
 .despertar-upgrade-icon.is-locked {
-  border: 0;
-  background: transparent;
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
-  filter: grayscale(0.35) brightness(0.7);
+  filter: grayscale(1) brightness(0.82);
 }
 
 .despertar-upgrade-icon:disabled {
@@ -1785,9 +1796,8 @@
 
 .despertar-upgrade-icon:not(:disabled):hover,
 .despertar-upgrade-icon:not(:disabled):focus-visible {
-  border: 0;
   outline: none;
-  box-shadow: none;
+  border-color: color-mix(in srgb, var(--hades-gold, #cfa759) 85%, transparent);
   filter: brightness(1.22) saturate(1.12);
   transform: scale(1.06);
   z-index: 1;
@@ -2161,6 +2171,31 @@
   background-color: #4f4a58;
   /* Deixa o <li> receber hover â€” tip Cookie funciona nos desabilitados. */
   pointer-events: none;
+}
+
+/* Sem almas / sem stock: ícone e tipografia monocromáticos. */
+.despertar-product:disabled .despertar-card__icon,
+.despertar-product:disabled .despertar-sprite__img {
+  filter: grayscale(1) brightness(0.9);
+  opacity: 0.88;
+}
+
+.despertar-product:disabled .despertar-card__name {
+  color: rgba(210, 208, 204, 0.72);
+  text-shadow: none;
+}
+
+.despertar-product:disabled .despertar-card__meta {
+  color: rgba(168, 166, 162, 0.78);
+}
+
+.despertar-product:disabled .despertar-card__meta::before {
+  filter: grayscale(1);
+  opacity: 0.65;
+}
+
+.despertar-product:disabled .despertar-card__owned {
+  color: rgba(255, 255, 255, 0.22);
 }
 
 .despertar-product:not(:disabled):hover {
@@ -4526,4 +4561,298 @@ button.despertar-juizo-card:disabled {
   font-family: 'Crimson Text', serif;
   font-size: 1rem;
   color: var(--hades-parchment, #f3e9d7);
+}
+
+/* -- Rio do Lethe (árvore de talentos pós-ritual) -- */
+.lethe-river {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 85%, rgba(40, 70, 90, 0.45), transparent 70%),
+    linear-gradient(180deg, #0c1218 0%, #152028 45%, #0a1014 100%);
+  color: #e8eef2;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lethe-river.is-open { opacity: 1; }
+.lethe-river[hidden] { display: none !important; }
+
+/* Memória do Rio ? árvore fechada embutida na aba Lethe */
+.lethe-river--memory {
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  width: 100%;
+  height: clamp(16rem, 42vh, 24rem);
+  min-height: 16rem;
+  margin: 0.55rem 0 0;
+  border: 1px solid rgba(160, 190, 210, 0.22);
+  border-radius: 0.35rem;
+  opacity: 1;
+  transition: none;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 90%, rgba(40, 70, 90, 0.35), transparent 68%),
+    linear-gradient(180deg, rgba(10, 16, 22, 0.92) 0%, rgba(18, 28, 36, 0.96) 100%);
+}
+.lethe-river--memory .lethe-river__watermark {
+  inset: 12% 0 auto;
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  letter-spacing: 0.18em;
+  color: rgba(180, 210, 230, 0.08);
+}
+.lethe-river--memory .lethe-river__svg {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+.lethe-river--memory .lethe-river__edge {
+  stroke: url(#lethe-memory-flow);
+}
+.lethe-river--memory .lethe-river__edge--flow {
+  animation: none;
+}
+.lethe-river--memory .lethe-river__tip {
+  z-index: 40;
+}
+.lethe-river--memory .lethe-river__node {
+  cursor: help;
+}
+.lethe-river__watermark {
+  position: absolute;
+  inset: 18% 0 auto;
+  margin: 0;
+  text-align: center;
+  font-family: 'Cinzel', 'Cormorant Garamond', serif;
+  font-size: clamp(2.5rem, 8vw, 5.5rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(180, 210, 230, 0.07);
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 0;
+}
+.lethe-river__tip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 90;
+  width: min(17.5rem, calc(100vw - 1.5rem));
+  padding: 0.85rem 1rem;
+  pointer-events: none;
+  background: rgba(8, 14, 20, 0.88);
+  border: 1px solid rgba(160, 190, 210, 0.28);
+  border-radius: 2px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  filter: blur(2px);
+  transition: opacity 0.14s ease, filter 0.14s ease;
+  will-change: left, top, opacity;
+}
+.lethe-river__tip.is-visible {
+  opacity: 1;
+  filter: none;
+}
+.lethe-river__tip-name {
+  margin: 0 0 0.3rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.lethe-river__tip-cost {
+  margin: 0 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #d4a24a;
+}
+.lethe-river__tip[data-state="owned"] .lethe-river__tip-cost { color: #9bbb86; }
+.lethe-river__tip[data-state="locked"] .lethe-river__tip-cost,
+.lethe-river__tip[data-state="session-locked"] .lethe-river__tip-cost,
+.lethe-river__tip[data-state="afford-locked"] .lethe-river__tip-cost { color: #8a9aa8; }
+.lethe-river__tip-blurb {
+  margin: 0 0 0.45rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: rgba(230, 236, 242, 0.88);
+}
+.lethe-river__tip-hint {
+  margin: 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  color: rgba(180, 200, 220, 0.65);
+}
+.lethe-river__svg {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.lethe-river__svg:active { cursor: grabbing; }
+.lethe-river__ring,
+.lethe-river__edge,
+.lethe-river__branch-label {
+  pointer-events: none;
+}
+.lethe-river__ring {
+  fill: none;
+  stroke: rgba(140, 170, 190, 0.18);
+  stroke-width: 1;
+  stroke-dasharray: 4 10;
+}
+.lethe-river__edge {
+  fill: none;
+  stroke: url(#lethe-river-flow);
+  stroke-width: 2.2;
+  opacity: 0.85;
+}
+.lethe-river__edge--flow {
+  stroke-dasharray: 8 14;
+  animation: lethe-river-flow 2.8s linear infinite;
+}
+@keyframes lethe-river-flow {
+  to { stroke-dashoffset: -44; }
+}
+.lethe-river__branch-label {
+  fill: rgba(230, 236, 242, 0.72);
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  letter-spacing: 0.2em;
+}
+/* Outer <g> keeps SVG translate(x,y). Never put CSS transform on it. */
+.lethe-river__node {
+  cursor: pointer;
+  outline: none;
+}
+.lethe-river__node-body {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lethe-river__node.is-hot .lethe-river__node-body { transform: scale(1.12); }
+.lethe-river__node-halo {
+  fill: none;
+  stroke: rgba(220, 235, 255, 0);
+  stroke-width: 2;
+  transition: stroke 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+.lethe-river__node.is-hot .lethe-river__node-halo {
+  stroke: rgba(220, 235, 255, 0.55);
+  opacity: 1;
+}
+.lethe-river__node-disk {
+  fill: rgba(28, 40, 52, 0.92);
+  stroke: rgba(170, 195, 215, 0.45);
+  stroke-width: 2;
+  transition: stroke 0.2s ease, filter 0.25s ease, fill 0.2s ease;
+}
+.lethe-river__node--locked .lethe-river__node-disk,
+.lethe-river__node--session-locked .lethe-river__node-disk,
+.lethe-river__node--afford-locked .lethe-river__node-disk {
+  fill: rgba(14, 22, 30, 0.9);
+  stroke: rgba(60, 80, 100, 0.55);
+}
+.lethe-river__node--locked { opacity: 0.38; }
+.lethe-river__node--session-locked { opacity: 0.5; }
+.lethe-river__node--afford-locked { opacity: 0.72; }
+/* Comprável agora ? contraste forte vs. pré-requisito fechado */
+.lethe-river__node--available {
+  opacity: 1;
+}
+.lethe-river__node--available .lethe-river__node-disk {
+  fill: rgba(52, 72, 92, 0.98);
+  stroke: rgba(240, 248, 255, 0.95);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 8px rgba(200, 230, 255, 0.35));
+}
+.lethe-river__node--available .lethe-river__node-halo {
+  stroke: rgba(220, 235, 255, 0.4);
+  opacity: 0.85;
+}
+.lethe-river__node--owned .lethe-river__node-disk {
+  fill: rgba(36, 52, 48, 0.95);
+  stroke: rgba(180, 210, 160, 0.75);
+}
+.lethe-river__node.is-hot .lethe-river__node-disk {
+  stroke: #fff;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35));
+}
+.lethe-river__node.is-sealing .lethe-river__node-body {
+  animation: lethe-node-seal 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes lethe-node-seal {
+  0% { transform: scale(1.12); }
+  35% { transform: scale(1.28); filter: brightness(1.35); }
+  100% { transform: scale(1); }
+}
+.lethe-river__node-mark {
+  fill: #e8eef2;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  pointer-events: none;
+}
+.lethe-river__node--locked .lethe-river__node-mark { fill: #6a8090; }
+.lethe-river__node-art { pointer-events: none; }
+.lethe-river__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem 1.35rem;
+  background: linear-gradient(180deg, transparent, rgba(6, 10, 14, 0.85));
+}
+.lethe-river__essence { margin: 0; text-align: center; }
+.lethe-river__essence-value {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.lethe-river__essence-value.is-pulse {
+  animation: lethe-essence-pulse 0.45s ease;
+}
+@keyframes lethe-essence-pulse {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.08); color: #f0d08a; }
+  100% { transform: scale(1); }
+}
+.lethe-river__essence-label {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: rgba(200, 215, 230, 0.7);
+}
+.lethe-river__continue { min-width: 10rem; }
+@media (prefers-reduced-motion: reduce) {
+  .lethe-river,
+  .lethe-river__tip,
+  .lethe-river__node,
+  .lethe-river__node-body,
+  .lethe-river__node-disk,
+  .lethe-river__node-halo {
+    transition: none !important;
+  }
+  .lethe-river__edge--flow,
+  .lethe-river__node.is-sealing .lethe-river__node-body,
+  .lethe-river__essence-value.is-pulse {
+    animation: none !important;
+  }
+  .lethe-river { opacity: 1; }
 }
