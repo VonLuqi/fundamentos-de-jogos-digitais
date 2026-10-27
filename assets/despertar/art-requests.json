@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-26",
+  "updated": "2026-10-27",
   "task": "B4+E3",
   "audience": "Mestre",
   "defaults": {
@@ -620,6 +620,59 @@
       "dropPath": "assets/despertar/sprites/seasons/",
       "filesGlob": "seasons/*.webp",
       "notes": "Paths: assets/despertar/sprites/seasons/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 396 upgrades. [2026-10-26: arte final upgrades + illustrated.json]"
+    },
+    {
+      "id": "art_synergy_vol_canon",
+      "listId": "B-SYN",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Sinergias Vol. I/II canónicas (36 ícones)",
+      "desc": "Malha template Synergy wiki: 18 Vol.I + 18 Vol.II (kind synergyMult).",
+      "kind": "synergyMult",
+      "sizes": [
+        "128x128"
+      ],
+      "format": "webp",
+      "dropPath": "assets/despertar/sprites/upgrades/",
+      "upgradeIds": [
+        "almanaques_do_destino_i",
+        "magia_sismica_i",
+        "eletronica_quantica_i",
+        "contratos_do_alem_i",
+        "paganismo_erebo_i",
+        "saber_arcano_i",
+        "combustivel_fossilisado_i",
+        "minerios_primordiais_i",
+        "colheitas_infernais_i",
+        "salto_parsec_i",
+        "verba_da_fisica_i",
+        "magia_luminosa_i",
+        "talismas_cravejados_i",
+        "espelhos_recursivos_i",
+        "avoas_script_i",
+        "cosmos_mil_folhas_i",
+        "pensamentos_e_preces_i",
+        "desenvolvimento_acelerado_i",
+        "oracao_da_chuva_ii",
+        "mineracao_asteroide_ii",
+        "overclock_temporal_ii",
+        "prensas_de_obolo_ii",
+        "particula_divina_ii",
+        "botanica_magica_ii",
+        "estaleiros_estigios_ii",
+        "fundo_de_ouro_ii",
+        "brilho_abissal_ii",
+        "fulgor_primitivo_ii",
+        "pericia_quimica_ii",
+        "energias_misticas_ii",
+        "quarks_encantados_ii",
+        "camundongos_clicando_ii",
+        "tombola_oracular_ii",
+        "infraversos_ii",
+        "mentes_ferteis_ii",
+        "revisao_por_pares_ii"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-synergy-vol-catalog + ensure-missing-upgrade-sprites."
     }
   ],
   "auditNote": "Status reconciliado 2026-10-26. Permanecem open: art_cosmetics. art_juizo_chrome + art_foice entregues."

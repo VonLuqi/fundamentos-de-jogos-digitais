@@ -22,6 +22,8 @@ import {
   OFFLINE_MAX_HOURS_TALENT,
   OFFLINE_MIN_SECONDS,
   PRESTIGE_RUN_DIVISOR,
+  PRESTIGE_SOFTCAP_LOG_COEFF,
+  PRESTIGE_SOFTCAP_START,
   GOLD_MULT,
   NEGATIVO_MULT,
   STARTING_FORGE_DESPERTADA,
@@ -73,7 +75,12 @@ import { ALL_SEASONAL_DROP_UPGRADE_IDS } from '../config/seasons.js';
 import { GENERATOR_BY_ID, GENERATORS, getGenerator } from '../config/generators.js';
 import { MINIGAME_UNLOCK_GENERATORS } from '../config/minigames.js';
 import { SHIMMER_BY_ID } from '../config/shimmers.js';
-import { UPGRADE_BY_ID, UPGRADES, getUpgrade } from '../config/upgrades.js';
+import {
+  LEGACY_SYNERGY_COSTS,
+  UPGRADE_BY_ID,
+  UPGRADES,
+  getUpgrade,
+} from '../config/upgrades.js';
 import { TALENT_BY_ID, getTalent } from '../config/talents.js';
 import { VERDICT_SHOP_BY_ID, isKnownVerdictPurchase } from '../config/verdict-shop.js';
 import { pantheonModifiers } from './minigames/PantheonSystem.js';
@@ -253,6 +260,7 @@ export function talentEffects(talentIds = []) {
     softPrestigeStyx: softPrestigeStyxCount > 0,
     softPrestigeStyxCount,
     mnemosyneGainBoost: owned.has('calice_da_memoria'),
+    mnemosyneGainMult: mnemosyneMult,
     nectarReserveBonus: owned.has('nectar_em_reserva'),
     nectarFrenzyUnlock: owned.has('frenesi_de_nectar_talento'),
     dragonUnlock: owned.has('ovo_primordial'),
@@ -544,9 +552,21 @@ export function styxClickKSps(upgradeIds = []) {
   return k;
 }
 
+/**
+ * Bônus SPS por óbolos: linear até PRESTIGE_SOFTCAP_START, depois log10.
+ * raw = óbolos × OBOL_BONUS_PER × mnemosyneMult
+ * Espelho de DespertarFormulas::prestigeBonus.
+ */
 export function prestigeBonus(obols, talentIds = []) {
   const { mnemosyneMult } = talentEffects(talentIds);
-  return add('1', mul(mul(obols || '0', OBOL_BONUS_PER), mnemosyneMult));
+  const raw = mul(mul(obols || '0', OBOL_BONUS_PER), mnemosyneMult);
+  if (cmp(raw, PRESTIGE_SOFTCAP_START) <= 0) {
+    return add('1', raw);
+  }
+  const ratio = Number(div(raw, PRESTIGE_SOFTCAP_START));
+  const safeRatio = Number.isFinite(ratio) && ratio >= 1 ? ratio : 1;
+  const logPart = Number(PRESTIGE_SOFTCAP_LOG_COEFF) * Math.log10(safeRatio);
+  return add(add('1', PRESTIGE_SOFTCAP_START), String(logPart));
 }
 
 function iterActiveBuffEntries(activeBuffs) {
@@ -1123,6 +1143,39 @@ export function obolsFromLifetimeCubic(lifetimeSouls = '0') {
 }
 
 /**
+ * Remove sinergias temáticas pré-malha wiki e devolve o custo em almas.
+ * Espelho de DespertarFormulas::migrateUpgradeSave.
+ * @param {string[]} rawUpgrades
+ * @param {string|number} [souls='0']
+ * @returns {{ upgrades: string[], souls: string, refunded: string }}
+ */
+export function migrateUpgradeSave(rawUpgrades = [], souls = '0') {
+  let refund = '0';
+  const next = [];
+  const seen = new Set();
+  for (const raw of rawUpgrades || []) {
+    const id = String(raw);
+    if (UPGRADE_BY_ID[id]) {
+      if (!seen.has(id)) {
+        seen.add(id);
+        next.push(id);
+      }
+      continue;
+    }
+    const cost = LEGACY_SYNERGY_COSTS[id] ?? '0';
+    if (cmp(cost, '0') > 0) {
+      refund = add(refund, cost);
+    }
+  }
+  const baseSouls = souls !== '' && souls != null ? String(souls) : '0';
+  return {
+    upgrades: next,
+    souls: money(add(baseSouls, refund)),
+    refunded: money(refund),
+  };
+}
+
+/**
  * Fase F8 — Migração segura (*Save Heal*) de saves legados (F0–F7) para F8:
  * - Preserva 100% dos Óbolos, Essência e conquistas existentes (nunca reduz Óbolos de saves válidos).
  * - Se um save legado tiver `lifetimeSouls` alto e `obols` abaixo da curva cúbica de segurança pós-Catábase,
@@ -1242,6 +1295,7 @@ export function meetsUpgradeRequirement(upgradeOrId, {
   souls = '0',
   generators = {},
   upgrades = [],
+  talents = [],
   achievements = [],
   normalAchievementsCount = null,
   veilPercent: explicitVeilPercent = null,
@@ -1257,6 +1311,9 @@ export function meetsUpgradeRequirement(upgradeOrId, {
   const owned = new Set(
     (Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)),
   );
+  const ownedTalents = new Set(
+    (Array.isArray(talents) ? talents : []).map((id) => String(id)),
+  );
 
   // Fase D / D1 — pré-requisitos de juramento (AND).
   if (req.upgradeId != null && req.upgradeId !== '') {
@@ -1265,6 +1322,14 @@ export function meetsUpgradeRequirement(upgradeOrId, {
   if (Array.isArray(req.allUpgradeIds) && req.allUpgradeIds.length > 0) {
     for (const id of req.allUpgradeIds) {
       if (!owned.has(String(id))) return false;
+    }
+  }
+  if (req.talentId != null && req.talentId !== '') {
+    if (!ownedTalents.has(String(req.talentId))) return false;
+  }
+  if (Array.isArray(req.allTalentIds) && req.allTalentIds.length > 0) {
+    for (const id of req.allTalentIds) {
+      if (!ownedTalents.has(String(id))) return false;
     }
   }
   if (req.researchId != null && req.researchId !== '') {

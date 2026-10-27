@@ -53,6 +53,7 @@ import {
   healLegacySave,
   lineSPS,
   meetsUpgradeRequirement,
+  migrateUpgradeSave,
   prestigePreview as formulaPrestigePreview,
   pickEcoDoStyxUpgrades,
   talentEffects,
@@ -257,10 +258,14 @@ export class GameState {
       qtyMap,
       this._goldCounts,
     );
-    this.upgrades = uniqueKnown(
-      snapshot.upgrades ?? snapshot.upgrades_state ?? [],
-      isKnownUpgradeId,
-    );
+    {
+      const migratedUp = migrateUpgradeSave(
+        snapshot.upgrades ?? snapshot.upgrades_state ?? [],
+        this.souls,
+      );
+      this.upgrades = migratedUp.upgrades;
+      this.souls = clampNonNegative(migratedUp.souls);
+    }
     this.talents = uniqueKnown(
       snapshot.talents ?? snapshot.talents_state ?? [],
       isKnownTalentId,
@@ -2468,15 +2473,18 @@ export class GameState {
     } else {
       this.#clampRarityCounts();
     }
-    this.upgrades = uniqueKnown(
-      snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
-      isKnownUpgradeId,
-    );
+    {
+      const migratedUp = migrateUpgradeSave(
+        snapshot.upgrades ?? snapshot.upgrades_state ?? this.upgrades,
+        snapshot.souls ?? this.souls,
+      );
+      this.upgrades = migratedUp.upgrades;
+      this.souls = clampNonNegative(migratedUp.souls);
+    }
     this.talents = uniqueKnown(
       snapshot.talents ?? snapshot.talents_state ?? this.talents,
       isKnownTalentId,
     );
-    if (snapshot.souls != null) this.souls = clampNonNegative(snapshot.souls);
     if (snapshot.mnemosyne != null) this.mnemosyne = clampNonNegative(snapshot.mnemosyne);
     if (snapshot.milestones != null && typeof snapshot.milestones === 'object') {
       this.milestones = { ...this.milestones, ...snapshot.milestones };

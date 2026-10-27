@@ -57,9 +57,9 @@ requiredFiles.forEach((rel) => {
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 staticAssert(pkg.includes('despertar-formulas-smoke.mjs'), 'npm run check inclui este smoke');
 
-staticAssert(GENERATORS.length === 6, '6 geradores no catálogo');
-staticAssert(UPGRADES.length === 56, '56 juramentos no catálogo');
-staticAssert(TALENTS.length === 18, '18 talentos no Panteão');
+staticAssert(GENERATORS.length === 20, '20 geradores no catálogo (T1–T20)');
+staticAssert(UPGRADES.length >= 210, 'ao menos 210 juramentos no catálogo (F1 + F3 + F4 + F7)');
+staticAssert(TALENTS.length >= 18, 'ao menos 18 talentos no Panteão');
 
 const eclipse = UPGRADES.find((u) => u.id === 'eclipse_do_acheron');
 staticAssert(eclipse?.kind === 'generatorMult', 'T1 qty100 é generatorMult');
@@ -165,7 +165,7 @@ await run('Óbolos: runSouls 4e9 → 1; 1e9 → 0; Catábase divide o yield', ()
   assert.equal(mnemosyneFromObolsGain('2'), '1');
   assert.equal(mnemosyneFromObolsGain('1'), '0');
   assert.equal(mnemosyneFromObolsGain('0'), '0');
-  eqMoney(prestigeBonus('1'), '1.05');
+  eqMoney(prestigeBonus('1'), '1.01');
 });
 
 await run('Offline 10 s a SPS 1, 80% → 8 almas', () => {

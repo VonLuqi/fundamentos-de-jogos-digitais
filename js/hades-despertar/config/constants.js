@@ -8,7 +8,11 @@ export const LOOP_PANIC_UPDATES = 300;
 export const COST_MULTIPLIER = '1.15';
 
 export const PRESTIGE_RUN_DIVISOR = '4000000000';
-export const OBOL_BONUS_PER = '0.05';
+/** +1% SPS por óbolo (paridade CC / Lethe rebalance V2). */
+export const OBOL_BONUS_PER = '0.01';
+/** Softcap do bônus de prestígio: linear até este raw, depois log10. */
+export const PRESTIGE_SOFTCAP_START = '100';
+export const PRESTIGE_SOFTCAP_LOG_COEFF = '25';
 export const LETHE_PREVIEW_RUN_SOULS = '100000000';
 
 export const CLICK_BASE = '1';
