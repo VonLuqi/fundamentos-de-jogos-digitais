@@ -242,7 +242,8 @@ Números = tabela CC ([Buildings](https://cookieclicker.wiki.gg/wiki/Buildings))
 1. ~~**Fase Perf** … **F8**~~ — roadmap mecânico F0–F8 **shipado** (JS ≡ PHP + smokes).  
 2. **Backlog pós-auditoria forense (2026-10-23)** — não confundir com “bug JS≠PHP”:
    - ~~Expandir malha de sinergias Vol. I/II~~ — **36 canónicas + 8 Servos** (item 6 = 100%).
-   - Alongar cadeia Mil Foices e Filhotes do Cérbero.
+   - ~~Alongar cadeia Mil Foices~~ — **12 elos** (item 7 = 100%).
+   - Alongar Filhotes do Cérbero (kitten ladder).
    - Crescer árvore Heavenly além dos **25** talentos atuais.
    - Decidir se digestão Sanguessuga permanece n² ou alinha ao modelo clássico per-wrinkler.
    - Arte: cosméticos, juízo chrome; mais WebPs únicos de conquista (Foice idle/pressed já em disco).

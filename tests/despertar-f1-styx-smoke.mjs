@@ -203,6 +203,27 @@ run('3. Mil Foices (Thousand Fingers): bônus linear não-Sombra em clique e Som
     '2000',
   );
 
+  // Escada completa wiki (8× ×20 após o trilhão): 2000 × 20^8 = 5.12e13
+  const fullLadder = [
+    'mil_foices',
+    'milhao_de_foices',
+    'bilhao_de_foices',
+    'trilhao_de_foices',
+    'quadrilhao_de_foices',
+    'quintilhao_de_foices',
+    'sextilhao_de_foices',
+    'septilhao_de_foices',
+    'octilhao_de_foices',
+    'nonilhao_de_foices',
+    'decilhao_de_foices',
+    'undecilhao_de_foices',
+  ];
+  assert.equal(thousandBladesBonusPerUnit(fullLadder, gens), '51200000000000');
+
+  // Gate trilhao: qty 150 (wiki), não 200
+  assert.equal(UPGRADE_BY_ID.trilhao_de_foices.requires.quantity, 150);
+  assert.equal(UPGRADE_BY_ID.undecilhao_de_foices.requires.quantity, 550);
+
   // Coexistência aditiva no clickPower com eco_da_foice (clickKSps = 0.01) e foice_afilada (×2):
   // flatPart = 1 * 2 = 2
   // bladesPart = 2 (mil_foices com 20 não-Sombras)
@@ -288,7 +309,14 @@ run('5. Assets (manifest.json + art-requests.json) e Códice (log_synergy_blades
   const b8 = artReq.requests.find((r) => r.id === 'art_upgrades');
   assert.ok(b8, 'pedido art_upgrades presente');
   assert.ok(['open', 'delivered'].includes(b8.status), `art_upgrades status válido (got ${b8.status})`);
-  assert.equal(Array.isArray(b8.f1UpgradeIds) && b8.f1UpgradeIds.length === 56, true, '56 novos IDs F1 listados em art-requests.json');
+  assert.equal(
+    Array.isArray(b8.f1UpgradeIds) && b8.f1UpgradeIds.length === 64,
+    true,
+    '64 IDs F1 (incl. escada Mil Foices 12 elos) em art-requests.json',
+  );
+  assert.ok(b8.f1UpgradeIds.includes('undecilhao_de_foices'));
+  const tfArt = artReq.requests.find((r) => r.id === 'art_mil_foices_ladder');
+  assert.ok(tfArt && tfArt.status === 'delivered' && tfArt.upgradeIds?.length === 12);
 
   assert.ok(EDU_LOG_IDS.includes('log_synergy_blades'));
   assert.ok(EDU_LOG_BY_ID.log_synergy_blades?.title.includes('Sinergias'));

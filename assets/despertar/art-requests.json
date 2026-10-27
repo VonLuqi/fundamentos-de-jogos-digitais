@@ -172,6 +172,14 @@
         "milhao_de_foices",
         "bilhao_de_foices",
         "trilhao_de_foices",
+        "quadrilhao_de_foices",
+        "quintilhao_de_foices",
+        "sextilhao_de_foices",
+        "septilhao_de_foices",
+        "octilhao_de_foices",
+        "nonilhao_de_foices",
+        "decilhao_de_foices",
+        "undecilhao_de_foices",
         "cortejo_das_margens_i",
         "cortejo_das_margens_ii",
         "brasa_cruzada_i",
@@ -182,6 +190,14 @@
         "milhao_de_foices",
         "bilhao_de_foices",
         "trilhao_de_foices",
+        "quadrilhao_de_foices",
+        "quintilhao_de_foices",
+        "sextilhao_de_foices",
+        "septilhao_de_foices",
+        "octilhao_de_foices",
+        "nonilhao_de_foices",
+        "decilhao_de_foices",
+        "undecilhao_de_foices",
         "sussurro_dos_juncos",
         "manto_do_crepusculo",
         "procissao_silente",
@@ -673,7 +689,34 @@
         "revisao_por_pares_ii"
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-synergy-vol-catalog + ensure-missing-upgrade-sprites."
+    },
+    {
+      "id": "art_mil_foices_ladder",
+      "listId": "B-TF",
+      "priority": "P1",
+      "status": "delivered",
+      "title": "Cadeia Mil Foices (12 elos Thousand→Undecillion)",
+      "desc": "Escada canónica Cursor/Thousand Fingers: mil_foices + 11 thousandBladesMult.",
+      "kind": "thousandBladesMult",
+      "sizes": ["128x128"],
+      "format": "webp",
+      "dropPath": "assets/despertar/sprites/upgrades/",
+      "upgradeIds": [
+        "mil_foices",
+        "milhao_de_foices",
+        "bilhao_de_foices",
+        "trilhao_de_foices",
+        "quadrilhao_de_foices",
+        "quintilhao_de_foices",
+        "sextilhao_de_foices",
+        "septilhao_de_foices",
+        "octilhao_de_foices",
+        "nonilhao_de_foices",
+        "decilhao_de_foices",
+        "undecilhao_de_foices"
+      ],
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-mil-foices-catalog + ensure-missing-upgrade-sprites."
     }
   ],
-  "auditNote": "Status reconciliado 2026-10-26. Permanecem open: art_cosmetics. art_juizo_chrome + art_foice entregues."
+  "auditNote": "Status reconciliado 2026-10-27. Permanecem open: art_cosmetics. art_juizo_chrome + art_foice + art_mil_foices_ladder entregues."
 }

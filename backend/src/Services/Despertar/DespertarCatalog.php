@@ -263,11 +263,19 @@ final class DespertarCatalog
         ['id' => 'danca_da_morte', 'cost' => '500000000000', 'kind' => 'clickMult', 'factor' => '2', 'requires' => ['upgradeId' => 'eco_da_foice', 'minSouls' => '0']],
         ['id' => 'colheita_absoluta', 'cost' => '2500000000000', 'kind' => 'clickMult', 'factor' => '5', 'requires' => ['upgradeId' => 'danca_da_morte', 'minSouls' => '0']],
 
-        // --- Cadeia Mil Foices (Paridade Thousand Fingers) ---
+        // --- Cadeia Mil Foices (Paridade Thousand Fingers · 12 elos wiki) ---
         ['id' => 'mil_foices', 'cost' => '100000', 'kind' => 'thousandBlades', 'factor' => '0.1', 'requires' => ['generatorId' => 'wandering_shade', 'quantity' => 25]],
         ['id' => 'milhao_de_foices', 'cost' => '10000000', 'kind' => 'thousandBladesMult', 'factor' => '5', 'requires' => ['upgradeId' => 'mil_foices', 'generatorId' => 'wandering_shade', 'quantity' => 50]],
         ['id' => 'bilhao_de_foices', 'cost' => '100000000', 'kind' => 'thousandBladesMult', 'factor' => '10', 'requires' => ['upgradeId' => 'milhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 100]],
-        ['id' => 'trilhao_de_foices', 'cost' => '100000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'bilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 200]],
+        ['id' => 'trilhao_de_foices', 'cost' => '1000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'bilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 150]],
+        ['id' => 'quadrilhao_de_foices', 'cost' => '10000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'trilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 200]],
+        ['id' => 'quintilhao_de_foices', 'cost' => '10000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'quadrilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 250]],
+        ['id' => 'sextilhao_de_foices', 'cost' => '10000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'quintilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 300]],
+        ['id' => 'septilhao_de_foices', 'cost' => '10000000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'sextilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 350]],
+        ['id' => 'octilhao_de_foices', 'cost' => '10000000000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'septilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 400]],
+        ['id' => 'nonilhao_de_foices', 'cost' => '10000000000000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'octilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 450]],
+        ['id' => 'decilhao_de_foices', 'cost' => '10000000000000000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'nonilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 500]],
+        ['id' => 'undecilhao_de_foices', 'cost' => '10000000000000000000000000000000', 'kind' => 'thousandBladesMult', 'factor' => '20', 'requires' => ['upgradeId' => 'decilhao_de_foices', 'generatorId' => 'wandering_shade', 'quantity' => 550]],
 
         // --- T1 Sombra Vagante (15 tiers) ---
         ['id' => 'umbras_despertas', 'cost' => '100', 'kind' => 'generatorMult', 'factor' => '2', 'generatorId' => 'wandering_shade', 'requires' => ['generatorId' => 'wandering_shade', 'quantity' => 1]],

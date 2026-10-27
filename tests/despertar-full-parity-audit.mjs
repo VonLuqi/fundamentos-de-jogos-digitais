@@ -237,7 +237,8 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   assert.equal(byKind.generatorMult, 300);
   assert.ok((byKind.synergyMult || 0) >= 4, 'ao menos sinergias base');
   assert.ok((byKind.veilMult || 0) >= 7, 'Filhotes do Cérbero');
-  assert.ok((byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0) >= 4, 'cadeia Mil Foices');
+  const tf = (byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0);
+  assert.equal(tf, 12, `cadeia Mil Foices = 12 (got ${tf})`);
   assert.ok(TALENTS.length >= 100, `≥100 talentos rio (got ${TALENTS.length})`);
   assert.ok(SHIMMER_EFFECTS.length >= 6, 'efeitos Eco do Acheron');
   assert.equal(DESPERTAR_ACHIEVEMENT_IDS.length, 138, `138 despertar_* (got ${DESPERTAR_ACHIEVEMENT_IDS.length})`);
@@ -249,10 +250,6 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   // Grandma-types / volume residual → WARN only
   if ((byKind.synergyMult || 0) < 44) {
     warn(`Sinergias totais: ${byKind.synergyMult || 0} (36 Vol.I/II + 8 Servos esperados)`);
-  }
-  const tf = (byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0);
-  if (tf < 10) {
-    warn(`Mil Foices: ${tf} elos (cadeia CC clássica é mais longa que mil/milhão/bilhão/trilhão)`);
   }
   if ((byKind.veilMult || 0) < 10) {
     warn(`Filhotes (veilMult): ${byKind.veilMult || 0} (CC kitten ladder é mais longa)`);

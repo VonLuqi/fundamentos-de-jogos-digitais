@@ -25,7 +25,7 @@
 | 4 | Geradores T7–T20 | Temple→You (14 prédios) | **Todos os 14 prédios T7–T20 implementados (`mnemosyne_temple` → `the_emperor`, 20/20 total)** | **100%** | **F3+F7 ✓** |
 | 5 | Upgrades por gerador (~15 tiers ×2) | Marcos 1/5/25/… ×2 | **15 tiers (1→300) por linha em todos os T1–T20 (300 upgrades de linha)** | **100%** | **F1+F3+F7 ✓** |
 | 6 | Sinergias Vol. I / II | +5% / +0.1% cruzado (malha densa) | **36 Vol. I/II canónicas + 8 Servos (`44` `synergyMult`) — template Synergy wiki** | **100%** | **F1+F3+F7+malha** |
-| 7 | Clique / Cursor scaling | Thousand fingers + tiers longos | **`clickMult` + `clickKSps` + Mil Foices (4 elos: mil→trilhão)** | **~70%** | **F1+F7** |
+| 7 | Clique / Cursor scaling | Thousand fingers + tiers longos | **`clickMult` + `clickKSps` + Mil Foices (12 elos: mil→undecilhão)** | **100%** | **F1+F7+escada** |
 | 8 | Prestígio / Ascensão | ∛(lifetime/1e12) · +1%/nível | **√(run/4e9)/(1+k) + Fortune #102 (+1%) + piso cúbico ∛(lifetime/1e12) c/ Save Heal** | **100%** | **F8 ✓** |
 | 9 | Heavenly tree / talentos | Árvore HC completa (centenas) | **Panteão de Mnemosyne (25 talentos) — subset jogável, não árvore HC plena** | **~35%** | **F5+F8** |
 | 10 | Soft keep (permanent slots / starters) | Slots + starter kit/kitchen | **Eco do Styx I–V (5 slots permanentes) + starters de Sombra, Cão e Forja** | **100%** | **Base+F8 ✓** |
@@ -55,7 +55,7 @@ Pesos = relevância para “parecer Cookie Clicker” na sessão (não horas de 
 
 | Grupo | Itens | Peso | % médio grupo | Contribuição |
 | --- | --- | ---: | ---: | ---: |
-| Economia core | 1–3, 5, 7, 8, 10, 16 | 40% | **~96%** | **38,4** |
+| Economia core | 1–3, 5, 7, 8, 10, 16 | 40% | **100%** | **40,0** |
 | Conteúdo late | 4, 6, 11–15, 20–22 | 35% | **~92%** | **32,2** |
 | Meta / UI / stack / fluidez / assets | 9, 17–19, 23, 25, 26 | 25% | **~84%** | **21,0** |
 | | | **100%** | | |
@@ -63,19 +63,19 @@ Pesos = relevância para “parecer Cookie Clicker” na sessão (não horas de 
 | | |
 | --- | ---: |
 | **Código / fórmulas JS ≡ PHP (gate audit)** | **100%** |
-| **Volume de catálogo vs wiki densa (sinergias/kittens/TF/HC)** | **~59%** |
+| **Volume de catálogo vs wiki densa (sinergias/kittens/TF/HC)** | **~62%** |
 | **Arte WebP entregue (foice ok; cosméticos/juízo chrome open)** | **~84%** |
-| **Paridade global ponderada (itens 1–23+25–26, pós-auditoria)** | **~93%** |
+| **Paridade global ponderada (itens 1–23+25–26, pós-auditoria)** | **~94%** |
 | **Geradores (20/20 · baseCost/baseRate canónicos)** | **100%** |
 | **Upgrades de linha (300 = 15×20)** | **100%** |
-| **Upgrades totais (396 no catálogo)** | **implementado** · composição ≠ volume CC pleno |
-| **Assets (~519 WebP sprites; 2 art-requests open)** | **~84%** |
+| **Upgrades totais (404 no catálogo)** | **implementado** · composição ≠ volume CC pleno |
+| **Assets (~519 WebP sprites; art_cosmetics open)** | **~84%** |
 
 ```text
 Código/fórmulas 100%  ████████████████████
-Volume catálogo ~59%  ███████████░░░░░░░░░
+Volume catálogo ~62%  ████████████░░░░░░░░
 Arte WebP       ~84%  ████████████████░░░░
-Global ponderado ~93% ███████████████████░
+Global ponderado ~94% ███████████████████░
 ```
 
 ### Paridade real (auditoria forense 2026-10-23)
@@ -85,12 +85,12 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 | Pilar | Medida | Resultado |
 | --- | --- | --- |
 | Código/fórmulas | 20 gens dígito-a-dígito · 300 tiers · Lucky/1.15/sell/leech · JS≡PHP | **100% / PASS** |
-| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 4 elos Mil Foices · 8 veilMult · 25 talentos · 138 `despertar_*` | **~70%** vs wiki densa |
+| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 8 veilMult · 25 talentos · 138 `despertar_*` | **~75%** vs wiki densa |
 | Arte WebP | ~519 ficheiros · manifest ok · Foice idle/pressed WebP · cosméticos/juízo chrome open | **~84%** |
 
 **Divergências explícitas (backlog, não bugs JS≠PHP):**
 1. ~~Sinergias Vol. I/II~~ — malha canónica 36 + 8 Servos (item 6 = 100%).
-2. Mil Foices: só mil / milhão / bilhão / trilhão (4 elos).
+2. ~~Mil Foices~~ — escada canónica 12 elos (mil→undecilhão; item 7 = 100%).
 3. Filhotes: ladder curta (fatores 0.1…0.2 ×7 + fortune_103).
 4. Heavenly: 25 talentos ≠ árvore HC wiki.
 5. Digestão Sanguessuga escala **n²** (cada leech acumula o drain total) — documentada no código.
@@ -756,7 +756,7 @@ Detalhe operacional: [`plano-paridade-cookieclicker-producao.md`](./plano-parida
 
 - [x] 15 tiers por gerador (T1–T6: marcos `1, 5, 10, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300`, novos marcos ×2 com blurb temático)
 - [x] Sinergias Vol. I (`qty >= 15`) e Vol. II (`qty >= 75`) com +5% SPS no *boosted* e +0,1% SPS na *base* (malha canónica 36 pares + 8 Servos; ex. *Almanaques do Destino*)
-- [x] Cadeia *Mil Foices* (`mil_foices`, `milhao_de_foices`, `bilhao_de_foices`, `trilhao_de_foices`) escalando clique e Sombra Vagante por estrutura não-Sombra
+- [x] Cadeia *Mil Foices* (12 elos: `mil_foices` → `undecilhao_de_foices`, fatores 0.1 / ×5 / ×10 / ×20⁸) escalando clique e Sombra Vagante por estrutura não-Sombra
 - [x] Espelhamento estrito JS ≡ PHP (`upgrades.js` ≡ `DespertarCatalog.php`, `formulas.js` ≡ `DespertarFormulas.php`)
 - [x] Códice `log_synergy_blades` + 112 ícones registrados em `manifest.json` e `art-requests.json`
 - [x] Smoke `tests/despertar-f1-styx-smoke.mjs` verde
