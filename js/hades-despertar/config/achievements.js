@@ -56,6 +56,54 @@ export const VEIL_TIERS = Object.freeze([
     color: '#cfa759',
     spriteId: 'veu_ouro_ancestral',
   }),
+  Object.freeze({
+    id: 'selo_tartaro',
+    name: 'Selo do Tártaro',
+    minVeilPercent: 400,
+    minAchievements: 100,
+    color: '#8b5cf6',
+    spriteId: 'veu_selo_tartaro',
+  }),
+  Object.freeze({
+    id: 'manto_hades',
+    name: 'Manto de Hades',
+    minVeilPercent: 600,
+    minAchievements: 150,
+    color: '#4c1d95',
+    spriteId: 'veu_manto_hades',
+  }),
+  Object.freeze({
+    id: 'coroa_estigia',
+    name: 'Coroa Estígia',
+    minVeilPercent: 800,
+    minAchievements: 200,
+    color: '#be123c',
+    spriteId: 'veu_coroa_estigia',
+  }),
+  Object.freeze({
+    id: 'trono_sombrio',
+    name: 'Trono Sombrio',
+    minVeilPercent: 1000,
+    minAchievements: 250,
+    color: '#0f172a',
+    spriteId: 'veu_trono_sombrio',
+  }),
+  Object.freeze({
+    id: 'olimpo_invertido',
+    name: 'Olimpo Invertido',
+    minVeilPercent: 1200,
+    minAchievements: 300,
+    color: '#eab308',
+    spriteId: 'veu_olimpo_invertido',
+  }),
+  Object.freeze({
+    id: 'veu_absoluto',
+    name: 'Véu Absoluto',
+    minVeilPercent: 1400,
+    minAchievements: 350,
+    color: '#f8fafc',
+    spriteId: 'veu_absoluto',
+  }),
 ]);
 
 export const CERBERUS_PUP_UPGRADE_IDS = Object.freeze([
@@ -66,6 +114,14 @@ export const CERBERUS_PUP_UPGRADE_IDS = Object.freeze([
   'filhote_intendente_erebo',
   'filhote_arauto_lethe',
   'cerbero_conselheiro_tartaro',
+  'filhote_experto_erebo',
+  'filhote_consultor_styx',
+  'filhote_assistente_regional',
+  'filhote_mercador_acheron',
+  'filhote_analista_moiras',
+  'filhote_executivo_hades',
+  'filhote_admin_tartaro',
+  'filhote_estrategista_olimpo',
 ]);
 
 export const DESPERTAR_ACHIEVEMENTS = Object.freeze(

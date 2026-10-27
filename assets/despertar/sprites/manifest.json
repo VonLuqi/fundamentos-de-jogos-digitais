@@ -3123,6 +3123,62 @@
       "webp": "upgrades/chave_do_obolo.webp",
       "svg": "upgrades/chave_do_obolo.svg",
       "size": 128
+    },
+    "filhote_experto_erebo": {
+      "name": "Filhote Experto do Érebo",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_experto_erebo.webp",
+      "svg": "upgrades/filhote_experto_erebo.svg",
+      "size": 128
+    },
+    "filhote_consultor_styx": {
+      "name": "Filhote Consultor do Styx",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_consultor_styx.webp",
+      "svg": "upgrades/filhote_consultor_styx.svg",
+      "size": 128
+    },
+    "filhote_assistente_regional": {
+      "name": "Filhote Assistente Regional",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_assistente_regional.webp",
+      "svg": "upgrades/filhote_assistente_regional.svg",
+      "size": 128
+    },
+    "filhote_mercador_acheron": {
+      "name": "Filhote Mercador do Acheron",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_mercador_acheron.webp",
+      "svg": "upgrades/filhote_mercador_acheron.svg",
+      "size": 128
+    },
+    "filhote_analista_moiras": {
+      "name": "Filhote Analista das Moiras",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_analista_moiras.webp",
+      "svg": "upgrades/filhote_analista_moiras.svg",
+      "size": 128
+    },
+    "filhote_executivo_hades": {
+      "name": "Filhote Executivo de Hades",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_executivo_hades.webp",
+      "svg": "upgrades/filhote_executivo_hades.svg",
+      "size": 128
+    },
+    "filhote_admin_tartaro": {
+      "name": "Filhote Admin do Tártaro",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_admin_tartaro.webp",
+      "svg": "upgrades/filhote_admin_tartaro.svg",
+      "size": 128
+    },
+    "filhote_estrategista_olimpo": {
+      "name": "Filhote Estrategista do Olimpo",
+      "kind": "veilMult",
+      "webp": "upgrades/filhote_estrategista_olimpo.webp",
+      "svg": "upgrades/filhote_estrategista_olimpo.svg",
+      "size": 128
     }
   },
   "shimmers": {

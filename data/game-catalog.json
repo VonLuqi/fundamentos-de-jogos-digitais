@@ -12,8 +12,17 @@
       "rarity": "stone",
       "xp": 0,
       "trailhead": {
-        "nameIndexes": [9],
-        "descIndexes": [0, 9, 17, 25, 35, 47]
+        "nameIndexes": [
+          9
+        ],
+        "descIndexes": [
+          0,
+          9,
+          17,
+          25,
+          35,
+          47
+        ]
       }
     },
     {
@@ -27,8 +36,16 @@
       "rarity": "copper",
       "xp": 20,
       "trailhead": {
-        "nameIndexes": [0],
-        "descIndexes": [0, 13, 19, 27, 35]
+        "nameIndexes": [
+          0
+        ],
+        "descIndexes": [
+          0,
+          13,
+          19,
+          27,
+          35
+        ]
       }
     },
     {
@@ -41,7 +58,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula1",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_alquimista_da_fisica",
@@ -53,7 +74,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula1",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_juramento_do_circulo",
@@ -65,7 +90,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula1", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula1",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula2_concluida",
@@ -88,7 +117,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula2",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_arquiteto_de_cenas",
@@ -100,7 +133,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula2",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_cartografo_do_input",
@@ -112,7 +149,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula2", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula2",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula3_concluida",
@@ -135,7 +176,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula3", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula3",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_artesao_do_pixel",
@@ -147,7 +192,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula3", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula3",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_identidade_ludica",
@@ -159,7 +208,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula3", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula3",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula4_concluida",
@@ -182,7 +235,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula4", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula4",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_artesao_da_viewport",
@@ -194,7 +251,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula4", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula4",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_criatividade_sob_limite",
@@ -206,7 +267,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula4", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula4",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula5_concluida",
@@ -229,7 +294,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula5",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_selo_do_livre",
@@ -241,7 +310,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula5",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_balanca_da_faixa",
@@ -253,7 +326,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula5", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula5",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula6_concluida",
@@ -276,7 +353,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula6", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula6",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_balcao_sem_azar",
@@ -288,7 +369,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula6", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula6",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_tempo_respeitado",
@@ -300,7 +385,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula6", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula6",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula7_concluida",
@@ -323,7 +412,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula7", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula7",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_cercado_do_escopo",
@@ -335,7 +428,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula7", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula7",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_pasta_sagrada",
@@ -347,7 +444,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula7", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula7",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "aula8_concluida",
@@ -370,7 +471,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula8",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_perfil_mecanica",
@@ -382,7 +487,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 15,
-      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula8",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "segredo_trilha_labirinto",
@@ -394,7 +503,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 25,
-      "meta": { "family": "aula8", "kind": "content", "volatile": true }
+      "meta": {
+        "family": "aula8",
+        "kind": "content",
+        "volatile": true
+      }
     },
     {
       "id": "soberano_do_submundo",
@@ -424,7 +537,10 @@
       "difficulty": "trivial",
       "rarity": "stone",
       "xp": 5,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "grimorio_elo_da_trilha",
@@ -436,7 +552,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "grimorio_dez_inscricoes",
@@ -448,7 +567,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "grimorio_revelacao",
@@ -460,7 +582,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "grimorio_vinculo_oculto",
@@ -472,7 +597,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "grimorio", "kind": "event", "combo": "lesson+share" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event",
+        "combo": "lesson+share"
+      }
     },
     {
       "id": "grimorio_eco_invertido",
@@ -484,7 +613,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "grimorio", "kind": "event", "combo": "receive+clone" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event",
+        "combo": "receive+clone"
+      }
     },
     {
       "id": "grimorio_escriba_ritual",
@@ -496,7 +629,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "grimorio", "kind": "content", "axis": "body" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "content",
+        "axis": "body"
+      }
     },
     {
       "id": "grimorio_cartografo_pessoal",
@@ -508,7 +645,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "grimorio", "kind": "content", "axis": "tags" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "content",
+        "axis": "tags"
+      }
     },
     {
       "id": "grimorio_fixador",
@@ -520,7 +661,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "grimorio_eco_clonado",
@@ -532,7 +676,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "grimorio", "kind": "event" }
+      "meta": {
+        "family": "grimorio",
+        "kind": "event"
+      }
     },
     {
       "id": "despertar_primeira_alma",
@@ -544,7 +691,10 @@
       "difficulty": "trivial",
       "rarity": "stone",
       "xp": 5,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_primeira_sombra",
@@ -556,7 +706,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_automacao",
@@ -568,7 +721,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_forja",
@@ -580,7 +736,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_trono",
@@ -592,7 +751,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_catabase",
@@ -604,7 +766,10 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_mnemosyne",
@@ -616,7 +781,10 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_soberania",
@@ -628,7 +796,10 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 50,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_juizo_5",
@@ -640,7 +811,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_juizo_25",
@@ -652,7 +826,10 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_veredito",
@@ -664,7 +841,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_cem_almas",
@@ -676,7 +856,10 @@
       "difficulty": "trivial",
       "rarity": "stone",
       "xp": 5,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_mil_almas",
@@ -688,7 +871,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_milhao",
@@ -700,7 +886,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_styx_primeiro",
@@ -712,7 +901,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_styx_cinco",
@@ -724,7 +916,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_shiny",
@@ -736,7 +931,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_gold",
@@ -748,7 +946,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_catabase_3",
@@ -760,7 +961,10 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "progress" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
     },
     {
       "id": "despertar_juizo_1",
@@ -772,7 +976,10 @@
       "difficulty": "trivial",
       "rarity": "stone",
       "xp": 5,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_juizo_10",
@@ -784,7 +991,10 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_bancada_cheia",
@@ -796,7 +1006,10 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "juizo" }
+      "meta": {
+        "family": "despertar",
+        "kind": "juizo"
+      }
     },
     {
       "id": "despertar_arquiteto_do_loop",
@@ -809,7 +1022,11 @@
       "rarity": "gold",
       "xp": 30,
       "veiledDesc": "As páginas do Códice ainda estão seladas.",
-      "meta": { "family": "despertar", "kind": "codex", "hidden": true }
+      "meta": {
+        "family": "despertar",
+        "kind": "codex",
+        "hidden": true
+      }
     },
     {
       "id": "despertar_paciencia",
@@ -822,7 +1039,11 @@
       "rarity": "silver",
       "xp": 20,
       "veiledDesc": "O Submundo ainda observa a sua ausência.",
-      "meta": { "family": "despertar", "kind": "progress", "hidden": true }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "hidden": true
+      }
     },
     {
       "id": "despertar_templo_1",
@@ -834,7 +1055,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "mnemosyne_temple", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_templo_50",
@@ -846,7 +1072,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "mnemosyne_temple", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_templo_100",
@@ -858,7 +1089,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "mnemosyne_temple", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_templo_200",
@@ -870,7 +1106,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 50,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "mnemosyne_temple", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_torre_1",
@@ -882,7 +1123,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "styx_tower", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_torre_50",
@@ -894,7 +1140,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "styx_tower", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_torre_100",
@@ -906,7 +1157,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "styx_tower", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_torre_200",
@@ -918,7 +1174,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 50,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "styx_tower", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_barca_1",
@@ -930,7 +1191,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "star_barge", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_barca_50",
@@ -942,7 +1208,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "star_barge", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_barca_100",
@@ -954,7 +1225,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 40,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "star_barge", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_barca_200",
@@ -966,7 +1242,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 55,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "star_barge", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_laboratorio_1",
@@ -978,7 +1259,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "tartarus_lab", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_laboratorio_50",
@@ -990,7 +1276,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "tartarus_lab", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_laboratorio_100",
@@ -1002,7 +1293,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 40,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "tartarus_lab", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_laboratorio_200",
@@ -1014,7 +1310,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 55,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "tartarus_lab", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_portal_1",
@@ -1026,7 +1327,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "erebus_portal", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_portal_50",
@@ -1038,7 +1344,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "erebus_portal", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_portal_100",
@@ -1050,7 +1361,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 45,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "erebus_portal", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_portal_200",
@@ -1062,7 +1378,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 60,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "erebus_portal", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_tear_1",
@@ -1074,7 +1395,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "chronos_loom", "milestone": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 1
+      }
     },
     {
       "id": "despertar_tear_50",
@@ -1086,7 +1412,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "chronos_loom", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_tear_100",
@@ -1098,7 +1429,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 45,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "chronos_loom", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_tear_200",
@@ -1110,7 +1446,12 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 65,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "chronos_loom", "milestone": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 200
+      }
     },
     {
       "id": "despertar_nectar_primeiro",
@@ -1122,7 +1463,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "nectar" }
+      "meta": {
+        "family": "despertar",
+        "kind": "nectar"
+      }
     },
     {
       "id": "despertar_nivel_1",
@@ -1134,7 +1478,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "nectar" }
+      "meta": {
+        "family": "despertar",
+        "kind": "nectar"
+      }
     },
     {
       "id": "despertar_nivel_10",
@@ -1146,7 +1493,10 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 55,
-      "meta": { "family": "despertar", "kind": "nectar" }
+      "meta": {
+        "family": "despertar",
+        "kind": "nectar"
+      }
     },
     {
       "id": "despertar_minigame_panteao",
@@ -1158,7 +1508,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "minigame", "minigame": "pantheon" }
+      "meta": {
+        "family": "despertar",
+        "kind": "minigame",
+        "minigame": "pantheon"
+      }
     },
     {
       "id": "despertar_minigame_grimorio",
@@ -1170,7 +1524,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "minigame", "minigame": "grimoire" }
+      "meta": {
+        "family": "despertar",
+        "kind": "minigame",
+        "minigame": "grimoire"
+      }
     },
     {
       "id": "despertar_minigame_jardim",
@@ -1182,7 +1540,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "minigame", "minigame": "garden" }
+      "meta": {
+        "family": "despertar",
+        "kind": "minigame",
+        "minigame": "garden"
+      }
     },
     {
       "id": "despertar_minigame_mercado",
@@ -1194,7 +1556,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "minigame", "minigame": "market" }
+      "meta": {
+        "family": "despertar",
+        "kind": "minigame",
+        "minigame": "market"
+      }
     },
     {
       "id": "despertar_bilhao",
@@ -1206,7 +1572,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "progress", "lifetimeSouls": "1000000000" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "lifetimeSouls": "1000000000"
+      }
     },
     {
       "id": "despertar_trilhao",
@@ -1218,7 +1588,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 45,
-      "meta": { "family": "despertar", "kind": "progress", "lifetimeSouls": "1000000000000" }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "lifetimeSouls": "1000000000000"
+      }
     },
     {
       "id": "despertar_sps_100",
@@ -1230,7 +1604,11 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "sps", "minSps": "100" }
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "100"
+      }
     },
     {
       "id": "despertar_sps_10k",
@@ -1242,7 +1620,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "sps", "minSps": "10000" }
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "10000"
+      }
     },
     {
       "id": "despertar_sps_1m",
@@ -1254,7 +1636,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "sps", "minSps": "1000000" }
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "1000000"
+      }
     },
     {
       "id": "despertar_sps_1b",
@@ -1266,7 +1652,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 45,
-      "meta": { "family": "despertar", "kind": "sps", "minSps": "1000000000" }
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "1000000000"
+      }
     },
     {
       "id": "despertar_cliques_100",
@@ -1278,7 +1668,11 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 10,
-      "meta": { "family": "despertar", "kind": "clicks", "minClicks": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "clicks",
+        "minClicks": 100
+      }
     },
     {
       "id": "despertar_cliques_1000",
@@ -1290,7 +1684,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "clicks", "minClicks": 1000 }
+      "meta": {
+        "family": "despertar",
+        "kind": "clicks",
+        "minClicks": 1000
+      }
     },
     {
       "id": "despertar_eco_1",
@@ -1302,7 +1700,11 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "shimmer", "minShimmers": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "shimmer",
+        "minShimmers": 1
+      }
     },
     {
       "id": "despertar_eco_7",
@@ -1314,7 +1716,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "shimmer", "minShimmers": 7 }
+      "meta": {
+        "family": "despertar",
+        "kind": "shimmer",
+        "minShimmers": 7
+      }
     },
     {
       "id": "despertar_eco_27",
@@ -1326,7 +1732,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "shimmer", "minShimmers": 27 }
+      "meta": {
+        "family": "despertar",
+        "kind": "shimmer",
+        "minShimmers": 27
+      }
     },
     {
       "id": "despertar_eco_colerico",
@@ -1338,7 +1748,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "shimmer", "minWrath": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "shimmer",
+        "minWrath": 1
+      }
     },
     {
       "id": "despertar_sombra_50",
@@ -1350,7 +1764,12 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "wandering_shade", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_sombra_100",
@@ -1362,7 +1781,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "wandering_shade", "milestone": 100 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 100
+      }
     },
     {
       "id": "despertar_servos_50",
@@ -1374,7 +1798,12 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "charon_servants", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_cao_50",
@@ -1386,7 +1815,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "cerberian_hound", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_juiz_50",
@@ -1398,7 +1832,12 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "tartarus_judge", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_forja_50",
@@ -1410,7 +1849,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "phlegethon_forge", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_trono_50",
@@ -1422,7 +1866,12 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 30,
-      "meta": { "family": "despertar", "kind": "progress", "generatorId": "obsidian_throne", "milestone": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 50
+      }
     },
     {
       "id": "despertar_catabase_5",
@@ -1434,7 +1883,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 45,
-      "meta": { "family": "despertar", "kind": "progress", "minPrestige": 5 }
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "minPrestige": 5
+      }
     },
     {
       "id": "despertar_filhote_primeiro",
@@ -1446,7 +1899,10 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "veil" }
+      "meta": {
+        "family": "despertar",
+        "kind": "veil"
+      }
     },
     {
       "id": "despertar_sombra_sorte_pura",
@@ -1460,7 +1916,11 @@
       "rarity": "unique",
       "xp": 0,
       "veiledDesc": "Um sussurro improvável atravessa o Érebo.",
-      "meta": { "family": "despertar", "kind": "shadow", "shadow": true }
+      "meta": {
+        "family": "despertar",
+        "kind": "shadow",
+        "shadow": true
+      }
     },
     {
       "id": "despertar_sombra_vigilia_eterna",
@@ -1474,7 +1934,11 @@
       "rarity": "unique",
       "xp": 0,
       "veiledDesc": "Apenas os que nunca fecham os olhos conhecem este selo.",
-      "meta": { "family": "despertar", "kind": "shadow", "shadow": true }
+      "meta": {
+        "family": "despertar",
+        "kind": "shadow",
+        "shadow": true
+      }
     },
     {
       "id": "despertar_catabase_avos_1",
@@ -1486,7 +1950,11 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 25,
-      "meta": { "family": "despertar", "kind": "catabase", "stage": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "catabase",
+        "stage": 1
+      }
     },
     {
       "id": "despertar_catabase_avos_3",
@@ -1498,7 +1966,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 40,
-      "meta": { "family": "despertar", "kind": "catabase", "stage": 3 }
+      "meta": {
+        "family": "despertar",
+        "kind": "catabase",
+        "stage": 3
+      }
     },
     {
       "id": "despertar_sanguessuga_1",
@@ -1510,7 +1982,11 @@
       "difficulty": "easy",
       "rarity": "copper",
       "xp": 15,
-      "meta": { "family": "despertar", "kind": "leech", "minPopped": 1 }
+      "meta": {
+        "family": "despertar",
+        "kind": "leech",
+        "minPopped": 1
+      }
     },
     {
       "id": "despertar_sanguessuga_50",
@@ -1522,7 +1998,11 @@
       "difficulty": "hard",
       "rarity": "gold",
       "xp": 35,
-      "meta": { "family": "despertar", "kind": "leech", "minPopped": 50 }
+      "meta": {
+        "family": "despertar",
+        "kind": "leech",
+        "minPopped": 50
+      }
     },
     {
       "id": "despertar_sanguessuga_200",
@@ -1534,7 +2014,11 @@
       "difficulty": "mythic",
       "rarity": "rainbow",
       "xp": 55,
-      "meta": { "family": "despertar", "kind": "leech", "minPopped": 200 }
+      "meta": {
+        "family": "despertar",
+        "kind": "leech",
+        "minPopped": 200
+      }
     },
     {
       "id": "despertar_sanguessuga_shiny",
@@ -1548,7 +2032,11 @@
       "rarity": "unique",
       "xp": 0,
       "veiledDesc": "Dizem que um parasita dourado espreita uma vez a cada dez mil nascimentos.",
-      "meta": { "family": "despertar", "kind": "leech", "shadow": true }
+      "meta": {
+        "family": "despertar",
+        "kind": "leech",
+        "shadow": true
+      }
     },
     {
       "id": "despertar_tregua_estigia",
@@ -1560,94 +2048,3882 @@
       "difficulty": "medium",
       "rarity": "silver",
       "xp": 20,
-      "meta": { "family": "despertar", "kind": "catabase" }
+      "meta": {
+        "family": "despertar",
+        "kind": "catabase"
+      }
     },
-    { "id": "despertar_condensador_1", "name": "Primeira Gota de Vazio", "desc": "Ativou o primeiro Condensador do Vazio (T13).", "icon": "⚛️", "art": "despertar_shiny.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 25, "meta": { "family": "despertar", "kind": "progress", "generatorId": "void_condenser", "milestone": 1 } },
-    { "id": "despertar_condensador_50", "name": "Cinquenta Câmaras de Vácuo", "desc": "Mantém 50 Condensadores do Vazio ativos.", "icon": "⚛️", "art": "despertar_shiny.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 35, "meta": { "family": "despertar", "kind": "progress", "generatorId": "void_condenser", "milestone": 50 } },
-    { "id": "despertar_condensador_100", "name": "Cem Singularidades Frias", "desc": "Alcançou 100 Condensadores do Vazio.", "icon": "⚛️", "art": "despertar_shiny.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 45, "meta": { "family": "despertar", "kind": "progress", "generatorId": "void_condenser", "milestone": 100 } },
-    { "id": "despertar_condensador_200", "name": "Catedral de Antimatéria", "desc": "Alcançou 200 Condensadores do Vazio.", "icon": "⚛️", "art": "despertar_shiny.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 60, "meta": { "family": "despertar", "kind": "progress", "generatorId": "void_condenser", "milestone": 200 } },
-    { "id": "despertar_condensador_300", "name": "Senhor do Vazio Absoluto", "desc": "Alcançou 300 Condensadores do Vazio.", "icon": "⚛️", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 75, "meta": { "family": "despertar", "kind": "progress", "generatorId": "void_condenser", "milestone": 300 } },
-
-    { "id": "despertar_prisma_1", "name": "Primeiro Feixe das Moiras", "desc": "Ergueu o primeiro Prisma das Moiras (T14).", "icon": "💎", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 25, "meta": { "family": "despertar", "kind": "progress", "generatorId": "moirai_prism", "milestone": 1 } },
-    { "id": "despertar_prisma_50", "name": "Cinquenta Lentes Estígias", "desc": "Mantém 50 Prismas das Moiras refratando destinos.", "icon": "💎", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 35, "meta": { "family": "despertar", "kind": "progress", "generatorId": "moirai_prism", "milestone": 50 } },
-    { "id": "despertar_prisma_100", "name": "Cem Sóis Refratados", "desc": "Alcançou 100 Prismas das Moiras.", "icon": "💎", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 45, "meta": { "family": "despertar", "kind": "progress", "generatorId": "moirai_prism", "milestone": 100 } },
-    { "id": "despertar_prisma_200", "name": "Abóbada Prismática", "desc": "Alcançou 200 Prismas das Moiras.", "icon": "💎", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 60, "meta": { "family": "despertar", "kind": "progress", "generatorId": "moirai_prism", "milestone": 200 } },
-    { "id": "despertar_prisma_300", "name": "Onividência das Três Irmãs", "desc": "Alcançou 300 Prismas das Moiras.", "icon": "💎", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 75, "meta": { "family": "despertar", "kind": "progress", "generatorId": "moirai_prism", "milestone": 300 } },
-
-    { "id": "despertar_forja_destino_1", "name": "Primeira Aposta Ctoniana", "desc": "Acendeu a primeira Forja do Destino (T15).", "icon": "🎲", "art": "despertar_gold.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 25, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fate_forge", "milestone": 1 } },
-    { "id": "despertar_forja_destino_50", "name": "Cinquenta Roletas de Ouro", "desc": "Mantém 50 Forjas do Destino em operação.", "icon": "🎲", "art": "despertar_gold.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 35, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fate_forge", "milestone": 50 } },
-    { "id": "despertar_forja_destino_100", "name": "Cem Milagres Estatísticos", "desc": "Alcançou 100 Forjas do Destino.", "icon": "🎲", "art": "despertar_gold.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 50, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fate_forge", "milestone": 100 } },
-    { "id": "despertar_forja_destino_200", "name": "Cidadela do Acaso", "desc": "Alcançou 200 Forjas do Destino.", "icon": "🎲", "art": "despertar_gold.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 65, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fate_forge", "milestone": 200 } },
-    { "id": "despertar_forja_destino_300", "name": "Soberano da Fortuna", "desc": "Alcançou 300 Forjas do Destino.", "icon": "🎲", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 80, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fate_forge", "milestone": 300 } },
-
-    { "id": "despertar_motor_fractal_1", "name": "Primeira Iteração", "desc": "Iniciou o primeiro Motor Fractal (T16).", "icon": "🕸️", "art": "despertar_automacao.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 30, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fractal_engine", "milestone": 1 } },
-    { "id": "despertar_motor_fractal_50", "name": "Cinquenta Espirais Infinitas", "desc": "Mantém 50 Motores Fractais em recursão.", "icon": "🕸️", "art": "despertar_automacao.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 40, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fractal_engine", "milestone": 50 } },
-    { "id": "despertar_motor_fractal_100", "name": "Cem Dimensões de Hausdorff", "desc": "Alcançou 100 Motores Fractais.", "icon": "🕸️", "art": "despertar_automacao.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 50, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fractal_engine", "milestone": 100 } },
-    { "id": "despertar_motor_fractal_200", "name": "Labirinto de Hilbert", "desc": "Alcançou 200 Motores Fractais.", "icon": "🕸️", "art": "despertar_automacao.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 65, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fractal_engine", "milestone": 200 } },
-    { "id": "despertar_motor_fractal_300", "name": "Mestre da Autossimilaridade", "desc": "Alcançou 300 Motores Fractais.", "icon": "🕸️", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 80, "meta": { "family": "despertar", "kind": "progress", "generatorId": "fractal_engine", "milestone": 300 } },
-
-    { "id": "despertar_console_1", "name": "Hello, Submundo", "desc": "Ligou o primeiro Console do Oráculo (T17).", "icon": "💻", "art": "despertar_arquiteto_do_loop.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 30, "meta": { "family": "despertar", "kind": "progress", "generatorId": "oracle_console", "milestone": 1 } },
-    { "id": "despertar_console_50", "name": "Cinquenta Terminais de Delfos", "desc": "Mantém 50 Consoles do Oráculo compilando o destino.", "icon": "💻", "art": "despertar_arquiteto_do_loop.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 40, "meta": { "family": "despertar", "kind": "progress", "generatorId": "oracle_console", "milestone": 50 } },
-    { "id": "despertar_console_100", "name": "Kernel em Anel Zero", "desc": "Alcançou 100 Consoles do Oráculo.", "icon": "💻", "art": "despertar_arquiteto_do_loop.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 55, "meta": { "family": "despertar", "kind": "progress", "generatorId": "oracle_console", "milestone": 100 } },
-    { "id": "despertar_console_200", "name": "Mainframe da Sibila", "desc": "Alcançou 200 Consoles do Oráculo.", "icon": "💻", "art": "despertar_arquiteto_do_loop.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 70, "meta": { "family": "despertar", "kind": "progress", "generatorId": "oracle_console", "milestone": 200 } },
-    { "id": "despertar_console_300", "name": "Root do Livro da Vida", "desc": "Alcançou 300 Consoles do Oráculo.", "icon": "💻", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 85, "meta": { "family": "despertar", "kind": "progress", "generatorId": "oracle_console", "milestone": 300 } },
-
-    { "id": "despertar_idleverso_1", "name": "Primeiro Universo Desviado", "desc": "Conquistou o primeiro Idleverso Ctoniano (T18).", "icon": "🪐", "art": "despertar_catabase.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 35, "meta": { "family": "despertar", "kind": "progress", "generatorId": "chthonic_idleverse", "milestone": 1 } },
-    { "id": "despertar_idleverso_50", "name": "Alfândega de Cinquenta Cosmos", "desc": "Mantém 50 Idleversos Ctonianos sob tributo.", "icon": "🪐", "art": "despertar_catabase.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 45, "meta": { "family": "despertar", "kind": "progress", "generatorId": "chthonic_idleverse", "milestone": 50 } },
-    { "id": "despertar_idleverso_100", "name": "Império Transversal", "desc": "Alcançou 100 Idleversos Ctonianos.", "icon": "🪐", "art": "despertar_catabase.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 60, "meta": { "family": "despertar", "kind": "progress", "generatorId": "chthonic_idleverse", "milestone": 100 } },
-    { "id": "despertar_idleverso_200", "name": "Parlamento do Multiverso", "desc": "Alcançou 200 Idleversos Ctonianos.", "icon": "🪐", "art": "despertar_catabase.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 75, "meta": { "family": "despertar", "kind": "progress", "generatorId": "chthonic_idleverse", "milestone": 200 } },
-    { "id": "despertar_idleverso_300", "name": "Senhor do Omnidomínio", "desc": "Alcançou 300 Idleversos Ctonianos.", "icon": "🪐", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 90, "meta": { "family": "despertar", "kind": "progress", "generatorId": "chthonic_idleverse", "milestone": 300 } },
-
-    { "id": "despertar_cortex_1", "name": "Primeira Lua Pensante", "desc": "Despertou o primeiro Padeiro do Córtex (T19).", "icon": "🧠", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 35, "meta": { "family": "despertar", "kind": "progress", "generatorId": "cortex_baker", "milestone": 1 } },
-    { "id": "despertar_cortex_50", "name": "Noosfera de Cinquenta Mentes", "desc": "Mantém 50 Padeiros do Córtex sonhando almas.", "icon": "🧠", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 50, "meta": { "family": "despertar", "kind": "progress", "generatorId": "cortex_baker", "milestone": 50 } },
-    { "id": "despertar_cortex_100", "name": "Cem Luas de Hipnos", "desc": "Alcançou 100 Padeiros do Córtex.", "icon": "🧠", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 65, "meta": { "family": "despertar", "kind": "progress", "generatorId": "cortex_baker", "milestone": 100 } },
-    { "id": "despertar_cortex_200", "name": "Panteão Neural", "desc": "Alcançou 200 Padeiros do Córtex.", "icon": "🧠", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 80, "meta": { "family": "despertar", "kind": "progress", "generatorId": "cortex_baker", "milestone": 200 } },
-    { "id": "despertar_cortex_300", "name": "Onisciência Primordial", "desc": "Alcançou 300 Padeiros do Córtex.", "icon": "🧠", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 95, "meta": { "family": "despertar", "kind": "progress", "generatorId": "cortex_baker", "milestone": 300 } },
-
-    { "id": "despertar_imperador_1", "name": "À Tua Própria Imagem", "desc": "Ergueu o primeiro avatar d’O Imperador (You — T20).", "icon": "👑", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 40, "meta": { "family": "despertar", "kind": "progress", "generatorId": "the_emperor", "milestone": 1 } },
-    { "id": "despertar_imperador_50", "name": "Cinquenta Tronos de um Só Nome", "desc": "Mantém 50 avatares d’O Imperador.", "icon": "👑", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 55, "meta": { "family": "despertar", "kind": "progress", "generatorId": "the_emperor", "milestone": 50 } },
-    { "id": "despertar_imperador_100", "name": "Centúria de Imperadores", "desc": "Alcançou 100 avatares d’O Imperador.", "icon": "👑", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 70, "meta": { "family": "despertar", "kind": "progress", "generatorId": "the_emperor", "milestone": 100 } },
-    { "id": "despertar_imperador_200", "name": "Duzentos Avatares do Fim", "desc": "Alcançou 200 avatares d’O Imperador.", "icon": "👑", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 85, "meta": { "family": "despertar", "kind": "progress", "generatorId": "the_emperor", "milestone": 200 } },
-    { "id": "despertar_imperador_300", "name": "O Imperador Eterno", "desc": "Alcançou 300 avatares d’O Imperador (T20).", "icon": "👑", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 100, "meta": { "family": "despertar", "kind": "progress", "generatorId": "the_emperor", "milestone": 300 } },
-
-    { "id": "despertar_vinte_rios", "name": "Soberano dos Vinte Domínios", "desc": "Possuiu simultaneamente ao menos 1 unidade de cada um dos 20 geradores (T1 a T20).", "icon": "🏛️", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 100, "meta": { "family": "despertar", "kind": "progress" } },
-    { "id": "despertar_almas_1e21", "name": "Sextilhão do Acheron", "desc": "Ceifou 1 sextilhão (1e21) de almas acumuladas no Submundo.", "icon": "🌌", "art": "despertar_milhao.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 60, "meta": { "family": "despertar", "kind": "progress", "lifetimeSouls": "1000000000000000000000" } },
-    { "id": "despertar_almas_1e30", "name": "Nonilhão Imperial", "desc": "Ceifou 1 nonilhão (1e30) de almas acumuladas no Submundo.", "icon": "🌌", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 90, "meta": { "family": "despertar", "kind": "progress", "lifetimeSouls": "1000000000000000000000000000000" } },
-    { "id": "despertar_sps_1e15", "name": "Caudal de Quadrilhão", "desc": "Alcançou 1 quadrilhão (1e15) de Almas / s.", "icon": "🌊", "art": "despertar_catabase.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 60, "meta": { "family": "despertar", "kind": "sps", "minSps": "1000000000000000" } },
-    { "id": "despertar_sps_1e21", "name": "Torrente de Sextilhão", "desc": "Alcançou 1 sextilhão (1e21) de Almas / s.", "icon": "🌊", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 90, "meta": { "family": "despertar", "kind": "sps", "minSps": "1000000000000000000000" } },
-
-    { "id": "despertar_dragao_filhote", "name": "Casca de Bronze Rompida", "desc": "Chocou o Ovo Primordial e despertou o Filhote de Pitão.", "icon": "🐉", "art": "despertar_forja.webp", "hidden": false, "difficulty": "medium", "rarity": "silver", "xp": 25, "meta": { "family": "despertar", "kind": "dragon", "stage": 1 } },
-    { "id": "despertar_dragao_ladao", "name": "Ladão de Cem Cabeças", "desc": "Evoluiu o Dragão Ctoniano ao estágio máximo (Ladão de Cem Cabeças) e desbloqueou o 2º Slot de Aura.", "icon": "🐉", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 75, "meta": { "family": "despertar", "kind": "dragon", "stage": 4 } },
-    { "id": "despertar_estacoes_4", "name": "Senhor das Quatro Estações", "desc": "Alternou as Estações do Submundo ao menos 4 vezes pela Roda das Estações.", "icon": "🍂", "art": "despertar_mnemosyne.webp", "hidden": false, "difficulty": "medium", "rarity": "silver", "xp": 30, "meta": { "family": "despertar", "kind": "season" } },
-    { "id": "despertar_reliquias_sazonais", "name": "Colecionador dos Festivais Ctonianos", "desc": "Selou todas as 10 Relíquias e Oferendas das 4 Estações numa mesma corrida.", "icon": "🏺", "art": "despertar_gold.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 65, "meta": { "family": "despertar", "kind": "season" } },
-    { "id": "despertar_rei_saturno_5", "name": "Rei Saturno Soberano", "desc": "Elevou o Rei Saturno ao nível máximo (5) durante a Saturnália Ctoniana.", "icon": "👑", "art": "despertar_trono.webp", "hidden": false, "difficulty": "hard", "rarity": "gold", "xp": 40, "meta": { "family": "despertar", "kind": "season" } },
-    { "id": "despertar_fortuna_1", "name": "Sussurro de Hermes", "desc": "Reivindicou a primeira Fortuna de Hermes no letreiro de rumores.", "icon": "🍀", "art": "despertar_gold.webp", "hidden": false, "difficulty": "medium", "rarity": "silver", "xp": 25, "meta": { "family": "despertar", "kind": "fortune" } },
-    { "id": "despertar_o_fortuna", "name": "Moira Dourada (O Fortuna)", "desc": "Reivindicou todas as 24 Fortunas de Hermes (dobra a chance de Fortunas no ticker de 2% para 4%).", "icon": "🍀", "art": "despertar_soberania.webp", "hidden": false, "difficulty": "mythic", "rarity": "rainbow", "xp": 90, "meta": { "family": "despertar", "kind": "fortune" } },
-    { "id": "despertar_mercador_acheron", "name": "Mercador das Margens", "desc": "Liquidou estruturas no Mercado do Acheron para recuperar liquidez imediata.", "icon": "⚖️", "art": "despertar_cem_almas.webp", "hidden": false, "difficulty": "easy", "rarity": "bronze", "xp": 15, "meta": { "family": "despertar", "kind": "market" } }
+    {
+      "id": "despertar_condensador_1",
+      "name": "Primeira Gota de Vazio",
+      "desc": "Ativou o primeiro Condensador do Vazio (T13).",
+      "icon": "⚛️",
+      "art": "despertar_shiny.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 25,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_condensador_50",
+      "name": "Cinquenta Câmaras de Vácuo",
+      "desc": "Mantém 50 Condensadores do Vazio ativos.",
+      "icon": "⚛️",
+      "art": "despertar_shiny.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_condensador_100",
+      "name": "Cem Singularidades Frias",
+      "desc": "Alcançou 100 Condensadores do Vazio.",
+      "icon": "⚛️",
+      "art": "despertar_shiny.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_condensador_200",
+      "name": "Catedral de Antimatéria",
+      "desc": "Alcançou 200 Condensadores do Vazio.",
+      "icon": "⚛️",
+      "art": "despertar_shiny.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 60,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_condensador_300",
+      "name": "Senhor do Vazio Absoluto",
+      "desc": "Alcançou 300 Condensadores do Vazio.",
+      "icon": "⚛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 75,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_prisma_1",
+      "name": "Primeiro Feixe das Moiras",
+      "desc": "Ergueu o primeiro Prisma das Moiras (T14).",
+      "icon": "💎",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 25,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_prisma_50",
+      "name": "Cinquenta Lentes Estígias",
+      "desc": "Mantém 50 Prismas das Moiras refratando destinos.",
+      "icon": "💎",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_prisma_100",
+      "name": "Cem Sóis Refratados",
+      "desc": "Alcançou 100 Prismas das Moiras.",
+      "icon": "💎",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_prisma_200",
+      "name": "Abóbada Prismática",
+      "desc": "Alcançou 200 Prismas das Moiras.",
+      "icon": "💎",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 60,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_prisma_300",
+      "name": "Onividência das Três Irmãs",
+      "desc": "Alcançou 300 Prismas das Moiras.",
+      "icon": "💎",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 75,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_forja_destino_1",
+      "name": "Primeira Aposta Ctoniana",
+      "desc": "Acendeu a primeira Forja do Destino (T15).",
+      "icon": "🎲",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 25,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_forja_destino_50",
+      "name": "Cinquenta Roletas de Ouro",
+      "desc": "Mantém 50 Forjas do Destino em operação.",
+      "icon": "🎲",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_forja_destino_100",
+      "name": "Cem Milagres Estatísticos",
+      "desc": "Alcançou 100 Forjas do Destino.",
+      "icon": "🎲",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 50,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_forja_destino_200",
+      "name": "Cidadela do Acaso",
+      "desc": "Alcançou 200 Forjas do Destino.",
+      "icon": "🎲",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 65,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_forja_destino_300",
+      "name": "Soberano da Fortuna",
+      "desc": "Alcançou 300 Forjas do Destino.",
+      "icon": "🎲",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 80,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_1",
+      "name": "Primeira Iteração",
+      "desc": "Iniciou o primeiro Motor Fractal (T16).",
+      "icon": "🕸️",
+      "art": "despertar_automacao.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_50",
+      "name": "Cinquenta Espirais Infinitas",
+      "desc": "Mantém 50 Motores Fractais em recursão.",
+      "icon": "🕸️",
+      "art": "despertar_automacao.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 40,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_100",
+      "name": "Cem Dimensões de Hausdorff",
+      "desc": "Alcançou 100 Motores Fractais.",
+      "icon": "🕸️",
+      "art": "despertar_automacao.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 50,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_200",
+      "name": "Labirinto de Hilbert",
+      "desc": "Alcançou 200 Motores Fractais.",
+      "icon": "🕸️",
+      "art": "despertar_automacao.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 65,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_300",
+      "name": "Mestre da Autossimilaridade",
+      "desc": "Alcançou 300 Motores Fractais.",
+      "icon": "🕸️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 80,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_console_1",
+      "name": "Hello, Submundo",
+      "desc": "Ligou o primeiro Console do Oráculo (T17).",
+      "icon": "💻",
+      "art": "despertar_arquiteto_do_loop.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_console_50",
+      "name": "Cinquenta Terminais de Delfos",
+      "desc": "Mantém 50 Consoles do Oráculo compilando o destino.",
+      "icon": "💻",
+      "art": "despertar_arquiteto_do_loop.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 40,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_console_100",
+      "name": "Kernel em Anel Zero",
+      "desc": "Alcançou 100 Consoles do Oráculo.",
+      "icon": "💻",
+      "art": "despertar_arquiteto_do_loop.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_console_200",
+      "name": "Mainframe da Sibila",
+      "desc": "Alcançou 200 Consoles do Oráculo.",
+      "icon": "💻",
+      "art": "despertar_arquiteto_do_loop.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 70,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_console_300",
+      "name": "Root do Livro da Vida",
+      "desc": "Alcançou 300 Consoles do Oráculo.",
+      "icon": "💻",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 85,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_idleverso_1",
+      "name": "Primeiro Universo Desviado",
+      "desc": "Conquistou o primeiro Idleverso Ctoniano (T18).",
+      "icon": "🪐",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_idleverso_50",
+      "name": "Alfândega de Cinquenta Cosmos",
+      "desc": "Mantém 50 Idleversos Ctonianos sob tributo.",
+      "icon": "🪐",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_idleverso_100",
+      "name": "Império Transversal",
+      "desc": "Alcançou 100 Idleversos Ctonianos.",
+      "icon": "🪐",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 60,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_idleverso_200",
+      "name": "Parlamento do Multiverso",
+      "desc": "Alcançou 200 Idleversos Ctonianos.",
+      "icon": "🪐",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 75,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_idleverso_300",
+      "name": "Senhor do Omnidomínio",
+      "desc": "Alcançou 300 Idleversos Ctonianos.",
+      "icon": "🪐",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 90,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_cortex_1",
+      "name": "Primeira Lua Pensante",
+      "desc": "Despertou o primeiro Padeiro do Córtex (T19).",
+      "icon": "🧠",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_cortex_50",
+      "name": "Noosfera de Cinquenta Mentes",
+      "desc": "Mantém 50 Padeiros do Córtex sonhando almas.",
+      "icon": "🧠",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 50,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_cortex_100",
+      "name": "Cem Luas de Hipnos",
+      "desc": "Alcançou 100 Padeiros do Córtex.",
+      "icon": "🧠",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 65,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_cortex_200",
+      "name": "Panteão Neural",
+      "desc": "Alcançou 200 Padeiros do Córtex.",
+      "icon": "🧠",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 80,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_cortex_300",
+      "name": "Onisciência Primordial",
+      "desc": "Alcançou 300 Padeiros do Córtex.",
+      "icon": "🧠",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 95,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_imperador_1",
+      "name": "À Tua Própria Imagem",
+      "desc": "Ergueu o primeiro avatar d’O Imperador (You — T20).",
+      "icon": "👑",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 40,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 1
+      }
+    },
+    {
+      "id": "despertar_imperador_50",
+      "name": "Cinquenta Tronos de um Só Nome",
+      "desc": "Mantém 50 avatares d’O Imperador.",
+      "icon": "👑",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 50
+      }
+    },
+    {
+      "id": "despertar_imperador_100",
+      "name": "Centúria de Imperadores",
+      "desc": "Alcançou 100 avatares d’O Imperador.",
+      "icon": "👑",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 70,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 100
+      }
+    },
+    {
+      "id": "despertar_imperador_200",
+      "name": "Duzentos Avatares do Fim",
+      "desc": "Alcançou 200 avatares d’O Imperador.",
+      "icon": "👑",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 85,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 200
+      }
+    },
+    {
+      "id": "despertar_imperador_300",
+      "name": "O Imperador Eterno",
+      "desc": "Alcançou 300 avatares d’O Imperador (T20).",
+      "icon": "👑",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 100,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_vinte_rios",
+      "name": "Soberano dos Vinte Domínios",
+      "desc": "Possuiu simultaneamente ao menos 1 unidade de cada um dos 20 geradores (T1 a T20).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 100,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress"
+      }
+    },
+    {
+      "id": "despertar_almas_1e21",
+      "name": "Sextilhão do Acheron",
+      "desc": "Ceifou 1 sextilhão (1e21) de almas acumuladas no Submundo.",
+      "icon": "🌌",
+      "art": "despertar_milhao.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 60,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "lifetimeSouls": "1000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_almas_1e30",
+      "name": "Nonilhão Imperial",
+      "desc": "Ceifou 1 nonilhão (1e30) de almas acumuladas no Submundo.",
+      "icon": "🌌",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 90,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "lifetimeSouls": "1000000000000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_sps_1e15",
+      "name": "Caudal de Quadrilhão",
+      "desc": "Alcançou 1 quadrilhão (1e15) de Almas / s.",
+      "icon": "🌊",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 60,
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "1000000000000000"
+      }
+    },
+    {
+      "id": "despertar_sps_1e21",
+      "name": "Torrente de Sextilhão",
+      "desc": "Alcançou 1 sextilhão (1e21) de Almas / s.",
+      "icon": "🌊",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 90,
+      "meta": {
+        "family": "despertar",
+        "kind": "sps",
+        "minSps": "1000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_dragao_filhote",
+      "name": "Casca de Bronze Rompida",
+      "desc": "Chocou o Ovo Primordial e despertou o Filhote de Pitão.",
+      "icon": "🐉",
+      "art": "despertar_forja.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 25,
+      "meta": {
+        "family": "despertar",
+        "kind": "dragon",
+        "stage": 1
+      }
+    },
+    {
+      "id": "despertar_dragao_ladao",
+      "name": "Ladão de Cem Cabeças",
+      "desc": "Evoluiu o Dragão Ctoniano ao estágio máximo (Ladão de Cem Cabeças) e desbloqueou o 2º Slot de Aura.",
+      "icon": "🐉",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 75,
+      "meta": {
+        "family": "despertar",
+        "kind": "dragon",
+        "stage": 4
+      }
+    },
+    {
+      "id": "despertar_estacoes_4",
+      "name": "Senhor das Quatro Estações",
+      "desc": "Alternou as Estações do Submundo ao menos 4 vezes pela Roda das Estações.",
+      "icon": "🍂",
+      "art": "despertar_mnemosyne.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "season"
+      }
+    },
+    {
+      "id": "despertar_reliquias_sazonais",
+      "name": "Colecionador dos Festivais Ctonianos",
+      "desc": "Selou todas as 10 Relíquias e Oferendas das 4 Estações numa mesma corrida.",
+      "icon": "🏺",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 65,
+      "meta": {
+        "family": "despertar",
+        "kind": "season"
+      }
+    },
+    {
+      "id": "despertar_rei_saturno_5",
+      "name": "Rei Saturno Soberano",
+      "desc": "Elevou o Rei Saturno ao nível máximo (5) durante a Saturnália Ctoniana.",
+      "icon": "👑",
+      "art": "despertar_trono.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 40,
+      "meta": {
+        "family": "despertar",
+        "kind": "season"
+      }
+    },
+    {
+      "id": "despertar_fortuna_1",
+      "name": "Sussurro de Hermes",
+      "desc": "Reivindicou a primeira Fortuna de Hermes no letreiro de rumores.",
+      "icon": "🍀",
+      "art": "despertar_gold.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 25,
+      "meta": {
+        "family": "despertar",
+        "kind": "fortune"
+      }
+    },
+    {
+      "id": "despertar_o_fortuna",
+      "name": "Moira Dourada (O Fortuna)",
+      "desc": "Reivindicou todas as 24 Fortunas de Hermes (dobra a chance de Fortunas no ticker de 2% para 4%).",
+      "icon": "🍀",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 90,
+      "meta": {
+        "family": "despertar",
+        "kind": "fortune"
+      }
+    },
+    {
+      "id": "despertar_mercador_acheron",
+      "name": "Mercador das Margens",
+      "desc": "Liquidou estruturas no Mercado do Acheron para recuperar liquidez imediata.",
+      "icon": "⚖️",
+      "art": "despertar_cem_almas.webp",
+      "hidden": false,
+      "difficulty": "easy",
+      "rarity": "bronze",
+      "xp": 15,
+      "meta": {
+        "family": "despertar",
+        "kind": "market"
+      }
+    },
+    {
+      "id": "despertar_sombra_150",
+      "name": "150 Sombra Vagante",
+      "desc": "Mantém 150 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_sombra_250",
+      "name": "250 Sombra Vagante",
+      "desc": "Mantém 250 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_sombra_300",
+      "name": "300 Sombra Vagante",
+      "desc": "Mantém 300 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_sombra_350",
+      "name": "350 Sombra Vagante",
+      "desc": "Mantém 350 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_sombra_400",
+      "name": "400 Sombra Vagante",
+      "desc": "Mantém 400 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_sombra_450",
+      "name": "450 Sombra Vagante",
+      "desc": "Mantém 450 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_sombra_500",
+      "name": "500 Sombra Vagante",
+      "desc": "Mantém 500 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_sombra_550",
+      "name": "550 Sombra Vagante",
+      "desc": "Mantém 550 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_sombra_600",
+      "name": "600 Sombra Vagante",
+      "desc": "Mantém 600 unidades de Sombra Vagante.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "wandering_shade",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_servos_150",
+      "name": "150 Servos de Caronte",
+      "desc": "Mantém 150 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_servos_250",
+      "name": "250 Servos de Caronte",
+      "desc": "Mantém 250 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_servos_300",
+      "name": "300 Servos de Caronte",
+      "desc": "Mantém 300 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_servos_350",
+      "name": "350 Servos de Caronte",
+      "desc": "Mantém 350 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_servos_400",
+      "name": "400 Servos de Caronte",
+      "desc": "Mantém 400 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_servos_450",
+      "name": "450 Servos de Caronte",
+      "desc": "Mantém 450 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_servos_500",
+      "name": "500 Servos de Caronte",
+      "desc": "Mantém 500 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_servos_550",
+      "name": "550 Servos de Caronte",
+      "desc": "Mantém 550 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_servos_600",
+      "name": "600 Servos de Caronte",
+      "desc": "Mantém 600 unidades de Servos de Caronte.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "charon_servants",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_cao_150",
+      "name": "150 Cão Cerberiano",
+      "desc": "Mantém 150 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_cao_250",
+      "name": "250 Cão Cerberiano",
+      "desc": "Mantém 250 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_cao_300",
+      "name": "300 Cão Cerberiano",
+      "desc": "Mantém 300 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_cao_350",
+      "name": "350 Cão Cerberiano",
+      "desc": "Mantém 350 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_cao_400",
+      "name": "400 Cão Cerberiano",
+      "desc": "Mantém 400 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_cao_450",
+      "name": "450 Cão Cerberiano",
+      "desc": "Mantém 450 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_cao_500",
+      "name": "500 Cão Cerberiano",
+      "desc": "Mantém 500 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_cao_550",
+      "name": "550 Cão Cerberiano",
+      "desc": "Mantém 550 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_cao_600",
+      "name": "600 Cão Cerberiano",
+      "desc": "Mantém 600 unidades de Cão Cerberiano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cerberian_hound",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_juiz_150",
+      "name": "150 Juiz do Tártaro",
+      "desc": "Mantém 150 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_juiz_250",
+      "name": "250 Juiz do Tártaro",
+      "desc": "Mantém 250 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_juiz_300",
+      "name": "300 Juiz do Tártaro",
+      "desc": "Mantém 300 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_juiz_350",
+      "name": "350 Juiz do Tártaro",
+      "desc": "Mantém 350 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_juiz_400",
+      "name": "400 Juiz do Tártaro",
+      "desc": "Mantém 400 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_juiz_450",
+      "name": "450 Juiz do Tártaro",
+      "desc": "Mantém 450 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_juiz_500",
+      "name": "500 Juiz do Tártaro",
+      "desc": "Mantém 500 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_juiz_550",
+      "name": "550 Juiz do Tártaro",
+      "desc": "Mantém 550 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_juiz_600",
+      "name": "600 Juiz do Tártaro",
+      "desc": "Mantém 600 unidades de Juiz do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_judge",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_forja_150",
+      "name": "150 Forja de Phlegethon",
+      "desc": "Mantém 150 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_forja_250",
+      "name": "250 Forja de Phlegethon",
+      "desc": "Mantém 250 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_forja_300",
+      "name": "300 Forja de Phlegethon",
+      "desc": "Mantém 300 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_forja_350",
+      "name": "350 Forja de Phlegethon",
+      "desc": "Mantém 350 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_forja_400",
+      "name": "400 Forja de Phlegethon",
+      "desc": "Mantém 400 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_forja_450",
+      "name": "450 Forja de Phlegethon",
+      "desc": "Mantém 450 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_forja_500",
+      "name": "500 Forja de Phlegethon",
+      "desc": "Mantém 500 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_forja_550",
+      "name": "550 Forja de Phlegethon",
+      "desc": "Mantém 550 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_forja_600",
+      "name": "600 Forja de Phlegethon",
+      "desc": "Mantém 600 unidades de Forja de Phlegethon.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "phlegethon_forge",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_trono_150",
+      "name": "150 Trono de Obsidiana",
+      "desc": "Mantém 150 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 150
+      }
+    },
+    {
+      "id": "despertar_trono_250",
+      "name": "250 Trono de Obsidiana",
+      "desc": "Mantém 250 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 35,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 250
+      }
+    },
+    {
+      "id": "despertar_trono_300",
+      "name": "300 Trono de Obsidiana",
+      "desc": "Mantém 300 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 300
+      }
+    },
+    {
+      "id": "despertar_trono_350",
+      "name": "350 Trono de Obsidiana",
+      "desc": "Mantém 350 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_trono_400",
+      "name": "400 Trono de Obsidiana",
+      "desc": "Mantém 400 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_trono_450",
+      "name": "450 Trono de Obsidiana",
+      "desc": "Mantém 450 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_trono_500",
+      "name": "500 Trono de Obsidiana",
+      "desc": "Mantém 500 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_trono_550",
+      "name": "550 Trono de Obsidiana",
+      "desc": "Mantém 550 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_trono_600",
+      "name": "600 Trono de Obsidiana",
+      "desc": "Mantém 600 unidades de Trono de Obsidiana.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "obsidian_throne",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_templo_350",
+      "name": "350 Templo de Mnemosyne",
+      "desc": "Mantém 350 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_templo_400",
+      "name": "400 Templo de Mnemosyne",
+      "desc": "Mantém 400 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_templo_450",
+      "name": "450 Templo de Mnemosyne",
+      "desc": "Mantém 450 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_templo_500",
+      "name": "500 Templo de Mnemosyne",
+      "desc": "Mantém 500 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_templo_550",
+      "name": "550 Templo de Mnemosyne",
+      "desc": "Mantém 550 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_templo_600",
+      "name": "600 Templo de Mnemosyne",
+      "desc": "Mantém 600 unidades de Templo de Mnemosyne.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "mnemosyne_temple",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_torre_350",
+      "name": "350 Torre do Estige",
+      "desc": "Mantém 350 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_torre_400",
+      "name": "400 Torre do Estige",
+      "desc": "Mantém 400 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_torre_450",
+      "name": "450 Torre do Estige",
+      "desc": "Mantém 450 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_torre_500",
+      "name": "500 Torre do Estige",
+      "desc": "Mantém 500 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_torre_550",
+      "name": "550 Torre do Estige",
+      "desc": "Mantém 550 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_torre_600",
+      "name": "600 Torre do Estige",
+      "desc": "Mantém 600 unidades de Torre do Estige.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "styx_tower",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_barca_350",
+      "name": "350 Barca das Estrelas",
+      "desc": "Mantém 350 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_barca_400",
+      "name": "400 Barca das Estrelas",
+      "desc": "Mantém 400 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_barca_450",
+      "name": "450 Barca das Estrelas",
+      "desc": "Mantém 450 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_barca_500",
+      "name": "500 Barca das Estrelas",
+      "desc": "Mantém 500 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_barca_550",
+      "name": "550 Barca das Estrelas",
+      "desc": "Mantém 550 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_barca_600",
+      "name": "600 Barca das Estrelas",
+      "desc": "Mantém 600 unidades de Barca das Estrelas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "star_barge",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_laboratorio_350",
+      "name": "350 Laboratório do Tártaro",
+      "desc": "Mantém 350 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_laboratorio_400",
+      "name": "400 Laboratório do Tártaro",
+      "desc": "Mantém 400 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_laboratorio_450",
+      "name": "450 Laboratório do Tártaro",
+      "desc": "Mantém 450 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_laboratorio_500",
+      "name": "500 Laboratório do Tártaro",
+      "desc": "Mantém 500 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_laboratorio_550",
+      "name": "550 Laboratório do Tártaro",
+      "desc": "Mantém 550 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_laboratorio_600",
+      "name": "600 Laboratório do Tártaro",
+      "desc": "Mantém 600 unidades de Laboratório do Tártaro.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "tartarus_lab",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_portal_350",
+      "name": "350 Portal do Érebo",
+      "desc": "Mantém 350 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_portal_400",
+      "name": "400 Portal do Érebo",
+      "desc": "Mantém 400 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_portal_450",
+      "name": "450 Portal do Érebo",
+      "desc": "Mantém 450 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_portal_500",
+      "name": "500 Portal do Érebo",
+      "desc": "Mantém 500 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_portal_550",
+      "name": "550 Portal do Érebo",
+      "desc": "Mantém 550 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_portal_600",
+      "name": "600 Portal do Érebo",
+      "desc": "Mantém 600 unidades de Portal do Érebo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "erebus_portal",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_tear_350",
+      "name": "350 Tear de Cronos",
+      "desc": "Mantém 350 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_tear_400",
+      "name": "400 Tear de Cronos",
+      "desc": "Mantém 400 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_tear_450",
+      "name": "450 Tear de Cronos",
+      "desc": "Mantém 450 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_tear_500",
+      "name": "500 Tear de Cronos",
+      "desc": "Mantém 500 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_tear_550",
+      "name": "550 Tear de Cronos",
+      "desc": "Mantém 550 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_tear_600",
+      "name": "600 Tear de Cronos",
+      "desc": "Mantém 600 unidades de Tear de Cronos.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chronos_loom",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_condensador_350",
+      "name": "350 Condensador do Vazio",
+      "desc": "Mantém 350 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_condensador_400",
+      "name": "400 Condensador do Vazio",
+      "desc": "Mantém 400 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_condensador_450",
+      "name": "450 Condensador do Vazio",
+      "desc": "Mantém 450 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_condensador_500",
+      "name": "500 Condensador do Vazio",
+      "desc": "Mantém 500 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_condensador_550",
+      "name": "550 Condensador do Vazio",
+      "desc": "Mantém 550 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_condensador_600",
+      "name": "600 Condensador do Vazio",
+      "desc": "Mantém 600 unidades de Condensador do Vazio.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "void_condenser",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_prisma_350",
+      "name": "350 Prisma das Moiras",
+      "desc": "Mantém 350 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_prisma_400",
+      "name": "400 Prisma das Moiras",
+      "desc": "Mantém 400 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_prisma_450",
+      "name": "450 Prisma das Moiras",
+      "desc": "Mantém 450 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_prisma_500",
+      "name": "500 Prisma das Moiras",
+      "desc": "Mantém 500 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_prisma_550",
+      "name": "550 Prisma das Moiras",
+      "desc": "Mantém 550 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_prisma_600",
+      "name": "600 Prisma das Moiras",
+      "desc": "Mantém 600 unidades de Prisma das Moiras.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "moirai_prism",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_forja_destino_350",
+      "name": "350 Forja do Destino",
+      "desc": "Mantém 350 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_forja_destino_400",
+      "name": "400 Forja do Destino",
+      "desc": "Mantém 400 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_forja_destino_450",
+      "name": "450 Forja do Destino",
+      "desc": "Mantém 450 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_forja_destino_500",
+      "name": "500 Forja do Destino",
+      "desc": "Mantém 500 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_forja_destino_550",
+      "name": "550 Forja do Destino",
+      "desc": "Mantém 550 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_forja_destino_600",
+      "name": "600 Forja do Destino",
+      "desc": "Mantém 600 unidades de Forja do Destino.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fate_forge",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_350",
+      "name": "350 Motor Fractal",
+      "desc": "Mantém 350 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_400",
+      "name": "400 Motor Fractal",
+      "desc": "Mantém 400 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_450",
+      "name": "450 Motor Fractal",
+      "desc": "Mantém 450 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_500",
+      "name": "500 Motor Fractal",
+      "desc": "Mantém 500 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_550",
+      "name": "550 Motor Fractal",
+      "desc": "Mantém 550 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_motor_fractal_600",
+      "name": "600 Motor Fractal",
+      "desc": "Mantém 600 unidades de Motor Fractal.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "fractal_engine",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_console_350",
+      "name": "350 Console do Oráculo",
+      "desc": "Mantém 350 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_console_400",
+      "name": "400 Console do Oráculo",
+      "desc": "Mantém 400 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_console_450",
+      "name": "450 Console do Oráculo",
+      "desc": "Mantém 450 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_console_500",
+      "name": "500 Console do Oráculo",
+      "desc": "Mantém 500 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_console_550",
+      "name": "550 Console do Oráculo",
+      "desc": "Mantém 550 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_console_600",
+      "name": "600 Console do Oráculo",
+      "desc": "Mantém 600 unidades de Console do Oráculo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "oracle_console",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_idleverso_350",
+      "name": "350 Idleverso Ctoniano",
+      "desc": "Mantém 350 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_idleverso_400",
+      "name": "400 Idleverso Ctoniano",
+      "desc": "Mantém 400 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_idleverso_450",
+      "name": "450 Idleverso Ctoniano",
+      "desc": "Mantém 450 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_idleverso_500",
+      "name": "500 Idleverso Ctoniano",
+      "desc": "Mantém 500 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_idleverso_550",
+      "name": "550 Idleverso Ctoniano",
+      "desc": "Mantém 550 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_idleverso_600",
+      "name": "600 Idleverso Ctoniano",
+      "desc": "Mantém 600 unidades de Idleverso Ctoniano.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "chthonic_idleverse",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_cortex_350",
+      "name": "350 Padeiro do Córtex",
+      "desc": "Mantém 350 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_cortex_400",
+      "name": "400 Padeiro do Córtex",
+      "desc": "Mantém 400 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_cortex_450",
+      "name": "450 Padeiro do Córtex",
+      "desc": "Mantém 450 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_cortex_500",
+      "name": "500 Padeiro do Córtex",
+      "desc": "Mantém 500 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_cortex_550",
+      "name": "550 Padeiro do Córtex",
+      "desc": "Mantém 550 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_cortex_600",
+      "name": "600 Padeiro do Córtex",
+      "desc": "Mantém 600 unidades de Padeiro do Córtex.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "cortex_baker",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_imperador_350",
+      "name": "350 O Imperador (You)",
+      "desc": "Mantém 350 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 350
+      }
+    },
+    {
+      "id": "despertar_imperador_400",
+      "name": "400 O Imperador (You)",
+      "desc": "Mantém 400 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 400
+      }
+    },
+    {
+      "id": "despertar_imperador_450",
+      "name": "450 O Imperador (You)",
+      "desc": "Mantém 450 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 45,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 450
+      }
+    },
+    {
+      "id": "despertar_imperador_500",
+      "name": "500 O Imperador (You)",
+      "desc": "Mantém 500 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 500
+      }
+    },
+    {
+      "id": "despertar_imperador_550",
+      "name": "550 O Imperador (You)",
+      "desc": "Mantém 550 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 550
+      }
+    },
+    {
+      "id": "despertar_imperador_600",
+      "name": "600 O Imperador (You)",
+      "desc": "Mantém 600 unidades de O Imperador (You).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 55,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "generatorId": "the_emperor",
+        "milestone": 600
+      }
+    },
+    {
+      "id": "despertar_prestigio_10",
+      "name": "Dez Lethes",
+      "desc": "Completou 10 Rituais do Lethe.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "prestige",
+        "threshold": 10
+      }
+    },
+    {
+      "id": "despertar_prestigio_25",
+      "name": "Vinte e Cinco Ciclos",
+      "desc": "Completou 25 Rituais do Lethe.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "prestige",
+        "threshold": 25
+      }
+    },
+    {
+      "id": "despertar_prestigio_50",
+      "name": "Meio Centenário Infernal",
+      "desc": "Completou 50 Rituais do Lethe.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "prestige",
+        "threshold": 50
+      }
+    },
+    {
+      "id": "despertar_prestigio_100",
+      "name": "Centúria do Rio",
+      "desc": "Completou 100 Rituais do Lethe.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "prestige",
+        "threshold": 100
+      }
+    },
+    {
+      "id": "despertar_filhotes_3",
+      "name": "Matilha Tripla",
+      "desc": "Comprou 3 upgrades Filhote do Cérbero (veilMult).",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "filhotes",
+        "threshold": 3
+      }
+    },
+    {
+      "id": "despertar_filhotes_5",
+      "name": "Quinteto Cerberiano",
+      "desc": "Comprou 5 upgrades Filhote do Cérbero.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "filhotes",
+        "threshold": 5
+      }
+    },
+    {
+      "id": "despertar_filhotes_8",
+      "name": "Octeto do Portão",
+      "desc": "Comprou 8 upgrades Filhote do Cérbero.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "filhotes",
+        "threshold": 8
+      }
+    },
+    {
+      "id": "despertar_filhotes_10",
+      "name": "Dez Coleiras de Ouro",
+      "desc": "Comprou 10 upgrades Filhote do Cérbero.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "filhotes",
+        "threshold": 10
+      }
+    },
+    {
+      "id": "despertar_filhotes_15",
+      "name": "Matilha Completa",
+      "desc": "Comprou os 15 Filhotes do Cérbero.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "filhotes",
+        "threshold": 15
+      }
+    },
+    {
+      "id": "despertar_ausencia_10h",
+      "name": "Vigília de Dez Horas",
+      "desc": "Colheu offline por 10 horas acumuladas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "offlineHours",
+        "threshold": 10
+      }
+    },
+    {
+      "id": "despertar_ausencia_24h",
+      "name": "Dia no Submundo",
+      "desc": "Colheu offline por 24 horas acumuladas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "offlineHours",
+        "threshold": 24
+      }
+    },
+    {
+      "id": "despertar_ausencia_72h",
+      "name": "Três Noites de Lethe",
+      "desc": "Colheu offline por 72 horas acumuladas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "offlineHours",
+        "threshold": 72
+      }
+    },
+    {
+      "id": "despertar_cliques_10k",
+      "name": "Dez Mil Golpes",
+      "desc": "Ceifou com 10.000 cliques na Foice.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "clicks",
+        "threshold": 10000
+      }
+    },
+    {
+      "id": "despertar_cliques_100k",
+      "name": "Centena de Mil Lâminas",
+      "desc": "Ceifou com 100.000 cliques na Foice.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "clicks",
+        "threshold": 100000
+      }
+    },
+    {
+      "id": "despertar_talentos_25",
+      "name": "Vinte e Cinco Nós Celestes",
+      "desc": "Desbloqueou 25 talentos Heavenly.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "talents",
+        "threshold": 25
+      }
+    },
+    {
+      "id": "despertar_talentos_50",
+      "name": "Meio Céu Comprado",
+      "desc": "Desbloqueou 50 talentos Heavenly.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "talents",
+        "threshold": 50
+      }
+    },
+    {
+      "id": "despertar_talentos_100",
+      "name": "Constelação Mnemosyne",
+      "desc": "Desbloqueou 100 talentos Heavenly.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "talents",
+        "threshold": 100
+      }
+    },
+    {
+      "id": "despertar_melhorias_50",
+      "name": "Cinquenta Selos Styx",
+      "desc": "Possui 50 melhorias permanentes.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "upgrades",
+        "threshold": 50
+      }
+    },
+    {
+      "id": "despertar_melhorias_100",
+      "name": "Centenário de Melhorias",
+      "desc": "Possui 100 melhorias permanentes.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "upgrades",
+        "threshold": 100
+      }
+    },
+    {
+      "id": "despertar_melhorias_150",
+      "name": "Arquivo Saturado",
+      "desc": "Possui 150 melhorias permanentes.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "upgrades",
+        "threshold": 150
+      }
+    },
+    {
+      "id": "despertar_juizo_50",
+      "name": "Juízo Implacável",
+      "desc": "Alcançou sequência de 50 no Juízo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "juizo",
+        "threshold": 50
+      }
+    },
+    {
+      "id": "despertar_juizo_100",
+      "name": "Sentença Perfeita",
+      "desc": "Alcançou sequência de 100 no Juízo.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "juizo",
+        "threshold": 100
+      }
+    },
+    {
+      "id": "despertar_almas_1e39",
+      "name": "Duodecilhão do Véu",
+      "desc": "Ceifou 1 duodecilhão (1e39) de almas acumuladas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "lifetime",
+        "threshold": "1000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_sps_1e27",
+      "name": "Caudal Octilhão",
+      "desc": "Alcançou 1 octilhão (1e27) de Almas / s.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "sps",
+        "threshold": "1000000000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_sps_1e33",
+      "name": "Torrente Decilhão",
+      "desc": "Alcançou 1 decilhão (1e33) de Almas / s.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "sps",
+        "threshold": "1000000000000000000000000000000000"
+      }
+    },
+    {
+      "id": "despertar_ecos_777",
+      "name": "Setecentos e Setenta e Sete Ecos",
+      "desc": "Reivindicou 777 Ecos dourados.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "shimmers",
+        "threshold": 777
+      }
+    },
+    {
+      "id": "despertar_nectar_100",
+      "name": "Centena de Gotas Lethe",
+      "desc": "Colheu 100 unidades de Néctar no total.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "nectar",
+        "threshold": 100
+      }
+    },
+    {
+      "id": "despertar_nectar_1000",
+      "name": "Mil Gotas da Memória",
+      "desc": "Colheu 1000 unidades de Néctar no total.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "nectar",
+        "threshold": 1000
+      }
+    },
+    {
+      "id": "despertar_sanguessuga_500",
+      "name": "Quinhentas Vísceras",
+      "desc": "Estourou 500 Sanguessugas do Acheron.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "leeches",
+        "threshold": 500
+      }
+    },
+    {
+      "id": "despertar_sanguessuga_1000",
+      "name": "Mil Banquetes Sombrios",
+      "desc": "Estourou 1000 Sanguessugas do Acheron.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "leeches",
+        "threshold": 1000
+      }
+    },
+    {
+      "id": "despertar_prestigio_200",
+      "name": "Duzentos Rios Cruzados",
+      "desc": "Completou 200 Rituais do Lethe.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "prestige",
+        "threshold": 200
+      }
+    },
+    {
+      "id": "despertar_cliques_1m",
+      "name": "Um Milhão de Golpes",
+      "desc": "Ceifou com 1.000.000 cliques na Foice.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "clicks",
+        "threshold": 1000000
+      }
+    },
+    {
+      "id": "despertar_ausencia_168h",
+      "name": "Semana no Submundo",
+      "desc": "Colheu offline por 168 horas acumuladas.",
+      "icon": "🏛️",
+      "art": "despertar_soberania.webp",
+      "hidden": false,
+      "difficulty": "mythic",
+      "rarity": "rainbow",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "progress",
+        "veilVolume": "offlineHours",
+        "threshold": 168
+      }
+    }
   ],
   "levels": {
     "maxLevel": 99,
     "bands": [
-      { "fromLevel": 1, "toLevel": 10, "xpPerLevel": 100 },
-      { "fromLevel": 11, "toLevel": 30, "xpPerLevel": 130 },
-      { "fromLevel": 31, "toLevel": 60, "xpPerLevel": 180 },
-      { "fromLevel": 61, "toLevel": 90, "xpPerLevel": 240 },
-      { "fromLevel": 91, "toLevel": 99, "xpPerLevel": 300 }
+      {
+        "fromLevel": 1,
+        "toLevel": 10,
+        "xpPerLevel": 100
+      },
+      {
+        "fromLevel": 11,
+        "toLevel": 30,
+        "xpPerLevel": 130
+      },
+      {
+        "fromLevel": 31,
+        "toLevel": 60,
+        "xpPerLevel": 180
+      },
+      {
+        "fromLevel": 61,
+        "toLevel": 90,
+        "xpPerLevel": 240
+      },
+      {
+        "fromLevel": 91,
+        "toLevel": 99,
+        "xpPerLevel": 300
+      }
     ],
     "ranks": [
-      { "minLevel": 1, "title": "Alma Novata" },
-      { "minLevel": 3, "title": "Iniciado do Tártaro" },
-      { "minLevel": 6, "title": "Operador do Tártaro" },
-      { "minLevel": 10, "title": "Veterano do Submundo" },
-      { "minLevel": 15, "title": "Campeão Érebo" },
-      { "minLevel": 25, "title": "Guardião do Estige" },
-      { "minLevel": 40, "title": "Arauto de Asfódelos" },
-      { "minLevel": 50, "title": "Vigia dos Campos" },
-      { "minLevel": 55, "title": "Juiz dos Elísios" },
-      { "minLevel": 70, "title": "Barqueiro do Véu" },
-      { "minLevel": 85, "title": "Herdeiro do Tártaro" },
-      { "minLevel": 92, "title": "Sombra Ascendente" },
-      { "minLevel": 99, "title": "Sombra do Olimpo" }
+      {
+        "minLevel": 1,
+        "title": "Alma Novata"
+      },
+      {
+        "minLevel": 3,
+        "title": "Iniciado do Tártaro"
+      },
+      {
+        "minLevel": 6,
+        "title": "Operador do Tártaro"
+      },
+      {
+        "minLevel": 10,
+        "title": "Veterano do Submundo"
+      },
+      {
+        "minLevel": 15,
+        "title": "Campeão Érebo"
+      },
+      {
+        "minLevel": 25,
+        "title": "Guardião do Estige"
+      },
+      {
+        "minLevel": 40,
+        "title": "Arauto de Asfódelos"
+      },
+      {
+        "minLevel": 50,
+        "title": "Vigia dos Campos"
+      },
+      {
+        "minLevel": 55,
+        "title": "Juiz dos Elísios"
+      },
+      {
+        "minLevel": 70,
+        "title": "Barqueiro do Véu"
+      },
+      {
+        "minLevel": 85,
+        "title": "Herdeiro do Tártaro"
+      },
+      {
+        "minLevel": 92,
+        "title": "Sombra Ascendente"
+      },
+      {
+        "minLevel": 99,
+        "title": "Sombra do Olimpo"
+      }
     ]
   }
 }

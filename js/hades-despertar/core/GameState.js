@@ -483,6 +483,7 @@ export class GameState {
     return upgradeEffectiveCost(up, {
       upgrades: this.upgrades,
       seasons: this.seasons,
+      talents: this.talents,
     });
   }
 
@@ -736,7 +737,7 @@ export class GameState {
   }
 
   cerberusPupMult() {
-    return formulaCerberusPupMult(this.upgrades, this.achievements, null, this.dragon);
+    return formulaCerberusPupMult(this.upgrades, this.achievements, null, this.dragon, this.talents);
   }
 
   /**

@@ -29,6 +29,7 @@ import {
   pickRumor,
   rumorPoolSignature,
 } from '../config/rumors.js';
+import { CERBERUS_PUP_UPGRADE_IDS } from '../config/achievements.js';
 import { TALENTS, getTalent, meetsTalentRequirement } from '../config/talents.js';
 import { UPGRADES, getUpgrade } from '../config/upgrades.js';
 import { VERDICT_SHOP } from '../config/verdict-shop.js';
@@ -392,7 +393,13 @@ export function describeGeneratorCard(state, id, buyMode = '1', tradeAction = 'b
   const saturnMult = saturnaliaSpsMult(state.seasons || null, state.upgrades || []);
   const fortuneMult = fortuneGlobalSpsMult(state.upgrades || []);
   const scaleMult = dragonScaleSpsMult(state.upgrades || []);
-  const pupMult = cerberusPupMult(state.upgrades || [], state.achievements || [], null, state.dragon || null);
+  const pupMult = cerberusPupMult(
+    state.upgrades || [],
+    state.achievements || [],
+    null,
+    state.dragon || null,
+    state.talents || [],
+  );
   const reserveMult = nectarReserveMult(state.nectar || 0, state.talents || []);
   const auraMult = dragonAuraSpsMult(state.dragon || null);
   const covMult = elderCovenantMult(Boolean(state.catabase?.covenantActive));
@@ -824,13 +831,26 @@ export function describeVeilSummary(state = {}) {
     : economicVeilTier(state?.achievements || [], state?.normalAchievementsCount);
   const pupMult = typeof state?.cerberusPupMult === 'function'
     ? state.cerberusPupMult()
-    : cerberusPupMult(state?.upgrades || [], state?.achievements || [], state?.normalAchievementsCount);
+    : cerberusPupMult(
+      state?.upgrades || [],
+      state?.achievements || [],
+      state?.normalAchievementsCount,
+      state?.dragon || null,
+      state?.talents || [],
+    );
+  const pupOwned = (state?.upgrades || []).filter((id) => CERBERUS_PUP_UPGRADE_IDS.includes(String(id))).length;
+  const pupTotal = CERBERUS_PUP_UPGRADE_IDS.length;
+  const wagesHint = talentEffects(state?.talents || []).kittenUpgradeDiscount
+    ? ' · Wages −10% Filhotes'
+    : '';
   return {
     veilPercent: econPct,
     veilFraction: econFrac,
     tier,
     pupMult,
-    label: `Véu: ${econPct}% (${tier.name}) · Mult Cerberiano: ${formatMultiplier(pupMult)}`,
+    pupOwned,
+    pupTotal,
+    label: `Véu: ${econPct}% (${tier.name}) · Filhotes ${pupOwned}/${pupTotal} · Mult Cerberiano: ${formatMultiplier(pupMult)}${wagesHint}`,
   };
 }
 

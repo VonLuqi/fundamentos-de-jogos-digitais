@@ -22,7 +22,10 @@ import { GENERATORS } from '../js/hades-despertar/config/generators.js';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 import { TALENTS } from '../js/hades-despertar/config/talents.js';
 import { SHIMMER_EFFECTS } from '../js/hades-despertar/config/shimmers.js';
-import { DESPERTAR_ACHIEVEMENT_IDS } from '../js/hades-despertar/config/achievements.js';
+import {
+  CERBERUS_PUP_UPGRADE_IDS,
+  DESPERTAR_ACHIEVEMENT_IDS,
+} from '../js/hades-despertar/config/achievements.js';
 import {
   LEECH_DRAIN_PER_UNIT,
   LEECH_PAYOUT_MULT_BASE,
@@ -236,12 +239,15 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   const byKind = countByKind(UPGRADES);
   assert.equal(byKind.generatorMult, 300);
   assert.ok((byKind.synergyMult || 0) >= 4, 'ao menos sinergias base');
-  assert.ok((byKind.veilMult || 0) >= 7, 'Filhotes do Cérbero');
+  const pupSet = new Set(CERBERUS_PUP_UPGRADE_IDS);
+  const pupVeilMult = UPGRADES.filter((u) => u.kind === 'veilMult' && pupSet.has(u.id));
+  assert.equal(pupVeilMult.length, 15, '15 Filhotes veilMult (ladder CC)');
+  assert.equal((byKind.veilMult || 0), 16, '15 Filhotes + fortune_103 veilMult');
   const tf = (byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0);
   assert.equal(tf, 12, `cadeia Mil Foices = 12 (got ${tf})`);
   assert.equal(TALENTS.length, 129, `129 talentos Heavenly (got ${TALENTS.length})`);
   assert.ok(SHIMMER_EFFECTS.length >= 6, 'efeitos Eco do Acheron');
-  assert.equal(DESPERTAR_ACHIEVEMENT_IDS.length, 138, `138 despertar_* (got ${DESPERTAR_ACHIEVEMENT_IDS.length})`);
+  assert.ok(DESPERTAR_ACHIEVEMENT_IDS.length >= 300, `despertar_* expandido (got ${DESPERTAR_ACHIEVEMENT_IDS.length})`);
 
   const volCanon = UPGRADES.filter(
     (u) => u.kind === 'synergyMult' && u.boostedBonusPerBase === '0.05',
@@ -250,9 +256,6 @@ run('3. Contagens por kind + talentos + shimmers + conquistas', () => {
   // Grandma-types / volume residual → WARN only
   if ((byKind.synergyMult || 0) < 44) {
     warn(`Sinergias totais: ${byKind.synergyMult || 0} (36 Vol.I/II + 8 Servos esperados)`);
-  }
-  if ((byKind.veilMult || 0) < 10) {
-    warn(`Filhotes (veilMult): ${byKind.veilMult || 0} (CC kitten ladder é mais longa)`);
   }
 });
 
@@ -523,7 +526,7 @@ const summary = {
         100 + // 20 gens
         100 + // 300 line
         Math.min(100, ((byKind.synergyMult || 0) / 100) * 100) +
-        Math.min(100, ((byKind.veilMult || 0) / 13) * 100) +
+        Math.min(100, ((byKind.veilMult || 0) / 15) * 100) +
         Math.min(100, (((byKind.thousandBlades || 0) + (byKind.thousandBladesMult || 0)) / 12) * 100) +
         Math.min(100, (TALENTS.length / 129) * 100)
       ) / 6,

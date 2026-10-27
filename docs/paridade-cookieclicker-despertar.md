@@ -30,7 +30,7 @@
 | 9 | Heavenly tree / talentos | Árvore HC completa (centenas) | **129 juramentos Heavenly (PrestigeUpgrades CC 1:1) + migração Rio do Lethe** | **100%** | **F5+F8 ✓** |
 | 10 | Soft keep (permanent slots / starters) | Slots + starter kit/kitchen | **Eco do Styx I–V (5 slots permanentes) + starters de Sombra, Cão e Forja** | **100%** | **Base+F8 ✓** |
 | 11 | Golden / Wrath shimmers | Frenzy, Lucky, Click Frenzy, Wrath | **Eco do Acheron (Maré ×7, Colheita, Fúria ×777, Voo Dracónico ×1111, Selo + Wrath v2)** | **100%** | **F2+F8 ✓** |
-| 12 | Milk → Kittens → CpS | 4%/achiev. + kitten ladder longa | **Véu (+4%/normal) + 8 `veilMult` (7 Filhotes + `fortune_103`) `∏(1+m·f_i)` — ladder curta vs CC** | **~75%** | **F4+F8** |
+| 12 | Milk → Kittens → CpS | 4%/achiev. + kitten ladder longa | **Véu (+4%/normal, 350 normais → 1400%) + 15 Filhotes `veilMult` + `fortune_103` · `∏(1+m·f_i)` · Kitten angels / wages / Cat Ladies / Milkhelp** | **100%** | **F4+F8 ✓** |
 | 13 | Sugar Lumps / levels de prédio | Lump ~24h · +1%/level · Sugar Baking | **Néctar do Lethe (24h + 5 variantes + +1%/lv + Néctar em Reserva cap 100)** | **100%** | **F5 ✓** |
 | 14 | Minigames (Garden/Pantheon/Grimoire/Stock) | 4 minigames + levels | **Panteão Ctoniano, Grimório de Hécate, Jardim de Perséfone e Mercado de Caronte (+ Juízo)** | **100%** | **F5 ✓** |
 | 15 | Grandmapocalypse + Wrinklers | Research · −5% · pop ×1.1 | **Catábase 1–3 + Sanguessugas (−5% aparente / pop ×1.1 / Shiny ×3.3 / Trégua & Aliança). Digestão acumula em escala n² (documentada) ≠ modelo clássico per-wrinkler** | **~90%** | **F6** |
@@ -85,13 +85,13 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 | Pilar | Medida | Resultado |
 | --- | --- | --- |
 | Código/fórmulas | 20 gens dígito-a-dígito · 300 tiers · Lucky/1.15/sell/leech · JS≡PHP | **100% / PASS** |
-| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 8 veilMult · 129 talentos Heavenly · 138 `despertar_*` | **~75%** vs wiki densa |
+| Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 16 veilMult (15 Filhotes + fortune_103) · 129 talentos Heavenly · 309+ `despertar_*` | **~80%** vs wiki densa |
 | Arte WebP | ~519 ficheiros · manifest ok · Foice idle/pressed WebP · cosméticos/juízo chrome open | **~84%** |
 
 **Divergências explícitas (backlog, não bugs JS≠PHP):**
 1. ~~Sinergias Vol. I/II~~ — malha canónica 36 + 8 Servos (item 6 = 100%).
 2. ~~Mil Foices~~ — escada canónica 12 elos (mil→undecilhão; item 7 = 100%).
-3. Filhotes: ladder curta (fatores 0.1…0.2 ×7 + fortune_103).
+3. ~~Filhotes: ladder curta~~ — **15 Filhotes** (52%→1400% Véu) + `fortune_103` + talentos Kitten/Milk (item 12 = 100%).
 4. ~~Heavenly: crescer árvore HC~~ · ~~25 talentos~~ → **129 Heavenly CC 1:1 entregue (2026-10).**
 5. Digestão Sanguessuga escala **n²** (cada leech acumula o drain total) — documentada no código.
 6. Arte ainda `open`: cosméticos + juízo chrome (`art-requests.json`).
@@ -509,7 +509,7 @@ Fonte: [Milk](https://cookieclicker.wiki.gg/wiki/Milk).
 
 ### 7.2 Despertar F4 (concluída)
 
-- **F4 implementada:** `veilPercent = 4% × conquistas normais` (`despertar_*` + plataforma; Shadow = `+0%`); overlay sob a Foice com 5 sabores ctonianos; 7 upgrades **Filhotes do Cérbero** (`0.1` a `0.2`) com produtório composto \(\prod(1 + \text{veil} \times \text{factor}_i)\) em `calculateTotalSPS`; Estela exibe `Véu: X% (Sabor) · Mult Cerberiano: ×Y`.
+- **F4 implementada:** `veilPercent = 4% × conquistas normais` (350 normais → **1400%** máx.; Shadow = `+0%`); overlay sob a Foice com **11 sabores** ctonianos; **15 upgrades Filhotes do Cérbero** (+ `fortune_103`) com produtório \(\prod(1 + \text{veil} \times \text{factor}_i)\) + **Kitten angels / wages / Cat Ladies / Milkhelp** em `calculateTotalSPS`; Estela exibe `Véu: X% (Sabor) · Mult Cerberiano: ×Y`.
 - Bancada / Juízo e Minigames F5 permanecem camadas adicionais no stack.
 
 ---

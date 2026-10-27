@@ -63,6 +63,7 @@ import {
 import {
   isNormalAchievementId,
   veilTierForPercent,
+  CERBERUS_PUP_UPGRADE_IDS,
 } from '../config/achievements.js';
 import { calculateLeechDrain } from './CatabaseSystem.js';
 import { dragonModifiers } from './DragonSystem.js';
@@ -169,10 +170,14 @@ export function generatorCostMultForId(generatorId, {
 export function upgradeEffectiveCost(upgradeOrCost, {
   upgrades = [],
   seasons = null,
+  talents = [],
 } = {}) {
   const baseCost = typeof upgradeOrCost === 'object' && upgradeOrCost !== null
     ? String(upgradeOrCost.cost ?? '0')
     : String(upgradeOrCost ?? '0');
+  const kind = typeof upgradeOrCost === 'object' && upgradeOrCost !== null
+    ? String(upgradeOrCost.kind || '')
+    : '';
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((u) => String(u)));
   let mult = '1';
   if (owned.has('fortune_101')) {
@@ -181,6 +186,13 @@ export function upgradeEffectiveCost(upgradeOrCost, {
   const sMods = seasonModifiers(seasons || {}, upgrades);
   if (cmp(sMods.upgradeCostMult, '1') !== 0) {
     mult = mul(mult, sMods.upgradeCostMult);
+  }
+  const tFx = talentEffects(talents);
+  if (tFx.upgradeCostMult && cmp(tFx.upgradeCostMult, '1') !== 0) {
+    mult = mul(mult, tFx.upgradeCostMult);
+  }
+  if (tFx.kittenUpgradeDiscount && (kind === 'veilMult' || kind === 'kittenMult')) {
+    mult = mul(mult, '0.9');
   }
   if (cmp(mult, '1') === 0) return money(baseCost);
   return money(mul(baseCost, mult));
@@ -242,6 +254,10 @@ export function talentEffects(talentIds = []) {
   let buyAllUnlock = false;
   let vaultUnlock = false;
   let labelPrinter = false;
+  let kittenVeilFactor = '0';
+  let kittenUpgradeDiscount = false;
+  let catLadies = false;
+  let milkhelpServants = false;
 
   for (const rawId of talentIds || []) {
     const talent = TALENT_BY_ID[String(rawId)];
@@ -260,6 +276,12 @@ export function talentEffects(talentIds = []) {
     if (fx.upgradeCostMult != null) {
       upgradeCostMult = mul(upgradeCostMult, String(fx.upgradeCostMult));
     }
+    if (fx.kittenVeilFactor != null) {
+      kittenVeilFactor = add(kittenVeilFactor, String(fx.kittenVeilFactor));
+    }
+    if (fx.kittenUpgradeDiscount) kittenUpgradeDiscount = true;
+    if (fx.catLadies) catLadies = true;
+    if (fx.milkhelpServants) milkhelpServants = true;
     if (fx.offlineEfficiency != null && cmp(String(fx.offlineEfficiency), offlineEfficiency) > 0) {
       offlineEfficiency = String(fx.offlineEfficiency);
     }
@@ -360,6 +382,10 @@ export function talentEffects(talentIds = []) {
     buyAllUnlock,
     vaultUnlock,
     labelPrinter,
+    kittenVeilFactor,
+    kittenUpgradeDiscount,
+    catLadies,
+    milkhelpServants,
   };
 }
 
@@ -521,7 +547,14 @@ export function elderPactServantFlatBonusPerUnit(upgradeIds = [], generators = {
   return mul(CATABASE_STAGE3_ELDER_PACT_PER_NON_SERVANT, String(nonServantQty));
 }
 
-export function generatorUpgradeMult(generatorId, upgradeIds = [], generators = {}, talentIds = []) {
+export function generatorUpgradeMult(
+  generatorId,
+  upgradeIds = [],
+  generators = {},
+  talentIds = [],
+  achievementsOrCount = [],
+  normalAchievementsCount = null,
+) {
   let mult = '1';
   for (const id of upgradeIds || []) {
     const upgrade = UPGRADE_BY_ID[id];
@@ -540,6 +573,12 @@ export function generatorUpgradeMult(generatorId, upgradeIds = [], generators = 
   if (fx.unshackledGenerators?.[generatorId]) mult = mul(mult, '25');
   if (fx.allGeneratorsMult && cmp(fx.allGeneratorsMult, '1') !== 0) {
     mult = mul(mult, fx.allGeneratorsMult);
+  }
+  if (generatorId === 'charon_servants') {
+    mult = mul(
+      mult,
+      servantTalentMult(upgradeIds, talentIds, achievementsOrCount, normalAchievementsCount),
+    );
   }
   return mul(mult, synergyUpgradeMult(generatorId, upgradeIds, generators));
 }
@@ -877,24 +916,62 @@ export function cerberusPupMult(
   achievementsOrCount = [],
   normalAchievementsCount = null,
   dragon = null,
+  talentIds = [],
 ) {
   const owned = new Set((Array.isArray(upgradeIds) ? upgradeIds : []).map((id) => String(id)));
-  if (owned.size === 0) return '1';
-
   const vFrac = veilFraction(achievementsOrCount, normalAchievementsCount);
   if (cmp(vFrac, '0') <= 0) return '1';
 
   const { veilPupBoost } = dragonModifiers(dragon || {});
+  const { kittenVeilFactor } = talentEffects(talentIds);
 
   let mult = '1';
+  let any = false;
   for (const def of UPGRADES) {
     if (!owned.has(def.id)) continue;
     if (def.kind !== 'veilMult' && def.kind !== 'kittenMult') continue;
+    any = true;
     const effectiveFactor = cmp(veilPupBoost, '1') === 0
       ? def.factor
       : mul(def.factor, veilPupBoost);
     const term = add('1', mul(vFrac, effectiveFactor));
     mult = mul(mult, term);
+  }
+  if (kittenVeilFactor && cmp(kittenVeilFactor, '0') > 0) {
+    any = true;
+    const effectiveFactor = cmp(veilPupBoost, '1') === 0
+      ? kittenVeilFactor
+      : mul(kittenVeilFactor, veilPupBoost);
+    mult = mul(mult, add('1', mul(vFrac, effectiveFactor)));
+  }
+  return any ? mult : '1';
+}
+
+/**
+ * Buff de Servos (grandma) via Cat Ladies / Milkhelp heavenly.
+ * Cat Ladies: ×1.29 por cada Filhote store + Kitten angels.
+ * Milkhelp: +5% por rank de Véu (floor(veilPercent/100)).
+ */
+export function servantTalentMult(
+  upgradeIds = [],
+  talentIds = [],
+  achievementsOrCount = [],
+  normalAchievementsCount = null,
+) {
+  const fx = talentEffects(talentIds);
+  let mult = '1';
+  if (fx.catLadies) {
+    let n = 0;
+    for (const rawId of upgradeIds || []) {
+      const def = UPGRADE_BY_ID[String(rawId)];
+      if (def?.kind === 'veilMult' || def?.kind === 'kittenMult') n += 1;
+    }
+    if (fx.kittenVeilFactor && cmp(fx.kittenVeilFactor, '0') > 0) n += 1;
+    for (let i = 0; i < n; i += 1) mult = mul(mult, '1.29');
+  }
+  if (fx.milkhelpServants) {
+    const ranks = Math.floor(veilPercent(achievementsOrCount, normalAchievementsCount) / 100);
+    if (ranks > 0) mult = mul(mult, add('1', mul('0.05', String(ranks))));
   }
   return mult;
 }
@@ -954,7 +1031,14 @@ export function calculateSpsBreakdown({
   for (const def of GENERATORS) {
     const qty = Number(generators[def.id] || 0);
     if (!Number.isFinite(qty) || qty <= 0) continue;
-    const upgradeMult = generatorUpgradeMult(def.id, upgrades, generators, talents);
+    const upgradeMult = generatorUpgradeMult(
+      def.id,
+      upgrades,
+      generators,
+      talents,
+      achievements,
+      normalAchievementsCount,
+    );
     const shiny = Number(shinyCounts?.[def.id] || 0);
     const gold = Number(goldCounts?.[def.id] || 0);
     const level = Number(generatorLevels?.[def.id] || 0);
@@ -981,7 +1065,7 @@ export function calculateSpsBreakdown({
   const saturnMult = saturnaliaSpsMult(seasons, upgrades);
   const fortuneMult = fortuneGlobalSpsMult(upgrades);
   const scaleMult = dragonScaleSpsMult(upgrades);
-  const pupMult = cerberusPupMult(upgrades, achievements, normalAchievementsCount, dragon);
+  const pupMult = cerberusPupMult(upgrades, achievements, normalAchievementsCount, dragon, talents);
   const reserveMult = nectarReserveMult(nectar, talents, nectarReserveActive);
   const auraMult = dragonAuraSpsMult(dragon);
   const isCovActive = typeof covenantActive === 'boolean'
@@ -1589,26 +1673,26 @@ export function meetsUpgradeRequirement(upgradeOrId, {
 }
 
 const GENERATOR_MILESTONE_ACHIEVEMENTS = Object.freeze({
-  wandering_shade: { 50: 'despertar_sombra_50', 100: 'despertar_sombra_100' },
-  charon_servants: { 50: 'despertar_servos_50' },
-  cerberian_hound: { 50: 'despertar_cao_50' },
-  tartarus_judge: { 50: 'despertar_juiz_50' },
-  phlegethon_forge: { 50: 'despertar_forja_50' },
-  obsidian_throne: { 50: 'despertar_trono_50' },
-  mnemosyne_temple: { 1: 'despertar_templo_1', 50: 'despertar_templo_50', 100: 'despertar_templo_100', 200: 'despertar_templo_200' },
-  styx_tower: { 1: 'despertar_torre_1', 50: 'despertar_torre_50', 100: 'despertar_torre_100', 200: 'despertar_torre_200' },
-  star_barge: { 1: 'despertar_barca_1', 50: 'despertar_barca_50', 100: 'despertar_barca_100', 200: 'despertar_barca_200' },
-  tartarus_lab: { 1: 'despertar_laboratorio_1', 50: 'despertar_laboratorio_50', 100: 'despertar_laboratorio_100', 200: 'despertar_laboratorio_200' },
-  erebus_portal: { 1: 'despertar_portal_1', 50: 'despertar_portal_50', 100: 'despertar_portal_100', 200: 'despertar_portal_200' },
-  chronos_loom: { 1: 'despertar_tear_1', 50: 'despertar_tear_50', 100: 'despertar_tear_100', 200: 'despertar_tear_200' },
-  void_condenser: { 1: 'despertar_condensador_1', 50: 'despertar_condensador_50', 100: 'despertar_condensador_100', 200: 'despertar_condensador_200', 300: 'despertar_condensador_300' },
-  moirai_prism: { 1: 'despertar_prisma_1', 50: 'despertar_prisma_50', 100: 'despertar_prisma_100', 200: 'despertar_prisma_200', 300: 'despertar_prisma_300' },
-  fate_forge: { 1: 'despertar_forja_destino_1', 50: 'despertar_forja_destino_50', 100: 'despertar_forja_destino_100', 200: 'despertar_forja_destino_200', 300: 'despertar_forja_destino_300' },
-  fractal_engine: { 1: 'despertar_motor_fractal_1', 50: 'despertar_motor_fractal_50', 100: 'despertar_motor_fractal_100', 200: 'despertar_motor_fractal_200', 300: 'despertar_motor_fractal_300' },
-  oracle_console: { 1: 'despertar_console_1', 50: 'despertar_console_50', 100: 'despertar_console_100', 200: 'despertar_console_200', 300: 'despertar_console_300' },
-  chthonic_idleverse: { 1: 'despertar_idleverso_1', 50: 'despertar_idleverso_50', 100: 'despertar_idleverso_100', 200: 'despertar_idleverso_200', 300: 'despertar_idleverso_300' },
-  cortex_baker: { 1: 'despertar_cortex_1', 50: 'despertar_cortex_50', 100: 'despertar_cortex_100', 200: 'despertar_cortex_200', 300: 'despertar_cortex_300' },
-  the_emperor: { 1: 'despertar_imperador_1', 50: 'despertar_imperador_50', 100: 'despertar_imperador_100', 200: 'despertar_imperador_200', 300: 'despertar_imperador_300' },
+  wandering_shade: { 50: 'despertar_sombra_50', 100: 'despertar_sombra_100', 150: 'despertar_sombra_150', 250: 'despertar_sombra_250', 300: 'despertar_sombra_300', 350: 'despertar_sombra_350', 400: 'despertar_sombra_400', 450: 'despertar_sombra_450', 500: 'despertar_sombra_500', 550: 'despertar_sombra_550', 600: 'despertar_sombra_600' },
+  charon_servants: { 50: 'despertar_servos_50', 150: 'despertar_servos_150', 250: 'despertar_servos_250', 300: 'despertar_servos_300', 350: 'despertar_servos_350', 400: 'despertar_servos_400', 450: 'despertar_servos_450', 500: 'despertar_servos_500', 550: 'despertar_servos_550', 600: 'despertar_servos_600' },
+  cerberian_hound: { 50: 'despertar_cao_50', 150: 'despertar_cao_150', 250: 'despertar_cao_250', 300: 'despertar_cao_300', 350: 'despertar_cao_350', 400: 'despertar_cao_400', 450: 'despertar_cao_450', 500: 'despertar_cao_500', 550: 'despertar_cao_550', 600: 'despertar_cao_600' },
+  tartarus_judge: { 50: 'despertar_juiz_50', 150: 'despertar_juiz_150', 250: 'despertar_juiz_250', 300: 'despertar_juiz_300', 350: 'despertar_juiz_350', 400: 'despertar_juiz_400', 450: 'despertar_juiz_450', 500: 'despertar_juiz_500', 550: 'despertar_juiz_550', 600: 'despertar_juiz_600' },
+  phlegethon_forge: { 50: 'despertar_forja_50', 150: 'despertar_forja_150', 250: 'despertar_forja_250', 300: 'despertar_forja_300', 350: 'despertar_forja_350', 400: 'despertar_forja_400', 450: 'despertar_forja_450', 500: 'despertar_forja_500', 550: 'despertar_forja_550', 600: 'despertar_forja_600' },
+  obsidian_throne: { 50: 'despertar_trono_50', 150: 'despertar_trono_150', 250: 'despertar_trono_250', 300: 'despertar_trono_300', 350: 'despertar_trono_350', 400: 'despertar_trono_400', 450: 'despertar_trono_450', 500: 'despertar_trono_500', 550: 'despertar_trono_550', 600: 'despertar_trono_600' },
+  mnemosyne_temple: { 1: 'despertar_templo_1', 50: 'despertar_templo_50', 100: 'despertar_templo_100', 200: 'despertar_templo_200', 350: 'despertar_templo_350', 400: 'despertar_templo_400', 450: 'despertar_templo_450', 500: 'despertar_templo_500', 550: 'despertar_templo_550', 600: 'despertar_templo_600' },
+  styx_tower: { 1: 'despertar_torre_1', 50: 'despertar_torre_50', 100: 'despertar_torre_100', 200: 'despertar_torre_200', 350: 'despertar_torre_350', 400: 'despertar_torre_400', 450: 'despertar_torre_450', 500: 'despertar_torre_500', 550: 'despertar_torre_550', 600: 'despertar_torre_600' },
+  star_barge: { 1: 'despertar_barca_1', 50: 'despertar_barca_50', 100: 'despertar_barca_100', 200: 'despertar_barca_200', 350: 'despertar_barca_350', 400: 'despertar_barca_400', 450: 'despertar_barca_450', 500: 'despertar_barca_500', 550: 'despertar_barca_550', 600: 'despertar_barca_600' },
+  tartarus_lab: { 1: 'despertar_laboratorio_1', 50: 'despertar_laboratorio_50', 100: 'despertar_laboratorio_100', 200: 'despertar_laboratorio_200', 350: 'despertar_laboratorio_350', 400: 'despertar_laboratorio_400', 450: 'despertar_laboratorio_450', 500: 'despertar_laboratorio_500', 550: 'despertar_laboratorio_550', 600: 'despertar_laboratorio_600' },
+  erebus_portal: { 1: 'despertar_portal_1', 50: 'despertar_portal_50', 100: 'despertar_portal_100', 200: 'despertar_portal_200', 350: 'despertar_portal_350', 400: 'despertar_portal_400', 450: 'despertar_portal_450', 500: 'despertar_portal_500', 550: 'despertar_portal_550', 600: 'despertar_portal_600' },
+  chronos_loom: { 1: 'despertar_tear_1', 50: 'despertar_tear_50', 100: 'despertar_tear_100', 200: 'despertar_tear_200', 350: 'despertar_tear_350', 400: 'despertar_tear_400', 450: 'despertar_tear_450', 500: 'despertar_tear_500', 550: 'despertar_tear_550', 600: 'despertar_tear_600' },
+  void_condenser: { 1: 'despertar_condensador_1', 50: 'despertar_condensador_50', 100: 'despertar_condensador_100', 200: 'despertar_condensador_200', 300: 'despertar_condensador_300', 350: 'despertar_condensador_350', 400: 'despertar_condensador_400', 450: 'despertar_condensador_450', 500: 'despertar_condensador_500', 550: 'despertar_condensador_550', 600: 'despertar_condensador_600' },
+  moirai_prism: { 1: 'despertar_prisma_1', 50: 'despertar_prisma_50', 100: 'despertar_prisma_100', 200: 'despertar_prisma_200', 300: 'despertar_prisma_300', 350: 'despertar_prisma_350', 400: 'despertar_prisma_400', 450: 'despertar_prisma_450', 500: 'despertar_prisma_500', 550: 'despertar_prisma_550', 600: 'despertar_prisma_600' },
+  fate_forge: { 1: 'despertar_forja_destino_1', 50: 'despertar_forja_destino_50', 100: 'despertar_forja_destino_100', 200: 'despertar_forja_destino_200', 300: 'despertar_forja_destino_300', 350: 'despertar_forja_destino_350', 400: 'despertar_forja_destino_400', 450: 'despertar_forja_destino_450', 500: 'despertar_forja_destino_500', 550: 'despertar_forja_destino_550', 600: 'despertar_forja_destino_600' },
+  fractal_engine: { 1: 'despertar_motor_fractal_1', 50: 'despertar_motor_fractal_50', 100: 'despertar_motor_fractal_100', 200: 'despertar_motor_fractal_200', 300: 'despertar_motor_fractal_300', 350: 'despertar_motor_fractal_350', 400: 'despertar_motor_fractal_400', 450: 'despertar_motor_fractal_450', 500: 'despertar_motor_fractal_500', 550: 'despertar_motor_fractal_550', 600: 'despertar_motor_fractal_600' },
+  oracle_console: { 1: 'despertar_console_1', 50: 'despertar_console_50', 100: 'despertar_console_100', 200: 'despertar_console_200', 300: 'despertar_console_300', 350: 'despertar_console_350', 400: 'despertar_console_400', 450: 'despertar_console_450', 500: 'despertar_console_500', 550: 'despertar_console_550', 600: 'despertar_console_600' },
+  chthonic_idleverse: { 1: 'despertar_idleverso_1', 50: 'despertar_idleverso_50', 100: 'despertar_idleverso_100', 200: 'despertar_idleverso_200', 300: 'despertar_idleverso_300', 350: 'despertar_idleverso_350', 400: 'despertar_idleverso_400', 450: 'despertar_idleverso_450', 500: 'despertar_idleverso_500', 550: 'despertar_idleverso_550', 600: 'despertar_idleverso_600' },
+  cortex_baker: { 1: 'despertar_cortex_1', 50: 'despertar_cortex_50', 100: 'despertar_cortex_100', 200: 'despertar_cortex_200', 300: 'despertar_cortex_300', 350: 'despertar_cortex_350', 400: 'despertar_cortex_400', 450: 'despertar_cortex_450', 500: 'despertar_cortex_500', 550: 'despertar_cortex_550', 600: 'despertar_cortex_600' },
+  the_emperor: { 1: 'despertar_imperador_1', 50: 'despertar_imperador_50', 100: 'despertar_imperador_100', 200: 'despertar_imperador_200', 300: 'despertar_imperador_300', 350: 'despertar_imperador_350', 400: 'despertar_imperador_400', 450: 'despertar_imperador_450', 500: 'despertar_imperador_500', 550: 'despertar_imperador_550', 600: 'despertar_imperador_600' },
 });
 
 /**
@@ -1811,6 +1895,45 @@ export function evaluateDespertarAchievementIds(state = {}, unlocked = []) {
     'despertar_mercador_acheron',
     Boolean(milestones.generatorSold) || Number(state.generatorsSold ?? stats.generatorsSold ?? 0) >= 1,
   );
+
+  // --- Véu volume (gen-despertar-veil-achievements.mjs) ---
+  const pupSet = new Set(CERBERUS_PUP_UPGRADE_IDS);
+  const pupOwned = upgrades.filter((uid) => pupSet.has(uid)).length;
+  const offlineHours = Math.max(0, Number(state.offlineSecondsAccumulated ?? stats.offlineSeconds ?? stats.offline_seconds ?? 0)) / 3600;
+  const totalNectarVol = Math.max(Number(state.totalNectarHarvested ?? milestones.f5Nectar?.totalNectarHarvested ?? 0), 0);
+  take('despertar_prestigio_10', prestigeCount >= 10);
+  take('despertar_prestigio_25', prestigeCount >= 25);
+  take('despertar_prestigio_50', prestigeCount >= 50);
+  take('despertar_prestigio_100', prestigeCount >= 100);
+  take('despertar_filhotes_3', pupOwned >= 3);
+  take('despertar_filhotes_5', pupOwned >= 5);
+  take('despertar_filhotes_8', pupOwned >= 8);
+  take('despertar_filhotes_10', pupOwned >= 10);
+  take('despertar_filhotes_15', pupOwned >= 15);
+  take('despertar_ausencia_10h', offlineHours >= 10);
+  take('despertar_ausencia_24h', offlineHours >= 24);
+  take('despertar_ausencia_72h', offlineHours >= 72);
+  take('despertar_cliques_10k', clicks >= 10000);
+  take('despertar_cliques_100k', clicks >= 100000);
+  take('despertar_talentos_25', talents.length >= 25);
+  take('despertar_talentos_50', talents.length >= 50);
+  take('despertar_talentos_100', talents.length >= 100);
+  take('despertar_melhorias_50', upgrades.length >= 50);
+  take('despertar_melhorias_100', upgrades.length >= 100);
+  take('despertar_melhorias_150', upgrades.length >= 150);
+  take('despertar_juizo_50', juizoBest >= 50);
+  take('despertar_juizo_100', juizoBest >= 100);
+  take('despertar_almas_1e39', cmp(lifetime, '1000000000000000000000000000000000000000') >= 0);
+  take('despertar_sps_1e27', cmp(sps, '1000000000000000000000000000') >= 0);
+  take('despertar_sps_1e33', cmp(sps, '1000000000000000000000000000000000') >= 0);
+  take('despertar_ecos_777', shimmersClicked >= 777);
+  take('despertar_nectar_100', totalNectarVol >= 100);
+  take('despertar_nectar_1000', totalNectarVol >= 1000);
+  take('despertar_sanguessuga_500', leechesPopped >= 500);
+  take('despertar_sanguessuga_1000', leechesPopped >= 1000);
+  take('despertar_prestigio_200', prestigeCount >= 200);
+  take('despertar_cliques_1m', clicks >= 1000000);
+  take('despertar_ausencia_168h', offlineHours >= 168);
 
   return earned;
 }

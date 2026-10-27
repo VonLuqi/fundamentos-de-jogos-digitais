@@ -435,10 +435,10 @@ function effectsFor(ccName) {
     case 'Asmodeus': return { offlineExtraHours: 64 };
     case 'Beelzebub': return { offlineExtraHours: 128 };
     case 'Lucifer': return { offlineExtraHours: 256 };
-    case 'Kitten angels': return { allGeneratorsMult: '1.05' };
-    case 'Cat ladies': return { allGeneratorsMult: '1.10' };
-    case 'Kitten wages': return { upgradeCostMult: '0.90' };
-    case 'Milkhelp® lactose intolerance relief tablets': return { allGeneratorsMult: '1.05' };
+    case 'Kitten angels': return { kittenVeilFactor: '0.1' };
+    case 'Cat ladies': return { catLadies: true };
+    case 'Kitten wages': return { kittenUpgradeDiscount: true };
+    case 'Milkhelp® lactose intolerance relief tablets': return { milkhelpServants: true };
     case 'Elder spice': return { nectarReserveBonus: true };
     case 'Sacrilegious corruption': return { allGeneratorsMult: '1.05' };
     case 'Unholy bait': return {};
@@ -774,8 +774,15 @@ async function patchPhpLegacy(legacyCosts, legacyMap) {
   const { costs, map } = phpLegacyBlock(legacyCosts, legacyMap);
   const legacyCostsRe =
     /    public const LEGACY_TALENT_COSTS = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const LEGACY_TALENT_MAP/;
+  const verdictRe =
+    /    public const VERDICT_SHOP = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const SHIMMER_EFFECTS/;
   const legacyMapRe =
-    /    public const LEGACY_TALENT_MAP = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const SHIMMER_EFFECTS/;
+    /    public const LEGACY_TALENT_MAP = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const VERDICT_SHOP = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const SHIMMER_EFFECTS/;
+  const verdictBlockMatch = src.match(/    public const VERDICT_SHOP = \[[\s\S]*?\r?\n    \];/);
+  if (!verdictBlockMatch) {
+    throw new Error('Não encontrou VERDICT_SHOP entre LEGACY_TALENT_MAP e SHIMMER_EFFECTS no PHP');
+  }
+  const verdictBlock = verdictBlockMatch[0];
   let next = src.replace(
     legacyCostsRe,
     () => `${costs}\n\n    public const LEGACY_TALENT_MAP`,
@@ -787,12 +794,21 @@ async function patchPhpLegacy(legacyCosts, legacyMap) {
   }
   let next2 = next.replace(
     legacyMapRe,
-    () => `${map}\n\n    public const SHIMMER_EFFECTS`,
+    () => `${map}\n\n${verdictBlock}\n\n    public const SHIMMER_EFFECTS`,
   );
   if (next2 === next) {
-    const fallbackMap = /    public const LEGACY_TALENT_MAP = \[[\s\S]*?\r?\n    \];/;
-    if (!fallbackMap.test(next)) throw new Error('Não encontrou LEGACY_TALENT_MAP no PHP');
-    next2 = next.replace(fallbackMap, () => map);
+    const fallbackMap =
+      /    public const LEGACY_TALENT_MAP = \[[\s\S]*?\r?\n    \];\r?\n\r?\n    public const SHIMMER_EFFECTS/;
+    if (fallbackMap.test(next)) {
+      next2 = next.replace(fallbackMap, () => `${map}\n\n${verdictBlock}\n\n    public const SHIMMER_EFFECTS`);
+    } else {
+      const legacyOnly = /    public const LEGACY_TALENT_MAP = \[[\s\S]*?\r?\n    \];/;
+      if (!legacyOnly.test(next)) throw new Error('Não encontrou LEGACY_TALENT_MAP no PHP');
+      next2 = next.replace(legacyOnly, () => `${map}\n\n${verdictBlock}`);
+    }
+  }
+  if (next2 === next && !verdictRe.test(next)) {
+    throw new Error('Patch LEGACY_TALENT_MAP falhou — VERDICT_SHOP/SHIMMER ausente');
   }
   next = next2;
   if (next !== src) await fs.writeFile(PHP_PATH, next, 'utf8');

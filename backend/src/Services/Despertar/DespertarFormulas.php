@@ -89,8 +89,19 @@ final class DespertarFormulas
      * @param array<int, string> $upgrades
      * @param array<string, mixed> $seasons
      */
-    public static function upgradeEffectiveCost(string $baseCost, array $upgrades = [], array $seasons = []): string
-    {
+    /**
+     * @param array<int, string> $upgrades
+     * @param array<string, mixed> $seasons
+     * @param array<int, string> $talents
+     * @param array<string, mixed>|null $upgradeDef
+     */
+    public static function upgradeEffectiveCost(
+        string $baseCost,
+        array $upgrades = [],
+        array $seasons = [],
+        array $talents = [],
+        ?array $upgradeDef = null
+    ): string {
         $owned = array_flip(array_map('strval', $upgrades));
         $mult = '1';
         if (isset($owned['fortune_101'])) {
@@ -100,6 +111,14 @@ final class DespertarFormulas
         if ($saturnLv > 0) {
             $saturnDisc = DespertarDecimal::sub('1', DespertarDecimal::mul(DespertarCatalog::SATURN_KING_DISCOUNT_PER_LEVEL, (string) $saturnLv));
             $mult = DespertarDecimal::mul($mult, $saturnDisc);
+        }
+        $tFx = self::talentEffects($talents);
+        if (isset($tFx['upgradeCostMult']) && DespertarDecimal::cmp((string) $tFx['upgradeCostMult'], '1') !== 0) {
+            $mult = DespertarDecimal::mul($mult, (string) $tFx['upgradeCostMult']);
+        }
+        $kind = (string) ($upgradeDef['kind'] ?? '');
+        if (!empty($tFx['kittenUpgradeDiscount']) && ($kind === 'veilMult' || $kind === 'kittenMult')) {
+            $mult = DespertarDecimal::mul($mult, '0.9');
         }
         if (DespertarDecimal::cmp($mult, '1') === 0) {
             return DespertarDecimal::money($baseCost);
@@ -154,6 +173,10 @@ final class DespertarFormulas
         $buyAllUnlock = false;
         $vaultUnlock = false;
         $labelPrinter = false;
+        $kittenVeilFactor = '0';
+        $kittenUpgradeDiscount = false;
+        $catLadies = false;
+        $milkhelpServants = false;
 
         foreach ($talentIds as $rawId) {
             $k = (string) $rawId;
@@ -268,6 +291,18 @@ final class DespertarFormulas
             if (!empty($fx['labelPrinter'])) {
                 $labelPrinter = true;
             }
+            if (isset($fx['kittenVeilFactor'])) {
+                $kittenVeilFactor = DespertarDecimal::add($kittenVeilFactor, (string) $fx['kittenVeilFactor']);
+            }
+            if (!empty($fx['kittenUpgradeDiscount'])) {
+                $kittenUpgradeDiscount = true;
+            }
+            if (!empty($fx['catLadies'])) {
+                $catLadies = true;
+            }
+            if (!empty($fx['milkhelpServants'])) {
+                $milkhelpServants = true;
+            }
         }
 
         foreach ($generatorBonus as $gid => $bonus) {
@@ -306,6 +341,10 @@ final class DespertarFormulas
             'buyAllUnlock' => $buyAllUnlock,
             'vaultUnlock' => $vaultUnlock,
             'labelPrinter' => $labelPrinter,
+            'kittenVeilFactor' => $kittenVeilFactor,
+            'kittenUpgradeDiscount' => $kittenUpgradeDiscount,
+            'catLadies' => $catLadies,
+            'milkhelpServants' => $milkhelpServants,
         ];
     }
 
@@ -684,11 +723,19 @@ final class DespertarFormulas
      * @param array<string, mixed> $generators
      * @param array<int, string> $talentIds
      */
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $generators
+     * @param array<int, string> $talentIds
+     * @param mixed $achievementsOrCount
+     */
     public static function generatorUpgradeMult(
         string $generatorId,
         array $upgradeIds = [],
         array $generators = [],
-        array $talentIds = []
+        array $talentIds = [],
+        mixed $achievementsOrCount = [],
+        ?int $normalAchievementsCount = null
     ): string {
         $upgradesById = DespertarCatalog::upgradesById();
         $mult = '1';
@@ -713,6 +760,12 @@ final class DespertarFormulas
         }
         if (isset($fx['allGeneratorsMult']) && DespertarDecimal::cmp((string) $fx['allGeneratorsMult'], '1') !== 0) {
             $mult = DespertarDecimal::mul($mult, (string) $fx['allGeneratorsMult']);
+        }
+        if ($generatorId === 'charon_servants') {
+            $mult = DespertarDecimal::mul(
+                $mult,
+                self::servantTalentMult($upgradeIds, $talentIds, $achievementsOrCount, $normalAchievementsCount)
+            );
         }
         return DespertarDecimal::mul($mult, self::synergyUpgradeMult($generatorId, $upgradeIds, $generators));
     }
@@ -1517,19 +1570,29 @@ final class DespertarFormulas
      * @param array<int, string> $upgradeIds
      * @param array<string, mixed> $dragon
      */
-    public static function cerberusPupMult(array $upgradeIds = [], mixed $achievementsOrCount = [], ?int $normalAchievementsCount = null, array $dragon = []): string
-    {
+    /**
+     * @param array<int, string> $upgradeIds
+     * @param array<string, mixed> $dragon
+     * @param array<int, string> $talentIds
+     */
+    public static function cerberusPupMult(
+        array $upgradeIds = [],
+        mixed $achievementsOrCount = [],
+        ?int $normalAchievementsCount = null,
+        array $dragon = [],
+        array $talentIds = []
+    ): string {
         $owned = array_flip(array_map('strval', $upgradeIds));
-        if ($owned === []) {
-            return '1';
-        }
         $vFrac = self::veilFraction($achievementsOrCount, $normalAchievementsCount);
         if (DespertarDecimal::cmp($vFrac, '0') <= 0) {
             return '1';
         }
         $veilPupBoost = self::dragonModifiers($dragon)['veilPupBoost'];
+        $tFx = self::talentEffects($talentIds);
+        $kittenVeilFactor = (string) ($tFx['kittenVeilFactor'] ?? '0');
 
         $mult = '1';
+        $any = false;
         foreach (DespertarCatalog::UPGRADES as $def) {
             $id = (string) $def['id'];
             if (!isset($owned[$id])) {
@@ -1539,11 +1602,65 @@ final class DespertarFormulas
             if ($kind !== 'veilMult' && $kind !== 'kittenMult') {
                 continue;
             }
+            $any = true;
             $effFactor = DespertarDecimal::cmp($veilPupBoost, '1') === 0
                 ? (string) $def['factor']
                 : DespertarDecimal::mul((string) $def['factor'], $veilPupBoost);
             $term = DespertarDecimal::add('1', DespertarDecimal::mul($vFrac, $effFactor));
             $mult = DespertarDecimal::mul($mult, $term);
+        }
+        if (DespertarDecimal::cmp($kittenVeilFactor, '0') > 0) {
+            $any = true;
+            $effFactor = DespertarDecimal::cmp($veilPupBoost, '1') === 0
+                ? $kittenVeilFactor
+                : DespertarDecimal::mul($kittenVeilFactor, $veilPupBoost);
+            $mult = DespertarDecimal::mul(
+                $mult,
+                DespertarDecimal::add('1', DespertarDecimal::mul($vFrac, $effFactor))
+            );
+        }
+        return $any ? $mult : '1';
+    }
+
+    /**
+     * Cat Ladies ×1.29 por Filhote/angels; Milkhelp +5% por rank de Véu (100%).
+     *
+     * @param array<int, string> $upgradeIds
+     * @param array<int, string> $talentIds
+     */
+    public static function servantTalentMult(
+        array $upgradeIds = [],
+        array $talentIds = [],
+        mixed $achievementsOrCount = [],
+        ?int $normalAchievementsCount = null
+    ): string {
+        $fx = self::talentEffects($talentIds);
+        $mult = '1';
+        if (!empty($fx['catLadies'])) {
+            $n = 0;
+            $byId = DespertarCatalog::upgradesById();
+            foreach ($upgradeIds as $rawId) {
+                $def = $byId[(string) $rawId] ?? null;
+                $kind = (string) ($def['kind'] ?? '');
+                if ($kind === 'veilMult' || $kind === 'kittenMult') {
+                    $n += 1;
+                }
+            }
+            if (DespertarDecimal::cmp((string) ($fx['kittenVeilFactor'] ?? '0'), '0') > 0) {
+                $n += 1;
+            }
+            for ($i = 0; $i < $n; $i += 1) {
+                $mult = DespertarDecimal::mul($mult, '1.29');
+            }
+        }
+        if (!empty($fx['milkhelpServants'])) {
+            $ranks = (int) floor(self::veilPercent($achievementsOrCount, $normalAchievementsCount) / 100);
+            if ($ranks > 0) {
+                $mult = DespertarDecimal::mul(
+                    $mult,
+                    DespertarDecimal::add('1', DespertarDecimal::mul('0.05', (string) $ranks))
+                );
+            }
         }
         return $mult;
     }
@@ -2003,7 +2120,14 @@ final class DespertarFormulas
             if ($qty <= 0) {
                 continue;
             }
-            $upMult = self::generatorUpgradeMult($id, $upgrades, $generators, $talents);
+            $upMult = self::generatorUpgradeMult(
+                $id,
+                $upgrades,
+                $generators,
+                $talents,
+                $achievements,
+                $normalAchievementsCount
+            );
             $shiny = (int) ($shinyCounts[$id] ?? 0);
             $gold = (int) ($goldCounts[$id] ?? 0);
             $level = (int) ($generatorLevels[$id] ?? 0);
@@ -2031,7 +2155,7 @@ final class DespertarFormulas
         $saturnMult = self::saturnaliaSpsMult($seasons, $upgrades);
         $fortuneMult = self::fortuneGlobalSpsMult($upgrades);
         $scaleMult = self::dragonScaleSpsMult($upgrades);
-        $pupMult = self::cerberusPupMult($upgrades, $achievements, $normalAchievementsCount, $dragon);
+        $pupMult = self::cerberusPupMult($upgrades, $achievements, $normalAchievementsCount, $dragon, $talents);
         $reserveMult = self::nectarReserveMult($nectar, $talents, $nectarReserveActive);
         $auraMult = self::dragonAuraSpsMult($dragon);
         $covenantMult = self::elderCovenantMult($covenantActive);
@@ -3097,6 +3221,50 @@ final class DespertarFormulas
         $seen = self::sanitizeEduLogsSeen($state['eduLogsSeen'] ?? [], $state, $syncOk);
         $totalLogs = count(DespertarCatalog::EDU_LOG_IDS);
         $take('despertar_arquiteto_do_loop', count($eligible) === $totalLogs && count($seen) === $totalLogs);
+
+        // --- Véu volume (gen-despertar-veil-achievements.mjs) ---
+        $pupSet = array_flip(DespertarCatalog::CERBERUS_PUP_UPGRADE_IDS);
+        $pupOwned = 0;
+        foreach ($upgrades as $uid) {
+            if (isset($pupSet[(string) $uid])) {
+                $pupOwned++;
+            }
+        }
+        $offlineHours = max(0, (int) ($state['offlineSecondsAccumulated'] ?? $stats['offline_seconds'] ?? $stats['offlineSeconds'] ?? 0)) / 3600;
+        $totalNectarVol = max((int) ($state['totalNectarHarvested'] ?? $f5Nectar['totalNectarHarvested'] ?? 0), 0);
+        $take('despertar_prestigio_10', $prestigeCount >= 10);
+        $take('despertar_prestigio_25', $prestigeCount >= 25);
+        $take('despertar_prestigio_50', $prestigeCount >= 50);
+        $take('despertar_prestigio_100', $prestigeCount >= 100);
+        $take('despertar_filhotes_3', $pupOwned >= 3);
+        $take('despertar_filhotes_5', $pupOwned >= 5);
+        $take('despertar_filhotes_8', $pupOwned >= 8);
+        $take('despertar_filhotes_10', $pupOwned >= 10);
+        $take('despertar_filhotes_15', $pupOwned >= 15);
+        $take('despertar_ausencia_10h', $offlineHours >= 10);
+        $take('despertar_ausencia_24h', $offlineHours >= 24);
+        $take('despertar_ausencia_72h', $offlineHours >= 72);
+        $take('despertar_cliques_10k', $clicks >= 10000);
+        $take('despertar_cliques_100k', $clicks >= 100000);
+        $take('despertar_talentos_25', count($talents) >= 25);
+        $take('despertar_talentos_50', count($talents) >= 50);
+        $take('despertar_talentos_100', count($talents) >= 100);
+        $take('despertar_melhorias_50', count($upgrades) >= 50);
+        $take('despertar_melhorias_100', count($upgrades) >= 100);
+        $take('despertar_melhorias_150', count($upgrades) >= 150);
+        $take('despertar_juizo_50', $juizoBest >= 50);
+        $take('despertar_juizo_100', $juizoBest >= 100);
+        $take('despertar_almas_1e39', DespertarDecimal::cmp($lifetime, '1000000000000000000000000000000000000000') >= 0);
+        $take('despertar_sps_1e27', DespertarDecimal::cmp($sps, '1000000000000000000000000000') >= 0);
+        $take('despertar_sps_1e33', DespertarDecimal::cmp($sps, '1000000000000000000000000000000000') >= 0);
+        $take('despertar_ecos_777', $shimmersClicked >= 777);
+        $take('despertar_nectar_100', $totalNectarVol >= 100);
+        $take('despertar_nectar_1000', $totalNectarVol >= 1000);
+        $take('despertar_sanguessuga_500', $leechesPopped >= 500);
+        $take('despertar_sanguessuga_1000', $leechesPopped >= 1000);
+        $take('despertar_prestigio_200', $prestigeCount >= 200);
+        $take('despertar_cliques_1m', $clicks >= 1000000);
+        $take('despertar_ausencia_168h', $offlineHours >= 168);
 
         return $earned;
     }

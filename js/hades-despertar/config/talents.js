@@ -583,7 +583,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      allGeneratorsMult: "1.05",
+      kittenVeilFactor: "0.1",
     },
   },
   {
@@ -1534,7 +1534,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      allGeneratorsMult: "1.10",
+      catLadies: true,
     },
   },
   {
@@ -1552,7 +1552,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      upgradeCostMult: "0.90",
+      kittenUpgradeDiscount: true,
     },
   },
   {
@@ -1835,7 +1835,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      allGeneratorsMult: "1.05",
+      milkhelpServants: true,
     },
   },
   {
