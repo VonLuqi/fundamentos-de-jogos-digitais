@@ -2835,7 +2835,8 @@
 }
 
 .despertar-fab-cluster > .despertar-codex-book,
-.despertar-fab-cluster > .despertar-codex-tip {
+.despertar-fab-cluster > .despertar-codex-tip,
+.despertar-fab-cluster > .despertar-season-hall-fab {
   pointer-events: auto;
 }
 
@@ -2898,11 +2899,18 @@
   animation: despertar-codex-book-pulse 1.6s ease-in-out infinite;
 }
 
-/* Placar do Loop â€” canto oposto ao CÃ³dice (direita do DomÃ­nio). */
+/* Placar do Loop ? canto oposto ao Códice (direita do Domínio). */
 .despertar-loop-board {
   left: auto;
   right: max(0.65rem, env(safe-area-inset-right, 0px));
   bottom: max(0.65rem, env(safe-area-inset-bottom, 0px));
+}
+
+/* Hall T1 ? empilhado acima do Placar (mesmo canto direito). */
+.despertar-season-hall-fab.despertar-codex-book {
+  left: auto;
+  right: max(0.65rem, env(safe-area-inset-right, 0px));
+  bottom: calc(0.65rem + 3rem + 0.55rem + env(safe-area-inset-bottom, 0px));
 }
 
 .despertar-loop-board-drawer .despertar-loop-board__blurb {
@@ -4637,26 +4645,31 @@ button.despertar-juizo-card:disabled {
   color: var(--hades-parchment, #f3e9d7);
 }
 
-.despertar-season-hall-fab {
-  position: fixed;
-  right: 1rem;
-  bottom: 5.5rem;
-  z-index: 40;
+/* Fallback se o FAB sair do cluster (sem .despertar-codex-book). */
+.despertar-season-hall-fab:not(.despertar-codex-book) {
+  position: absolute;
+  right: max(0.65rem, env(safe-area-inset-right, 0px));
+  bottom: calc(0.65rem + 3rem + 0.55rem + env(safe-area-inset-bottom, 0px));
+  z-index: 36;
   appearance: none;
-  border: 1px solid rgba(207, 167, 89, 0.55);
-  background: rgba(18, 12, 20, 0.92);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 0;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--hades-gold) 55%, transparent);
+  background:
+    linear-gradient(160deg, rgba(36, 22, 12, 0.96), rgba(14, 10, 18, 0.96));
   color: var(--hades-gold-bright, #e8d4a8);
-  font-family: var(--font-title, Cinzel, serif);
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0.55rem 0.75rem;
   cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
 }
 
 .despertar-season-hall-fab:focus-visible {
   outline: 2px solid var(--hades-gold-bright, #e8d4a8);
-  outline-offset: 2px;
+  outline-offset: 3px;
 }
 
 .despertar-season-hall-overlay {

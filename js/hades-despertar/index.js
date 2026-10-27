@@ -185,15 +185,26 @@ async function ensureAcheronSealedForSeason(token, isAdmin) {
 }
 
 function mountSeasonHallFab({ token }) {
-  const host = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
-  if (!host || host.querySelector('[data-season-hall-fab]')) return;
+  const page = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!page || page.querySelector('[data-season-hall-fab]')) return;
+
+  const cluster = page.querySelector('[data-fab-cluster]');
+  const fabHost = cluster || page;
 
   const fab = document.createElement('button');
   fab.type = 'button';
-  fab.className = 'despertar-season-hall-fab';
+  fab.id = 'despertar-season-hall';
+  fab.className = 'despertar-codex-book despertar-season-hall-fab';
   fab.setAttribute('data-season-hall-fab', '1');
   fab.setAttribute('title', SEASON_HALL_COPY.fabTitle);
-  fab.textContent = SEASON_HALL_COPY.fabLabel;
+  fab.setAttribute('aria-label', SEASON_HALL_COPY.fabTitle);
+  fab.innerHTML = `
+    <span class="despertar-codex-book__icon" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="26" height="26" focusable="false">
+        <path fill="currentColor" d="M4 26h24v2H4zm3-2h4V14H7zm7 0h4V10h-4zm7 0h4V6h-4zM6 8l10-5 10 5v2H6z"/>
+      </svg>
+    </span>
+  `;
 
   const overlay = document.createElement('div');
   overlay.className = 'despertar-season-hall-overlay';
@@ -220,7 +231,8 @@ function mountSeasonHallFab({ token }) {
     if (event.target === overlay) closeHall();
   });
 
-  host.append(fab, overlay);
+  fabHost.append(fab);
+  page.append(overlay);
 }
 
 /**
