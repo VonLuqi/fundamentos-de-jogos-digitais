@@ -1,18 +1,11 @@
 'use strict';
 
+import { siteBasePath } from '../api.js?v=20261021i';
+
 const SESSION_KEY = 'activeSession';
 
-function resolveSubmundoRoot() {
-  const p = String(window.location?.pathname || '');
-  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
-    const idx = p.indexOf(marker);
-    if (idx >= 0) return p.slice(0, idx);
-  }
-  return '';
-}
-
 function resolveSubmundoPath(nextPath) {
-  const root = resolveSubmundoRoot();
+  const root = siteBasePath();
   return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
 }
 
@@ -28,7 +21,7 @@ function getActiveSession() {
 }
 
 async function postProgress(payload) {
-  const root = resolveSubmundoRoot();
+  const root = siteBasePath();
   const res = await fetch(`${root}/api/progress`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

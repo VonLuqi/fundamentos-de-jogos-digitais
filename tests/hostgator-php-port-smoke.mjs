@@ -297,6 +297,15 @@ try {
     globalThis.window = { location: { pathname: '/fundamentos-de-jogos-digitais/submundo/estige-obolo/' } };
     assert.equal(siteBasePath(), '/fundamentos-de-jogos-digitais');
     assert.equal(rootPath(), '../..');
+
+    // URL limpa do Salão (onde o portão do ARG vive) — sem /pages/ nem /submundo/
+    globalThis.window = { location: { pathname: '/fundamentos-de-jogos-digitais/dashboard/' } };
+    assert.equal(siteBasePath(), '/fundamentos-de-jogos-digitais');
+    assert.equal(rootPath(), '..');
+
+    globalThis.window = { location: { pathname: '/dashboard/' } };
+    assert.equal(siteBasePath(), '');
+    assert.equal(rootPath(), '..');
 } finally {
     globalThis.window = prevWindow;
 }

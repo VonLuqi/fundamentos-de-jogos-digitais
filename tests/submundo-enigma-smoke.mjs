@@ -259,10 +259,24 @@ assert(
 );
 
 assert(gateJs.includes('initUnderworldGate') && gateJs.includes('underworldStep'), 'portão do Salão via servidor');
+assert(gateJs.includes('siteBasePath'), 'portão usa siteBasePath (subdir + URL limpa)');
+assert(!gateJs.includes('resolveSiteRoot'), 'portão não reimplementa resolveSiteRoot incompleto');
 assert(read('pages/dashboard.html').includes('underworld-gate'), 'markup do portão no hub');
 assert(read('css/dashboard.css').includes('.underworld-gate'), 'CSS juicy do portão');
 assert(read('js/dashboard.js').includes('initUnderworldGate'), 'dashboard inicia o portão');
 assert(read('js/submundo/tartaro.js').includes('consumeUnderworldGateEcho'), 'eco do portão no Tártaro');
+for (const [label, src] of [
+  ['tartaro', tartaroJs],
+  ['asfodelos', asfodelosJs],
+  ['hecate', hecateJs],
+  ['elisios', elisiosJs],
+  ['persefone', persefoneJs],
+  ['observatorio', observatorioJs],
+  ['cocito', cocitoJs],
+]) {
+  assert(src.includes('siteBasePath'), `${label}.js usa siteBasePath`);
+  assert(!src.includes('resolveSubmundoRoot'), `${label}.js não reimplementa resolveSubmundoRoot`);
+}
 assert(
   spawnSync(process.execPath, ['--check', path.join(root, 'js/underworld-gate.js')], { encoding: 'utf8' }).status === 0,
   'node --check underworld-gate.js'

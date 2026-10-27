@@ -9,25 +9,17 @@
 'use strict';
 
 import { setRainbowVfxSuspended } from './achievements-ui.js';
+import { siteBasePath } from './api.js';
 
 const GATE_STORAGE_KEY = 'underworld_gate_ok';
 
-function resolveSiteRoot() {
-  const p = typeof window !== 'undefined' ? String(window.location?.pathname || '') : '';
-  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
-    const idx = p.indexOf(marker);
-    if (idx >= 0) return p.slice(0, idx);
-  }
-  return '';
-}
-
 function resolveSubmundoPath(nextPath) {
-  const root = resolveSiteRoot();
+  const root = siteBasePath();
   return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
 }
 
 async function postUnderworldGateStep(pass) {
-  const root = resolveSiteRoot();
+  const root = siteBasePath();
   const res = await fetch(`${root}/api/progress`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

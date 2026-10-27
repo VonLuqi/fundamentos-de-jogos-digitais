@@ -1,21 +1,14 @@
 'use strict';
 
-function resolveSubmundoRoot() {
-  const p = String(window.location?.pathname || '');
-  for (const marker of ['/pages/submundo/', '/pages/', '/submundo/']) {
-    const idx = p.indexOf(marker);
-    if (idx >= 0) return p.slice(0, idx);
-  }
-  return '';
-}
+import { siteBasePath } from '../api.js?v=20261021i';
 
 function resolveSubmundoPath(nextPath) {
-  const root = resolveSubmundoRoot();
+  const root = siteBasePath();
   return `${root}${String(nextPath || '').replace(/\/+$/, '')}/`;
 }
 
 async function postUnderworldStep(payload) {
-  const root = resolveSubmundoRoot();
+  const root = siteBasePath();
   const res = await fetch(`${root}/api/progress`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
