@@ -4303,13 +4303,20 @@ button.despertar-juizo-card:disabled {
   text-align: left;
 }
 
+.despertar-classroom-veil--season .despertar-classroom-veil__eyebrow,
+.despertar-classroom-veil--season .despertar-classroom-veil__title,
+.despertar-classroom-veil--season .despertar-classroom-veil__body {
+  text-align: center;
+}
+
 .despertar-season-boards__eyebrow {
   margin-top: 1.25rem;
+  text-align: center;
 }
 
 .despertar-season-boards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
   gap: 0.75rem;
   margin: 0.35rem 0 0;
 }
@@ -4344,19 +4351,23 @@ button.despertar-juizo-card:disabled {
 
 .despertar-season-board__row {
   display: grid;
-  grid-template-columns: 1.6rem minmax(0, 1fr) auto;
-  gap: 0.35rem;
+  grid-template-columns: 1.75rem minmax(0, 1fr) auto;
+  gap: 0.45rem;
   align-items: baseline;
+  padding: 0.3rem 0.35rem;
   font-size: 0.88rem;
   line-height: 1.25;
+  background: rgba(18, 12, 20, 0.35);
 }
 
 .despertar-season-board__rank {
   font-family: var(--font-title, Cinzel, serif);
+  font-weight: 700;
   color: var(--hades-gold, #cfa759);
 }
 
 .despertar-season-board__name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -4365,12 +4376,35 @@ button.despertar-juizo-card:disabled {
 
 .despertar-season-board__metric {
   font-variant-numeric: tabular-nums;
+  font-weight: 600;
   color: var(--despertar-styx, #00a896);
+}
+
+.despertar-season-board__row.is-podium-1 {
+  background: linear-gradient(90deg, rgba(227, 179, 79, 0.18), transparent 75%);
 }
 
 .despertar-season-board__row.is-podium-1 .despertar-season-board__rank,
 .despertar-season-board__row.is-podium-1 .despertar-season-board__name {
   color: var(--hades-gold-bright, #e8d4a8);
+}
+
+.despertar-season-board__row.is-podium-2 {
+  background: linear-gradient(90deg, rgba(199, 210, 220, 0.12), transparent 75%);
+}
+
+.despertar-season-board__row.is-podium-2 .despertar-season-board__rank,
+.despertar-season-board__row.is-podium-2 .despertar-season-board__name {
+  color: var(--rarity-silver, #c7d2dc);
+}
+
+.despertar-season-board__row.is-podium-3 {
+  background: linear-gradient(90deg, rgba(181, 121, 71, 0.14), transparent 75%);
+}
+
+.despertar-season-board__row.is-podium-3 .despertar-season-board__rank,
+.despertar-season-board__row.is-podium-3 .despertar-season-board__name {
+  color: var(--rarity-copper, #b57947);
 }
 
 .despertar-season-board__empty {
@@ -4379,11 +4413,17 @@ button.despertar-juizo-card:disabled {
   color: var(--hades-text-dim, #a89bb0);
 }
 
+.despertar-season-prize,
+.despertar-season-tablet {
+  text-align: left;
+}
+
 .despertar-season-closed__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.55rem;
   align-items: center;
+  justify-content: center;
 }
 
 .despertar-classroom-veil--pulse {

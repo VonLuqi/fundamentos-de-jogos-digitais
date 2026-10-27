@@ -294,9 +294,9 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   const boardSlots = SEASON_CLOSED_CATEGORIES.map((category) => `
     <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">
       <h3 class="despertar-season-board__title">${escapeHtml(category.label)}</h3>
-      <ol class="despertar-season-board__list" data-season-list>
+      <ul class="despertar-season-board__list" data-season-list>
         <li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.loading)}</li>
-      </ol>
+      </ul>
     </section>
   `).join('');
 

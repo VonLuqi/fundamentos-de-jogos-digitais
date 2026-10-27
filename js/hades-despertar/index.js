@@ -91,7 +91,11 @@ function pushJudgesTickerHint() {
   if (ticker) setMarqueeText(ticker, JUDGES_REFUSED_TICKER);
 }
 
-function showSealedState() {
+function showSealedState(token = null, { isAdmin = false } = {}) {
+  if (DESPERTAR_SEASON_CLOSED) {
+    void showSeasonClosedState(token || getSession()?.token || null, { isAdmin });
+    return;
+  }
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
