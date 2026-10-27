@@ -736,10 +736,24 @@ async function init() {
   // Preview só com ?preview=1 nesta carga (não sticky sozinho).
   const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin, requireQuery: true });
   if (seasonHold && !adminPreview) {
-    await ensureAcheronSealedForSeason(token, isAdmin);
-    await showSeasonClosedState(token, { isAdmin });
+    try {
+      await ensureAcheronSealedForSeason(token, isAdmin);
+      await showSeasonClosedState(token, { isAdmin });
+    } catch (error) {
+      console.error('[Despertar] falha ao montar véu de temporada:', error);
+      showApiWarning(
+        error instanceof ApiError
+          ? error.message
+          : 'O pódio da Temporada 1 não carregou por completo. Use o Placar ou force atualizar (Ctrl+F5).',
+        { dismissMs: 0 }
+      );
+      // Mantém o véu estático do HTML (data-season-hold-static) se o rich veil falhar.
+    }
     return;
   }
+
+  // Liberado / preview: tira o fallback HTML para o jogo montar.
+  document.querySelector('[data-season-hold-static]')?.remove();
 
   if (!isAdmin && !published) {
     showSealedState(token, { isAdmin });

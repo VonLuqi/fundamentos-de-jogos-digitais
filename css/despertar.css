@@ -4584,6 +4584,40 @@ button.despertar-juizo-card:disabled {
   opacity: 0.92;
 }
 
+/* Fallback HTML do hold T1 ? cobre o shell estático se o grafo ES não bootar. */
+.app-shell__content.despertar-page {
+  position: relative;
+}
+
+.despertar-season-hold-static {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 1.25rem 1rem 2rem;
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(60, 20, 40, 0.35), transparent 65%),
+    linear-gradient(180deg, rgba(8, 6, 12, 0.97), rgba(4, 2, 8, 0.98));
+}
+
+.despertar-page:has([data-season-hold-static]) > .despertar-layout {
+  visibility: hidden;
+  pointer-events: none;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.despertar-season-hold-static__hint {
+  margin: 1rem 0 0;
+  text-align: center;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.95rem;
+  color: rgba(243, 233, 215, 0.72);
+}
+
 .despertar-admin-preview-banner {
   display: flex;
   flex-wrap: wrap;

@@ -125,8 +125,12 @@ DirectoryIndex index.html index.php
     Header onsuccess set Cache-Control "public, max-age=60, stale-while-revalidate=300"
   </If>
 
-  # HTML, CSS e JS de aplicação revalidam sempre (evita módulos ES cacheados em versões diferentes)
+  # HTML, CSS e JS de aplicação revalidam sempre (evita módulos ES cacheados em versões diferentes).
+  # Cloudflare-CDN-Cache-Control / CDN-Cache-Control: o edge da CF ignora max-age próprio (ex.: 14400)
+  # e não serve api.js/season-closed.js velhos contra um index.js?v= novo.
   <If "%{REQUEST_URI} =~ m#\.(?:html|js|mjs|css)$#">
     Header set Cache-Control "no-cache, must-revalidate"
+    Header set CDN-Cache-Control "no-store"
+    Header set Cloudflare-CDN-Cache-Control "no-store"
   </If>
 </IfModule>
