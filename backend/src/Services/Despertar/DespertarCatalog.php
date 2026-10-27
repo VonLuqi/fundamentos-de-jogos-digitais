@@ -134,7 +134,7 @@ final class DespertarCatalog
     public const CATABASE_UNLOCK_SERVANTS = 7;
     public const CATABASE_RESEARCH_DURATION_SEC = 1800;
     public const CATABASE_PLEDGE_DURATION_SEC = 1800;
-    public const CATABASE_PLEDGE_MAX_STEP = 12;
+    public const CATABASE_PLEDGE_MAX_STEP = 14;
     public const CATABASE_COVENANT_SPS_MULT = '0.95';
     public const CATABASE_STAGE3_ELDER_PACT_PER_NON_SERVANT = '0.05';
     public const LEECH_BASE_CAP = 10;
@@ -1119,7 +1119,7 @@ final class DespertarCatalog
         ['id' => 'sinapse_espectral', 'cost' => '64000000000', 'kind' => 'catabaseResearch', 'factor' => '1.03', 'generatorId' => 'charon_servants', 'generatorFactor' => '2', 'setsCatabaseStage' => 1, 'requires' => ['upgradeId' => 'despertar_ctoniano', 'researchId' => 'sinapse_espectral']],
         ['id' => 'comunhao_abissal', 'cost' => '256000000000', 'kind' => 'catabaseResearch', 'factor' => '1.04', 'setsCatabaseStage' => 2, 'requires' => ['upgradeId' => 'sinapse_espectral', 'researchId' => 'comunhao_abissal']],
         ['id' => 'pacto_primordial', 'cost' => '1024000000000', 'kind' => 'catabaseResearch', 'factor' => '1.05', 'setsCatabaseStage' => 3, 'elderPactBonusPerNonServant' => '0.05', 'requires' => ['upgradeId' => 'comunhao_abissal', 'researchId' => 'pacto_primordial']],
-        ['id' => 'ninho_do_acheron', 'cost' => '500000000000', 'kind' => 'leechCap', 'factor' => '4', 'requires' => ['upgradeId' => 'despertar_ctoniano']],
+        ['id' => 'ninho_do_acheron', 'cost' => '500000000000', 'kind' => 'leechCap', 'factor' => '2', 'requires' => ['upgradeId' => 'despertar_ctoniano']],
         ['id' => 'visceras_sacras', 'cost' => '2000000000000', 'kind' => 'leechPayout', 'factor' => '1.05', 'requires' => ['upgradeId' => 'comunhao_abissal']],
 
         // --- Fase F8: Dragão Ctoniano, Drops das 4 Estações e 24 Fortunas de Hermes ---
@@ -1187,7 +1187,7 @@ final class DespertarCatalog
         'permanent_slot_i' => ['id' => 'permanent_slot_i', 'cost' => '100', 'branch' => 'persistent', 'ring' => 1, 'angle' => -50.97, 'requires' => ['legado'], 'effects' => ['permanentSlot' => 1]],
         'abadao' => ['id' => 'abadao', 'cost' => '343', 'branch' => 'demon', 'ring' => 4, 'angle' => 57.14, 'requires' => ['mamon'], 'effects' => ['offlineExtraHours' => 16]],
         'virtues' => ['id' => 'virtues', 'cost' => '343', 'branch' => 'angel', 'ring' => 4, 'angle' => -88.89, 'requires' => ['archangels'], 'effects' => ['offlineRate' => '0.10']],
-        'persistent_memory' => ['id' => 'persistent_memory', 'cost' => '500', 'branch' => 'persistent', 'ring' => 1, 'angle' => 4.21, 'requires' => ['legado'], 'effects' => ['buyAllUnlock' => true]],
+        'persistent_memory' => ['id' => 'persistent_memory', 'cost' => '500', 'branch' => 'persistent', 'ring' => 1, 'angle' => 4.21, 'requires' => ['legado'], 'effects' => ['buyAllUnlock' => true, 'researchDurationMult' => 0.1]],
         'lasting_fortune' => ['id' => 'lasting_fortune', 'cost' => '777', 'branch' => 'golden', 'ring' => 2, 'angle' => -79.94, 'requires' => ['heavenly_luck'], 'effects' => ['shimmerLuckMult' => '1.02']],
         'lucky_digit' => ['id' => 'lucky_digit', 'cost' => '777', 'branch' => 'golden', 'ring' => 2, 'angle' => -63.94, 'requires' => ['heavenly_luck'], 'effects' => ['prestigeEffectMult' => '1.01', 'shimmerLuckMult' => '1.01']],
         'golden_switch' => ['id' => 'golden_switch', 'cost' => '999', 'branch' => 'golden', 'ring' => 2, 'angle' => -47.95, 'requires' => ['heavenly_luck'], 'effects' => ['goldenSwitchUnlock' => true]],
@@ -1200,7 +1200,7 @@ final class DespertarCatalog
         'asmodeus' => ['id' => 'asmodeus', 'cost' => '16807', 'branch' => 'demon', 'ring' => 6, 'angle' => 64.29, 'requires' => ['satan'], 'effects' => ['offlineExtraHours' => 64]],
         'cherubim' => ['id' => 'cherubim', 'cost' => '16807', 'branch' => 'angel', 'ring' => 6, 'angle' => -71.99, 'requires' => ['dominions'], 'effects' => ['offlineRate' => '0.10']],
         'permanent_slot_ii' => ['id' => 'permanent_slot_ii', 'cost' => '20000', 'branch' => 'persistent', 'ring' => 2, 'angle' => -31.96, 'requires' => ['permanent_slot_i'], 'effects' => ['permanentSlot' => 2]],
-        'unholy_bait' => ['id' => 'unholy_bait', 'cost' => '44444', 'branch' => 'demon', 'ring' => 5, 'angle' => 67.86, 'requires' => ['cozinha_inicial'], 'effects' => []],
+        'unholy_bait' => ['id' => 'unholy_bait', 'cost' => '44444', 'branch' => 'demon', 'ring' => 5, 'angle' => 67.86, 'requires' => ['cozinha_inicial'], 'effects' => ['leechSpawnMult' => 5]],
         'luvas_de_halo' => ['id' => 'luvas_de_halo', 'cost' => '55555', 'branch' => 'discount', 'ring' => 4, 'angle' => -45.37, 'requires' => ['kit_inicial'], 'effects' => ['clickTalentMult' => '1.10']],
         'numero_da_sorte' => ['id' => 'numero_da_sorte', 'cost' => '77777', 'branch' => 'golden', 'ring' => 3, 'angle' => -30.21, 'requires' => ['lucky_digit', 'lasting_fortune'], 'effects' => ['prestigeEffectMult' => '1.01', 'shimmerLuckMult' => '1.01']],
         'desconto_divino' => ['id' => 'desconto_divino', 'cost' => '99999', 'branch' => 'discount', 'ring' => 4, 'angle' => -36.62, 'requires' => ['decisive_fate'], 'effects' => ['generatorCostMult' => '0.99']],
@@ -1215,8 +1215,8 @@ final class DespertarCatalog
         'seraphim' => ['id' => 'seraphim', 'cost' => '117649', 'branch' => 'angel', 'ring' => 7, 'angle' => -66.67, 'requires' => ['cherubim'], 'effects' => ['offlineRate' => '0.10']],
         'sinergias_vol_i' => ['id' => 'sinergias_vol_i', 'cost' => '222222', 'branch' => 'production', 'ring' => 6, 'angle' => 10, 'requires' => ['satan', 'dominions'], 'effects' => ['synergyVolUnlock' => 1]],
         'divine_bakeries' => ['id' => 'divine_bakeries', 'cost' => '399999', 'branch' => 'discount', 'ring' => 5, 'angle' => -27.13, 'requires' => ['vendas_divinas', 'desconto_divino'], 'effects' => ['generatorCostMult' => '0.99', 'upgradeCostMult' => '0.99']],
-        'elder_spice' => ['id' => 'elder_spice', 'cost' => '444444', 'branch' => 'demon', 'ring' => 6, 'angle' => 73.78, 'requires' => ['unholy_bait'], 'effects' => ['nectarReserveBonus' => true]],
-        'sacrilegious_corruption' => ['id' => 'sacrilegious_corruption', 'cost' => '444444', 'branch' => 'demon', 'ring' => 6, 'angle' => 79.79, 'requires' => ['unholy_bait'], 'effects' => ['allGeneratorsMult' => '1.05']],
+        'elder_spice' => ['id' => 'elder_spice', 'cost' => '444444', 'branch' => 'demon', 'ring' => 6, 'angle' => 73.78, 'requires' => ['unholy_bait'], 'effects' => ['leechCapBonus' => 2]],
+        'sacrilegious_corruption' => ['id' => 'sacrilegious_corruption', 'cost' => '444444', 'branch' => 'demon', 'ring' => 6, 'angle' => 79.79, 'requires' => ['unholy_bait'], 'effects' => ['leechPayoutMult' => '1.05']],
         'five_finger_discount' => ['id' => 'five_finger_discount', 'cost' => '555555', 'branch' => 'discount', 'ring' => 5, 'angle' => -20, 'requires' => ['luvas_de_halo', 'abadao'], 'effects' => ['generatorCostMult' => '0.99']],
         'god' => ['id' => 'god', 'cost' => '823543', 'branch' => 'angel', 'ring' => 8, 'angle' => -61.11, 'requires' => ['seraphim'], 'effects' => ['offlineRate' => '0.05']],
         'lucifer' => ['id' => 'lucifer', 'cost' => '823543', 'branch' => 'demon', 'ring' => 8, 'angle' => 82.14, 'requires' => ['beelzebub'], 'effects' => ['offlineExtraHours' => 256]],
@@ -1235,7 +1235,7 @@ final class DespertarCatalog
         'unshackled_cursors' => ['id' => 'unshackled_cursors', 'cost' => '15000000', 'branch' => 'unshackled', 'ring' => 7, 'angle' => 110.88, 'requires' => ['unshackled_flavor'], 'effects' => ['unshackleFingers' => true]],
         'quimera' => ['id' => 'quimera', 'cost' => '40353607', 'branch' => 'cookie', 'ring' => 9, 'angle' => 30, 'requires' => ['god', 'lucifer', 'sinergias_vol_ii'], 'effects' => ['offlineRate' => '0.05', 'offlineExtraHours' => 48, 'upgradeCostMult' => '0.99']],
         'pagamento_da_sorte' => ['id' => 'pagamento_da_sorte', 'cost' => '77777777', 'branch' => 'golden', 'ring' => 4, 'angle' => -19.13, 'requires' => ['numero_da_sorte', 'decisive_fate'], 'effects' => ['prestigeEffectMult' => '1.01', 'shimmerLuckMult' => '1.01']],
-        'eye_of_the_wrinkler' => ['id' => 'eye_of_the_wrinkler', 'cost' => '99999999', 'branch' => 'demon', 'ring' => 8, 'angle' => 88.78, 'requires' => ['wrinkly_cookies'], 'effects' => ['allGeneratorsMult' => '1.05']],
+        'eye_of_the_wrinkler' => ['id' => 'eye_of_the_wrinkler', 'cost' => '99999999', 'branch' => 'demon', 'ring' => 8, 'angle' => 88.78, 'requires' => ['wrinkly_cookies'], 'effects' => ['leechDigestVisible' => true]],
         'stevia_caelestis' => ['id' => 'stevia_caelestis', 'cost' => '100000000', 'branch' => 'demon', 'ring' => 8, 'angle' => 93.36, 'requires' => ['wrinkly_cookies'], 'effects' => []],
         'cozimento_de_acucar' => ['id' => 'cozimento_de_acucar', 'cost' => '200000000', 'branch' => 'nectar', 'ring' => 9, 'angle' => 110, 'requires' => ['stevia_caelestis'], 'effects' => ['nectarReserveBonus' => true]],
         'diabetica_daemonicus' => ['id' => 'diabetica_daemonicus', 'cost' => '300000000', 'branch' => 'demon', 'ring' => 9, 'angle' => 96.43, 'requires' => ['stevia_caelestis', 'lucifer'], 'effects' => []],
@@ -1642,12 +1642,14 @@ final class DespertarCatalog
         'despertar_sombra_sorte_pura',
         'despertar_sombra_vigilia_eterna',
         'despertar_catabase_avos_1',
+        'despertar_catabase_avos_2',
         'despertar_catabase_avos_3',
         'despertar_sanguessuga_1',
         'despertar_sanguessuga_50',
         'despertar_sanguessuga_200',
         'despertar_sanguessuga_shiny',
         'despertar_tregua_estigia',
+        'despertar_alianca_eterna',
         'despertar_condensador_1',
         'despertar_condensador_50',
         'despertar_condensador_100',

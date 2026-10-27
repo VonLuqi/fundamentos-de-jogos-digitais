@@ -89,6 +89,23 @@ export function shimmerSprite(id) {
   };
 }
 
+/** Sprites da Catábase (Sanguessugas + estágios Grandmapocalypse). */
+export function catabaseSprite(id) {
+  const safe = String(id || '').replace(/[^\w-]/g, '');
+  const paths = spritePaths('catabase', safe);
+  let mark = '?';
+  if (safe.includes('shiny')) mark = '✦';
+  else if (safe.includes('sanguessuga')) mark = 'ᚹ';
+  else if (safe.includes('estagio')) mark = 'Ω';
+  else if (safe.includes('tregua')) mark = '☮';
+  else if (safe.includes('alianca')) mark = '⚔';
+  return {
+    id: safe,
+    ...paths,
+    mark,
+  };
+}
+
 /**
  * Monta <img> com cadeia WebP → SVG → marca de texto.
  * @param {Document} doc

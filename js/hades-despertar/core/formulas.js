@@ -258,6 +258,11 @@ export function talentEffects(talentIds = []) {
   let kittenUpgradeDiscount = false;
   let catLadies = false;
   let milkhelpServants = false;
+  let leechSpawnMult = '1';
+  let leechCapBonus = 0;
+  let leechPayoutMult = '1';
+  let researchDurationMult = '1';
+  let leechDigestVisible = false;
 
   for (const rawId of talentIds || []) {
     const talent = TALENT_BY_ID[String(rawId)];
@@ -282,6 +287,19 @@ export function talentEffects(talentIds = []) {
     if (fx.kittenUpgradeDiscount) kittenUpgradeDiscount = true;
     if (fx.catLadies) catLadies = true;
     if (fx.milkhelpServants) milkhelpServants = true;
+    if (fx.leechSpawnMult != null) {
+      leechSpawnMult = mul(leechSpawnMult, String(fx.leechSpawnMult));
+    }
+    if (fx.leechCapBonus != null) {
+      leechCapBonus += Math.max(0, Math.floor(Number(fx.leechCapBonus) || 0));
+    }
+    if (fx.leechPayoutMult != null) {
+      leechPayoutMult = mul(leechPayoutMult, String(fx.leechPayoutMult));
+    }
+    if (fx.researchDurationMult != null) {
+      researchDurationMult = mul(researchDurationMult, String(fx.researchDurationMult));
+    }
+    if (fx.leechDigestVisible) leechDigestVisible = true;
     if (fx.offlineEfficiency != null && cmp(String(fx.offlineEfficiency), offlineEfficiency) > 0) {
       offlineEfficiency = String(fx.offlineEfficiency);
     }
@@ -386,6 +404,11 @@ export function talentEffects(talentIds = []) {
     kittenUpgradeDiscount,
     catLadies,
     milkhelpServants,
+    leechSpawnMult,
+    leechCapBonus,
+    leechPayoutMult,
+    researchDurationMult,
+    leechDigestVisible,
   };
 }
 
@@ -1851,14 +1874,20 @@ export function evaluateDespertarAchievementIds(state = {}, unlocked = []) {
   );
   const pledgesCount = Number(f6Cat.pledgesCount || 0);
   const covenantActive = Boolean(f6Cat.covenantActive);
+  const covenantActivations = Math.max(
+    Number(f6Cat.covenantActivations || 0),
+    covenantActive ? 1 : 0,
+  );
 
   take('despertar_catabase_avos_1', catStage >= 1);
+  take('despertar_catabase_avos_2', catStage >= 2);
   take('despertar_catabase_avos_3', catStage >= 3);
   take('despertar_sanguessuga_1', leechesPopped >= 1);
   take('despertar_sanguessuga_50', leechesPopped >= 50);
   take('despertar_sanguessuga_200', leechesPopped >= 200);
   take('despertar_sanguessuga_shiny', shinyLeechesPopped >= 1);
-  take('despertar_tregua_estigia', pledgesCount >= 1 || covenantActive);
+  take('despertar_tregua_estigia', pledgesCount >= 1);
+  take('despertar_alianca_eterna', covenantActivations >= 1);
 
   const ownedVerdictSet = new Set(verdictPurchases.map((v) => String(v)));
   const fullBench = Object.keys(VERDICT_SHOP_BY_ID).every((vid) => ownedVerdictSet.has(vid));

@@ -158,9 +158,11 @@ export function wrathProbabilityForStage(stage = 0) {
 }
 
 /**
- * Custo do Juramento de Trégua (*Elder Pledge*): `8^min(pledgesCount, 12)` (1, 8, 64 ... até 68.719.476.736).
+ * Custo do Juramento de Trégua (*Elder Pledge*): `8^min(pledgesCount+2, 14)`
+ * (1ª = 64, 2ª = 512, … até ≈ 4.4e12).
  */
 export function calculatePledgeCost(pledgesCount = 0) {
-  const step = Math.max(0, Math.min(CATABASE_PLEDGE_MAX_STEP, Math.floor(Number(pledgesCount) || 0)));
+  const n = Math.max(0, Math.floor(Number(pledgesCount) || 0));
+  const step = Math.max(0, Math.min(CATABASE_PLEDGE_MAX_STEP, n + 2));
   return (8n ** BigInt(step)).toString();
 }

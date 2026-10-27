@@ -2960,10 +2960,10 @@ export const UPGRADES = freezeAll([
   {
     id: 'ninho_do_acheron',
     name: 'Ninho do Acheron (Elder Spice)',
-    blurb: 'Expande o anel da Foice de 10 para 14 Sanguessugas do Acheron simultâneas.',
+    blurb: 'Expande o anel da Foice em +2 Sanguessugas (10→12). Com o talento Elder Spice chega a 14.',
     cost: '500000000000',
     kind: 'leechCap',
-    factor: '4',
+    factor: '2',
     requires: { upgradeId: 'despertar_ctoniano' },
   },
   {

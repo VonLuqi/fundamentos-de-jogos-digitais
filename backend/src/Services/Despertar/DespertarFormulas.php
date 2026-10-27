@@ -177,6 +177,11 @@ final class DespertarFormulas
         $kittenUpgradeDiscount = false;
         $catLadies = false;
         $milkhelpServants = false;
+        $leechSpawnMult = '1';
+        $leechCapBonus = 0;
+        $leechPayoutMult = '1';
+        $researchDurationMult = '1';
+        $leechDigestVisible = false;
 
         foreach ($talentIds as $rawId) {
             $k = (string) $rawId;
@@ -303,6 +308,21 @@ final class DespertarFormulas
             if (!empty($fx['milkhelpServants'])) {
                 $milkhelpServants = true;
             }
+            if (isset($fx['leechSpawnMult'])) {
+                $leechSpawnMult = DespertarDecimal::mul($leechSpawnMult, (string) $fx['leechSpawnMult']);
+            }
+            if (isset($fx['leechCapBonus'])) {
+                $leechCapBonus += max(0, (int) floor((float) $fx['leechCapBonus']));
+            }
+            if (isset($fx['leechPayoutMult'])) {
+                $leechPayoutMult = DespertarDecimal::mul($leechPayoutMult, (string) $fx['leechPayoutMult']);
+            }
+            if (isset($fx['researchDurationMult'])) {
+                $researchDurationMult = DespertarDecimal::mul($researchDurationMult, (string) $fx['researchDurationMult']);
+            }
+            if (!empty($fx['leechDigestVisible'])) {
+                $leechDigestVisible = true;
+            }
         }
 
         foreach ($generatorBonus as $gid => $bonus) {
@@ -345,6 +365,11 @@ final class DespertarFormulas
             'kittenUpgradeDiscount' => $kittenUpgradeDiscount,
             'catLadies' => $catLadies,
             'milkhelpServants' => $milkhelpServants,
+            'leechSpawnMult' => $leechSpawnMult,
+            'leechCapBonus' => $leechCapBonus,
+            'leechPayoutMult' => $leechPayoutMult,
+            'researchDurationMult' => $researchDurationMult,
+            'leechDigestVisible' => $leechDigestVisible,
         ];
     }
 
@@ -495,6 +520,21 @@ final class DespertarFormulas
             $claimSet = array_flip(array_map('strval', $ctx['fortunes']['claimedIds']));
             if (!isset($claimSet[(string) $req['fortuneId']]) && !isset($owned[(string) $req['fortuneId']])) {
                 return false;
+            }
+        }
+        if (!empty($req['researchId'])) {
+            $resList = null;
+            if (is_array($ctx['unlockedResearchIds'] ?? null)) {
+                $resList = $ctx['unlockedResearchIds'];
+            } elseif (is_array($ctx['catabase']['unlockedResearchIds'] ?? null)) {
+                $resList = $ctx['catabase']['unlockedResearchIds'];
+            }
+            if ($resList !== null) {
+                $resSet = array_flip(array_map('strval', $resList));
+                $rid = (string) $req['researchId'];
+                if (!isset($resSet[$rid]) && !isset($owned[$rid])) {
+                    return false;
+                }
             }
         }
         return true;
@@ -935,21 +975,53 @@ final class DespertarFormulas
         return DespertarDecimal::cmp($drain, '1') >= 0 ? '0' : DespertarDecimal::sub('1', $drain);
     }
 
-    public static function leechPayoutMultiplier(bool $shiny = false, array $upgrades = []): string
+    /**
+     * Cap de Sanguessugas: 10 +2 (Ninho) + leechCapBonus (Elder Spice) ≤ 14.
+     *
+     * @param array<int, string> $upgrades
+     * @param array<int, string> $talents
+     */
+    public static function maxLeechCapacity(array $upgrades = [], array $talents = []): int
     {
-        if ($shiny) {
-            return DespertarCatalog::LEECH_SHINY_PAYOUT_MULT;
-        }
         $owned = array_flip(array_map('strval', $upgrades));
-        return isset($owned['visceras_sacras'])
-            ? DespertarCatalog::LEECH_PAYOUT_MULT_SACRA
-            : DespertarCatalog::LEECH_PAYOUT_MULT_BASE;
+        $cap = DespertarCatalog::LEECH_BASE_CAP;
+        if (isset($owned['ninho_do_acheron'])) {
+            $cap += 2;
+        }
+        $fx = self::talentEffects($talents);
+        $cap += max(0, (int) ($fx['leechCapBonus'] ?? 0));
+        return max(0, min(DespertarCatalog::LEECH_MAX_CAP, $cap));
     }
 
-    public static function calculateLeechPayout(string $digested, bool $shiny = false, array $upgrades = []): string
+    /**
+     * @param array<int, string> $upgrades
+     * @param array<int, string> $talents
+     */
+    public static function leechPayoutMultiplier(bool $shiny = false, array $upgrades = [], array $talents = []): string
+    {
+        $owned = array_flip(array_map('strval', $upgrades));
+        $mult = isset($owned['visceras_sacras'])
+            ? DespertarCatalog::LEECH_PAYOUT_MULT_SACRA
+            : DespertarCatalog::LEECH_PAYOUT_MULT_BASE;
+        $fx = self::talentEffects($talents);
+        $talentMult = (string) ($fx['leechPayoutMult'] ?? '1');
+        if (DespertarDecimal::cmp($talentMult, '1') !== 0) {
+            $mult = DespertarDecimal::mul($mult, $talentMult);
+        }
+        if ($shiny) {
+            $mult = DespertarDecimal::mul($mult, '3');
+        }
+        return $mult;
+    }
+
+    /**
+     * @param array<int, string> $upgrades
+     * @param array<int, string> $talents
+     */
+    public static function calculateLeechPayout(string $digested, bool $shiny = false, array $upgrades = [], array $talents = []): string
     {
         $safeDigested = DespertarDecimal::cmp($digested, '0') > 0 ? $digested : '0';
-        $mult = self::leechPayoutMultiplier($shiny, $upgrades);
+        $mult = self::leechPayoutMultiplier($shiny, $upgrades, $talents);
         return DespertarDecimal::money(DespertarDecimal::mul($safeDigested, $mult));
     }
 
@@ -1799,10 +1871,21 @@ final class DespertarFormulas
         $pledgesCount = isset($rawCat['pledgesCount']) && is_numeric($rawCat['pledgesCount'])
             ? max(0, (int) floor((float) $rawCat['pledgesCount']))
             : 0;
+        $dbCat = is_array($dbCanonical['catabase'] ?? null)
+            ? $dbCanonical['catabase']
+            : (is_array($dbCanonical['milestones']['f6Catabase'] ?? null) ? $dbCanonical['milestones']['f6Catabase'] : []);
+        $covenantActivations = max(
+            isset($rawCat['covenantActivations']) && is_numeric($rawCat['covenantActivations'])
+                ? max(0, (int) floor((float) $rawCat['covenantActivations']))
+                : 0,
+            isset($dbCat['covenantActivations']) && is_numeric($dbCat['covenantActivations'])
+                ? max(0, (int) floor((float) $dbCat['covenantActivations']))
+                : 0,
+            $covenantActive ? 1 : 0
+        );
 
-        $maxCap = isset($owned['ninho_do_acheron'])
-            ? DespertarCatalog::LEECH_MAX_CAP
-            : DespertarCatalog::LEECH_BASE_CAP;
+        $talents = is_array($nextCanonical['talents'] ?? null) ? array_values($nextCanonical['talents']) : [];
+        $maxCap = self::maxLeechCapacity($upgrades, $talents);
 
         $rawLeeches = $rawCat['leeches'] ?? [];
         if (!is_array($rawLeeches)) {
@@ -1894,12 +1977,36 @@ final class DespertarFormulas
             (int) ($clientState['shinyLeechesPopped'] ?? $rawCat['shinyLeechesPopped'] ?? $clientStats['shinyLeechesPopped'] ?? 0)
         );
 
+        $canonicalResearchIds = [
+            'soro_estigio',
+            'despertar_ctoniano',
+            'sinapse_espectral',
+            'comunhao_abissal',
+            'pacto_primordial',
+        ];
+        $canonicalSet = array_flip($canonicalResearchIds);
         $unlockedResearchIds = [];
         if (is_array($rawCat['unlockedResearchIds'] ?? null)) {
             foreach ($rawCat['unlockedResearchIds'] as $rid) {
-                $unlockedResearchIds[] = (string) $rid;
+                $sid = (string) $rid;
+                if (isset($canonicalSet[$sid])) {
+                    $unlockedResearchIds[] = $sid;
+                }
             }
         }
+        foreach ($canonicalResearchIds as $rid) {
+            if (isset($owned[$rid]) && !in_array($rid, $unlockedResearchIds, true)) {
+                $unlockedResearchIds[] = $rid;
+            }
+        }
+
+        $researchTargetId = isset($rawCat['researchTargetId']) ? (string) $rawCat['researchTargetId'] : null;
+        if ($researchTargetId !== null && $researchTargetId !== '' && !isset($canonicalSet[$researchTargetId])) {
+            $researchTargetId = null;
+        }
+        $researchRemainingSec = isset($rawCat['researchRemainingSec']) && is_numeric($rawCat['researchRemainingSec'])
+            ? max(0, (int) floor((float) $rawCat['researchRemainingSec']))
+            : 0;
 
         return [
             'ok' => true,
@@ -1911,14 +2018,13 @@ final class DespertarFormulas
                 'covenantActive' => $covenantActive,
                 'pledgeExpiresAt' => $pledgeExpiresAt,
                 'pledgesCount' => $pledgesCount,
+                'covenantActivations' => $covenantActivations,
                 'leeches' => $leeches,
                 'leechesPopped' => $leechesPopped,
                 'shinyLeechesPopped' => $shinyLeechesPopped,
                 'unlockedResearchIds' => array_values(array_unique($unlockedResearchIds)),
-                'researchTargetId' => isset($rawCat['researchTargetId']) ? (string) $rawCat['researchTargetId'] : null,
-                'researchRemainingSec' => isset($rawCat['researchRemainingSec']) && is_numeric($rawCat['researchRemainingSec'])
-                    ? max(0, (int) floor((float) $rawCat['researchRemainingSec']))
-                    : 0,
+                'researchTargetId' => $researchTargetId,
+                'researchRemainingSec' => $researchRemainingSec,
             ],
         ];
     }
@@ -3154,14 +3260,20 @@ final class DespertarFormulas
         );
         $pledgesCount = (int) ($f6Cat['pledgesCount'] ?? 0);
         $covenantActive = !empty($f6Cat['covenantActive']);
+        $covenantActivations = max(
+            (int) ($f6Cat['covenantActivations'] ?? 0),
+            $covenantActive ? 1 : 0
+        );
 
         $take('despertar_catabase_avos_1', $catStage >= 1);
+        $take('despertar_catabase_avos_2', $catStage >= 2);
         $take('despertar_catabase_avos_3', $catStage >= 3);
         $take('despertar_sanguessuga_1', $leechesPopped >= 1);
         $take('despertar_sanguessuga_50', $leechesPopped >= 50);
         $take('despertar_sanguessuga_200', $leechesPopped >= 200);
         $take('despertar_sanguessuga_shiny', $shinyLeechesPopped >= 1);
-        $take('despertar_tregua_estigia', $pledgesCount >= 1 || $covenantActive);
+        $take('despertar_tregua_estigia', $pledgesCount >= 1);
+        $take('despertar_alianca_eterna', $covenantActivations >= 1);
 
         $ownedVerdictSet = array_flip(array_map('strval', $verdictPurchases));
         $fullBench = true;

@@ -1957,6 +1957,22 @@
       }
     },
     {
+      "id": "despertar_catabase_avos_2",
+      "name": "Comunhão Abissal",
+      "desc": "Alcançou o Estágio 2 da Catábase das Avós com a Comunhão Abissal.",
+      "icon": "🕸️",
+      "art": "despertar_catabase.webp",
+      "hidden": false,
+      "difficulty": "hard",
+      "rarity": "gold",
+      "xp": 30,
+      "meta": {
+        "family": "despertar",
+        "kind": "catabase",
+        "stage": 2
+      }
+    },
+    {
       "id": "despertar_catabase_avos_3",
       "name": "Pacto Primordial",
       "desc": "Alcançou o Estágio 3 da Catábase das Avós selando o Pacto Primordial.",
@@ -2041,7 +2057,7 @@
     {
       "id": "despertar_tregua_estigia",
       "name": "Apaziguador do Estige",
-      "desc": "Selou o Juramento de Trégua ou a Aliança Eterna para conter a Catábase.",
+      "desc": "Selou o Juramento de Trégua para suspender a Catábase por 30 minutos.",
       "icon": "🕊️",
       "art": "despertar_styx_cinco.webp",
       "hidden": false,
@@ -2050,7 +2066,24 @@
       "xp": 20,
       "meta": {
         "family": "despertar",
-        "kind": "catabase"
+        "kind": "catabase",
+        "pact": "pledge"
+      }
+    },
+    {
+      "id": "despertar_alianca_eterna",
+      "name": "Aliança Eterna",
+      "desc": "Declarou a Aliança Eterna, contendo a Catábase em troca de −5% SPS.",
+      "icon": "🤝",
+      "art": "despertar_styx_cinco.webp",
+      "hidden": false,
+      "difficulty": "medium",
+      "rarity": "silver",
+      "xp": 20,
+      "meta": {
+        "family": "despertar",
+        "kind": "catabase",
+        "pact": "covenant"
       }
     },
     {

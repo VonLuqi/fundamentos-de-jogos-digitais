@@ -420,6 +420,7 @@ export const TALENTS = freezeAll([
     },
     effects: {
       buyAllUnlock: true,
+      researchDurationMult: 0.1,
     },
   },
   {
@@ -654,7 +655,9 @@ export const TALENTS = freezeAll([
         "cozinha_inicial",
       ],
     },
-    effects: {},
+    effects: {
+      leechSpawnMult: 5,
+    },
   },
   {
     id: "luvas_de_halo",
@@ -916,7 +919,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      nectarReserveBonus: true,
+      leechCapBonus: 2,
     },
   },
   {
@@ -934,7 +937,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      allGeneratorsMult: "1.05",
+      leechPayoutMult: "1.05",
     },
   },
   {
@@ -1287,7 +1290,7 @@ export const TALENTS = freezeAll([
       ],
     },
     effects: {
-      allGeneratorsMult: "1.05",
+      leechDigestVisible: true,
     },
   },
   {

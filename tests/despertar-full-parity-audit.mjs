@@ -41,8 +41,13 @@ import {
   generatorPriceAt,
   generatorSellRefund,
   leechApparentMult,
+  talentEffects,
 } from '../js/hades-despertar/core/formulas.js';
-import { leechPayoutMultiplier } from '../js/hades-despertar/core/CatabaseSystem.js';
+import {
+  calculatePledgeCost,
+  leechPayoutMultiplier,
+  maxLeechCapacity,
+} from '../js/hades-despertar/core/CatabaseSystem.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPRITES = path.join(root, 'assets/despertar/sprites');
@@ -411,7 +416,17 @@ run('5. Curva 1.15, sell 25%/50%, Lucky, leech −5%/pop ×1.1/×3.3, stack keys
   for (const key of SPS_STACK_KEYS) {
     assert.ok(key in bd, `stack key ausente: ${key}`);
   }
-  warn('Digestão Sanguessuga: modelo n² documentado (cada leech acumula drain total) — distinto do CC clássico per-wrinkler; não falha o gate técnico.');
+  // n² = modelo canônico Cookie Clicker (cada wrinkler acumula o drain total).
+  assert.equal(maxLeechCapacity([], { leechCapBonus: 0 }), 10);
+  assert.equal(maxLeechCapacity(['ninho_do_acheron'], { leechCapBonus: 0 }), 12);
+  assert.equal(maxLeechCapacity(['ninho_do_acheron'], { leechCapBonus: 2 }), 14);
+  assert.equal(calculatePledgeCost(0), '64');
+  const tFx = talentEffects(['unholy_bait', 'elder_spice', 'sacrilegious_corruption', 'persistent_memory', 'eye_of_the_wrinkler']);
+  assert.equal(String(tFx.leechSpawnMult), '5');
+  assert.equal(Number(tFx.leechCapBonus), 2);
+  assert.equal(String(tFx.leechPayoutMult), '1.05');
+  assert.equal(Number(tFx.researchDurationMult), 0.1);
+  assert.equal(tFx.leechDigestVisible, true);
 });
 
 // ─── 4. Disco visual ─────────────────────────────────────────────────────────

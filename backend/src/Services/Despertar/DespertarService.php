@@ -526,11 +526,22 @@ final class DespertarService
             if (!$upgrade) {
                 return ['ok' => false, 'error' => "Juramento desconhecido: {$id}"];
             }
+            $clientCatabase = is_array($client['catabase'] ?? null)
+                ? $client['catabase']
+                : (is_array($client['milestones']['f6Catabase'] ?? null) ? $client['milestones']['f6Catabase'] : []);
             if (!DespertarFormulas::meetsUpgradeRequirement($upgrade, [
                 'souls' => $client['souls'],
                 'generators' => $client['generators'],
                 'upgrades' => $client['upgrades'],
                 'talents' => $client['talents'] ?? $db['talents'] ?? [],
+                'catabase' => $clientCatabase,
+                'unlockedResearchIds' => is_array($clientCatabase['unlockedResearchIds'] ?? null)
+                    ? $clientCatabase['unlockedResearchIds']
+                    : [],
+                'dragon' => is_array($client['dragon'] ?? null) ? $client['dragon'] : [],
+                'seasons' => is_array($client['seasons'] ?? null) ? $client['seasons'] : [],
+                'fortunes' => is_array($client['fortunes'] ?? null) ? $client['fortunes'] : [],
+                'achievements' => $client['achievements'] ?? $db['achievements'] ?? [],
             ])) {
                 return ['ok' => false, 'error' => "Juramento sem requisito: {$id}"];
             }

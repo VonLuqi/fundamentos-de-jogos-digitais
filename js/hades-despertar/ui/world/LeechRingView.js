@@ -15,6 +15,7 @@ import { getUpgrade } from '../../config/upgrades.js';
 import { cmp } from '../../core/decimal.js';
 import { formatSouls } from '../NumberFormatter.js';
 import { acquirePooledNode, releasePooledNode } from '../particles.js';
+import { catabaseSprite, createSpriteNode } from './SpriteAtlas.js';
 
 export function leechSlotPolarPosition(slot = 0, maxSlots = 10) {
   const cap = Math.max(1, Math.min(LEECH_MAX_CAP, Number(maxSlots) || 10));
@@ -42,12 +43,24 @@ export class LeechRingView {
     this._pledgeBtn = null;
     this._covenantBtn = null;
     this._slotButtons = [];
+    this._stageBackdrop = null;
+    this._lastStageSpriteId = null;
   }
 
   mount({ stageHost = null, particleLayer = null, altarCol = null } = {}) {
     this._stageHost = stageHost;
     this._particleLayer = particleLayer;
     if (!this._doc?.createElement) return this;
+
+    if (this._stageHost && !this._stageBackdrop) {
+      const backdrop = this._doc.createElement('div');
+      backdrop.className = 'despertar-catabase-stage-bg';
+      backdrop.id = 'despertar-catabase-stage-bg';
+      backdrop.setAttribute('aria-hidden', 'true');
+      backdrop.hidden = true;
+      this._stageBackdrop = backdrop;
+      this._stageHost.prepend?.(backdrop);
+    }
 
     if (this._stageHost && !this._ringEl) {
       const ring = this._doc.createElement('div');
@@ -67,6 +80,12 @@ export class LeechRingView {
           event?.stopPropagation?.();
           this._onPopLeech?.(slot);
         });
+        const spriteHost = createSpriteNode(
+          this._doc,
+          catabaseSprite('sanguessuga_normal'),
+          { className: 'despertar-sprite despertar-leech__sprite' },
+        );
+        btn.append?.(spriteHost);
         ring.append?.(btn);
         this._slotButtons.push(btn);
       }
@@ -163,10 +182,24 @@ export class LeechRingView {
         btn.classList?.toggle?.('is-static', staticMode);
         const digLabel = formatSouls(leech.digested || '0');
         const kindLabel = leech.shiny ? 'Sanguessuga Abissal Dourada' : 'Sanguessuga do Acheron';
-        const label = `${kindLabel} · Digerido: ${digLabel} almas (clique para estourar)`;
+        const showDigest = typeof state.leechDigestVisible === 'function'
+          ? state.leechDigestVisible()
+          : Boolean(state.talents?.includes?.('eye_of_the_wrinkler'));
+        const digestPart = showDigest ? ` · Digerido: ${digLabel} almas` : '';
+        const label = `${kindLabel}${digestPart} (clique para estourar)`;
         btn.setAttribute?.('aria-label', label);
         btn.title = label;
-        btn.textContent = leech.shiny ? '✨🪱' : '🪱';
+        const spriteId = leech.shiny ? 'sanguessuga_shiny' : 'sanguessuga_normal';
+        if (btn.dataset.spriteId !== spriteId) {
+          btn.dataset.spriteId = spriteId;
+          btn.replaceChildren?.(
+            createSpriteNode(
+              this._doc,
+              catabaseSprite(spriteId),
+              { className: 'despertar-sprite despertar-leech__sprite' },
+            ),
+          );
+        }
       }
     }
 
@@ -177,6 +210,24 @@ export class LeechRingView {
       const effStage = typeof state.catabaseStage === 'function'
         ? state.catabaseStage()
         : structStage;
+
+      if (this._stageBackdrop) {
+        const stageInfoBg = CATABASE_STAGES[effStage] || CATABASE_STAGES[0];
+        const showBg = effStage >= 1 && !Number.isNaN(effStage);
+        this._stageBackdrop.hidden = !showBg;
+        this._stageBackdrop.classList?.toggle?.('is-static', staticMode);
+        if (showBg && stageInfoBg.spriteId && this._lastStageSpriteId !== stageInfoBg.spriteId) {
+          this._lastStageSpriteId = stageInfoBg.spriteId;
+          this._stageBackdrop.replaceChildren?.(
+            createSpriteNode(
+              this._doc,
+              catabaseSprite(stageInfoBg.spriteId),
+              { className: 'despertar-sprite despertar-catabase-stage-bg__sprite' },
+            ),
+          );
+        }
+        if (!showBg) this._lastStageSpriteId = null;
+      }
       const hasResearchHub = Array.isArray(state.upgrades) && state.upgrades.includes('concilio_das_moiras');
       const showBar = hasResearchHub || structStage >= 1;
       this._pactBar.hidden = !showBar;

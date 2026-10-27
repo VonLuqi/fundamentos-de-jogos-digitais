@@ -21,6 +21,10 @@ import {
   wrathProbabilityForStage,
 } from '../config/catabase.js';
 import {
+  LEECH_CLICKS_REQUIRED,
+  LEECH_SHINY_CLICKS_REQUIRED,
+} from '../config/constants.js';
+import {
   add,
   clampNonNegative,
   cmp,
@@ -29,21 +33,42 @@ import {
   sub,
 } from './decimal.js';
 
-export function maxLeechCapacity(upgradeIds = []) {
+/**
+ * Cap de Sanguessugas: 10 base +2 (*Ninho do Acheron*) + leechCapBonus (Elder Spice) ≤ 14.
+ */
+export function maxLeechCapacity(upgradeIds = [], { leechCapBonus = 0 } = {}) {
   const owned = new Set((Array.isArray(upgradeIds) ? upgradeIds : []).map((id) => String(id)));
-  return owned.has('ninho_do_acheron')
-    ? CATABASE_CONFIG.leechMaxCap
-    : CATABASE_CONFIG.leechBaseCap;
+  let cap = CATABASE_CONFIG.leechBaseCap;
+  if (owned.has('ninho_do_acheron')) cap += 2;
+  cap += Math.max(0, Math.floor(Number(leechCapBonus) || 0));
+  return Math.max(0, Math.min(CATABASE_CONFIG.leechMaxCap, cap));
 }
 
-export function leechPayoutMultiplier({ shiny = false, upgrades = [] } = {}) {
-  if (shiny) {
-    return CATABASE_CONFIG.leechShinyPayoutMult;
-  }
+export function leechPayoutMultiplier({
+  shiny = false,
+  upgrades = [],
+  leechPayoutMult = '1',
+} = {}) {
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)));
-  return owned.has('visceras_sacras')
+  let mult = owned.has('visceras_sacras')
     ? CATABASE_CONFIG.leechPayoutMultSacra
     : CATABASE_CONFIG.leechPayoutMultBase;
+  const talentMult = leechPayoutMult != null ? String(leechPayoutMult) : '1';
+  if (talentMult !== '1') {
+    mult = mul(mult, talentMult);
+  }
+  if (shiny) {
+    // Shiny = 3× o payout normal (1.1 → 3.3; com stacks aplica o produto).
+    mult = mul(mult, '3');
+  }
+  return mult;
+}
+
+export function researchDurationSeconds({ researchDurationMult = '1' } = {}) {
+  const base = CATABASE_CONFIG.researchDurationSec;
+  const factor = Number(researchDurationMult);
+  if (!Number.isFinite(factor) || factor <= 0 || factor === 1) return base;
+  return Math.max(1, Math.round(base * factor));
 }
 
 export function normalizeLeechEntry(raw, index = 0, maxCap = CATABASE_CONFIG.leechMaxCap) {
@@ -67,8 +92,8 @@ export function normalizeLeechEntry(raw, index = 0, maxCap = CATABASE_CONFIG.lee
   };
 }
 
-export function normalizeLeechesList(rawList = [], upgrades = []) {
-  const cap = maxLeechCapacity(upgrades);
+export function normalizeLeechesList(rawList = [], upgrades = [], { leechCapBonus = 0 } = {}) {
+  const cap = maxLeechCapacity(upgrades, { leechCapBonus });
   if (!Array.isArray(rawList)) return [];
   const out = [];
   const usedSlots = new Set();
@@ -113,7 +138,12 @@ export function resolveNextResearchTarget(upgradeIds = [], unlockedIds = []) {
   return null;
 }
 
-export function normalizeCatabaseState(raw = {}, { upgrades = [], nowMs = null } = {}) {
+export function normalizeCatabaseState(raw = {}, {
+  upgrades = [],
+  nowMs = null,
+  leechCapBonus = 0,
+  researchDurationMult = '1',
+} = {}) {
   const src = raw && typeof raw === 'object' ? raw : {};
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)));
   const structuralStage = structuralCatabaseStageFromUpgrades(upgrades);
@@ -131,6 +161,7 @@ export function normalizeCatabaseState(raw = {}, { upgrades = [], nowMs = null }
   }
 
   const pledgesCount = Math.max(0, Math.floor(Number(src.pledgesCount) || 0));
+  const covenantActivations = Math.max(0, Math.floor(Number(src.covenantActivations) || 0));
   const leechesPopped = Math.max(0, Math.floor(Number(src.leechesPopped) || 0));
   const shinyLeechesPopped = Math.max(0, Math.floor(Number(src.shinyLeechesPopped) || 0));
 
@@ -146,26 +177,28 @@ export function normalizeCatabaseState(raw = {}, { upgrades = [], nowMs = null }
     .map((s) => s.upgradeId)
     .filter((id) => unlockedSet.has(id));
 
+  const researchDur = researchDurationSeconds({ researchDurationMult });
   const nextTarget = resolveNextResearchTarget(upgrades, unlockedResearchIds);
   let researchRemainingSec = Number.isFinite(Number(src.researchRemainingSec))
     ? Math.max(0, Number(src.researchRemainingSec))
     : 0;
   let researchTargetId = nextTarget ? nextTarget.upgradeId : null;
   if (researchTargetId && src.researchTargetId !== researchTargetId && researchRemainingSec <= 0) {
-    researchRemainingSec = CATABASE_CONFIG.researchDurationSec;
+    researchRemainingSec = researchDur;
   }
   if (!researchTargetId) {
     researchRemainingSec = 0;
   }
 
   const suppressed = covenantActive || (pledgeExpiresAt != null && (nowMs == null || pledgeExpiresAt > Number(nowMs)));
-  const leeches = suppressed ? [] : normalizeLeechesList(src.leeches, upgrades);
+  const leeches = suppressed ? [] : normalizeLeechesList(src.leeches, upgrades, { leechCapBonus });
 
   return {
     stage,
     covenantActive,
     pledgeExpiresAt,
     pledgesCount,
+    covenantActivations,
     leeches,
     leechesPopped,
     shinyLeechesPopped,
@@ -225,7 +258,7 @@ export function calculateLeechDrain(leechesOrCount = 0) {
  * Soma total de almas atualmente digeridas em todas as Sanguessugas ativas,
  * bem como o payout líquido estimado se todas fossem estouradas agora.
  */
-export function summarizeLeeches(leeches = [], upgrades = []) {
+export function summarizeLeeches(leeches = [], upgrades = [], { leechPayoutMult = '1' } = {}) {
   const list = Array.isArray(leeches) ? leeches : [];
   let totalDigested = '0';
   let totalPayout = '0';
@@ -234,7 +267,11 @@ export function summarizeLeeches(leeches = [], upgrades = []) {
     if (!leech) continue;
     const dig = clampNonNegative(leech.digested ?? '0');
     totalDigested = add(totalDigested, dig);
-    const mult = leechPayoutMultiplier({ shiny: Boolean(leech.shiny), upgrades });
+    const mult = leechPayoutMultiplier({
+      shiny: Boolean(leech.shiny),
+      upgrades,
+      leechPayoutMult,
+    });
     totalPayout = add(totalPayout, mul(dig, mult));
     if (leech.shiny) shinyCount += 1;
   }
@@ -255,13 +292,20 @@ export function spawnLeech(catabaseState = {}, {
   shiny = null,
   slot = null,
   random = Math.random,
+  leechCapBonus = 0,
+  researchDurationMult = '1',
 } = {}) {
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+  const state = normalizeCatabaseState(catabaseState, {
+    upgrades,
+    nowMs,
+    leechCapBonus,
+    researchDurationMult,
+  });
   const effStage = effectiveCatabaseStage(state, nowMs);
   if (effStage < 1) {
     return { ok: false, reason: 'catabase_inactive', state };
   }
-  const cap = maxLeechCapacity(upgrades);
+  const cap = maxLeechCapacity(upgrades, { leechCapBonus });
   if (state.leeches.length >= cap) {
     return { ok: false, reason: 'capacity_full', state };
   }
@@ -311,9 +355,17 @@ export function spawnLeech(catabaseState = {}, {
 export function popLeech(catabaseState = {}, targetIndexOrId = 0, {
   upgrades = [],
   nowMs = null,
-  clicksRequired = 1,
+  clicksRequired = null,
+  leechCapBonus = 0,
+  leechPayoutMult = '1',
+  researchDurationMult = '1',
 } = {}) {
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+  const state = normalizeCatabaseState(catabaseState, {
+    upgrades,
+    nowMs,
+    leechCapBonus,
+    researchDurationMult,
+  });
   if (!state.leeches.length) {
     return { ok: false, reason: 'no_leeches', payout: '0', state };
   }
@@ -334,7 +386,12 @@ export function popLeech(catabaseState = {}, targetIndexOrId = 0, {
 
   const target = state.leeches[idx];
   const nextClicks = (target.clicks || 0) + 1;
-  const reqClicks = Math.max(1, Math.floor(Number(clicksRequired) || 1));
+  const defaultReq = target.shiny
+    ? LEECH_SHINY_CLICKS_REQUIRED
+    : LEECH_CLICKS_REQUIRED;
+  const reqClicks = Math.max(1, Math.floor(
+    clicksRequired != null ? Number(clicksRequired) || 1 : defaultReq,
+  ));
 
   if (nextClicks < reqClicks) {
     const nextLeeches = state.leeches.map((item, i) => (i === idx ? { ...item, clicks: nextClicks } : item));
@@ -342,13 +399,18 @@ export function popLeech(catabaseState = {}, targetIndexOrId = 0, {
       ok: true,
       popped: false,
       clicks: nextClicks,
+      clicksRequired: reqClicks,
       payout: '0',
       leech: nextLeeches[idx],
       state: { ...state, leeches: nextLeeches },
     };
   }
 
-  const mult = leechPayoutMultiplier({ shiny: target.shiny, upgrades });
+  const mult = leechPayoutMultiplier({
+    shiny: target.shiny,
+    upgrades,
+    leechPayoutMult,
+  });
   const payout = money(mul(target.digested || '0', mult));
   const nextLeeches = state.leeches.filter((_, i) => i !== idx);
 
@@ -370,8 +432,19 @@ export function popLeech(catabaseState = {}, targetIndexOrId = 0, {
 /**
  * Estoura todas as Sanguessugas ativas de uma vez (ex.: ao ativar Juramento de Trégua ou Aliança).
  */
-export function popAllLeeches(catabaseState = {}, { upgrades = [], nowMs = null } = {}) {
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+export function popAllLeeches(catabaseState = {}, {
+  upgrades = [],
+  nowMs = null,
+  leechCapBonus = 0,
+  leechPayoutMult = '1',
+  researchDurationMult = '1',
+} = {}) {
+  const state = normalizeCatabaseState(catabaseState, {
+    upgrades,
+    nowMs,
+    leechCapBonus,
+    researchDurationMult,
+  });
   if (!state.leeches.length) {
     return {
       ok: true,
@@ -384,7 +457,11 @@ export function popAllLeeches(catabaseState = {}, { upgrades = [], nowMs = null 
   let totalPayout = '0';
   let shinyPopped = 0;
   for (const leech of state.leeches) {
-    const mult = leechPayoutMultiplier({ shiny: leech.shiny, upgrades });
+    const mult = leechPayoutMultiplier({
+      shiny: leech.shiny,
+      upgrades,
+      leechPayoutMult,
+    });
     totalPayout = add(totalPayout, mul(leech.digested || '0', mult));
     if (leech.shiny) shinyPopped += 1;
   }
@@ -416,13 +493,23 @@ export function stepCatabaseTick(catabaseState = {}, {
   upgrades = [],
   nowMs = Date.now(),
   random = Math.random,
+  leechCapBonus = 0,
+  leechSpawnMult = '1',
+  researchDurationMult = '1',
 } = {}) {
   const dt = Math.max(0, Number(dtSeconds) || 0);
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+  const state = normalizeCatabaseState(catabaseState, {
+    upgrades,
+    nowMs,
+    leechCapBonus,
+    researchDurationMult,
+  });
   let pledgeExpired = false;
   if (catabaseState?.pledgeExpiresAt && !state.pledgeExpiresAt) {
     pledgeExpired = true;
   }
+
+  const researchDur = researchDurationSeconds({ researchDurationMult });
 
   // 1. Timer de pesquisa
   let unlockedResearchIds = [...state.unlockedResearchIds];
@@ -439,7 +526,7 @@ export function stepCatabaseTick(catabaseState = {}, {
       }
       const nextTarget = resolveNextResearchTarget(upgrades, unlockedResearchIds);
       researchTargetId = nextTarget ? nextTarget.upgradeId : null;
-      researchRemainingSec = researchTargetId ? CATABASE_CONFIG.researchDurationSec : 0;
+      researchRemainingSec = researchTargetId ? researchDur : 0;
     }
   }
 
@@ -460,14 +547,24 @@ export function stepCatabaseTick(catabaseState = {}, {
       }
     }
 
-    // 3. Tentativa de spawn proporcional ao estágio
-    const cap = maxLeechCapacity(upgrades);
+    // 3. Tentativa de spawn proporcional ao estágio × talentos (Unholy Bait)
+    const cap = maxLeechCapacity(upgrades, { leechCapBonus });
     if (leeches.length < cap) {
-      const spawnProb = Math.min(1, dt * effStage * CATABASE_CONFIG.leechSpawnChancePerSecPerStage);
+      const spawnFactor = Math.max(0, Number(leechSpawnMult) || 1);
+      const spawnProb = Math.min(
+        1,
+        dt * effStage * CATABASE_CONFIG.leechSpawnChancePerSecPerStage * spawnFactor,
+      );
       if (Number(random()) < spawnProb) {
         const res = spawnLeech(
           { ...state, leeches, unlockedResearchIds, researchTargetId, researchRemainingSec },
-          { upgrades, nowMs, random },
+          {
+            upgrades,
+            nowMs,
+            random,
+            leechCapBonus,
+            researchDurationMult,
+          },
         );
         if (res.ok) {
           leeches = res.state.leeches;
@@ -494,15 +591,19 @@ export function stepCatabaseTick(catabaseState = {}, {
 
 /**
  * Ativa o Juramento de Trégua (*Elder Pledge*): exige Estágio 3 (ou `pacto_primordial`),
- * cobra `8^min(pledgesCount, 12)` almas, estoura todas as Sanguessugas e suspende a Catábase por 30 min.
+ * cobra `8^min(pledgesCount+2, 14)` almas, estoura todas as Sanguessugas e suspende a Catábase por 30 min.
  */
 export function activateElderPledge(catabaseState = {}, {
   souls = '0',
   upgrades = [],
   nowMs = Date.now(),
   free = false,
+  leechCapBonus = 0,
+  leechPayoutMult = '1',
+  researchDurationMult = '1',
 } = {}) {
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+  const fxOpts = { leechCapBonus, researchDurationMult };
+  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs, ...fxOpts });
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)));
   if (state.stage < 3 && !owned.has('pacto_primordial')) {
     return { ok: false, reason: 'requires_stage_3', state };
@@ -512,7 +613,13 @@ export function activateElderPledge(catabaseState = {}, {
     return { ok: false, reason: 'insufficient_souls', cost, state };
   }
 
-  const popped = popAllLeeches(state, { upgrades, nowMs });
+  const popped = popAllLeeches(state, {
+    upgrades,
+    nowMs,
+    leechCapBonus,
+    leechPayoutMult,
+    researchDurationMult,
+  });
   const pledgeExpiresAt = Math.floor(Number(nowMs) || Date.now()) + CATABASE_CONFIG.pledgeDurationSec * 1000;
 
   return {
@@ -536,15 +643,26 @@ export function activateElderPledge(catabaseState = {}, {
 export function setElderCovenant(catabaseState = {}, active = true, {
   upgrades = [],
   nowMs = Date.now(),
+  leechCapBonus = 0,
+  leechPayoutMult = '1',
+  researchDurationMult = '1',
 } = {}) {
-  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs });
+  const fxOpts = { leechCapBonus, researchDurationMult };
+  const state = normalizeCatabaseState(catabaseState, { upgrades, nowMs, ...fxOpts });
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((id) => String(id)));
   if (state.stage < 3 && !owned.has('pacto_primordial')) {
     return { ok: false, reason: 'requires_stage_3', state };
   }
   const nextActive = Boolean(active);
   if (nextActive) {
-    const popped = popAllLeeches(state, { upgrades, nowMs });
+    const popped = popAllLeeches(state, {
+      upgrades,
+      nowMs,
+      leechCapBonus,
+      leechPayoutMult,
+      researchDurationMult,
+    });
+    const wasActive = Boolean(state.covenantActive);
     return {
       ok: true,
       covenantActive: true,
@@ -554,6 +672,9 @@ export function setElderCovenant(catabaseState = {}, active = true, {
         ...popped.state,
         covenantActive: true,
         pledgeExpiresAt: null,
+        covenantActivations: wasActive
+          ? state.covenantActivations
+          : state.covenantActivations + 1,
       },
     };
   }

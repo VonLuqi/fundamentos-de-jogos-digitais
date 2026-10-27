@@ -339,10 +339,7 @@ export class GameState {
 
     // --- Fase F6: Catábase das Avós & Sanguessugas do Acheron (Wrinklers) ---
     const rawCatabase = snapshot.catabase ?? snapshot.milestones?.f6Catabase ?? {};
-    this.catabase = normalizeCatabaseState(rawCatabase, {
-      upgrades: this.upgrades,
-      nowMs: this._clockMs,
-    });
+    this.catabase = normalizeCatabaseState(rawCatabase, this.#catabaseNormalizeOpts());
     const explicitCatabaseActive = Boolean(
       snapshot.catabaseActive ?? snapshot.milestones?.catabaseActive ?? false,
     );
@@ -853,6 +850,27 @@ export class GameState {
   // Fase F6: Catábase das Avós (Grandmapocalypse) & Sanguessugas do Acheron (Wrinklers)
   // ---------------------------------------------------------------------------
 
+  #catabaseTalentFx() {
+    const fx = talentEffects(this.talents);
+    return {
+      leechCapBonus: Math.max(0, Math.floor(Number(fx.leechCapBonus) || 0)),
+      leechSpawnMult: String(fx.leechSpawnMult ?? '1'),
+      leechPayoutMult: String(fx.leechPayoutMult ?? '1'),
+      researchDurationMult: String(fx.researchDurationMult ?? '1'),
+      leechDigestVisible: Boolean(fx.leechDigestVisible),
+    };
+  }
+
+  #catabaseNormalizeOpts() {
+    const fx = this.#catabaseTalentFx();
+    return {
+      upgrades: this.upgrades,
+      nowMs: this._clockMs,
+      leechCapBonus: fx.leechCapBonus,
+      researchDurationMult: fx.researchDurationMult,
+    };
+  }
+
   catabaseStage() {
     return effectiveCatabaseStage(this.catabase, this._clockMs);
   }
@@ -874,7 +892,8 @@ export class GameState {
   }
 
   maxLeeches() {
-    return maxLeechCapacity(this.upgrades);
+    const { leechCapBonus } = this.#catabaseTalentFx();
+    return maxLeechCapacity(this.upgrades, { leechCapBonus });
   }
 
   leeches() {
@@ -882,7 +901,12 @@ export class GameState {
   }
 
   leechSummary() {
-    return summarizeLeeches(this.catabase?.leeches || [], this.upgrades);
+    const { leechPayoutMult } = this.#catabaseTalentFx();
+    return summarizeLeeches(this.catabase?.leeches || [], this.upgrades, { leechPayoutMult });
+  }
+
+  leechDigestVisible() {
+    return this.#catabaseTalentFx().leechDigestVisible;
   }
 
   leechDrainInfo() {
@@ -896,7 +920,7 @@ export class GameState {
     const nextStage = Math.max(0, Math.min(3, Math.floor(Number(stage) || 0)));
     this.catabase = normalizeCatabaseState(
       { ...this.catabase, stage: nextStage },
-      { upgrades: this.upgrades, nowMs: this._clockMs },
+      this.#catabaseNormalizeOpts(),
     );
     this.#syncCatabaseFlags();
     this.invalidateEconomyCache();
@@ -913,12 +937,12 @@ export class GameState {
     if (next && this.catabase.stage < 1) {
       this.catabase = normalizeCatabaseState(
         { ...this.catabase, stage: 1, covenantActive: false, pledgeExpiresAt: null },
-        { upgrades: this.upgrades, nowMs: this._clockMs },
+        this.#catabaseNormalizeOpts(),
       );
     } else if (!next) {
       this.catabase = normalizeCatabaseState(
         { ...this.catabase, stage: 0, leeches: [] },
-        { upgrades: this.upgrades, nowMs: this._clockMs },
+        this.#catabaseNormalizeOpts(),
       );
     }
     this.catabaseActive = next;
@@ -972,12 +996,15 @@ export class GameState {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
+    const fx = this.#catabaseTalentFx();
     const res = domainSpawnLeech(this.catabase, {
       upgrades: this.upgrades,
       nowMs: this._clockMs,
       shiny: opts.shiny ?? null,
       slot: opts.slot ?? null,
       random: typeof opts.random === 'function' ? opts.random : this._random,
+      leechCapBonus: fx.leechCapBonus,
+      researchDurationMult: fx.researchDurationMult,
     });
     if (!res.ok) return res;
     this.catabase = res.state;
@@ -996,10 +1023,14 @@ export class GameState {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
+    const fx = this.#catabaseTalentFx();
     const res = domainPopLeech(this.catabase, targetIndexOrId, {
       upgrades: this.upgrades,
       nowMs: this._clockMs,
-      clicksRequired: opts.clicksRequired ?? 1,
+      clicksRequired: opts.clicksRequired ?? null,
+      leechCapBonus: fx.leechCapBonus,
+      leechPayoutMult: fx.leechPayoutMult,
+      researchDurationMult: fx.researchDurationMult,
     });
     if (!res.ok) return res;
     this.catabase = res.state;
@@ -1030,9 +1061,13 @@ export class GameState {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
+    const fx = this.#catabaseTalentFx();
     const res = domainPopAllLeeches(this.catabase, {
       upgrades: this.upgrades,
       nowMs: this._clockMs,
+      leechCapBonus: fx.leechCapBonus,
+      leechPayoutMult: fx.leechPayoutMult,
+      researchDurationMult: fx.researchDurationMult,
     });
     this.catabase = res.state;
     this.#syncCatabaseFlags();
@@ -1055,11 +1090,15 @@ export class GameState {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
     const free = this.isFreeShopping() || Boolean(opts.free);
+    const fx = this.#catabaseTalentFx();
     const res = domainActivateElderPledge(this.catabase, {
       souls: this.souls,
       upgrades: this.upgrades,
       nowMs: this._clockMs,
       free,
+      leechCapBonus: fx.leechCapBonus,
+      leechPayoutMult: fx.leechPayoutMult,
+      researchDurationMult: fx.researchDurationMult,
     });
     if (!res.ok) return res;
     if (!free && cmp(res.cost || '0', '0') > 0) {
@@ -1085,9 +1124,13 @@ export class GameState {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
+    const fx = this.#catabaseTalentFx();
     const res = domainSetElderCovenant(this.catabase, active, {
       upgrades: this.upgrades,
       nowMs: this._clockMs,
+      leechCapBonus: fx.leechCapBonus,
+      leechPayoutMult: fx.leechPayoutMult,
+      researchDurationMult: fx.researchDurationMult,
     });
     if (!res.ok) return res;
     if (cmp(res.totalPayout || '0', '0') > 0) {
@@ -1108,12 +1151,16 @@ export class GameState {
    */
   advanceCatabaseResearch(seconds = 1800) {
     const dt = Math.max(0, Number(seconds) || 0);
+    const fx = this.#catabaseTalentFx();
     const stepped = stepCatabaseTick(this.catabase, {
       dtSeconds: dt,
       rawSps: '0',
       upgrades: this.upgrades,
       nowMs: this._clockMs,
       random: () => 1, // sem spawn de Sanguessuga durante avanço puro de pesquisa
+      leechCapBonus: fx.leechCapBonus,
+      leechSpawnMult: fx.leechSpawnMult,
+      researchDurationMult: fx.researchDurationMult,
     });
     this.catabase = stepped.state;
     this.#syncCatabaseFlags();
@@ -1318,12 +1365,16 @@ export class GameState {
     // 4. Fase F6: Pesquisa do Arquivo Estígio, dreno e digestão paralela das Sanguessugas
     const rawSpsVal = this.rawSps();
     const prevLeechCount = this.catabase?.leeches?.length || 0;
+    const catFx = this.#catabaseTalentFx();
     const catStepped = stepCatabaseTick(this.catabase, {
       dtSeconds: dt,
       rawSps: rawSpsVal,
       upgrades: this.upgrades,
       nowMs: this._clockMs,
       random: this._random,
+      leechCapBonus: catFx.leechCapBonus,
+      leechSpawnMult: catFx.leechSpawnMult,
+      researchDurationMult: catFx.researchDurationMult,
     });
     this.catabase = catStepped.state;
     if (
@@ -2218,10 +2269,7 @@ export class GameState {
     const effCost = this.upgradeCost(upgrade);
     if (!free && !this.#spendSouls(effCost)) return { ok: false };
     this.upgrades = [...this.upgrades, id];
-    this.catabase = normalizeCatabaseState(this.catabase, {
-      upgrades: this.upgrades,
-      nowMs: this._clockMs,
-    });
+    this.catabase = normalizeCatabaseState(this.catabase, this.#catabaseNormalizeOpts());
     this.dragon = normalizeDragonState(this.dragon, { upgrades: this.upgrades });
     this.seasons = normalizeSeasonState(this.seasons, {
       upgrades: this.upgrades,
@@ -2324,13 +2372,14 @@ export class GameState {
       covenantActive: false,
       pledgeExpiresAt: null,
       pledgesCount: 0,
+      covenantActivations: this.catabase?.covenantActivations || 0,
       leeches: [],
       leechesPopped: this.leechesPopped,
       shinyLeechesPopped: this.shinyLeechesPopped,
       unlockedResearchIds: [],
       researchTargetId: null,
       researchRemainingSec: 0,
-    }, { upgrades: [], nowMs: this._clockMs });
+    }, { ...this.#catabaseNormalizeOpts(), upgrades: [] });
     this.#syncCatabaseFlags();
     // Fase F8: Lethe reseta estágio do Dragão, Estação ativa e Fortunas da corrida, preservando Fortunas vitalícias.
     this.dragon = normalizeDragonState({ stage: 0, auraSlot1: null, auraSlot2: null, scaleDropped: false });
@@ -2642,10 +2691,7 @@ export class GameState {
     }
     if (snapshot.catabase != null || this.milestones?.f6Catabase != null) {
       const rawCat = snapshot.catabase ?? this.milestones?.f6Catabase ?? {};
-      this.catabase = normalizeCatabaseState(rawCat, {
-        upgrades: this.upgrades,
-        nowMs: this._clockMs,
-      });
+      this.catabase = normalizeCatabaseState(rawCat, this.#catabaseNormalizeOpts());
     }
     if (snapshot.leechesPopped != null || snapshot.stats?.leechesPopped != null) {
       this.leechesPopped = Math.max(
@@ -2880,10 +2926,7 @@ export class GameState {
       this.catabase = normalizeCatabaseState({
         ...this.catabase,
         ...rawCat,
-      }, {
-        upgrades: this.upgrades,
-        nowMs: this._clockMs,
-      });
+      }, this.#catabaseNormalizeOpts());
     }
     if (snapshot.leechesPopped != null || snapshot.stats?.leechesPopped != null) {
       this.leechesPopped = Math.max(

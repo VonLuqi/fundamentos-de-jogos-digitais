@@ -33,11 +33,11 @@
 | 12 | Milk → Kittens → CpS | 4%/achiev. + kitten ladder longa | **Véu (+4%/normal, 350 normais → 1400%) + 15 Filhotes `veilMult` + `fortune_103` · `∏(1+m·f_i)` · Kitten angels / wages / Cat Ladies / Milkhelp** | **100%** | **F4+F8 ✓** |
 | 13 | Sugar Lumps / levels de prédio | Lump ~24h · +1%/level · Sugar Baking | **Néctar do Lethe (24h + 5 variantes + +1%/lv + Néctar em Reserva cap 100)** | **100%** | **F5 ✓** |
 | 14 | Minigames (Garden/Pantheon/Grimoire/Stock) | 4 minigames + levels | **Panteão Ctoniano, Grimório de Hécate, Jardim de Perséfone e Mercado de Caronte (+ Juízo)** | **100%** | **F5 ✓** |
-| 15 | Grandmapocalypse + Wrinklers | Research · −5% · pop ×1.1 | **Catábase 1–3 + Sanguessugas (−5% aparente / pop ×1.1 / Shiny ×3.3 / Trégua & Aliança). Digestão acumula em escala n² (documentada) ≠ modelo clássico per-wrinkler** | **~90%** | **F6** |
+| 15 | Grandmapocalypse + Wrinklers | Research · −5% · pop ×1.1 | **Catábase 1–3 + Sanguessugas (−5% / pop ×1.1 / Shiny ×3 / Trégua `8^(n+2)` & Aliança). Cap 10+2 Ninho +2 Elder Spice. Heavenly: Unholy Bait ×5, Sacrilegious ×1.05, Persistent Memory 3 min, Eye. Digestão n² = modelo CC** | **100%** | **F6 ✓** |
 | 16 | Offline production | Unlock heavenly escalonado | **On de fábrica 8h @ 80% → 18h @ 100% com talentos e Bancada** | **100%** | **Base+F1 ✓** |
 | 17 | UI 3 colunas + órbita + store | Big Cookie \| mundo \| store | **Foice \| Domínio (20 prateleiras c/ cull) \| Mercado (Comprar/Vender)** | **100%** | **Base+F8 ✓** |
 | 18 | News Ticker / Fortunes | Rumores + fortune upgrades | **24 Fortunas de Hermes (2%/4% no ciclo natural; #100–#103 + T1–T20 −7% custo/+7% SPS)** | **100%** | **F8 ✓** |
-| 19 | Achievements (estrutura) | Centenas + shadow | **Set `despertar_*` (138 conquistas: 135 normais + 3 Shadow) + plataforma (180 normais)** | **100%** | **F3–F8 ✓** |
+| 19 | Achievements (estrutura) | Centenas + shadow | **Set `despertar_*` (140 conquistas: 137 normais + 3 Shadow) + plataforma (180 normais)** | **100%** | **F3–F8 ✓** |
 | 20 | Venda de geradores (refund 25%/50%) | Sell na store | **Modo Comprar/Vender (`1/10/100/Máx`) c/ 25% base e 50% c/ Abalo do Tártaro** | **100%** | **F8 ✓** |
 | 21 | Seasons | Natal, Halloween, etc. | **4 Estações Ctonianas (Antestéria, Lemúria, Saturnália c/ Rei Saturno e Corças, Feira de Hermes)** | **100%** | **F8 ✓** |
 | 22 | Dragon / auras | Krumblor + auras | **Dragão Pitão/Ladão (Estágios 0–4, 2 Slots de Aura, Apetite Radiante ×2, Sopro de Flegêton, Escama +3%)** | **100%** | **F8 ✓** |
@@ -93,7 +93,7 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 2. ~~Mil Foices~~ — escada canónica 12 elos (mil→undecilhão; item 7 = 100%).
 3. ~~Filhotes: ladder curta~~ — **15 Filhotes** (52%→1400% Véu) + `fortune_103` + talentos Kitten/Milk (item 12 = 100%).
 4. ~~Heavenly: crescer árvore HC~~ · ~~25 talentos~~ → **129 Heavenly CC 1:1 entregue (2026-10).**
-5. Digestão Sanguessuga escala **n²** (cada leech acumula o drain total) — documentada no código.
+5. ~~Digestão Sanguessuga n²~~ — **confirmado = modelo canônico CC** (cada wrinkler acumula o drain total; idle ×6 com 10).
 6. Arte ainda `open`: cosméticos + juízo chrome (`art-requests.json`).
 7. 138 conquistas `despertar_*` reutilizam **24** ficheiros WebP únicos.
 
@@ -625,7 +625,7 @@ Sem GC, idle mid do CC fica flat. Mirror [ozh/cookieclicker](https://github.com/
 - Até 10 (14 com upgrades/auras); cada um **−5% CpS** aparente.
 - Ao estourar, devolvem **×1.1** do digerido (mais com upgrades) → idle risk/reward.
 - Shiny wrinkler 0.01% spawn, payout maior.
-- **Despertar F6 (concluída):** **Sanguessugas do Acheron** (`core/CatabaseSystem.js`, `ui/world/LeechRingView.js`) com a mesma matemática `−5%` aparente / digestão coletiva paralela / pop `×1.1` (`×1.155` com *Vísceras Sacras*) / `×3.3` Shiny (`0.01%`), cap `10`→`14` (*Ninho do Acheron*), estágios `1–3` via *Arquivo Estígio* e contenção por *Juramento de Trégua* (`8^n`) e *Aliança Eterna* (`×0.95` SPS).
+- **Despertar F6 (100%):** **Sanguessugas do Acheron** (`core/CatabaseSystem.js`, `ui/world/LeechRingView.js`) com matemática CC `−5%` / digestão coletiva n² / pop `×1.1` (`×1.155` Vísceras ou Sacrilegious; Shiny `×3`) / spawn `0.01%` shiny, cap `10+2` Ninho `+2` Elder Spice (≤14), pop 3 cliques (9 shiny), estágios `1–3` via *Arquivo Estígio* (Persistent Memory → 3 min), Unholy Bait `×5` spawn, Eye revela digestão, Trégua `8^(n+2)` e Aliança `×0.95` SPS; sprites WebP + fundo de estágio.
 
 ### 9.3 Despertar hoje + F2
 

@@ -161,11 +161,13 @@ export const VEIL_PERCENT_PER_ACHIEVEMENT = 4;
 export const CATABASE_UNLOCK_SERVANTS = 7;
 export const CATABASE_RESEARCH_DURATION_SEC = 1800; // 30 min base entre pesquisas
 export const CATABASE_PLEDGE_DURATION_SEC = 1800; // 30 min de Trégua (Elder Pledge)
-export const CATABASE_PLEDGE_MAX_STEP = 12; // 8^12 = 68.719.476.736 (teto canónico)
+export const CATABASE_PLEDGE_MAX_STEP = 14; // 8^14 ≈ 4.4e12 (teto canónico CC: min(n+2, 14))
 export const CATABASE_COVENANT_SPS_MULT = '0.95'; // −5% SPS global na Aliança Eterna (Elder Covenant)
 export const CATABASE_STAGE3_ELDER_PACT_PER_NON_SERVANT = '0.05'; // +0.05 SPS base em Servos por prédio não-Servo
 export const LEECH_BASE_CAP = 10;
-export const LEECH_MAX_CAP = 14; // com Ninho do Acheron (+4 slots)
+export const LEECH_MAX_CAP = 14; // 10 + Ninho (+2) + Elder Spice (+2)
+export const LEECH_CLICKS_REQUIRED = 3;
+export const LEECH_SHINY_CLICKS_REQUIRED = 9;
 export const LEECH_DRAIN_PER_UNIT = '0.05'; // −5% SPS aparente por Sanguessuga
 export const LEECH_PAYOUT_MULT_BASE = '1.1'; // ×1.1 digerido no pop
 export const LEECH_PAYOUT_MULT_SACRA = '1.155'; // ×1.155 com Vísceras Sacras (+5%)
