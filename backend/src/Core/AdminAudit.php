@@ -31,6 +31,7 @@ final class AdminAudit
         'resetProvaAttempt' => 'admin_reset_prova_attempt',
         'resetAllProvaAttempts' => 'admin_reset_all_prova_attempts',
         'rebalanceLetheWallets' => 'admin_rebalance_lethe_wallets',
+        'seasonOpen' => 'admin_despertar_season_open',
     ];
 
     /**

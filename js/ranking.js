@@ -11,9 +11,12 @@ import {
   leaderboardGet,
   logout,
   requireSession,
+  seasonArchiveGet,
 } from './api.js';
 import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
 import { formatSouls } from './hades-despertar/ui/NumberFormatter.js';
+import { renderSeasonBoardsMarkup } from './hades-despertar/ui/pauseVeil.js';
+import { SEASON_HALL_COPY } from './hades-despertar/config/season-closed.js';
 
 const SORT_LABELS = Object.freeze({
   xp: 'XP',
@@ -297,6 +300,38 @@ async function init() {
 
   syncChips();
   await refresh();
+  await loadSeasonArchive(getSession()?.token ?? null);
+}
+
+async function loadSeasonArchive(token) {
+  const section = document.getElementById('ranking-season-archive');
+  const boards = document.getElementById('ranking-season-boards');
+  const body = document.getElementById('ranking-season-archive-body');
+  if (!section || !boards) return;
+  if (!token) {
+    section.hidden = true;
+    return;
+  }
+  boards.innerHTML = renderSeasonBoardsMarkup(null, { loading: true });
+  section.hidden = false;
+  try {
+    const result = await seasonArchiveGet(token, { seasonId: 1 });
+    const archive = result?.archive;
+    if (!archive?.boards) {
+      boards.innerHTML = renderSeasonBoardsMarkup(null, { emptyCopy: SEASON_HALL_COPY.empty });
+      if (body) body.textContent = SEASON_HALL_COPY.empty;
+      return;
+    }
+    if (body) {
+      body.textContent = archive.label
+        ? `${archive.label} · congelado em ${archive.closedAt || '—'}`
+        : SEASON_HALL_COPY.body;
+    }
+    boards.innerHTML = renderSeasonBoardsMarkup(archive.boards, { emptyCopy: SEASON_HALL_COPY.empty });
+  } catch {
+    boards.innerHTML = renderSeasonBoardsMarkup(null, { emptyCopy: SEASON_HALL_COPY.error });
+    if (body) body.textContent = SEASON_HALL_COPY.error;
+  }
 }
 
 document.addEventListener('DOMContentLoaded', init);

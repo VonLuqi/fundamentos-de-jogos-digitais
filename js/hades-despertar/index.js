@@ -20,6 +20,8 @@ import {
   requireSession,
   ROUTES,
   setLessonGate,
+  seasonArchiveGet,
+  seasonOpen,
 } from '../api.js';
 import { seedUnitNamePool } from './ui/unitPersona.js';
 import { GameLoop } from './core/GameLoop.js';
@@ -33,8 +35,8 @@ import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } fro
 import { JuizoModal } from './ui/JuizoModal.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
-import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil } from './ui/pauseVeil.js';
-import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY } from './config/season-closed.js';
+import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil, presentSeasonHall } from './ui/pauseVeil.js';
+import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY, SEASON_HALL_COPY } from './config/season-closed.js';
 import {
   consumeAdminPreviewQuery,
   setAdminPreviewActive,
@@ -142,7 +144,7 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   const shell = document.querySelector('[data-shell]');
-  // Link aberto para toda a turma ver o pódio (jogo não monta enquanto published=false).
+  // Link aberto para toda a turma ver o pódio (jogo não monta enquanto hold ativo).
   applyDespertarNavState(shell, {
     published: false,
     isAdmin,
@@ -157,20 +159,21 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
     onPreview: isAdmin
       ? () => {
         setAdminPreviewActive(true);
-        globalThis.location.reload();
+        const base = `${globalThis.location.pathname}`;
+        globalThis.location.assign(`${base}?preview=1`);
       }
       : undefined,
     onLiberate: isAdmin
       ? async () => {
-        await setLessonGate(token, 'despertar', 'season_liberated', true);
-        await setLessonGate(token, 'despertar', 'published', true);
+        await seasonOpen(token, { confirm: SEASON_CLOSED_COPY.liberateConfirmToken, seasonId: 1 });
+        setAdminPreviewActive(false);
         globalThis.location.reload();
       }
       : undefined,
   });
 }
 
-/** Admin na tela fechada: garante Acheron selado até o Dia 1. */
+/** Admin na tela fechada: garante Acheron selado até Abrir Temporada 2. */
 async function ensureAcheronSealedForSeason(token, isAdmin) {
   if (!DESPERTAR_SEASON_CLOSED || !isAdmin || !token) return;
   try {
@@ -179,6 +182,45 @@ async function ensureAcheronSealedForSeason(token, isAdmin) {
   } catch (error) {
     console.warn('[Despertar] não foi possível selar o Acheron:', error);
   }
+}
+
+function mountSeasonHallFab({ token }) {
+  const host = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!host || host.querySelector('[data-season-hall-fab]')) return;
+
+  const fab = document.createElement('button');
+  fab.type = 'button';
+  fab.className = 'despertar-season-hall-fab';
+  fab.setAttribute('data-season-hall-fab', '1');
+  fab.setAttribute('title', SEASON_HALL_COPY.fabTitle);
+  fab.textContent = SEASON_HALL_COPY.fabLabel;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'despertar-season-hall-overlay';
+  overlay.setAttribute('data-season-hall-overlay', '1');
+  overlay.hidden = true;
+
+  const closeHall = () => {
+    overlay.hidden = true;
+    overlay.innerHTML = '';
+  };
+
+  fab.addEventListener('click', () => {
+    overlay.hidden = false;
+    void presentSeasonHall(overlay, {
+      rankingHref: ROUTES.ranking(),
+      token,
+      seasonId: 1,
+      seasonArchiveGet,
+      onClose: closeHall,
+    });
+  });
+
+  overlay.addEventListener('click', (event) => {
+    if (event.target === overlay) closeHall();
+  });
+
+  host.append(fab, overlay);
 }
 
 /**
@@ -677,8 +719,9 @@ async function init() {
   const token = getSession()?.token ?? null;
   const isAdmin = user?.role === 'admin';
   const season = await fetchDespertarSeasonHold(token);
-  const published = season.published;
-  const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && season.seasonHold);
+  const published = season.effectivePublished;
+  // Liberado só com season_liberated === true explícito.
+  const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && season.seasonLiberated !== true);
 
   initAppShell({
     route: 'despertar',
@@ -689,9 +732,9 @@ async function init() {
     },
   });
 
-  // Hold até Dia 1: pódio para todos até Liberar (season_liberated).
-  // Pré-visualizar = só este admin (sessionStorage).
-  const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin });
+  // Hold: pódio para todos até Abrir Temporada 2.
+  // Preview só com ?preview=1 nesta carga (não sticky sozinho).
+  const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin, requireQuery: true });
   if (seasonHold && !adminPreview) {
     await ensureAcheronSealedForSeason(token, isAdmin);
     await showSeasonClosedState(token, { isAdmin });
@@ -1183,6 +1226,7 @@ async function init() {
   });
   uiRef.renderer = renderer;
   renderer.mount(state);
+  mountSeasonHallFab({ token });
 
   // Nomes das unidades = mistura dos nomes/usernames da turma (Cookie: grandma names).
   void (async () => {

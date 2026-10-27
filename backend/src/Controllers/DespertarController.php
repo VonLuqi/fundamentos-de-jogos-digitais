@@ -71,6 +71,49 @@ final class DespertarController
             ]);
         }
 
+        // Archive eterno (leitura autenticada — disponível mesmo com Acheron selado)
+        if ($action === 'seasonArchiveGet') {
+            $seasonId = isset($body['seasonId']) && is_numeric($body['seasonId'])
+                ? (int) $body['seasonId']
+                : 1;
+            $archive = DespertarService::getSeasonArchive($seasonId);
+            Http::json(200, [
+                'ok' => true,
+                'archive' => $archive,
+            ]);
+        }
+
+        // Admin: congelar T1 + wipe + abrir Temporada 2
+        if ($action === 'seasonOpen') {
+            if (!$isAdmin) {
+                Http::error(403, 'Esta senda é só do Mestre.');
+            }
+            $confirm = (string) ($body['confirm'] ?? '');
+            $seasonId = isset($body['seasonId']) && is_numeric($body['seasonId'])
+                ? (int) $body['seasonId']
+                : 1;
+            $result = DespertarService::openNextSeason($userId, $confirm, $seasonId);
+            if (!$result['ok']) {
+                Http::error(400, $result['error'] ?? 'Não foi possível abrir a Temporada 2.');
+            }
+            AdminAudit::record(
+                $userId,
+                AdminAudit::ACTIONS['seasonOpen'],
+                null,
+                [
+                    'archiveSeasonId' => $seasonId,
+                    'deleted' => $result['deleted'],
+                ]
+            );
+            Http::json(200, [
+                'ok' => true,
+                'archive' => $result['archive'],
+                'deleted' => $result['deleted'],
+                'published' => true,
+                'seasonLiberated' => true,
+            ]);
+        }
+
         // Admin: limpar Estelas dos alunos
         if ($action === 'stateResetStudents') {
             if (!$isAdmin) {
@@ -151,10 +194,7 @@ final class DespertarController
 
                 Http::json(200, [
                     'ok' => true,
-                    // Perfil atual: o replace no cliente não pode apagar conquistas do Domínio.
-                    'state' => DespertarService::buildStateDto($saved, [
-                        'achievements' => $user['conquistas'] ?? [],
-                    ]),
+                    'state' => DespertarService::buildStateDto($saved),
                     'grantId' => $grant['grantId'] ?? null,
                     'label' => $grant['label'] ?? '',
                     'awarded' => self::emptyAwarded(),
@@ -195,10 +235,7 @@ final class DespertarController
 
             Http::json(200, [
                 'ok' => true,
-                // `$kept` = perfil sem família Despertar (já persistido acima).
-                'state' => DespertarService::buildStateDto($saved, [
-                    'achievements' => $kept,
-                ]),
+                'state' => DespertarService::buildStateDto($saved),
                 'strippedAchievements' => $removed,
                 'xpLoss' => $xpLoss,
                 'xp' => $nextXp,
@@ -343,17 +380,6 @@ final class DespertarController
                 ]);
             }
 
-            $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], true);
-            Http::json(200, [
-                'ok' => true,
-                'state' => DespertarService::buildStateDto($persisted['row']),
-                'awarded' => $persisted['awarded'],
-            ]);
-        }
-
-        if ($action === 'closeAscension') {
-            $row = DespertarService::getOrCreateStateRow($userId);
-            $result = DespertarService::applyCloseAscension($row, $nowMs);
             $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], true);
             Http::json(200, [
                 'ok' => true,

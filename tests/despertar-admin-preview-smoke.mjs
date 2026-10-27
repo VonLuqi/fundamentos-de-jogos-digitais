@@ -27,14 +27,11 @@ assert.match(veilJs, /onPreview/);
 assert.match(indexJs, /consumeAdminPreviewQuery/);
 assert.match(indexJs, /mountAdminPreviewBanner/);
 assert.match(indexJs, /!adminPreview/);
-assert.match(
-  indexJs,
-  /onPreview:\s*isAdmin\s*\?\s*\(\)\s*=>\s*\{\s*setAdminPreviewActive\(true\);/,
-);
-assert.match(
-  indexJs,
-  /onLiberate:\s*isAdmin\s*\?\s*async\s*\(\)\s*=>\s*\{\s*await setLessonGate/,
-);
+assert.match(indexJs, /setAdminPreviewActive\(true\)/);
+assert.match(indexJs, /\?preview=1/);
+assert.match(indexJs, /requireQuery:\s*true/);
+assert.match(indexJs, /await seasonOpen\(/);
+assert.match(indexJs, /mountSeasonHallFab/);
 
 const mem = new Map();
 globalThis.sessionStorage = {

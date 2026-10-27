@@ -4603,6 +4603,50 @@ button.despertar-juizo-card:disabled {
   color: var(--hades-parchment, #f3e9d7);
 }
 
+.despertar-season-hall-fab {
+  position: fixed;
+  right: 1rem;
+  bottom: 5.5rem;
+  z-index: 40;
+  appearance: none;
+  border: 1px solid rgba(207, 167, 89, 0.55);
+  background: rgba(18, 12, 20, 0.92);
+  color: var(--hades-gold-bright, #e8d4a8);
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+}
+
+.despertar-season-hall-fab:focus-visible {
+  outline: 2px solid var(--hades-gold-bright, #e8d4a8);
+  outline-offset: 2px;
+}
+
+.despertar-season-hall-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: auto;
+  padding: 1.25rem;
+  background: rgba(4, 2, 8, 0.72);
+}
+
+.despertar-season-hall-overlay[hidden] {
+  display: none;
+}
+
+.despertar-season-hall {
+  margin: 1rem auto 2rem;
+  max-width: 56rem;
+  width: min(56rem, 100%);
+}
+
 /* -- Rio do Lethe (árvore de talentos pós-ritual) -- */
 .lethe-river {
   position: fixed;

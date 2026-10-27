@@ -395,6 +395,37 @@
   line-height: 1.45;
 }
 
+.ranking-season-archive {
+  margin: 0 0 1.5rem;
+  padding: 1rem 1.1rem 1.15rem;
+  text-align: left;
+}
+
+.ranking-season-archive__eyebrow {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--despertar-styx, #00a896);
+}
+
+.ranking-season-archive__title {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-title, Cinzel, serif);
+  font-size: 1.15rem;
+  color: var(--hades-gold-bright, #e8d4a8);
+}
+
+.ranking-season-archive__body {
+  margin: 0 0 0.85rem;
+  font-family: 'Crimson Text', serif;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: var(--hades-parchment, #f3e9d7);
+  opacity: 0.9;
+}
+
 @media (max-width: 640px) {
   .ranking-turma {
     margin-left: 0;

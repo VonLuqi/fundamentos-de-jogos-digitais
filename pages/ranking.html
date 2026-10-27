@@ -22,7 +22,8 @@
   <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021d" />
   <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
   <link rel="stylesheet" href="../css/app-shell.css?v=20261021d" />
-  <link rel="stylesheet" href="../css/ranking.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/ranking.css?v=season-t2-1" />
+  <link rel="stylesheet" href="../css/despertar.css?v=season-t2-1" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="ranking" data-role-scope="protected">
@@ -102,6 +103,13 @@
           Sem SPS nem óbolos — o Domínio não vaza a taxa do Acheron.
         </p>
 
+        <section class="ranking-season-archive hades-frame" id="ranking-season-archive" aria-labelledby="ranking-season-archive-title" hidden>
+          <p class="ranking-season-archive__eyebrow">Arquivo eterno · Despertar</p>
+          <h2 class="ranking-season-archive__title" id="ranking-season-archive-title">Temporada 1</h2>
+          <p class="ranking-season-archive__body" id="ranking-season-archive-body">Pódio congelado no encerramento da Temporada 1.</p>
+          <div class="despertar-season-boards" id="ranking-season-boards" data-season-boards></div>
+        </section>
+
         <div class="ranking-controls" role="group" aria-label="Filtros do Placar">
           <div class="ranking-controls__group" role="group" aria-label="Ordenação">
             <button class="ranking-chip is-active" type="button" data-ranking-sort="xp" aria-pressed="true">XP</button>
@@ -142,6 +150,6 @@
     </div>
   </div>
 
-  <script type="module" src="../js/ranking.js"></script>
+  <script type="module" src="../js/ranking.js?v=season-t2-1"></script>
 </body>
 </html>

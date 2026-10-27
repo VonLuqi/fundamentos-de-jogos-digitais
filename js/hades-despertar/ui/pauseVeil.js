@@ -7,6 +7,7 @@
 import {
   SEASON_CLOSED_CATEGORIES,
   SEASON_CLOSED_COPY,
+  SEASON_HALL_COPY,
 } from '../config/season-closed.js';
 import { formatSouls } from './NumberFormatter.js';
 
@@ -250,9 +251,14 @@ function formatSeasonMetric(entry, category) {
   }
 }
 
-function renderSeasonBoardRows(entries, category) {
+/**
+ * @param {object[]} entries
+ * @param {{ metricKey: string, format: string }} category
+ * @param {string} [emptyCopy]
+ */
+export function renderSeasonBoardRows(entries, category, emptyCopy = SEASON_CLOSED_COPY.empty) {
   if (!entries?.length) {
-    return `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.empty)}</li>`;
+    return `<li class="despertar-season-board__empty">${escapeHtml(emptyCopy)}</li>`;
   }
   return entries.slice(0, 3).map((row, index) => {
     const rank = Number(row.rank) || index + 1;
@@ -265,6 +271,29 @@ function renderSeasonBoardRows(entries, category) {
         <span class="despertar-season-board__metric despertar-num">${escapeHtml(metric)}</span>
       </li>
     `;
+  }).join('');
+}
+
+/**
+ * HTML dos 3 boards (slots vazios ou preenchidos a partir de archive.boards).
+ * @param {Record<string, object[]>|null|undefined} boards
+ * @param {{ loading?: boolean, emptyCopy?: string }} [opts]
+ */
+export function renderSeasonBoardsMarkup(boards = null, opts = {}) {
+  const emptyCopy = opts.emptyCopy || SEASON_CLOSED_COPY.empty;
+  const loading = Boolean(opts.loading);
+  return SEASON_CLOSED_CATEGORIES.map((category) => {
+    const entries = Array.isArray(boards?.[category.sort]) ? boards[category.sort] : null;
+    const listHtml = loading
+      ? `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.loading)}</li>`
+      : renderSeasonBoardRows(entries || [], category, emptyCopy);
+    return `
+    <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">
+      <h3 class="despertar-season-board__title">${escapeHtml(category.label)}</h3>
+      <ul class="despertar-season-board__list" data-season-list>
+        ${listHtml}
+      </ul>
+    </section>`;
   }).join('');
 }
 
@@ -291,14 +320,7 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   const scope = opts.scope === 'turma' ? 'turma' : 'global';
   const isAdmin = Boolean(opts.isAdmin);
 
-  const boardSlots = SEASON_CLOSED_CATEGORIES.map((category) => `
-    <section class="despertar-season-board" data-season-board="${escapeAttr(category.sort)}">
-      <h3 class="despertar-season-board__title">${escapeHtml(category.label)}</h3>
-      <ul class="despertar-season-board__list" data-season-list>
-        <li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.loading)}</li>
-      </ul>
-    </section>
-  `).join('');
+  const boardSlots = renderSeasonBoardsMarkup(null, { loading: true });
 
   const adminActions = isAdmin
     ? `
@@ -338,6 +360,14 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   if (liberateBtn && typeof opts.onLiberate === 'function') {
     liberateBtn.addEventListener('click', async () => {
       if (liberateBtn.disabled) return;
+      const typed = globalThis.prompt?.(SEASON_CLOSED_COPY.liberateConfirm, '');
+      if (String(typed || '').trim().toUpperCase() !== SEASON_CLOSED_COPY.liberateConfirmToken) {
+        if (liberateError) {
+          liberateError.hidden = false;
+          liberateError.textContent = 'Confirmação cancelada ou incorreta.';
+        }
+        return;
+      }
       liberateBtn.disabled = true;
       liberateBtn.textContent = SEASON_CLOSED_COPY.liberating;
       if (liberateError) {
@@ -378,6 +408,70 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       list.innerHTML = `<li class="despertar-season-board__empty">${escapeHtml(SEASON_CLOSED_COPY.error)}</li>`;
     }
   }));
+}
+
+/**
+ * Hall eterno da Temporada 1 (não bloqueia o jogo).
+ * @param {ParentNode & { innerHTML?: string }} container
+ * @param {{
+ *   rankingHref?: string,
+ *   token?: string|null,
+ *   seasonId?: number,
+ *   seasonArchiveGet?: (token: string, opts: { seasonId: number }) => Promise<object>,
+ *   onClose?: () => void,
+ * }} [opts]
+ */
+export async function presentSeasonHall(container, opts = {}) {
+  if (!container) return;
+  const rankingHref = String(opts.rankingHref || '#');
+  const seasonId = Number(opts.seasonId) || 1;
+
+  container.innerHTML = `
+    <article class="despertar-classroom-veil despertar-classroom-veil--season despertar-season-hall hades-frame" data-despertar-season-hall>
+      <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_HALL_COPY.eyebrow)}</p>
+      <h2 class="despertar-classroom-veil__title app-shell__title">${escapeHtml(SEASON_HALL_COPY.title)}</h2>
+      <p class="despertar-classroom-veil__body">${escapeHtml(SEASON_HALL_COPY.body)}</p>
+      <div class="despertar-season-boards" data-season-boards>
+        ${renderSeasonBoardsMarkup(null, { loading: true })}
+      </div>
+      <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
+        <button class="btn-gold" type="button" data-season-hall-close>${escapeHtml(SEASON_HALL_COPY.ctaClose)}</button>
+        <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_HALL_COPY.ctaRanking)}</a>
+      </p>
+      <p class="despertar-season-liberate-error" data-season-hall-error hidden></p>
+    </article>
+  `;
+
+  const closeBtn = container.querySelector('[data-season-hall-close]');
+  closeBtn?.addEventListener('click', () => {
+    opts.onClose?.();
+  });
+
+  const token = opts.token;
+  const fetchArchive = typeof opts.seasonArchiveGet === 'function' ? opts.seasonArchiveGet : null;
+  const boardsRoot = container.querySelector('[data-season-boards]');
+  const errEl = container.querySelector('[data-season-hall-error]');
+
+  if (!token || !fetchArchive || !boardsRoot) {
+    boardsRoot.innerHTML = renderSeasonBoardsMarkup(null, { emptyCopy: SEASON_HALL_COPY.error });
+    return;
+  }
+
+  try {
+    const result = await fetchArchive(token, { seasonId });
+    const boards = result?.archive?.boards || null;
+    if (!boards) {
+      boardsRoot.innerHTML = renderSeasonBoardsMarkup(null, { emptyCopy: SEASON_HALL_COPY.empty });
+      return;
+    }
+    boardsRoot.innerHTML = renderSeasonBoardsMarkup(boards, { emptyCopy: SEASON_HALL_COPY.empty });
+  } catch (error) {
+    boardsRoot.innerHTML = renderSeasonBoardsMarkup(null, { emptyCopy: SEASON_HALL_COPY.error });
+    if (errEl) {
+      errEl.hidden = false;
+      errEl.textContent = error?.message || SEASON_HALL_COPY.error;
+    }
+  }
 }
 
 /**

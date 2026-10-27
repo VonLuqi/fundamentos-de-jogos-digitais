@@ -1520,6 +1520,204 @@ final class DespertarService
         return $val !== false && (bool) $val;
     }
 
+    public static function ensureSeasonArchivesTable(): void
+    {
+        $pdo = Database::pdo();
+        $pdo->exec(
+            'CREATE TABLE IF NOT EXISTS `despertar_season_archives` (
+              `season_id` INT NOT NULL,
+              `label` VARCHAR(120) NOT NULL DEFAULT \'\',
+              `closed_at` DATETIME(3) NOT NULL,
+              `boards` JSON NOT NULL,
+              `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+              `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+              PRIMARY KEY (`season_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
+    }
+
+    /**
+     * @return array{seasonId: int, label: string, closedAt: string, boards: array<string, array<int, array<string, mixed>>>}|null
+     */
+    public static function getSeasonArchive(int $seasonId): ?array
+    {
+        self::ensureSeasonArchivesTable();
+        $pdo = Database::pdo();
+        $stmt = $pdo->prepare(
+            'SELECT `season_id`, `label`, `closed_at`, `boards`
+             FROM `despertar_season_archives` WHERE `season_id` = :sid LIMIT 1'
+        );
+        $stmt->execute([':sid' => $seasonId]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+        $boards = Database::decodeJsonObject($row['boards'] ?? null);
+        if (!is_array($boards)) {
+            $boards = [];
+        }
+        return [
+            'seasonId' => (int) $row['season_id'],
+            'label' => (string) ($row['label'] ?? ''),
+            'closedAt' => Database::sqlToIso($row['closed_at'] ?? null) ?? (string) $row['closed_at'],
+            'boards' => $boards,
+        ];
+    }
+
+    /**
+     * Top 3 global por Juízo / Catábases / Almas (mesmo critério do véu).
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public static function buildSeasonPodiumBoards(int $limit = 3): array
+    {
+        $pdo = Database::pdo();
+        $limit = max(1, min(20, $limit));
+        $sql = 'SELECT
+                    `u`.`id`,
+                    `u`.`full_name`,
+                    `u`.`username`,
+                    COALESCE(`d`.`juizo_best_streak`, 0) AS `juizo_best`,
+                    COALESCE(`d`.`prestige_count`, 0) AS `prestige_count`,
+                    COALESCE(`d`.`lifetime_souls`, 0) AS `lifetime_souls`
+                FROM `users` `u`
+                LEFT JOIN `despertar_states` `d` ON `d`.`user_id` = `u`.`id`
+                WHERE `u`.`role` = \'student\'';
+        $rows = $pdo->query($sql)?->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        $enriched = [];
+        foreach ($rows as $row) {
+            $lifetimeStr = (string) ($row['lifetime_souls'] ?? '0');
+            $lifetimeNum = is_numeric($row['lifetime_souls'] ?? null) ? (float) $row['lifetime_souls'] : 0.0;
+            $enriched[] = [
+                'userId' => (int) $row['id'],
+                'fullName' => (string) ($row['full_name'] ?? ''),
+                'username' => (string) ($row['username'] ?? ''),
+                'juizoBest' => (int) ($row['juizo_best'] ?? 0),
+                'prestigeCount' => (int) ($row['prestige_count'] ?? 0),
+                'lifetimeSouls' => $lifetimeStr,
+                'lifetimeSoulsNum' => $lifetimeNum,
+            ];
+        }
+
+        $sortAndSlice = static function (array $items, callable $cmp) use ($limit): array {
+            usort($items, $cmp);
+            $out = [];
+            $rank = 1;
+            foreach (array_slice($items, 0, $limit) as $item) {
+                $out[] = [
+                    'rank' => $rank,
+                    'userId' => $item['userId'],
+                    'fullName' => $item['fullName'],
+                    'username' => $item['username'],
+                    'juizoBest' => $item['juizoBest'],
+                    'prestigeCount' => $item['prestigeCount'],
+                    'lifetimeSouls' => $item['lifetimeSouls'],
+                ];
+                $rank++;
+            }
+            return $out;
+        };
+
+        return [
+            'juizoBest' => $sortAndSlice($enriched, static function (array $a, array $b): int {
+                $primary = $b['juizoBest'] <=> $a['juizoBest'];
+                return $primary !== 0 ? $primary : strcmp($a['username'], $b['username']);
+            }),
+            'prestigeCount' => $sortAndSlice($enriched, static function (array $a, array $b): int {
+                $primary = $b['prestigeCount'] <=> $a['prestigeCount'];
+                return $primary !== 0 ? $primary : strcmp($a['username'], $b['username']);
+            }),
+            'lifetimeSouls' => $sortAndSlice($enriched, static function (array $a, array $b): int {
+                $primary = $b['lifetimeSoulsNum'] <=> $a['lifetimeSoulsNum'];
+                return $primary !== 0 ? $primary : strcmp($a['username'], $b['username']);
+            }),
+        ];
+    }
+
+    /**
+     * @return array{ok: bool, archive: array<string, mixed>}
+     */
+    public static function snapshotSeasonArchive(int $seasonId, string $label = ''): array
+    {
+        self::ensureSeasonArchivesTable();
+        $boards = self::buildSeasonPodiumBoards(3);
+        $nowSql = Database::nowSql();
+        $pdo = Database::pdo();
+        $label = $label !== '' ? $label : ('Temporada ' . $seasonId);
+        $ups = $pdo->prepare(
+            'INSERT INTO `despertar_season_archives` (`season_id`, `label`, `closed_at`, `boards`, `created_at`, `updated_at`)
+             VALUES (:sid, :label, :closed, :boards, :created, :updated)
+             ON DUPLICATE KEY UPDATE
+               `label` = VALUES(`label`),
+               `closed_at` = VALUES(`closed_at`),
+               `boards` = VALUES(`boards`),
+               `updated_at` = VALUES(`updated_at`)'
+        );
+        $ups->execute([
+            ':sid' => $seasonId,
+            ':label' => $label,
+            ':closed' => $nowSql,
+            ':boards' => Database::encodeJsonObject($boards),
+            ':created' => $nowSql,
+            ':updated' => $nowSql,
+        ]);
+
+        $archive = self::getSeasonArchive($seasonId);
+        return ['ok' => true, 'archive' => $archive ?? [
+            'seasonId' => $seasonId,
+            'label' => $label,
+            'closedAt' => Database::nowIso(),
+            'boards' => $boards,
+        ]];
+    }
+
+    public static function setDespertarGate(string $gateKey, bool $released, int $adminUserId): void
+    {
+        $nowSql = Database::nowSql();
+        $pdo = Database::pdo();
+        $ups = $pdo->prepare(
+            'INSERT INTO `lesson_gates` (`lesson_id`, `gate_key`, `released`, `released_by`, `released_at`, `updated_at`)
+             VALUES (\'despertar\', :gkey, :rel, :by, :rel_at, :upd)
+             ON DUPLICATE KEY UPDATE
+               `released` = VALUES(`released`),
+               `released_by` = VALUES(`released_by`),
+               `released_at` = VALUES(`released_at`),
+               `updated_at` = VALUES(`updated_at`)'
+        );
+        $ups->execute([
+            ':gkey' => $gateKey,
+            ':rel' => $released ? 1 : 0,
+            ':by' => $adminUserId,
+            ':rel_at' => $released ? $nowSql : null,
+            ':upd' => $nowSql,
+        ]);
+    }
+
+    /**
+     * Congela T1, zera despertar_states de todos, abre Temporada 2.
+     * @return array{ok: bool, archive: array<string, mixed>, deleted: int, error?: string}
+     */
+    public static function openNextSeason(int $adminUserId, string $confirm, int $archiveSeasonId = 1): array
+    {
+        $token = strtoupper(trim($confirm));
+        if ($token !== 'TEMPORADA 2') {
+            return ['ok' => false, 'error' => 'Confirmação inválida. Digite TEMPORADA 2.', 'archive' => [], 'deleted' => 0];
+        }
+
+        $snap = self::snapshotSeasonArchive($archiveSeasonId, 'Temporada ' . $archiveSeasonId);
+        $pdo = Database::pdo();
+        $deleted = (int) $pdo->exec('DELETE FROM `despertar_states`');
+
+        self::setDespertarGate('season_liberated', true, $adminUserId);
+        self::setDespertarGate('published', true, $adminUserId);
+
+        return [
+            'ok' => true,
+            'archive' => $snap['archive'],
+            'deleted' => $deleted,
+        ];
+    }
+
     /**
      * @return array{released: bool, pauseUntil: string|null, reason: string|null, pauseStartedAt: string|null}
      */

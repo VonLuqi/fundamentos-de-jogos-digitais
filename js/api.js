@@ -1006,20 +1006,19 @@ export function setLessonGate(token, lessonId, gateKey, released) {
 }
 
 /**
- * Hold de fim de temporada: true até o Mestre marcar `season_liberated` no Dia 1.
+ * Hold de fim de temporada: true até Abrir Temporada 2 (`season_liberated === true`).
  * @returns {Promise<{ published: boolean, seasonLiberated: boolean, seasonHold: boolean, effectivePublished: boolean }>}
  */
 export async function fetchDespertarSeasonHold(token) {
   try {
     const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
     const published = Boolean(result?.gates?.published);
-    const seasonLiberated = Boolean(result?.gates?.season_liberated);
+    const seasonLiberated = result?.gates?.season_liberated === true;
     const seasonHold = !seasonLiberated;
     return {
       published,
       seasonLiberated,
       seasonHold,
-      // UI/nav: durante o hold o Acheron conta como selado.
       effectivePublished: seasonHold ? false : published,
     };
   } catch {
@@ -1040,6 +1039,31 @@ export async function fetchDespertarPublished(token) {
   } catch {
     return false;
   }
+}
+
+/** Archive eterno de uma temporada do Despertar (Hall / Placar). */
+export async function seasonArchiveGet(token, { seasonId = 1 } = {}) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'seasonArchiveGet', seasonId }),
+  });
+}
+
+/**
+ * Admin: congela T1, zera despertar_states de todos, abre Temporada 2.
+ * @param {string} token
+ * @param {{ confirm: string, seasonId?: number }} opts
+ */
+export async function seasonOpen(token, { confirm, seasonId = 1 } = {}) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({
+      token,
+      action: 'seasonOpen',
+      confirm: String(confirm || ''),
+      seasonId,
+    }),
+  });
 }
 
 /** Mapa lessonId → published (boolean). Uma única action batch (Task 2). */

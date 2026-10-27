@@ -28,23 +28,27 @@ export function setAdminPreviewActive(active) {
 
 /**
  * Se a URL tiver ?preview=1 e o user for admin, ativa o preview e limpa a query.
- * @param {{ isAdmin?: boolean, location?: Location, history?: History }} [opts]
+ * Com `requireQuery: true`, ignora sticky do sessionStorage (só honra ?preview=1 nesta carga).
+ * @param {{ isAdmin?: boolean, requireQuery?: boolean, location?: Location, history?: History }} [opts]
  * @returns {boolean} true se o preview ficou ativo
  */
 export function consumeAdminPreviewQuery(opts = {}) {
-  if (!opts.isAdmin) return isAdminPreviewActive();
+  if (!opts.isAdmin) return false;
   const loc = opts.location || (typeof globalThis !== 'undefined' ? globalThis.location : null);
-  if (!loc?.search) return isAdminPreviewActive();
+  const requireQuery = opts.requireQuery === true;
   try {
-    const params = new URLSearchParams(loc.search);
-    if (params.get('preview') !== '1') return isAdminPreviewActive();
-    setAdminPreviewActive(true);
-    params.delete('preview');
-    const next = `${loc.pathname}${params.toString() ? `?${params}` : ''}${loc.hash || ''}`;
-    const hist = opts.history || (typeof globalThis !== 'undefined' ? globalThis.history : null);
-    hist?.replaceState?.(hist.state, '', next);
+    const params = new URLSearchParams(loc?.search || '');
+    if (params.get('preview') === '1') {
+      setAdminPreviewActive(true);
+      params.delete('preview');
+      const next = `${loc.pathname}${params.toString() ? `?${params}` : ''}${loc.hash || ''}`;
+      const hist = opts.history || (typeof globalThis !== 'undefined' ? globalThis.history : null);
+      hist?.replaceState?.(hist.state, '', next);
+      return true;
+    }
   } catch {
-    setAdminPreviewActive(true);
+    /* fall through */
   }
-  return true;
+  if (requireQuery) return false;
+  return isAdminPreviewActive();
 }
