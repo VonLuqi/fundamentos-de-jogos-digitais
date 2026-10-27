@@ -287,5 +287,17 @@ run('Estela ZERAR: prestigeCount 0 no replace (não reatribui despertar_catabase
   );
 });
 
+run('órfã despertar_catabase com prestige 0 é podada no sync local', () => {
+  const state = new GameState({
+    souls: '100',
+    lifetimeSouls: '100',
+    prestigeCount: 0,
+    achievements: ['despertar_catabase', 'despertar_primeira_alma'],
+  });
+  // #syncAchievements roda no construtor / apply — órfã some, elegível fica.
+  assert.equal(state.achievements.includes('despertar_catabase'), false);
+  assert.ok(state.achievements.includes('despertar_primeira_alma'));
+});
+
 console.log(`\ndespertar-debug-smoke: ${passed} passed, ${failed} failed`);
 if (failed) process.exitCode = 1;

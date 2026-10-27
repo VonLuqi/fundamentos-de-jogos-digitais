@@ -13,6 +13,7 @@ import {
 } from '../config/constants.js';
 import { EDU_LOG_IDS } from '../config/edu-logs.js';
 import {
+  DESPERTAR_ACHIEVEMENT_IDS,
   isKnownAchievementId,
   isNormalAchievementId,
 } from '../config/achievements.js';
@@ -814,9 +815,16 @@ export class GameState {
   }
 
   #syncAchievements({ invalidate = true } = {}) {
-    const earned = evaluateDespertarAchievementIds(this, this.achievements);
-    if (!earned.length) return false;
-    this.achievements = uniqueKnown([...this.achievements, ...earned], isKnownAchievementId);
+    const despertarSet = new Set(DESPERTAR_ACHIEVEMENT_IDS);
+    const platform = this.achievements.filter((id) => !despertarSet.has(id));
+    // Reavalia do zero: remove órfãs (ex. despertar_catabase com prestigeCount 0 pós-ZERAR)
+    // e adiciona as elegíveis ao estado atual.
+    const eligible = evaluateDespertarAchievementIds(this, []);
+    const next = uniqueKnown([...platform, ...eligible], isKnownAchievementId);
+    const prevSig = this.achievements.join('\0');
+    const nextSig = next.join('\0');
+    if (prevSig === nextSig) return false;
+    this.achievements = next;
     if (invalidate) {
       this.invalidateEconomyCache();
     }

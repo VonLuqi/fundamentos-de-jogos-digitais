@@ -1440,7 +1440,8 @@ final class DespertarFormulas
         $authoritative = array_values(array_unique(array_merge($baseUnlocked, $earnedNow)));
         $authSet = array_flip($authoritative);
 
-        // Se o cliente enviou lista explícita de conquistas, rejeitar IDs falsos ou não conquistados
+        // Cliente pode mandar lista explícita. IDs Despertar órfãos (ex.: despertar_catabase
+        // após ZERAR com prestigeCount 0) são ignorados — não derrubam o sync inteiro.
         $rawClientAch = $clientState['achievements'] ?? $clientState['unlockedAchievements'] ?? null;
         if ($rawClientAch !== null) {
             if (!is_array($rawClientAch)) {
@@ -1452,7 +1453,8 @@ final class DespertarFormulas
                     return ['ok' => false, 'error' => "Conquista desconhecida ou inválida no sync: {$cid}"];
                 }
                 if (isset($despertarSet[$cid]) && !isset($authSet[$cid])) {
-                    return ['ok' => false, 'error' => "Conquista não elegível para o estado atual (anti-cheat): {$cid}"];
+                    // Stale local (ZERAR / sync atrasado): strip silencioso.
+                    continue;
                 }
                 if (!isset($despertarSet[$cid]) && !isset($baseSet[$cid])) {
                     return ['ok' => false, 'error' => "Conquista de plataforma não autorizada no perfil: {$cid}"];
