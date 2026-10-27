@@ -4,6 +4,7 @@
  */
 
 import { GENERATOR_BY_ID } from '../../config/generators.js';
+import { getTalent } from '../../config/talents.js';
 import { UPGRADES } from '../../config/upgrades.js';
 
 /** Relativo a pages/*.html */
@@ -60,6 +61,17 @@ export function habitatSprite(id) {
 export function upgradeSprite(id) {
   const def = UPGRADE_BY_ID[id];
   const paths = spritePaths('upgrades', id);
+  return {
+    id,
+    ...paths,
+    mark: markFrom(def?.name, id),
+  };
+}
+
+/** Ícones do Rio do Lethe (talentos). */
+export function talentSprite(id) {
+  const def = typeof getTalent === 'function' ? getTalent(id) : null;
+  const paths = spritePaths('talents', id);
   return {
     id,
     ...paths,
