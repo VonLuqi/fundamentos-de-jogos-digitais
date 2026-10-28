@@ -29,7 +29,7 @@ Corrigido no caminho:
 - Rodar "Abrir Temporada 2" duas vezes **sobrescrevia o pódio eterno da T1** com o placar da T2 e apagava a T2 inteira. Agora a segunda vez é recusada.
 - A abertura não era atômica; com a transação nova, o `CREATE TABLE IF NOT EXISTS` do arquivo fazia commit implícito e o botão devolveria erro 500 depois de já ter feito tudo. Corrigido (DDL fora da transação).
 
-**Decisão pendente:** as conquistas do Despertar ficam no perfil (`users.conquistas`) entre temporadas, e o Véu (+4% de SPS por conquista, até 1400%, mais os Filhotes) é calculado delas. Quem jogou a T1 começa a T2 com vantagem. Se a T2 deve começar "do zero" para valer, é preciso decidir: zerar as conquistas `despertar_*` na abertura, ou calcular o Véu só com conquistas da temporada atual.
+**Decidido (2026-10-28):** ao abrir a T2, as conquistas `despertar_*` saem de todos os perfis (o Véu recomeça só com as conquistas de aula) e o XP ganho com elas fica. Quais já pagaram XP fica em `despertar_paid_achievements`; reconquistar na T2 devolve a conquista sem pagar o XP de novo. O ensaio confere tudo isso num banco real.
 
 ## B. Ritmo de um save limpo
 
@@ -56,7 +56,7 @@ Leitura:
 - [ ] Arte: `docs/STATUS-DESPERTAR.md` com 0 placeholders (lotes L2–L7 do Cursor).
 - [ ] Telas que faltam para mecânicas F8 que já existem no código: **Dragão** (alimentar, escolher auras), **troca de estação** e **Corça de Ártemis** — hoje não há botão para o aluno. Sem isso, os ícones do lote L3 também não aparecem.
 - [ ] Ícones de Véu e estágios da Catábase na interface (lotes L4/L5 hoje não têm onde aparecer).
-- [ ] Decidir conquistas entre temporadas (acima).
+- [x] Decidir conquistas entre temporadas (acima).
 - [ ] Decidir o ritmo da 1ª Catábase (acima).
 - [ ] `npm run test:despertar` verde e `despertar:ensaio-temporada` 15/15 na véspera.
 - [ ] Deploy na HostGator de tudo desde o último envio (PHP do Despertar, `js/hades-despertar/**`, `pages/despertar.html`, `css/despertar.css`, `assets/despertar/sprites/**`).

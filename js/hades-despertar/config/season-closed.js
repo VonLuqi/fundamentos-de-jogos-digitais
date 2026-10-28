@@ -30,7 +30,7 @@ export const SEASON_CLOSED_COPY = Object.freeze({
   ctaPreview: 'Pré-visualizar / Testar Despertar',
   liberating: 'Abrindo a Temporada 2…',
   liberateError: 'Não foi possível abrir a Temporada 2. Tente de novo ou use o Painel.',
-  liberateConfirm: 'Isto zera o Despertar de TODA a turma e congela o placar da T1. Digite TEMPORADA 2 para confirmar.',
+  liberateConfirm: 'Isto zera o Despertar de TODA a turma, congela o placar da T1 e devolve as conquistas do Despertar para serem reconquistadas (o XP ganho fica; reconquistar não paga de novo). Digite TEMPORADA 2 para confirmar.',
   liberateConfirmToken: 'TEMPORADA 2',
   previewBanner: 'Modo teste — a turma ainda vê o Acheron fechado.',
   ctaExitPreview: 'Sair do teste',

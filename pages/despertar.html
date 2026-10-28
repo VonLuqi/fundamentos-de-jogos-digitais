@@ -21,7 +21,7 @@
 
   <link rel="stylesheet" href="../css/hades-tokens.css" />
   <link rel="stylesheet" href="../css/app-shell.css" />
-  <link rel="stylesheet" href="../css/despertar.css?v=nomes-sanguessugas-320" />
+  <link rel="stylesheet" href="../css/despertar.css?v=modais-leitura-321" />
   <script src="../js/devtools-guard.boot.js"></script>
   <!-- Import map: força a mesma URL versionada em todo o grafo ES
        (CF cacheava js sem query com max-age=14400 e quebrava o boot do véu). -->
@@ -31,7 +31,7 @@
       "../js/api.js": "../js/api.js?v=lethe-429-301",
       "../js/app-shell.js": "../js/app-shell.js?v=lethe-429-301",
       "../js/grimorio-awards.js": "../js/grimorio-awards.js?v=lethe-429-301",
-      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=lethe-429-301",
+      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=conquistas-t2-321",
       "../js/hades-despertar/config/admin-preview.js": "../js/hades-despertar/config/admin-preview.js?v=lethe-429-301",
       "../js/hades-despertar/ui/pauseVeil.js": "../js/hades-despertar/ui/pauseVeil.js?v=lethe-429-301",
       "../js/hades-despertar/core/GameState.js": "../js/hades-despertar/core/GameState.js?v=ecos-multiplos-316",
@@ -43,6 +43,8 @@
       "../js/hades-despertar/ui/world/SpriteAtlas.js": "../js/hades-despertar/ui/world/SpriteAtlas.js?v=foice-3d-317",
       "../js/hades-despertar/ui/world/LeechRingView.js": "../js/hades-despertar/ui/world/LeechRingView.js?v=nomes-sanguessugas-320",
       "../js/hades-despertar/ui/UIRenderer.js": "../js/hades-despertar/ui/UIRenderer.js?v=nomes-sanguessugas-320",
+      "../js/hades-despertar/ui/CodexBook.js": "../js/hades-despertar/ui/CodexBook.js?v=modais-leitura-321",
+      "../js/hades-despertar/ui/LoopLeaderboard.js": "../js/hades-despertar/ui/LoopLeaderboard.js?v=modais-leitura-321",
       "../js/hades-despertar/ui/ShimmerView.js": "../js/hades-despertar/ui/ShimmerView.js?v=ecos-multiplos-316",
       "../js/hades-despertar/ui/world/Foice3D.js": "../js/hades-despertar/ui/world/Foice3D.js?v=foice-empunhada-319",
       "../js/hades-despertar/ui/juice.js": "../js/hades-despertar/ui/juice.js?v=foice-3d-317",
@@ -1018,7 +1020,10 @@
       tabindex="-1"
     >
       <header class="despertar-codex-drawer__head">
-        <h2 class="despertar-codex-drawer__title" id="codex-drawer-title">Códice do Loop</h2>
+        <div class="despertar-codex-drawer__heading">
+          <h2 class="despertar-codex-drawer__title" id="codex-drawer-title">Códice do Loop</h2>
+          <p class="despertar-codex-drawer__count" id="codex-drawer-count"></p>
+        </div>
         <button
           type="button"
           class="despertar-codex-drawer__close"
@@ -1028,8 +1033,16 @@
           Fechar
         </button>
       </header>
-      <p class="despertar-empty" id="codex-drawer-empty">O Códice espera o primeiro clique.</p>
-      <ol class="despertar-codex-list" id="codex-drawer-list" hidden></ol>
+      <div class="despertar-codex-drawer__body">
+        <p class="despertar-empty" id="codex-drawer-empty">O Códice espera o primeiro clique.</p>
+        <div class="despertar-codex-read">
+          <ol class="despertar-codex-list" id="codex-drawer-list" hidden></ol>
+          <article class="despertar-codex-page" id="codex-drawer-page" hidden>
+            <h3 class="despertar-codex-page__title" id="codex-drawer-page-title"></h3>
+            <p class="despertar-codex-page__body" id="codex-drawer-page-body"></p>
+          </article>
+        </div>
+      </div>
     </aside>
   </div>
 
@@ -1058,6 +1071,7 @@
           Fechar
         </button>
       </header>
+      <div class="despertar-codex-drawer__body">
       <div
         class="despertar-loop-board-tabs"
         role="tablist"
@@ -1105,10 +1119,13 @@
       </p>
       <p class="despertar-empty" id="loop-board-status">Consultando o Domínio…</p>
       <ol class="despertar-loop-board-list" id="loop-board-list" hidden></ol>
-      <p class="despertar-loop-board__self" id="loop-board-self" hidden></p>
-      <p class="despertar-loop-board__foot">
-        <a class="despertar-loop-board__link" href="../ranking/">Ver o Placar completo</a>
-      </p>
+      </div>
+      <footer class="despertar-loop-board__dock">
+        <p class="despertar-loop-board__self" id="loop-board-self" hidden></p>
+        <p class="despertar-loop-board__foot">
+          <a class="despertar-loop-board__link" href="../ranking/">Ver o Placar completo</a>
+        </p>
+      </footer>
     </aside>
   </div>
 
@@ -1128,6 +1145,6 @@
     <p class="despertar-upgrade-tooltip__mark" data-tip="mark">Selado</p>
   </div>
 
-  <script type="module" src="../js/hades-despertar/index.js?v=nomes-sanguessugas-320"></script>
+  <script type="module" src="../js/hades-despertar/index.js?v=modais-leitura-321"></script>
 </body>
 </html>

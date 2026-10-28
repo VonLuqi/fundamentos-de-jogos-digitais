@@ -71,6 +71,11 @@ foreach ($students as $u => [$juizo, $prestige, $lifetime]) {
 }
 $insUser->execute([':n' => 'Gabi', ':u' => 'gabi', ':r' => 'student', ':c' => '[]']); // nunca jogou
 $ids['gabi'] = (int) $pdo->lastInsertId();
+// ana: XP da T1 + uma conquista de aula (não é do Despertar e tem que ficar).
+$pdo->prepare('UPDATE `users` SET `xp` = 500, `conquistas` = :c WHERE `id` = :id')->execute([
+    ':c' => json_encode(['despertar_primeira_alma', 'despertar_cem_almas', 'aula1_concluida']),
+    ':id' => $ids['ana'],
+]);
 DespertarService::setDespertarGate('published', true, $adminId);
 
 // ─── T1 encerrada: hold ativo até abrir a T2 ───────────────────────────────
@@ -116,10 +121,40 @@ $saved = DespertarService::persistPatch($uid, $sync['patch']);
 $reloaded = DespertarService::rowToCanonical($saved);
 $check('Progresso gravado e relido do banco', (float) $reloaded['lifetimeSouls'] === 50.0 && ($reloaded['generators']['wandering_shade'] ?? 0) === 1);
 
-// Conquistas do Despertar ficam no perfil (users.conquistas) entre temporadas → Véu da T2 já começa alto.
-$conq = json_decode((string) $pdo->query("SELECT `conquistas` FROM `users` WHERE `id` = {$uid}")->fetchColumn(), true);
-$veil = DespertarFormulas::veilPercent($conq);
-$check('Informativo: conquistas da T1 continuam no perfil', true, 'ana entra na T2 com ' . count($conq) . " conquistas → Véu {$veil}%");
+// ─── Conquistas: saem do perfil na virada, XP fica, e reconquistar não paga de novo ──
+$userRow = static function (int $id) use ($pdo): array {
+    $r = $pdo->query("SELECT `id`, `xp`, `conquistas` FROM `users` WHERE `id` = {$id}")->fetch(PDO::FETCH_ASSOC);
+    return ['id' => (int) $r['id'], 'xp' => (int) $r['xp'], 'conquistas' => json_decode((string) $r['conquistas'], true) ?: []];
+};
+$ana = $userRow($uid);
+$check('Conquistas do Despertar saíram do perfil; a de aula ficou', $ana['conquistas'] === ['aula1_concluida'], json_encode($ana['conquistas']));
+$check('XP da T1 mantido', $ana['xp'] === 500, "xp={$ana['xp']}");
+$check('Véu da T2 só conta as conquistas fora do Despertar', (float) DespertarFormulas::veilPercent($ana['conquistas']) === (float) DespertarFormulas::veilPercent(['aula1_concluida'])
+    && (float) DespertarFormulas::veilPercent($ana['conquistas']) < (float) DespertarFormulas::veilPercent(['despertar_primeira_alma', 'despertar_cem_almas', 'aula1_concluida']));
+$check('Resumo da virada conta perfis e conquistas', ($open['achievementsReset']['users'] ?? 0) === 6 && ($open['achievementsReset']['removed'] ?? 0) === 12, json_encode($open['achievementsReset'] ?? null));
+$paid = json_decode((string) $pdo->query("SELECT `achievement_ids` FROM `despertar_paid_achievements` WHERE `user_id` = {$uid}")->fetchColumn(), true);
+$check('Já pagas anotadas', $paid === ['despertar_primeira_alma', 'despertar_cem_almas'], json_encode($paid));
+
+// Reconquista (paga na T1): volta ao perfil sem XP; as novas do mesmo sync pagam normalmente.
+$xpOf = static fn(array $ids, array $paidIds): int => array_sum(array_map(
+    static fn($id) => in_array($id, $paidIds, true) ? 0 : \App\Core\GameCatalog::getAchievementXp($id), $ids));
+$award = DespertarService::persistPatchAndAward($ana, [], $reloaded, true);
+$got = $award['awarded']['achievements'] ?? [];
+$ana = $userRow($uid);
+$check('Reconquistar na T2 devolve a conquista sem XP', in_array('despertar_primeira_alma', $got, true)
+    && $ana['xp'] === 500 + $xpOf($got, $paid) && ($award['awarded']['xp'] ?? -1) === $xpOf($got, $paid),
+    "xp={$ana['xp']} awarded=" . json_encode($got) . " (só as não pagas valem XP)");
+$xpBefore = $ana['xp'];
+
+// Conquista nova (nunca paga): paga XP normalmente.
+$richer = array_merge($reloaded, ['lifetimeSouls' => '1500.00', 'runSouls' => '1500.00']);
+$award = DespertarService::persistPatchAndAward($ana, [], $richer, true);
+$ana = $userRow($uid);
+$milXp = \App\Core\GameCatalog::getAchievementXp('despertar_mil_almas');
+$check('Conquista nova na T2 paga XP; a já paga (cem almas) não', in_array('despertar_mil_almas', $ana['conquistas'], true)
+    && in_array('despertar_cem_almas', $ana['conquistas'], true) && $ana['xp'] === $xpBefore + $xpOf($award['awarded']['achievements'] ?? [], $paid)
+    && $milXp > 0 && ($award['awarded']['xp'] ?? -1) === $xpOf($award['awarded']['achievements'] ?? [], $paid),
+    "xp={$ana['xp']} (mil_almas vale {$milXp})");
 
 $failed = count(array_filter($results, static fn($r) => !$r['ok']));
 echo "\nensaio-temporada: " . (count($results) - $failed) . '/' . count($results) . " ok\n";

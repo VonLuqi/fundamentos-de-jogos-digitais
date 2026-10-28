@@ -2049,7 +2049,9 @@ final class DespertarService
 
     /**
      * Congela T1, zera despertar_states de todos, abre Temporada 2.
-     * @return array{ok: bool, archive: array<string, mixed>, deleted: int, error?: string}
+     * As conquistas do Despertar saem dos perfis (voltam a ser conquistáveis na T2) sem tirar
+     * o XP; o que já foi pago fica em `despertar_paid_achievements` e não paga XP de novo.
+     * @return array{ok: bool, archive: array<string, mixed>, deleted: int, achievementsReset?: array{users: int, removed: int}, error?: string}
      */
     public static function openNextSeason(int $adminUserId, string $confirm, int $archiveSeasonId = 1): array
     {
@@ -2071,10 +2073,13 @@ final class DespertarService
         }
 
         $pdo = Database::pdo();
+        // DDL fora da transação: CREATE TABLE faz commit implícito no MySQL.
+        self::ensurePaidAchievementsTable();
         $pdo->beginTransaction();
         try {
             $snap = self::snapshotSeasonArchive($archiveSeasonId, 'Temporada ' . $archiveSeasonId, false);
             $deleted = (int) $pdo->exec('DELETE FROM `despertar_states`');
+            $achievementsReset = self::resetDespertarAchievementsKeepXp($pdo);
             self::setDespertarGate('season_liberated', true, $adminUserId);
             self::setDespertarGate('published', true, $adminUserId);
             $pdo->commit();
@@ -2089,7 +2094,82 @@ final class DespertarService
             'ok' => true,
             'archive' => $snap['archive'],
             'deleted' => $deleted,
+            'achievementsReset' => $achievementsReset,
         ];
+    }
+
+    public static function ensurePaidAchievementsTable(): void
+    {
+        Database::pdo()->exec(
+            'CREATE TABLE IF NOT EXISTS `despertar_paid_achievements` (
+              `user_id` INT NOT NULL,
+              `achievement_ids` JSON NOT NULL,
+              `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+              PRIMARY KEY (`user_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
+        );
+    }
+
+    /**
+     * Tira as conquistas do Despertar de todos os perfis, mantendo o XP, e anota em
+     * `despertar_paid_achievements` quais já pagaram XP (somando às de temporadas anteriores).
+     * Roda dentro da transação de openNextSeason.
+     * @return array{users: int, removed: int}
+     */
+    private static function resetDespertarAchievementsKeepXp(PDO $pdo): array
+    {
+        $despertarSet = array_flip(DespertarCatalog::DESPERTAR_ACHIEVEMENT_IDS);
+        $rows = $pdo->query('SELECT `id`, `conquistas` FROM `users` FOR UPDATE')->fetchAll(PDO::FETCH_ASSOC);
+        $upsert = $pdo->prepare(
+            'INSERT INTO `despertar_paid_achievements` (`user_id`, `achievement_ids`) VALUES (:uid, :ids)
+             ON DUPLICATE KEY UPDATE `achievement_ids` = VALUES(`achievement_ids`)'
+        );
+        $prevStmt = $pdo->prepare('SELECT `achievement_ids` FROM `despertar_paid_achievements` WHERE `user_id` = :uid');
+        $update = $pdo->prepare('UPDATE `users` SET `conquistas` = :conq WHERE `id` = :uid');
+        $users = 0;
+        $removed = 0;
+        foreach ($rows as $row) {
+            $conquistas = Database::decodeJsonArray($row['conquistas'] ?? null);
+            $kept = [];
+            $paid = [];
+            foreach ($conquistas as $cid) {
+                if (isset($despertarSet[(string) $cid])) {
+                    $paid[] = (string) $cid;
+                } else {
+                    $kept[] = $cid;
+                }
+            }
+            if ($paid === []) {
+                continue;
+            }
+            $uid = (int) $row['id'];
+            $prevStmt->execute([':uid' => $uid]);
+            $prev = Database::decodeJsonArray($prevStmt->fetchColumn() ?: null);
+            $upsert->execute([
+                ':uid' => $uid,
+                ':ids' => Database::encodeJsonArray(array_values(array_unique(array_merge(array_map('strval', $prev), $paid)))),
+            ]);
+            $update->execute([':conq' => Database::encodeJsonArray(array_values($kept)), ':uid' => $uid]);
+            $users += 1;
+            $removed += count($paid);
+        }
+        return ['users' => $users, 'removed' => $removed];
+    }
+
+    /**
+     * Conquistas do Despertar que já pagaram XP numa temporada anterior (não pagam de novo).
+     * @return array<string, true>
+     */
+    private static function paidAchievementSet(PDO $pdo, int $userId): array
+    {
+        try {
+            $stmt = $pdo->prepare('SELECT `achievement_ids` FROM `despertar_paid_achievements` WHERE `user_id` = :uid');
+            $stmt->execute([':uid' => $userId]);
+            return array_fill_keys(array_map('strval', Database::decodeJsonArray($stmt->fetchColumn() ?: null)), true);
+        } catch (\PDOException $e) {
+            // Tabela ainda não existe (antes da 1ª virada de temporada): nada foi pago antes.
+            return [];
+        }
     }
 
     /**
@@ -2718,10 +2798,14 @@ final class DespertarService
                     $curConq = Database::decodeJsonArray($uRow['conquistas'] ?? null);
                     $trulyFresh = [];
                     $realXpGain = 0;
+                    $paidBefore = self::paidAchievementSet($pdo, $userId);
                     foreach ($fresh as $fid) {
                         if (!in_array($fid, $curConq, true)) {
                             $trulyFresh[] = $fid;
-                            $realXpGain += GameCatalog::getAchievementXp($fid);
+                            // Reconquistada numa nova temporada: volta a valer, mas o XP já foi pago.
+                            if (!isset($paidBefore[(string) $fid])) {
+                                $realXpGain += GameCatalog::getAchievementXp($fid);
+                            }
                         }
                     }
                     if ($trulyFresh !== []) {
