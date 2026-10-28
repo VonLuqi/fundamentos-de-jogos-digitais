@@ -286,7 +286,15 @@ export class LeechRingView {
           if (resTargetId && resRem > 0) {
             const upDef = getUpgrade(resTargetId);
             this._researchBadge.hidden = false;
-            this._researchBadge.textContent = `Pesquisa: ${upDef?.name || resTargetId} (${resRem} s)`;
+            const mins = Math.floor(resRem / 60);
+            const secs = resRem % 60;
+            const clock = mins > 0
+              ? `${mins}:${String(secs).padStart(2, '0')}`
+              : `${secs}s`;
+            this._researchBadge.textContent = `Pesquisa: ${upDef?.name || resTargetId} (${clock}) · aba Arquivo`;
+          } else if (hasResearchHub) {
+            this._researchBadge.hidden = false;
+            this._researchBadge.textContent = 'Arquivo Estígio · detalhes na aba Arquivo';
           } else {
             this._researchBadge.hidden = true;
           }

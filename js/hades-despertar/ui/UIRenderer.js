@@ -84,6 +84,7 @@ import { describeUnitPersona } from './unitPersona.js';
 import { WorldView } from './world/WorldView.js';
 import { ShimmerView } from './ShimmerView.js';
 import { MinigamesView } from './minigames/MinigamesView.js';
+import { ArquivoEstigioView, isArquivoTabUnlocked } from './ArquivoEstigioView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
 import { withPerfMeasure } from './perfTelemetry.js';
@@ -1195,6 +1196,8 @@ export class UIRenderer {
     this._altar = null;
     this._shimmerView = null;
     this._minigamesView = null;
+    this._arquivoView = null;
+    this._leechRingView = null;
     this._modeButtons = [];
     this._actionButtons = [];
     this._prefInputs = new Map();
@@ -1210,6 +1213,7 @@ export class UIRenderer {
       stats: true,
       lethe: true,
       bancada: true,
+      arquivo: true,
     };
     this._lastStructureVersion = -1;
     this._lastSlowSyncAt = -Infinity;
@@ -1250,6 +1254,7 @@ export class UIRenderer {
     this.#mountAltar();
     this.#mountLethe();
     this.#mountBancada();
+    this.#mountArquivo();
     this.#mountMinigames();
     this.#mountCodexBook();
     this.#mountLoopBoard();
@@ -1278,7 +1283,7 @@ export class UIRenderer {
 
   /**
    * Marca seções da UI como sujas (Perf-2: event-driven).
-   * @param {'all'|'market'|'styx'|'world'|'stats'|'lethe'|'bancada'} [section]
+   * @param {'all'|'market'|'styx'|'world'|'stats'|'lethe'|'bancada'|'arquivo'} [section]
    */
   markDirty(section = 'all') {
     if (section === 'all') {
@@ -1288,6 +1293,7 @@ export class UIRenderer {
       this._uiDirty.stats = true;
       this._uiDirty.lethe = true;
       this._uiDirty.bancada = true;
+      this._uiDirty.arquivo = true;
       return;
     }
     if (section in this._uiDirty) {
@@ -1444,7 +1450,8 @@ export class UIRenderer {
         || this._uiDirty.world
         || this._uiDirty.stats
         || this._uiDirty.lethe
-        || this._uiDirty.bancada;
+        || this._uiDirty.bancada
+        || this._uiDirty.arquivo;
 
       if (slowDue || anyDirty) {
         if (slowDue) this._lastSlowSyncAt = nowMs;
@@ -1481,6 +1488,10 @@ export class UIRenderer {
           this.#renderBancada(state);
           this._minigamesView?.sync(state);
           this._uiDirty.bancada = false;
+        }
+        if (slowDue || this._uiDirty.arquivo) {
+          this.#renderArquivo(state);
+          this._uiDirty.arquivo = false;
         }
         this._shimmerView?.sync(state, {
           reducedMotion,
@@ -2427,6 +2438,42 @@ export class UIRenderer {
     if (res?.ok) {
       this.markDirty('all');
     }
+  }
+
+  #mountArquivo() {
+    const panel = this.root.getElementById('panel-arquivo')
+      || this.root.getElementById('despertar-arquivo');
+    this._arquivoView = new ArquivoEstigioView({
+      document: this.root,
+      onBuyUpgrade: (id) => this.#handleArquivoBuy(id),
+      onActivatePledge: () => this.#handleActivatePledge(),
+      onToggleCovenant: () => this.#handleToggleCovenant(),
+    }).mount(panel);
+  }
+
+  #handleArquivoBuy(id) {
+    if (!id) return;
+    if (this.onBuyUpgrade) {
+      this.onBuyUpgrade(id);
+      this.markDirty('all');
+      return;
+    }
+    if (!this.state?.buyUpgrade) return;
+    const res = this.state.buyUpgrade(id);
+    if (res?.ok) this.markDirty('all');
+  }
+
+  #renderArquivo(state) {
+    const tab = this.root.getElementById('tab-arquivo');
+    const unlocked = isArquivoTabUnlocked(state);
+    if (tab) {
+      const wasHidden = tab.hidden;
+      tab.hidden = !unlocked;
+      if (wasHidden !== tab.hidden) {
+        this.#fallbackHiddenDomainTab(tab);
+      }
+    }
+    this._arquivoView?.sync(state);
   }
 
   #handleShimmerClick() {
