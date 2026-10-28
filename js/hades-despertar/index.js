@@ -1447,6 +1447,9 @@ async function init() {
   const reap = document.getElementById('despertar-reap');
   const particles = document.querySelector('[data-particle-layer]');
   const floatLayer = document.querySelector('[data-float-layer]');
+  // Floats órfãos de builds antigas (release quebrado / classe sem CSS).
+  document.querySelectorAll?.('.despertar-leech-float, .despertar-reap-float')
+    ?.forEach?.((node) => { try { node.remove?.(); } catch { /* ignore */ } });
   const reapStage = document.querySelector('.despertar-reap-stage');
   const unbindFeel = bindReapFeel(reap);
   const unbindFoice = bindFoiceAsset(reap);

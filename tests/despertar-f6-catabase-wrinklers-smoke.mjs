@@ -431,6 +431,7 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
         setAttribute(k, v) { this[k] = v; },
         addEventListener() {},
         remove() { this.removed = true; },
+        querySelectorAll() { return []; },
         append(...nodes) { this.children.push(...nodes); },
         prepend(...nodes) { this.children.unshift(...nodes); },
         replaceChildren(...nodes) { this.children = [...nodes]; },
@@ -471,9 +472,14 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   // Float de estouro: precisa sair da tela (releasePooledNode com doc).
   const particleLayer = fakeDoc.createElement('div');
   particleLayer.appendChild = (n) => { particleLayer.children.push(n); };
+  const floatLayer = fakeDoc.createElement('div');
+  floatLayer.appendChild = (n) => { floatLayer.children.push(n); };
+  floatLayer.querySelectorAll = () => [];
+  particleLayer.querySelectorAll = () => [];
   const floatView = new LeechRingView({ document: fakeDoc }).mount({
     stageHost: fakeDoc.createElement('div'),
     particleLayer,
+    floatLayer,
   });
   const floatTimers = [];
   const prevSetTimeout = globalThis.setTimeout;
@@ -481,15 +487,16 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   try {
     const floatNode = floatView.spawnPopFeedback(
       { ok: true, popped: true, payout: '1000', leech: { shiny: false } },
-      { reducedMotion: false, particles: true },
+      { reducedMotion: false },
     );
     assert.ok(floatNode, 'spawnPopFeedback cria nó');
     assert.match(String(floatNode.className), /despertar-float/);
     assert.match(String(floatNode.textContent), /Sanguessuga estourada/);
-    assert.equal(particleLayer.children.includes(floatNode), true);
+    assert.equal(floatLayer.children.includes(floatNode), true, 'float vai na float-layer');
     assert.equal(floatTimers.length >= 1, true, 'fallback de release agendado');
     floatTimers[0]();
     assert.equal(floatNode.removed, true, 'release remove o float (não gruda na tela)');
+    assert.equal(floatNode.dataset.leechFloatReleased, '1');
   } finally {
     globalThis.setTimeout = prevSetTimeout;
   }

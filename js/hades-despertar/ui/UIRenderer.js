@@ -2360,6 +2360,7 @@ export class UIRenderer {
 
   #mountAltar() {
     const particleLayer = this.root.querySelector('[data-particle-layer]');
+    const floatLayer = this.root.querySelector('[data-float-layer]');
     this._altar = new AltarOrbit({
       document: this.root,
       prefs: this.getPerfPrefs(),
@@ -2393,6 +2394,7 @@ export class UIRenderer {
     }).mount({
       stageHost: reapStage,
       particleLayer,
+      floatLayer,
       altarCol,
     });
   }
@@ -2401,10 +2403,8 @@ export class UIRenderer {
     if (!this.state?.popLeech) return;
     const res = this.state.popLeech(slot);
     if (res?.ok && res.popped) {
-      const prefs = this.getPerfPrefs();
       this._leechRingView?.spawnPopFeedback(res, {
         reducedMotion: juicePrefersReducedMotion(),
-        particles: prefs.particles,
       });
       this.markDirty('all');
     }

@@ -55,6 +55,8 @@ export class LeechRingView {
     this._onToggleCovenant = typeof options.onToggleCovenant === 'function' ? options.onToggleCovenant : null;
     this._stageHost = null;
     this._particleLayer = null;
+    this._floatLayer = null;
+    this._activeFloats = [];
     this._ringEl = null;
     this._pactBar = null;
     this._stageBadge = null;
@@ -66,9 +68,15 @@ export class LeechRingView {
     this._lastStageSpriteId = null;
   }
 
-  mount({ stageHost = null, particleLayer = null, altarCol = null } = {}) {
+  mount({ stageHost = null, particleLayer = null, floatLayer = null, altarCol = null } = {}) {
     this._stageHost = stageHost;
     this._particleLayer = particleLayer;
+    this._floatLayer = floatLayer
+      || this._doc?.querySelector?.('[data-float-layer]')
+      || particleLayer
+      || null;
+    // Limpa floats órfãos de builds antigas (classe sem CSS / release quebrado).
+    this.#sweepStaleFloats();
     if (!this._doc?.createElement) return this;
 
     if (this._stageHost && !this._stageBackdrop) {
@@ -307,39 +315,90 @@ export class LeechRingView {
     }
   }
 
+  #sweepStaleFloats() {
+    const roots = [this._floatLayer, this._particleLayer, this._stageHost].filter(Boolean);
+    const seen = new Set();
+    for (const root of roots) {
+      const nodes = root.querySelectorAll?.(
+        '.despertar-leech-float, .despertar-reap-float',
+      ) || [];
+      for (const node of nodes) {
+        if (seen.has(node)) continue;
+        seen.add(node);
+        try { node.remove?.(); } catch { /* ignore */ }
+      }
+    }
+    this._activeFloats = [];
+  }
+
+  #releaseFloat(doc, node) {
+    if (!node || node.dataset?.leechFloatReleased === '1') return;
+    if (node.dataset) node.dataset.leechFloatReleased = '1';
+    this._activeFloats = this._activeFloats.filter((n) => n !== node);
+    try {
+      if (node.style) {
+        node.style.animation = 'none';
+        node.style.opacity = '0';
+      }
+    } catch { /* ignore */ }
+    releasePooledNode(doc, 'leech-float', node);
+  }
+
   /**
-   * Dispara texto flutuante via Object Pool ao estourar uma Sanguessuga.
+   * Dispara texto flutuante ao estourar uma Sanguessuga.
+   * Sempre agenda remoção por timeout (prefers-reduced-motion zera animationend).
    */
   spawnPopFeedback(result, opts = {}) {
     if (!result?.ok || !result?.popped) return null;
-    if (opts.reducedMotion || opts.particles === false) return null;
-    const host = this._particleLayer || this._stageHost;
+    if (opts.reducedMotion) return null;
+    const host = this._floatLayer || this._particleLayer || this._stageHost;
     const doc = this._doc || host?.ownerDocument;
     if (!host || !doc?.createElement) return null;
 
+    // Cap: evita coluna de textos se o release falhar de novo.
+    while (this._activeFloats.length >= 3) {
+      this.#releaseFloat(doc, this._activeFloats[0]);
+    }
+
     const node = acquirePooledNode(doc, 'leech-float', 'despertar-float despertar-leech-float');
     if (!node) return null;
+    if (node.dataset) delete node.dataset.leechFloatReleased;
+
     const prefix = result.leech?.shiny ? 'Sanguessuga Dourada!' : 'Sanguessuga estourada';
-    node.textContent = `${prefix} · +${formatSouls(result.payout || '0')} almas`;
-    // Espalha pra não empilhar "almas" + próximo título na mesma célula.
-    const x = 42 + Math.random() * 16;
-    const y = 48 + Math.random() * 14;
-    node.style?.setProperty?.('--float-x', `${x}%`);
-    node.style?.setProperty?.('--float-y', `${y}%`);
-    if (node.style) node.style.animation = 'none';
+    const payout = formatSouls(result.payout || '0');
+    node.textContent = cmp(result.payout || '0', '0') > 0
+      ? `${prefix} · +${payout}`
+      : prefix;
+
+    const x = 38 + Math.random() * 24;
+    const y = 40 + Math.random() * 28;
+    if (node.style) {
+      // Cinto de segurança: mesmo se o CSS cacheado não tiver .despertar-float.
+      node.style.position = 'absolute';
+      node.style.left = `${x}%`;
+      node.style.top = `${y}%`;
+      node.style.transform = 'translate(-50%, -50%)';
+      node.style.pointerEvents = 'none';
+      node.style.whiteSpace = 'nowrap';
+      node.style.zIndex = '12';
+      node.style.opacity = '1';
+      node.style.setProperty?.('--float-x', `${x}%`);
+      node.style.setProperty?.('--float-y', `${y}%`);
+      node.style.animation = 'none';
+    }
     host.appendChild?.(node);
     try { void node.offsetWidth; } catch { /* mock */ }
-    if (node.style) node.style.animation = '';
+    if (node.style) {
+      node.style.animation = '';
+      try { node.style.removeProperty?.('animation'); } catch { /* mock */ }
+    }
 
-    let released = false;
-    const release = () => {
-      if (released) return;
-      released = true;
-      releasePooledNode(doc, 'leech-float', node);
-    };
+    this._activeFloats.push(node);
+    const release = () => this.#releaseFloat(doc, node);
     node.addEventListener?.('animationend', release, { once: true });
+    // Timeout duro: não depende de CSS/animationend (reduced-motion / cache velho).
     if (typeof globalThis.setTimeout === 'function') {
-      const timer = globalThis.setTimeout(release, 1200);
+      const timer = globalThis.setTimeout(release, 1100);
       if (typeof timer?.unref === 'function') timer.unref();
     }
     return node;
