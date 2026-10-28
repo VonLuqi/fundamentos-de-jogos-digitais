@@ -33,6 +33,10 @@ import {
   GOLD_BORDER,
   GOLD_GEM,
   GOLD_SHADOW,
+  NEGATIVO_ACCENT,
+  NEGATIVO_BODY,
+  NEGATIVO_BORDER,
+  NEGATIVO_SHADOW,
   goldPulse,
   paintGoldAura,
   paintGoldSparkles,
@@ -360,7 +364,7 @@ export function orbitHitIndex(mx, my, placements, geom, hitRadiusBase = ORBIT_HI
 /**
  * Cursor procedural Hades (Q2).
  * Gold: corpo/glow quentes (sem invert/glitch); reduced = borda dourada.
- * Negativo (legacy shiny): invert + glow Styx; reduced = borda dourada (Q11).
+ * Negativo (legacy shiny): invert + glow Styx; reduced = paleta Negativo + borda Styx.
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} x
  * @param {number} y
@@ -381,9 +385,9 @@ export function drawOrbitCursor(ctx, x, y, angle, scale = 1, opts = {}) {
   if (isGold) {
     body = GOLD_BODY;
     gem = GOLD_GEM;
-  } else if (isNegativo && !reduced) {
-    body = 'rgba(242, 232, 220, 0.95)';
-    gem = 'rgba(217, 4, 41, 0.95)';
+  } else if (isNegativo) {
+    body = NEGATIVO_BODY;
+    gem = NEGATIVO_ACCENT;
   }
 
   const paintCursor = (bodyColor, gemColor) => {
@@ -456,16 +460,19 @@ export function drawOrbitCursor(ctx, x, y, angle, scale = 1, opts = {}) {
     }
   } else if (isNegativo) {
     if (reduced) {
-      ctx.strokeStyle = GOLD_BORDER;
-      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = NEGATIVO_BORDER;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.arc(0, 0, 9.5, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.shadowColor = NEGATIVO_SHADOW;
+      ctx.shadowBlur = 8;
       paintCursor(body, gem);
+      ctx.shadowBlur = 0;
     } else {
       const t = shinyGlitchNow();
       const chroma = shinyChromaticPx(t);
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowColor = NEGATIVO_SHADOW;
       ctx.shadowBlur = 12;
       paintCursor(body, gem);
 

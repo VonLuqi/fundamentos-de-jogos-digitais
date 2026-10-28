@@ -256,7 +256,7 @@ run('F1: drawContainedInCell nunca estica (object-fit contain)', () => {
   assert.equal(dy, 20 + (18 - 9) / 2);
 });
 
-run('G4.2: shelf shiny — glow + glitch; reduced = borda', () => {
+run('G4.2: shelf Negativo — glow + glitch; reduced = invert + borda Styx', () => {
   let shadowBlurCalls = 0;
   let clipCalls = 0;
   const glowCtx = {
@@ -277,23 +277,35 @@ run('G4.2: shelf shiny — glow + glitch; reduced = borda', () => {
     shiny: true,
     reducedMotion: false,
   });
-  assert.ok(shadowBlurCalls > 0, 'shiny sprite aplica glow');
+  assert.ok(shadowBlurCalls > 0, 'Negativo sprite aplica glow');
   assert.ok(clipCalls >= 0, 'glitch pode clipar tears');
 
   let strokeRectCalls = 0;
+  let invertDraws = 0;
   const reducedCtx = {
     save() {},
     restore() {},
-    drawImage() {},
+    drawImage() { invertDraws += 1; },
     strokeRect() { strokeRectCalls += 1; },
     strokeStyle: '',
     lineWidth: 1,
+    filter: '',
+    set shadowBlur(v) { if (v > 0) invertDraws += 1; },
+    get shadowBlur() { return 0; },
+    shadowColor: '',
   };
   drawContainedInCell(reducedCtx, { width: 36, height: 36 }, 0, 0, 36, 0, {
     shiny: true,
     reducedMotion: true,
   });
-  assert.equal(strokeRectCalls, 1, 'reduced-motion usa borda dourada');
+  assert.equal(strokeRectCalls, 1, 'reduced-motion usa borda');
+  assert.ok(
+    String(reducedCtx.strokeStyle).includes('45, 212, 191')
+      || String(reducedCtx.strokeStyle).includes('0, 168, 150')
+      || reducedCtx.strokeStyle === 'rgba(45, 212, 191, 0.98)',
+    'borda Styx (não gold)',
+  );
+  assert.ok(invertDraws > 0, 'reduced ainda pinta invert/glow');
 
   let silhouetteGlow = 0;
   const silCtx = {
@@ -318,7 +330,7 @@ run('G4.2: shelf shiny — glow + glitch; reduced = borda', () => {
     lineWidth: 1,
   };
   drawNpcSilhouette(silCtx, 0, 0, 2, 0, 36, { shiny: true, reducedMotion: false });
-  assert.ok(silhouetteGlow > 0, 'shiny silhueta aplica glow');
+  assert.ok(silhouetteGlow > 0, 'Negativo silhueta aplica glow');
 });
 
 run('prefersReducedMotion lê matchMedia', () => {
@@ -452,12 +464,11 @@ run('C2: motes com budget; peso log ≠ linear no saldo', () => {
   world.sync(new GameState({ generators: { wandering_shade: 1, charon_servants: 50 } }));
   assert.ok(Object.values(world.moteRates).reduce((a, b) => a + b, 0) <= SHELF_MOTE_MAX_PER_SEC + 1e-9);
 
-  // ~2 s de frames
+  // ~2 s de frames conduzidos pelo GameLoop via world.frame(dt)
   now = 0;
   for (let t = 0; t <= 2000; t += 50) {
     now = t;
-    const cb = frames.pop();
-    if (cb) cb(now);
+    world.frame(0.05);
   }
   const shelf = world._shelves.get('charon_servants');
   assert.ok(shelf.motes.childNodes.length > 0);

@@ -30,6 +30,10 @@ import {
   GOLD_ACCENT,
   GOLD_BODY,
   GOLD_BORDER,
+  NEGATIVO_ACCENT,
+  NEGATIVO_BODY,
+  NEGATIVO_BORDER,
+  NEGATIVO_SHADOW,
   GOLD_SHADOW,
   drawImageAsGold,
   goldPulse,
@@ -399,14 +403,18 @@ export function drawContainedInCell(ctx, img, cellX, cellY, cell = SHELF_CELL, b
     }
   } else if (isNegativo) {
     if (reduced) {
-      ctx.strokeStyle = GOLD_BORDER;
-      ctx.lineWidth = 1.5;
+      // LOD/cap: mantém invert + borda Styx. Borda dourada fazia Negativo “sumir”.
+      ctx.strokeStyle = NEGATIVO_BORDER;
+      ctx.lineWidth = 2;
       ctx.strokeRect(cellX + 0.75, cellY + 0.75 + bobY, cell - 1.5, cell - 1.5);
-      ctx.drawImage(img, dx, dy, dw, dh);
+      ctx.shadowColor = NEGATIVO_SHADOW;
+      ctx.shadowBlur = 8;
+      drawInvertSprite(0);
+      ctx.shadowBlur = 0;
     } else {
       const t = shinyGlitchNow();
       const chroma = shinyChromaticPx(t);
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowColor = NEGATIVO_SHADOW;
       ctx.shadowBlur = 12;
       drawInvertSprite(0);
       ctx.shadowBlur = 0;
@@ -481,7 +489,7 @@ export function prefersReducedMotion(matchMediaFn) {
 /**
  * Silhueta flat centrada na célula (escala para caber sem distorcer).
  * Gold: corpo/glow quentes (sem invert/glitch); reduced = borda dourada.
- * Negativo (legacy shiny): invert de cores + glow + glitch; reduced = borda dourada.
+ * Negativo (legacy shiny): invert + glow + glitch; reduced = invert + borda Styx.
  *
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} cellX
@@ -503,9 +511,9 @@ export function drawNpcSilhouette(ctx, cellX, cellY, tier, bobY = 0, cell = SHEL
     // Sempre ouro no corpo (reduced também) — não só a sombra.
     body = GOLD_BODY;
     accent = GOLD_ACCENT;
-  } else if (isNegativo && !reduced) {
-    body = 'rgba(242, 232, 220, 0.95)';
-    accent = 'rgba(217, 4, 41, 0.9)';
+  } else if (isNegativo) {
+    body = NEGATIVO_BODY;
+    accent = NEGATIVO_ACCENT;
   }
   const s = cell / 24;
   const cx = cellX + cell / 2;
@@ -572,16 +580,19 @@ export function drawNpcSilhouette(ctx, cellX, cellY, tier, bobY = 0, cell = SHEL
     }
   } else if (isNegativo) {
     if (reduced) {
-      ctx.strokeStyle = GOLD_BORDER;
-      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = NEGATIVO_BORDER;
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.arc(0, -2, 12, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.shadowColor = NEGATIVO_SHADOW;
+      ctx.shadowBlur = 8;
       paintFigure(body, accent);
+      ctx.shadowBlur = 0;
     } else {
       const t = shinyGlitchNow();
       const chroma = shinyChromaticPx(t) / Math.max(s, 0.01);
-      ctx.shadowColor = 'rgba(0, 168, 150, 0.9)';
+      ctx.shadowColor = NEGATIVO_SHADOW;
       ctx.shadowBlur = 12;
       paintFigure(body, accent);
       ctx.shadowBlur = 0;

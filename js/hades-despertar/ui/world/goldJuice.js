@@ -12,6 +12,12 @@ export const GOLD_ACCENT = 'rgba(255, 236, 180, 0.98)';
 export const GOLD_GEM = 'rgba(255, 244, 200, 0.98)';
 export const GOLD_BLOOM = 'rgba(255, 220, 130, 0.55)';
 
+/** Identidade estática do Negativo (LOD / reduced) — nunca reusar GOLD_BORDER. */
+export const NEGATIVO_BORDER = 'rgba(45, 212, 191, 0.98)';
+export const NEGATIVO_BODY = 'rgba(242, 232, 220, 0.95)';
+export const NEGATIVO_ACCENT = 'rgba(217, 4, 41, 0.92)';
+export const NEGATIVO_SHADOW = 'rgba(0, 168, 150, 0.9)';
+
 /**
  * Pulso suave 0.55..1 (respiração do brilho).
  * @param {number} [t]
