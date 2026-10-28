@@ -218,7 +218,8 @@ run('3. Desbloqueio no Nível 1 e mecânicas determinísticas dos 4 Minigames (P
   const handBackfire = state.castSpell('mao_do_destino', { forceBackfire: true });
   assert.equal(handBackfire.ok, true);
   assert.equal(handBackfire.backfired, true);
-  assert.equal(state.shimmer?.variant, 'wrath');
+  // Mão do Destino soma um Eco aos que já estão na tela (o tick acima pode ter trazido o natural).
+  assert.ok(state.shimmers.some((s) => s.variant === 'wrath' && !s.lead), 'Eco Colérico extra na tela');
 
   // 3.3 Jardim de Perséfone (cerberian_hound Lv.1 -> grelha 2x2 = 4 plots)
   state.levelUpGenerator('cerberian_hound');

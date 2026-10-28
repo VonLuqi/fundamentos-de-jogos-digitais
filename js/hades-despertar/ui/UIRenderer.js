@@ -2392,7 +2392,7 @@ export class UIRenderer {
     const buffsHost = this.root.getElementById('despertar-active-buffs');
     this._shimmerView = new ShimmerView({
       document: this.root,
-      onClickShimmer: () => this.#handleShimmerClick(),
+      onClickShimmer: (shimmerId) => this.#handleShimmerClick(shimmerId),
     }).mount({
       shimmerHost,
       buffsHost,
@@ -2491,13 +2491,13 @@ export class UIRenderer {
     this._arquivoView?.sync(state);
   }
 
-  #handleShimmerClick() {
+  #handleShimmerClick(shimmerId = null) {
     if (this.onClickShimmer) {
-      this.onClickShimmer();
+      this.onClickShimmer(shimmerId);
       return;
     }
     if (!this.state?.clickShimmer) return;
-    const res = this.state.clickShimmer();
+    const res = this.state.clickShimmer({ shimmerId });
     if (res?.ok) {
       const prefs = this.getPerfPrefs();
       this._shimmerView?.spawnClickFeedback(res, {

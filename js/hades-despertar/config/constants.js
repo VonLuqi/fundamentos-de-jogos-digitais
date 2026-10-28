@@ -121,7 +121,8 @@ export const DEFAULT_PERF_PREFS = Object.freeze({
 export const SHIMMER_SPAWN_MIN_SEC = 420;
 export const SHIMMER_SPAWN_MAX_SEC = 720;
 export const SHIMMER_LIFETIME_SEC = 13;
-export const SHIMMER_MAX_ACTIVE = 1;
+/** Ecos na tela ao mesmo tempo: 1 natural (timer) + extras de Mão do Destino / debug. */
+export const SHIMMER_MAX_ACTIVE = 7;
 export const SHIMMER_MAX_ACTIVE_BUFFS = 3;
 export const SHIMMER_SYNC_TOLERANCE_MS = 15_000;
 export const SHIMMER_FRENZY_MULT = '7';

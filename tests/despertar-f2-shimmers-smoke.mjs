@@ -136,7 +136,7 @@ run('1. Ciclo completo: spawn → clique → buff ativo → expiração e invali
   assert.equal(SHIMMER_CONFIG.spawnMinSec, 420);
   assert.equal(SHIMMER_CONFIG.spawnMaxSec, 720);
   assert.equal(SHIMMER_CONFIG.lifetimeSec, 13);
-  assert.equal(SHIMMER_CONFIG.maxActiveShimmers, 1);
+  assert.equal(SHIMMER_CONFIG.maxActiveShimmers, 7, 'vários Ecos na tela (natural + extras)');
   assert.ok(SHIMMER_PRESETS.canonical);
   assert.ok(SHIMMER_PRESETS.classroom);
 
@@ -158,10 +158,11 @@ run('1. Ciclo completo: spawn → clique → buff ativo → expiração e invali
   assert.equal(state.shimmer?.kind, 'mare_acheron');
   assert.equal(state.shimmer?.expiresAt, 23_000);
 
-  // Máximo 1 shimmer ativo
+  // Um segundo Eco convive com o primeiro (como no Cookie Clicker); o resto do ciclo usa só a Maré.
   const spDup = state.spawnShimmer({ effectId: 'furia_foice', nowMs: 11_000 });
-  assert.equal(spDup.ok, false);
-  assert.equal(spDup.reason, 'already_active');
+  assert.equal(spDup.ok, true);
+  assert.equal(state.shimmers.length, 2);
+  state.shimmers = state.shimmers.slice(0, 1);
 
   // Clique no shimmer ativa buff e invalida cache de SPS
   const vBeforeClick = state.structureVersion;
@@ -536,6 +537,68 @@ run('5. ShimmerView A11y + Object Pool + Assets (manifest/art-requests) + Códic
 
   assert.ok(EDU_LOG_BY_ID.log_shimmer_echo, 'log_shimmer_echo registrado em edu-logs.js');
   assert.ok(state.eduLogsSeen.includes('log_shimmer_echo'), 'clicar no Eco desbloqueia log_shimmer_echo');
+});
+
+// 6. Vários Ecos ao mesmo tempo (Cookie Clicker): 1 natural do timer + extras
+run('6. Vários Ecos na tela: natural do timer + extras; timer pausa com natural; clique pelo id', () => {
+  const state = new GameState({ souls: '500', generators: { charon_servants: 5 } }, {
+    initialNowMs: 0,
+    shimmerSpawnRange: { minSec: 10, maxSec: 10 },
+    random: () => 0.5,
+  });
+  state.tick(11); // timer de 10 s → nasce o natural
+  assert.equal(state.shimmers.length, 1);
+  assert.equal(state.hasLeadShimmer(), true);
+
+  // Extras (debug / Mão do Destino) somam na tela
+  assert.equal(state.spawnShimmer({ effectId: 'mare_acheron' }).ok, true);
+  assert.equal(state.spawnShimmer({ effectId: 'colheita_acheron' }).ok, true);
+  assert.equal(state.shimmers.length, 3, 'três Ecos ao mesmo tempo');
+  assert.equal(new Set(state.shimmers.map((s) => s.id)).size, 3, 'ids únicos');
+
+  // Enquanto o natural está na tela, o timer não corre (não nasce outro natural)
+  const timerBefore = state._nextShimmerInSec;
+  state.tick(1);
+  assert.equal(state._nextShimmerInSec, timerBefore, 'timer pausado com natural na tela');
+
+  // Clicar num extra não reinicia o timer nem tira o natural
+  const extra = state.shimmers.find((s) => !s.lead);
+  assert.equal(state.clickShimmer({ shimmerId: extra.id }).ok, true);
+  assert.equal(state.shimmers.length, 2);
+  assert.equal(state.hasLeadShimmer(), true);
+
+  // Clicar no natural libera o timer
+  const lead = state.shimmers.find((s) => s.lead);
+  assert.equal(state.clickShimmer({ shimmerId: lead.id }).ok, true);
+  assert.equal(state.hasLeadShimmer(), false);
+  assert.ok(state._nextShimmerInSec > 0);
+
+  // Teto de SHIMMER_MAX_ACTIVE
+  while (state.shimmers.length < SHIMMER_CONFIG.maxActiveShimmers) state.spawnShimmer({ effectId: 'mare_acheron' });
+  assert.equal(state.spawnShimmer({ effectId: 'mare_acheron' }).reason, 'max_active');
+
+  // Save/load preserva todos (e qual é o natural)
+  const restored = new GameState(state.toSnapshot(), { initialNowMs: state._clockMs });
+  assert.equal(restored.shimmers.length, state.shimmers.length);
+  assert.equal(restored.shimmers.filter((s) => s.lead).length, state.shimmers.filter((s) => s.lead).length);
+
+  // UI: um botão por Eco; clique informa qual
+  const doc = makeFakeDoc();
+  const shimmerHost = doc.createElement('div');
+  const clickedIds = [];
+  const view = new ShimmerView({ document: doc, onClickShimmer: (id) => clickedIds.push(id) })
+    .mount({ shimmerHost, buffsHost: doc.createElement('div') });
+  view.sync(state, { reducedMotion: false, fancy: true });
+  const visible = shimmerHost.children.filter((b) => !b.hidden);
+  assert.equal(visible.length, state.shimmers.length, 'um botão visível por Eco');
+  visible[1].dispatchEvent('click', { stopPropagation() {} });
+  assert.deepEqual(clickedIds, [state.shimmers[1].id]);
+
+  // Menos Ecos → botões sobrando ficam ocultos (reaproveitados, sem recriar DOM)
+  const keep = state.shimmers[0];
+  state.shimmers = [keep];
+  view.sync(state, { reducedMotion: false, fancy: true });
+  assert.equal(shimmerHost.children.filter((b) => !b.hidden).length, 1);
 });
 
 console.log(`\ndespertar-f2-shimmers-smoke: ${passed} passed, ${failed} failed`);

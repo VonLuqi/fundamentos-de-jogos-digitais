@@ -104,7 +104,7 @@ final class DespertarCatalog
     public const SHIMMER_SPAWN_MIN_SEC = 420;
     public const SHIMMER_SPAWN_MAX_SEC = 720;
     public const SHIMMER_LIFETIME_SEC = 13;
-    public const SHIMMER_MAX_ACTIVE = 1;
+    public const SHIMMER_MAX_ACTIVE = 7;
     public const SHIMMER_MAX_ACTIVE_BUFFS = 3;
     public const SHIMMER_SYNC_TOLERANCE_MS = 15000;
     public const SHIMMER_FRENZY_MULT = '7';

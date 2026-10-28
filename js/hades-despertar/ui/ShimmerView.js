@@ -41,10 +41,8 @@ export class ShimmerView {
     this._shimmerHost = null;
     this._buffsHost = null;
     this._particleLayer = null;
-    this._button = null;
-    this._spriteWrap = null;
-    this._currentShimmerId = null;
-    this._currentVariant = null;
+    /** Pilha reutilizada: um botão por Eco na tela; sobras ficam ocultas. */
+    this._buttons = [];
     this._buffNodes = new Map();
   }
 
@@ -52,22 +50,29 @@ export class ShimmerView {
     this._shimmerHost = shimmerHost;
     this._buffsHost = buffsHost;
     this._particleLayer = particleLayer;
-
-    if (this._shimmerHost && this._doc?.createElement && !this._button) {
-      const btn = this._doc.createElement('button');
-      btn.type = 'button';
-      btn.className = 'despertar-shimmer';
-      btn.id = 'despertar-shimmer-btn';
-      btn.hidden = true;
-      btn.setAttribute('aria-label', 'Ceifar Eco do Acheron');
-      btn.addEventListener?.('click', (event) => {
-        event?.stopPropagation?.();
-        this._onClickShimmer?.();
-      });
-      this._button = btn;
-      this._shimmerHost.append?.(btn);
+    if (this._shimmerHost && this._doc?.createElement && this._buttons.length === 0) {
+      this.#buttonAt(0);
     }
     return this;
+  }
+
+  #buttonAt(index) {
+    if (this._buttons[index]) return this._buttons[index];
+    const btn = this._doc.createElement('button');
+    btn.type = 'button';
+    btn.className = 'despertar-shimmer';
+    if (index === 0) btn.id = 'despertar-shimmer-btn';
+    btn.hidden = true;
+    btn.setAttribute('aria-label', 'Ceifar Eco do Acheron');
+    btn.addEventListener?.('click', (event) => {
+      event?.stopPropagation?.();
+      this._onClickShimmer?.(btn.dataset?.shimmerId || null);
+    });
+    btn._shimmerId = null;
+    btn._variant = null;
+    this._buttons[index] = btn;
+    this._shimmerHost.append?.(btn);
+    return btn;
   }
 
   /**
@@ -84,7 +89,8 @@ export class ShimmerView {
       ? Number(meta.nowMs)
       : (typeof state.nowMs === 'function' ? state.nowMs() : Date.now());
 
-    this.#syncShimmerButton(state.shimmer, { staticMode });
+    const shimmers = Array.isArray(state.shimmers) ? state.shimmers : (state.shimmer ? [state.shimmer] : []);
+    this.#syncShimmerButtons(shimmers, { staticMode });
     this.#syncActiveBuffs(state.activeBuffs, { nowMs, staticMode });
   }
 
@@ -130,26 +136,28 @@ export class ShimmerView {
     return node;
   }
 
-  #syncShimmerButton(shimmer, { staticMode = false } = {}) {
-    const btn = this._button;
-    if (!btn) return;
-    if (!shimmer) {
+  #syncShimmerButtons(shimmers, { staticMode = false } = {}) {
+    if (!this._shimmerHost || !this._doc?.createElement) return;
+    shimmers.forEach((shimmer, i) => this.#syncShimmerButton(this.#buttonAt(i), shimmer, { staticMode }));
+    for (let i = shimmers.length; i < this._buttons.length; i += 1) {
+      const btn = this._buttons[i];
       if (!btn.hidden) btn.hidden = true;
-      this._currentShimmerId = null;
-      return;
+      btn._shimmerId = null;
     }
+  }
 
+  #syncShimmerButton(btn, shimmer, { staticMode = false } = {}) {
     const isWrath = shimmer.variant === 'wrath';
-    if (this._currentShimmerId !== shimmer.id || this._currentVariant !== shimmer.variant) {
-      this._currentShimmerId = shimmer.id;
-      this._currentVariant = shimmer.variant;
+    if (btn._shimmerId !== shimmer.id || btn._variant !== shimmer.variant) {
+      const variantChanged = btn._variant !== shimmer.variant;
+      btn._shimmerId = shimmer.id;
+      btn._variant = shimmer.variant;
       const spriteId = isWrath ? 'eco_colerico' : 'eco_dourado';
-      if (this._doc?.createElement) {
+      if (variantChanged || !btn.firstChild) {
         const spriteNode = createSpriteNode(this._doc, shimmerSprite(spriteId), {
           className: 'despertar-shimmer__sprite despertar-sprite',
         });
         btn.replaceChildren?.(spriteNode);
-        this._spriteWrap = spriteNode;
       }
       const xPct = Math.round((Number(shimmer.x) || 0.5) * 100);
       const yPct = Math.round((Number(shimmer.y) || 0.45) * 100);

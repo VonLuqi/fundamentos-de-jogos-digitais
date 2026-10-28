@@ -8,6 +8,7 @@ import {
   GOLD_CHANCE,
   LETHE_PREVIEW_RUN_SOULS,
   NEGATIVO_CHANCE,
+  SHIMMER_MAX_ACTIVE,
   SHINY_CHANCE,
   STYX_UNLOCK_SOULS,
 } from '../config/constants.js';
@@ -373,10 +374,19 @@ export class GameState {
       0,
       Number.parseInt(snapshot.wrathClicked ?? snapshot.stats?.wrathClicked, 10) || 0,
     );
-    this.shimmer = normalizeShimmerInstance(snapshot.shimmer, {
-      catabaseActive: this.catabaseActive,
-      nowMs: this._clockMs,
-    });
+    // Vários Ecos ao mesmo tempo (como no Cookie Clicker): 1 natural ("lead", do timer) + extras
+    // (Mão do Destino, debug). Save antigo tinha só `shimmer`.
+    this._shimmerSeq = 0;
+    const rawShimmers = Array.isArray(snapshot.shimmers)
+      ? snapshot.shimmers
+      : (snapshot.shimmer ? [{ ...snapshot.shimmer, lead: true }] : []);
+    this.shimmers = rawShimmers
+      .map((raw) => {
+        const inst = normalizeShimmerInstance(raw, { catabaseActive: this.catabaseActive, nowMs: this._clockMs });
+        return inst ? { ...inst, lead: Boolean(raw.lead) } : null;
+      })
+      .filter(Boolean)
+      .slice(0, SHIMMER_MAX_ACTIVE);
     this.activeBuffs = normalizeActiveBuffs(
       snapshot.activeBuffs ?? snapshot.active_buffs,
       {
@@ -979,9 +989,7 @@ export class GameState {
         catabaseActive: false,
         nowMs: this._clockMs,
       });
-      if (this.shimmer?.variant === 'wrath') {
-        this.shimmer = null;
-      }
+      this.shimmers = this.shimmers.filter((s) => s.variant !== 'wrath');
     }
     this.invalidateEconomyCache();
     this.#bump();
@@ -1002,9 +1010,7 @@ export class GameState {
         catabaseActive: false,
         nowMs: this._clockMs,
       });
-      if (this.shimmer?.variant === 'wrath') {
-        this.shimmer = null;
-      }
+      this.shimmers = this.shimmers.filter((s) => s.variant !== 'wrath');
     }
     this.leechesPopped = Math.max(this.leechesPopped || 0, this.catabase?.leechesPopped || 0);
     this.shinyLeechesPopped = Math.max(this.shinyLeechesPopped || 0, this.catabase?.shinyLeechesPopped || 0);
@@ -1299,16 +1305,53 @@ export class GameState {
     return { ok: false, reason: 'unknown_action', action: act };
   }
 
+  /** Primeiro Eco na tela (compatibilidade com quem lê um só). */
+  get shimmer() {
+    return this.shimmers[0] || null;
+  }
+
+  /** `state.shimmer = x` troca todos os Ecos por x (null limpa); x vira o natural. */
+  set shimmer(value) {
+    this.shimmers = value ? [{ ...value, lead: value.lead ?? true }] : [];
+  }
+
+  /** Há um Eco natural na tela? O timer do próximo só corre sem ele (regra do Cookie Clicker). */
+  hasLeadShimmer() {
+    return this.shimmers.some((s) => s.lead);
+  }
+
+  /** Põe um Eco na tela com id único; respeita SHIMMER_MAX_ACTIVE. */
+  #addShimmer(instance, { lead = false } = {}) {
+    if (!instance || this.shimmers.length >= SHIMMER_MAX_ACTIVE) return null;
+    this._shimmerSeq += 1;
+    const placed = { ...instance, id: `${instance.id}_${this._shimmerSeq}`, lead };
+    this.shimmers = [...this.shimmers, placed];
+    return placed;
+  }
+
+  /** Tira um Eco; se era o natural, sorteia o atraso do próximo. */
+  #removeShimmer(shimmer, { missed = false } = {}) {
+    this.shimmers = this.shimmers.filter((s) => s.id !== shimmer.id);
+    if (missed) this.shimmersMissed += 1;
+    if (shimmer.lead) {
+      this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
+        ...(this._shimmerSpawnRange || {}),
+        luckMult: this.shimmerLuckMult(),
+      });
+    }
+  }
+
   /**
-   * Spawna um Eco do Acheron no Santuário (máximo 1 ativo por vez).
-   * @param {{ nowMs?: number, effectId?: string, variant?: 'golden'|'wrath'|null, lifetimeSec?: number, force?: boolean, x?: number, y?: number, random?: () => number }} [opts]
+   * Põe um Eco extra no Santuário, além dos que já estão (até SHIMMER_MAX_ACTIVE).
+   * Usado pelo debug e por quem não é o timer natural.
+   * @param {{ nowMs?: number, effectId?: string, variant?: 'golden'|'wrath'|null, lifetimeSec?: number, x?: number, y?: number, random?: () => number }} [opts]
    */
   spawnShimmer(opts = {}) {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
-    if (this.shimmer && !opts.force) {
-      return { ok: false, reason: 'already_active', shimmer: this.shimmer };
+    if (this.shimmers.length >= SHIMMER_MAX_ACTIVE) {
+      return { ok: false, reason: 'max_active', shimmer: null };
     }
     if (opts.effectId) {
       const def = getShimmerEffect(opts.effectId);
@@ -1323,7 +1366,7 @@ export class GameState {
       return { ok: false, reason: 'requires_catabase', shimmer: null };
     }
 
-    this.shimmer = createShimmerInstance({
+    const placed = this.#addShimmer(createShimmerInstance({
       nowMs: this._clockMs,
       catabaseActive: this.catabaseActive,
       catabaseStage: this.catabaseStage(),
@@ -1334,10 +1377,10 @@ export class GameState {
       random: typeof opts.random === 'function' ? opts.random : this._random,
       x: opts.x,
       y: opts.y,
-    });
+    }));
     this.invalidateEconomyCache();
     this.#bump();
-    return { ok: true, shimmer: this.shimmer };
+    return { ok: true, shimmer: placed };
   }
 
   /**
@@ -1352,30 +1395,27 @@ export class GameState {
   }
 
   /**
-   * Clica no Eco do Acheron ativo e aplica a recompensa/buff correspondente.
-   * @param {{ nowMs?: number, random?: () => number }} [opts]
+   * Clica num Eco do Acheron e aplica a recompensa/buff correspondente.
+   * @param {{ shimmerId?: string, nowMs?: number, random?: () => number }} [opts] sem shimmerId = o primeiro
    */
   clickShimmer(opts = {}) {
     if (opts.nowMs != null && Number.isFinite(Number(opts.nowMs))) {
       this._clockMs = Math.floor(Number(opts.nowMs));
     }
-    if (!this.shimmer) {
+    const target = opts.shimmerId
+      ? this.shimmers.find((s) => s.id === opts.shimmerId)
+      : this.shimmers[0];
+    if (!target) {
       return { ok: false, reason: 'no_shimmer' };
     }
-    const luckMult = this.shimmerLuckMult();
-    if (this._clockMs >= Number(this.shimmer.expiresAt)) {
-      this.shimmer = null;
-      this.shimmersMissed += 1;
-      this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
-        ...(this._shimmerSpawnRange || {}),
-        luckMult,
-      });
+    if (this._clockMs >= Number(target.expiresAt)) {
+      this.#removeShimmer(target, { missed: true });
       this.invalidateEconomyCache();
       this.#bump();
       return { ok: false, reason: 'expired' };
     }
 
-    const activeShimmer = this.shimmer;
+    const activeShimmer = target;
     const currentSps = this.sps();
     const resolved = resolveShimmerClickEffect({
       shimmer: activeShimmer,
@@ -1390,11 +1430,7 @@ export class GameState {
       return resolved;
     }
 
-    this.shimmer = null;
-    this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
-      ...(this._shimmerSpawnRange || {}),
-      luckMult,
-    });
+    this.#removeShimmer(activeShimmer);
     this.shimmersClicked += 1;
     if (resolved.variant === 'wrath') {
       this.wrathClicked += 1;
@@ -1466,26 +1502,29 @@ export class GameState {
       this.invalidateEconomyCache();
     }
 
-    // 2. Expiração ou spawn do Eco do Acheron
-    if (this.shimmer) {
-      if (this._clockMs >= Number(this.shimmer.expiresAt)) {
-        this.shimmer = null;
-        this.shimmersMissed += 1;
-        this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
-          ...(this._shimmerSpawnRange || {}),
-          luckMult: this.shimmerLuckMult(),
-        });
+    // 2. Ecos do Acheron: cada um expira sozinho; o timer do natural só corre sem natural na tela.
+    for (const s of this.shimmers) {
+      if (this._clockMs >= Number(s.expiresAt)) {
+        this.#removeShimmer(s, { missed: true });
         this.invalidateEconomyCache();
       }
-    } else {
+    }
+    if (!this.hasLeadShimmer()) {
       this._nextShimmerInSec -= dt;
       if (this._nextShimmerInSec <= 0) {
-        this.shimmer = createShimmerInstance({
+        const placed = this.#addShimmer(createShimmerInstance({
           nowMs: this._clockMs,
           catabaseActive: this.catabaseActive,
           catabaseStage: this.catabaseStage(),
           random: this._random,
-        });
+        }), { lead: true });
+        // Tela cheia de extras: tenta de novo no próximo ciclo em vez de travar o timer.
+        if (!placed) {
+          this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
+            ...(this._shimmerSpawnRange || {}),
+            luckMult: this.shimmerLuckMult(),
+          });
+        }
         this.invalidateEconomyCache();
       }
     }
@@ -1846,24 +1885,16 @@ export class GameState {
       grimoire: res.state,
     };
 
+    // Mão do Destino (Force the Hand of Fate): Eco extra, somado aos que já estão na tela.
     if (res.spawnShimmerVariant) {
-      if (res.spawnShimmerVariant === 'wrath') {
-        this.shimmer = createShimmerInstance({
-          nowMs: this._clockMs,
-          catabaseActive: true,
-          variant: 'wrath',
-          effectId: res.spawnShimmerEffectId || 'clot_acheron',
-          random: this._random,
-        });
-      } else {
-        this.shimmer = createShimmerInstance({
-          nowMs: this._clockMs,
-          catabaseActive: this.catabaseActive,
-          variant: 'golden',
-          effectId: res.spawnShimmerEffectId || 'mare_acheron',
-          random: this._random,
-        });
-      }
+      const wrath = res.spawnShimmerVariant === 'wrath';
+      this.#addShimmer(createShimmerInstance({
+        nowMs: this._clockMs,
+        catabaseActive: wrath ? true : this.catabaseActive,
+        variant: wrath ? 'wrath' : 'golden',
+        effectId: res.spawnShimmerEffectId || (wrath ? 'clot_acheron' : 'mare_acheron'),
+        random: this._random,
+      }));
     }
     if (res.soulsGain && cmp(res.soulsGain, '0') > 0) {
       this.#credit(res.soulsGain);
@@ -2510,7 +2541,7 @@ export class GameState {
     this.souls = '0';
     this.runSouls = '0';
     this.clickCount = 0;
-    this.shimmer = null;
+    this.shimmers = [];
     this.activeBuffs = {};
     // Fase F5: Néctar, generatorLevels e minigames PERSISTEM entre Catábases; só reseta o Frenesi da corrida.
     this.nectarFrenzyUsedThisRun = false;
@@ -3229,6 +3260,7 @@ export class GameState {
       juizoCurrentStreak: this.juizoCurrentStreak,
       eduLogsSeen: [...this.eduLogsSeen],
       milestones: { ...this.milestones, ascensionOpen: Boolean(this.ascensionOpen) },
+      shimmers: this.shimmers.map((s) => ({ ...s })),
       shimmer: this.shimmer ? { ...this.shimmer } : null,
       activeBuffs: { ...this.activeBuffs },
       shimmersClicked: this.shimmersClicked,

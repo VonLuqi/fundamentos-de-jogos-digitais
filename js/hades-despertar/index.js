@@ -1448,8 +1448,8 @@ async function init() {
     onLetheFirstUnlock: () => {
       api.requestSync();
     },
-    onClickShimmer: () => {
-      const res = state.clickShimmer();
+    onClickShimmer: (shimmerId) => {
+      const res = state.clickShimmer({ shimmerId });
       if (res?.ok) {
         const reducedMotion = juicePrefersReducedMotion();
         const prefs = uiRef.renderer?.getPerfPrefs?.() || { particles: true, fancy: true };
