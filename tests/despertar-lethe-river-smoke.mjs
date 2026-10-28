@@ -348,6 +348,13 @@ run('selo otimista: sem rollback por Essência/prereq; reject não replace', () 
   assert.ok(!/mode: 'replace',\s*\n\s*ok: false/.test(apiSrc), 'reject não usa replace');
   // Recusa que persiste depois do flush+retry = selo fantasma: desfaz em vez de manter.
   assert.ok(sealBody.includes('definitiveRefusal') && /definitiveRefusal\)\s*\{\s*\n\s*rollbackUnknown/.test(sealBody), 'recusa definitiva desfaz o selo');
+  // Selos em sequência batem no limite (429): espera o Retry-After em vez de largar o pai só local.
+  assert.ok(/status !== 429/.test(sealBody) && sealBody.includes('retryAfterSec'), '429 no selo espera e tenta de novo');
+  // Pai ainda a caminho do servidor não faz o filho ser desfeito.
+  assert.ok(/payload\?\.state/.test(sealBody) && /!serverTalents\.includes\(p\)/.test(sealBody), 'só desfaz se o servidor já tem os pais');
+  // Uma requisição por selo: nada de flush antes do talentBuy.
+  const persistBody = sealBody.slice(sealBody.indexOf('const persist = async'));
+  assert.ok(persistBody.indexOf('buyWithBackoff()') < persistBody.indexOf('await api.flush()'), 'flush só no retry');
 });
 
 run('Ritual recusado pelo servidor não vira Lethe só local', () => {

@@ -50,7 +50,7 @@ import {
   JUDGES_REFUSED_TICKER,
 } from './config/constants.js';
 import { presentGrimoireAwards } from '../grimorio-awards.js';
-import { add } from './core/decimal.js';
+import { add, cmp } from './core/decimal.js';
 import { getTalent } from './config/talents.js';
 
 let apiWarningTimer = null;
@@ -1232,18 +1232,44 @@ async function init() {
       api.requestSync?.();
     };
 
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // Selar em sequência estoura o limite do Despertar (60 req/min por IP): 429 espera o
+    // Retry-After em vez de desistir — desistir deixava o pai só no navegador e o filho,
+    // logo depois, era recusado por "faltam vertentes".
+    const buyWithBackoff = async () => {
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          return await api.talentBuy(id);
+        } catch (err) {
+          if (!(err instanceof ApiError) || err.status !== 429 || attempt >= 3) throw err;
+          await sleep(Math.min(Math.max(Number(err.retryAfterSec) || 3, 1), 30) * 1000);
+        }
+      }
+    };
+
+    // Recusa só é definitiva se o servidor já sabe de tudo que o selo depende: pai ainda a
+    // caminho (só local) não desfaz o filho — o próximo sync une os selos.
+    const isDefinitiveRefusal = (err, msg) => {
+      const server = err instanceof ApiError ? err.payload?.state : null;
+      if (!server) return false;
+      if (/faltam vertentes/i.test(msg)) {
+        const serverTalents = (server.talents ?? server.talents_state ?? []).map(String);
+        const parents = getTalent(id)?.requires?.talentIds || [];
+        return !parents.some((p) => s.talents.includes(p) && !serverTalents.includes(p));
+      }
+      if (/essência insuficiente/i.test(msg)) {
+        return server.mnemosyne != null && cost != null && cmp(server.mnemosyne, cost) < 0;
+      }
+      return false;
+    };
+
     const persist = async () => {
       s.ascensionOpen = true;
       s.milestones = { ...s.milestones, ascensionOpen: true };
       api.markDirty();
-      // Flush primeiro: grava pais otimistas no DB (Catábase aceita newSpend ≤ mne).
+      // Uma requisição por selo; o flush só entra quando o servidor acusa pai/carteira atrasados.
       try {
-        await api.flush();
-      } catch {
-        /* reject agora é reconcile — segue para talentBuy */
-      }
-      try {
-        await api.talentBuy(id);
+        await buyWithBackoff();
       } catch (buyErr) {
         const buyMsg = buyErr instanceof ApiError
           ? buyErr.message
@@ -1258,12 +1284,12 @@ async function init() {
             await api.flush();
           } catch { /* ignore */ }
           try {
-            await api.talentBuy(id);
+            await buyWithBackoff();
           } catch (retryErr) {
-            // Recusado de novo depois do flush: o servidor não tem os pais ou a Essência.
-            // Manter o selo seria um fantasma que some no F5 — desfaz e avisa.
+            // Recusado de novo depois do flush e o servidor já tem tudo de que o selo depende
+            // (ou não tem a Essência): manter seria um fantasma que some no F5 — desfaz.
             const retryMsg = retryErr instanceof ApiError ? retryErr.message : String(retryErr?.message || '');
-            if (/faltam vertentes|essência insuficiente/i.test(retryMsg)) retryErr.definitiveRefusal = true;
+            if (isDefinitiveRefusal(retryErr, retryMsg)) retryErr.definitiveRefusal = true;
             throw retryErr;
           }
           return;
