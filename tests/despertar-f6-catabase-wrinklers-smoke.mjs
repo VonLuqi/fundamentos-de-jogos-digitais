@@ -460,6 +460,23 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   assert.equal(ringEl.children[1].classList.contains('is-shiny'), true);
   assert.equal(ringEl.children[1].dataset.spriteId, 'sanguessuga_shiny');
   assert.equal(ringEl.children[2].hidden, true);
+  const sipCount = ringEl.children[0].children.filter(
+    (node) => String(node.className).includes('despertar-leech__sip'),
+  ).length;
+  assert.equal(sipCount, 3, 'filete de sucção no slot visível');
+  view.playClickHit(0, { reducedMotion: false });
+  assert.equal(ringEl.children[0].classList.contains('is-hit'), true, 'clique pisca o verme');
+  const taps = stageHost.children.filter(
+    (node) => String(node.className).includes('despertar-leech-burst--tap'),
+  );
+  assert.equal(taps.length, 4, 'clique solta partículas');
+  view.playClickHit(1, { reducedMotion: true });
+  assert.equal(ringEl.children[1].classList.contains('is-hit'), true);
+  assert.equal(
+    stageHost.children.filter((node) => String(node.className).includes('despertar-leech-burst--tap')).length,
+    4,
+    'reduced-motion não soma partículas',
+  );
 
   // Distribuição orgânica + assets sem fundo preto.
   const p0 = leechSlotPolarPosition(0, 10);
@@ -483,8 +500,9 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   floatLayer.appendChild = (n) => { floatLayer.children.push(n); };
   floatLayer.querySelectorAll = () => [];
   particleLayer.querySelectorAll = () => [];
+  const burstStage = fakeDoc.createElement('div');
   const floatView = new LeechRingView({ document: fakeDoc }).mount({
-    stageHost: fakeDoc.createElement('div'),
+    stageHost: burstStage,
     particleLayer,
     floatLayer,
   });
@@ -500,10 +518,15 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
     assert.match(String(floatNode.className), /despertar-float/);
     assert.match(String(floatNode.textContent), /Sanguessuga estourada/);
     assert.equal(floatLayer.children.includes(floatNode), true, 'float vai na float-layer');
+    const bursts = burstStage.children.filter(
+      (node) => String(node.className).includes('despertar-leech-burst'),
+    );
+    assert.ok(bursts.length >= 2, 'estalo no ponto da sanguessuga');
     assert.equal(floatTimers.length >= 1, true, 'fallback de release agendado');
     floatTimers[0]();
     assert.equal(floatNode.removed, true, 'release remove o float (não gruda na tela)');
     assert.equal(floatNode.dataset.leechFloatReleased, '1');
+    assert.equal(bursts.every((node) => node.removed), true, 'estalo sai junto com o float');
   } finally {
     globalThis.setTimeout = prevSetTimeout;
   }

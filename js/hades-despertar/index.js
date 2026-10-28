@@ -1528,7 +1528,12 @@ async function init() {
         /* offline / sem Salão — fallback estático em unitPersona */
       }
     }
-    seedUnitNamePool(people);
+    seedUnitNamePool(people, user ? {
+      self: {
+        fullName: user.fullName || user.name || '',
+        username: user.username || '',
+      },
+    } : {});
   })();
 
   const reap = document.getElementById('despertar-reap');

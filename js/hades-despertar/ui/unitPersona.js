@@ -1,6 +1,8 @@
 /**
  * Personas das unidades nas prateleiras / órbita (paridade “Memaw, idade 89”).
- * Nome = mistura estável de nomes e usernames da turma; idade determinística por índice.
+ * Almas e servos misturam a turma. O resto junta um nome da turma a um epíteto do tipo.
+ * O Imperador é um clone da conta logada: todos se chamam “Imperador” + o username.
+ * Idade determinística por índice.
  */
 
 /** Fallback quando a API da turma ainda não hidratou (offline / smoke). */
@@ -20,12 +22,38 @@ const FALLBACK_HANDLES = Object.freeze([
   'alma', 'umbra', 'charon', 'hades', 'persefone', 'thanatos',
 ]);
 
+/** Epítetos curtos (≤9) para caber com um nome da turma no teto de 22. */
+const UNIT_EPITHETS = Object.freeze({
+  cerberian_hound: Object.freeze(['Cérbero', 'Tricéfalo', 'Goela', 'Matilha', 'Farejo']),
+  tartarus_judge: Object.freeze(['Juiz', 'Minos', 'Éaco', 'Veredito', 'Sentença']),
+  phlegethon_forge: Object.freeze(['Forja', 'Bigorna', 'Brasa', 'Tenaz']),
+  obsidian_throne: Object.freeze(['Trono', 'Cetro', 'Obsidiana', 'Basalto']),
+  mnemosyne_temple: Object.freeze(['Templo', 'Memória', 'Moira', 'Hino']),
+  styx_tower: Object.freeze(['Torre', 'Vigia', 'Estige', 'Pináculo']),
+  star_barge: Object.freeze(['Barca', 'Quilha', 'Galeão', 'Óbolo']),
+  tartarus_lab: Object.freeze(['Cadinho', 'Soro', 'Alambique', 'Forno']),
+  erebus_portal: Object.freeze(['Portal', 'Limiar', 'Érebo', 'Fenda']),
+  chronos_loom: Object.freeze(['Tear', 'Fio', 'Cronos', 'Urdidura']),
+  void_condenser: Object.freeze(['Vazio', 'Câmara', 'Núcleo', 'Extrato']),
+  moirai_prism: Object.freeze(['Prisma', 'Moira', 'Cristal', 'Faceta']),
+  fate_forge: Object.freeze(['Destino', 'Forja', 'Bigorna', 'Acaso']),
+  fractal_engine: Object.freeze(['Motor', 'Fractal', 'Eixo', 'Malha']),
+  oracle_console: Object.freeze(['Oráculo', 'Console', 'Bronze', 'Código']),
+  chthonic_idleverse: Object.freeze(['Verso', 'Esfera', 'Ctônio', 'Acheron']),
+  cortex_baker: Object.freeze(['Padeiro', 'Forno', 'Córtex', 'Sonho']),
+});
+
+const PLAIN_NAME_IDS = new Set(['wandering_shade', 'charon_servants']);
+
 /** @type {{ given: string[], family: string[], handles: string[] }} */
 let _pool = {
   given: [...FALLBACK_GIVEN],
   family: [...FALLBACK_FAMILY],
   handles: [...FALLBACK_HANDLES],
 };
+
+/** Username (ou prenome) da conta logada — todos os Imperadores usam este token. */
+let _selfToken = '';
 
 function hashSeed(text) {
   const s = String(text || '');
@@ -87,7 +115,7 @@ function tokenizeFullName(fullName) {
  * Alimenta o pool com colegas (+ jogador). Pode chamar de novo após fetch.
  * Com ≥3 alunos, troca o fallback pela turma (nomes reais da sala).
  * @param {Array<{ fullName?: string, name?: string, username?: string }|string>} people
- * @param {{ replace?: boolean }} [opts] — replace força só a lista passada
+ * @param {{ replace?: boolean, self?: { fullName?: string, name?: string, username?: string } }} [opts]
  */
 export function seedUnitNamePool(people = [], opts = {}) {
   const rows = Array.isArray(people) ? people.filter(Boolean) : [];
@@ -122,6 +150,7 @@ export function seedUnitNamePool(people = [], opts = {}) {
     family: [...family],
     handles: [...handles],
   };
+  _selfToken = selfDisplayToken(opts.self);
   return {
     given: _pool.given.length,
     family: _pool.family.length,
@@ -137,6 +166,7 @@ export function resetUnitNamePool() {
     family: [...FALLBACK_FAMILY],
     handles: [...FALLBACK_HANDLES],
   };
+  _selfToken = '';
 }
 
 export function getUnitNamePoolSize() {
@@ -179,6 +209,39 @@ export function mixUnitDisplayName(seed) {
   return clampDisplayName(name);
 }
 
+/** Um único token da turma — prenome, ou a primeira palavra de um handle. */
+function oneStudentToken(seed) {
+  const s = seed >>> 0;
+  const given = pick(_pool.given, s, 3);
+  if (given) return shortenToken(given, 12);
+  const titled = titleHandle(pick(_pool.handles, s, 5));
+  const first = titled.split(' ').filter(Boolean)[0] || '';
+  return shortenToken(first, 12) || 'Alma';
+}
+
+function mixThemedDisplayName(seed, epithets) {
+  const s = seed >>> 0;
+  const token = oneStudentToken(s);
+  const epithet = pick(epithets, s, 13);
+  const name = (s % 2 === 0) ? `${token} ${epithet}` : `${epithet} ${token}`;
+  return clampDisplayName(name);
+}
+
+function selfDisplayToken(person) {
+  if (!person || typeof person !== 'object') return '';
+  const user = String(person.username || '').replace(/^@+/, '').trim();
+  if (user.length >= 2) return shortenToken(user, 12);
+  const full = person.fullName || person.name || '';
+  const given = tokenizeFullName(full).given[0] || '';
+  return given ? shortenToken(given, 12) : '';
+}
+
+function emperorDisplayName() {
+  const token = _selfToken
+    || shortenToken(_pool.handles[0] || _pool.given[0] || 'Alma', 12);
+  return clampDisplayName(`Imperador ${token}`);
+}
+
 /**
  * Persona estável por unidade (mesmo índice → mesmo nome/idade na sessão).
  * @param {string} generatorId
@@ -191,8 +254,13 @@ export function describeUnitPersona(generatorId, index = 0, opts = {}) {
   const seed = hashSeed(`${generatorId}|${index}|${rarity}`);
   // Idade “de Submundo”: 19–109 (eco Cookie grandma).
   const age = 19 + (seed % 91);
+  const epithets = UNIT_EPITHETS[generatorId];
+  let name;
+  if (generatorId === 'the_emperor') name = emperorDisplayName();
+  else if (PLAIN_NAME_IDS.has(generatorId) || !epithets) name = mixUnitDisplayName(seed);
+  else name = mixThemedDisplayName(seed, epithets);
   return {
-    name: mixUnitDisplayName(seed),
+    name,
     age,
     seed,
   };

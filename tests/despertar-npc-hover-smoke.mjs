@@ -237,14 +237,27 @@ run('unitPersona: mistura turma + idade estável', () => {
     { fullName: 'Maria Clara Souza', username: 'mclara' },
     { fullName: 'Pedro Henrique Lima', username: 'phlima' },
     { fullName: 'Ana Beatriz Costa', username: 'anabc' },
-  ]);
+  ], { self: { username: 'vonluqi', fullName: 'Von Marques' } });
   assert.equal(seeded.replaced, true);
+  const student = /Maria|Pedro|Ana|Clara|Souza|Lima|Costa|Henrique|Beatriz|mclara|phlima|anabc/i;
   const a = describeUnitPersona('cerberian_hound', 0);
   const b = describeUnitPersona('cerberian_hound', 0);
   assert.equal(a.name, b.name);
   assert.equal(a.age, b.age);
-  assert.match(a.name, /Maria|Pedro|Ana|Clara|Souza|Lima|Costa|Henrique|Beatriz|mclara|phlima|anabc/i);
+  assert.match(a.name, student);
+  assert.match(a.name, /Cérbero|Tricéfalo|Goela|Matilha|Farejo/);
   assert.ok(a.age >= 19 && a.age <= 109);
+
+  for (const id of ['wandering_shade', 'charon_servants']) {
+    const plain = describeUnitPersona(id, 0);
+    assert.match(plain.name, student);
+    assert.doesNotMatch(plain.name, /^Imperador\b/);
+  }
+
+  const emperor = describeUnitPersona('the_emperor', 0);
+  const emperorAgain = describeUnitPersona('the_emperor', 4);
+  assert.equal(emperor.name, 'Imperador vonluqi');
+  assert.equal(emperorAgain.name, emperor.name);
   resetUnitNamePool();
 });
 

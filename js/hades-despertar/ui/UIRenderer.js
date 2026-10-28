@@ -2417,10 +2417,14 @@ export class UIRenderer {
   #handlePopLeech(slot) {
     if (!this.state?.popLeech) return;
     const res = this.state.popLeech(slot);
-    if (res?.ok && res.popped) {
-      this._leechRingView?.spawnPopFeedback(res, {
-        reducedMotion: juicePrefersReducedMotion(),
-      });
+    if (!res?.ok) return;
+    const reducedMotion = juicePrefersReducedMotion();
+    this._leechRingView?.playClickHit(slot, {
+      reducedMotion,
+      shiny: Boolean(res.leech?.shiny),
+    });
+    if (res.popped) {
+      this._leechRingView?.spawnPopFeedback(res, { reducedMotion });
       this.markDirty('all');
     }
   }

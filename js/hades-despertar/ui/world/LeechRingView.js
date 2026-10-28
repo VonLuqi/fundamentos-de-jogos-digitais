@@ -11,11 +11,14 @@
 
 import { CATABASE_STAGES } from '../../config/catabase.js';
 import { LEECH_MAX_CAP } from '../../config/constants.js';
-import { getUpgrade } from '../../config/upgrades.js';
 import { cmp } from '../../core/decimal.js';
 import { formatSouls } from '../NumberFormatter.js';
 import { acquirePooledNode, releasePooledNode } from '../particles.js';
 import { catabaseSprite, createSpriteNode } from './SpriteAtlas.js';
+
+/** Brasas visíveis por estágio da Catábase (0 = nenhuma). */
+const CATABASE_MOTE_COUNT = Object.freeze([0, 6, 12, 20]);
+const CATABASE_BOLT_COUNT = Object.freeze([0, 0, 4, 10]);
 
 /** Pseudo-aleatório determinístico por slot (−1..1) — scatter estável entre syncs. */
 function leechSlotNoise(slot, salt = 0) {
@@ -64,7 +67,12 @@ export class LeechRingView {
     this._pledgeBtn = null;
     this._covenantBtn = null;
     this._slotButtons = [];
+    this._slotSips = [];
+    this._popOrigin = null;
     this._stageBackdrop = null;
+    this._moteLayer = null;
+    this._motes = [];
+    this._bolts = [];
     this._lastStageSpriteId = null;
   }
 
@@ -105,6 +113,15 @@ export class LeechRingView {
         btn.hidden = true;
         btn.addEventListener?.('click', (event) => {
           event?.stopPropagation?.();
+          const style = btn.style;
+          const read = (name) => style?.getPropertyValue?.(name)
+            || style?.props?.[name]
+            || '';
+          this._popOrigin = {
+            x: read('--leech-x'),
+            y: read('--leech-y'),
+            shiny: Boolean(btn.classList?.contains?.('is-shiny')),
+          };
           this._onPopLeech?.(slot);
         });
         const spriteHost = createSpriteNode(
@@ -113,12 +130,60 @@ export class LeechRingView {
           { className: 'despertar-sprite despertar-leech__sprite' },
         );
         btn.append?.(spriteHost);
+        const sips = [];
+        for (let i = 0; i < 3; i += 1) {
+          const sip = this._doc.createElement('span');
+          sip.className = 'despertar-leech__sip';
+          sip.setAttribute?.('aria-hidden', 'true');
+          sip.style?.setProperty?.('--sip-d', `${(i * 0.42).toFixed(2)}s`);
+          sip.style?.setProperty?.('--sip-dur', `${(1.15 + i * 0.22).toFixed(2)}s`);
+          sips.push(sip);
+        }
+        this._slotSips.push(sips);
+        this.#attachSips(btn, sips);
         ring.append?.(btn);
         this._slotButtons.push(btn);
       }
 
       this._ringEl = ring;
       this._stageHost.append?.(ring);
+    }
+
+    if (this._stageHost && !this._moteLayer) {
+      const layer = this._doc.createElement('div');
+      layer.className = 'despertar-catabase-motes';
+      layer.id = 'despertar-catabase-motes';
+      layer.setAttribute('aria-hidden', 'true');
+      layer.hidden = true;
+      const total = CATABASE_MOTE_COUNT[CATABASE_MOTE_COUNT.length - 1];
+      for (let i = 0; i < total; i += 1) {
+        const mote = this._doc.createElement('span');
+        mote.className = 'despertar-catabase-mote';
+        mote.hidden = true;
+        const drift = ((i % 5) - 2) * 10;
+        mote.style?.setProperty?.('--mx', `${10 + ((i * 37) % 80)}%`);
+        mote.style?.setProperty?.('--my', `${18 + ((i * 19) % 58)}%`);
+        mote.style?.setProperty?.('--md', `${((i * 0.23) % 2.6).toFixed(2)}s`);
+        mote.style?.setProperty?.('--mdur', `${(2.4 + (i % 4) * 0.45).toFixed(2)}s`);
+        mote.style?.setProperty?.('--mdx', `${drift}px`);
+        layer.append?.(mote);
+        this._motes.push(mote);
+      }
+      const boltTotal = CATABASE_BOLT_COUNT[CATABASE_BOLT_COUNT.length - 1];
+      for (let i = 0; i < boltTotal; i += 1) {
+        const bolt = this._doc.createElement('span');
+        bolt.className = 'despertar-catabase-bolt';
+        bolt.hidden = true;
+        bolt.style?.setProperty?.('--bx', `${14 + ((i * 53) % 72)}%`);
+        bolt.style?.setProperty?.('--by', `${16 + ((i * 29) % 58)}%`);
+        bolt.style?.setProperty?.('--bd', `${((i * 0.41) % 2.2).toFixed(2)}s`);
+        bolt.style?.setProperty?.('--bdur', `${(1.5 + (i % 5) * 0.32).toFixed(2)}s`);
+        bolt.style?.setProperty?.('--br', `${-32 + ((i * 19) % 64)}deg`);
+        layer.append?.(bolt);
+        this._bolts.push(bolt);
+      }
+      this._moteLayer = layer;
+      this._stageHost.append?.(layer);
     }
 
     const pactParent = altarCol || this._stageHost;
@@ -230,6 +295,7 @@ export class LeechRingView {
               { className: 'despertar-sprite despertar-leech__sprite' },
             ),
           );
+          this.#attachSips(btn, this._slotSips[s]);
         }
       }
     }
@@ -262,6 +328,7 @@ export class LeechRingView {
       const hasResearchHub = Array.isArray(state.upgrades) && state.upgrades.includes('concilio_das_moiras');
       const showBar = hasResearchHub || structStage >= 1;
       this._pactBar.hidden = !showBar;
+      if (!showBar) this.#syncStageMotes(0, { staticMode });
 
       if (showBar) {
         const stageInfo = CATABASE_STAGES[effStage] || CATABASE_STAGES[0];
@@ -279,47 +346,36 @@ export class LeechRingView {
         if (this._stageBadge) {
           this._stageBadge.textContent = statusText;
         }
+        this.#syncStageMotes(effStage, { staticMode, contained: covOn || pledgeOn });
 
-        const resTargetId = state.catabase?.researchTargetId || null;
-        const resRem = Math.ceil(Number(state.catabase?.researchRemainingSec || 0));
-        if (this._researchBadge) {
-          if (resTargetId && resRem > 0) {
-            const upDef = getUpgrade(resTargetId);
-            this._researchBadge.hidden = false;
-            const mins = Math.floor(resRem / 60);
-            const secs = resRem % 60;
-            const clock = mins > 0
-              ? `${mins}:${String(secs).padStart(2, '0')}`
-              : `${secs}s`;
-            this._researchBadge.textContent = `Pesquisa: ${upDef?.name || resTargetId} (${clock}) · aba Arquivo`;
-          } else if (hasResearchHub) {
-            this._researchBadge.hidden = false;
-            this._researchBadge.textContent = 'Arquivo Estígio · detalhes na aba Arquivo';
-          } else {
-            this._researchBadge.hidden = true;
-          }
-        }
+        if (this._researchBadge) this._researchBadge.hidden = true;
 
-        const canUsePacts = structStage >= 3 || (Array.isArray(state.upgrades) && state.upgrades.includes('pacto_primordial'));
-        if (this._pledgeBtn) {
-          this._pledgeBtn.hidden = !canUsePacts || covOn;
-          if (!this._pledgeBtn.hidden) {
-            const pCost = typeof state.pledgeCost === 'function' ? state.pledgeCost() : '1';
-            this._pledgeBtn.textContent = pledgeOn
-              ? `Renovar Trégua (${formatSouls(pCost)})`
-              : `Juramento de Trégua (${formatSouls(pCost)} almas)`;
-            this._pledgeBtn.disabled = cmp(state.souls || '0', pCost) < 0 && !state.debugFlags?.freeShopping;
-          }
-        }
-        if (this._covenantBtn) {
-          this._covenantBtn.hidden = !canUsePacts;
-          if (!this._covenantBtn.hidden) {
-            this._covenantBtn.textContent = covOn
-              ? 'Revogar Aliança Eterna'
-              : 'Aliança Eterna (−5% SPS)';
-          }
-        }
+        if (this._pledgeBtn) this._pledgeBtn.hidden = true;
+        if (this._covenantBtn) this._covenantBtn.hidden = true;
       }
+    }
+  }
+
+  #attachSips(btn, sips = []) {
+    if (!btn?.append) return;
+    for (const sip of sips || []) btn.append(sip);
+  }
+
+  #syncStageMotes(stage, { staticMode = false, contained = false } = {}) {
+    const layer = this._moteLayer;
+    if (!layer) return;
+    const level = Math.max(0, Math.min(CATABASE_MOTE_COUNT.length - 1, Math.floor(Number(stage) || 0)));
+    const count = CATABASE_MOTE_COUNT[level];
+    const bolts = CATABASE_BOLT_COUNT[level];
+    layer.hidden = count === 0 && bolts === 0;
+    if (layer.dataset) layer.dataset.stage = String(level);
+    layer.classList?.toggle?.('is-static', Boolean(staticMode) || Boolean(contained));
+    layer.classList?.toggle?.('is-contained', Boolean(contained));
+    for (let i = 0; i < this._motes.length; i += 1) {
+      this._motes[i].hidden = i >= count;
+    }
+    for (let i = 0; i < this._bolts.length; i += 1) {
+      this._bolts[i].hidden = i >= bolts;
     }
   }
 
@@ -353,6 +409,105 @@ export class LeechRingView {
   }
 
   /**
+   * Anel e fragmentos no ponto da sanguessuga. Coordenadas do stage, não da float-layer.
+   */
+  #spawnPopBurst(doc, origin, shiny) {
+    const host = this._stageHost || this._particleLayer;
+    if (!host?.append || !doc?.createElement) return [];
+    const pct = (value, fallback) => {
+      const raw = String(value || '').trim();
+      if (!raw) return fallback;
+      return raw.endsWith('%') ? raw : `${raw}%`;
+    };
+    const x = pct(origin?.x, '50%');
+    const y = pct(origin?.y, '50%');
+    const nodes = [];
+    const place = (node, dx, dy, delay) => {
+      node.setAttribute?.('aria-hidden', 'true');
+      if (shiny) node.className += ' is-shiny';
+      node.style?.setProperty?.('--burst-x', x);
+      node.style?.setProperty?.('--burst-y', y);
+      node.style?.setProperty?.('--burst-dx', `${dx}px`);
+      node.style?.setProperty?.('--burst-dy', `${dy}px`);
+      node.style?.setProperty?.('--burst-d', `${delay}s`);
+      host.append(node);
+      nodes.push(node);
+    };
+    const ring = doc.createElement('span');
+    ring.className = 'despertar-leech-burst despertar-leech-burst--ring';
+    place(ring, 0, 0, 0);
+    const bits = [
+      [-18, -22], [16, -26], [-10, 14], [20, 8], [0, -34],
+    ];
+    bits.forEach(([dx, dy], i) => {
+      const bit = doc.createElement('span');
+      bit.className = 'despertar-leech-burst';
+      place(bit, dx, dy, i * 0.02);
+    });
+    return nodes;
+  }
+
+  /**
+   * Cada clique (não só o estouro): o verme pisca e solta um punhado de partículas.
+   */
+  playClickHit(slot, opts = {}) {
+    const btn = this._slotButtons?.[slot];
+    if (!btn) return;
+    btn.classList?.toggle?.('is-hit', false);
+    try { void btn.offsetWidth; } catch { /* mock */ }
+    btn.classList?.toggle?.('is-hit', true);
+    if (typeof globalThis.setTimeout === 'function') {
+      const timer = globalThis.setTimeout(() => {
+        btn.classList?.toggle?.('is-hit', false);
+      }, 240);
+      if (typeof timer?.unref === 'function') timer.unref();
+    }
+    if (opts.reducedMotion) return;
+    const style = btn.style;
+    const read = (name) => style?.getPropertyValue?.(name) || style?.props?.[name] || '';
+    const motes = this.#spawnClickMotes(this._doc, {
+      x: read('--leech-x'),
+      y: read('--leech-y'),
+      shiny: Boolean(opts.shiny || btn.classList?.contains?.('is-shiny')),
+    });
+    if (typeof globalThis.setTimeout === 'function') {
+      const timer = globalThis.setTimeout(() => {
+        for (const mote of motes) {
+          try { mote.remove?.(); } catch { /* ignore */ }
+        }
+      }, 480);
+      if (typeof timer?.unref === 'function') timer.unref();
+    }
+  }
+
+  #spawnClickMotes(doc, origin) {
+    const host = this._stageHost || this._particleLayer;
+    if (!host?.append || !doc?.createElement) return [];
+    const pct = (value, fallback) => {
+      const raw = String(value || '').trim();
+      if (!raw) return fallback;
+      return raw.endsWith('%') ? raw : `${raw}%`;
+    };
+    const x = pct(origin?.x, '50%');
+    const y = pct(origin?.y, '50%');
+    const shiny = Boolean(origin?.shiny);
+    const bits = [[-14, -18], [12, -16], [-8, 12], [16, 6]];
+    return bits.map(([dx, dy], i) => {
+      const mote = doc.createElement('span');
+      mote.className = 'despertar-leech-burst despertar-leech-burst--tap';
+      if (shiny) mote.className += ' is-shiny';
+      mote.setAttribute?.('aria-hidden', 'true');
+      mote.style?.setProperty?.('--burst-x', x);
+      mote.style?.setProperty?.('--burst-y', y);
+      mote.style?.setProperty?.('--burst-dx', `${dx}px`);
+      mote.style?.setProperty?.('--burst-dy', `${dy}px`);
+      mote.style?.setProperty?.('--burst-d', `${i * 0.02}s`);
+      host.append(mote);
+      return mote;
+    });
+  }
+
+  /**
    * Dispara texto flutuante ao estourar uma Sanguessuga.
    * Sempre agenda remoção por timeout (prefers-reduced-motion zera animationend).
    */
@@ -372,11 +527,16 @@ export class LeechRingView {
     if (!node) return null;
     if (node.dataset) delete node.dataset.leechFloatReleased;
 
-    const prefix = result.leech?.shiny ? 'Sanguessuga Dourada!' : 'Sanguessuga estourada';
+    const origin = this._popOrigin;
+    this._popOrigin = null;
+    const shiny = Boolean(result.leech?.shiny || origin?.shiny);
+    const prefix = shiny ? 'Sanguessuga Dourada!' : 'Sanguessuga estourada';
     const payout = formatSouls(result.payout || '0');
     node.textContent = cmp(result.payout || '0', '0') > 0
       ? `${prefix} · +${payout}`
       : prefix;
+
+    const bursts = this.#spawnPopBurst(doc, origin, shiny);
 
     const x = 38 + Math.random() * 24;
     const y = 40 + Math.random() * 28;
@@ -402,7 +562,12 @@ export class LeechRingView {
     }
 
     this._activeFloats.push(node);
-    const release = () => this.#releaseFloat(doc, node);
+    const release = () => {
+      this.#releaseFloat(doc, node);
+      for (const burst of bursts) {
+        try { burst.remove?.(); } catch { /* ignore */ }
+      }
+    };
     node.addEventListener?.('animationend', release, { once: true });
     // Timeout duro: não depende de CSS/animationend (reduced-motion / cache velho).
     if (typeof globalThis.setTimeout === 'function') {

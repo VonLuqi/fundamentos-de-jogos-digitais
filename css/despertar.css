@@ -386,12 +386,12 @@
   /* visible: sombras da órbita / alminhas do clique não ficam “picadas” sob o SPS */
   overflow: visible;
   flex: 1 1 auto;
-  /* Cookie: Big Cookie ~40%+ da coluna esquerda */
-  min-height: max(16rem, 42%);
+  /* Cede altura no viewport curto: o botão do Juízo fica inteiro. */
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0.55rem 0 0.25rem;
+  margin: 0.35rem 0 0.15rem;
   /* Sem “quadro” — só atmosfera do Acheron */
   border: none;
   background:
@@ -488,6 +488,108 @@
   opacity: 0.28;
 }
 
+.despertar-catabase-motes {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.despertar-catabase-motes[hidden],
+.despertar-catabase-mote[hidden],
+.despertar-catabase-bolt[hidden] {
+  display: none;
+}
+
+.despertar-catabase-mote {
+  position: absolute;
+  left: var(--mx, 50%);
+  bottom: 8%;
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe4e6 0%, #d90429 42%, transparent 72%);
+  box-shadow: 0 0 6px rgba(217, 4, 41, 0.75);
+  animation: despertarCatabaseMote var(--mdur, 2.6s) ease-in infinite;
+  animation-delay: var(--md, 0s);
+}
+
+.despertar-catabase-motes[data-stage="2"] .despertar-catabase-mote {
+  width: 0.36rem;
+  height: 0.36rem;
+}
+
+.despertar-catabase-motes[data-stage="3"] .despertar-catabase-mote {
+  width: 0.42rem;
+  height: 0.42rem;
+  box-shadow: 0 0 10px rgba(217, 4, 41, 0.95);
+}
+
+.despertar-catabase-bolt {
+  position: absolute;
+  left: var(--bx, 50%);
+  top: var(--by, 40%);
+  width: 0.85rem;
+  height: 1.7rem;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 64'%3E%3Cpolygon points='20,0 8,28 16,26 4,64 28,30 16,34' fill='%23fff5f6'/%3E%3C/svg%3E") center / contain no-repeat;
+  filter: drop-shadow(0 0 5px rgba(217, 4, 41, 0.95));
+  opacity: 0;
+  transform: rotate(var(--br, -12deg));
+  transform-origin: 50% 0;
+  animation: despertarCatabaseBolt var(--bdur, 2.2s) ease-in infinite;
+  animation-delay: var(--bd, 0s);
+}
+
+.despertar-catabase-motes[data-stage="3"] .despertar-catabase-bolt {
+  width: 1.2rem;
+  height: 2.45rem;
+  filter: drop-shadow(0 0 9px rgba(255, 70, 90, 1));
+}
+
+.despertar-catabase-motes.is-contained .despertar-catabase-mote {
+  opacity: 0.35;
+  filter: saturate(0.6);
+}
+
+.despertar-catabase-motes.is-static .despertar-catabase-mote {
+  animation: none;
+  bottom: auto;
+  top: var(--my, 42%);
+}
+
+.despertar-catabase-motes.is-static .despertar-catabase-bolt {
+  animation: none;
+  opacity: 0.92;
+}
+
+.despertar-catabase-motes.is-contained .despertar-catabase-bolt {
+  animation: none;
+  opacity: 0.35;
+}
+
+@keyframes despertarCatabaseBolt {
+  0%, 100% { opacity: 0; }
+  10% { opacity: 1; }
+  18% { opacity: 0.25; }
+  26% { opacity: 1; }
+  48% { opacity: 0.8; }
+  64% { opacity: 0; }
+}
+
+@keyframes despertarCatabaseMote {
+  0% {
+    transform: translate(-50%, 8%) scale(0.7);
+    opacity: 0;
+  }
+  12% { opacity: 1; }
+  70% { opacity: 0.85; }
+  100% {
+    transform: translate(calc(-50% + var(--mdx, 0px)), -26vh) scale(0.2);
+    opacity: 0;
+  }
+}
+
 .despertar-leech-ring {
   position: absolute;
   inset: 0;
@@ -566,6 +668,115 @@
 .despertar-leech.is-static,
 .despertar-leech-ring.is-static .despertar-leech {
   animation: none;
+}
+
+.despertar-leech.is-hit .despertar-sprite__img {
+  filter: brightness(2.3) drop-shadow(0 0 14px rgba(255, 70, 90, 0.95));
+  animation: despertarLeechFlash 220ms ease-out;
+}
+
+.despertar-leech.is-shiny.is-hit .despertar-sprite__img {
+  filter: brightness(2.1) drop-shadow(0 0 14px rgba(245, 197, 66, 0.95));
+  animation-name: despertarLeechFlashGold;
+}
+
+@keyframes despertarLeechFlash {
+  0% { filter: brightness(1) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45)); }
+  28% { filter: brightness(2.6) drop-shadow(0 0 16px rgba(255, 60, 80, 1)); }
+  100% { filter: brightness(1) drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45)); }
+}
+
+@keyframes despertarLeechFlashGold {
+  0% { filter: brightness(1) drop-shadow(0 0 8px rgba(245, 197, 66, 0.55)); }
+  28% { filter: brightness(2.4) drop-shadow(0 0 16px rgba(255, 220, 120, 1)); }
+  100% { filter: brightness(1) drop-shadow(0 0 8px rgba(245, 197, 66, 0.55)); }
+}
+
+.despertar-leech__sip {
+  position: absolute;
+  left: 50%;
+  bottom: 8%;
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, 0);
+  background: radial-gradient(circle, #ffe4e6 0%, #d90429 55%, transparent 72%);
+  box-shadow: 0 0 6px rgba(217, 4, 41, 0.85);
+  animation: despertarLeechSiphon var(--sip-dur, 1.3s) ease-in infinite;
+  animation-delay: var(--sip-d, 0s);
+}
+
+.despertar-leech.is-shiny .despertar-leech__sip {
+  background: radial-gradient(circle, #fff6d8 0%, #f5c542 55%, transparent 72%);
+  box-shadow: 0 0 6px rgba(245, 197, 66, 0.85);
+}
+
+.despertar-leech.is-static .despertar-leech__sip,
+.despertar-leech-ring.is-static .despertar-leech__sip {
+  animation: none;
+  opacity: 0.75;
+}
+
+.despertar-leech-burst {
+  position: absolute;
+  left: var(--burst-x, 50%);
+  top: var(--burst-y, 50%);
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 8;
+  background: radial-gradient(circle, #fff 0%, #d90429 58%, transparent 72%);
+  animation: despertarLeechBurst 420ms ease-out forwards;
+  animation-delay: var(--burst-d, 0s);
+}
+
+.despertar-leech-burst--ring {
+  width: 1.35rem;
+  height: 1.35rem;
+  background: transparent;
+  border: 2px solid rgba(217, 4, 41, 0.9);
+  box-shadow: 0 0 10px rgba(217, 4, 41, 0.55);
+}
+
+.despertar-leech-burst.is-shiny {
+  background: radial-gradient(circle, #fff 0%, #f5c542 58%, transparent 72%);
+}
+
+.despertar-leech-burst--ring.is-shiny {
+  background: transparent;
+  border-color: rgba(245, 197, 66, 0.95);
+  box-shadow: 0 0 10px rgba(245, 197, 66, 0.55);
+}
+
+.despertar-leech-burst--tap {
+  width: 0.32rem;
+  height: 0.32rem;
+}
+
+@keyframes despertarLeechSiphon {
+  0% {
+    transform: translate(-50%, 0) scale(0.65);
+    opacity: 0;
+  }
+  16% { opacity: 1; }
+  100% {
+    transform: translate(-50%, -7rem) scale(0.3);
+    opacity: 0;
+  }
+}
+
+@keyframes despertarLeechBurst {
+  0% {
+    transform: translate(-50%, -50%) scale(0.35);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--burst-dx, 0px)), calc(-50% + var(--burst-dy, 0px))) scale(1.45);
+    opacity: 0;
+  }
 }
 
 @keyframes despertarLeechWrithe {
@@ -1476,11 +1687,28 @@
 }
 
 .despertar-catabase-bar__stage {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.despertar-catabase-bar:not(:has(.despertar-catabase-bar__research:not([hidden]))):not(:has(.despertar-catabase-bar__btn:not([hidden]))) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   margin: 0;
-  font-family: var(--font-title);
-  font-size: 0.76rem;
-  letter-spacing: 0.08em;
-  color: #fda4af;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .despertar-catabase-bar__research {
@@ -1509,7 +1737,8 @@
   z-index: 1;
   width: min(94%, 18.5rem);
   aspect-ratio: 1;
-  min-height: 12rem;
+  min-height: 0;
+  max-height: 100%;
   padding: 0;
   display: grid;
   place-items: center;
@@ -1525,6 +1754,19 @@
   color: var(--hades-gold-bright);
   cursor: pointer;
   overflow: visible;
+}
+
+@media (min-width: 981px) {
+  .despertar-reap-stage {
+    container-type: size;
+  }
+
+  .despertar-reap {
+    /* Quadrado que cabe na altura que sobra depois do botão do Juízo. */
+    width: min(94cqw, 100cqh, 18.5rem);
+    max-height: none;
+    min-height: 0;
+  }
 }
 
 .despertar-reap:hover .despertar-reap__foice {
@@ -2030,18 +2272,32 @@
 }
 
 .despertar-juizo-cta {
-  margin-top: 0.85rem;
+  margin-top: 0.65rem;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.despertar-col--acheron > .despertar-bakery,
+.despertar-col--acheron > .despertar-big-hud,
+.despertar-col--acheron > .despertar-active-buffs,
+.despertar-col--acheron > .despertar-hud,
+.despertar-col--acheron > .despertar-col__hint {
+  flex-shrink: 0;
 }
 
 .despertar-juizo-cta .btn-gold,
 .despertar-juizo-cta__btn {
   width: 100%;
+  min-height: 2.75rem;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
+  padding: 0.5rem 0.65rem;
+  letter-spacing: 0.08em;
+  overflow: visible;
 }
 
 .despertar-juizo-cta .btn-gold:disabled,
@@ -2052,15 +2308,21 @@
 }
 
 .despertar-juizo-cta__badge {
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 1.35rem;
+  height: 1.35rem;
   flex: 0 0 auto;
   filter: drop-shadow(0 0 6px rgba(207, 167, 89, 0.35));
 }
 
+.despertar-juizo-cta__label {
+  line-height: 1.15;
+  text-wrap: balance;
+}
+
 .despertar-juizo-cta__hint {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
   color: var(--hades-text-muted);
   font-style: italic;
 }
@@ -4583,6 +4845,7 @@
 
   .despertar-reap {
     min-height: 8.5rem;
+    max-height: none;
   }
 }
 
@@ -4608,6 +4871,11 @@
   .despertar-particle,
   .despertar-particle--rain,
   .despertar-particle--soul,
+  .despertar-catabase-mote,
+  .despertar-catabase-bolt,
+  .despertar-leech__sip,
+  .despertar-leech-burst,
+  .despertar-leech.is-hit .despertar-sprite__img,
   .despertar-styx-flash.is-active,
   .despertar-lethe-overlay.is-active .despertar-lethe-overlay__card,
   .despertar-big-souls.is-bump,
@@ -5623,20 +5891,22 @@ button.despertar-juizo-card:disabled {
   position: absolute;
   left: var(--shimmer-x, 50%);
   top: var(--shimmer-y, 45%);
-  transform: translate(-50%, -50%);
-  width: 64px;
-  height: 64px;
+  width: 72px;
+  height: 72px;
+  margin: 0;
   padding: 0;
-  border-radius: 50%;
-  border: 2px solid var(--hades-gold, #cfa759);
-  background: radial-gradient(circle, rgba(207, 167, 89, 0.35) 0%, rgba(12, 18, 24, 0.92) 78%);
-  box-shadow: 0 0 18px rgba(232, 212, 168, 0.55);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  appearance: none;
   cursor: pointer;
   pointer-events: auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  animation: despertar-shimmer-bob 2.2s ease-in-out infinite;
+  display: block;
+  transform: translate(-50%, -50%);
+  animation:
+    despertar-shimmer-tremor 0.38s ease-in-out infinite,
+    despertar-shimmer-fade 1.45s ease-in-out infinite;
 }
 
 .despertar-shimmer[hidden],
@@ -5644,25 +5914,19 @@ button.despertar-juizo-card:disabled {
   display: none;
 }
 
-.despertar-shimmer.is-wrath {
-  border-color: var(--hades-fire, #d90429);
-  background: radial-gradient(circle, rgba(217, 4, 41, 0.4) 0%, rgba(12, 18, 24, 0.94) 78%);
-  box-shadow: 0 0 20px rgba(217, 4, 41, 0.65);
-}
-
 .despertar-shimmer:focus-visible {
-  outline: 3px solid var(--hades-gold-bright, #e8d4a8);
-  outline-offset: 3px;
+  outline: 2px solid var(--hades-gold-bright, #e8d4a8);
+  outline-offset: 4px;
 }
 
 .despertar-shimmer.is-static {
   animation: none;
-  box-shadow: 0 0 0 2px rgba(232, 212, 168, 0.85);
+  opacity: 1;
 }
 
 .despertar-shimmer__sprite {
-  width: 48px;
-  height: 48px;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 
@@ -5711,19 +5975,45 @@ button.despertar-juizo-card:disabled {
   z-index: 8;
 }
 
-@keyframes despertar-shimmer-bob {
+@keyframes despertar-shimmer-tremor {
   0%,
   100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(-50%, -50%) translate(0, 0) rotate(-2.5deg);
+  }
+  25% {
+    transform: translate(-50%, -50%) translate(1.6px, -1.2px) rotate(2deg);
   }
   50% {
-    transform: translate(-50%, -56%) scale(1.06);
+    transform: translate(-50%, -50%) translate(-1.3px, 1.5px) rotate(-1.4deg);
+  }
+  75% {
+    transform: translate(-50%, -50%) translate(1.1px, 0.8px) rotate(2.6deg);
+  }
+}
+
+@keyframes despertar-shimmer-fade {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  28% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 0.55;
+  }
+  74% {
+    opacity: 0.96;
+  }
+  90% {
+    opacity: 0.32;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .despertar-shimmer {
     animation: none;
+    opacity: 1;
   }
 }
 
