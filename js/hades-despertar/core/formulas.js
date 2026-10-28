@@ -22,6 +22,7 @@ import {
   OFFLINE_MAX_HOURS_TALENT,
   OFFLINE_MIN_SECONDS,
   PRESTIGE_RUN_DIVISOR,
+  FIRST_CATABASE_RUN_SOULS,
   PRESTIGE_SOFTCAP_LOG_COEFF,
   PRESTIGE_SOFTCAP_START,
   GOLD_MULT,
@@ -1349,11 +1350,12 @@ export function obolsFromRunSouls(runSouls, prestigeCount = 0, upgrades = []) {
   const q = toScaled(PRESTIGE_RUN_DIVISOR);
   if (p <= 0n || q <= 0n) return '0';
   const raw = floorSqrtRatio(p, q);
-  if (raw <= 0n) return '0';
   // Dificuldade progressiva por Catábase: floor(raw / (1 + prestigeCount)).
   const n = Math.max(0, Number.parseInt(prestigeCount, 10) || 0);
   const denom = BigInt(1 + n);
   let gain = raw / denom;
+  // 1ª Catábase: piso de 1 óbolo a partir de FIRST_CATABASE_RUN_SOULS (só com 0 Catábases).
+  if (gain <= 0n && n === 0 && p >= toScaled(FIRST_CATABASE_RUN_SOULS)) gain = 1n;
   if (gain <= 0n) return '0';
   const owned = new Set((Array.isArray(upgrades) ? upgrades : []).map((u) => String(u)));
   if (owned.has('fortune_102')) {

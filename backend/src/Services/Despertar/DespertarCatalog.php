@@ -10,6 +10,8 @@ final class DespertarCatalog
 {
     public const COST_MULTIPLIER = '1.15';
     public const PRESTIGE_RUN_DIVISOR = '4000000000';
+    /** 1ª Catábase garante 1 óbolo a partir daqui (espelha FIRST_CATABASE_RUN_SOULS do JS). */
+    public const FIRST_CATABASE_RUN_SOULS = '250000000';
     /** Divisor legado (pré-rebalance) — só para telemetria/documentação do heal. */
     public const LEGACY_PRESTIGE_RUN_DIVISOR = '1000000000';
     public const OBOL_BONUS_PER = '0.01';

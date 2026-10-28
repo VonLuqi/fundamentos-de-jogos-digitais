@@ -2382,11 +2382,13 @@ final class DespertarFormulas
             return '0';
         }
         $raw = DespertarDecimal::floorSqrtRatio($p, $q);
-        if (DespertarDecimal::intCmp($raw, '0') <= 0) {
-            return '0';
-        }
         $denom = (string) (1 + max(0, $prestigeCount));
         $gain = DespertarDecimal::intDiv($raw, $denom);
+        // 1ª Catábase: piso de 1 óbolo a partir de FIRST_CATABASE_RUN_SOULS (só com 0 Catábases).
+        if (DespertarDecimal::intCmp($gain, '0') <= 0 && $prestigeCount <= 0
+            && DespertarDecimal::intCmp($p, DespertarDecimal::toScaled(DespertarCatalog::FIRST_CATABASE_RUN_SOULS)) >= 0) {
+            $gain = '1';
+        }
         if (DespertarDecimal::intCmp($gain, '0') <= 0) {
             return '0';
         }

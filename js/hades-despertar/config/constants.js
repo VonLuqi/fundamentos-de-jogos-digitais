@@ -8,6 +8,11 @@ export const LOOP_PANIC_UPDATES = 300;
 export const COST_MULTIPLIER = '1.15';
 
 export const PRESTIGE_RUN_DIVISOR = '4000000000';
+/**
+ * 1ª Catábase entra mais cedo (ensaio de ritmo: ~56 min, meta 45–70) sem inflar óbolos:
+ * com 0 Catábases, a corrida a partir deste valor garante 1 óbolo. Da 2ª em diante, nada muda.
+ */
+export const FIRST_CATABASE_RUN_SOULS = '250000000';
 /** +1% SPS por óbolo (paridade CC / Lethe rebalance V2). */
 export const OBOL_BONUS_PER = '0.01';
 /** Softcap do bônus de prestígio: linear até este raw, depois log10. */

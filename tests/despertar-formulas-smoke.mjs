@@ -133,12 +133,19 @@ await run('G4.1 lineSPS / shiny no total SPS', () => {
   eqMoney(sps, '3.8');
 });
 
-await run('Óbolos: runSouls 4e9 → 1; 1e9 → 0; Catábase divide o yield', () => {
+await run('Óbolos: 1ª Catábase a partir de 2,5e8 (1 óbolo); 4e9 → 1; Catábase divide o yield', () => {
   assert.equal(obolsFromRunSouls('4000000000'), '1');
-  assert.equal(obolsFromRunSouls('1000000000'), '0');
-  assert.equal(obolsFromRunSouls('3999000000'), '0');
-  assert.equal(canPrestige('1000000000'), false);
+  // Piso da 1ª Catábase: entra mais cedo sem inflar óbolos (2,5e8–4e9 → 1).
+  assert.equal(obolsFromRunSouls('249999999'), '0');
+  assert.equal(obolsFromRunSouls('250000000'), '1');
+  assert.equal(obolsFromRunSouls('1000000000'), '1');
+  assert.equal(obolsFromRunSouls('3999000000'), '1');
+  assert.equal(canPrestige('249999999'), false);
+  assert.equal(canPrestige('250000000'), true);
   assert.equal(canPrestige('4000000000'), true);
+  // Só a primeira: da 2ª em diante o piso não vale (nada de Catábases-relâmpago por 1 óbolo).
+  assert.equal(obolsFromRunSouls('1000000000', 1), '0');
+  assert.equal(canPrestige('1000000000', 1), false);
   assert.deepEqual(prestigePreview('4000000000'), {
     obolsGain: '1',
     mnemosyneGain: '0',
