@@ -55,17 +55,6 @@ function scoreForRow(row, sort) {
   return row.prestigeCount;
 }
 
-function statusLabel(sort, turma, count) {
-  const metric = sort === 'juizoBest'
-    ? 'Juízo'
-    : sort === 'lifetimeSouls'
-      ? 'Almas'
-      : 'Catábases';
-  return turma
-    ? `Turma ${turma} · top ${count} por ${metric}`
-    : `Top ${count} por ${metric}`;
-}
-
 /**
  * Widget FAB + drawer do Placar do Loop (3 abas).
  */
@@ -242,15 +231,14 @@ export class LoopLeaderboard {
     const entries = Array.isArray(payload?.entries) ? payload.entries : [];
     const self = payload?.self || null;
     const total = payload?.total ?? entries.length;
-    const turma = payload?.turma ? String(payload.turma) : null;
 
     if (this.status) {
       if (!entries.length) {
         this.status.hidden = false;
         this.status.textContent = 'Nenhuma alma neste escopo ainda.';
       } else {
-        this.status.hidden = false;
-        this.status.textContent = statusLabel(sort, turma, entries.length);
+        this.status.hidden = true;
+        this.status.textContent = '';
       }
     }
 

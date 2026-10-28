@@ -161,6 +161,11 @@ export class CodexBook {
     this.panel = null;
     this.list = null;
     this.empty = null;
+    this.page = null;
+    this.pageTitle = null;
+    this.pageBody = null;
+    this.countEl = null;
+    this._selectedId = null;
     this._focusBefore = null;
     this._onKey = (event) => this.#onKeyDown(event);
     this._drawerSeen = new Set();
@@ -197,6 +202,10 @@ export class CodexBook {
     this.panel = this.drawer.querySelector('.despertar-codex-drawer__panel');
     this.list = this.root.getElementById('codex-drawer-list');
     this.empty = this.root.getElementById('codex-drawer-empty');
+    this.page = this.root.getElementById('codex-drawer-page');
+    this.pageTitle = this.root.getElementById('codex-drawer-page-title');
+    this.pageBody = this.root.getElementById('codex-drawer-page-body');
+    this.countEl = this.root.getElementById('codex-drawer-count');
     this.#ensureTipNode();
 
     this._drawerSeen = new Set(loadDrawerSeen(this.getUserId(), this.storage));
@@ -261,6 +270,7 @@ export class CodexBook {
     if (!this.drawer || this.isOpen) return;
     this.onOpen?.();
     this.hideTip();
+    this._selectedId = null;
     const state = this.getState();
     this.#renderDrawerList(state);
     this._focusBefore = this.root.activeElement;
@@ -400,28 +410,62 @@ export class CodexBook {
     if (!view.showList) {
       this.empty.textContent = view.emptyText;
       this.list.replaceChildren();
+      if (this.countEl) this.countEl.textContent = '';
+      this.#showCodexPage(null);
       return;
     }
 
     this.list.replaceChildren();
-    for (const entry of view.entries) {
-      if (!entry.unlocked) continue;
+    const unlocked = view.entries.filter((entry) => entry.unlocked);
+    if (this.countEl) {
+      const n = unlocked.length;
+      this.countEl.textContent = n === 1 ? '1 página' : `${n} páginas`;
+    }
+    if (!unlocked.some((entry) => entry.id === this._selectedId)) {
+      this._selectedId = unlocked.length ? unlocked[unlocked.length - 1].id : null;
+    }
+    for (const entry of unlocked) {
       const item = this.root.createElement('li');
       item.className = 'despertar-codex-entry is-unlocked';
       if (item.dataset) item.dataset.logId = entry.id;
       else item.setAttribute?.('data-log-id', entry.id);
 
-      const title = this.root.createElement('p');
-      title.className = 'despertar-codex-entry__title';
-      title.textContent = entry.title;
+      const button = this.root.createElement('button');
+      button.type = 'button';
+      button.className = 'despertar-codex-index__btn';
+      button.textContent = entry.title;
+      const current = entry.id === this._selectedId;
+      button.classList.toggle('is-current', current);
+      if (current) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => {
+        if (this._selectedId === entry.id) return;
+        this._selectedId = entry.id;
+        this.#renderDrawerList(state);
+      });
 
-      const body = this.root.createElement('p');
-      body.className = 'despertar-codex-entry__body';
-      body.textContent = entry.body;
-
-      item.append(title, body);
+      item.append(button);
       this.list.append(item);
     }
+    this.#showCodexPage(unlocked.find((entry) => entry.id === this._selectedId) || null);
+    const currentBtn = this.list.querySelector?.('.is-current');
+    if (
+      currentBtn
+      && this.list.scrollWidth > this.list.clientWidth
+      && typeof currentBtn.scrollIntoView === 'function'
+    ) {
+      currentBtn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+  }
+
+  #showCodexPage(entry) {
+    if (!this.page) return;
+    if (!entry) {
+      this.page.hidden = true;
+      return;
+    }
+    this.page.hidden = false;
+    if (this.pageTitle) this.pageTitle.textContent = entry.title;
+    if (this.pageBody) this.pageBody.textContent = entry.body;
   }
 
   #onKeyDown(event) {
