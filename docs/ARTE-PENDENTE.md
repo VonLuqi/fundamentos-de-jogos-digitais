@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**64 ícones pendentes.**
+**44 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 49)
+## L7 — Talentos do Rio do Lethe (`talents`, 29)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `starterror` | Estrela de Lemúria | Os mortos inquietos atraem Ecos. Ecos do Acheron aparecem +2% mais. |
-| `startrade` | Estrela de Hermes | Dia de feira, dia de sorte. Ecos do Acheron aparecem +2% mais. |
-| `steadfast_murmur` | Murmúrio Firme | O Manto sussurra e não cede. Todos os geradores +2%. |
-| `stevia_caelestis` | Estévia Celeste | Um doce que não pesa na balança dos Juízes. Todos os geradores +2%. |
-| `sucralosia_inutilis` | Sucralose Inútil | Um adoçante que só serve para dar sorte. Ecos do Acheron aparecem +2% mais. |
-| `sugar_aging_process` | Envelhecer o Néctar | O néctar velho é o mais forte. Néctar em Reserva: +1% de SPS por Néctar guardado (até 100). Libera o Frenesi de Néctar (×3 SPS por 1 h, uma vez por corrida). |
-| `sugar_crystal_cookies` | Bolachas de Cristal de Néctar | Crocantes como gelo do Cócito. Todos os geradores +5%. |
-| `tin_of_british_tea_biscuits` | Lata de Biscoitos de Hermes | Para o chá do mensageiro entre duas viagens. Todos os geradores +2%. |
-| `tin_of_butter_cookies` | Lata de Bolachas de Ambrosia | Manteiga dos deuses, só um pouco rançosa. Todos os geradores +2%. |
-| `unholy_bait` | Isca Profana | Carne velha jogada no Acheron. Sanguessugas surgem 5× mais. |
-| `unshackled_alabascream` | Alabascreme Liberto | Creme branco como mármore de túmulo. Todos os geradores +1%. |
-| `unshackled_alchemy_labs` | Laboratórios Libertos | A alquimia do Tártaro sem regras. Laboratório do Tártaro produz ×25. |
-| `unshackled_antimatter_condensers` | Condensadores Libertos | O Vazio sem contenção. Condensador do Vazio produz ×25. |
-| `unshackled_astrofudge` | Astrocaramelo Liberto | Caramelo de estrela cadente. Todos os geradores +1%. |
-| `unshackled_banks` | Tronos Libertos | O Trono de Obsidiana sem dono. Trono de Obsidiana produz ×25. |
-| `unshackled_berrylium` | Bagálio Liberto | Frutos de metal que não enferrujam. Todos os geradores +1%. |
-| `unshackled_blueberrylium` | Mirtilálio Liberto | Um metal azul que pulsa. Todos os geradores +1%. |
-| `unshackled_buttergold` | Manteigouro Liberto | Ouro que derrete na boca. Todos os geradores +1%. |
-| `unshackled_chalcedhoney` | Calcedmel Liberto | Mel de pedra escorrendo livre. Todos os geradores +1%. |
-| `unshackled_chancemakers` | Forjas do Destino Libertas | O acaso forjado sem molde. Forja do Destino produz ×25. |
 | `unshackled_cherrysilver` | Cereja-Prata Liberta | Fruta que reflete a lua. Todos os geradores +1%. |
 | `unshackled_cortex_bakers` | Padeiros do Córtex Libertos | Mentes que assam sem parar. Padeiro do Córtex produz ×25. |
 | `unshackled_cursors` | Foices Libertas | As Mil Foices sem grilhões. Mil Foices rendem ×25. |
