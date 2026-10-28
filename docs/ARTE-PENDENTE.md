@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**44 ícones pendentes.**
+**24 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 29)
+## L7 — Talentos do Rio do Lethe (`talents`, 9)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `unshackled_cherrysilver` | Cereja-Prata Liberta | Fruta que reflete a lua. Todos os geradores +1%. |
-| `unshackled_cortex_bakers` | Padeiros do Córtex Libertos | Mentes que assam sem parar. Padeiro do Córtex produz ×25. |
-| `unshackled_cursors` | Foices Libertas | As Mil Foices sem grilhões. Mil Foices rendem ×25. |
-| `unshackled_factories` | Forjas Libertas | O Phlegethon sem represas. Forja de Phlegethon produz ×25. |
-| `unshackled_farms` | Cães Libertos | Os Cães Cerberianos soltos da coleira. Cão Cerberiano produz ×25. |
-| `unshackled_flavor` | Sabor Liberto | O primeiro sabor sem correntes. Todos os geradores +1%. |
-| `unshackled_fractal_engines` | Motores Fractais Libertos | Engrenagens dentro de engrenagens, soltas. Motor Fractal produz ×25. |
-| `unshackled_glimmeringue` | Merengue Cintilante Liberto | Espuma de luz que não desmancha. Todos os geradores +1%. |
-| `unshackled_glucosmium` | Glicósmio Liberto | Açúcar das estrelas mais densas. Todos os geradores +1%. |
-| `unshackled_grandmas` | Servos Libertos | Os remadores de Caronte sem correntes. Servos de Caronte produz ×25. |
-| `unshackled_hazelrald` | Avelãrald Liberto | Uma joia com gosto de noz. Todos os geradores +1%. |
-| `unshackled_idleverses` | Idleversos Libertos | Universos ociosos sem fronteira. Idleverso Ctoniano produz ×25. |
-| `unshackled_iridyum` | Irídio Liberto | O metal do arco-íris de Íris. Todos os geradores +1%. |
-| `unshackled_javascript_consoles` | Consoles do Oráculo Libertos | O Oráculo fala sem censura. Console do Oráculo produz ×25. |
-| `unshackled_jetmint` | Menta Negra Liberta | Fresca como um túmulo. Todos os geradores +1%. |
-| `unshackled_mines` | Juízes Libertos | Os Juízes do Tártaro sem amarras. Juiz do Tártaro produz ×25. |
-| `unshackled_mooncandy` | Doce Lunar Liberto | Açúcar colhido de Selene. Todos os geradores +1%. |
-| `unshackled_portals` | Portais Libertos | O Érebo de portas escancaradas. Portal do Érebo produz ×25. |
-| `unshackled_prisms` | Prismas Libertos | A luz das Moiras sem filtro. Prisma das Moiras produz ×25. |
-| `unshackled_shipments` | Barcas Libertas | As Barcas das Estrelas sem âncora. Barca das Estrelas produz ×25. |
 | `unshackled_sugarmuck` | Açucarlodo Liberto | Um lodo doce no fundo do rio. Todos os geradores +1%. |
 | `unshackled_temples` | Templos Libertos | Mnemosyne lembra sem limites. Templo de Mnemosyne produz ×25. |
 | `unshackled_time_machines` | Teares Libertos | O Tear de Cronos sem fio de prumo. Tear de Cronos produz ×25. |

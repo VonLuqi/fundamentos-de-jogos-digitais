@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **287/660 (43%)** · vetorial interina: 329 · placeholder: **44** · faltando: 0
+Ilustrada: **307/660 (47%)** · vetorial interina: 329 · placeholder: **24** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -16,7 +16,7 @@ Ilustrada: **287/660 (43%)** · vetorial interina: 329 · placeholder: **44** ·
 | `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 104 | 329 | 0 | 0 |
-| `talents` | 129 | 100 | 0 | 29 | 0 |
+| `talents` | 129 | 120 | 0 | 9 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
 | `catabase` | 7 | 7 | 0 | 0 | 0 |
@@ -26,9 +26,9 @@ Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-P
 
 Placeholders por pasta (IDs para gerar arte):
 
-<details><summary><code>talents</code> — 29</summary>
+<details><summary><code>talents</code> — 9</summary>
 
-`unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
+`unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
 
 </details>
 
