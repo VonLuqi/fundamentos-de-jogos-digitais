@@ -29,7 +29,8 @@ export function folderVersion(folder) {
   const dir = path.join(SPRITES, folder);
   if (!fs.existsSync(dir)) return '0';
   const hash = crypto.createHash('sha1');
-  const files = fs.readdirSync(dir).filter((f) => /\.(webp|svg)$/.test(f)).sort();
+  // .glb = modelo 3D da Foice; *_3d.glb é a fonte bruta (não vai para o jogo).
+  const files = fs.readdirSync(dir).filter((f) => /\.(webp|svg|glb)$/.test(f) && !f.endsWith('_3d.glb')).sort();
   for (const file of files) {
     hash.update(file);
     hash.update(fs.readFileSync(path.join(dir, file)));

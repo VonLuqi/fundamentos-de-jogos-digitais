@@ -6151,3 +6151,76 @@ button.despertar-juizo-card:disabled {
   }
   .lethe-river { opacity: 1; }
 }
+
+/* --- Foice 3D (ui/world/Foice3D.js) --- */
+/* Canvas maior que o botão: o golpe sai da área sem ser cortado; o clique continua no botão. */
+.despertar-reap__foice--3d {
+  width: 128%;
+  height: 128%;
+  max-width: none;
+  max-height: none;
+  align-self: center;
+  justify-self: center;
+  filter: none;
+  animation: despertarFoice3dIn 360ms ease-out;
+}
+
+/* O corte agora é 3D: desliga a rotação 2D antiga só no canvas. */
+.despertar-reap.has-foice-3d.is-slashing .despertar-reap__foice--3d,
+.despertar-reap.has-foice-3d.is-slash-soft .despertar-reap__foice--3d {
+  animation: none;
+}
+
+@keyframes despertarFoice3dIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Rastro do corte: o elemento fica girado na diagonal sorteada; o ::before varre ao longo dela. */
+.despertar-slash-trail {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  z-index: 3;
+  width: min(120%, 22rem);
+  height: 0.6rem;
+  translate: -50% -50%;
+  transform: rotate(var(--slash-angle, 35deg)) scaleX(var(--slash-flip, 1));
+  pointer-events: none;
+  animation: despertarSlashFade 300ms ease-out forwards;
+}
+
+.despertar-slash-trail::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 247, 218, 0) 0%,
+    rgba(255, 247, 218, 0.95) 58%,
+    rgba(207, 167, 89, 0.9) 80%,
+    rgba(0, 168, 150, 0) 100%
+  );
+  box-shadow: 0 0 16px rgba(232, 212, 168, 0.85), 0 0 34px rgba(0, 168, 150, 0.45);
+  /* O brilho some junto com as pontas (box-shadow sozinho deixava um toco cinza). */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 30%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 30%, #000 82%, transparent 100%);
+  transform-origin: 0 50%;
+  animation: despertarSlashSweep 220ms cubic-bezier(0.15, 0.85, 0.25, 1) forwards;
+}
+
+@keyframes despertarSlashSweep {
+  from { transform: scaleX(0) scaleY(1.6); }
+  to { transform: scaleX(1) scaleY(0.6); }
+}
+
+@keyframes despertarSlashFade {
+  0%, 55% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .despertar-slash-trail { display: none; }
+  .despertar-reap__foice--3d { animation: none; }
+}

@@ -96,12 +96,16 @@ DirectoryIndex index.html index.php
   AddType application/javascript .js .mjs
   AddType application/json .json
   AddType application/manifest+json .webmanifest
+  # Modelo 3D da Foice
+  AddType model/gltf-binary .glb
 </IfModule>
 
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css
   AddOutputFilterByType DEFLATE application/javascript application/json application/xml
   AddOutputFilterByType DEFLATE image/svg+xml
+  # Geometria do GLB comprime ~30% (texturas JPEG já vêm comprimidas)
+  AddOutputFilterByType DEFLATE model/gltf-binary
 </IfModule>
 
 # Cabeçalhos de Cache e Segurança (compatíveis com raiz ou subdiretório)

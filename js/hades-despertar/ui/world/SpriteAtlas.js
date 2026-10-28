@@ -107,6 +107,12 @@ export function catabaseSprite(id) {
   };
 }
 
+/** Modelo 3D da Foice (gerado por npm run despertar:foice3d), com versão de cache da pasta. */
+export function foiceModelUrl() {
+  const v = ART_VERSIONS.foice ? `?v=${ART_VERSIONS.foice}` : '';
+  return `${SPRITE_BASE}/foice/foice-3d.glb${v}`;
+}
+
 /** Ícones de Néctar e minigames (sprites/minigames/<spriteId>: nectar_*, seed_*, spirit_*, spell_*, good_*). */
 export function minigameSprite(spriteId, name = '') {
   return {

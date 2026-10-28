@@ -61,3 +61,6 @@ db/mysql/hostgator-full-import.sql
 
 # ==================== Load / stress tokens ====================
 docs/load-results/raw/
+
+# Fonte bruta do modelo 3D da Foice (7 MB); o jogo usa foice-3d.glb (npm run despertar:foice3d)
+assets/despertar/sprites/foice/foice_3d.glb

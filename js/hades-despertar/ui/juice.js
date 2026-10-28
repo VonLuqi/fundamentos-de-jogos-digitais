@@ -190,6 +190,31 @@ export function spawnShockwave(stage, options = {}) {
 }
 
 /**
+ * Rastro do corte da Foice 3D: risco de luz no ângulo da diagonal sorteada (rollSlash).
+ * Nó do pool, animado só por transform/opacity (composição na GPU, sem layout).
+ * @param {HTMLElement|null} stage
+ * @param {{ angleDeg?: number, dir?: number, reducedMotion?: boolean, particles?: boolean, root?: Document }} [options]
+ */
+export function spawnSlashTrail(stage, options = {}) {
+  if (!stage || options.particles === false || resolveReduced(options)) return false;
+  const doc = stage.ownerDocument || options.root || (typeof document !== 'undefined' ? document : null);
+  if (!doc?.createElement) return false;
+  const trail = acquirePooledNode(doc, 'slash-trail', 'despertar-slash-trail');
+  if (!trail) return false;
+  trail.style?.setProperty?.('--slash-angle', `${Number(options.angleDeg) || 35}deg`);
+  trail.style?.setProperty?.('--slash-flip', options.dir < 0 ? '-1' : '1');
+  // O ::before (varredura) também dispara animationend aqui — só o fade final devolve ao pool.
+  const onEnd = (event) => {
+    if (event?.animationName && event.animationName !== 'despertarSlashFade') return;
+    trail.removeEventListener('animationend', onEnd);
+    releasePooledNode(doc, 'slash-trail', trail);
+  };
+  trail.addEventListener('animationend', onEnd);
+  stage.appendChild(trail);
+  return true;
+}
+
+/**
  * Screen shake suave na órbita (não no stage — senão alminhas/+N reiniciam).
  */
 export function shakeAltar(stage, options = {}) {

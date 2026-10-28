@@ -33,7 +33,9 @@ import { bindLetheRiverTree } from './ui/LetheRiverTree.js';
 import { applyHarnessGrant, harnessEnabled, logSyncDiag, syncDiagEnabled } from './ui/harness.js';
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
-import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
+import { Foice3D } from './ui/world/Foice3D.js';
+import { foiceModelUrl } from './ui/world/SpriteAtlas.js';
+import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, spawnSlashTrail, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
 import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil, presentSeasonHall } from './ui/pauseVeil.js';
 import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY, SEASON_HALL_COPY } from './config/season-closed.js';
@@ -1502,6 +1504,8 @@ async function init() {
   const reapStage = document.querySelector('.despertar-reap-stage');
   const unbindFeel = bindReapFeel(reap);
   const unbindFoice = bindFoiceAsset(reap);
+  // Foice 3D: desenha dentro deste loop (sem RAF próprio); a imagem fica até o modelo carregar.
+  let foice3d = null;
 
   const loop = new GameLoop(
     (dt) => {
@@ -1509,6 +1513,7 @@ async function init() {
     },
     (alpha, meta) => {
       renderer.render(alpha, meta);
+      foice3d?.frame(performance.now());
     },
     {
       onResume: (seconds) => {
@@ -1525,12 +1530,37 @@ async function init() {
     },
   );
 
+  if (reap) {
+    foice3d = new Foice3D({
+      button: reap,
+      modelUrl: foiceModelUrl(),
+      getMotion: () => {
+        const prefs = renderer.getPerfPrefs();
+        return { reducedMotion: loop.prefersReducedMotion(), fancy: prefs.fancy, lowQuality: !prefs.fancy };
+      },
+    });
+    // Depois do primeiro paint: three.js + modelo (~1 MB) não atrasam a entrada no jogo.
+    const startFoice3d = () => { foice3d.load(); };
+    if (typeof requestIdleCallback === 'function') requestIdleCallback(startFoice3d, { timeout: 2000 });
+    else setTimeout(startFoice3d, 400);
+  }
+
   reap?.addEventListener('click', () => {
     const { gained } = state.click();
     const reducedMotion = loop.prefersReducedMotion();
     const perfPrefs = renderer.getPerfPrefs();
     pulseReapButton(reap, { reducedMotion });
     playFoiceSlash(reap, { reducedMotion });
+    // Corte diagonal 3D (sorteado a cada clique) + rastro de luz no mesmo ângulo.
+    const slash = foice3d?.slash(performance.now(), { reducedMotion });
+    if (slash && foice3d.ready) {
+      spawnSlashTrail(reapStage, {
+        angleDeg: slash.angleDeg,
+        dir: slash.dir,
+        reducedMotion,
+        particles: perfPrefs.particles || perfPrefs.fancy,
+      });
+    }
     spawnReapParticles(particles, {
       reducedMotion,
       particles: perfPrefs.particles,
