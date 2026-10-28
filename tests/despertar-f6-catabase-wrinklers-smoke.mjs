@@ -30,8 +30,9 @@ import {
 } from '../js/hades-despertar/core/formulas.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
 import { describeCatabaseSummary } from '../js/hades-despertar/ui/UIRenderer.js';
-import { LeechRingView } from '../js/hades-despertar/ui/world/LeechRingView.js';
+import { LeechRingView, leechSlotPolarPosition } from '../js/hades-despertar/ui/world/LeechRingView.js';
 import { maxLeechCapacity } from '../js/hades-despertar/core/CatabaseSystem.js';
+import { CATABASE_ASSET_VER } from '../js/hades-despertar/ui/world/SpriteAtlas.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let passed = 0;
@@ -451,6 +452,21 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   assert.equal(ringEl.children[1].classList.contains('is-shiny'), true);
   assert.equal(ringEl.children[1].dataset.spriteId, 'sanguessuga_shiny');
   assert.equal(ringEl.children[2].hidden, true);
+
+  // Distribuição orgânica + assets sem fundo preto.
+  const p0 = leechSlotPolarPosition(0, 10);
+  const p1 = leechSlotPolarPosition(1, 10);
+  assert.notEqual(p0.deg, p1.deg);
+  assert.ok(Math.abs(p0.xPct - p1.xPct) > 0.01 || Math.abs(p0.yPct - p1.yPct) > 0.01);
+  assert.ok(Number.isFinite(p0.jitterXPx) && Number.isFinite(p0.delaySec));
+  assert.match(CATABASE_ASSET_VER, /leech-natural/);
+  for (const id of ['sanguessuga_normal', 'sanguessuga_shiny']) {
+    const webp = fs.readFileSync(path.join(root, `assets/despertar/sprites/catabase/${id}.webp`));
+    // RIFF....WEBP + VP8L/VP8X com alpha: arquivo deve existir e SVG fallback sem rect preto.
+    assert.ok(webp.length > 800, `${id}.webp presente`);
+    const svg = fs.readFileSync(path.join(root, `assets/despertar/sprites/catabase/${id}.svg`), 'utf8');
+    assert.equal(/fill="#0a0a0f"/.test(svg), false, `${id}.svg sem fundo preto`);
+  }
 
   // Float de estouro: precisa sair da tela (releasePooledNode com doc).
   const particleLayer = fakeDoc.createElement('div');

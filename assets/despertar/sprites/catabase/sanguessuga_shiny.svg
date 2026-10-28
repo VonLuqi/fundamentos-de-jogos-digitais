@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
-  <!-- Fallback Wrinkler shiny -->
-  <rect width="256" height="256" fill="#0a0a0f"/>
-  <path d="M128 18 C148 40 156 70 150 110 C146 140 152 170 140 200 C132 220 120 232 128 246 C136 232 148 220 152 200 C164 170 170 140 166 110 C160 70 148 40 128 18 Z"
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="384" viewBox="0 0 256 384" fill="none">
+  <!-- Fallback Wrinkler shiny — fundo transparente -->
+  <path d="M128 18 C152 48 162 90 154 150 C148 200 156 250 140 300 C130 330 118 350 128 372 C138 350 152 330 158 300 C174 250 182 200 176 150 C168 90 152 48 128 18 Z"
         fill="#c9a04a" stroke="#f5e6c0" stroke-width="3"/>
-  <path d="M118 40 C130 55 134 80 130 110 C128 140 132 165 124 190"
-        fill="none" stroke="#8a6820" stroke-width="6" stroke-linecap="round"/>
-  <ellipse cx="128" cy="228" rx="34" ry="22" fill="#3a2808" stroke="#f5e6c0" stroke-width="2"/>
-  <ellipse cx="128" cy="230" rx="18" ry="12" fill="#1a1404"/>
-  <circle cx="112" cy="210" r="4" fill="#120808"/>
-  <circle cx="144" cy="210" r="4" fill="#120808"/>
-  <circle cx="113" cy="209" r="1.4" fill="#7ef0e0"/>
-  <circle cx="145" cy="209" r="1.4" fill="#7ef0e0"/>
+  <path d="M112 50 C130 70 136 110 130 160 C126 210 132 250 120 290"
+        fill="none" stroke="#8a6820" stroke-width="7" stroke-linecap="round"/>
+  <ellipse cx="128" cy="348" rx="42" ry="26" fill="#3a2808" stroke="#f5e6c0" stroke-width="2"/>
+  <ellipse cx="128" cy="350" rx="22" ry="14" fill="#1a1404"/>
+  <circle cx="108" cy="322" r="5" fill="#120808"/>
+  <circle cx="148" cy="322" r="5" fill="#120808"/>
+  <circle cx="109" cy="321" r="1.6" fill="#7ef0e0"/>
+  <circle cx="149" cy="321" r="1.6" fill="#7ef0e0"/>
 </svg>

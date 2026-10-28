@@ -495,19 +495,19 @@
   pointer-events: none;
 }
 
-/* Wrinkler-style: corpo alongado, boca na Foice ? sem bolinha/frame. */
+/* Wrinkler-style: verme grande, boca na Foice, fundo transparente. */
 .despertar-leech {
   position: absolute;
   left: var(--leech-x, 50%);
   top: var(--leech-y, 50%);
-  width: 3.4rem;
-  height: 5.2rem;
-  margin-left: -1.7rem;
-  margin-top: -2.6rem;
+  width: 6.2rem;
+  height: 9.6rem;
+  margin-left: -3.1rem;
+  margin-top: -4.8rem;
   padding: 0;
   border: 0;
   border-radius: 0;
-  background: transparent;
+  background: transparent !important;
   box-shadow: none;
   color: #fda4af;
   font-size: 1rem;
@@ -518,8 +518,10 @@
   pointer-events: auto;
   overflow: visible;
   transform: rotate(var(--leech-deg, 0deg));
-  transform-origin: center center;
-  animation: despertarLeechWrithe 2.2s ease-in-out infinite alternate;
+  transform-origin: 50% 92%;
+  animation: despertarLeechWrithe var(--leech-phase, 2s) ease-in-out infinite alternate;
+  animation-delay: var(--leech-delay, 0s);
+  will-change: transform;
 }
 
 .despertar-leech__sprite,
@@ -527,7 +529,8 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  background: transparent;
+  background: transparent !important;
+  box-shadow: none;
 }
 
 .despertar-leech .despertar-sprite__mark {
@@ -538,7 +541,8 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+  background: transparent;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
 }
 
 .despertar-leech-ring[hidden],
@@ -555,8 +559,8 @@
 
 .despertar-leech.is-shiny .despertar-sprite__img {
   filter:
-    drop-shadow(0 0 6px rgba(245, 197, 66, 0.55))
-    drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45));
+    drop-shadow(0 0 8px rgba(245, 197, 66, 0.55))
+    drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
 }
 
 .despertar-leech.is-static,
@@ -565,8 +569,24 @@
 }
 
 @keyframes despertarLeechWrithe {
-  0% { transform: rotate(var(--leech-deg, 0deg)) scale(0.95); }
-  100% { transform: rotate(var(--leech-deg, 0deg)) scale(1.08); }
+  0% {
+    transform:
+      translate(calc(var(--leech-jx, 0px) * -1), calc(var(--leech-jy, 0px) * -0.4))
+      rotate(calc(var(--leech-deg, 0deg) - 2.8deg))
+      scale(0.97, 0.98);
+  }
+  50% {
+    transform:
+      translate(var(--leech-jx, 0px), var(--leech-jy, 0px))
+      rotate(calc(var(--leech-deg, 0deg) + 1.6deg))
+      scale(1.02, 1.04);
+  }
+  100% {
+    transform:
+      translate(calc(var(--leech-jx, 0px) * 0.35), calc(var(--leech-jy, 0px) * -1))
+      rotate(calc(var(--leech-deg, 0deg) + 3.4deg))
+      scale(1.04, 1.07);
+  }
 }
 
 .despertar-catabase-bar {

@@ -17,16 +17,34 @@ import { formatSouls } from '../NumberFormatter.js';
 import { acquirePooledNode, releasePooledNode } from '../particles.js';
 import { catabaseSprite, createSpriteNode } from './SpriteAtlas.js';
 
+/** Pseudo-aleatório determinístico por slot (−1..1) — scatter estável entre syncs. */
+function leechSlotNoise(slot, salt = 0) {
+  const n = Math.imul(Math.floor(Number(slot) || 0) + 1 + salt * 17, 1103515245) + 12345;
+  return (((n >>> 0) % 2001) / 1000) - 1;
+}
+
 export function leechSlotPolarPosition(slot = 0, maxSlots = 10) {
   const cap = Math.max(1, Math.min(LEECH_MAX_CAP, Number(maxSlots) || 10));
   const idx = Math.max(0, Math.min(cap - 1, Math.floor(Number(slot) || 0)));
-  const angleRad = ((idx / cap) * Math.PI * 2) - (Math.PI / 2);
-  // Um pouco mais perto da Foice — boca ancora no ceifeiro como no Cookie Clicker.
-  const radiusPct = 32;
+  const nA = leechSlotNoise(idx, 1);
+  const nR = leechSlotNoise(idx, 2);
+  const nJ = leechSlotNoise(idx, 3);
+  const nK = leechSlotNoise(idx, 4);
+  // Ângulo irregular (±~14°) e raio orgânico — boca perto da Foice, corpo pra fora.
+  const angleRad = ((idx / cap) * Math.PI * 2) - (Math.PI / 2) + nA * 0.25;
+  const radiusPct = 38 + nR * 5.5;
   const xPct = Number((50 + Math.cos(angleRad) * radiusPct).toFixed(2));
   const yPct = Number((50 + Math.sin(angleRad) * radiusPct).toFixed(2));
-  const deg = Number(((angleRad * 180) / Math.PI + 90).toFixed(1));
-  return { xPct, yPct, deg };
+  const deg = Number(((angleRad * 180) / Math.PI + 90 + nA * 4).toFixed(1));
+  return {
+    xPct,
+    yPct,
+    deg,
+    jitterXPx: Number((nJ * 5).toFixed(2)),
+    jitterYPx: Number((nK * 4).toFixed(2)),
+    delaySec: Number((Math.abs(nA) * 0.55 + idx * 0.11).toFixed(2)),
+    phaseSec: Number((1.6 + Math.abs(nR) * 0.9).toFixed(2)),
+  };
 }
 
 export class LeechRingView {
@@ -179,6 +197,10 @@ export class LeechRingView {
         btn.style?.setProperty?.('--leech-x', `${pos.xPct}%`);
         btn.style?.setProperty?.('--leech-y', `${pos.yPct}%`);
         btn.style?.setProperty?.('--leech-deg', `${pos.deg}deg`);
+        btn.style?.setProperty?.('--leech-jx', `${pos.jitterXPx}px`);
+        btn.style?.setProperty?.('--leech-jy', `${pos.jitterYPx}px`);
+        btn.style?.setProperty?.('--leech-delay', `${pos.delaySec}s`);
+        btn.style?.setProperty?.('--leech-phase', `${pos.phaseSec}s`);
         btn.classList?.toggle?.('is-shiny', Boolean(leech.shiny));
         btn.classList?.toggle?.('is-static', staticMode);
         const digLabel = formatSouls(leech.digested || '0');
