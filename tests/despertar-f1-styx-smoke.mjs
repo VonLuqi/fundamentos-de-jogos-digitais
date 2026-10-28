@@ -308,7 +308,7 @@ run('5. Assets (manifest.json + art-requests.json) e Códice (log_synergy_blades
   }
   const b8 = artReq.requests.find((r) => r.id === 'art_upgrades');
   assert.ok(b8, 'pedido art_upgrades presente');
-  assert.ok(['open', 'delivered'].includes(b8.status), `art_upgrades status válido (got ${b8.status})`);
+  assert.ok(['open', 'interim', 'delivered'].includes(b8.status), `art_upgrades status válido (got ${b8.status})`);
   assert.equal(
     Array.isArray(b8.f1UpgradeIds) && b8.f1UpgradeIds.length === 64,
     true,

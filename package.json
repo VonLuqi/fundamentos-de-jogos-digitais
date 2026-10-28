@@ -20,7 +20,8 @@
     "despertar:art-requests": "node scripts/gen-despertar-art-requests.mjs",
     "submundo:wav": "node scripts/generate-asfodelos-wav.mjs",
     "submundo:hecate": "node scripts/generate-hecate-relic.mjs",
-    "classind:covers": "node scripts/normalize-classind-covers.mjs"
+    "classind:covers": "node scripts/normalize-classind-covers.mjs",
+    "despertar:status": "node scripts/despertar-status.mjs"
   },
   "dependencies": {
     "@vfx-js/core": "^1.1.0",

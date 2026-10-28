@@ -42,7 +42,13 @@
         "foice/foice-idle.webp",
         "foice/foice-pressed.webp"
       ],
-      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master. [reconciliado 2026-10-23: foice-idle/pressed.webp em disco]"
+      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master. [reconciliado 2026-10-23: foice-idle/pressed.webp em disco]",
+      "detected": {
+        "ilustrada": 2,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t1",
@@ -60,7 +66,13 @@
         "generators/wandering_shade.webp",
         "generators/wandering_shade.svg"
       ],
-      "notes": "Substituir placeholders em assets/despertar/sprites/generators/."
+      "notes": "Substituir placeholders em assets/despertar/sprites/generators/.",
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t2",
@@ -77,7 +89,13 @@
         "generators/charon_servants.webp",
         "generators/charon_servants.svg"
       ],
-      "notes": "Barco / remadores; acento ouro #cfa759."
+      "notes": "Barco / remadores; acento ouro #cfa759.",
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t3",
@@ -93,7 +111,13 @@
       "files": [
         "generators/cerberian_hound.webp",
         "generators/cerberian_hound.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t4",
@@ -109,7 +133,13 @@
       "files": [
         "generators/tartarus_judge.webp",
         "generators/tartarus_judge.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t5",
@@ -125,7 +155,13 @@
       "files": [
         "generators/phlegethon_forge.webp",
         "generators/phlegethon_forge.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t6",
@@ -141,13 +177,19 @@
       "files": [
         "generators/obsidian_throne.webp",
         "generators/obsidian_throne.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_upgrades",
       "listId": "B8",
       "priority": "P1",
-      "status": "delivered",
+      "status": "interim",
       "title": "Ícones dos Juramentos do Styx (Grade F1: 112 ícones)",
       "desc": "Set completo F1 (15 tiers por gerador T1–T6, cadeia Foice, Mil Foices e Sinergias Vol. I/II) via pipeline Gemini → Sharp WebP.",
       "sizes": [
@@ -251,7 +293,13 @@
         "oracao_da_chuva_ii",
         "mineracao_asteroide_ii"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]"
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]",
+      "detected": {
+        "ilustrada": 16,
+        "vetorial": 48,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_juizo_chrome",
@@ -349,7 +397,9 @@
       "title": "Cosméticos de linha 15×20 (300 uniques)",
       "desc": "Um accessory por juramento generatorMult. Variants em habitats/variants/ trocam o sprite da célula; mirror em cosmetics/ para tip Styx.",
       "count": 300,
-      "sizes": ["64x64"],
+      "sizes": [
+        "64x64"
+      ],
       "dropPath": "assets/despertar/sprites/habitats/variants/",
       "filesGlob": "habitats/variants/*.webp",
       "cosmeticsMirror": "assets/despertar/cosmetics/",
@@ -359,7 +409,7 @@
       "id": "art_shimmers",
       "listId": "B12",
       "priority": "P1",
-      "status": "delivered",
+      "status": "open",
       "title": "Ecos do Acheron (Shimmers Golden / Wrath — Fase F2)",
       "desc": "Fragmentos flutuantes clicáveis no Santuário (Eco Dourado e Eco Colérico) gerados via Gemini + Sharp WebP.",
       "sizes": [
@@ -372,7 +422,13 @@
         "shimmers/eco_colerico.webp",
         "shimmers/eco_colerico.svg"
       ],
-      "notes": "Paths: assets/despertar/sprites/shimmers/{eco_dourado,eco_colerico}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]"
+      "notes": "Paths: assets/despertar/sprites/shimmers/{eco_dourado,eco_colerico}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]",
+      "detected": {
+        "ilustrada": 0,
+        "vetorial": 0,
+        "placeholder": 2,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t7",
@@ -388,7 +444,13 @@
       "files": [
         "generators/mnemosyne_temple.webp",
         "generators/mnemosyne_temple.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t8",
@@ -404,7 +466,13 @@
       "files": [
         "generators/styx_tower.webp",
         "generators/styx_tower.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t9",
@@ -420,7 +488,13 @@
       "files": [
         "generators/star_barge.webp",
         "generators/star_barge.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t10",
@@ -436,7 +510,13 @@
       "files": [
         "generators/tartarus_lab.webp",
         "generators/tartarus_lab.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t11",
@@ -452,7 +532,13 @@
       "files": [
         "generators/erebus_portal.webp",
         "generators/erebus_portal.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_t12",
@@ -468,13 +554,19 @@
       "files": [
         "generators/chronos_loom.webp",
         "generators/chronos_loom.svg"
-      ]
+      ],
+      "detected": {
+        "ilustrada": 1,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f3_upgrades",
       "listId": "F3-UP",
       "priority": "P1",
-      "status": "delivered",
+      "status": "interim",
       "title": "Juramentos e Sinergias T7–T12 (98 ícones F3)",
       "desc": "90 upgrades de linha (15 tiers × 6 geradores T7–T12) + 8 sinergias cruzadas Vol. I/II via pipeline Gemini → Sharp WebP.",
       "sizes": [
@@ -492,13 +584,19 @@
         "trama_do_erebo_i",
         "trama_do_erebo_ii"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 210 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 210 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
+      "detected": {
+        "ilustrada": 0,
+        "vetorial": 8,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f5_minigames",
       "listId": "F5-MG",
       "priority": "P1",
-      "status": "delivered",
+      "status": "open",
       "title": "Néctar do Lethe & 4 Minigames Temáticos (21 ícones F5)",
       "desc": "5 variantes de Néctar (normal, bifurcado, dourado, colérico, caramelizado), 4 sementes do Jardim de Perséfone, 4 espíritos do Panteão Ctoniano, 2 feitiços do Grimório de Hécate e 6 bens do Mercado de Caronte.",
       "sizes": [
@@ -530,13 +628,19 @@
         "good_amalgama_aurica",
         "good_areia_de_cronos"
       ],
-      "notes": "Paths: assets/despertar/sprites/minigames/{id}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]"
+      "notes": "Paths: assets/despertar/sprites/minigames/{id}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]",
+      "detected": {
+        "ilustrada": 0,
+        "vetorial": 0,
+        "placeholder": 21,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f4_veil_kittens",
       "listId": "F4-VK",
       "priority": "P1",
-      "status": "delivered",
+      "status": "open",
       "title": "Véu do Acheron (5 sabores) & Filhotes do Cérbero (7 juramentos F4)",
       "desc": "5 estados/sabores de névoa do Véu do Acheron (Névoa Cinzenta, Águas do Estige, Corrente do Lethe, Chama de Flegêton, Ouro Ancestral) e 7 ícones da linhagem Filhotes do Cérbero (do Filhote Vigia do Estige ao Cérbero Conselheiro do Tártaro).",
       "sizes": [
@@ -561,13 +665,19 @@
         "veu_chama_phlegethon",
         "veu_ouro_ancestral"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp e assets/despertar/sprites/veil/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp e assets/despertar/sprites/veil/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
+      "detected": {
+        "ilustrada": 0,
+        "vetorial": 7,
+        "placeholder": 5,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f6_catabase_wrinklers",
       "listId": "F6-CW",
       "priority": "P1",
-      "status": "delivered",
+      "status": "open",
       "title": "Catábase das Avós & Sanguessugas do Acheron (7 sprites F6 + 8 juramentos)",
       "desc": "Sanguessuga do Acheron normal e Abissal Dourada (Shiny), ícones dos 3 estágios da Catábase (Despertar Ctoniano, Comunhão Abissal, Pacto Primordial), Juramento de Trégua, Aliança Eterna e 8 ícones da cadeia de pesquisa do Arquivo Estígio.",
       "sizes": [
@@ -595,7 +705,13 @@
         "ninho_do_acheron",
         "visceras_sacras"
       ],
-      "notes": "Paths: assets/despertar/sprites/catabase/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/catabase/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
+      "detected": {
+        "ilustrada": 2,
+        "vetorial": 8,
+        "placeholder": 5,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f7_generators_t13_t20",
@@ -619,13 +735,19 @@
         "cortex_baker",
         "the_emperor"
       ],
-      "notes": "Paths: assets/despertar/sprites/generators/{id}.webp (+ .svg fallback). Total catálogo = 20 geradores (T1–T20)."
+      "notes": "Paths: assets/despertar/sprites/generators/{id}.webp (+ .svg fallback). Total catálogo = 20 geradores (T1–T20).",
+      "detected": {
+        "ilustrada": 8,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f7_upgrades_late",
       "listId": "F7-UP",
       "priority": "P2",
-      "status": "delivered",
+      "status": "open",
       "title": "Juramentos Styx T13–T20 (120 tiers ×2 + 8 Sinergias Vol. I/II + 8 Tipos de Servos)",
       "desc": "136 ícones de juramentos late-game cobrindo os 15 marcos (1..300) de T13–T20, os 4 pares finais de sinergia Vol. I/II e os 8 Servos especializados.",
       "sizes": [
@@ -634,13 +756,19 @@
       ],
       "dropPath": "assets/despertar/sprites/upgrades/",
       "filesGlob": "upgrades/*.webp",
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
+      "detected": {
+        "ilustrada": 84,
+        "vetorial": 345,
+        "placeholder": 24,
+        "faltando": 0
+      }
     },
     {
       "id": "art_f8_seasons_dragon_fortunes",
       "listId": "F8-SD",
       "priority": "P1",
-      "status": "delivered",
+      "status": "open",
       "title": "Dragão Pitão/Ladão (5 estágios + 5 Auras), 4 Estações Ctonianas e 24 Fortunas de Hermes",
       "desc": "5 estágios do Dragão Ctoniano (Ovo Primordial → Ladão de Cem Cabeças), 5 ícones de Auras, 4 emblemas de Estações (Antestéria, Lemúria, Saturnália, Feira de Hermes), Corça de Ártemis e 35 juramentos (Escama de Ladão + 10 relíquias sazonais + 24 Fortunas).",
       "sizes": [
@@ -649,7 +777,13 @@
       ],
       "dropPath": "assets/despertar/sprites/seasons/",
       "filesGlob": "seasons/*.webp",
-      "notes": "Paths: assets/despertar/sprites/seasons/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 396 upgrades. [2026-10-26: arte final upgrades + illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/seasons/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 396 upgrades. [2026-10-26: arte final upgrades + illustrated.json]",
+      "detected": {
+        "ilustrada": 0,
+        "vetorial": 0,
+        "placeholder": 15,
+        "faltando": 0
+      }
     },
     {
       "id": "art_synergy_vol_canon",
@@ -702,7 +836,13 @@
         "mentes_ferteis_ii",
         "revisao_por_pares_ii"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-synergy-vol-catalog + ensure-missing-upgrade-sprites."
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-synergy-vol-catalog + ensure-missing-upgrade-sprites.",
+      "detected": {
+        "ilustrada": 36,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     },
     {
       "id": "art_mil_foices_ladder",
@@ -712,7 +852,9 @@
       "title": "Cadeia Mil Foices (12 elos Thousand→Undecillion)",
       "desc": "Escada canónica Cursor/Thousand Fingers: mil_foices + 11 thousandBladesMult.",
       "kind": "thousandBladesMult",
-      "sizes": ["128x128"],
+      "sizes": [
+        "128x128"
+      ],
       "format": "webp",
       "dropPath": "assets/despertar/sprites/upgrades/",
       "upgradeIds": [
@@ -729,8 +871,15 @@
         "decilhao_de_foices",
         "undecilhao_de_foices"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-mil-foices-catalog + ensure-missing-upgrade-sprites."
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-mil-foices-catalog + ensure-missing-upgrade-sprites.",
+      "detected": {
+        "ilustrada": 12,
+        "vetorial": 0,
+        "placeholder": 0,
+        "faltando": 0
+      }
     }
   ],
-  "auditNote": "Status reconciliado 2026-10-27. art_cosmetics P0 + art_cosmetics_line (300 variants) delivered. Soft gaps: conquistas reuse 24↔311; capas Juízo editoriais."
+  "auditNote": "Status reconciliado 2026-10-27. art_cosmetics P0 + art_cosmetics_line (300 variants) delivered. Soft gaps: conquistas reuse 24↔311; capas Juízo editoriais.",
+  "statusSource": "scripts/despertar-status.mjs --sync-requests (status medido; não editar à mão)"
 }

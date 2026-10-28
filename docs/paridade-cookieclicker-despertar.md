@@ -1,5 +1,7 @@
 # Paridade Cookie Clicker ↔ O Despertar (mecânicas + balanceamento)
 
+> **Status de entrega (arte, conteúdo, testes): [`STATUS-DESPERTAR.md`](./STATUS-DESPERTAR.md)**, gerado por `npm run despertar:status`. Os percentuais abaixo descrevem o design implementado; números de arte aqui (ex.: "~92%") estão desatualizados — vale o arquivo gerado.
+
 **Status:** referência de paridade · **auditoria forense 2026-10-23** (código/disco ≠ checkboxes)  
 **Gate automatizado:** `node tests/despertar-full-parity-audit.mjs` (também em `npm run test:despertar`)  
 **Plano de produção (F0–F8):** [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md)  

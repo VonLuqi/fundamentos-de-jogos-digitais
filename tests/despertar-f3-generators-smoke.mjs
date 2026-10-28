@@ -414,8 +414,8 @@ run('5. WorldView T7–T12 (orçamento Perf preservado) + Conquistas + Códice +
     const req = artReqs.requests.find((r) => r.id === key);
     assert.ok(req, `Pedido ${key} em art-requests.json`);
     assert.ok(
-      ['open', 'delivered'].includes(req.status),
-      `Pedido ${key} com status open|delivered (got ${req.status})`,
+      ['open', 'interim', 'delivered'].includes(req.status),
+      `Pedido ${key} com status open|interim|delivered (got ${req.status})`,
     );
   }
 });

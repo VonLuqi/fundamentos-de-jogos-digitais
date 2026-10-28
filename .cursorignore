@@ -1,0 +1,8 @@
+# Imagens que provedores de modelo rejeitam ("Invalid Image": proporção extrema).
+# Trilhos 1px da moldura da HUD — não precisam ser vistos pelo agente.
+assets/despertar/sprites/hud/moldura-rail-h.webp
+assets/despertar/sprites/hud/moldura-rail-v.webp
+
+# Saídas soltas de scripts de arte/auditoria (dezenas de MB, ruído para o agente).
+.tmp-*
+tmp/
