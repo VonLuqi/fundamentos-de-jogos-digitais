@@ -101,7 +101,7 @@ Placeholders por pasta (IDs para gerar arte):
 
 ## Conteúdo
 
-- Talentos com texto genérico ("Eco celestial espelhado"): **114/129**
-- Talentos sem efeito (fora `legado`): **19** — `residual_luck`, `starlove`, `starsnow`, `starspawn`, `starterror`, `startrade`, `distilled_essence_of_redoubled_luck`, `stevia_caelestis`, `diabetica_daemonicus`, `shimmering_veil`, `sucralosia_inutilis`, `sugar_crystal_cookies`, `keepsakes`, `cosmic_beginner_s_luck`, `reinforced_membrane`, `fortune_cookies`, `delicate_touch`, `steadfast_murmur`, `glittering_edge`
+- Talentos com texto genérico ("Eco celestial espelhado"): **0/129**
+- Talentos sem efeito (fora `legado`): **0** — nenhum
 - Conquistas `despertar_*`: 311 usando **24** artes únicas
 

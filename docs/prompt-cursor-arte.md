@@ -4,6 +4,7 @@ Cole o bloco abaixo num **chat novo**, trocando `<LOTE>` por `L1`, `L2`… Um lo
 
 ```text
 Tarefa: gerar a arte final de um lote de ícones do jogo "O Despertar" (incremental tipo Cookie Clicker com tema do Submundo grego) e integrar no repositório. Lote desta conversa: <LOTE>.
+(Se <LOTE> ficou sem número, use o primeiro lote que ainda aparece em docs/ARTE-PENDENTE.md, exceto L7.)
 
 1. Leia antes de começar
 - docs/ARTE-PENDENTE.md → seção do lote <LOTE>: cada linha tem o id, o nome no jogo e o que o item faz. Essa é a lista completa; não gere nada fora dela.
@@ -27,7 +28,7 @@ Tarefa: gerar a arte final de um lote de ícones do jogo "O Despertar" (incremen
 4. Integrar (no terminal)
 - npm run despertar:art -- --folder <pasta> --in-dir .art-raw/<pasta>
   (recorta o fundo, grava assets/despertar/sprites/<pasta>/<id>.webp em 128×128 e registra em illustrated.json; não edite os .svg — são a referência que prova que o WebP foi pintado)
-- Abra 3 ou 4 dos .webp gerados e confira o recorte (sem halo preto, sem pedaço cortado). Se algum ficou ruim, refaça só aquele id e rode de novo com --ids <id>.
+- Abra 3 ou 4 dos .webp gerados sobre fundo cinza médio e confira o recorte a olho (sem contorno preto destacado do objeto, sem pedaço cortado). Sombra escura pintada na borda do objeto é normal, não é halo; não precisa medir pixel a pixel. Se algum ficou ruim, refaça só aquele id e rode de novo com --ids <id>.
 - npm run despertar:status -- --sync-requests
   → em docs/STATUS-DESPERTAR.md, a pasta do lote tem que mostrar 0 placeholders.
 - npm run despertar:art-briefs

@@ -55,6 +55,7 @@ import {
   meetsUpgradeRequirement,
   migrateUpgradeSave,
   migrateTalentSave,
+  minigameEffects,
   prestigePreview as formulaPrestigePreview,
   pickEcoDoStyxUpgrades,
   talentEffects,
@@ -1340,6 +1341,17 @@ export class GameState {
   }
 
   /**
+   * Frequência dos Ecos: estação (Feira de Hermes) × talentos de sorte × Panteão/Jardim.
+   * Divide o atraso até o próximo Eco (rollNextShimmerDelaySec).
+   */
+  shimmerLuckMult() {
+    const season = Number(seasonModifiers(this.seasons, this.upgrades).shimmerRateMult) || 1;
+    const talents = Number(talentEffects(this.talents).shimmerLuckMult) || 1;
+    const games = Number(minigameEffects({ generatorLevels: this.generatorLevels, minigames: this.minigames }).shimmerLuckMult) || 1;
+    return season * talents * games;
+  }
+
+  /**
    * Clica no Eco do Acheron ativo e aplica a recompensa/buff correspondente.
    * @param {{ nowMs?: number, random?: () => number }} [opts]
    */
@@ -1350,7 +1362,7 @@ export class GameState {
     if (!this.shimmer) {
       return { ok: false, reason: 'no_shimmer' };
     }
-    const luckMult = seasonModifiers(this.seasons, this.upgrades).shimmerRateMult;
+    const luckMult = this.shimmerLuckMult();
     if (this._clockMs >= Number(this.shimmer.expiresAt)) {
       this.shimmer = null;
       this.shimmersMissed += 1;
@@ -1459,7 +1471,10 @@ export class GameState {
       if (this._clockMs >= Number(this.shimmer.expiresAt)) {
         this.shimmer = null;
         this.shimmersMissed += 1;
-        this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, this._shimmerSpawnRange || {});
+        this._nextShimmerInSec = rollNextShimmerDelaySec(this._random, {
+          ...(this._shimmerSpawnRange || {}),
+          luckMult: this.shimmerLuckMult(),
+        });
         this.invalidateEconomyCache();
       }
     } else {
@@ -1736,6 +1751,11 @@ export class GameState {
     };
   }
 
+  /** Frenesi de Néctar exige o talento *Desejo de Néctar* (ou *Envelhecer o Néctar*), como Sugar craving. */
+  isNectarFrenzyUnlocked() {
+    return Boolean(talentEffects(this.talents).nectarFrenzyUnlock);
+  }
+
   /**
    * Ativa o Frenesi de Néctar (Sugar Frenzy): gasta 1 Néctar (1× por ascensão) para ×3 SPS por 1h.
    */
@@ -1747,6 +1767,9 @@ export class GameState {
       return { ok: false, reason: 'already_used_this_run' };
     }
     const free = this.isFreeShopping();
+    if (!free && !this.isNectarFrenzyUnlocked()) {
+      return { ok: false, reason: 'locked' };
+    }
     const cost = NECTAR_CONFIG.frenzyCost;
     if (!free && this.nectar < cost) {
       return { ok: false, reason: 'insufficient_nectar', cost };

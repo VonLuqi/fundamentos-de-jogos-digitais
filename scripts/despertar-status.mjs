@@ -41,6 +41,8 @@ export const ART_FOLDERS = [
   'talents', 'minigames', 'veil', 'catabase', 'seasons',
 ];
 const GENERIC_TALENT_BLURB = /Eco celestial espelhado/i;
+/** Chaves de efeito que nenhum sistema do jogo lê (cosmético sem tela, telas inexistentes). */
+const DEAD_TALENT_EFFECT_KEYS = new Set(['cosmeticId', 'goldenSwitchUnlock', 'buyAllUnlock', 'vaultUnlock', 'labelPrinter']);
 
 async function thumb(input, isSvg) {
   const img = isSvg ? sharp(fs.readFileSync(input), { density: 72 }) : sharp(input);
@@ -177,7 +179,8 @@ export function requestStatus(keys, byKey) {
 
 function auditContent() {
   const generic = TALENTS.filter((t) => GENERIC_TALENT_BLURB.test(t.blurb || ''));
-  const noEffect = TALENTS.filter((t) => t.id !== 'legado' && Object.keys(t.effects || {}).length === 0);
+  const noEffect = TALENTS.filter((t) => t.id !== 'legado'
+    && Object.keys(t.effects || {}).every((key) => DEAD_TALENT_EFFECT_KEYS.has(key)));
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'game-catalog.json'), 'utf8'));
   const arts = DESPERTAR_ACHIEVEMENT_IDS
     .map((id) => catalog.achievements.find((a) => a.id === id)?.art)

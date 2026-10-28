@@ -509,13 +509,14 @@ export class MinigamesView {
     }
 
     const frenzyUsed = Boolean(state.nectarFrenzyUsedThisRun);
-    const canFrenzy = !frenzyUsed && (nectar >= 1 || state.isFreeShopping?.());
+    const frenzyLocked = !state.isFreeShopping?.() && state.isNectarFrenzyUnlocked?.() === false;
+    const canFrenzy = !frenzyUsed && !frenzyLocked && (nectar >= 1 || state.isFreeShopping?.());
     setDisabled(this._frenzyBtn, !canFrenzy);
     setClass(this._frenzyBtn, 'is-spent', frenzyUsed);
-    setText(
-      this._frenzyBtn,
-      frenzyUsed ? 'Frenesi já usado nesta corrida' : 'Frenesi · ×3 SPS / 1h',
-    );
+    let frenzyLabel = 'Frenesi · ×3 SPS / 1h';
+    if (frenzyUsed) frenzyLabel = 'Frenesi já usado nesta corrida';
+    else if (frenzyLocked) frenzyLabel = 'Frenesi · exige o talento Desejo de Néctar';
+    setText(this._frenzyBtn, frenzyLabel);
 
     const free = Boolean(state.isFreeShopping?.());
     const maxLv = NECTAR_CONFIG.maxGeneratorLevel;

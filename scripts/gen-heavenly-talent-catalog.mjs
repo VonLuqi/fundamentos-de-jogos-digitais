@@ -9,6 +9,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import { TALENT_COPY, talentEffectText } from './data/heavenly-talent-copy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const require = createRequire(import.meta.url);
@@ -466,14 +467,15 @@ function effectsFor(ccName) {
     case 'Lucky digit': return { prestigeEffectMult: '1.01', shimmerLuckMult: '1.01' };
     case 'Lucky number': return { prestigeEffectMult: '1.01', shimmerLuckMult: '1.01' };
     case 'Lucky payout': return { prestigeEffectMult: '1.01', shimmerLuckMult: '1.01' };
-    case 'Golden switch': return { goldenSwitchUnlock: true };
+    // Chave Dourada / Lista / Selos: o jogo não tem essas telas — efeito numérico real.
+    case 'Golden switch': return { allGeneratorsMult: '1.10' };
     case 'Season switcher': return { seasonSwitcherUnlock: true };
     case 'How to bake your dragon': return { dragonUnlock: true };
-    case 'Pet the dragon': return { dragonUnlock: true };
+    case 'Pet the dragon': return { allGeneratorsMult: '1.02' };
     case 'Unshackled cursors': return { unshackleFingers: true };
-    case 'Inspired checklist': return { buyAllUnlock: true, vaultUnlock: true };
+    case 'Inspired checklist': return { upgradeCostMult: '0.98' };
     case 'Genius accounting': return { richAmort: true };
-    case 'Label printer': return { labelPrinter: true };
+    case 'Label printer': return { upgradeCostMult: '0.99' };
     case 'Heralds': return { allGeneratorsMult: '1.01' };
     case 'Wrinkly cookies': return { allGeneratorsMult: '1.10' };
     case 'Sugar baking': return { nectarReserveBonus: true };
@@ -481,22 +483,45 @@ function effectsFor(ccName) {
     case 'Sugar aging process': return { nectarReserveBonus: true, nectarFrenzyUnlock: true };
     case 'Chimera':
       return { offlineRate: '0.05', offlineExtraHours: 48, upgradeCostMult: '0.99' };
+    // Sorte dos Ecos (aplicada no spawn via GameState.shimmerLuckMult).
+    case 'Residual luck':
+    case "Cosmic beginner's luck":
+      return { shimmerLuckMult: '1.03' };
+    case 'Distilled essence of redoubled luck': return { shimmerLuckMult: '1.05' };
+    case 'Starlove':
+    case 'Starsnow':
+    case 'Starspawn':
+    case 'Starterror':
+    case 'Startrade':
+    case 'Sucralosia Inutilis':
+      return { shimmerLuckMult: '1.02' };
+    // Manto Cintilante e reforços; doces e lembranças: produção global.
+    case 'Shimmering veil': return { allGeneratorsMult: '1.10' };
+    case 'Sugar crystal cookies': return { allGeneratorsMult: '1.05' };
+    case 'Reinforced membrane':
+    case 'Delicate touch':
+    case 'Steadfast murmur':
+    case 'Glittering edge':
+    case 'Fortune cookies':
+    case 'Keepsakes':
+    case 'Stevia Caelestis':
+      return { allGeneratorsMult: '1.02' };
+    case 'Diabetica Daemonicus': return { clickTalentMult: '1.05' };
     default:
       break;
   }
   if (UNSHACKLE_GEN[n]) return { unshackleGeneratorId: UNSHACKLE_GEN[n] };
+  // Sabores libertos, laticínios, tapeçarias e sons não têm tela de cosmético no jogo:
+  // efeito pequeno e real em vez de compra morta. Caixas/latas = bolachas (+2%, como no CC).
   if (n.startsWith('Unshackled ') && n !== 'Unshackled cursors') {
     const tier = n.replace('Unshackled ', '');
-    if (UNSHACKLE_TIER_NAMES.includes(tier)) {
-      return { cosmeticId: tier === 'flavor' ? 'sabor_liberado' : tier };
-    }
+    if (UNSHACKLE_TIER_NAMES.includes(tier)) return { allGeneratorsMult: '1.01' };
   }
-  if (/dairy|wallpaper|Wrapping paper|Box of|Tin of/.test(n)) {
-    return { cosmeticId: slugId(n) };
-  }
-  if (n === 'Persistent memory') return { buyAllUnlock: true, researchDurationMult: 0.1 };
+  if (/^(Box of|Tin of)/.test(n)) return { allGeneratorsMult: '1.02' };
+  if (/dairy|wallpaper|Wrapping paper/.test(n)) return { allGeneratorsMult: '1.01' };
+  if (n === 'Persistent memory') return { researchDurationMult: 0.1 };
   if (n === 'Five-finger discount') return { generatorCostMult: '0.99' };
-  if (n === 'Golden cookie alert sound' || n === 'Sound test') return { cosmeticId: slugId(n) };
+  if (n === 'Golden cookie alert sound' || n === 'Sound test') return { allGeneratorsMult: '1.01' };
   return {};
 }
 
@@ -518,11 +543,14 @@ const PT_NAMES = Object.freeze({
   Heralds: ['Eco da Turma', 'Todos os geradores +1% — os arautos sussurram.'],
 });
 
+/** Nome + sabor de TALENT_COPY e frase do efeito gerada do efeito real (Legado mantém o texto próprio). */
 function ptLabel(ccName) {
-  if (PT_NAMES[ccName]) return PT_NAMES[ccName];
-  const id = slugId(ccName);
-  const title = id.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-  return [title, `Eco celestial espelhado: ${ccName}.`];
+  if (ccName === 'Legacy') return PT_NAMES.Legacy;
+  const copy = TALENT_COPY[ccName];
+  if (!copy) throw new Error(`Talento sem nome/sabor em scripts/data/heavenly-talent-copy.mjs: ${ccName}`);
+  const [name, flavor] = copy;
+  const effect = talentEffectText(effectsFor(ccName));
+  return [name, effect ? `${flavor} ${effect}` : flavor];
 }
 
 /** Raio polar visual (rings altos comprimidos — espelha talents.js). */

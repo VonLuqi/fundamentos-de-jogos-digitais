@@ -117,133 +117,133 @@ Grade de juramentos da loja — os únicos upgrades ainda placeholder.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `abadao` | Abadao | Eco celestial espelhado: Abaddon. |
-| `angels` | Anjos | Mensageiros das receitas proibidas — +10% offline. |
-| `archangels` | Archangels | Eco celestial espelhado: Archangels. |
-| `asmodeus` | Asmodeus | Eco celestial espelhado: Asmodeus. |
-| `aura_gloves` | Aura Gloves | Eco celestial espelhado: Aura gloves. |
-| `basic_wallpaper_assortment` | Basic Wallpaper Assortment | Eco celestial espelhado: Basic wallpaper assortment. |
-| `beelzebub` | Beelzebub | Eco celestial espelhado: Beelzebub. |
-| `belphegor` | Belphegor | Daemon da preguiça — estende a maré offline. |
-| `bolachas_celestes` | Bolachas Celestes | Todos os geradores produzem +10% para sempre. |
-| `box_of_brand_biscuits` | Box Of Brand Biscuits | Eco celestial espelhado: Box of brand biscuits. |
-| `box_of_macarons` | Box Of Macarons | Eco celestial espelhado: Box of macarons. |
-| `box_of_maybe_cookies` | Box Of Maybe Cookies | Eco celestial espelhado: Box of maybe cookies. |
-| `box_of_not_cookies` | Box Of Not Cookies | Eco celestial espelhado: Box of not cookies. |
-| `box_of_pastries` | Box Of Pastries | Eco celestial espelhado: Box of pastries. |
-| `cat_ladies` | Cat Ladies | Eco celestial espelhado: Cat ladies. |
-| `cherubim` | Cherubim | Eco celestial espelhado: Cherubim. |
-| `classic_dairy_selection` | Classic Dairy Selection | Eco celestial espelhado: Classic dairy selection. |
-| `comprimidos_milkhelp` | Comprimidos Milkhelp | Eco celestial espelhado: Milkhelp® lactose intolerance relief tablets. |
-| `contabilidade_genial` | Contabilidade Genial | Eco celestial espelhado: Genius accounting. |
-| `cosmic_beginner_s_luck` | Cosmic Beginner S Luck | Eco celestial espelhado: Cosmic beginner's luck. |
-| `cozimento_de_acucar` | Cozimento De Acucar | Eco celestial espelhado: Sugar baking. |
-| `cozinha_inicial` | Cozinha Inicial | Eco celestial espelhado: Starter kitchen. |
-| `decisive_fate` | Decisive Fate | Eco celestial espelhado: Decisive fate. |
-| `delicate_touch` | Delicate Touch | Eco celestial espelhado: Delicate touch. |
-| `desconto_divino` | Desconto Divino | Eco celestial espelhado: Divine discount. |
-| `diabetica_daemonicus` | Diabetica Daemonicus | Eco celestial espelhado: Diabetica Daemonicus. |
-| `distilled_essence_of_redoubled_luck` | Distilled Essence Of Redoubled Luck | Eco celestial espelhado: Distilled essence of redoubled luck. |
-| `distinguished_wallpaper_assortment` | Distinguished Wallpaper Assortment | Eco celestial espelhado: Distinguished wallpaper assortment. |
-| `divine_bakeries` | Divine Bakeries | Eco celestial espelhado: Divine bakeries. |
-| `dominions` | Dominions | Eco celestial espelhado: Dominions. |
-| `elder_spice` | Elder Spice | Eco celestial espelhado: Elder spice. |
-| `eye_of_the_wrinkler` | Eye Of The Wrinkler | Eco celestial espelhado: Eye of the wrinkler. |
-| `fanciful_dairy_selection` | Fanciful Dairy Selection | Eco celestial espelhado: Fanciful dairy selection. |
-| `five_finger_discount` | Five Finger Discount | Eco celestial espelhado: Five-finger discount. |
-| `fortune_cookies` | Fortune Cookies | Eco celestial espelhado: Fortune cookies. |
-| `frenesi_de_acucar` | Frenesi De Acucar | Eco celestial espelhado: Sugar craving. |
-| `glittering_edge` | Glittering Edge | Eco celestial espelhado: Glittering edge. |
-| `god` | God | Eco celestial espelhado: God. |
-| `golden_cookie_alert_sound` | Golden Cookie Alert Sound | Eco celestial espelhado: Golden cookie alert sound. |
-| `golden_switch` | Golden Switch | Eco celestial espelhado: Golden switch. |
-| `heavenly_luck` | Heavenly Luck | Eco celestial espelhado: Heavenly luck. |
-| `heralds` | Eco da Turma | Todos os geradores +1% — os arautos sussurram. |
-| `inspired_checklist` | Inspired Checklist | Eco celestial espelhado: Inspired checklist. |
-| `keepsakes` | Keepsakes | Eco celestial espelhado: Keepsakes. |
-| `kit_inicial` | Kit Inicial | Eco celestial espelhado: Starter kit. |
-| `kitten_angels` | Kitten Angels | Eco celestial espelhado: Kitten angels. |
-| `kitten_wages` | Kitten Wages | Eco celestial espelhado: Kitten wages. |
-| `label_printer` | Label Printer | Eco celestial espelhado: Label printer. |
-| `lasting_fortune` | Lasting Fortune | Eco celestial espelhado: Lasting fortune. |
+| `abadao` | Abadom | O destruidor guarda a porta do sono. Janela offline +16 h. |
+| `angels` | Anjos | Mensageiros que vigiam a margem na sua ausência. Offline rende +10% do SPS. |
+| `archangels` | Arcanjos | Asas maiores, vigília mais longa. Offline rende +10% do SPS. |
+| `asmodeus` | Asmodeu | O daemon do desejo não deixa a maré esfriar. Janela offline +64 h. |
+| `aura_gloves` | Luvas de Aura | Mãos que brilham no escuro. Ceifar +5%. |
+| `basic_wallpaper_assortment` | Tapeçarias do Érebo | Paredes de sombra bordada para o Domínio. Todos os geradores +1%. |
+| `beelzebub` | Belzebu | O senhor das moscas não deixa nada parar. Janela offline +128 h. |
+| `belphegor` | Belphegor | O daemon da preguiça conta as horas por você. Janela offline +4 h. |
+| `bolachas_celestes` | Bolachas Celestes | O pão dos que já atravessaram. Todos os geradores +10%. |
+| `box_of_brand_biscuits` | Caixa de Óbolos Cunhados | Moedas de Caronte assadas em fornada. Todos os geradores +2%. |
+| `box_of_macarons` | Caixa de Doces de Perséfone | Pequenas romãs açucaradas da rainha. Todos os geradores +2%. |
+| `box_of_maybe_cookies` | Caixa de Talvez-Bolachas | Pode ser que estejam aí dentro. Todos os geradores +2%. |
+| `box_of_not_cookies` | Caixa de Não-Bolachas | Definitivamente não são bolachas. Todos os geradores +2%. |
+| `box_of_pastries` | Caixa de Doces do Elísio | Confeitaria dos campos dos bem-aventurados. Todos os geradores +2%. |
+| `cat_ladies` | Damas dos Filhotes | Quem cuida dos cães cuida do Domínio. ×1,29 de SPS por Filhote do Cérbero possuído. |
+| `cherubim` | Querubins | Guardiões de quatro faces sobre o rio. Offline rende +10% do SPS. |
+| `classic_dairy_selection` | Ânforas de Leite Ancestral | Leite servido nas ânforas dos primeiros mortos. Todos os geradores +1%. |
+| `comprimidos_milkhelp` | Pastilhas do Véu | Para quem bebe Véu demais. +5% de SPS por 100% de Véu. |
+| `contabilidade_genial` | Contabilidade Genial | Caronte anota cada óbolo. A loja detalha em quanto tempo cada compra se paga. |
+| `cosmic_beginner_s_luck` | Sorte de Principiante Cósmica | O rio ajuda quem acabou de chegar. Ecos do Acheron aparecem +3% mais. |
+| `cozimento_de_acucar` | Cozimento de Néctar | Néctar guardado é néctar que rende. Néctar em Reserva: +1% de SPS por Néctar guardado (até 100). |
+| `cozinha_inicial` | Cozinha Inicial | Os remadores já chegam ao cais. Cada corrida começa com 5 × Servos de Caronte. |
+| `decisive_fate` | Destino Decisivo | As Moiras cortam o fio na hora certa. Ecos do Acheron aparecem +2% mais. |
+| `delicate_touch` | Toque Delicado | A Foice passa sem rasgar o Manto. Todos os geradores +2%. |
+| `desconto_divino` | Desconto Divino | Os deuses pechincham por você. Geradores 1% mais baratos. |
+| `diabetica_daemonicus` | Diabetes Demoníaca | Açúcar demais deixa a Foice nervosa. Ceifar +5%. |
+| `distilled_essence_of_redoubled_luck` | Essência de Sorte Destilada | Uma gota que dobra o acaso. Ecos do Acheron aparecem +5% mais. |
+| `distinguished_wallpaper_assortment` | Tapeçarias do Olimpo | Fios de ouro roubados de cima. Todos os geradores +1%. |
+| `divine_bakeries` | Padarias Divinas | Tudo no Olimpo sai mais em conta. Geradores 1% mais baratos. Juramentos 1% mais baratos. |
+| `dominions` | Dominações | Ordens que seguem cumpridas na sua ausência. Offline rende +10% do SPS. |
+| `elder_spice` | Especiaria Anciã | Um tempero que atrai mais Sanguessugas. +2 vagas de Sanguessuga. |
+| `eye_of_the_wrinkler` | Olho da Sanguessuga | Você vê o que elas engoliram. Mostra quanto cada Sanguessuga digeriu. |
+| `fanciful_dairy_selection` | Ânforas de Néctar Raro | Leites de sabores que nenhum vivo provou. Todos os geradores +1%. |
+| `five_finger_discount` | Desconto dos Cinco Dedos | Ninguém viu nada. Geradores 1% mais baratos. |
+| `fortune_cookies` | Óbolos da Sorte | Moedas com uma profecia gravada. Todos os geradores +2%. |
+| `frenesi_de_acucar` | Desejo de Néctar | Uma vontade que só o Frenesi mata. Libera o Frenesi de Néctar (×3 SPS por 1 h, uma vez por corrida). |
+| `glittering_edge` | Fio Cintilante | A borda do Manto corta a escuridão. Todos os geradores +2%. |
+| `god` | Deus | Nada escapa ao olhar mais alto. Offline rende +5% do SPS. |
+| `golden_cookie_alert_sound` | Sino do Acheron | Um badalo que avisa antes da maré. Todos os geradores +1%. |
+| `golden_switch` | Chave Dourada | Um ferrolho de ouro que mantém a forja acesa. Todos os geradores +10%. |
+| `heavenly_luck` | Sorte Celeste | As correntes do Acheron sobem mais vezes. Ecos do Acheron aparecem +5% mais. |
+| `heralds` | Eco da Turma | Os arautos sussurram. Todos os geradores +1%. |
+| `inspired_checklist` | Lista Inspirada | Juramentos riscados um a um. Juramentos 2% mais baratos. |
+| `keepsakes` | Relicários | Lembranças de festas passadas. Todos os geradores +2%. |
+| `kit_inicial` | Kit Inicial | Toda corrida começa com companhia. Cada corrida começa com 10 × Sombra Vagante. |
+| `kitten_angels` | Filhotes Alados | Até os cães do Cérbero ganham asas. Conta como mais um Filhote do Cérbero (+10% do Véu). |
+| `kitten_wages` | Salário dos Filhotes | Ossos mais baratos no mercado. Filhotes do Cérbero 10% mais baratos. |
+| `label_printer` | Selos de Bronze | Cada juramento ganha seu selo. Juramentos 1% mais baratos. |
+| `lasting_fortune` | Fortuna Duradoura | A maré dourada demora a baixar. Ecos do Acheron aparecem +2% mais. |
 | `legado` | Legado | Desbloqueia o sistema de Essência de Mnemosyne e juramentos permanentes. |
-| `lucifer` | Lucifer | Eco celestial espelhado: Lucifer. |
-| `lucky_digit` | Lucky Digit | Eco celestial espelhado: Lucky digit. |
-| `luminous_gloves` | Luminous Gloves | Eco celestial espelhado: Luminous gloves. |
-| `luvas_de_halo` | Luvas De Halo | Eco celestial espelhado: Halo gloves. |
-| `mamon` | Mamon | Eco celestial espelhado: Mammon. |
-| `numero_da_sorte` | Numero Da Sorte | Eco celestial espelhado: Lucky number. |
-| `ovo_primordial` | Ovo Primordial | Desperta o Dragão Ctoniano. |
-| `pagamento_da_sorte` | Pagamento Da Sorte | Eco celestial espelhado: Lucky payout. |
-| `permanent_slot_i` | Eco do Styx I | Um juramento Styx permanece selado entre corridas. |
-| `permanent_slot_ii` | Eco do Styx II | Dois juramentos permanentes na margem. |
-| `permanent_slot_iii` | Eco do Styx III | Três juramentos atravessam o Lethe. |
-| `permanent_slot_iv` | Eco do Styx IV | Quatro juramentos sobrevivem à Catábase. |
-| `permanent_slot_v` | Eco do Styx V | Cinco juramentos — memória máxima do rio. |
-| `persistent_memory` | Persistent Memory | Eco celestial espelhado: Persistent memory. |
-| `pet_the_dragon` | Pet The Dragon | Eco celestial espelhado: Pet the dragon. |
-| `portoes_gemeos` | Portões Gêmeos | Offline rende 5% do SPS enquanto o rio dorme. |
-| `quimera` | Quimera | Eco celestial espelhado: Chimera. |
-| `reinforced_membrane` | Reinforced Membrane | Eco celestial espelhado: Reinforced membrane. |
-| `residual_luck` | Residual Luck | Eco celestial espelhado: Residual luck. |
-| `rodizio_das_estacoes` | Roda das Estações | Seletor de estações do Submundo. |
-| `sacrilegious_corruption` | Sacrilegious Corruption | Eco celestial espelhado: Sacrilegious corruption. |
-| `satan` | Satan | Eco celestial espelhado: Satan. |
-| `seraphim` | Seraphim | Eco celestial espelhado: Seraphim. |
-| `shimmering_veil` | Shimmering Veil | Eco celestial espelhado: Shimmering veil. |
-| `sinergias_vol_i` | Sinergias Vol. I | Malha Styx Vol. I (pares ≥ 15). |
-| `sinergias_vol_ii` | Sinergias Vol. II | Malha Styx Vol. II (pares ≥ 75). |
-| `sound_test` | Sound Test | Eco celestial espelhado: Sound test. |
-| `starlove` | Starlove | Eco celestial espelhado: Starlove. |
-| `starsnow` | Starsnow | Eco celestial espelhado: Starsnow. |
-| `starspawn` | Starspawn | Eco celestial espelhado: Starspawn. |
-| `starterror` | Starterror | Eco celestial espelhado: Starterror. |
-| `startrade` | Startrade | Eco celestial espelhado: Startrade. |
-| `steadfast_murmur` | Steadfast Murmur | Eco celestial espelhado: Steadfast murmur. |
-| `stevia_caelestis` | Stevia Caelestis | Eco celestial espelhado: Stevia Caelestis. |
-| `sucralosia_inutilis` | Sucralosia Inutilis | Eco celestial espelhado: Sucralosia Inutilis. |
-| `sugar_aging_process` | Sugar Aging Process | Eco celestial espelhado: Sugar aging process. |
-| `sugar_crystal_cookies` | Sugar Crystal Cookies | Eco celestial espelhado: Sugar crystal cookies. |
-| `tin_of_british_tea_biscuits` | Tin Of British Tea Biscuits | Eco celestial espelhado: Tin of british tea biscuits. |
-| `tin_of_butter_cookies` | Tin Of Butter Cookies | Eco celestial espelhado: Tin of butter cookies. |
-| `unholy_bait` | Unholy Bait | Eco celestial espelhado: Unholy bait. |
-| `unshackled_alabascream` | Unshackled Alabascream | Eco celestial espelhado: Unshackled alabascream. |
-| `unshackled_alchemy_labs` | Unshackled Alchemy Labs | Eco celestial espelhado: Unshackled alchemy labs. |
-| `unshackled_antimatter_condensers` | Unshackled Antimatter Condensers | Eco celestial espelhado: Unshackled antimatter condensers. |
-| `unshackled_astrofudge` | Unshackled Astrofudge | Eco celestial espelhado: Unshackled astrofudge. |
-| `unshackled_banks` | Unshackled Banks | Eco celestial espelhado: Unshackled banks. |
-| `unshackled_berrylium` | Unshackled Berrylium | Eco celestial espelhado: Unshackled berrylium. |
-| `unshackled_blueberrylium` | Unshackled Blueberrylium | Eco celestial espelhado: Unshackled blueberrylium. |
-| `unshackled_buttergold` | Unshackled Buttergold | Eco celestial espelhado: Unshackled buttergold. |
-| `unshackled_chalcedhoney` | Unshackled Chalcedhoney | Eco celestial espelhado: Unshackled chalcedhoney. |
-| `unshackled_chancemakers` | Unshackled Chancemakers | Eco celestial espelhado: Unshackled chancemakers. |
-| `unshackled_cherrysilver` | Unshackled Cherrysilver | Eco celestial espelhado: Unshackled cherrysilver. |
-| `unshackled_cortex_bakers` | Unshackled Cortex Bakers | Eco celestial espelhado: Unshackled cortex bakers. |
-| `unshackled_cursors` | Unshackled Cursors | Eco celestial espelhado: Unshackled cursors. |
-| `unshackled_factories` | Unshackled Factories | Eco celestial espelhado: Unshackled factories. |
-| `unshackled_farms` | Unshackled Farms | Eco celestial espelhado: Unshackled farms. |
-| `unshackled_flavor` | Unshackled Flavor | Eco celestial espelhado: Unshackled flavor. |
-| `unshackled_fractal_engines` | Unshackled Fractal Engines | Eco celestial espelhado: Unshackled fractal engines. |
-| `unshackled_glimmeringue` | Unshackled Glimmeringue | Eco celestial espelhado: Unshackled glimmeringue. |
-| `unshackled_glucosmium` | Unshackled Glucosmium | Eco celestial espelhado: Unshackled glucosmium. |
-| `unshackled_grandmas` | Unshackled Grandmas | Eco celestial espelhado: Unshackled grandmas. |
-| `unshackled_hazelrald` | Unshackled Hazelrald | Eco celestial espelhado: Unshackled hazelrald. |
-| `unshackled_idleverses` | Unshackled Idleverses | Eco celestial espelhado: Unshackled idleverses. |
-| `unshackled_iridyum` | Unshackled Iridyum | Eco celestial espelhado: Unshackled iridyum. |
-| `unshackled_javascript_consoles` | Unshackled Javascript Consoles | Eco celestial espelhado: Unshackled javascript consoles. |
-| `unshackled_jetmint` | Unshackled Jetmint | Eco celestial espelhado: Unshackled jetmint. |
-| `unshackled_mines` | Unshackled Mines | Eco celestial espelhado: Unshackled mines. |
-| `unshackled_mooncandy` | Unshackled Mooncandy | Eco celestial espelhado: Unshackled mooncandy. |
-| `unshackled_portals` | Unshackled Portals | Eco celestial espelhado: Unshackled portals. |
-| `unshackled_prisms` | Unshackled Prisms | Eco celestial espelhado: Unshackled prisms. |
-| `unshackled_shipments` | Unshackled Shipments | Eco celestial espelhado: Unshackled shipments. |
-| `unshackled_sugarmuck` | Unshackled Sugarmuck | Eco celestial espelhado: Unshackled sugarmuck. |
-| `unshackled_temples` | Unshackled Temples | Eco celestial espelhado: Unshackled temples. |
-| `unshackled_time_machines` | Unshackled Time Machines | Eco celestial espelhado: Unshackled time machines. |
-| `unshackled_wizard_towers` | Unshackled Wizard Towers | Eco celestial espelhado: Unshackled wizard towers. |
-| `unshackled_you` | Unshackled You | Eco celestial espelhado: Unshackled You. |
-| `vendas_divinas` | Vendas Divinas | Eco celestial espelhado: Divine sales. |
-| `virtues` | Virtues | Eco celestial espelhado: Virtues. |
-| `wrapping_paper` | Wrapping Paper | Eco celestial espelhado: Wrapping paper. |
-| `wrinkly_cookies` | Wrinkly Cookies | Eco celestial espelhado: Wrinkly cookies. |
+| `lucifer` | Lúcifer | A estrela caída estende a noite inteira. Janela offline +256 h. |
+| `lucky_digit` | Dígito da Sorte | Um número que Caronte sempre aceita. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
+| `luminous_gloves` | Luvas Luminosas | Cada golpe acende a margem. Ceifar +5%. |
+| `luvas_de_halo` | Luvas de Auréola | A Foice pesa menos. Ceifar +10%. |
+| `mamon` | Mamon | O avarento estica a maré enquanto você descansa. Janela offline +8 h. |
+| `numero_da_sorte` | Número da Sorte | Sete, como os portões. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
+| `ovo_primordial` | Ovo Primordial | Uma casca morna sob as cinzas do Phlegethon. Desperta o Dragão Ctoniano. |
+| `pagamento_da_sorte` | Pagamento da Sorte | Caronte paga o troco em ouro. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
+| `permanent_slot_i` | Eco do Styx I | Um juramento permanece selado entre corridas. 1 juramento(s) sobrevivem ao Lethe. |
+| `permanent_slot_ii` | Eco do Styx II | Dois juramentos permanentes na margem. 2 juramento(s) sobrevivem ao Lethe. |
+| `permanent_slot_iii` | Eco do Styx III | Três juramentos atravessam o Lethe. 3 juramento(s) sobrevivem ao Lethe. |
+| `permanent_slot_iv` | Eco do Styx IV | Quatro juramentos sobrevivem à Catábase. 4 juramento(s) sobrevivem ao Lethe. |
+| `permanent_slot_v` | Eco do Styx V | Cinco juramentos — memória máxima do rio. 5 juramento(s) sobrevivem ao Lethe. |
+| `persistent_memory` | Memória Persistente | O Arquivo Estígio lembra onde parou. Pesquisas do Arquivo Estígio 10× mais rápidas. |
+| `pet_the_dragon` | Afagar o Dragão | Ele ronrona fogo. Todos os geradores +2%. |
+| `portoes_gemeos` | Portões Gêmeos | Duas portas que não fecham nem quando você dorme. Offline rende +5% do SPS. |
+| `quimera` | Quimera | Três bestas, uma só vigília. Juramentos 1% mais baratos. Offline rende +5% do SPS. Janela offline +48 h. |
+| `reinforced_membrane` | Membrana Reforçada | O Manto não rasga tão fácil. Todos os geradores +2%. |
+| `residual_luck` | Sorte Residual | Restos de ouro no fundo do rio. Ecos do Acheron aparecem +3% mais. |
+| `rodizio_das_estacoes` | Roda das Estações | Gire o ano do Submundo. Libera a troca de estações. |
+| `sacrilegious_corruption` | Corrupção Sacrílega | O que é digerido volta mais gordo. Sanguessugas devolvem +5%. |
+| `satan` | Satanás | O adversário prolonga a noite. Janela offline +32 h. |
+| `seraphim` | Serafins | Fogo que vigia de longe. Offline rende +10% do SPS. |
+| `shimmering_veil` | Manto Cintilante | Um tecido de luz sobre o Domínio. Todos os geradores +10%. |
+| `sinergias_vol_i` | Sinergias Vol. I | Malha Styx Vol. I. Libera as Sinergias Vol. I. |
+| `sinergias_vol_ii` | Sinergias Vol. II | Malha Styx Vol. II. Libera as Sinergias Vol. II. |
+| `sound_test` | Teste de Lira | Afinando a lira de Orfeu. Todos os geradores +1%. |
+| `starlove` | Estrela de Antestéria | O festival das flores chama os Ecos. Ecos do Acheron aparecem +2% mais. |
+| `starsnow` | Estrela de Saturnália | A neve de Saturno brilha no Acheron. Ecos do Acheron aparecem +2% mais. |
+| `starspawn` | Estrela de Perséfone | A primavera da rainha agita o rio. Ecos do Acheron aparecem +2% mais. |
+| `starterror` | Estrela de Lemúria | Os mortos inquietos atraem Ecos. Ecos do Acheron aparecem +2% mais. |
+| `startrade` | Estrela de Hermes | Dia de feira, dia de sorte. Ecos do Acheron aparecem +2% mais. |
+| `steadfast_murmur` | Murmúrio Firme | O Manto sussurra e não cede. Todos os geradores +2%. |
+| `stevia_caelestis` | Estévia Celeste | Um doce que não pesa na balança dos Juízes. Todos os geradores +2%. |
+| `sucralosia_inutilis` | Sucralose Inútil | Um adoçante que só serve para dar sorte. Ecos do Acheron aparecem +2% mais. |
+| `sugar_aging_process` | Envelhecer o Néctar | O néctar velho é o mais forte. Néctar em Reserva: +1% de SPS por Néctar guardado (até 100). Libera o Frenesi de Néctar (×3 SPS por 1 h, uma vez por corrida). |
+| `sugar_crystal_cookies` | Bolachas de Cristal de Néctar | Crocantes como gelo do Cócito. Todos os geradores +5%. |
+| `tin_of_british_tea_biscuits` | Lata de Biscoitos de Hermes | Para o chá do mensageiro entre duas viagens. Todos os geradores +2%. |
+| `tin_of_butter_cookies` | Lata de Bolachas de Ambrosia | Manteiga dos deuses, só um pouco rançosa. Todos os geradores +2%. |
+| `unholy_bait` | Isca Profana | Carne velha jogada no Acheron. Sanguessugas surgem 5× mais. |
+| `unshackled_alabascream` | Alabascreme Liberto | Creme branco como mármore de túmulo. Todos os geradores +1%. |
+| `unshackled_alchemy_labs` | Laboratórios Libertos | A alquimia do Tártaro sem regras. Laboratório do Tártaro produz ×25. |
+| `unshackled_antimatter_condensers` | Condensadores Libertos | O Vazio sem contenção. Condensador do Vazio produz ×25. |
+| `unshackled_astrofudge` | Astrocaramelo Liberto | Caramelo de estrela cadente. Todos os geradores +1%. |
+| `unshackled_banks` | Tronos Libertos | O Trono de Obsidiana sem dono. Trono de Obsidiana produz ×25. |
+| `unshackled_berrylium` | Bagálio Liberto | Frutos de metal que não enferrujam. Todos os geradores +1%. |
+| `unshackled_blueberrylium` | Mirtilálio Liberto | Um metal azul que pulsa. Todos os geradores +1%. |
+| `unshackled_buttergold` | Manteigouro Liberto | Ouro que derrete na boca. Todos os geradores +1%. |
+| `unshackled_chalcedhoney` | Calcedmel Liberto | Mel de pedra escorrendo livre. Todos os geradores +1%. |
+| `unshackled_chancemakers` | Forjas do Destino Libertas | O acaso forjado sem molde. Forja do Destino produz ×25. |
+| `unshackled_cherrysilver` | Cereja-Prata Liberta | Fruta que reflete a lua. Todos os geradores +1%. |
+| `unshackled_cortex_bakers` | Padeiros do Córtex Libertos | Mentes que assam sem parar. Padeiro do Córtex produz ×25. |
+| `unshackled_cursors` | Foices Libertas | As Mil Foices sem grilhões. Mil Foices rendem ×25. |
+| `unshackled_factories` | Forjas Libertas | O Phlegethon sem represas. Forja de Phlegethon produz ×25. |
+| `unshackled_farms` | Cães Libertos | Os Cães Cerberianos soltos da coleira. Cão Cerberiano produz ×25. |
+| `unshackled_flavor` | Sabor Liberto | O primeiro sabor sem correntes. Todos os geradores +1%. |
+| `unshackled_fractal_engines` | Motores Fractais Libertos | Engrenagens dentro de engrenagens, soltas. Motor Fractal produz ×25. |
+| `unshackled_glimmeringue` | Merengue Cintilante Liberto | Espuma de luz que não desmancha. Todos os geradores +1%. |
+| `unshackled_glucosmium` | Glicósmio Liberto | Açúcar das estrelas mais densas. Todos os geradores +1%. |
+| `unshackled_grandmas` | Servos Libertos | Os remadores de Caronte sem correntes. Servos de Caronte produz ×25. |
+| `unshackled_hazelrald` | Avelãrald Liberto | Uma joia com gosto de noz. Todos os geradores +1%. |
+| `unshackled_idleverses` | Idleversos Libertos | Universos ociosos sem fronteira. Idleverso Ctoniano produz ×25. |
+| `unshackled_iridyum` | Irídio Liberto | O metal do arco-íris de Íris. Todos os geradores +1%. |
+| `unshackled_javascript_consoles` | Consoles do Oráculo Libertos | O Oráculo fala sem censura. Console do Oráculo produz ×25. |
+| `unshackled_jetmint` | Menta Negra Liberta | Fresca como um túmulo. Todos os geradores +1%. |
+| `unshackled_mines` | Juízes Libertos | Os Juízes do Tártaro sem amarras. Juiz do Tártaro produz ×25. |
+| `unshackled_mooncandy` | Doce Lunar Liberto | Açúcar colhido de Selene. Todos os geradores +1%. |
+| `unshackled_portals` | Portais Libertos | O Érebo de portas escancaradas. Portal do Érebo produz ×25. |
+| `unshackled_prisms` | Prismas Libertos | A luz das Moiras sem filtro. Prisma das Moiras produz ×25. |
+| `unshackled_shipments` | Barcas Libertas | As Barcas das Estrelas sem âncora. Barca das Estrelas produz ×25. |
+| `unshackled_sugarmuck` | Açucarlodo Liberto | Um lodo doce no fundo do rio. Todos os geradores +1%. |
+| `unshackled_temples` | Templos Libertos | Mnemosyne lembra sem limites. Templo de Mnemosyne produz ×25. |
+| `unshackled_time_machines` | Teares Libertos | O Tear de Cronos sem fio de prumo. Tear de Cronos produz ×25. |
+| `unshackled_wizard_towers` | Torres Libertas | As Torres do Estige sem selos. Torre do Estige produz ×25. |
+| `unshackled_you` | Imperador Liberto | Você mesmo, sem correntes. O Imperador (You) produz ×25. |
+| `vendas_divinas` | Liquidação Divina | Juramentos em promoção no Olimpo. Juramentos 1% mais baratos. |
+| `virtues` | Virtudes | Disciplina que trabalha sozinha. Offline rende +10% do SPS. |
+| `wrapping_paper` | Mortalhas de Presente | Embrulhos fúnebres para as festas. Todos os geradores +1%. |
+| `wrinkly_cookies` | Bolachas Enrugadas | Assadas no ventre das Sanguessugas. Todos os geradores +10%. |
 

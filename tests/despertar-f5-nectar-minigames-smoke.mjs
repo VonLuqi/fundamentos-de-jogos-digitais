@@ -151,6 +151,13 @@ run('2. Níveis de Gerador (+1% SPS/nível), Néctar em Reserva (cap 100) e Fren
   assert.equal(lv1.level, 1);
   assert.equal(cmp(state.sps(), '202'), 0);
 
+  // Frenesi de Néctar exige o talento Desejo de Néctar (Sugar craving)
+  const locked = state.activateNectarFrenzy({ nowMs: 50_000 });
+  assert.equal(locked.ok, false);
+  assert.equal(locked.reason, 'locked');
+  assert.equal(cmp(state.sps(), '202'), 0, 'sem talento o SPS não muda');
+  state.talents = [...state.talents, 'frenesi_de_acucar'];
+
   // Ativa Frenesi de Néctar (×3 por 1h, 1× por corrida)
   const frenzy = state.activateNectarFrenzy({ nowMs: 50_000 });
   assert.equal(frenzy.ok, true);
