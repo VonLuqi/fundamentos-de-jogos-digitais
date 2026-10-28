@@ -212,15 +212,37 @@ await run('C1: float/shockwave/shake respeitam reduced-motion', () => {
   }), false);
   assert.equal(created.length, 0);
 
+  const orbit = {
+    classList: {
+      _on: new Set(),
+      add(name) { this._on.add(name); },
+      remove(name) { this._on.delete(name); },
+    },
+  };
+  stage.querySelector = (sel) => (sel === '.despertar-reap-orbit' ? orbit : null);
+
   assert.equal(playReapJuice({
     stage,
-    particleLayer: layer,
+    floatLayer: layer,
     amount: '3',
     reducedMotion: false,
   }), true);
   assert.ok(created.some((n) => n.className === 'despertar-float'));
   assert.ok(created.some((n) => n.className === 'despertar-shockwave'));
-  assert.ok(stage.classList._on.has('is-shaking'));
+  assert.ok(orbit.classList._on.has('is-shaking'));
+  assert.equal(stage.classList._on.has('is-shaking'), false);
+
+  created.length = 0;
+  assert.equal(playReapJuice({
+    stage,
+    floatLayer: layer,
+    amount: '10480000000000000',
+    reducedMotion: false,
+    particles: false,
+    fancy: false,
+  }), true, '+N sobrevive a particles/LOD off');
+  assert.ok(created.some((n) => n.className === 'despertar-float'), 'float mesmo com LOD');
+  assert.equal(created.some((n) => n.className === 'despertar-shockwave'), false, 'shockwave respeita particles');
 });
 
 await run('C1: compra flash + shelf pop + selo upgrade', () => {

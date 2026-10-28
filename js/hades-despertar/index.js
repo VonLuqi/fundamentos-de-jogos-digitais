@@ -1494,7 +1494,8 @@ async function init() {
       particles: perfPrefs.particles,
       fancy: perfPrefs.fancy,
     });
-    if (!reducedMotion && perfPrefs.fancy) {
+    // Contador sempre “bate” no clique — fancy/LOD não podem esconder o Ceifar.
+    if (!reducedMotion) {
       juiceBumpClass(document.getElementById('despertar-souls'), 'is-bump', 380);
     }
   });

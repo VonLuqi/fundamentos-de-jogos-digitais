@@ -240,7 +240,8 @@
   background: transparent;
   box-shadow: none;
   text-align: center;
-  overflow: hidden;
+  /* visible: o +N do Ceifar sobe até o contador; hidden cortava o float no meio. */
+  overflow: visible;
   padding: 0.75rem 0.7rem 0.85rem;
 }
 

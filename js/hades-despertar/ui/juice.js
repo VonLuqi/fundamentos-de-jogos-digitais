@@ -144,16 +144,24 @@ export function playLetheRitualFeel({
 
 /**
  * Float `+N` no altar (Task C1) — teatro; não muda o saldo.
+ * Não depende de `particles`/auto-LOD: sem o +N o Ceifar parece morto no late-game
+ * (ganho << SPS/Sx e o contador não mexe).
  */
 export function spawnFloatText(layer, options = {}) {
-  if (!layer || options.particles === false || resolveReduced(options)) return false;
+  if (!layer || options.floatText === false || resolveReduced(options)) return false;
   const doc = layer.ownerDocument || options.root || (typeof document !== 'undefined' ? document : null);
   if (!doc?.createElement) return false;
 
   const amount = options.amount ?? options.gained ?? '1';
   const node = acquirePooledNode(doc, 'reap-float', 'despertar-float');
   if (!node) return false;
-  node.textContent = `+${formatSouls(amount)}`;
+  let label = '+1';
+  try {
+    label = `+${formatSouls(amount)}`;
+  } catch {
+    label = `+${amount}`;
+  }
+  node.textContent = label;
   // Origem na foice (coluna Acheron); sobe até o contador sem reiniciar no próximo clique.
   const x = Number.isFinite(options.x) ? options.x : 50 + (Math.random() * 16 - 8);
   const y = Number.isFinite(options.y) ? options.y : 62 + (Math.random() * 8 - 4);
@@ -208,6 +216,7 @@ export function playReapJuice(options = {}) {
     || options.particleLayer
     || null;
   let any = false;
+  // +N sempre (mesmo com particles/LOD off); shockwave/shake seguem prefs.
   if (spawnFloatText(floatLayer, options)) any = true;
   if (spawnShockwave(stage, options)) any = true;
   if (shakeAltar(stage, options)) any = true;
