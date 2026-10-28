@@ -13,6 +13,8 @@ import {
   TALENT_BY_ID,
   LEGACY_TALENT_MAP,
   LEGACY_TALENT_COSTS,
+  talentNodePosition,
+  talentRingRadius,
 } from '../js/hades-despertar/config/talents.js';
 import { cmp } from '../js/hades-despertar/core/decimal.js';
 import {
@@ -115,6 +117,62 @@ run('LEGACY_TALENT_MAP ⊆ catálogo ou null', () => {
       assert.ok(TALENT_BY_ID[mapped], `${oldId} → ${mapped}`);
     }
   }
+});
+
+run('layout polar: nós sem colisão + arestas sob controle', () => {
+  const CX = 800;
+  const CY = 1056;
+  const RING_GAP = 88;
+  const ROOT_R = 56;
+  const NODE_R = 26;
+  const pos = Object.fromEntries(
+    TALENTS.map((t) => [
+      t.id,
+      talentNodePosition(t, { cx: CX, cy: CY, ringGap: RING_GAP, rootR: ROOT_R }),
+    ]),
+  );
+  let minD = Infinity;
+  const ids = TALENTS.map((t) => t.id);
+  for (let i = 0; i < ids.length; i += 1) {
+    for (let j = i + 1; j < ids.length; j += 1) {
+      const a = pos[ids[i]];
+      const b = pos[ids[j]];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < minD) minD = d;
+    }
+  }
+  assert.ok(minD >= NODE_R * 2 - 0.5, `minDist ${minD}`);
+
+  const edges = [];
+  for (const t of TALENTS) {
+    for (const pid of t.requires?.talentIds || []) {
+      const a = pos[pid];
+      const b = pos[t.id];
+      if (!a || !b) continue;
+      edges.push(Math.hypot(a.x - b.x, a.y - b.y));
+    }
+  }
+  edges.sort((a, b) => a - b);
+  const mean = edges.reduce((s, v) => s + v, 0) / edges.length;
+  const p90 = edges[Math.floor(edges.length * 0.9)];
+  const max = edges[edges.length - 1];
+  assert.ok(mean < 450, `edge mean ${mean}`);
+  assert.ok(p90 < 1100, `edge p90 ${p90}`);
+  assert.ok(max < 3200, `edge max ${max}`);
+});
+
+run('rings altos comprimidos + gerador com wedges/pull', () => {
+  const full = 8 * 88 + 36;
+  const deep = talentRingRadius(26, { ringGap: 88, rootR: 56 });
+  assert.ok(deep < 26 * 88 + 36, `ring26 ${deep} deve comprimir`);
+  assert.ok(talentRingRadius(8) === full || Math.abs(talentRingRadius(8) - full) < 1e-6);
+  const gen = fs.readFileSync(path.join(root, 'scripts/gen-heavenly-talent-catalog.mjs'), 'utf8');
+  assert.ok(gen.includes('pullAngleTowardParents'));
+  assert.ok(gen.includes("unshackled: [-148, -100]"));
+  assert.ok(!gen.includes('season: [110, 140],\n    nectar: [110, 140],\n    unshackled: [-140, -110]'));
+  const ui = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/LetheRiverTree.js'), 'utf8');
+  assert.ok(ui.includes('talentRingRadius'));
+  assert.ok(ui.includes('medianRing'));
 });
 
 console.log(`\ndespertar-heavenly-tree-smoke: ${passed} passed, ${failed} failed`);

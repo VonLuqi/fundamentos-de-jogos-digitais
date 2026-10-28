@@ -161,9 +161,8 @@ await run('CTA disabled enquanto ready < 30', () => {
 });
 
 await run('J.1 copy educacional distingue sistemas', () => {
-  assert.match(JUIZO_BANCADA_HINT, /marcos do melhor streak/);
-  assert.match(JUIZO_BANCADA_HINT, /Juiz do Tártaro/);
-  assert.match(JUIZO_BANCADA_HINT, /Juramentos do Styx/);
+  assert.match(JUIZO_BANCADA_HINT, /marcos do teu melhor streak/);
+  assert.match(JUIZO_BANCADA_HINT, /Bancada sobrevive ao Lethe/);
   assert.match(JUIZO_CODEX_BODY, /não de cada acerto/);
   assert.match(JUIZO_CODEX_BODY, /Veredito do Tártaro/);
   assert.match(JUIZO_MODAL_EDU_HINT, /marcos do teu recorde/);

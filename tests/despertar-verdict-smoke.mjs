@@ -62,7 +62,12 @@ staticAssert(html.includes('id="panel-bancada"'), 'painel Bancada no HTML');
 staticAssert(html.includes('id="bancada-list-available"'), 'lista Bancada disponíveis');
 staticAssert(html.includes('id="bancada-list-owned"'), 'lista Bancada comprados');
 staticAssert(html.includes('id="bancada-subtabs"'), 'subtabs Bancada');
-staticAssert(html.includes('marcos do melhor streak') || html.includes('não cada acerto'), 'Bancada hint B4/J.1');
+staticAssert(
+  html.includes('marcos do teu melhor streak') || html.includes('Bancada sobrevive ao Lethe'),
+  'Bancada hint B4/J.1',
+);
+staticAssert(html.includes('id="bancada-shop-heading"'), 'heading Vereditos acima da loja');
+staticAssert(html.includes('bancada-minigames-heading'), 'secção Néctar e minijogos');
 staticAssert(indexJs.includes('onBuyVerdict'), 'index wire onBuyVerdict');
 staticAssert(indexJs.includes('verdictBuy'), 'index chama verdictBuy');
 staticAssert(apiJs.includes('despertarVerdictBuy'), 'cliente despertarVerdictBuy');

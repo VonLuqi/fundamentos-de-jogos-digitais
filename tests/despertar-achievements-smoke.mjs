@@ -361,8 +361,8 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
   );
   const generatorsSrc = read('js/hades-despertar/config/generators.js');
   staticAssert(
-    generatorsSrc.includes('minigame Juízo') || generatorsSrc.includes('distinto do minigame'),
-    'blurb T4 distingue Juízo (Q16)',
+    generatorsSrc.includes('Minos') || generatorsSrc.includes('malhete'),
+    'blurb T4 Juiz do Tártaro em lore (não meta)',
   );
 }
 

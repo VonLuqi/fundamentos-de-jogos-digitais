@@ -68,10 +68,10 @@ const apiJs = read('js/api.js');
 
 // —— Funcional ——
 staticAssert(html.includes('id="despertar-reap"'), 'altar Ceifar');
-staticAssert(GENERATORS.length === 6, '6 geradores T1–T6');
+staticAssert(GENERATORS.length === 20, '20 geradores T1–T20');
 staticAssert(COST_MULTIPLIER === '1.15', 'curva 1.15');
-staticAssert(UPGRADES.length >= 1, 'juramentos Styx');
-staticAssert(TALENTS.length === 18, '18 talentos do Panteão');
+staticAssert(UPGRADES.length >= 396, 'juramentos Styx (≥396)');
+staticAssert(TALENTS.length >= 100, `≥100 talentos Rio do Lethe (got ${TALENTS.length})`);
 staticAssert(OFFLINE_MAX_HOURS_BASE === 8, 'offline base 8 h');
 staticAssert(OFFLINE_MAX_HOURS_TALENT === 12, 'offline talento 12 h');
 staticAssert(cmp(OFFLINE_EFFICIENCY_BASE, '0.80') === 0, 'eficiência offline 80%');
@@ -149,15 +149,15 @@ await run('Preço Base×1.15^n; lote 10 usa série', () => {
 });
 
 await run('SPS HUD = 2 geradores + 1 juramento + 1 óbolo', () => {
-  // 10 sombras × 0.1 = 1; ×2 umbras = 2; + 1 servo ×0.8 = 2.8; × prestige(1 óbolo)=1.05 → 2.94
+  // 10 sombras × 0.1 = 1; ×2 umbras = 2; + 1 servo ×0.8 = 2.8; × prestige(1 óbolo)=1.01 → 2.828
   const sps = calculateTotalSPS({
     generators: { wandering_shade: 10, charon_servants: 1 },
     upgrades: ['umbras_despertas'],
     talents: [],
     obols: '1',
   });
-  assert.equal(cmp(sps, '2.94'), 0, `SPS esperado 2.94, got ${sps}`);
-  assert.equal(cmp(prestigeBonus('1', []), '1.05'), 0);
+  assert.equal(cmp(sps, '2.828'), 0, `SPS esperado 2.828, got ${sps}`);
+  assert.equal(cmp(prestigeBonus('1', []), '1.01'), 0);
 });
 
 await run('Juramentos ×2 no alvo; resetam no Lethe', () => {

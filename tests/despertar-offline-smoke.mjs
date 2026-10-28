@@ -55,6 +55,20 @@ staticAssert(storageSrc.includes('sessionStorage'), 'fallback sessionStorage');
 staticAssert(!/localStorage\.(get|set|remove)Item/.test(storageSrc), 'não usa API localStorage');
 staticAssert(storageSrc.includes('pagehide'), 'flush no pagehide');
 
+const harvestHtml = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
+staticAssert(harvestHtml.includes('id="despertar-harvest-modal"'), 'modal da colheita no HTML');
+staticAssert(harvestHtml.includes('despertar-harvest__eyebrow'), 'eyebrow da colheita');
+staticAssert(harvestHtml.includes('id="despertar-harvest-souls"'), 'hero de almas da colheita');
+staticAssert(harvestHtml.includes('id="despertar-harvest-duration"'), 'stat de tempo da colheita');
+staticAssert(harvestHtml.includes('id="despertar-harvest-rate"'), 'stat de ritmo da colheita');
+staticAssert(harvestHtml.includes('id="despertar-harvest-body"'), 'body a11y da colheita');
+
+const offlineSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/services/OfflineEngine.js'), 'utf8');
+staticAssert(offlineSrc.includes('formatSouls'), 'formatHarvest usa formatSouls');
+staticAssert(offlineSrc.includes('soulsLabel'), 'payload estruturado soulsLabel');
+staticAssert(offlineSrc.includes('durationLabel'), 'payload estruturado durationLabel');
+staticAssert(offlineSrc.includes('rateLabel'), 'payload estruturado rateLabel');
+
 if (errors.length) {
   console.error('despertar-offline-smoke (estático):');
   errors.forEach((item) => console.error(` - ${item}`));
@@ -241,6 +255,9 @@ await run('reload após 15 s com 1 sombra colhe 80% do SPS', async () => {
   assert.equal(catchUp.ignored, false);
   assert.equal(catchUp.harvest.show, true);
   assert.equal(catchUp.harvest.title, 'Colheita na ausência');
+  assert.equal(catchUp.harvest.durationLabel, '15 s');
+  assert.ok(catchUp.harvest.soulsLabel, 'soulsLabel preenchido');
+  assert.ok(catchUp.harvest.rateLabel, 'rateLabel preenchido com SPS do catch-up');
   assert.match(catchUp.harvest.body, /15 s/);
   assert.match(catchUp.harvest.body, /almas chegaram à margem/);
   assert.equal(catchUp.harvest.cta, 'Retomar o trono');
@@ -325,11 +342,26 @@ await run('formatHarvest usa a copy congelada', () => {
     effectiveSeconds: 28800,
     offlineSouls: '2304.00',
     maxHours: 8,
+    sps: '0.1',
   });
   assert.equal(harvest.title, 'Colheita na ausência');
   assert.equal(harvest.cta, 'Retomar o trono');
+  assert.equal(harvest.durationLabel, '8 h');
+  assert.equal(harvest.soulsLabel, '2.3K');
+  assert.equal(harvest.rateLabel, '0.1/s');
   assert.match(harvest.body, /8 h/);
+  assert.match(harvest.body, /2\.3K almas chegaram à margem/);
   assert.match(harvest.capNote, /O véu fechou após 8 h/);
+
+  const noRate = formatHarvest({
+    ok: true,
+    ignored: false,
+    cappedOut: false,
+    effectiveSeconds: 60,
+    offlineSouls: '10.00',
+  });
+  assert.equal(noRate.rateLabel, null);
+  assert.equal(noRate.durationLabel, '1 min');
 });
 
 console.log(`\ndespertar-offline-smoke: ${passed} passed, ${failed} failed`);

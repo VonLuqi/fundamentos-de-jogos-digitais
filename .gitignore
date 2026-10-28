@@ -39,6 +39,8 @@ tmp/
 temp/
 *.tmp
 *.temp
+# Saídas soltas de scripts de arte/auditoria (.tmp-upgrade-raw/, .tmp-placeholders.json…)
+.tmp-*
 assets/docs/aulas/_tmp_slide_covers/
 assets/classind-dle/_covers-staging/
 

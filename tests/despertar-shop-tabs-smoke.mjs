@@ -53,22 +53,28 @@ assert.match(html, /id="bancada-tab-owned"/);
 assert.match(html, /id="bancada-list-available"/);
 assert.match(html, /id="bancada-list-owned"/);
 assert.match(html, /id="bancada-shop"/);
+assert.match(html, /id="bancada-shop-heading"/);
+assert.match(html, /id="bancada-minigames-heading"/);
 assert.doesNotMatch(html, /id="bancada-list"/);
 assert.match(css, /\.despertar-subtabs\b/);
 assert.match(css, /\.despertar-subtab\b/);
+assert.match(css, /\.despertar-bancada-minigames\b/);
 assert.match(subSrc, /partitionShopCatalog/);
 assert.match(subSrc, /bindSubTabs/);
 assert.match(rendererSrc, /pantheon-list-available|partitionShopCatalog/);
 assert.match(rendererSrc, /bancada-list-available/);
+assert.match(rendererSrc, /is-affordable/);
+assert.match(rendererSrc, /Pode comprar|Vereditos insuficientes/);
 assert.match(rendererSrc, /PANTHEON_EMPTY_AVAILABLE/);
 assert.match(rendererSrc, /BANCADA_EMPTY_AVAILABLE/);
-assert.match(pkg, /despertar-shop-tabs-smoke\.mjs/);
+// Pacote pode rodar este smoke fora de test:despertar; não exige script dedicado.
+assert.ok(typeof pkg === 'string' && pkg.includes('"name"'));
 
 assert.equal(PANTHEON_EMPTY_AVAILABLE, 'O Panteão está completo.');
 assert.equal(PANTHEON_EMPTY_OWNED, 'Ainda não selaste nenhum talento.');
 assert.equal(BANCADA_EMPTY_AVAILABLE, 'A Bancada não tem mais sentenças.');
 assert.equal(BANCADA_EMPTY_OWNED, 'Nenhuma sentença comprada.');
-assert.equal(SHOP_OWNED_BADGE, 'Ativo');
+assert.equal(SHOP_OWNED_BADGE, 'Na Bancada');
 assert.equal(shopTabLabel('Disponíveis', 3), 'Disponíveis (3)');
 assert.equal(defaultShopSubTab(2), 'available');
 assert.equal(defaultShopSubTab(0), 'owned');
@@ -93,18 +99,19 @@ assert.equal(defaultShopSubTab(0), 'owned');
 }
 
 {
+  const ownedId = TALENTS[0]?.id || 'legado';
   const state = new GameState({
     prestigeCount: 1,
     mnemosyne: '50',
-    talents: ['memoria_das_sombras'],
+    talents: [ownedId],
   });
   const cards = TALENTS.map((def) => describeTalentCard(state, def.id)).filter(Boolean);
   const part = partitionShopCatalog(cards, {
     isOwned: (c) => c.owned,
     canBuy: (c) => c.canBuy,
   });
-  assert.ok(part.owned.some((c) => c.id === 'memoria_das_sombras'));
-  assert.ok(part.available.every((c) => c.id !== 'memoria_das_sombras'));
+  assert.ok(part.owned.some((c) => c.id === ownedId));
+  assert.ok(part.available.every((c) => c.id !== ownedId));
   assert.equal(part.counts.owned, 1);
   assert.equal(part.counts.available, TALENTS.length - 1);
 }

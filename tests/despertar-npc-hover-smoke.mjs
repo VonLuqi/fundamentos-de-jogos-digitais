@@ -17,15 +17,22 @@ import {
 import { GameState } from '../js/hades-despertar/core/GameState.js';
 import { describeGeneratorCard, describeNpcUnit, NPC_UNIT_PRODUCTION_BLURB } from '../js/hades-despertar/ui/UIRenderer.js';
 import {
+  describeUnitPersona,
+  resetUnitNamePool,
+  seedUnitNamePool,
+} from '../js/hades-despertar/ui/unitPersona.js';
+import {
   ORBIT_HIT_RADIUS,
   orbitHitIndex,
   orbitPlacementXY,
   orbitSlotLayout,
 } from '../js/hades-despertar/ui/world/AltarOrbit.js';
 import {
+  NPC_PORTRAIT_CELL,
   SHELF_CELL,
   SHELF_PAD,
   buyPulseScale,
+  paintShelfUnitPortrait,
   shelfCellOrigin,
   shelfHitIndex,
   shinyCountFromState,
@@ -52,10 +59,16 @@ staticAssert(altarSrc.includes('orbitHitIndex'), 'orbitHitIndex');
 staticAssert(altarSrc.includes('pulseBuy') && altarSrc.includes('_hoverIndex'), 'G5.2 orbit highlight/pulse');
 staticAssert(rendererSrc.includes('describeNpcUnit'), 'describeNpcUnit');
 staticAssert(rendererSrc.includes('produção desta unidade') || rendererSrc.includes('NPC_UNIT_PRODUCTION_BLURB'), 'copy G3.2 unidade');
-staticAssert(rendererSrc.includes('Linha total'), 'store title marca linha total');
+staticAssert(/linha total/i.test(rendererSrc), 'store title marca linha total');
 staticAssert(rendererSrc.includes('despertar-npc-tooltip'), 'NPC tooltip DOM');
+staticAssert(rendererSrc.includes('describeUnitPersona') || rendererSrc.includes('unitPersona'), 'persona turma no tip');
+staticAssert(rendererSrc.includes('habitatSprite'), 'sprite habitat no tip NPC');
+staticAssert(rendererSrc.includes('paintNpcPortrait') || worldSrc.includes('paintShelfUnitPortrait'), 'preview = pipeline da prateleira');
+staticAssert(worldSrc.includes('paintShelfUnitPortrait'), 'paintShelfUnitPortrait export');
 staticAssert(rendererSrc.includes('pulseGeneratorBuy'), 'G5.2 pulseGeneratorBuy');
 staticAssert(css.includes('despertar-npc-tooltip') || css.includes('upgrade-tooltip__shiny'), 'CSS tip shiny');
+staticAssert(css.includes('despertar-npc-tooltip__portrait'), 'CSS portrait maior');
+staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/ui/unitPersona.js')), 'unitPersona.js');
 staticAssert(css.includes('is-buy-pulse') || css.includes('despertarOrbitBuyPulse'), 'CSS orbit buy pulse');
 staticAssert(pkg.includes('despertar-npc-hover-smoke.mjs'), 'check inclui npc hover smoke');
 
@@ -169,6 +182,73 @@ run('orbitHitIndex: ponto no placement', () => {
   assert.equal(orbitHitIndex(p0.x + ORBIT_HIT_RADIUS + 20, p0.y, placements, geom), -1);
 });
 
+run('paintShelfUnitPortrait: negativo + accessory no canvas', () => {
+  const calls = [];
+  const ctx = {
+    clearRect(...args) { calls.push(['clear', ...args]); },
+    save() {},
+    restore() {},
+    drawImage() { calls.push(['draw']); },
+    beginPath() {},
+    moveTo() {},
+    lineTo() {},
+    closePath() {},
+    fill() {},
+    stroke() {},
+    arc() {},
+    ellipse() {},
+    rect() {},
+    clip() {},
+    filter: 'none',
+    globalAlpha: 1,
+    imageSmoothingEnabled: true,
+  };
+  const img = { naturalWidth: 16, naturalHeight: 16, width: 16, height: 16 };
+  assert.equal(paintShelfUnitPortrait(ctx, {
+    cell: NPC_PORTRAIT_CELL,
+    sprite: img,
+    index: 0,
+    rarity: 'negativo',
+    tier: 3,
+  }), true);
+  assert.ok(calls.some((c) => c[0] === 'clear'));
+  assert.ok(calls.some((c) => c[0] === 'draw'));
+
+  const accessories = [];
+  const ctx2 = {
+    ...ctx,
+    clearRect() {},
+    drawImage() {},
+    // drawAccessory hat_charon usa path fill/stroke
+  };
+  paintShelfUnitPortrait(ctx2, {
+    cell: NPC_PORTRAIT_CELL,
+    sprite: img,
+    index: 0,
+    rarity: 'normal',
+    tier: 2,
+    cosmetics: [{ accessory: 'hat_charon', coverage: 1, priority: 1, upgradeId: 'test_hat' }],
+  });
+  void accessories;
+});
+
+run('unitPersona: mistura turma + idade estável', () => {
+  resetUnitNamePool();
+  const seeded = seedUnitNamePool([
+    { fullName: 'Maria Clara Souza', username: 'mclara' },
+    { fullName: 'Pedro Henrique Lima', username: 'phlima' },
+    { fullName: 'Ana Beatriz Costa', username: 'anabc' },
+  ]);
+  assert.equal(seeded.replaced, true);
+  const a = describeUnitPersona('cerberian_hound', 0);
+  const b = describeUnitPersona('cerberian_hound', 0);
+  assert.equal(a.name, b.name);
+  assert.equal(a.age, b.age);
+  assert.match(a.name, /Maria|Pedro|Ana|Clara|Souza|Lima|Costa|Henrique|Beatriz|mclara|phlima|anabc/i);
+  assert.ok(a.age >= 19 && a.age <= 109);
+  resetUnitNamePool();
+});
+
 run('shinyCountFromState + describeNpcUnit', () => {
   assert.equal(shinyCountFromState({ shinyCounts: { charon_servants: 2 } }, 'charon_servants', 5), 2);
   assert.equal(shinyCountFromState({ shinyCounts: { charon_servants: 9 } }, 'charon_servants', 3), 3);
@@ -177,9 +257,12 @@ run('shinyCountFromState + describeNpcUnit', () => {
     souls: '1000',
     generators: { wandering_shade: 3 },
   });
-  const view = describeNpcUnit(gs, 'wandering_shade', { shiny: false });
-  assert.equal(view.name, 'Sombra Vagante');
-  assert.equal(view.blurb, NPC_UNIT_PRODUCTION_BLURB);
+  const view = describeNpcUnit(gs, 'wandering_shade', { shiny: false, index: 0 });
+  assert.equal(view.typeName, 'Sombra Vagante');
+  assert.match(view.blurb, /^tempo de existência: \d+$/);
+  assert.ok(view.age >= 19 && view.age <= 109);
+  assert.ok(view.name && view.name !== view.typeName);
+  assert.equal(view.productionBlurb, NPC_UNIT_PRODUCTION_BLURB);
   assert.equal(view.rate, effectiveUnitSPS({
     generatorId: 'wandering_shade',
     upgrades: gs.upgrades,
@@ -187,7 +270,12 @@ run('shinyCountFromState + describeNpcUnit', () => {
     obols: gs.obols,
     verdictPurchases: gs.verdictPurchases,
   }));
-  const shinyView = describeNpcUnit(gs, 'wandering_shade', { shiny: true });
+  const same = describeNpcUnit(gs, 'wandering_shade', { shiny: false, index: 0 });
+  assert.equal(same.name, view.name);
+  assert.equal(same.age, view.age);
+  const other = describeNpcUnit(gs, 'wandering_shade', { shiny: false, index: 1 });
+  assert.ok(other.name !== view.name || other.age !== view.age);
+  const shinyView = describeNpcUnit(gs, 'wandering_shade', { shiny: true, index: 0 });
   assert.equal(shinyView.shiny, true);
   assert.equal(shinyView.rate, mul(view.rate, SHINY_MULT));
 });
@@ -198,10 +286,11 @@ run('G3.2: unidade × qty ≈ linha da store (Servo)', () => {
     generators: { charon_servants: 7 },
     obols: '10',
   });
-  const unit = describeNpcUnit(gs, 'charon_servants', { shiny: false });
+  const unit = describeNpcUnit(gs, 'charon_servants', { shiny: false, index: 2 });
   const card = describeGeneratorCard(gs, 'charon_servants', '1');
   assert.ok(unit && card);
-  assert.equal(unit.blurb, 'produção desta unidade');
+  assert.equal(unit.productionBlurb, 'produção desta unidade');
+  assert.match(unit.blurb, /^tempo de existência: \d+$/);
   assert.equal(card.quantity, 7);
   assert.equal(card.rate, mul(unit.rate, String(card.quantity)));
   assert.equal(card.unitRate, unit.rate);

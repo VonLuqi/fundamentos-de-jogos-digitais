@@ -35,6 +35,7 @@ staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/ui/world/AltarOrb
 staticAssert(html.includes('id="despertar-reap-orbit"'), 'host da órbita');
 staticAssert(html.includes('id="despertar-veil"'), 'véu milk');
 staticAssert(html.includes('data-particle-layer'), 'camada de chuva');
+staticAssert(html.includes('data-float-layer'), 'camada de floats fora do stage');
 staticAssert(rendererSrc.includes('AltarOrbit'), 'UIRenderer integra AltarOrbit');
 staticAssert(css.includes('despertar-particle--rain'), 'CSS chuva');
 staticAssert(css.includes('is-milk'), 'CSS véu milk');
@@ -56,6 +57,7 @@ function fakeHosts() {
   const particles = {
     childElementCount: 0,
     firstElementChild: null,
+    get children() { return rains; },
     ownerDocument: {
       createElement() {
         const mote = {
@@ -63,6 +65,12 @@ function fakeHosts() {
           style: { setProperty() {} },
           setAttribute() {},
           addEventListener() {},
+          remove() {
+            const i = rains.indexOf(mote);
+            if (i >= 0) rains.splice(i, 1);
+            particles.childElementCount = rains.length;
+            particles.firstElementChild = rains[0] || null;
+          },
         };
         return mote;
       },

@@ -83,9 +83,9 @@ function check(label, fn) {
   }
 }
 
-check('catálogo tem 21 logs', () => {
-  assert.equal(EDU_LOGS.length, 21);
-  assert.equal(EDU_LOG_IDS.length, 21);
+check('catálogo tem 29 logs (inclui F1 log_synergy_blades, F2 log_shimmer_echo, F3 log_midgame_payoff, F4 log_veil_kittens, F5 log_nectar_minigames, F6 log_catabase_wrinklers, F7 log_late_bignum_payoff e F8 log_incremental_architecture_f8)', () => {
+  assert.equal(EDU_LOGS.length, 29);
+  assert.equal(EDU_LOG_IDS.length, 29);
   assert.ok(EDU_LOG_IDS.includes('log_lethe_unlock'));
   assert.ok(EDU_LOG_IDS.includes('log_lethe_ritual'));
   assert.ok(EDU_LOG_IDS.includes('log_styx_open'));
@@ -94,6 +94,14 @@ check('catálogo tem 21 logs', () => {
   assert.ok(EDU_LOG_IDS.includes('log_sealed_juramentos'));
   assert.ok(EDU_LOG_IDS.includes('log_verdicts_milestone'));
   assert.ok(EDU_LOG_IDS.includes('log_obols_bonus'));
+  assert.ok(EDU_LOG_IDS.includes('log_synergy_blades'));
+  assert.ok(EDU_LOG_IDS.includes('log_shimmer_echo'));
+  assert.ok(EDU_LOG_IDS.includes('log_midgame_payoff'));
+  assert.ok(EDU_LOG_IDS.includes('log_nectar_minigames'));
+  assert.ok(EDU_LOG_IDS.includes('log_veil_kittens'));
+  assert.ok(EDU_LOG_IDS.includes('log_catabase_wrinklers'));
+  assert.ok(EDU_LOG_IDS.includes('log_late_bignum_payoff'));
+  assert.ok(EDU_LOG_IDS.includes('log_incremental_architecture_f8'));
 });
 
 check('Códice vazio antes do primeiro clique', () => {
