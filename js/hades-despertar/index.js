@@ -667,9 +667,56 @@ function bindDebugSandbox({
       refreshUi();
       return;
     }
+    if (action === 'catabase2') {
+      state.setCatabaseStage?.(2);
+      if (status) status.textContent = 'Catábase estágio 2.';
+      refreshUi();
+      return;
+    }
     if (action === 'catabase3') {
       state.setCatabaseStage?.(3);
       if (status) status.textContent = 'Catábase estágio 3.';
+      refreshUi();
+      return;
+    }
+
+    const arquivoActions = {
+      arquivoFund: 'fund',
+      arquivoFinish: 'finishResearch',
+      arquivoBuyNext: 'buyNext',
+      arquivoComplete: 'completeChain',
+      arquivoPledge: 'pledge',
+      arquivoCovenant: 'covenant',
+    };
+    if (arquivoActions[action]) {
+      if (typeof state.debugArquivoEstigio !== 'function') {
+        if (status) status.textContent = 'debugArquivoEstigio indisponível — atualize o cache.';
+        return;
+      }
+      const mode = arquivoActions[action];
+      const res = state.debugArquivoEstigio(mode);
+      if (!res?.ok) {
+        if (status) {
+          status.textContent = res?.reason === 'chain_complete'
+            ? 'Arquivo Estígio: cadeia já completa.'
+            : `Arquivo falhou (${res?.reason || 'desconhecido'}).`;
+        }
+        refreshUi();
+        return;
+      }
+      const labels = {
+        fund: 'Arquivo fundado (Concílio + 7 Servos). Pesquisa iniciada.',
+        finishResearch: res.completedId
+          ? `Pesquisa concluída: ${res.completedId}. Compre a tese na loja ou use “Comprar próxima”.`
+          : 'Timer de pesquisa zerado.',
+        buyNext: `Tese comprada: ${res.upgradeId}. Estágio ${res.stage ?? '?'}.`,
+        completeChain: 'Arquivo completo — todas as teses + Catábase 3.',
+        pledge: 'Juramento de Trégua ativado (debug, grátis).',
+        covenant: state.isElderCovenantActive?.()
+          ? 'Aliança Eterna ligada (−5% SPS).'
+          : 'Aliança Eterna revogada.',
+      };
+      if (status) status.textContent = labels[mode] || 'Arquivo Estígio atualizado.';
       refreshUi();
       return;
     }

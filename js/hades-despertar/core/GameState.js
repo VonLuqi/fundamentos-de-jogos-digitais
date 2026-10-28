@@ -87,6 +87,7 @@ import {
   normalizeFortuneState,
   rollTickerFortune as domainRollTickerFortune,
 } from './FortuneSystem.js';
+import { CATABASE_RESEARCH_CHAIN } from '../config/catabase.js';
 import {
   activateElderPledge as domainActivateElderPledge,
   calculateLeechDrain,
@@ -1194,6 +1195,107 @@ export class GameState {
       researchTargetId: this.catabase.researchTargetId,
       researchRemainingSec: this.catabase.researchRemainingSec,
     };
+  }
+
+  /**
+   * Debug Estela — Arquivo Estígio / Catábase canônica (sem passar 30 min reais).
+   * @param {'fund'|'finishResearch'|'buyNext'|'completeChain'|'pledge'|'covenant'} action
+   */
+  debugArquivoEstigio(action = 'fund') {
+    const act = String(action || 'fund');
+
+    if (act === 'pledge') {
+      return this.activateElderPledge({ free: true });
+    }
+    if (act === 'covenant') {
+      const on = !this.isElderCovenantActive?.();
+      return this.setElderCovenant(on);
+    }
+
+    if (act === 'fund' || act === 'completeChain') {
+      const qty = { ...this.quantities() };
+      qty.charon_servants = Math.max(7, Math.floor(Number(qty.charon_servants) || 0));
+      this.generators.applyQuantities(qty);
+
+      const chainIds = [
+        'concilio_das_moiras',
+        ...CATABASE_RESEARCH_CHAIN.map((step) => step.upgradeId),
+      ];
+      const grantIds = act === 'completeChain'
+        ? chainIds
+        : ['concilio_das_moiras'];
+      let nextUp = [...this.upgrades];
+      for (const id of grantIds) {
+        if (!nextUp.includes(id)) nextUp.push(id);
+      }
+      this.upgrades = nextUp;
+      this.catabase = normalizeCatabaseState(
+        {
+          ...this.catabase,
+          stage: act === 'completeChain' ? 3 : this.catabase.stage,
+          covenantActive: false,
+          pledgeExpiresAt: null,
+        },
+        this.#catabaseNormalizeOpts(),
+      );
+      this.#syncCatabaseFlags();
+      this.invalidateEconomyCache();
+      this.unlockLogs();
+      this.#bumpSyncEpoch();
+      this.#bump();
+      return {
+        ok: true,
+        action: act,
+        stage: this.catabaseStage?.() ?? this.catabase.stage,
+        researchTargetId: this.catabase.researchTargetId,
+        researchRemainingSec: this.catabase.researchRemainingSec,
+        upgradesGranted: grantIds,
+      };
+    }
+
+    if (act === 'finishResearch') {
+      if (!this.upgrades.includes('concilio_das_moiras')) {
+        this.debugArquivoEstigio('fund');
+      }
+      const res = this.advanceCatabaseResearch(1e7);
+      return { ...res, action: 'finishResearch' };
+    }
+
+    if (act === 'buyNext') {
+      if (!this.upgrades.includes('concilio_das_moiras')) {
+        this.debugArquivoEstigio('fund');
+      }
+      // Zera o timer da tese atual (libera compra) e compra a primeira desbloqueada faltante.
+      this.advanceCatabaseResearch(1e7);
+      const unlocked = Array.isArray(this.catabase.unlockedResearchIds)
+        ? this.catabase.unlockedResearchIds
+        : [];
+      const toBuy = unlocked.find((id) => !this.upgrades.includes(id))
+        || CATABASE_RESEARCH_CHAIN.map((s) => s.upgradeId).find((id) => !this.upgrades.includes(id));
+      if (!toBuy) {
+        return {
+          ok: false,
+          reason: 'chain_complete',
+          action: 'buyNext',
+          stage: this.catabaseStage?.() ?? this.catabase.stage,
+        };
+      }
+      const prevFree = Boolean(this.debugFlags?.freeShopping);
+      if (!this.debugFlags) this.debugFlags = {};
+      this.debugFlags.freeShopping = true;
+      const bought = this.buyUpgrade(toBuy);
+      this.debugFlags.freeShopping = prevFree;
+      return {
+        ok: Boolean(bought?.ok),
+        action: 'buyNext',
+        upgradeId: toBuy,
+        stage: this.catabaseStage?.() ?? this.catabase.stage,
+        researchTargetId: this.catabase.researchTargetId,
+        researchRemainingSec: this.catabase.researchRemainingSec,
+      };
+    }
+
+    return { ok: false, reason: 'unknown_action', action: act };
   }
 
   /**

@@ -35,6 +35,13 @@ run('HTML mecânicas na Estela', () => {
   assert.ok(html.includes('data-debug-action="spawnShinyLeech"'));
   assert.ok(html.includes('data-debug-action="openLetheUnlimited"'));
   assert.ok(html.includes('data-debug-action="catabase1"'));
+  assert.ok(html.includes('data-debug-action="catabase2"'));
+  assert.ok(html.includes('data-debug-action="arquivoFund"'));
+  assert.ok(html.includes('data-debug-action="arquivoFinish"'));
+  assert.ok(html.includes('data-debug-action="arquivoBuyNext"'));
+  assert.ok(html.includes('data-debug-action="arquivoComplete"'));
+  assert.ok(html.includes('data-debug-action="arquivoPledge"'));
+  assert.ok(html.includes('data-debug-action="arquivoCovenant"'));
   assert.ok(html.includes('data-debug-shimmer-effect'));
 });
 
@@ -42,7 +49,9 @@ run('index + GameState wire', () => {
   assert.ok(indexSrc.includes('openLetheUnlimited'));
   assert.ok(indexSrc.includes('spawnShimmer'));
   assert.ok(indexSrc.includes('openRiver'));
+  assert.ok(indexSrc.includes('debugArquivoEstigio'));
   assert.ok(stateSrc.includes('debugLocalPatch'));
+  assert.ok(stateSrc.includes('debugArquivoEstigio'));
 });
 
 run('spawn Eco + Sanguessuga + patch local', () => {
@@ -71,6 +80,38 @@ run('spawn Eco + Sanguessuga + patch local', () => {
   assert.equal(state.ascensionOpen, false);
   state.ascensionOpen = true;
   assert.equal(state.ascensionOpen, true);
+});
+
+run('Arquivo Estígio debug: fundar → pesquisa → comprar → cadeia', () => {
+  const state = new GameState({ souls: '0', generators: {} }, { initialNowMs: 1_000 });
+  const fund = state.debugArquivoEstigio('fund');
+  assert.equal(fund.ok, true);
+  assert.equal(state.quantities().charon_servants >= 7, true);
+  assert.equal(state.upgrades.includes('concilio_das_moiras'), true);
+  assert.equal(state.catabase.researchTargetId, 'soro_estigio');
+  assert.ok(Number(state.catabase.researchRemainingSec) > 0);
+
+  const finish = state.debugArquivoEstigio('finishResearch');
+  assert.equal(finish.ok, true);
+  assert.equal(finish.completedId, 'soro_estigio');
+  assert.equal(state.catabase.unlockedResearchIds.includes('soro_estigio'), true);
+
+  const buy = state.debugArquivoEstigio('buyNext');
+  assert.equal(buy.ok, true);
+  assert.equal(buy.upgradeId, 'soro_estigio');
+  assert.equal(state.upgrades.includes('soro_estigio'), true);
+
+  const full = new GameState({ souls: '0' }, { initialNowMs: 2_000 });
+  const chain = full.debugArquivoEstigio('completeChain');
+  assert.equal(chain.ok, true);
+  assert.equal(full.catabase.stage, 3);
+  assert.equal(full.upgrades.includes('pacto_primordial'), true);
+
+  const pledge = full.debugArquivoEstigio('pledge');
+  assert.equal(pledge.ok, true);
+  const cov = full.debugArquivoEstigio('covenant');
+  assert.equal(cov.ok, true);
+  assert.equal(full.isElderCovenantActive(), true);
 });
 
 console.log(`\ndespertar-debug-mechanics-smoke: ${passed} passed, ${failed} failed`);
