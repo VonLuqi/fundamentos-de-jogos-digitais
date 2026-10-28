@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**144 ícones pendentes.**
+**124 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 129)
+## L7 — Talentos do Rio do Lethe (`talents`, 109)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `abadao` | Abadom | O destruidor guarda a porta do sono. Janela offline +16 h. |
-| `angels` | Anjos | Mensageiros que vigiam a margem na sua ausência. Offline rende +10% do SPS. |
-| `archangels` | Arcanjos | Asas maiores, vigília mais longa. Offline rende +10% do SPS. |
-| `asmodeus` | Asmodeu | O daemon do desejo não deixa a maré esfriar. Janela offline +64 h. |
-| `aura_gloves` | Luvas de Aura | Mãos que brilham no escuro. Ceifar +5%. |
-| `basic_wallpaper_assortment` | Tapeçarias do Érebo | Paredes de sombra bordada para o Domínio. Todos os geradores +1%. |
-| `beelzebub` | Belzebu | O senhor das moscas não deixa nada parar. Janela offline +128 h. |
-| `belphegor` | Belphegor | O daemon da preguiça conta as horas por você. Janela offline +4 h. |
-| `bolachas_celestes` | Bolachas Celestes | O pão dos que já atravessaram. Todos os geradores +10%. |
-| `box_of_brand_biscuits` | Caixa de Óbolos Cunhados | Moedas de Caronte assadas em fornada. Todos os geradores +2%. |
-| `box_of_macarons` | Caixa de Doces de Perséfone | Pequenas romãs açucaradas da rainha. Todos os geradores +2%. |
-| `box_of_maybe_cookies` | Caixa de Talvez-Bolachas | Pode ser que estejam aí dentro. Todos os geradores +2%. |
-| `box_of_not_cookies` | Caixa de Não-Bolachas | Definitivamente não são bolachas. Todos os geradores +2%. |
-| `box_of_pastries` | Caixa de Doces do Elísio | Confeitaria dos campos dos bem-aventurados. Todos os geradores +2%. |
-| `cat_ladies` | Damas dos Filhotes | Quem cuida dos cães cuida do Domínio. ×1,29 de SPS por Filhote do Cérbero possuído. |
-| `cherubim` | Querubins | Guardiões de quatro faces sobre o rio. Offline rende +10% do SPS. |
-| `classic_dairy_selection` | Ânforas de Leite Ancestral | Leite servido nas ânforas dos primeiros mortos. Todos os geradores +1%. |
-| `comprimidos_milkhelp` | Pastilhas do Véu | Para quem bebe Véu demais. +5% de SPS por 100% de Véu. |
-| `contabilidade_genial` | Contabilidade Genial | Caronte anota cada óbolo. A loja detalha em quanto tempo cada compra se paga. |
-| `cosmic_beginner_s_luck` | Sorte de Principiante Cósmica | O rio ajuda quem acabou de chegar. Ecos do Acheron aparecem +3% mais. |
 | `cozimento_de_acucar` | Cozimento de Néctar | Néctar guardado é néctar que rende. Néctar em Reserva: +1% de SPS por Néctar guardado (até 100). |
 | `cozinha_inicial` | Cozinha Inicial | Os remadores já chegam ao cais. Cada corrida começa com 5 × Servos de Caronte. |
 | `decisive_fate` | Destino Decisivo | As Moiras cortam o fio na hora certa. Ecos do Acheron aparecem +2% mais. |
