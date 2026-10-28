@@ -1,13 +1,13 @@
 # Cosméticos WebP (Fase E / E3)
 
 Pasta de entrega do Mestre. Enquanto o arquivo **não** existir, o jogo usa
-**procedural/CSS** (`drawAccessory` / classes `has-cosmetic-*`).
+**procedural/CSS** (`drawAccessory` / `drawParametricAccessory` / classes `has-cosmetic-*`).
 
 ## Naming
 
 `{accessory}.webp` (+ opcional `{accessory}.svg`)
 
-Ids P0 (12) — ver `upgrade-cosmetics.js` / `PEDIDOS-MESTRE.md` § P3:
+### P0 (12) — `art_cosmetics` delivered
 
 | Accessory | Alvo típico |
 | --- | --- |
@@ -24,4 +24,9 @@ Ids P0 (12) — ver `upgrade-cosmetics.js` / `PEDIDOS-MESTRE.md` § P3:
 | `reap_ripple` | Foice trail (CSS ok) |
 | `orbit_halo` | Órbita altar |
 
-Marcar entrega em `art-requests.json` (`art_cosmetics` → `delivered`).
+### Linha 15×20 (300) — `art_cosmetics_line` delivered
+
+- Accessory id = `upgrade.id` (exceto aliases P0 acima).
+- **Prateleira:** `assets/despertar/sprites/habitats/variants/{id}.webp` — troca o sprite da célula.
+- **Tip Styx:** mirror em `assets/despertar/cosmetics/{id}.webp`.
+- Regenerar: `node scripts/gen-line-cosmetic-variants.mjs` (recolor a partir do habitat base; não sobrescreve P0).

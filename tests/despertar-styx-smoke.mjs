@@ -19,6 +19,8 @@ import {
   isLetheOpen,
   isStyxUnlocked,
   sortStyxVisible,
+  upgradeAffordHint,
+  upgradeEffectText,
   upgradeRequirementText,
 } from '../js/hades-despertar/ui/UIRenderer.js';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
@@ -52,7 +54,7 @@ staticAssert(html.includes('id="lethe-ritual"'), 'CTA Ritual do Lethe');
 staticAssert(html.includes('id="despertar-lethe-modal"'), 'modal de confirmação');
 staticAssert(html.includes('Beber do Lethe'), 'copy confirmar');
 staticAssert(html.includes('Recuar'), 'copy cancelar');
-staticAssert(html.includes('Panteão de Mnemosyne'), 'Panteão na aba Lethe');
+staticAssert(html.includes('Memória do Rio') || html.includes('despertar-lethe-river'), 'Rio/Memória na aba Lethe');
 
 const boot = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8');
 staticAssert(boot.includes('buyUpgrade'), 'compra de juramento no boot');
@@ -66,6 +68,10 @@ staticAssert(harnessSrc.includes("host !== 'localhost'") || harnessSrc.includes(
 
 const uiSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
 staticAssert(uiSrc.includes('styx-tooltip'), 'tooltip Styx no renderer');
+staticAssert(uiSrc.includes('upgradeEffectText'), 'efeito mecânico separado');
+staticAssert(uiSrc.includes('data-tip="effect"') || uiSrc.includes("dataTip = 'effect'") || uiSrc.includes("'effect'"), 'tip effect');
+staticAssert(uiSrc.includes('despertar-upgrade-icon--has-cosmetic'), 'badge cosmético na strip');
+staticAssert(uiSrc.includes('#fillCosmeticTipPreview') || uiSrc.includes('fillCosmeticTipPreview'), 'preview cosmético');
 staticAssert(uiSrc.includes('is-sealing'), 'strip mantém ícone durante seal');
 staticAssert(uiSrc.includes('!view.owned'), 'owned some da strip');
 staticAssert(uiSrc.includes('#renderSealed') || uiSrc.includes('renderSealed'), 'Stats selados');
@@ -76,11 +82,17 @@ staticAssert(uiSrc.includes("strip?.addEventListener?.('pointerleave'") || uiSrc
 
 const css = fs.readFileSync(path.join(root, 'css/despertar.css'), 'utf8');
 staticAssert(css.includes('despertar-upgrade-tooltip'), 'CSS tooltip');
+staticAssert(css.includes('despertar-upgrade-tooltip__effect'), 'CSS tip effect');
+staticAssert(css.includes('despertar-upgrade-tooltip__cosmetic'), 'CSS tip cosmetic');
+staticAssert(css.includes('despertar-upgrade-icon--has-cosmetic'), 'CSS badge cosmético');
 staticAssert(css.includes('is-affordable'), 'CSS affordable');
+staticAssert(css.includes('is-unaffordable'), 'CSS unaffordable (revelado sem almas)');
+staticAssert(uiSrc.includes('is-unaffordable'), 'strip usa is-unaffordable ≠ locked');
 staticAssert(css.includes('despertar-sealed-icons'), 'CSS grade selados');
 staticAssert(!css.includes('despertar-sealed-chip'), 'sem chips largos selados');
 staticAssert(!css.includes('despertar-upgrade-icon__mark'), 'sem mark empilhado no ícone');
 staticAssert(html.includes('id="sealed-tooltip"'), 'F3: #sealed-tooltip');
+staticAssert(html.includes('data-tip="effect"'), 'sealed tip effect');
 
 if (errors.length) {
   console.error('despertar-styx-smoke (estático):');
@@ -110,11 +122,18 @@ await run('F4: owned some da strip; requisito + Stats selados', () => {
   assert.equal(before.owned, false);
   assert.equal(before.canBuy, true);
   assert.ok(before.requirement);
+  assert.ok(before.effect);
+  assert.equal(before.effect, upgradeEffectText(UPGRADES.find((u) => u.id === 'foice_afilada')));
+  assert.equal(before.cosmetic?.accessory, 'blade_glow');
+  assert.equal(before.affordHint, 'Pode comprar');
+  assert.equal(upgradeAffordHint(before), 'Pode comprar');
 
   const umbras = describeUpgradeCard(shade, 'umbras_despertas');
   assert.equal(umbras.revealed, true);
   assert.equal(umbras.canBuy, true);
   assert.match(umbras.requirement, /Sombra|Umbras|Exige/i);
+  assert.equal(umbras.cosmetic?.accessory, 'shade_wisp');
+  assert.ok(umbras.flavor || umbras.effect);
 
   assert.equal(shade.buyUpgrade('foice_afilada').ok, true);
   const after = describeUpgradeCard(shade, 'foice_afilada');
@@ -197,7 +216,7 @@ await run('D3: sortStyxVisible — 2 affordáveis + 1 caro → baratos primeiro'
   // Integração com cards reais: foice+umbras affordáveis; cortejo revelado mas caro.
   const state = new GameState({
     souls: '150',
-    generators: { wandering_shade: 10 },
+    generators: { wandering_shade: 25 },
   });
   const visible = [];
   UPGRADES.forEach((def, catalogIndex) => {
@@ -283,14 +302,14 @@ await run('juramento ×2 no clique e no gerador', () => {
   assert.equal(cmp(genState.sps(), '0.2'), 0);
 });
 
-await run('catch-up T1: qty 100 revela Eclipse ×5 e SPS sobe', () => {
+await run('catch-up T1: qty 200 revela Eclipse ×5 e SPS sobe', () => {
   const state = new GameState({
     souls: '500000000',
-    generators: { wandering_shade: 100 },
+    generators: { wandering_shade: 200 },
     upgrades: ['umbras_despertas', 'cortejo_das_sombras', 'legiao_das_umbras', 'mare_de_sombras'],
   });
-  // ×2×2×5×5 = ×100 sobre base 0.1 → 100 * 0.1 * 100 = 1000 SPS
-  assert.equal(cmp(state.sps(), '1000'), 0);
+  // ×2×2×5×5 = ×100 sobre base 0.1 → 200 * 0.1 * 100 = 2000 SPS
+  assert.equal(cmp(state.sps(), '2000'), 0);
 
   const card = describeUpgradeCard(state, 'eclipse_do_acheron');
   assert.equal(card.revealed, true);
@@ -298,28 +317,28 @@ await run('catch-up T1: qty 100 revela Eclipse ×5 e SPS sobe', () => {
   assert.equal(card.owned, false);
 
   assert.equal(state.buyUpgrade('eclipse_do_acheron').ok, true);
-  // ×5 a mais → 5000 SPS
-  assert.equal(cmp(state.sps(), '5000'), 0);
+  // ×5 a mais → 10000 SPS
+  assert.equal(cmp(state.sps(), '10000'), 0);
   assert.equal(describeUpgradeCard(state, 'eclipse_do_acheron').owned, true);
   assert.equal(describeUpgradeCard(state, 'eclipse_do_acheron').canBuy, false);
 });
 
-await run('catch-up T4: qty 50 revela Código ×5 e SPS do Juiz sobe', () => {
+await run('catch-up T4: qty 100 revela Código ×5 e SPS do Juiz sobe', () => {
   const state = new GameState({
     souls: '60000000000',
-    generators: { tartarus_judge: 50 },
+    generators: { tartarus_judge: 100 },
     upgrades: ['veredito_tartaro', 'lei_inquebravel', 'banco_dos_juizes'],
   });
-  // ×2×2×5 = ×20 sobre base 47 → 50 * 47 * 20 = 47000
-  assert.equal(cmp(state.sps(), '47000'), 0);
+  // ×2×2×5 = ×20 sobre base 47 → 100 * 47 * 20 = 94000
+  assert.equal(cmp(state.sps(), '94000'), 0);
 
   const card = describeUpgradeCard(state, 'codigo_das_profundezas');
   assert.equal(card.revealed, true);
   assert.equal(card.canBuy, true);
 
   assert.equal(state.buyUpgrade('codigo_das_profundezas').ok, true);
-  // ×5 a mais → 235000
-  assert.equal(cmp(state.sps(), '235000'), 0);
+  // ×5 a mais → 470000
+  assert.equal(cmp(state.sps(), '470000'), 0);
 });
 
 await run('Lethe: prévia em 1e8 bloqueia o ritual; 4e9 bebe e zera geradores', () => {
@@ -351,10 +370,15 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 4e9 bebe e zera geradores', 
   assert.equal(cmp(ripe.souls, '0'), 0);
   assert.equal(cmp(ripe.runSouls, '0'), 0);
   assert.equal(cmp(ripe.lifetimeSouls, '4000000000'), 0);
-  assert.equal(cmp(prestigeBonus(ripe.obols, ripe.talents), '1.05'), 0);
+  // Sem heavenlyPower nos upgrades, o bônus fica ×1; com power pleno → ×1.01.
+  assert.equal(cmp(prestigeBonus(ripe.obols, ripe.talents), '1'), 0);
+  assert.equal(
+    cmp(prestigeBonus(ripe.obols, ripe.talents, { legacyFullPower: true }), '1.01'),
+    0,
+  );
 });
 
-await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
+await run('Rio do Lethe: pós-ritual compra talento; óbolos permanecem', () => {
   // 16e9 → 2 óbolos → 1 essência (2:1)
   const state = new GameState({
     runSouls: '16000000000',
@@ -362,16 +386,20 @@ await run('Panteão: 1 essência compra talento; óbolos permanecem', () => {
     generators: { wandering_shade: 2 },
   });
   assert.equal(state.applyPrestige().ok, true);
-  const card = describeTalentCard(state, 'memoria_das_sombras');
+  assert.equal(state.ascensionOpen, true);
+  const card = describeTalentCard(state, 'legado');
+  assert.ok(card);
   assert.equal(card.canBuy, true);
-  const sealed = state.buyTalent('memoria_das_sombras');
+  const sealed = state.buyTalent('legado');
   assert.equal(sealed.ok, true);
-  assert.equal(state.talents.includes('memoria_das_sombras'), true);
+  assert.equal(state.talents.includes('legado'), true);
   assert.equal(cmp(state.mnemosyne, '0'), 0);
   assert.equal(cmp(state.obols, '2'), 0);
   assert.equal(Object.keys(state.quantities()).length, 0);
-  assert.equal(describeTalentCard(state, 'memoria_das_sombras').owned, true);
-  assert.equal(describeTalentCard(state, 'memoria_das_sombras').canBuy, false);
+  assert.equal(describeTalentCard(state, 'legado').owned, true);
+  assert.equal(describeTalentCard(state, 'legado').canBuy, false);
+  state.closeAscension();
+  assert.equal(state.buyTalent('heavenly_luck').ok, false);
 });
 
 await run('harness só em localhost com ?harness=1; concede 4e9', () => {

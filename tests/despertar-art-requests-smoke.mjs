@@ -116,8 +116,15 @@ run('E3: CosmeticsAtlas + P0 accessories alinhados', async () => {
     [...byList.B11.accessoryIds].sort(),
     [...P0_COSMETIC_ACCESSORIES].sort(),
   );
+  assert.equal(byList.B11.status, 'delivered', 'art_cosmetics delivered');
+  for (const id of P0_COSMETIC_ACCESSORIES) {
+    const webp = path.join(root, 'assets/despertar/cosmetics', `${id}.webp`);
+    const svg = path.join(root, 'assets/despertar/cosmetics', `${id}.svg`);
+    assert.ok(fs.existsSync(webp), `falta ${id}.webp`);
+    assert.ok(fs.existsSync(svg), `falta ${id}.svg`);
+  }
   const paths = cosmeticPaths('hat_charon');
-  assert.match(paths.webp, /cosmetics\/hat_charon\.webp$/);
+  assert.match(paths.webp, /cosmetics\/hat_charon\.webp(\?v=[\w-]+)?$/);
   clearCosmeticImageCache();
   // Sem arquivo → null (fallback procedural)
   const missing = await loadCosmeticImage('hat_charon_never_exists_xyz');

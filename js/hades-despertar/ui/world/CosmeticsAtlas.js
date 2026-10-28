@@ -12,12 +12,16 @@ export const COSMETIC_BASE = '../assets/despertar/cosmetics';
 /**
  * @param {string} accessoryId
  */
+/** Cache-bust dos WebP pixel (prateleira) + overlays Foice. */
+const COSMETIC_ASSET_VER = 'cosmetics-px1';
+
 export function cosmeticPaths(accessoryId) {
   const safe = String(accessoryId || '').replace(/[^\w-]/g, '');
   if (!safe) return { webp: null, svg: null };
+  const q = `?v=${COSMETIC_ASSET_VER}`;
   return {
-    webp: `${COSMETIC_BASE}/${safe}.webp`,
-    svg: `${COSMETIC_BASE}/${safe}.svg`,
+    webp: `${COSMETIC_BASE}/${safe}.webp${q}`,
+    svg: `${COSMETIC_BASE}/${safe}.svg${q}`,
   };
 }
 

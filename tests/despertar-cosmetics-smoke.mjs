@@ -9,6 +9,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   COSMETIC_LAYERS,
+  GENERATOR_LINE_COSMETIC_IDS,
+  LEGACY_GENERATOR_COSMETIC_ALIAS,
   P0_COSMETIC_ACCESSORIES,
   UPGRADE_COSMETICS,
   UPGRADE_COSMETIC_IDS,
@@ -16,6 +18,8 @@ import {
   applyReapCosmeticClasses,
   cosmeticCoverageIndices,
   cosmeticCoverageMask,
+  cosmeticForUpgrade,
+  cosmeticLabel,
   cosmeticsForAltar,
   cosmeticsForGenerator,
   cosmeticsForReap,
@@ -23,11 +27,13 @@ import {
   reapCosmeticClassNames,
   resolveCosmeticLayers,
 } from '../js/hades-despertar/config/upgrade-cosmetics.js';
+import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
 import {
   applyShelfCosmeticClasses,
   drawAccessory,
   drawOrbitHalo,
+  drawParametricAccessory,
 } from '../js/hades-despertar/ui/world/WorldView.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -59,11 +65,14 @@ staticAssert(pkg.includes('despertar-cosmetics-smoke.mjs'), 'check inclui cosmet
 staticAssert(UPGRADE_COSMETIC_IDS.includes('moeda_no_barquinho'), 'ids list');
 staticAssert(UPGRADE_COSMETICS.moeda_no_barquinho.coverage === 0.5, 'coverage 0.5');
 staticAssert(UPGRADE_COSMETICS.foice_afilada.coverage === 1, 'coverage 1 foice');
-staticAssert(UPGRADE_COSMETIC_IDS.length === 12, `P0 = 12 defs (tem ${UPGRADE_COSMETIC_IDS.length})`);
-staticAssert(P0_COSMETIC_ACCESSORIES.length === 12, '12 accessories');
+staticAssert(GENERATOR_LINE_COSMETIC_IDS.length === 300, `300 line (tem ${GENERATOR_LINE_COSMETIC_IDS.length})`);
+staticAssert(UPGRADE_COSMETIC_IDS.length === 306, `306 defs (tem ${UPGRADE_COSMETIC_IDS.length})`);
+staticAssert(P0_COSMETIC_ACCESSORIES.length === 12, '12 accessories arte');
 staticAssert(COSMETIC_LAYERS.includes('blade') && COSMETIC_LAYERS.includes('shelf_fx'), 'layers 0E');
 staticAssert(UPGRADE_COSMETICS.selo_do_juiz?.source === 'verdict', 'selo é verdict');
 staticAssert(UPGRADE_COSMETICS.colheita_eterna?.target === 'altar', 'colheita → altar');
+staticAssert(cfgSrc.includes('buildGeneratorLineCosmetics'), 'builder line');
+staticAssert(cfgSrc.includes('cosmeticForUpgrade'), 'helper cosmeticForUpgrade');
 staticAssert(plan.includes('0E congelada') || plan.includes('Task 0E'), 'plano 0E');
 
 const expectedAccessories = [
@@ -82,6 +91,12 @@ const expectedAccessories = [
 ];
 for (const acc of expectedAccessories) {
   staticAssert(P0_COSMETIC_ACCESSORIES.includes(acc), `accessory ${acc}`);
+}
+for (const id of Object.keys(LEGACY_GENERATOR_COSMETIC_ALIAS)) {
+  staticAssert(
+    UPGRADE_COSMETICS[id]?.accessory === LEGACY_GENERATOR_COSMETIC_ALIAS[id].accessory,
+    `alias ${id}`,
+  );
 }
 
 if (errors.length) {
@@ -363,6 +378,78 @@ run('E2: CSS Foice trail/ember + reduced-motion', () => {
   assert.ok(altarSrc.includes('_shadeCosmetics'));
 });
 
+run('linha 15×20: 300 generatorMult com accessory único', () => {
+  const lineUps = UPGRADES.filter((u) => u.kind === 'generatorMult');
+  assert.equal(lineUps.length, 300);
+  const accessories = new Set();
+  for (const up of lineUps) {
+    const cos = cosmeticForUpgrade(up.id);
+    assert.ok(cos, up.id);
+    assert.equal(cos.targetGeneratorId, up.generatorId);
+    accessories.add(cos.accessory);
+  }
+  assert.equal(accessories.size, 300, '1 accessory único por marco');
+  assert.equal(cosmeticForUpgrade('sussurro_dos_juncos')?.accessory, 'sussurro_dos_juncos');
+  assert.equal(cosmeticForUpgrade('moeda_no_barquinho')?.accessory, 'hat_charon');
+  assert.ok(cosmeticLabel('hat_charon'));
+  assert.ok(cosmeticLabel('sussurro_dos_juncos'));
+});
+
+run('variants de linha em habitats/variants (troca de sprite)', () => {
+  const vdir = path.join(root, 'assets/despertar/sprites/habitats/variants');
+  for (const id of GENERATOR_LINE_COSMETIC_IDS) {
+    const acc = UPGRADE_COSMETICS[id].accessory;
+    assert.ok(
+      fs.existsSync(path.join(vdir, `${acc}.webp`)),
+      `falta variant ${acc}`,
+    );
+  }
+  // Barca das Estrelas — samples de progressão
+  for (const id of [
+    'velas_de_eter_noturno',
+    'lanternas_de_pulsar',
+    'soberania_da_frota_sideral',
+  ]) {
+    assert.ok(fs.existsSync(path.join(vdir, `${id}.webp`)), id);
+  }
+  const worldSrc = fs.readFileSync(
+    path.join(root, 'js/hades-despertar/ui/world/WorldView.js'),
+    'utf8',
+  );
+  assert.ok(worldSrc.includes('loadHabitatVariantImage'));
+  assert.equal(worldSrc.includes('artAccessories'), false, 'prefetch sem filtro P0');
+});
+
+run('drawParametricAccessory distingue ids sem WebP', () => {
+  const ops = [];
+  const ctx = {
+    save() { ops.push('save'); },
+    restore() { ops.push('restore'); },
+    beginPath() {},
+    moveTo() {},
+    lineTo() {},
+    closePath() {},
+    fill() { ops.push('fill'); },
+    stroke() { ops.push('stroke'); },
+    arc() {},
+    ellipse() { ops.push('ellipse'); },
+    fillStyle: '',
+    strokeStyle: '',
+    lineWidth: 1,
+    lineCap: '',
+    globalAlpha: 1,
+  };
+  assert.equal(
+    drawAccessory(ctx, 'sussurro_dos_juncos', 0, 0, 36, 0, { reducedMotion: true, image: null }),
+    true,
+  );
+  assert.ok(ops.includes('save'));
+  assert.equal(
+    drawParametricAccessory(ctx, 'apoteose_do_submundo', 0, 0, 36, 18, { reduced: true }),
+    true,
+  );
+});
+
 run('E3: pedidos arte 12 accessories + CosmeticsAtlas', () => {
   const brief = fs.readFileSync(path.join(root, 'assets/despertar/PEDIDOS-MESTRE.md'), 'utf8');
   const req = JSON.parse(
@@ -371,11 +458,19 @@ run('E3: pedidos arte 12 accessories + CosmeticsAtlas', () => {
   const art = req.requests.find((r) => r.id === 'art_cosmetics');
   assert.ok(art);
   assert.equal(art.accessoryIds.length, 12);
-  assert.equal(art.status, 'open');
+  assert.equal(art.status, 'delivered');
   for (const id of P0_COSMETIC_ACCESSORIES) {
     assert.ok(art.accessoryIds.includes(id), id);
     assert.ok(brief.includes(id), `brief ${id}`);
+    assert.ok(
+      fs.existsSync(path.join(root, 'assets/despertar/cosmetics', `${id}.webp`)),
+      `${id}.webp`,
+    );
   }
+  const lineArt = req.requests.find((r) => r.id === 'art_cosmetics_line');
+  assert.ok(lineArt, 'art_cosmetics_line');
+  assert.equal(lineArt.status, 'delivered');
+  assert.equal(lineArt.count, 300);
   const atlas = fs.readFileSync(
     path.join(root, 'js/hades-despertar/ui/world/CosmeticsAtlas.js'),
     'utf8',

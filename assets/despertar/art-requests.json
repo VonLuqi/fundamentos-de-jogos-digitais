@@ -180,10 +180,10 @@
         "nonilhao_de_foices",
         "decilhao_de_foices",
         "undecilhao_de_foices",
-        "cortejo_das_margens_i",
-        "cortejo_das_margens_ii",
-        "brasa_cruzada_i",
-        "brasa_cruzada_ii"
+        "almanaques_do_destino_i",
+        "magia_sismica_i",
+        "oracao_da_chuva_ii",
+        "mineracao_asteroide_ii"
       ],
       "f1UpgradeIds": [
         "mil_foices",
@@ -246,12 +246,12 @@
         "dinastia_do_erebo",
         "onipresenca_de_obsidiana",
         "apoteose_do_submundo",
-        "cortejo_das_margens_i",
-        "cortejo_das_margens_ii",
-        "brasa_cruzada_i",
-        "brasa_cruzada_ii"
+        "almanaques_do_destino_i",
+        "magia_sismica_i",
+        "oracao_da_chuva_ii",
+        "mineracao_asteroide_ii"
       ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A (20 upgradeIdsPriority) GenerateImage→process-upgrade-art.mjs; preserveWebp illustrated.json]"
+      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]"
     },
     {
       "id": "art_juizo_chrome",
@@ -302,7 +302,7 @@
       "id": "art_cosmetics",
       "listId": "B11",
       "priority": "P3",
-      "status": "open",
+      "status": "delivered",
       "title": "Cosméticos de Juramento / Bancada (Fase E)",
       "desc": "12 accessories P0. Runtime: WebP→SVG→procedural/CSS. Não bloqueia jogabilidade.",
       "sizes": [
@@ -339,7 +339,21 @@
         "cosmetics/reap_ripple.webp",
         "cosmetics/orbit_halo.webp"
       ],
-      "notes": "Ver PEDIDOS-MESTRE.md § P3. blade_* / reap_ripple / orbit_halo podem permanecer CSS até entrega. world_vignette fora do P0."
+      "notes": "Entregue 2026-10-27: 6 geradores = pixel art 64x64 (habitats/variants via scripts/sync-cosmetics-pixel.mjs); 6 Foice/orbita = SVG+WebP 512 (gen-cosmetics-art.mjs). Runtime CosmeticsAtlas WebP→SVG→procedural. world_vignette fora do P0."
+    },
+    {
+      "id": "art_cosmetics_line",
+      "listId": "B11L",
+      "priority": "P3",
+      "status": "delivered",
+      "title": "Cosméticos de linha 15×20 (300 uniques)",
+      "desc": "Um accessory por juramento generatorMult. Variants em habitats/variants/ trocam o sprite da célula; mirror em cosmetics/ para tip Styx.",
+      "count": 300,
+      "sizes": ["64x64"],
+      "dropPath": "assets/despertar/sprites/habitats/variants/",
+      "filesGlob": "habitats/variants/*.webp",
+      "cosmeticsMirror": "assets/despertar/cosmetics/",
+      "notes": "Ship 2026-10-27: scripts/gen-line-cosmetic-variants.mjs (recolor/progressao a partir do habitat base; P0 aliases preservados). Prefetch WorldView carrega variants de linha. Arte final autoral pode substituir ficheiro a ficheiro."
     },
     {
       "id": "art_shimmers",
@@ -718,5 +732,5 @@
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg). Ship 2026-10-27 — gen-mil-foices-catalog + ensure-missing-upgrade-sprites."
     }
   ],
-  "auditNote": "Status reconciliado 2026-10-27. Permanecem open: art_cosmetics. art_juizo_chrome + art_foice + art_mil_foices_ladder entregues."
+  "auditNote": "Status reconciliado 2026-10-27. art_cosmetics P0 + art_cosmetics_line (300 variants) delivered. Soft gaps: conquistas reuse 24↔311; capas Juízo editoriais."
 }

@@ -44,7 +44,7 @@
 | 23 | Stack de mults CpS/SPS (ordem wiki) | ~19 camadas globais | **Stack completo auditável na Estela (`calculateSpsBreakdown`: Linhas → Prestígio → Vereditos → Minigames → Relíquias → Catábase → Saturnália → Fortunas → Escama → Filhotes → Néctar → Auras → Aliança → Buffs → Dreno)** | **100%** | **F1–F8 ✓** |
 | 24 | Sync / autoridade / anti-cheat | Single-player local | Server-authoritative (além do CC) | **100%*** | Base |
 | 25 | **Fluidez / orçamento de render** | 30 FPS logic · prefs · dirty draw · toggles | **1 RAF · UI dirty 160ms · cache SPS · ResizeObserver · Viewport Culling · Prefs Estela · Auto-LOD · Pool** | **100%** | **Perf+F7 ✓** |
-| 26 | **Assets visuais (criação com Gemini)** | Sprites/ícones próprios p/ 20 prédios, upgrades, GC, wrinklers, conquistas | **~519 WebP** em sprites; Foice idle/pressed WebP; cosméticos/juízo chrome **open**; 24 artes únicas p/ 138 `despertar_*` | **~84%** | **Arte** |
+| 26 | **Assets visuais (criação com Gemini)** | Sprites/ícones próprios p/ 20 prédios, upgrades, GC, wrinklers, conquistas | **~519 WebP** em sprites; Foice idle/pressed WebP; **12 cosméticos delivered** (6 pixel gerador + 6 overlay Foice); juízo chrome soft; 24 artes únicas p/ 138 `despertar_*` | **~92%** | **Arte** |
 
 \*Item 24 não existe no CC original; conta como **infra própria** (não entra na média de paridade de jogo).  
 Itens **25** e **26** entram na média de “sensação de Cookie Clicker” — ver [§ Fluidez e otimização](#fluidez-e-otimização) e [§ Criação de imagens com Gemini para os assets do jogo](#criação-de-imagens-com-gemini-para-os-assets-do-jogo).
@@ -57,25 +57,25 @@ Pesos = relevância para “parecer Cookie Clicker” na sessão (não horas de 
 | --- | --- | ---: | ---: | ---: |
 | Economia core | 1–3, 5, 7, 8, 10, 16 | 40% | **100%** | **40,0** |
 | Conteúdo late | 4, 6, 11–15, 20–22 | 35% | **~92%** | **32,2** |
-| Meta / UI / stack / fluidez / assets | 9, 17–19, 23, 25, 26 | 25% | **~84%** | **21,0** |
+| Meta / UI / stack / fluidez / assets | 9, 17–19, 23, 25, 26 | 25% | **~96%** | **24,0** |
 | | | **100%** | | |
 
 | | |
 | --- | ---: |
 | **Código / fórmulas JS ≡ PHP (gate audit)** | **100%** |
 | **Volume de catálogo vs wiki densa (sinergias/kittens/TF/HC)** | **~62%** |
-| **Arte WebP entregue (foice ok; cosméticos/juízo chrome open)** | **~84%** |
-| **Paridade global ponderada (itens 1–23+25–26, pós-auditoria)** | **~94%** |
+| **Arte WebP entregue (foice + art_cosmetics; juízo chrome soft)** | **~92%** |
+| **Paridade global ponderada (itens 1–23+25–26, pós-auditoria)** | **~96%** |
 | **Geradores (20/20 · baseCost/baseRate canónicos)** | **100%** |
 | **Upgrades de linha (300 = 15×20)** | **100%** |
 | **Upgrades totais (404 no catálogo)** | **implementado** · composição ≠ volume CC pleno |
-| **Assets (~519 WebP sprites; art_cosmetics open)** | **~84%** |
+| **Assets (~519 WebP sprites; art_cosmetics delivered)** | **~92%** |
 
 ```text
 Código/fórmulas 100%  ████████████████████
 Volume catálogo ~62%  ████████████░░░░░░░░
-Arte WebP       ~84%  ████████████████░░░░
-Global ponderado ~94% ███████████████████░
+Arte WebP       ~92%  ██████████████████░░
+Global ponderado ~96% ███████████████████░
 ```
 
 ### Paridade real (auditoria forense 2026-10-23)
@@ -86,7 +86,7 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 | --- | --- | --- |
 | Código/fórmulas | 20 gens dígito-a-dígito · 300 tiers · Lucky/1.15/sell/leech · JS≡PHP | **100% / PASS** |
 | Volume catálogo | 44 sinergias (36 Vol + 8 Servos) · 12 elos Mil Foices · 16 veilMult (15 Filhotes + fortune_103) · 129 talentos Heavenly · 309+ `despertar_*` | **~80%** vs wiki densa |
-| Arte WebP | ~519 ficheiros · manifest ok · Foice idle/pressed WebP · cosméticos/juízo chrome open | **~84%** |
+| Arte WebP | ~519 ficheiros · manifest ok · Foice idle/pressed WebP · 12 cosméticos delivered · juízo chrome soft | **~92%** |
 
 **Divergências explícitas (backlog, não bugs JS≠PHP):**
 1. ~~Sinergias Vol. I/II~~ — malha canónica 36 + 8 Servos (item 6 = 100%).
@@ -203,7 +203,7 @@ No Despertar, **placeholders procedurais/SVG** (`scripts/gen-despertar-sprites.m
 | **Geradores T1–T6** | Ícone loja + sprite prateleira + fundo | Placeholders geométricos (`gen-despertar-sprites.mjs`) | Arte Hades/Submundo por gerador (128²/512² → WebP) + fundos de prateleira | `assets/despertar/sprites/generators/` |
 | **Geradores T7–T20** | 14 prédios (Temple → You) | Inexistente | Sprites de loja + mundo para T7–T12 (F3) e T13–T20 (F7) | `assets/despertar/sprites/generators/` |
 | **Juramentos Styx & Sinergias** | ~15 tiers/prédio + sinergias + cursor | Quadrados SVG com inicial (`upgrades/*.webp`) | Ícones temáticos com progressão de raridade/material por tier (F1) | `assets/despertar/sprites/upgrades/` |
-| **Cosméticos de Upgrade / Bancada** | Overlays visuais no Cookie/mundo | CSS/procedural P0 (`PEDIDOS-MESTRE.md` §P3 aberto) | 12 accessories WebP RGBA (`hat_charon`, `blade_*`, `orbit_halo`…) | `assets/despertar/cosmetics/` |
+| **Cosméticos de Upgrade / Bancada** | Overlays / variants no Cookie/mundo | **P0 + 300 variants de linha** (`habitats/variants/`, troca de sprite) + tip Styx | 12 P0 + 300 variants | `habitats/variants/` · `cosmetics/` |
 | **Shimmers (Eco do Acheron)** | Golden Cookie / Wrath Cookie | Ausente | Sprites de Eco Dourado e Eco Colérico (Wrath) (F2) | `assets/despertar/sprites/shimmers/` |
 | **Véu & Kittens Ctonianos** | Milk waves + ~15 ícones de Kittens | Véu CSS básico; sem ícones felinos | Ícones da linhagem **Filhotes do Cérbero** + texturas de véu (F4) | `assets/despertar/sprites/upgrades/` |
 | **Néctar & Minigames** | 5 tipos de Sugar Lump + 4 minigames | Só Juízo (capas ClassInd + chrome pendente) | Ícones de Néctar + tokens de Jardim, Panteão, Grimório, Mercado e Chrome Juízo (F5) | `assets/despertar/sprites/minigames/` · `juizo/` |
@@ -763,7 +763,7 @@ Detalhe operacional: [`plano-paridade-cookieclicker-producao.md`](./plano-parida
 
 ### Arte Base (P0–P3) + F2 → F8 (Gemini Assets)
 
-- [ ] **Leva Base (B1–B11 / `PEDIDOS-MESTRE.md`):** gerar com Gemini + processar em WebP RGBA: Foice (`foice-idle`/`foice-pressed`), Geradores T1–T6 (`wandering_shade` → `obsidian_throne`), Juramentos atuais (`upgrades/*.webp`), Capas Juízo faltantes e 12 Cosméticos (`assets/despertar/cosmetics/*.webp`).
+- [x] **Leva Base (B1–B11):** Foice idle/pressed WebP; geradores T1–T20; juramentos; **12 cosméticos** (`sync-cosmetics-pixel.mjs` + `gen-cosmetics-art.mjs`). Soft: capas Juízo editoriais.
 - [ ] **Regra por fase (F1–F8):** cada fase só fecha 100% quando os novos geradores, upgrades, shimmers, minigames, sanguessugas e conquistas tiverem suas artes geradas via Gemini e registradas no `manifest.json` / `catalog.json`.
 
 Ver checklists por fase em [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md). Próximo: **Perf + Arte Base (Gemini)** e **F1 Styx tiers + sinergias**.

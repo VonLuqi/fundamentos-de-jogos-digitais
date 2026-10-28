@@ -200,6 +200,13 @@ function requestFilesOnDisk(req) {
       else missing.push(f);
     }
   }
+  if (req.id === 'art_cosmetics_line') {
+    const vDir = path.join(root, 'assets/despertar/sprites/habitats/variants');
+    const n = walkWebp(vDir).length;
+    const need = Number(req.count) || 300;
+    if (n >= need) present.push(`habitats/variants line (${n})`);
+    else missing.push(`habitats/variants line ~${n}/${need}`);
+  }
   if (req.id === 'art_juizo_chrome') {
     for (const f of req.files || []) {
       const full = path.join(root, 'assets/despertar', f.replace(/^juizo\//, 'juizo/'));

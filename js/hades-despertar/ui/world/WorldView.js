@@ -834,7 +834,128 @@ export function drawAccessory(ctx, accessory, cellX, cellY, cell = SHELF_CELL, b
     return true;
   }
 
-  return false;
+  // Só accessories do catálogo (300 line); ids desconhecidos → false.
+  if (!UPGRADE_COSMETICS[id]) return false;
+  return drawParametricAccessory(ctx, id, x, y, s, cx, {
+    palette,
+    reduced,
+    timeSec: t,
+  });
+}
+
+/**
+ * Seed estável a partir do id do accessory (juramento de linha).
+ * @param {string} id
+ */
+function accessorySeed(id) {
+  let h = 2166136261;
+  const s = String(id || '');
+  for (let i = 0; i < s.length; i += 1) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Overlay único por upgrade sem WebP: silhueta + tint + detalhe.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ * @param {number} s
+ * @param {number} cx
+ * @param {{ palette?: { accent?: string, body?: string }, reduced?: boolean, timeSec?: number }} [opts]
+ */
+export function drawParametricAccessory(ctx, id, x, y, s, cx, opts = {}) {
+  if (!ctx || !id) return false;
+  const seed = accessorySeed(id);
+  const palette = opts.palette || TIER_PALETTE[2];
+  const reduced = Boolean(opts.reduced);
+  const t = Number(opts.timeSec) || 0;
+  const hue = seed % 360;
+  const shape = seed % 5;
+  const accent = `hsla(${hue}, 62%, 58%, 0.75)`;
+  const soft = `hsla(${(hue + 40) % 360}, 48%, 62%, 0.45)`;
+  const pulse = reduced ? 1 : 0.85 + 0.15 * Math.sin(t * 2.2 + (seed % 17));
+  const drift = reduced ? 0 : Math.sin(t * 1.8 + seed * 0.01) * s * 0.03;
+
+  ctx.save();
+  ctx.globalAlpha = 0.55 * pulse;
+
+  if (shape === 0) {
+    // Coroa / diadema
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.moveTo(cx + drift, y + s * 0.08);
+    ctx.lineTo(cx - s * 0.18, y + s * 0.28);
+    ctx.lineTo(cx - s * 0.06, y + s * 0.22);
+    ctx.lineTo(cx, y + s * 0.3);
+    ctx.lineTo(cx + s * 0.06, y + s * 0.22);
+    ctx.lineTo(cx + s * 0.18, y + s * 0.28);
+    ctx.closePath();
+    ctx.fill();
+  } else if (shape === 1) {
+    // Anel orbital
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = Math.max(1, s * 0.035);
+    ctx.beginPath();
+    ctx.ellipse(cx, y + s * 0.42 + drift, s * 0.32, s * 0.14, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = soft;
+    ctx.beginPath();
+    ctx.arc(cx + s * 0.28, y + s * 0.42 + drift, s * 0.045, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (shape === 2) {
+    // Brasão / losango
+    ctx.fillStyle = accent;
+    ctx.beginPath();
+    ctx.moveTo(cx, y + s * 0.1 + drift);
+    ctx.lineTo(cx + s * 0.16, y + s * 0.28);
+    ctx.lineTo(cx, y + s * 0.46);
+    ctx.lineTo(cx - s * 0.16, y + s * 0.28);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = palette.accent || soft;
+    ctx.beginPath();
+    ctx.arc(cx, y + s * 0.28, s * 0.05, 0, Math.PI * 2);
+    ctx.fill();
+  } else if (shape === 3) {
+    // Véu / faíscas
+    ctx.fillStyle = soft;
+    for (let i = 0; i < 4; i += 1) {
+      const ox = ((seed >> (i * 3)) & 7) / 7 - 0.5;
+      const oy = ((seed >> (i * 5)) & 7) / 7;
+      ctx.beginPath();
+      ctx.ellipse(
+        cx + ox * s * 0.35 + drift,
+        y + s * (0.12 + oy * 0.35),
+        s * 0.1,
+        s * 0.07,
+        0,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+    }
+  } else {
+    // Runas / marcas
+    ctx.strokeStyle = accent;
+    ctx.lineWidth = Math.max(1, s * 0.03);
+    ctx.lineCap = 'round';
+    const baseY = y + s * 0.2 + drift;
+    ctx.beginPath();
+    ctx.moveTo(cx - s * 0.14, baseY);
+    ctx.lineTo(cx + s * 0.14, baseY);
+    ctx.moveTo(cx, baseY - s * 0.08);
+    ctx.lineTo(cx, baseY + s * 0.16);
+    ctx.moveTo(cx - s * 0.1, baseY + s * 0.1);
+    ctx.lineTo(cx + s * 0.1, baseY + s * 0.1);
+    ctx.stroke();
+  }
+
+  ctx.restore();
+  return true;
 }
 
 /**
@@ -1717,11 +1838,13 @@ export class WorldView {
   }
 
   #prefetchSprites() {
+    // Variants de linha (15×20) + P0: troca o sprite da célula, não overlay.
     const accessoriesByGenerator = new Map();
     for (const def of Object.values(UPGRADE_COSMETICS)) {
       if (!def?.targetGeneratorId || !def.accessory) continue;
+      if (def.target) continue;
       const list = accessoriesByGenerator.get(def.targetGeneratorId) || [];
-      list.push(def.accessory);
+      if (!list.includes(def.accessory)) list.push(def.accessory);
       accessoriesByGenerator.set(def.targetGeneratorId, list);
     }
     for (const [id, nodes] of this._shelves) {

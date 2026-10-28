@@ -1,9 +1,9 @@
 /**
  * Cosméticos de upgrade / Bancada → sprites / Foice / altar (Fase E).
- * P0: procedural/CSS; WebP reais ficam para arte (E3).
- *
- * Catálogo congelado 0E — docs/plano-despertar-producao-profundo.md
+ * Base (Foice/altar/Bancada) + 300 juramentos de linha (15×20), 1 accessory por marco.
  */
+
+import { UPGRADES, getUpgrade } from './upgrades.js';
 
 export const COSMETIC_LAYERS = Object.freeze([
   'hat',
@@ -37,9 +37,34 @@ function freezeCosmetic(def) {
  * }} UpgradeCosmeticDef
  */
 
-/** @type {Readonly<Record<string, UpgradeCosmeticDef>>} */
-export const UPGRADE_COSMETICS = Object.freeze({
-  // --- Foice (cadeia click) ---
+/** Accessories com WebP entregue (prefetch / art P0). */
+export const P0_COSMETIC_ACCESSORIES = Object.freeze([
+  'blade_glow',
+  'blade_runes',
+  'reap_ripple',
+  'blade_ember',
+  'orbit_halo',
+  'hat_charon',
+  'boat_wake',
+  'shade_wisp',
+  'hound_chain',
+  'hound_triple_aura',
+  'judge_scale_fx',
+  'blade_seal',
+]);
+
+/** Alias dos 6 cosméticos de gerador já pixelados (não trocar id do accessory). */
+export const LEGACY_GENERATOR_COSMETIC_ALIAS = Object.freeze({
+  moeda_no_barquinho: Object.freeze({ accessory: 'hat_charon', layer: 'hat', coverage: 0.5 }),
+  frota_de_caronte: Object.freeze({ accessory: 'boat_wake', layer: 'trail', coverage: 0.5 }),
+  umbras_despertas: Object.freeze({ accessory: 'shade_wisp', layer: 'aura', coverage: 0.5 }),
+  trela_cerberiana: Object.freeze({ accessory: 'hound_chain', layer: 'shelf_fx', coverage: 0.5 }),
+  tres_cabecas: Object.freeze({ accessory: 'hound_triple_aura', layer: 'aura', coverage: 0.5 }),
+  veredito_tartaro: Object.freeze({ accessory: 'judge_scale_fx', layer: 'shelf_fx', coverage: 0.5 }),
+});
+
+/** Foice / altar / Bancada — fora da malha 15×20. */
+const BASE_COSMETICS = Object.freeze({
   foice_afilada: freezeCosmetic({
     target: 'reap',
     accessory: 'blade_glow',
@@ -75,52 +100,6 @@ export const UPGRADE_COSMETICS = Object.freeze({
     layer: 'aura',
     priority: 1,
   }),
-
-  // --- Prateleiras / geradores ---
-  moeda_no_barquinho: freezeCosmetic({
-    targetGeneratorId: 'charon_servants',
-    accessory: 'hat_charon',
-    coverage: 0.5,
-    layer: 'hat',
-    priority: 1,
-  }),
-  frota_de_caronte: freezeCosmetic({
-    targetGeneratorId: 'charon_servants',
-    accessory: 'boat_wake',
-    coverage: 0.5,
-    layer: 'trail',
-    priority: 1,
-  }),
-  umbras_despertas: freezeCosmetic({
-    targetGeneratorId: 'wandering_shade',
-    accessory: 'shade_wisp',
-    coverage: 0.5,
-    layer: 'aura',
-    priority: 1,
-  }),
-  trela_cerberiana: freezeCosmetic({
-    targetGeneratorId: 'cerberian_hound',
-    accessory: 'hound_chain',
-    coverage: 0.5,
-    layer: 'shelf_fx',
-    priority: 1,
-  }),
-  tres_cabecas: freezeCosmetic({
-    targetGeneratorId: 'cerberian_hound',
-    accessory: 'hound_triple_aura',
-    coverage: 0.5,
-    layer: 'aura',
-    priority: 2,
-  }),
-  veredito_tartaro: freezeCosmetic({
-    targetGeneratorId: 'tartarus_judge',
-    accessory: 'judge_scale_fx',
-    coverage: 0.5,
-    layer: 'shelf_fx',
-    priority: 1,
-  }),
-
-  // --- Bancada (persiste no Lethe) ---
   selo_do_juiz: freezeCosmetic({
     source: 'verdict',
     target: 'reap',
@@ -131,12 +110,103 @@ export const UPGRADE_COSMETICS = Object.freeze({
   }),
 });
 
+/**
+ * Coverage 0.35 → 1.0 ao longo dos 15 marcos.
+ * @param {number} tierIndex 1..15
+ */
+export function lineCosmeticCoverage(tierIndex) {
+  const t = Math.max(1, Math.min(15, Math.floor(Number(tierIndex) || 1)));
+  return 0.35 + ((t - 1) / 14) * 0.65;
+}
+
+/**
+ * @param {readonly { id: string, kind?: string, generatorId?: string, requires?: { quantity?: number } }[]} [upgrades]
+ * @returns {Record<string, UpgradeCosmeticDef>}
+ */
+export function buildGeneratorLineCosmetics(upgrades = UPGRADES) {
+  /** @type {Map<string, typeof upgrades>} */
+  const byGen = new Map();
+  for (const up of upgrades) {
+    if (!up || up.kind !== 'generatorMult' || !up.generatorId || !up.id) continue;
+    const list = byGen.get(up.generatorId) || [];
+    list.push(up);
+    byGen.set(up.generatorId, list);
+  }
+
+  /** @type {Record<string, UpgradeCosmeticDef>} */
+  const out = {};
+  for (const [generatorId, list] of byGen) {
+    list.sort((a, b) => {
+      const qa = Number(a.requires?.quantity) || 0;
+      const qb = Number(b.requires?.quantity) || 0;
+      if (qa !== qb) return qa - qb;
+      return String(a.id).localeCompare(String(b.id));
+    });
+    list.forEach((up, index) => {
+      const tierIndex = index + 1;
+      const alias = LEGACY_GENERATOR_COSMETIC_ALIAS[up.id];
+      const accessory = alias?.accessory || up.id;
+      const layer = alias?.layer || 'aura';
+      const coverage = alias && Number.isFinite(Number(alias.coverage))
+        ? Number(alias.coverage)
+        : lineCosmeticCoverage(tierIndex);
+      out[up.id] = freezeCosmetic({
+        targetGeneratorId: generatorId,
+        accessory,
+        coverage,
+        layer,
+        priority: tierIndex,
+      });
+    });
+  }
+  return out;
+}
+
+const LINE_COSMETICS = buildGeneratorLineCosmetics(UPGRADES);
+
+/** @type {Readonly<Record<string, UpgradeCosmeticDef>>} */
+export const UPGRADE_COSMETICS = Object.freeze({
+  ...BASE_COSMETICS,
+  ...LINE_COSMETICS,
+});
+
 export const UPGRADE_COSMETIC_IDS = Object.freeze(Object.keys(UPGRADE_COSMETICS));
 
-/** Accessories P0 (12). */
-export const P0_COSMETIC_ACCESSORIES = Object.freeze(
-  UPGRADE_COSMETIC_IDS.map((id) => UPGRADE_COSMETICS[id].accessory),
-);
+/** Ids de upgrade de linha com cosmético (300). */
+export const GENERATOR_LINE_COSMETIC_IDS = Object.freeze(Object.keys(LINE_COSMETICS));
+
+/**
+ * @param {string} upgradeId
+ * @returns {UpgradeCosmeticDef|null}
+ */
+export function cosmeticForUpgrade(upgradeId) {
+  const id = String(upgradeId || '');
+  return UPGRADE_COSMETICS[id] || null;
+}
+
+/**
+ * Rótulo amigável do accessory (nome do upgrade que o libera, ou o id).
+ * @param {string} accessory
+ * @returns {string}
+ */
+export function cosmeticLabel(accessory) {
+  const acc = String(accessory || '');
+  if (!acc) return '';
+  for (const [upgradeId, alias] of Object.entries(LEGACY_GENERATOR_COSMETIC_ALIAS)) {
+    if (alias.accessory === acc) {
+      return getUpgrade(upgradeId)?.name || acc;
+    }
+  }
+  const fromUpgrade = getUpgrade(acc);
+  if (fromUpgrade?.name) return fromUpgrade.name;
+  for (const id of UPGRADE_COSMETIC_IDS) {
+    const def = UPGRADE_COSMETICS[id];
+    if (def?.accessory === acc) {
+      return getUpgrade(id)?.name || acc;
+    }
+  }
+  return acc;
+}
 
 /**
  * Hash estável → [0, 1). Visualmente irregular; não re-rola entre frames.

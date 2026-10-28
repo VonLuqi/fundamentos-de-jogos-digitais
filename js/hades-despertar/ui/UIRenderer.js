@@ -32,8 +32,13 @@ import {
 import { CERBERUS_PUP_UPGRADE_IDS } from '../config/achievements.js';
 import { TALENTS, getTalent, meetsTalentRequirement } from '../config/talents.js';
 import { UPGRADES, getUpgrade } from '../config/upgrades.js';
+import {
+  cosmeticForUpgrade,
+  cosmeticLabel,
+} from '../config/upgrade-cosmetics.js';
 import { VERDICT_SHOP } from '../config/verdict-shop.js';
 import { JUIZO_BANCADA_HINT } from '../config/juizo-pool.js';
+import { cosmeticPaths } from './world/CosmeticsAtlas.js';
 import { add, cmp, div, mul } from '../core/decimal.js';
 import {
   amortizationSeconds,
@@ -68,7 +73,13 @@ import { FORTUNES, getFortune } from '../config/fortunes.js';
 import { formatAmortSeconds, formatOwned, formatRate, formatSouls } from './NumberFormatter.js';
 import { AltarOrbit, applyVeilElementStyle, veilPercent } from './world/AltarOrbit.js';
 import { LeechRingView } from './world/LeechRingView.js';
-import { createSpriteNode, generatorSprite, habitatSprite, upgradeSprite } from './world/SpriteAtlas.js';
+import {
+  createSpriteNode,
+  generatorSprite,
+  habitatSprite,
+  habitatVariantSprite,
+  upgradeSprite,
+} from './world/SpriteAtlas.js';
 import { describeUnitPersona } from './unitPersona.js';
 import { WorldView } from './world/WorldView.js';
 import { ShimmerView } from './ShimmerView.js';
@@ -632,23 +643,23 @@ export function isLetheOpen(state) {
   return cmp(state.runSouls, LETHE_PREVIEW_RUN_SOULS) >= 0;
 }
 
-export function upgradeBlurb(upgrade) {
+/** Só o efeito mecânico (sem flavor do catálogo). */
+export function upgradeEffectText(upgrade) {
   if (!upgrade) return '';
-  const flavor = upgrade.blurb ? ` ${upgrade.blurb}` : '';
   // Q16 / J.1 — Juramentos T4 ≠ Vereditos do minigame Juízo.
   if (upgrade.id === 'veredito_tartaro' || upgrade.id === 'lei_inquebravel') {
-    return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.${flavor}`;
+    return `Juramento do Styx: ×${upgrade.factor} no Juiz do Tártaro (gerador). Não é Veredito do Juízo.`;
   }
-  if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.${flavor}`;
+  if (upgrade.kind === 'clickMult') return `A Foice rende ×${upgrade.factor}.`;
   if (upgrade.kind === 'clickKSps') {
     const pct = mul(upgrade.factor, '100');
-    return `O clique ganha ${pct}% das Almas / s.${flavor}`;
+    return `O clique ganha ${pct}% das Almas / s.`;
   }
   if (upgrade.kind === 'thousandBlades') {
-    return `A Foice e cada Sombra Vagante ganham +${upgrade.factor} por gerador não-Sombra.${flavor}`;
+    return `A Foice e cada Sombra Vagante ganham +${upgrade.factor} por gerador não-Sombra.`;
   }
   if (upgrade.kind === 'thousandBladesMult') {
-    return `Multiplica o bônus de Mil Foices por ×${upgrade.factor}.${flavor}`;
+    return `Multiplica o bônus de Mil Foices por ×${upgrade.factor}.`;
   }
   if (upgrade.kind === 'synergyMult') {
     const baseGen = getGenerator(upgrade.baseGeneratorId);
@@ -657,49 +668,71 @@ export function upgradeBlurb(upgrade) {
     const boostedName = boostedGen?.name ?? upgrade.boostedGeneratorId;
     const boostedPct = mul(upgrade.boostedBonusPerBase || '0.05', '100');
     const basePct = mul(upgrade.baseBonusPerBoosted || '0.001', '100');
-    return `${boostedName} ganha +${boostedPct}% SPS por ${baseName}; ${baseName} ganha +${basePct}% SPS por ${boostedName}.${flavor}`;
+    return `${boostedName} ganha +${boostedPct}% SPS por ${baseName}; ${baseName} ganha +${basePct}% SPS por ${boostedName}.`;
   }
   if (upgrade.kind === 'generatorMult') {
     const gen = getGenerator(upgrade.generatorId);
-    return `${gen?.name ?? 'O gerador'} rende ×${upgrade.factor}.${flavor}`;
+    return `${gen?.name ?? 'O gerador'} rende ×${upgrade.factor}.`;
   }
-  if (upgrade.kind === 'allGeneratorsMult') return `Todos os geradores rendem ×${upgrade.factor}.${flavor}`;
+  if (upgrade.kind === 'allGeneratorsMult') return `Todos os geradores rendem ×${upgrade.factor}.`;
   if (upgrade.kind === 'veilMult' || upgrade.kind === 'kittenMult') {
-    return `Multiplica o SPS global em 1 + (Véu × ${upgrade.factor}).${flavor}`;
+    return `Multiplica o SPS global em 1 + (Véu × ${upgrade.factor}).`;
   }
   if (upgrade.kind === 'catabaseResearch') {
-    return `Pesquisa do Arquivo Estígio (×${upgrade.factor} SPS global).${flavor}`;
+    return `Pesquisa do Arquivo Estígio (×${upgrade.factor} SPS global).`;
   }
   if (upgrade.kind === 'leechCap') {
-    return `Aumenta a capacidade de Sanguessugas em +${upgrade.factor} slots.${flavor}`;
+    return `Aumenta a capacidade de Sanguessugas em +${upgrade.factor} slots.`;
   }
   if (upgrade.kind === 'leechPayout') {
-    return `Aumenta o retorno ao estourar Sanguessugas em ×${upgrade.factor}.${flavor}`;
+    return `Aumenta o retorno ao estourar Sanguessugas em ×${upgrade.factor}.`;
   }
   if (upgrade.kind === 'dragonScale') {
-    return `Escama Dracónica (×${upgrade.factor} SPS global).${flavor}`;
+    return `Escama Dracónica (×${upgrade.factor} SPS global).`;
   }
   if (upgrade.kind === 'seasonalCompound') {
     const pct = mul(upgrade.factor || '0.01', '100');
-    return `Relíquia Sazonal (+${pct}% SPS composto).${flavor}`;
+    return `Relíquia Sazonal (+${pct}% SPS composto).`;
   }
   if (upgrade.kind === 'saturnaliaMult') {
-    return `Bênção da Saturnália (×${upgrade.factor} SPS global).${flavor}`;
+    return `Bênção da Saturnália (×${upgrade.factor} SPS global).`;
   }
   if (upgrade.kind === 'hermesContract') {
-    return `Contrato de Hermes (−2% custo de todos os geradores).${flavor}`;
+    return `Contrato de Hermes (−2% custo de todos os geradores).`;
   }
   if (upgrade.kind === 'fortuneGlobal') {
-    return `Fortuna de Hermes (×${upgrade.factor} SPS global).${flavor}`;
+    return `Fortuna de Hermes (×${upgrade.factor} SPS global).`;
   }
   if (upgrade.kind === 'fortuneObol') {
-    return `Fortuna de Hermes (+1% ganho de Óbolos no Lethe).${flavor}`;
+    return `Fortuna de Hermes (+1% ganho de Óbolos no Lethe).`;
   }
   if (upgrade.kind === 'fortuneLine') {
     const gen = getGenerator(upgrade.generatorId);
-    return `Fortuna de ${gen?.name ?? upgrade.generatorId}: +7% SPS e −7% custo.${flavor}`;
+    return `Fortuna de ${gen?.name ?? upgrade.generatorId}: +7% SPS e −7% custo.`;
   }
-  return upgrade.blurb || '';
+  return '';
+}
+
+/** Efeito + flavor concatenados (compat / selados / callers legados). */
+export function upgradeBlurb(upgrade) {
+  if (!upgrade) return '';
+  const effect = upgradeEffectText(upgrade);
+  const flavor = upgrade.blurb ? String(upgrade.blurb) : '';
+  if (effect && flavor) return `${effect} ${flavor}`;
+  return effect || flavor;
+}
+
+/**
+ * Status curto para o tip Styx.
+ * @param {{ owned?: boolean, canBuy?: boolean, revealed?: boolean, meets?: boolean }} view
+ */
+export function upgradeAffordHint(view) {
+  if (!view) return '';
+  if (view.owned) return 'Já selado';
+  if (view.canBuy) return 'Pode comprar';
+  if (view.revealed && view.meets === false) return 'Requisito em falta';
+  if (view.revealed) return 'Almas insuficientes';
+  return '';
 }
 
 export function upgradeRequirementText(upgrade) {
@@ -912,15 +945,31 @@ export function describeUpgradeCard(state, id) {
       seasons: state.seasons || null,
     });
   const canBuy = revealed && !owned && meets && (free || cmp(state.souls, effCost) >= 0);
+  const cosDef = cosmeticForUpgrade(id);
+  const effect = upgradeEffectText(upgrade);
+  const flavor = upgrade.blurb ? String(upgrade.blurb) : '';
   return {
     id,
     name: upgrade.name,
     blurb: upgradeBlurb(upgrade),
+    effect,
+    flavor,
     requirement: upgradeRequirementText(upgrade),
     cost: free ? '0' : effCost,
     owned,
     revealed,
+    meets,
     canBuy,
+    affordHint: upgradeAffordHint({ owned, canBuy, revealed, meets }),
+    cosmetic: cosDef
+      ? {
+        accessory: cosDef.accessory,
+        label: cosmeticLabel(cosDef.accessory),
+        layer: cosDef.layer,
+        targetGeneratorId: cosDef.targetGeneratorId || null,
+        target: cosDef.target || null,
+      }
+      : null,
   };
 }
 
@@ -976,6 +1025,7 @@ export function describeVerdictCard(state, id) {
   const owned = (state.verdictPurchases || []).includes(id);
   const verdicts = Number(state.verdicts) || 0;
   const cost = Number(item.cost) || 0;
+  const cosDef = cosmeticForUpgrade(id);
   return {
     id,
     name: item.name,
@@ -983,6 +1033,14 @@ export function describeVerdictCard(state, id) {
     cost,
     owned,
     canBuy: !owned && verdicts >= cost,
+    cosmetic: cosDef
+      ? {
+        accessory: cosDef.accessory,
+        label: cosmeticLabel(cosDef.accessory),
+        layer: cosDef.layer,
+        target: cosDef.target || null,
+      }
+      : null,
   };
 }
 
@@ -1812,38 +1870,34 @@ export class UIRenderer {
     if (!tip) {
       tip = this.root.createElement('div');
       tip.id = 'styx-tooltip';
-      tip.className = 'despertar-upgrade-tooltip';
+      tip.className = 'despertar-upgrade-tooltip is-fixed';
       tip.setAttribute('role', 'tooltip');
       tip.hidden = true;
-      const nameEl = this.root.createElement('p');
-      nameEl.className = 'despertar-upgrade-tooltip__name';
-      nameEl.dataset.tip = 'name';
-      const blurbEl = this.root.createElement('p');
-      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
-      blurbEl.dataset.tip = 'blurb';
-      const costEl = this.root.createElement('p');
-      costEl.className = 'despertar-upgrade-tooltip__cost';
-      costEl.dataset.tip = 'cost';
-      const reqEl = this.root.createElement('p');
-      reqEl.className = 'despertar-upgrade-tooltip__req';
-      reqEl.dataset.tip = 'req';
-      tip.append(nameEl, blurbEl, costEl, reqEl);
       // Fora da strip (overflow) — senão o custo some cortado.
       const mountParent = this.root.body || this.root.documentElement || strip;
       mountParent?.append?.(tip);
     }
+    this.#ensureStyxTipStructure(tip);
     this._styxTip = tip
       ? {
         root: tip,
         name: tip.querySelector('[data-tip="name"]'),
-        blurb: tip.querySelector('[data-tip="blurb"]'),
+        effect: tip.querySelector('[data-tip="effect"]'),
+        flavor: tip.querySelector('[data-tip="flavor"]'),
+        cosmetic: tip.querySelector('[data-tip="cosmetic"]'),
+        cosmeticThumb: tip.querySelector('[data-tip="cosmetic-thumb"]'),
+        cosmeticLabel: tip.querySelector('[data-tip="cosmetic-label"]'),
         cost: tip.querySelector('[data-tip="cost"]'),
+        status: tip.querySelector('[data-tip="status"]'),
         req: tip.querySelector('[data-tip="req"]'),
+        // legado
+        blurb: tip.querySelector('[data-tip="blurb"]'),
         activeId: null,
       }
       : null;
 
     this._styx = { empty, list, strip };
+    toggleClass(strip, 'is-empty', true);
     this._styxOrderSig = '';
     this._styxKeyHandler = (event) => {
       if (event.key === 'Escape') {
@@ -1874,6 +1928,10 @@ export class UIRenderer {
         className: 'despertar-upgrade-icon__sprite despertar-sprite',
       });
       buy.append(sprite);
+      if (cosmeticForUpgrade(def.id)) {
+        buy.classList.add('despertar-upgrade-icon--has-cosmetic');
+        buy.dataset.hasCosmetic = '1';
+      }
 
       buy.addEventListener('click', () => {
         if (buy.disabled) return;
@@ -1896,6 +1954,86 @@ export class UIRenderer {
     }
   }
 
+  /** Garante blocos do tip Styx (efeito / sabor / cosmético / status). */
+  #ensureStyxTipStructure(tip) {
+    if (!tip || !this.root) return;
+    const ensure = (tag, className, dataTip, parent = tip) => {
+      let el = tip.querySelector(`[data-tip="${dataTip}"]`);
+      if (el) return el;
+      el = this.root.createElement(tag);
+      el.className = className;
+      el.dataset.tip = dataTip;
+      parent.append(el);
+      return el;
+    };
+    ensure('p', 'despertar-upgrade-tooltip__name', 'name');
+    ensure('p', 'despertar-upgrade-tooltip__effect', 'effect');
+    ensure('p', 'despertar-upgrade-tooltip__flavor', 'flavor');
+    let cos = tip.querySelector('[data-tip="cosmetic"]');
+    if (!cos) {
+      cos = this.root.createElement('div');
+      cos.className = 'despertar-upgrade-tooltip__cosmetic';
+      cos.dataset.tip = 'cosmetic';
+      cos.hidden = true;
+      tip.append(cos);
+    }
+    if (!cos.querySelector('[data-tip="cosmetic-thumb"]')) {
+      const thumb = this.root.createElement('div');
+      thumb.className = 'despertar-upgrade-tooltip__cosmetic-thumb';
+      thumb.dataset.tip = 'cosmetic-thumb';
+      cos.append(thumb);
+    }
+    if (!cos.querySelector('[data-tip="cosmetic-label"]')) {
+      const label = this.root.createElement('p');
+      label.className = 'despertar-upgrade-tooltip__cosmetic-label';
+      label.dataset.tip = 'cosmetic-label';
+      cos.append(label);
+    }
+    ensure('p', 'despertar-upgrade-tooltip__cost', 'cost');
+    ensure('p', 'despertar-upgrade-tooltip__status', 'status');
+    ensure('p', 'despertar-upgrade-tooltip__req', 'req');
+  }
+
+  #fillCosmeticTipPreview(tip, cosmetic) {
+    if (!tip?.cosmetic) return;
+    if (!cosmetic?.accessory) {
+      setHidden(tip.cosmetic, true);
+      return;
+    }
+    setHidden(tip.cosmetic, false);
+    setText(tip.cosmeticLabel, `Visual: ${cosmetic.label || cosmetic.accessory}`);
+    const thumbHost = tip.cosmeticThumb;
+    if (!thumbHost) return;
+    thumbHost.replaceChildren();
+    const variant = habitatVariantSprite(cosmetic.accessory);
+    const cosPaths = cosmeticPaths(cosmetic.accessory);
+    const webp = variant.webp || cosPaths.webp;
+    const svg = variant.svg || cosPaths.svg;
+    if (webp || svg) {
+      const sprite = createSpriteNode(this.root, {
+        webp,
+        svg,
+        mark: (cosmetic.label || cosmetic.accessory).slice(0, 1).toUpperCase(),
+        pixel: true,
+      }, {
+        className: 'despertar-upgrade-tooltip__cosmetic-sprite despertar-sprite',
+      });
+      thumbHost.append(sprite);
+      return;
+    }
+    const swatch = this.root.createElement('span');
+    swatch.className = 'despertar-upgrade-tooltip__cosmetic-swatch';
+    let h = 2166136261;
+    const acc = String(cosmetic.accessory);
+    for (let i = 0; i < acc.length; i += 1) {
+      h ^= acc.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    swatch.style.setProperty('--cos-hue', String(h % 360));
+    swatch.textContent = (cosmetic.label || acc).slice(0, 1).toUpperCase();
+    thumbHost.append(swatch);
+  }
+
   #showStyxTip(id, anchor) {
     this.#hideSealedTip();
     const tip = this._styxTip;
@@ -1903,10 +2041,16 @@ export class UIRenderer {
     const view = describeUpgradeCard(this.state, id);
     if (!view || view.owned) return;
     setText(tip.name, view.name);
-    setText(tip.blurb, view.blurb);
+    setText(tip.effect, view.effect || view.blurb);
+    setHidden(tip.effect, !(view.effect || view.blurb));
+    setText(tip.flavor, view.flavor || '');
+    setHidden(tip.flavor, !view.flavor);
+    this.#fillCosmeticTipPreview(tip, view.cosmetic);
     setText(tip.cost, `Custo: ${formatSouls(view.cost)} almas`);
+    setText(tip.status, view.affordHint || '');
+    setHidden(tip.status, !view.affordHint);
     const req = view.requirement && view.requirement !== 'Sem requisito especial'
-      ? view.requirement
+      ? `Requer: ${view.requirement}`
       : '';
     setText(tip.req, req);
     setHidden(tip.req, !req);
@@ -2009,6 +2153,9 @@ export class UIRenderer {
     const showList = unlocked && visibleCards.length > 0;
     setHidden(this._styx.empty, showList);
     setHidden(this._styx.list, !showList);
+    // Sem juramentos: hover não pode encolher a strip (aspect-ratio → auto)
+    // senão a margem inferior entra em loop pointerenter/leave.
+    toggleClass(this._styx.strip, 'is-empty', !showList);
     if (this._styx.empty && !showList) setText(this._styx.empty, STYX_EMPTY);
     if (this._styxTip?.activeId) {
       const active = this._upgrades.get(this._styxTip.activeId);
@@ -2558,29 +2705,31 @@ export class UIRenderer {
     if (!tip) {
       tip = this.root.createElement('div');
       tip.id = 'sealed-tooltip';
-      tip.className = 'despertar-upgrade-tooltip';
+      tip.className = 'despertar-upgrade-tooltip is-fixed';
       tip.setAttribute('role', 'tooltip');
       tip.hidden = true;
-      const nameEl = this.root.createElement('p');
-      nameEl.className = 'despertar-upgrade-tooltip__name';
-      nameEl.dataset.tip = 'name';
-      const blurbEl = this.root.createElement('p');
-      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
-      blurbEl.dataset.tip = 'blurb';
-      const markEl = this.root.createElement('p');
-      markEl.className = 'despertar-upgrade-tooltip__mark';
-      markEl.dataset.tip = 'mark';
-      markEl.textContent = 'Selado';
-      tip.append(nameEl, blurbEl, markEl);
       const mountParent = this.root.body
         || this.root.documentElement
         || this._sealed?.section;
       mountParent?.append?.(tip);
     }
+    this.#ensureStyxTipStructure(tip);
+    if (!tip.querySelector('[data-tip="mark"]')) {
+      const markEl = this.root.createElement('p');
+      markEl.className = 'despertar-upgrade-tooltip__mark';
+      markEl.dataset.tip = 'mark';
+      markEl.textContent = 'Selado';
+      tip.append(markEl);
+    }
     this._sealedTip = tip
       ? {
         root: tip,
         name: tip.querySelector('[data-tip="name"]'),
+        effect: tip.querySelector('[data-tip="effect"]'),
+        flavor: tip.querySelector('[data-tip="flavor"]'),
+        cosmetic: tip.querySelector('[data-tip="cosmetic"]'),
+        cosmeticThumb: tip.querySelector('[data-tip="cosmetic-thumb"]'),
+        cosmeticLabel: tip.querySelector('[data-tip="cosmetic-label"]'),
         blurb: tip.querySelector('[data-tip="blurb"]'),
         mark: tip.querySelector('[data-tip="mark"]'),
         activeId: null,
@@ -2595,8 +2744,20 @@ export class UIRenderer {
     if (!tip?.root || !anchor) return;
     const upgrade = getUpgrade(id);
     if (!upgrade) return;
+    const cos = cosmeticForUpgrade(id);
+    const effect = upgradeEffectText(upgrade);
+    const flavor = upgrade.blurb ? String(upgrade.blurb) : '';
     setText(tip.name, upgrade.name);
-    setText(tip.blurb, upgradeBlurb(upgrade));
+    setText(tip.effect, effect || upgradeBlurb(upgrade));
+    setHidden(tip.effect, !(effect || upgrade.blurb));
+    setText(tip.flavor, flavor);
+    setHidden(tip.flavor, !flavor);
+    this.#fillCosmeticTipPreview(tip, cos
+      ? { accessory: cos.accessory, label: cosmeticLabel(cos.accessory) }
+      : null);
+    if (tip.cosmeticLabel && cos) {
+      setText(tip.cosmeticLabel, `Visual ativo: ${cosmeticLabel(cos.accessory)}`);
+    }
     setText(tip.mark, 'Selado');
     tip.activeId = id;
     tip.activeAnchor = anchor;
@@ -2808,27 +2969,23 @@ export class UIRenderer {
     if (!tip) {
       tip = this.root.createElement('div');
       tip.id = 'bancada-tooltip';
-      tip.className = 'despertar-upgrade-tooltip';
+      tip.className = 'despertar-upgrade-tooltip is-fixed';
       tip.setAttribute('role', 'tooltip');
       tip.hidden = true;
-      const nameEl = this.root.createElement('p');
-      nameEl.className = 'despertar-upgrade-tooltip__name';
-      nameEl.dataset.tip = 'name';
-      const blurbEl = this.root.createElement('p');
-      blurbEl.className = 'despertar-upgrade-tooltip__blurb';
-      blurbEl.dataset.tip = 'blurb';
-      const costEl = this.root.createElement('p');
-      costEl.className = 'despertar-upgrade-tooltip__cost';
-      costEl.dataset.tip = 'cost';
-      tip.append(nameEl, blurbEl, costEl);
       const mountParent = this.root.body || this.root.documentElement || panel;
       mountParent?.append?.(tip);
     }
+    this.#ensureStyxTipStructure(tip);
     this._bancadaTip = tip
       ? {
         root: tip,
         name: tip.querySelector('[data-tip="name"]'),
-        blurb: tip.querySelector('[data-tip="blurb"]'),
+        effect: tip.querySelector('[data-tip="effect"]'),
+        flavor: tip.querySelector('[data-tip="flavor"]'),
+        blurb: tip.querySelector('[data-tip="blurb"]') || tip.querySelector('[data-tip="effect"]'),
+        cosmetic: tip.querySelector('[data-tip="cosmetic"]'),
+        cosmeticThumb: tip.querySelector('[data-tip="cosmetic-thumb"]'),
+        cosmeticLabel: tip.querySelector('[data-tip="cosmetic-label"]'),
         cost: tip.querySelector('[data-tip="cost"]'),
         activeId: null,
         activeAnchor: null,
@@ -2914,7 +3071,9 @@ export class UIRenderer {
     const view = describeVerdictCard(this.state, id);
     if (!view) return;
     setText(tip.name, view.name);
-    setText(tip.blurb, view.blurb);
+    setText(tip.effect || tip.blurb, view.blurb);
+    setHidden(tip.flavor, true);
+    this.#fillCosmeticTipPreview(tip, view.cosmetic);
     setText(
       tip.cost,
       view.owned ? 'Na Bancada' : `Custo: ${view.cost} Vereditos`,
