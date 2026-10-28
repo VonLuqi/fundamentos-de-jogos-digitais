@@ -214,9 +214,9 @@ async function patchPhp(defs) {
   src = `${src.slice(0, start)}${block}${src.slice(servosEntry)}`;
 
   if (!src.includes('LEGACY_SYNERGY_COSTS')) {
-    const talentAnchor = 'public const LEGACY_TALENT_COSTS';
+    const talentAnchor = '    public const LEGACY_TALENT_COSTS';
     if (src.includes(talentAnchor)) {
-      src = src.replace(talentAnchor, `${formatLegacyPhp()}\n    ${talentAnchor}`);
+      src = src.replace(talentAnchor, `${formatLegacyPhp()}\n${talentAnchor}`);
     } else {
       src = src.replace(
         'public const LETHE_REBALANCE_V2_MILESTONE',

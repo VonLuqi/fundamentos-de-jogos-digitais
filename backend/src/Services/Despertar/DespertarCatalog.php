@@ -1298,6 +1298,29 @@ final class DespertarCatalog
         'unshackled_you' => ['id' => 'unshackled_you', 'cost' => '19200000000000000', 'branch' => 'unshackled', 'ring' => 26, 'angle' => -17.008604483692324, 'requires' => ['unshackled_cortex_bakers'], 'effects' => ['unshackleGeneratorId' => 'the_emperor']],
     ];
 
+    public const LEGACY_SYNERGY_COSTS = [
+        'cortejo_das_margens_i' => '150000',
+        'cortejo_das_margens_ii' => '1500000000',
+        'brasa_cruzada_i' => '2100000000',
+        'brasa_cruzada_ii' => '21000000000000',
+        'guardiao_dos_umbrais_i' => '300000000',
+        'guardiao_dos_umbrais_ii' => '3000000000000',
+        'jurisprudencia_arcana_i' => '4950000000',
+        'jurisprudencia_arcana_ii' => '49500000000000',
+        'alquimia_estelar_i' => '1125000000000',
+        'alquimia_estelar_ii' => '11250000000000000',
+        'trama_do_erebo_i' => '210000000000000',
+        'trama_do_erebo_ii' => '2100000000000000000',
+        'refracao_do_vazio_i' => '31500000000000000',
+        'refracao_do_vazio_ii' => '315000000000000000000',
+        'geometria_do_acaso_i' => '4650000000000000000',
+        'geometria_do_acaso_ii' => '46500000000000000000000',
+        'compilacao_multiversal_i' => '180000000000000000000000',
+        'compilacao_multiversal_ii' => '1800000000000000000000000000',
+        'soberania_psiquica_i' => '8100000000000000000000000000',
+        'soberania_psiquica_ii' => '81000000000000000000000000000000',
+    ];
+
     public const LEGACY_TALENT_COSTS = [
         'memoria_das_sombras' => '1',
         'juramento_eterno' => '1',

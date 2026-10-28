@@ -982,11 +982,12 @@ export function talentNodePosition(talent, { cx = 0, cy = 0, ringGap = 88, rootR
 
 async function patchPhp(talents) {
   const src = await fs.readFile(PHP_PATH, 'utf8');
-  const re =
-    /    public const TALENTS = \[[\s\S]*?\n    \];\r?\n\r?\n    public const LEGACY_TALENT_COSTS/;
+  // Para no `];` do próprio TALENTS (entradas ficam com 8 espaços). Exigir LEGACY_TALENT_COSTS
+  // logo depois fazia a regex engolir constantes no meio (LEGACY_SYNERGY_COSTS sumiu assim).
+  const re = /    public const TALENTS = \[[\s\S]*?\r?\n    \];/;
   if (!re.test(src)) throw new Error('Não encontrou public const TALENTS para patch');
   const block = phpTalentBlock(talents);
-  const next = src.replace(re, () => `${block}\n\n    public const LEGACY_TALENT_COSTS`);
+  const next = src.replace(re, () => block);
   if (next !== src) await fs.writeFile(PHP_PATH, next, 'utf8');
 }
 
