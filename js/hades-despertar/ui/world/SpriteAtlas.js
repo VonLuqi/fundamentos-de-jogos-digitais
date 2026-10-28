@@ -39,9 +39,11 @@ export function spritePaths(folder, id) {
 export function generatorSprite(id) {
   const def = GENERATOR_BY_ID[id];
   const paths = spritePaths('generators', id);
+  const q = '?v=gen-art-1';
   return {
     id,
-    ...paths,
+    webp: paths.webp ? `${paths.webp}${q}` : null,
+    svg: paths.svg ? `${paths.svg}${q}` : null,
     mark: markFrom(def?.name, id),
     tier: def?.tier ?? 1,
   };
