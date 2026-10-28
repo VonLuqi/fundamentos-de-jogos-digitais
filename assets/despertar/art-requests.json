@@ -640,7 +640,7 @@
       "id": "art_f4_veil_kittens",
       "listId": "F4-VK",
       "priority": "P1",
-      "status": "open",
+      "status": "interim",
       "title": "Véu do Acheron (5 sabores) & Filhotes do Cérbero (7 juramentos F4)",
       "desc": "5 estados/sabores de névoa do Véu do Acheron (Névoa Cinzenta, Águas do Estige, Corrente do Lethe, Chama de Flegêton, Ouro Ancestral) e 7 ícones da linhagem Filhotes do Cérbero (do Filhote Vigia do Estige ao Cérbero Conselheiro do Tártaro).",
       "sizes": [
@@ -667,9 +667,9 @@
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp e assets/despertar/sprites/veil/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 0,
+        "ilustrada": 5,
         "vetorial": 7,
-        "placeholder": 5,
+        "placeholder": 0,
         "faltando": 0
       }
     },

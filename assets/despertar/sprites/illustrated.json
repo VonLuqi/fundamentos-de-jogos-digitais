@@ -540,6 +540,11 @@
     "upgrades/veu_dos_esquecidos",
     "upgrades/visceras_sacras",
     "upgrades/vontade_pura_sem_intermediarios",
-    "upgrades/vortice_de_caos_domado"
+    "upgrades/vortice_de_caos_domado",
+    "veil/veu_aguas_estige",
+    "veil/veu_chama_phlegethon",
+    "veil/veu_corrente_lethe",
+    "veil/veu_nevoa_cinzenta",
+    "veil/veu_ouro_ancestral"
   ]
 }

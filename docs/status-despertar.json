@@ -230,18 +230,12 @@
     },
     "veil": {
       "total": 5,
-      "ilustrada": 0,
+      "ilustrada": 5,
       "vetorial": 0,
-      "placeholder": 5,
+      "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
-      "placeholders": [
-        "veu_aguas_estige",
-        "veu_chama_phlegethon",
-        "veu_corrente_lethe",
-        "veu_nevoa_cinzenta",
-        "veu_ouro_ancestral"
-      ]
+      "placeholders": []
     },
     "catabase": {
       "total": 7,
@@ -499,11 +493,11 @@
     {
       "id": "art_f4_veil_kittens",
       "auditable": true,
-      "status": "open",
+      "status": "interim",
       "counts": {
-        "ilustrada": 0,
+        "ilustrada": 5,
         "vetorial": 7,
-        "placeholder": 5,
+        "placeholder": 0,
         "faltando": 0
       }
     },
