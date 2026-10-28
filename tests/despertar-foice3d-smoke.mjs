@@ -84,4 +84,13 @@ for (const f of ['three.module.min.js', 'addons/loaders/GLTFLoader.js', 'addons/
 }
 assert.match(read('.htaccess'), /AddType model\/gltf-binary \.glb/);
 
+// 6. Layout: o canvas mede o botão (não a si mesmo) — senão cresce em loop e some da coluna.
+assert.match(src, /this\.button\.clientWidth/, '#resize mede o botão');
+assert.match(src, /MAX_CANVAS_CSS/, 'tamanho do canvas tem teto');
+const css = read('css/despertar.css');
+const rule = css.match(/\.despertar-reap\.has-foice-3d \.despertar-reap__foice--3d \{([^}]*)\}/)?.[1] || '';
+assert.match(rule, /position: absolute;/, 'canvas fora do fluxo do grid');
+assert.match(rule, /pointer-events: none;/, 'canvas não rouba o clique do botão');
+assert.match(rule, /filter: none !important;/, 'sem filtro CSS no canvas WebGL');
+
 console.log('despertar-foice3d-smoke: ok');

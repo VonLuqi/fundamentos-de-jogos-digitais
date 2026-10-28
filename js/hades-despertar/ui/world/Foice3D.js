@@ -14,6 +14,20 @@
 
 const IDLE_FRAME_MS = 33;
 const MAX_PIXEL_RATIO = 1.5;
+/** Canvas = 128% do botão (CSS absoluto). Medir o botão, nunca o canvas: evita laço de resize. */
+const CANVAS_SCALE = 1.28;
+/** Teto de segurança do canvas em px CSS (um botão absurdo não pode virar buffer gigante). */
+const MAX_CANVAS_CSS = 640;
+const COSMETIC_CHECK_MS = 500;
+/** Cosméticos da Foice (classes has-cosmetic-*) viram brilho na lâmina em vez de filtro CSS. */
+const COSMETIC_GLOW = {
+  blade_glow: { color: 0x00e0c8, intensity: 0.04, rim: 4.2 },
+  blade_runes: { color: 0xa855f7, intensity: 0.04, rim: 4.2 },
+  blade_ember: { color: 0xff5a1f, intensity: 0.05, rim: 4.6 },
+  blade_seal: { color: 0xffc76a, intensity: 0.04, rim: 3.8 },
+};
+const RIM_DEFAULT = { color: 0x2ee6d0, intensity: 2.2 };
+const FLASH_COLOR = 0xffc76a;
 const SLASH_MS = { windup: 70, strike: 140, hold: 45, recover: 320 };
 const SLASH_TOTAL_MS = SLASH_MS.windup + SLASH_MS.strike + SLASH_MS.hold + SLASH_MS.recover;
 /** Pose de descanso: a Foice deitada na diagonal, como a arte 2D. */
@@ -178,7 +192,8 @@ export class Foice3D {
       scene.add(new THREE.HemisphereLight(0xe8d4a8, 0x0a0a0f, 0.55));
       const key = new THREE.DirectionalLight(0xffd9a0, 2.4);
       key.position.set(-2.5, 3, 4);
-      const rim = new THREE.DirectionalLight(0x2ee6d0, 2.2);
+      const rim = new THREE.DirectionalLight(RIM_DEFAULT.color, RIM_DEFAULT.intensity);
+      this._rim = rim;
       rim.position.set(3, 1.5, -3);
       const fill = new THREE.PointLight(0xa855f7, 6, 8, 2);
       fill.position.set(1.8, -1.6, 2);
@@ -204,13 +219,18 @@ export class Foice3D {
       this._baseScale = fit;
 
       this._materials = [];
+      this._glowBase = new THREE.Color(0x000000);
+      this._glowFlash = new THREE.Color(FLASH_COLOR);
+      this._glowIntensity = 0;
+      this._cosmeticKey = null;
+      this._cosmeticCheckedAt = -Infinity;
       model.traverse((node) => {
         if (!node.isMesh) return;
         const mats = Array.isArray(node.material) ? node.material : [node.material];
         for (const m of mats) {
           m.envMapIntensity = 0.9;
           if (m.emissive) {
-            m.emissive.setHex(0xffc76a);
+            m.emissive.setHex(FLASH_COLOR);
             m.emissiveIntensity = 0;
             this._materials.push(m);
           }
@@ -264,8 +284,9 @@ export class Foice3D {
   #resize() {
     const motion = this._getMotion();
     const ratio = Math.min(this._win?.devicePixelRatio || 1, motion.lowQuality ? 1 : MAX_PIXEL_RATIO);
-    const w = Math.max(1, Math.round(this.canvas.clientWidth || this.button.clientWidth || 280));
-    const h = Math.max(1, Math.round(this.canvas.clientHeight || this.button.clientHeight || 280));
+    const side = (px) => Math.max(1, Math.min(MAX_CANVAS_CSS, Math.round((px || 220) * CANVAS_SCALE)));
+    const w = side(this.button.clientWidth);
+    const h = side(this.button.clientHeight || this.button.clientWidth);
     if (ratio === this._pixelRatio && w === this._w && h === this._h) return;
     this._pixelRatio = ratio;
     this._w = w;
@@ -274,6 +295,22 @@ export class Foice3D {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+  }
+
+  /** Lê as classes has-cosmetic-blade_* do botão (barato, a cada 0,5 s) e ajusta o brilho. */
+  #syncCosmetic(nowMs) {
+    if (nowMs - this._cosmeticCheckedAt < COSMETIC_CHECK_MS) return;
+    this._cosmeticCheckedAt = nowMs;
+    const id = Object.keys(COSMETIC_GLOW).find((k) => this.button.classList?.contains(`has-cosmetic-${k}`)) || null;
+    if (id === this._cosmeticKey) return;
+    this._cosmeticKey = id;
+    const glow = id ? COSMETIC_GLOW[id] : null;
+    // Aura na borda (luz de recorte) + toque de emissive: emissive forte tingia a Foice inteira.
+    this._glowBase.setHex(glow ? glow.color : 0x000000);
+    this._glowIntensity = glow ? glow.intensity : 0;
+    this._rim.color.setHex(glow ? glow.color : RIM_DEFAULT.color);
+    this._rim.intensity = glow ? glow.rim : RIM_DEFAULT.intensity;
+    this._dirty = true;
   }
 
   /** Aplica a pose: descanso + balanço parado + corte. */
@@ -305,8 +342,12 @@ export class Foice3D {
     this.pivot.rotation.set(REST.x, rotY, rotZ);
     this.pivot.position.set(posX, posY, 0);
     this.pivot.scale.setScalar(this._baseScale * scale);
-    // Brilho dourado por cima da textura (forte demais estourava a Foice num bege chapado).
-    for (const m of this._materials) m.emissiveIntensity = flash * 0.22;
+    // Brilho do cosmético (contínuo) + flash dourado do corte por cima da textura
+    // (forte demais estourava a Foice num bege chapado).
+    for (const m of this._materials) {
+      m.emissive.copy(this._glowBase).lerp(this._glowFlash, flash);
+      m.emissiveIntensity = this._glowIntensity * (1 - flash) + flash * 0.22;
+    }
   }
 
   /**
@@ -323,6 +364,7 @@ export class Foice3D {
     }
     this._lastFrame = nowMs;
     this._dirty = false;
+    this.#syncCosmetic(nowMs);
     this.#resize();
     this.#pose(nowMs);
     this.renderer.render(this.scene, this.camera);

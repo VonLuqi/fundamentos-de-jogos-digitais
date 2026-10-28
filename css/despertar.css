@@ -6153,15 +6153,25 @@ button.despertar-juizo-card:disabled {
 }
 
 /* --- Foice 3D (ui/world/Foice3D.js) --- */
-/* Canvas maior que o botão: o golpe sai da área sem ser cortado; o clique continua no botão. */
-.despertar-reap__foice--3d {
+/*
+ * Canvas maior que o botão (o golpe sai da área sem ser cortado; o clique continua no botão).
+ * Absoluto e com tamanho fixo no botão: no grid, `height: 128%` empurrava a linha, o botão
+ * crescia, o canvas crescia de novo — laço que levava o canvas a 18 000 px e sumia com a Foice.
+ */
+.despertar-reap__foice--3d,
+.despertar-reap.has-foice-3d .despertar-reap__foice--3d {
+  position: absolute;
+  left: -14%;
+  top: -14%;
   width: 128%;
   height: 128%;
   max-width: none;
   max-height: none;
-  align-self: center;
-  justify-self: center;
-  filter: none;
+  margin: 0;
+  pointer-events: none;
+  /* Filtro CSS num canvas WebGL animado custa caro por frame e contornava o retângulo do canvas:
+     o brilho dos cosméticos é feito em 3D (Foice3D, emissive/rim). */
+  filter: none !important;
   animation: despertarFoice3dIn 360ms ease-out;
 }
 
