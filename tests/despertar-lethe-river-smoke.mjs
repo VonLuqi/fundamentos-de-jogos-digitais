@@ -346,6 +346,19 @@ run('selo otimista: sem rollback por Essência/prereq; reject não replace', () 
   assert.ok(sealBody.includes('softFail'), 'softFail mantém selo');
   const apiSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/services/ApiService.js'), 'utf8');
   assert.ok(!/mode: 'replace',\s*\n\s*ok: false/.test(apiSrc), 'reject não usa replace');
+  // Recusa que persiste depois do flush+retry = selo fantasma: desfaz em vez de manter.
+  assert.ok(sealBody.includes('definitiveRefusal') && /definitiveRefusal\)\s*\{\s*\n\s*rollbackUnknown/.test(sealBody), 'recusa definitiva desfaz o selo');
+});
+
+run('Ritual recusado pelo servidor não vira Lethe só local', () => {
+  const indexSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8');
+  const start = indexSrc.indexOf('const letheUi = bindLetheModal');
+  const body = indexSrc.slice(start, indexSrc.indexOf('onAfterPrestige', start));
+  const catchBody = body.slice(body.lastIndexOf('} catch (error) {'));
+  // O sync não entrega Óbolos/Essência: Ritual local zerava a corrida sem recompensa no save.
+  assert.ok(!catchBody.includes('applyPrestige'), 'erro do servidor não aplica Ritual local');
+  assert.ok(!catchBody.includes('openAscensionLocal'), 'erro do servidor não abre o Rio');
+  assert.ok(/return false;/.test(catchBody), 'Ritual fica pendente');
 });
 
 console.log(`\ndespertar-lethe-river-smoke: ${passed} passed, ${failed} failed`);

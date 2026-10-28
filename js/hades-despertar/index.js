@@ -1257,7 +1257,15 @@ async function init() {
           try {
             await api.flush();
           } catch { /* ignore */ }
-          await api.talentBuy(id);
+          try {
+            await api.talentBuy(id);
+          } catch (retryErr) {
+            // Recusado de novo depois do flush: o servidor não tem os pais ou a Essência.
+            // Manter o selo seria um fantasma que some no F5 — desfaz e avisa.
+            const retryMsg = retryErr instanceof ApiError ? retryErr.message : String(retryErr?.message || '');
+            if (/faltam vertentes|essência insuficiente/i.test(retryMsg)) retryErr.definitiveRefusal = true;
+            throw retryErr;
+          }
           return;
         }
         throw buyErr;
@@ -1284,6 +1292,12 @@ async function init() {
             return;
           }
           rollbackUnknown(msg);
+          return;
+        }
+        if (error?.definitiveRefusal) {
+          rollbackUnknown(/faltam vertentes/i.test(msg)
+            ? 'O Submundo não registrou os selos anteriores deste ramo — este selo foi desfeito e a Essência devolvida.'
+            : 'O Submundo não tem Essência para este selo — ele foi desfeito e a Essência devolvida.');
           return;
         }
         softFail(msg);
@@ -1357,21 +1371,17 @@ async function init() {
         openAscensionLocal();
         return true;
       } catch (error) {
-        const local = state.applyPrestige();
-        if (local.ok) {
-          openAscensionLocal();
-          api.markDirty();
-          api.requestSync?.();
-          showApiWarning(
-            error instanceof ApiError && error.status === 429
-              ? 'Ritual aplicado na Estela local — o Submundo sincroniza em breve.'
-              : error instanceof ApiError
-                ? error.message
-                : 'O Submundo não responde… o Ritual ficou só na Estela local.'
-          );
-          return true;
-        }
-        showApiWarning(error instanceof ApiError ? error.message : 'O Ritual falhou.');
+        // Sem Ritual local: o sync nunca entrega Óbolos/Essência/Catábase ao servidor, então um
+        // Lethe só no navegador zerava a corrida no save sem dar a recompensa, e os selos do Rio
+        // eram recusados ("faltam vertentes"). A corrida fica intacta; o jogador tenta de novo.
+        api.markDirty();
+        api.requestSync?.();
+        const reason = error instanceof ApiError ? error.message : '';
+        showApiWarning(
+          /não rende óbolos/i.test(reason)
+            ? 'O Submundo ainda não registrou almas suficientes nesta corrida para o Ritual. Sua corrida continua; tente de novo em instantes.'
+            : `O Ritual não foi aceito${reason ? `: ${reason}` : ' — o Submundo não respondeu'}. Nada foi perdido; tente de novo.`,
+        );
         return false;
       }
     },
