@@ -57,22 +57,12 @@
     },
     "talents": {
       "total": 129,
-      "ilustrada": 120,
+      "ilustrada": 129,
       "vetorial": 0,
-      "placeholder": 9,
+      "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
-      "placeholders": [
-        "unshackled_sugarmuck",
-        "unshackled_temples",
-        "unshackled_time_machines",
-        "unshackled_wizard_towers",
-        "unshackled_you",
-        "vendas_divinas",
-        "virtues",
-        "wrapping_paper",
-        "wrinkly_cookies"
-      ]
+      "placeholders": []
     },
     "minigames": {
       "total": 21,

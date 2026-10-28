@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **307/660 (47%)** · vetorial interina: 329 · placeholder: **24** · faltando: 0
+Ilustrada: **316/660 (48%)** · vetorial interina: 329 · placeholder: **15** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -16,7 +16,7 @@ Ilustrada: **307/660 (47%)** · vetorial interina: 329 · placeholder: **24** ·
 | `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 104 | 329 | 0 | 0 |
-| `talents` | 129 | 120 | 0 | 9 | 0 |
+| `talents` | 129 | 129 | 0 | 0 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
 | `catabase` | 7 | 7 | 0 | 0 | 0 |
@@ -25,12 +25,6 @@ Ilustrada: **307/660 (47%)** · vetorial interina: 329 · placeholder: **24** ·
 Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-PENDENTE.md) (`npm run despertar:art-briefs`).
 
 Placeholders por pasta (IDs para gerar arte):
-
-<details><summary><code>talents</code> — 9</summary>
-
-`unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
-
-</details>
 
 <details><summary><code>seasons</code> — 15</summary>
 
