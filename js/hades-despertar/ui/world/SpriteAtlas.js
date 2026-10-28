@@ -6,13 +6,10 @@
 import { GENERATOR_BY_ID } from '../../config/generators.js';
 import { getTalent } from '../../config/talents.js';
 import { UPGRADES } from '../../config/upgrades.js';
+import { ART_VERSIONS } from '../../config/art-versions.js';
 
 /** Relativo a pages/*.html */
 export const SPRITE_BASE = '../assets/despertar/sprites';
-/** Cache-bust de assets catabase (Sanguessugas estilo Foice). */
-export const CATABASE_ASSET_VER = 'leech-natural-307';
-/** Cache-bust de ícones de upgrade (WebP ilustrados). */
-export const UPGRADE_ASSET_VER = 'upgrade-art-311';
 
 const UPGRADE_BY_ID = Object.freeze(
   Object.fromEntries(UPGRADES.map((item) => [item.id, item])),
@@ -24,7 +21,9 @@ function markFrom(name, id) {
 }
 
 /**
- * @param {'generators'|'upgrades'} folder
+ * URLs do sprite com a versão de cache da pasta (hash do conteúdo, config/art-versions.js):
+ * arte nova troca a URL e fura o cache de 7 dias do WebP.
+ * @param {string} folder
  * @param {string} id
  */
 export function spritePaths(folder, id) {
@@ -32,20 +31,18 @@ export function spritePaths(folder, id) {
   if (!safe) {
     return { webp: null, svg: null };
   }
+  const q = ART_VERSIONS[folder] ? `?v=${ART_VERSIONS[folder]}` : '';
   return {
-    webp: `${SPRITE_BASE}/${folder}/${safe}.webp`,
-    svg: `${SPRITE_BASE}/${folder}/${safe}.svg`,
+    webp: `${SPRITE_BASE}/${folder}/${safe}.webp${q}`,
+    svg: `${SPRITE_BASE}/${folder}/${safe}.svg${q}`,
   };
 }
 
 export function generatorSprite(id) {
   const def = GENERATOR_BY_ID[id];
-  const paths = spritePaths('generators', id);
-  const q = '?v=gen-art-1';
   return {
     id,
-    webp: paths.webp ? `${paths.webp}${q}` : null,
-    svg: paths.svg ? `${paths.svg}${q}` : null,
+    ...spritePaths('generators', id),
     mark: markFrom(def?.name, id),
     tier: def?.tier ?? 1,
   };
@@ -66,12 +63,9 @@ export function habitatSprite(id) {
 
 export function upgradeSprite(id) {
   const def = UPGRADE_BY_ID[id];
-  const paths = spritePaths('upgrades', id);
-  const q = `?v=${UPGRADE_ASSET_VER}`;
   return {
     id,
-    webp: paths.webp ? `${paths.webp}${q}` : null,
-    svg: paths.svg ? `${paths.svg}${q}` : null,
+    ...spritePaths('upgrades', id),
     mark: markFrom(def?.name, id),
   };
 }
@@ -100,8 +94,6 @@ export function shimmerSprite(id) {
 /** Sprites da Catábase (Sanguessugas + estágios Grandmapocalypse). */
 export function catabaseSprite(id) {
   const safe = String(id || '').replace(/[^\w-]/g, '');
-  const paths = spritePaths('catabase', safe);
-  const q = `?v=${CATABASE_ASSET_VER}`;
   let mark = '?';
   if (safe.includes('shiny')) mark = '✦';
   else if (safe.includes('sanguessuga')) mark = 'ᚹ';
@@ -110,9 +102,17 @@ export function catabaseSprite(id) {
   else if (safe.includes('alianca')) mark = '⚔';
   return {
     id: safe,
-    webp: paths.webp ? `${paths.webp}${q}` : null,
-    svg: paths.svg ? `${paths.svg}${q}` : null,
+    ...spritePaths('catabase', safe),
     mark,
+  };
+}
+
+/** Ícones de Néctar e minigames (sprites/minigames/<spriteId>: nectar_*, seed_*, spirit_*, spell_*, good_*). */
+export function minigameSprite(spriteId, name = '') {
+  return {
+    id: spriteId,
+    ...spritePaths('minigames', spriteId),
+    mark: markFrom(name, spriteId),
   };
 }
 
@@ -218,11 +218,9 @@ export async function loadHabitatVariantImage(accessory, env = {}) {
   return loadSpriteImage(sprite.svg, env);
 }
 
-/** Fundo pixel art da prateleira. O query troca o cache quando o chão muda. */
+/** Fundo pixel art da prateleira. */
 export function habitatBackgroundSprite(id) {
-  const sprite = spritePaths('habitats/backgrounds', id);
-  if (sprite.webp) sprite.webp += '?v=floor3';
-  return sprite;
+  return spritePaths('habitats/backgrounds', id);
 }
 
 export async function loadHabitatBackgroundImage(id, env = {}) {

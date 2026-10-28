@@ -32,7 +32,7 @@ import { GameState } from '../js/hades-despertar/core/GameState.js';
 import { describeCatabaseSummary } from '../js/hades-despertar/ui/UIRenderer.js';
 import { LeechRingView, leechSlotPolarPosition } from '../js/hades-despertar/ui/world/LeechRingView.js';
 import { maxLeechCapacity } from '../js/hades-despertar/core/CatabaseSystem.js';
-import { CATABASE_ASSET_VER } from '../js/hades-despertar/ui/world/SpriteAtlas.js';
+import { ART_VERSIONS } from '../js/hades-despertar/config/art-versions.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 let passed = 0;
@@ -467,7 +467,7 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   assert.notEqual(p0.deg, p1.deg);
   assert.ok(Math.abs(p0.xPct - p1.xPct) > 0.01 || Math.abs(p0.yPct - p1.yPct) > 0.01);
   assert.ok(Number.isFinite(p0.jitterXPx) && Number.isFinite(p0.delaySec));
-  assert.match(CATABASE_ASSET_VER, /leech-natural/);
+  assert.match(ART_VERSIONS.catabase, /^[0-9a-f]{8}$/, 'catabase com versão de cache por conteúdo');
   for (const id of ['sanguessuga_normal', 'sanguessuga_shiny']) {
     const webp = fs.readFileSync(path.join(root, `assets/despertar/sprites/catabase/${id}.webp`));
     // RIFF....WEBP + VP8L/VP8X com alpha: arquivo deve existir e SVG fallback sem rect preto.

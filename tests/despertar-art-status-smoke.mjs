@@ -17,6 +17,7 @@ import {
   requestSpriteKeys,
   requestStatus,
 } from '../scripts/despertar-status.mjs';
+import { computeArtVersions } from '../scripts/update-art-versions.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const doc = JSON.parse(fs.readFileSync(path.join(root, 'assets/despertar/art-requests.json'), 'utf8'));
@@ -39,5 +40,11 @@ for (const req of doc.requests) {
 }
 assert.deepEqual(stale, [], `art-requests.json desatualizado — rode npm run despertar:status -- --sync-requests\n${stale.join('\n')}`);
 assert.match(doc.statusSource || '', /despertar-status\.mjs/, 'art-requests declara a fonte do status');
+
+// Versão de cache dos sprites = hash do disco. Arte trocada sem atualizar = jogador vê a antiga por 7 dias.
+const { ART_VERSIONS } = await import('../js/hades-despertar/config/art-versions.js');
+assert.deepEqual({ ...ART_VERSIONS }, computeArtVersions(), 'art-versions.js desatualizado — rode npm run despertar:art-versions');
+const page = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
+assert.match(page, /"\.\.\/js\/hades-despertar\/config\/art-versions\.js": "\.\.\/js\/hades-despertar\/config\/art-versions\.js\?v=[0-9a-f]{8}"/, 'importmap versiona art-versions.js');
 
 console.log('despertar-art-status-smoke: ok');

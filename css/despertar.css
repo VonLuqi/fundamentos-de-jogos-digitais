@@ -240,7 +240,7 @@
   background: transparent;
   box-shadow: none;
   text-align: center;
-  /* visible: o +N do Ceifar sobe atÈ o contador; hidden cortava o float no meio. */
+  /* visible: o +N do Ceifar sobe at√© o contador; hidden cortava o float no meio. */
   overflow: visible;
   padding: 0.75rem 0.7rem 0.85rem;
 }
@@ -457,7 +457,7 @@
   100% { transform: translateY(1.5px) scaleY(1.04); }
 }
 
-/* --- Fase F6: Sanguessugas do Acheron (Wrinklers) & Barra da Cat·base --- */
+/* --- Fase F6: Sanguessugas do Acheron (Wrinklers) & Barra da Cat√°base --- */
 .despertar-catabase-stage-bg {
   position: absolute;
   inset: 0;
@@ -920,7 +920,7 @@
   gap: 0.85rem;
 }
 
-/* --- NÈctar do Lethe: colmeia de Artes Ctonianas --- */
+/* --- N√©ctar do Lethe: colmeia de Artes Ctonianas --- */
 .despertar-nectar-panel {
   --nectar-amber: #e8b84a;
   --nectar-amber-deep: #b8860b;
@@ -985,16 +985,18 @@
   min-width: 5.5rem;
 }
 
+/* √çcone da variante de N√©ctar do ciclo atual (sprites/minigames/nectar_*). */
 .despertar-nectar-stock__drop {
   display: grid;
   place-items: center;
-  width: 1.35rem;
-  height: 1.35rem;
-  border-radius: 50%;
-  font-size: 0.72rem;
-  color: #1a1206;
-  background: radial-gradient(circle at 35% 30%, #ffe7a0, var(--nectar-amber) 55%, var(--nectar-amber-deep));
-  box-shadow: 0 0 10px rgba(232, 184, 74, 0.45);
+  width: 2.25rem;
+  height: 2.25rem;
+  filter: drop-shadow(0 0 6px rgba(232, 184, 74, 0.45));
+}
+
+.despertar-nectar-stock__drop .despertar-minigame-icon {
+  width: 100%;
+  height: 100%;
 }
 
 .despertar-nectar-stock__body {
@@ -1362,9 +1364,41 @@
 
 .despertar-garden-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(7.5rem, 1fr));
   gap: 0.35rem;
   margin-top: 0.45rem;
+}
+
+/* √çcones de N√©ctar/minigames (sprites/minigames) ao lado do texto. */
+.despertar-icon-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.despertar-minigame-icon {
+  flex: 0 0 auto;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.despertar-minigame-icon .despertar-sprite__img {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
+}
+
+.despertar-minigame-icon .despertar-sprite__mark {
+  font-size: 0.75rem;
+}
+
+.despertar-minigame-slot-icon {
+  display: inline-grid;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.despertar-seed-picker [data-garden-seed].is-selected {
+  border-color: var(--hades-gold-bright);
+  box-shadow: 0 0 0 1px var(--hades-gold-bright) inset;
 }
 
 @keyframes despertar-nectar-pulse {
@@ -2696,7 +2730,7 @@
   filter: brightness(1.14) saturate(1.1);
 }
 
-/* Revelado, sem almas: monocrom·tico = ?n„o d· para comprar agora?. */
+/* Revelado, sem almas: monocrom√°tico = ?n√£o d√° para comprar agora?. */
 .despertar-upgrade-icon.is-unaffordable {
   opacity: 0.78;
   filter: grayscale(1) brightness(0.92);
@@ -3077,7 +3111,7 @@
     linear-gradient(180deg, rgba(8, 12, 16, 0.55), rgba(8, 12, 16, 0.28));
 }
 
-/* SÛ expande com Ìcones; strip vazia mantÈm o aspect (evita flicker na margem). */
+/* S√≥ expande com √≠cones; strip vazia mant√©m o aspect (evita flicker na margem). */
 .despertar-col--store .despertar-upgrade-strip:not(.is-empty):hover,
 .despertar-col--store .despertar-upgrade-strip:not(.is-empty):focus-within {
   aspect-ratio: auto;
@@ -3194,7 +3228,7 @@
   pointer-events: none;
 }
 
-/* Sem almas / sem stock: Ìcone e tipografia monocrom·ticos. */
+/* Sem almas / sem stock: √≠cone e tipografia monocrom√°ticos. */
 .despertar-product:disabled .despertar-card__icon,
 .despertar-product:disabled .despertar-sprite__img {
   filter: grayscale(1) brightness(0.9);
@@ -3925,7 +3959,7 @@
   animation: despertar-codex-book-pulse 1.6s ease-in-out infinite;
 }
 
-/* Placar do Loop ? canto oposto ao CÛdice (direita do DomÌnio). */
+/* Placar do Loop ? canto oposto ao C√≥dice (direita do Dom√≠nio). */
 .despertar-loop-board {
   left: auto;
   right: max(0.65rem, env(safe-area-inset-right, 0px));
@@ -4317,7 +4351,7 @@
   color: var(--hades-text-dim);
 }
 
-/* Colheita na ausÍncia ? painel estruturado (vÈu/HUD) */
+/* Colheita na aus√™ncia ? painel estruturado (v√©u/HUD) */
 .despertar-harvest .despertar-harvest__panel {
   width: min(100%, 28rem);
   padding: 1.45rem 1.35rem 1.25rem;
@@ -5722,7 +5756,7 @@ button.despertar-juizo-card:disabled {
   opacity: 0.92;
 }
 
-/* Fallback HTML do hold T1 ? cobre o shell est·tico se o grafo ES n„o bootar. */
+/* Fallback HTML do hold T1 ? cobre o shell est√°tico se o grafo ES n√£o bootar. */
 .app-shell__content.despertar-page {
   position: relative;
 }
@@ -5824,7 +5858,7 @@ button.despertar-juizo-card:disabled {
   width: min(56rem, 100%);
 }
 
-/* -- Rio do Lethe (·rvore de talentos pÛs-ritual) -- */
+/* -- Rio do Lethe (√°rvore de talentos p√≥s-ritual) -- */
 .lethe-river {
   position: fixed;
   inset: 0;
@@ -5844,7 +5878,7 @@ button.despertar-juizo-card:disabled {
 .lethe-river.is-open { opacity: 1; }
 .lethe-river[hidden] { display: none !important; }
 
-/* MemÛria do Rio ? ·rvore fechada embutida na aba Lethe */
+/* Mem√≥ria do Rio ? √°rvore fechada embutida na aba Lethe */
 .lethe-river--memory {
   position: relative;
   inset: auto;
@@ -6031,7 +6065,7 @@ button.despertar-juizo-card:disabled {
 .lethe-river__node--locked { opacity: 0.38; }
 .lethe-river__node--session-locked { opacity: 0.5; }
 .lethe-river__node--afford-locked { opacity: 0.72; }
-/* Compr·vel agora ? contraste forte vs. prÈ-requisito fechado */
+/* Compr√°vel agora ? contraste forte vs. pr√©-requisito fechado */
 .lethe-river__node--available {
   opacity: 1;
 }

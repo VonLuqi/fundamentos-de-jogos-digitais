@@ -3372,6 +3372,8 @@ export class UIRenderer {
       onSelectSoil: (soilId) => {
         if (this.state?.setGardenSoil?.(soilId)?.ok) this.markDirty('all');
       },
+      // Semente escolhida só muda o custo exibido nas parcelas vazias.
+      onSelectSeed: () => this.markDirty('all'),
       onBuyGood: (goodId, qty) => {
         if (this.state?.buyMarketStock?.(goodId, qty)?.ok) this.markDirty('all');
       },

@@ -23,9 +23,45 @@ import { calculateSeedPlantCost } from '../../core/minigames/GardenSystem.js';
 import { calculateGoodMaxStock, calculateMarketTradeSouls } from '../../core/minigames/MarketSystem.js';
 import { formatDuration } from '../../services/OfflineEngine.js';
 import { formatSouls } from '../NumberFormatter.js';
-import { createSpriteNode, generatorSprite } from '../world/SpriteAtlas.js';
+import { createSpriteNode, generatorSprite, minigameSprite } from '../world/SpriteAtlas.js';
 
 const HIVE_COLS = 5;
+
+const SPIRIT_BY_ID = Object.freeze(Object.fromEntries(PANTHEON_SPIRITS.map((s) => [s.id, s])));
+const SEED_BY_ID = Object.freeze(Object.fromEntries(GARDEN_SEEDS.map((s) => [s.id, s])));
+
+/** Ícone de minigame (sprites/minigames) como nó DOM. */
+function minigameIcon(doc, spriteId, name) {
+  return createSpriteNode(doc, minigameSprite(spriteId, name), {
+    className: 'despertar-sprite despertar-minigame-icon',
+  });
+}
+
+/**
+ * Ícone + texto: o render atualiza só `node._label` (setText no nó inteiro apagaria o ícone).
+ * @returns {HTMLElement & { _label: HTMLElement, _iconId: string }}
+ */
+function iconLabel(doc, tag, spriteId, name, text = name) {
+  const node = doc.createElement(tag);
+  node.classList?.add('despertar-icon-label');
+  const label = doc.createElement('span');
+  label.textContent = text;
+  node.append(minigameIcon(doc, spriteId, name), label);
+  node._label = label;
+  node._iconId = spriteId;
+  return node;
+}
+
+/** Troca o ícone de um iconLabel/host quando o item mudou. */
+function swapIcon(doc, host, spriteId, name) {
+  if (!host || host._iconId === spriteId) return;
+  host._iconId = spriteId;
+  const icon = spriteId ? minigameIcon(doc, spriteId, name) : null;
+  const old = host.querySelector?.('.despertar-minigame-icon');
+  if (old && icon) old.replaceWith(icon);
+  else if (old) old.remove();
+  else if (icon) host.prepend?.(icon);
+}
 
 const MINIGAME_UNLOCK_LABEL = Object.freeze({
   pantheon: 'Panteão',
@@ -82,6 +118,7 @@ export class MinigamesView {
     this._onPlantSeed = typeof options.onPlantSeed === 'function' ? options.onPlantSeed : null;
     this._onHarvestPlot = typeof options.onHarvestPlot === 'function' ? options.onHarvestPlot : null;
     this._onSelectSoil = typeof options.onSelectSoil === 'function' ? options.onSelectSoil : null;
+    this._onSelectSeed = typeof options.onSelectSeed === 'function' ? options.onSelectSeed : null;
     this._onBuyGood = typeof options.onBuyGood === 'function' ? options.onBuyGood : null;
     this._onSellGood = typeof options.onSellGood === 'function' ? options.onSellGood : null;
 
@@ -132,7 +169,8 @@ export class MinigamesView {
     const drop = this._doc.createElement('span');
     drop.className = 'despertar-nectar-stock__drop';
     drop.setAttribute('aria-hidden', 'true');
-    drop.textContent = '◆';
+    swapIcon(this._doc, drop, 'nectar_normal', 'Néctar do Lethe');
+    this._nectarDropEl = drop;
 
     const stockBody = this._doc.createElement('div');
     stockBody.className = 'despertar-nectar-stock__body';
@@ -327,7 +365,10 @@ export class MinigamesView {
       select.addEventListener?.('change', () => {
         this._onAssignPantheon?.(slot.id, select.value || null);
       });
-      row.append(label, select);
+      const iconHost = this._doc.createElement('span');
+      iconHost.className = 'despertar-minigame-slot-icon';
+      select._iconHost = iconHost;
+      row.append(iconHost, label, select);
       sec.append(row);
       this._pantheonSelects.set(slot.id, select);
     }
@@ -355,11 +396,10 @@ export class MinigamesView {
     const spellsWrap = this._doc.createElement('div');
     spellsWrap.className = 'despertar-minigame-actions';
     for (const sp of GRIMOIRE_SPELLS) {
-      const btn = this._doc.createElement('button');
+      const btn = iconLabel(this._doc, 'button', sp.spriteId, sp.name);
       btn.type = 'button';
-      btn.className = 'btn-gold';
+      btn.className = 'btn-gold despertar-icon-label';
       btn.dataset.castSpell = sp.id;
-      btn.textContent = sp.name;
       btn.addEventListener?.('click', () => this._onCastSpell?.(sp.id));
       spellsWrap.append(btn);
       this._grimoireBtns.set(sp.id, btn);
@@ -393,13 +433,44 @@ export class MinigamesView {
     });
     this._gardenSoilSelect = soilSelect;
 
+    // Semente a plantar: antes não havia escolha (só a primeira semente era plantável).
+    const seedPicker = this._doc.createElement('div');
+    seedPicker.className = 'despertar-minigame-actions despertar-seed-picker';
+    seedPicker.setAttribute('role', 'radiogroup');
+    seedPicker.setAttribute('aria-label', 'Semente a plantar');
+    this._seedBtns = new Map();
+    for (const seed of GARDEN_SEEDS) {
+      const btn = iconLabel(this._doc, 'button', seed.spriteId, seed.name);
+      btn.type = 'button';
+      btn.className = 'despertar-ghost despertar-icon-label';
+      btn.dataset.gardenSeed = seed.id;
+      btn.setAttribute('role', 'radio');
+      btn.title = seed.blurb || seed.name;
+      btn.addEventListener?.('click', () => {
+        this._selectedSeedId = seed.id;
+        this.#syncSeedPicker();
+        this._onSelectSeed?.(seed.id);
+      });
+      seedPicker.append(btn);
+      this._seedBtns.set(seed.id, btn);
+    }
+    this.#syncSeedPicker();
+
     const plotsHost = this._doc.createElement('div');
     plotsHost.className = 'despertar-garden-grid';
     this._gardenPlotsHost = plotsHost;
 
-    sec.append(h4, soilSelect, plotsHost);
+    sec.append(h4, soilSelect, seedPicker, plotsHost);
     this._sections.garden = sec;
     host.append(sec);
+  }
+
+  #syncSeedPicker() {
+    for (const [seedId, btn] of this._seedBtns || []) {
+      const on = seedId === this._selectedSeedId;
+      btn.setAttribute?.('aria-checked', String(on));
+      btn.classList?.toggle?.('is-selected', on);
+    }
   }
 
   #mountMarketSection(host) {
@@ -418,8 +489,7 @@ export class MinigamesView {
       row.className = 'despertar-minigame-row';
       row.dataset.marketGood = g.id;
 
-      const info = this._doc.createElement('span');
-      info.textContent = `${g.symbol} · ${g.name}`;
+      const info = iconLabel(this._doc, 'span', g.spriteId, g.name, `${g.symbol} · ${g.name}`);
 
       const buyBtn = this._doc.createElement('button');
       buyBtn.type = 'button';
@@ -466,6 +536,7 @@ export class MinigamesView {
         harvestChance: 0,
       };
     const vDef = NECTAR_VARIANT_BY_ID[cycle.variantId] || NECTAR_VARIANT_BY_ID.nectar_normal;
+    swapIcon(this._doc, this._nectarDropEl, vDef.spriteId || 'nectar_normal', vDef.name);
     const stage = cycle.unlocked ? (cycle.stage || 'budding') : 'locked';
 
     if (this._nectarStageEl) this._nectarStageEl.dataset.nectarStage = stage;
@@ -565,6 +636,8 @@ export class MinigamesView {
       for (const [slotId, select] of this._pantheonSelects.entries()) {
         const val = state.minigames.pantheon.slots?.[slotId] || '';
         if (select.value !== val) select.value = val;
+        const spirit = SPIRIT_BY_ID[val];
+        swapIcon(this._doc, select._iconHost, spirit?.spriteId || '', spirit?.name);
       }
     }
 
@@ -577,7 +650,7 @@ export class MinigamesView {
         const btn = this._grimoireBtns.get(sp.id);
         if (!btn) continue;
         const cost = calculateSpellCost(sp, gState.maxMana);
-        setText(btn, `${sp.name} (${cost} Éter)`);
+        setText(btn._label || btn, `${sp.name} (${cost} Éter)`);
         setDisabled(btn, gState.mana < cost);
       }
     }
@@ -595,8 +668,10 @@ export class MinigamesView {
           const idx = this._gardenPlotsHost.children.length;
           const cellBtn = this._doc.createElement('button');
           cellBtn.type = 'button';
-          cellBtn.className = 'despertar-debug__grant';
+          cellBtn.className = 'despertar-debug__grant despertar-icon-label';
           cellBtn.dataset.gardenPlot = String(idx);
+          cellBtn._label = this._doc.createElement('span');
+          cellBtn.append(cellBtn._label);
           cellBtn.addEventListener?.('click', () => {
             const cell = this._currentGardenPlots?.[idx];
             if (cell) this._onHarvestPlot?.(idx);
@@ -611,10 +686,12 @@ export class MinigamesView {
           const btn = this._gardenPlotsHost.children[i];
           const cell = gar.plots[i];
           if (!btn) continue;
+          const seed = cell ? SEED_BY_ID[cell.seedId] : null;
+          swapIcon(this._doc, btn, seed?.spriteId || '', seed?.name);
           if (!cell) {
-            setText(btn, `[Vazio · Plantar ${formatSouls(seedCost)}]`);
+            setText(btn._label || btn, `Vazio · Plantar ${formatSouls(seedCost)}`);
           } else {
-            setText(btn, `[${cell.seedId} · ${cell.mature ? 'Madura' : `Tick ${cell.ageTicks}`}]`);
+            setText(btn._label || btn, `${seed?.name || cell.seedId} · ${cell.mature ? 'Madura — colher' : `crescendo (${cell.ageTicks})`}`);
           }
         }
       }
@@ -634,8 +711,8 @@ export class MinigamesView {
         const maxStock = calculateGoodMaxStock(g, qtyMap, throneLv);
         const tradeSouls = calculateMarketTradeSouls(entry.price, 1, sps);
         setText(
-          nodes.info,
-          `${g.symbol} (${entry.stock}/${maxStock}) · Índice ${entry.price} (${formatSouls(tradeSouls)} almas)`,
+          nodes.info._label || nodes.info,
+          `${g.name} (${entry.stock}/${maxStock}) · Índice ${entry.price} (${formatSouls(tradeSouls)} almas)`,
         );
         setDisabled(nodes.buyBtn, entry.stock >= maxStock);
         setDisabled(nodes.sellBtn, entry.stock <= 0);

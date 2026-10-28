@@ -17,6 +17,7 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { trimAndCenterIcon } from './process-achievement-art.mjs';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
+import { writeArtVersions } from './update-art-versions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SPRITES = path.join(ROOT, 'assets', 'despertar', 'sprites');
@@ -233,6 +234,8 @@ async function main() {
   doc.preserveWebp = [...set].sort();
   await fs.writeFile(ILLUSTRATED, `${JSON.stringify(doc, null, 2)}\n`, 'utf8');
   console.log(`ok=${ok} missing=${missing} illustrated.json=${doc.preserveWebp.length}`);
+  // Troca a URL dos sprites da pasta: sem isso o WebP antigo fica 7 dias em cache.
+  if (ok > 0) writeArtVersions();
 }
 
 main().catch((error) => {
