@@ -22,6 +22,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 import { TALENTS } from '../js/hades-despertar/config/talents.js';
+import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 import { DESPERTAR_ACHIEVEMENT_IDS } from '../js/hades-despertar/config/achievements.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -91,20 +92,33 @@ async function mapLimit(items, limit, fn) {
   return out;
 }
 
+/** Pastas com catálogo: só contam os ícones que o jogo usa (o resto é arquivo órfão de legado). */
+const IN_USE = {
+  upgrades: new Set(UPGRADES.map((u) => u.icon || u.id)),
+  talents: new Set(TALENTS.map((t) => t.icon || t.id)),
+};
+
 export async function auditArt() {
   const byKey = {};
   const folders = {};
   for (const folder of ART_FOLDERS) {
     const dir = path.join(SPRITES, folder);
     if (!fs.existsSync(dir)) continue;
-    const ids = fs.readdirSync(dir).filter((f) => f.endsWith('.webp')).map((f) => f.slice(0, -5)).sort();
+    const onDisk = fs.readdirSync(dir).filter((f) => f.endsWith('.webp')).map((f) => f.slice(0, -5)).sort();
+    const inUse = IN_USE[folder];
+    const ids = inUse ? onDisk.filter((id) => inUse.has(id)) : onDisk;
     const results = await mapLimit(ids, 8, (id) => classifySprite(folder, id));
     const counts = { ilustrada: 0, vetorial: 0, placeholder: 0, faltando: 0 };
     ids.forEach((id, i) => {
       counts[results[i].status] += 1;
       byKey[`${folder}/${id}`] = results[i].status;
     });
-    folders[folder] = { total: ids.length, ...counts, placeholders: ids.filter((_, i) => results[i].status === 'placeholder') };
+    folders[folder] = {
+      total: ids.length,
+      ...counts,
+      orphanFiles: onDisk.length - ids.length,
+      placeholders: ids.filter((_, i) => results[i].status === 'placeholder'),
+    };
   }
   return { folders, byKey };
 }
@@ -217,6 +231,13 @@ function renderMarkdown({ generatedAt, art, requests, content, tests }) {
   for (const [folder, f] of Object.entries(art.folders)) {
     L.push(`| \`${folder}\` | ${f.total} | ${f.ilustrada} | ${f.vetorial} | ${f.placeholder} | ${f.faltando} |`);
   }
+  L.push('');
+  const orphans = Object.entries(art.folders).filter(([, f]) => f.orphanFiles > 0);
+  if (orphans.length) {
+    L.push(`Fora da conta (ícones que nenhum item usa): ${orphans.map(([folder, f]) => `\`${folder}\` ${f.orphanFiles}`).join(' · ')}.`);
+    L.push('');
+  }
+  L.push('Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-PENDENTE.md) (`npm run despertar:art-briefs`).');
   L.push('');
   L.push('Placeholders por pasta (IDs para gerar arte):');
   L.push('');

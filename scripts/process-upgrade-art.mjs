@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 /**
- * Pós-processa ícones brutos de upgrades (Gemini / GenerateImage) → WebP 128² RGBA.
- * Flood-fill só na borda (obsidiana interna preservada), trim+center, protege em illustrated.json.
+ * Pós-processa ícones brutos (Gemini / GenerateImage) → WebP 128² RGBA em sprites/<pasta>/.
+ * Flood-fill só na borda (obsidiana interna preservada), trim+center, protege em illustrated.json
+ * (sem isso `npm run despertar:sprites` volta o placeholder). O SVG da pasta não é tocado:
+ * ele é a referência que `npm run despertar:status` usa para saber que o WebP foi pintado.
  *
  * Uso:
- *   node scripts/process-upgrade-art.mjs --in-dir <pasta-com-{id}.png|jpg|webp>
- *   node scripts/process-upgrade-art.mjs --in-dir <pasta> --ids foice_afilada,juramento_acheron
+ *   npm run despertar:art -- --in-dir <pasta-com-{id}.png|jpg|webp>                 (upgrades)
+ *   npm run despertar:art -- --folder minigames --in-dir <pasta> [--ids id1,id2]
+ * Pastas: upgrades, talents, minigames, seasons, catabase, veil, shimmers.
  */
 
 import fs from 'node:fs/promises';
@@ -16,11 +19,17 @@ import { trimAndCenterIcon } from './process-achievement-art.mjs';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const OUT_DIR = path.join(ROOT, 'assets', 'despertar', 'sprites', 'upgrades');
-const ILLUSTRATED = path.join(ROOT, 'assets', 'despertar', 'sprites', 'illustrated.json');
+const SPRITES = path.join(ROOT, 'assets', 'despertar', 'sprites');
+const ILLUSTRATED = path.join(SPRITES, 'illustrated.json');
 const TARGET = 128;
+const ICON_FOLDERS = ['upgrades', 'talents', 'minigames', 'seasons', 'catabase', 'veil', 'shimmers'];
 
-const ALL_IDS = UPGRADES.map((u) => u.id);
+/** IDs válidos da pasta: catálogo para upgrades; sprites existentes (SVG/WebP) nas demais. */
+async function knownIds(folder) {
+  if (folder === 'upgrades') return UPGRADES.map((u) => u.id);
+  const files = await fs.readdir(path.join(SPRITES, folder));
+  return [...new Set(files.filter((f) => /\.(svg|webp)$/.test(f)).map((f) => f.replace(/\.(svg|webp)$/, '')))];
+}
 
 function colorDist(r1, g1, b1, r2, g2, b2) {
   const dr = r1 - r2;
@@ -173,11 +182,15 @@ function parseIds(args) {
 async function main() {
   const args = process.argv.slice(2);
   const dirFlag = args.indexOf('--in-dir');
-  if (dirFlag === -1 || !args[dirFlag + 1]) {
-    console.error('Uso: node scripts/process-upgrade-art.mjs --in-dir <pasta> [--ids id1,id2]');
+  const folderFlag = args.indexOf('--folder');
+  const folder = folderFlag === -1 ? 'upgrades' : String(args[folderFlag + 1] || '');
+  if (dirFlag === -1 || !args[dirFlag + 1] || !ICON_FOLDERS.includes(folder)) {
+    console.error(`Uso: npm run despertar:art -- [--folder ${ICON_FOLDERS.join('|')}] --in-dir <pasta> [--ids id1,id2]`);
     process.exit(1);
   }
   const inDir = path.resolve(args[dirFlag + 1]);
+  const OUT_DIR = path.join(SPRITES, folder);
+  const ALL_IDS = await knownIds(folder);
   const only = parseIds(args);
   const ids = only || ALL_IDS;
   await fs.mkdir(OUT_DIR, { recursive: true });
@@ -188,7 +201,9 @@ async function main() {
 
   for (const id of ids) {
     if (!ALL_IDS.includes(id)) {
-      console.warn(`id desconhecido (fora do catálogo): ${id}`);
+      console.error(`id desconhecido em ${folder}/ (pulado): ${id}`);
+      process.exitCode = 1;
+      continue;
     }
     const source = await findSource(inDir, id);
     if (!source) {
@@ -201,7 +216,7 @@ async function main() {
     const cleaned = removeEdgeBackground(data, info.width, info.height);
     const webp = await trimAndCenterIcon(cleaned.buffer, info.width, info.height, TARGET);
     await fs.writeFile(path.join(OUT_DIR, `${id}.webp`), webp);
-    preserved.push(`upgrades/${id}`);
+    preserved.push(`${folder}/${id}`);
     ok += 1;
     const pct = (cleaned.opaqueRatio * 100).toFixed(1);
     console.log(`${id}  opaco ${pct}%  fundo ${cleaned.bg.join(',')}  ${info.width}x${info.height}`);

@@ -41,6 +41,8 @@ temp/
 *.temp
 # Saídas soltas de scripts de arte/auditoria (.tmp-upgrade-raw/, .tmp-placeholders.json…)
 .tmp-*
+# Imagens brutas geradas para o pipeline de arte (npm run despertar:art -- --in-dir .art-raw/<pasta>)
+.art-raw/
 assets/docs/aulas/_tmp_slide_covers/
 assets/classind-dle/_covers-staging/
 

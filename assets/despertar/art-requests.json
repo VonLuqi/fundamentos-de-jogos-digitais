@@ -32,7 +32,7 @@
       "id": "art_foice",
       "listId": "B1",
       "priority": "P0",
-      "status": "delivered",
+      "status": "open",
       "title": "Foice / Portal do Acheron",
       "desc": "Alvo de clique (idle + pressed). Dominante na coluna esquerda.",
       "sizes": [
@@ -44,10 +44,10 @@
       ],
       "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master. [reconciliado 2026-10-23: foice-idle/pressed.webp em disco]",
       "detected": {
-        "ilustrada": 2,
+        "ilustrada": 1,
         "vetorial": 0,
         "placeholder": 0,
-        "faltando": 0
+        "faltando": 1
       }
     },
     {
@@ -566,7 +566,7 @@
       "id": "art_f3_upgrades",
       "listId": "F3-UP",
       "priority": "P1",
-      "status": "interim",
+      "status": "open",
       "title": "Juramentos e Sinergias T7–T12 (98 ícones F3)",
       "desc": "90 upgrades de linha (15 tiers × 6 geradores T7–T12) + 8 sinergias cruzadas Vol. I/II via pipeline Gemini → Sharp WebP.",
       "sizes": [
@@ -587,9 +587,9 @@
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 210 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
         "ilustrada": 0,
-        "vetorial": 8,
+        "vetorial": 0,
         "placeholder": 0,
-        "faltando": 0
+        "faltando": 8
       }
     },
     {
@@ -758,10 +758,10 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 84,
-        "vetorial": 345,
+        "ilustrada": 80,
+        "vetorial": 329,
         "placeholder": 24,
-        "faltando": 0
+        "faltando": 20
       }
     },
     {

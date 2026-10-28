@@ -4,27 +4,27 @@
 > Fonte de verdade de "o que está pronto": este arquivo e `npm run test:despertar`.
 > Os percentuais de `paridade-cookieclicker-despertar.md` são de design, não de entrega.
 
-## Testes
-
-**66/66** smokes passando.
-
 ## Arte por pasta
 
-Ilustrada: **141/797 (18%)** · vetorial interina: 345 · placeholder: **311** · faltando: 0
+Ilustrada: **136/666 (20%)** · vetorial interina: 329 · placeholder: **201** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `foice` | 2 | 2 | 0 | 0 | 0 |
+| `foice` | 1 | 1 | 0 | 0 | 0 |
 | `generators` | 20 | 20 | 0 | 0 | 0 |
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
 | `hud` | 13 | 13 | 0 | 0 | 0 |
 | `shimmers` | 2 | 0 | 0 | 2 | 0 |
-| `upgrades` | 453 | 84 | 345 | 24 | 0 |
-| `talents` | 239 | 0 | 0 | 239 | 0 |
+| `upgrades` | 433 | 80 | 329 | 24 | 0 |
+| `talents` | 129 | 0 | 0 | 129 | 0 |
 | `minigames` | 21 | 0 | 0 | 21 | 0 |
 | `veil` | 5 | 0 | 0 | 5 | 0 |
 | `catabase` | 7 | 2 | 0 | 5 | 0 |
 | `seasons` | 15 | 0 | 0 | 15 | 0 |
+
+Fora da conta (ícones que nenhum item usa): `upgrades` 20 · `talents` 110.
+
+Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-PENDENTE.md) (`npm run despertar:art-briefs`).
 
 Placeholders por pasta (IDs para gerar arte):
 
@@ -40,9 +40,9 @@ Placeholders por pasta (IDs para gerar arte):
 
 </details>
 
-<details><summary><code>talents</code> — 239</summary>
+<details><summary><code>talents</code> — 129</summary>
 
-`abadao` · `abismo_das_sombras` · `almas_cem_milhao` · `almas_centenas` · `almas_dezena_milhao` · `almas_milhao` · `angels` · `archangels` · `asmodeus` · `aura_gloves` · `barco_estelar_start` · `barganha_abissal` · `basic_wallpaper_assortment` · `beelzebub` · `belphegor` · `bolachas_celestes` · `box_of_brand_biscuits` · `box_of_macarons` · `box_of_maybe_cookies` · `box_of_not_cookies` · `box_of_pastries` · `calice_abissal` · `calice_da_memoria` · `calice_do_esquecimento` · `calice_dourado` · `calice_final` · `cat_ladies` · `ceifa_absoluta` · `cherubim` · `classic_dairy_selection` · `comprimidos_milkhelp` · `condensador_start` · `contabilidade_genial` · `coroa_da_margem` · `coroa_da_memoria` · `coroa_do_imperio` · `corte_do_abismo` · `cosmic_beginner_s_luck` · `cozimento_de_acucar` · `cozinha_inicial` · `decisive_fate` · `delicate_touch` · `desconto_absoluto` · `desconto_divino` · `desconto_profundo` · `diabetica_daemonicus` · `distilled_essence_of_redoubled_luck` · `distinguished_wallpaper_assortment` · `divine_bakeries` · `dominions` · `dragao_coroado` · `eco_ancestral_iii` · `eco_ancestral_iv` · `eco_ancestral_ix` · `eco_ancestral_v` · `eco_ancestral_vi` · `eco_ancestral_vii` · `eco_ancestral_viii` · `eco_ancestral_x` · `eco_da_foice_rio` · `eco_do_abismo` · `eco_do_styx` · `eco_infinito` · `eco_ressonante` · `elder_spice` · `eye_of_the_wrinkler` · `fanciful_dairy_selection` · `favor_de_caronte` · `five_finger_discount` · `foice_absoluta` · `foice_afilada_rio` · `foice_ancestral` · `foice_do_lethe` · `foice_profunda` · `foice_voraz` · `forja_despertada` · `forja_do_destino` · `forja_dupla` · `forja_imperial` · `fortune_cookies` · `frenesi_de_acucar` · `frenesi_de_nectar_talento` · `glittering_edge` · `god` · `golden_cookie_alert_sound` · `golden_switch` · `heavenly_luck` · `heralds` · `imperio_do_abismo` · `imperio_fluvial` · `inspired_checklist` · `juizes_iniciais` · `juramento_eterno` · `keepsakes` · `kit_inicial` · `kitten_angels` · `kitten_wages` · `lab_tartaro_start` · `label_printer` · `lamina_do_esquecimento` · `lamina_viva` · `lasting_fortune` · `legado` · `legado_do_rio` · `legado_profundo` · `legiao_das_umbras` · `legiao_final` · `lucifer` · `lucky_digit` · `luminous_gloves` · `luvas_de_halo` · `mamon` · `mare_inicial` · `mare_titanica` · `margem_abundante` · `margem_generosa` · `matilha_ampliada` · `matilha_cerberiana` · `matilha_imperial` · `memoria_das_sombras` · `memoria_viva` · `mercado_do_lethe` · `mnemosyne_nonupla` · `mnemosyne_octupla` · `mnemosyne_profunda` · `mnemosyne_quintupla` · `mnemosyne_raiz` · `mnemosyne_sestupla` · `mnemosyne_setupla` · `mnemosyne_tripla` · `nectar_em_reserva` · `nectar_imperial` · `noite_abissal` · `noite_do_lethe` · `noite_profunda` · `noite_prolongada` · `numero_da_sorte` · `olho_da_curva` · `ovo_primordial` · `pacto_barato` · `pacto_do_abismo` · `pacto_do_silencio` · `pagamento_da_sorte` · `permanent_slot_i` · `permanent_slot_ii` · `permanent_slot_iii` · `permanent_slot_iv` · `permanent_slot_v` · `persistent_memory` · `pet_the_dragon` · `portal_erebus_start` · `portoes_gemeos` · `preludio_ctoniano` · `preludio_eterno` · `prisma_start` · `quimera` · `raiz_da_margem` · `raiz_da_memoria` · `rebanho_despertado` · `reinforced_membrane` · `residual_luck` · `rodizio_das_estacoes` · `sacrilegious_corruption` · `satan` · `segundo_folego` · `seraphim` · `servo_das_margens` · `servos_dobrados` · `shimmering_veil` · `silencio_eterno` · `sinergias_vol_i` · `sinergias_vol_ii` · `sombra_centuria` · `sombra_mil` · `sound_test` · `starlove` · `starsnow` · `starspawn` · `starterror` · `startrade` · `steadfast_murmur` · `stevia_caelestis` · `sucralosia_inutilis` · `sugar_aging_process` · `sugar_crystal_cookies` · `tear_chronos_start` · `templo_inicial` · `tin_of_british_tea_biscuits` · `tin_of_butter_cookies` · `torre_do_styx_start` · `torrente_das_umbras` · `torrente_eterna` · `trono_do_esquecimento` · `trono_imperial` · `trono_reforcado` · `trono_sombrio` · `umbras_infinitas` · `unholy_bait` · `unshackled_alabascream` · `unshackled_alchemy_labs` · `unshackled_antimatter_condensers` · `unshackled_astrofudge` · `unshackled_banks` · `unshackled_berrylium` · `unshackled_blueberrylium` · `unshackled_buttergold` · `unshackled_chalcedhoney` · `unshackled_chancemakers` · `unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `veu_absoluto` · `veu_eficiente` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
+`abadao` · `angels` · `archangels` · `asmodeus` · `aura_gloves` · `basic_wallpaper_assortment` · `beelzebub` · `belphegor` · `bolachas_celestes` · `box_of_brand_biscuits` · `box_of_macarons` · `box_of_maybe_cookies` · `box_of_not_cookies` · `box_of_pastries` · `cat_ladies` · `cherubim` · `classic_dairy_selection` · `comprimidos_milkhelp` · `contabilidade_genial` · `cosmic_beginner_s_luck` · `cozimento_de_acucar` · `cozinha_inicial` · `decisive_fate` · `delicate_touch` · `desconto_divino` · `diabetica_daemonicus` · `distilled_essence_of_redoubled_luck` · `distinguished_wallpaper_assortment` · `divine_bakeries` · `dominions` · `elder_spice` · `eye_of_the_wrinkler` · `fanciful_dairy_selection` · `five_finger_discount` · `fortune_cookies` · `frenesi_de_acucar` · `glittering_edge` · `god` · `golden_cookie_alert_sound` · `golden_switch` · `heavenly_luck` · `heralds` · `inspired_checklist` · `keepsakes` · `kit_inicial` · `kitten_angels` · `kitten_wages` · `label_printer` · `lasting_fortune` · `legado` · `lucifer` · `lucky_digit` · `luminous_gloves` · `luvas_de_halo` · `mamon` · `numero_da_sorte` · `ovo_primordial` · `pagamento_da_sorte` · `permanent_slot_i` · `permanent_slot_ii` · `permanent_slot_iii` · `permanent_slot_iv` · `permanent_slot_v` · `persistent_memory` · `pet_the_dragon` · `portoes_gemeos` · `quimera` · `reinforced_membrane` · `residual_luck` · `rodizio_das_estacoes` · `sacrilegious_corruption` · `satan` · `seraphim` · `shimmering_veil` · `sinergias_vol_i` · `sinergias_vol_ii` · `sound_test` · `starlove` · `starsnow` · `starspawn` · `starterror` · `startrade` · `steadfast_murmur` · `stevia_caelestis` · `sucralosia_inutilis` · `sugar_aging_process` · `sugar_crystal_cookies` · `tin_of_british_tea_biscuits` · `tin_of_butter_cookies` · `unholy_bait` · `unshackled_alabascream` · `unshackled_alchemy_labs` · `unshackled_antimatter_condensers` · `unshackled_astrofudge` · `unshackled_banks` · `unshackled_berrylium` · `unshackled_blueberrylium` · `unshackled_buttergold` · `unshackled_chalcedhoney` · `unshackled_chancemakers` · `unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
 
 </details>
 
@@ -76,7 +76,7 @@ Placeholders por pasta (IDs para gerar arte):
 
 | Pedido | Status medido | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `art_foice` | delivered | 2 | 0 | 0 | 0 |
+| `art_foice` | open | 1 | 0 | 0 | 1 |
 | `art_t1` | delivered | 1 | 0 | 0 | 0 |
 | `art_t2` | delivered | 1 | 0 | 0 | 0 |
 | `art_t3` | delivered | 1 | 0 | 0 | 0 |
@@ -95,12 +95,12 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_t10` | delivered | 1 | 0 | 0 | 0 |
 | `art_t11` | delivered | 1 | 0 | 0 | 0 |
 | `art_t12` | delivered | 1 | 0 | 0 | 0 |
-| `art_f3_upgrades` | interim | 0 | 8 | 0 | 0 |
+| `art_f3_upgrades` | open | 0 | 0 | 0 | 8 |
 | `art_f5_minigames` | open | 0 | 0 | 21 | 0 |
 | `art_f4_veil_kittens` | open | 0 | 7 | 5 | 0 |
 | `art_f6_catabase_wrinklers` | open | 2 | 8 | 5 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
-| `art_f7_upgrades_late` | open | 84 | 345 | 24 | 0 |
+| `art_f7_upgrades_late` | open | 80 | 329 | 24 | 20 |
 | `art_f8_seasons_dragon_fortunes` | open | 0 | 0 | 15 | 0 |
 | `art_synergy_vol_canon` | delivered | 36 | 0 | 0 | 0 |
 | `art_mil_foices_ladder` | delivered | 12 | 0 | 0 | 0 |
