@@ -376,9 +376,12 @@ run('4. Paridade JS ≡ PHP (Stack SPS/Click com Níveis + Néctar em Reserva + 
       'syncOk' => $syncOk['ok'],
       'syncLogs' => $syncOk['next']['eduLogsSeen'] ?? [],
       'syncFutureOk' => $syncFuture['ok'],
-      'syncFutureErr' => $syncFuture['error'] ?? '',
+      'syncFutureCycle' => $syncFuture['next']['nectarCycleStartedAt'] ?? null,
+      'syncFutureCorr' => array_column($syncFuture['corrections'] ?? [], 'system'),
       'syncInfiniteOk' => $syncInfiniteNectar['ok'],
-      'syncInfiniteErr' => $syncInfiniteNectar['error'] ?? '',
+      'syncInfiniteTotal' => $syncInfiniteNectar['next']['totalNectarHarvested'] ?? null,
+      'syncInfiniteCorr' => array_column($syncInfiniteNectar['corrections'] ?? [], 'system'),
+      'dbCycle' => $dbRow['milestones']['f5Nectar']['nectarCycleStartedAt'],
       'earnedAch' => $earnedAch,
     ]);
   `;
@@ -394,11 +397,13 @@ run('4. Paridade JS ≡ PHP (Stack SPS/Click com Níveis + Néctar em Reserva + 
   assert.equal(phpOut.syncOk, true);
   assert.ok(phpOut.syncLogs.includes('log_nectar_minigames'));
 
-  // Rejeições de anti-clock-skew
-  assert.equal(phpOut.syncFutureOk, false);
-  assert.match(phpOut.syncFutureErr, /clock-skew/i);
-  assert.equal(phpOut.syncInfiniteOk, false);
-  assert.match(phpOut.syncInfiniteErr, /clock-skew/i);
+  // Anti-clock-skew sem recusa: o sync segue e o Néctar volta ao último estado bom.
+  assert.equal(phpOut.syncFutureOk, true);
+  assert.equal(phpOut.syncFutureCycle, phpOut.dbCycle, 'ciclo no futuro descartado');
+  assert.ok(phpOut.syncFutureCorr.includes('nectar'));
+  assert.equal(phpOut.syncInfiniteOk, true);
+  assert.equal(phpOut.syncInfiniteTotal, 2, '+50 Néctares em 1 h descartados');
+  assert.ok(phpOut.syncInfiniteCorr.includes('nectar'));
 
   // Conquistas F5
   const expectedF5Achievements = [

@@ -347,9 +347,11 @@ run('4. Paridade JS ≡ PHP (rawSPS, effectiveSPS, Elder Pact, Covenant) e Anti-
       'syncLegitOk' => $syncLegit['ok'],
       'syncLegitLogs' => $syncLegit['next']['eduLogsSeen'] ?? [],
       'syncTooManyOk' => $syncTooMany['ok'],
-      'syncTooManyErr' => $syncTooMany['error'] ?? '',
+      'syncTooManyLeeches' => count($syncTooMany['next']['catabase']['leeches'] ?? []),
+      'syncTooManyCorr' => array_column($syncTooMany['corrections'] ?? [], 'system'),
       'syncImpossibleOk' => $syncImpossibleDigested['ok'],
-      'syncImpossibleErr' => $syncImpossibleDigested['error'] ?? '',
+      'syncImpossibleDigested' => array_column($syncImpossibleDigested['next']['catabase']['leeches'] ?? [], 'digested'),
+      'syncImpossibleCorr' => array_column($syncImpossibleDigested['corrections'] ?? [], 'system'),
       'earnedAch' => $earnedAch,
     ]);
   `;
@@ -369,11 +371,16 @@ run('4. Paridade JS ≡ PHP (rawSPS, effectiveSPS, Elder Pact, Covenant) e Anti-
   assert.equal(phpOut.syncLegitOk, true);
   assert.ok(phpOut.syncLegitLogs.includes('log_catabase_wrinklers'));
 
-  // Rejeições anti-cheat
-  assert.equal(phpOut.syncTooManyOk, false);
-  assert.match(phpOut.syncTooManyErr, /excede a capacidade/i);
-  assert.equal(phpOut.syncImpossibleOk, false);
-  assert.match(phpOut.syncImpossibleErr, /excede o limite matemático/i);
+  // Anti-cheat sem recusa: o sync segue e a Catábase volta ao último estado bom (aqui, vazio).
+  assert.equal(phpOut.syncTooManyOk, true);
+  assert.ok(phpOut.syncTooManyLeeches <= 14, `≤ 14 Sanguessugas (${phpOut.syncTooManyLeeches})`);
+  assert.ok(phpOut.syncTooManyCorr.includes('catabase'));
+  assert.equal(phpOut.syncImpossibleOk, true);
+  assert.ok(
+    phpOut.syncImpossibleDigested.every((d) => cmp(d, '1000000000000000000000000') < 0),
+    'digestão 1e35 descartada',
+  );
+  assert.ok(phpOut.syncImpossibleCorr.includes('catabase'));
 
   // Conquistas F6
   for (const achId of [

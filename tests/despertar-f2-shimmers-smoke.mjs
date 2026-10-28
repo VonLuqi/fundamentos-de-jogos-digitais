@@ -416,11 +416,14 @@ run('4. Paridade JS ≡ PHP (Catálogo, SPS/Click/Lucky e Rejeição de buffs in
       'syncValidLogs' => $syncValid['next']['eduLogsSeen'] ?? [],
       'syncValidShimmersClicked' => $syncValid['state']['shimmersClicked'] ?? 0,
       'syncExpiredOk' => $syncExpired['ok'],
-      'syncExpiredErr' => $syncExpired['error'] ?? '',
+      'syncExpiredBuffs' => array_keys($syncExpired['next']['activeBuffs'] ?? []),
+      'syncExpiredCorr' => array_column($syncExpired['corrections'] ?? [], 'system'),
       'syncUnknownOk' => $syncUnknown['ok'],
-      'syncUnknownErr' => $syncUnknown['error'] ?? '',
+      'syncUnknownBuffs' => array_keys($syncUnknown['next']['activeBuffs'] ?? []),
+      'syncUnknownCorr' => array_column($syncUnknown['corrections'] ?? [], 'system'),
       'syncWrathBlockedOk' => $syncWrathBlocked['ok'],
-      'syncWrathBlockedErr' => $syncWrathBlocked['error'] ?? '',
+      'syncWrathBlockedBuffs' => array_keys($syncWrathBlocked['next']['activeBuffs'] ?? []),
+      'syncWrathBlockedCorr' => array_column($syncWrathBlocked['corrections'] ?? [], 'system'),
     ]);
   `;
 
@@ -454,13 +457,12 @@ run('4. Paridade JS ≡ PHP (Catálogo, SPS/Click/Lucky e Rejeição de buffs in
   assert.ok(phpOut.syncValidLogs.includes('log_shimmer_echo'));
   assert.equal(phpOut.syncValidShimmersClicked, 3);
 
-  // Sync rejeita buff expirado, ID inválido e Wrath sem Catábase
-  assert.equal(phpOut.syncExpiredOk, false);
-  assert.match(phpOut.syncExpiredErr, /expirado/i);
-  assert.equal(phpOut.syncUnknownOk, false);
-  assert.match(phpOut.syncUnknownErr, /desconhecido/i);
-  assert.equal(phpOut.syncWrathBlockedOk, false);
-  assert.match(phpOut.syncWrathBlockedErr, /Catábase/i);
+  // Buff vencido, ID inválido e Wrath sem Catábase: o sync segue, o buff é descartado.
+  for (const k of ['Expired', 'Unknown', 'WrathBlocked']) {
+    assert.equal(phpOut[`sync${k}Ok`], true, `${k}: sync não recusa`);
+    assert.deepEqual(phpOut[`sync${k}Buffs`], [], `${k}: buff não entra no estado`);
+    assert.ok(phpOut[`sync${k}Corr`].includes('buffs'), `${k}: correção registrada`);
+  }
 });
 
 // 5. UI no Santuário, A11y (prefers-reduced-motion / fancy), Object Pool, Assets e Códice

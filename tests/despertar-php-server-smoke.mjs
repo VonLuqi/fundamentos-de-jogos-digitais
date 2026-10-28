@@ -231,6 +231,105 @@ run('Juízo: aliases de escolha e ordem de classificação JS ≡ PHP', () => {
   assert.equal(out.unknownRating, false);
 });
 
+// ─── Teto suave do sync: nunca recusa, corta só o impossível ───────────────
+const CEIL_ROW = {
+  souls: '1000.00',
+  lifetime_souls: '50000.00',
+  run_souls: '50000.00',
+  generators_state: { wandering_shade: 50, charon_servants: 20, cerberian_hound: 5 },
+  upgrades_state: [],
+  last_sync_at: new Date(NOW_MS - 30_000).toISOString(),
+  stats: { shimmersClicked: 2 },
+};
+const CEIL_CLIENT = {
+  souls: '1000',
+  lifetimeSouls: '50000',
+  runSouls: '50000',
+  generators: CEIL_ROW.generators_state,
+  upgrades: [],
+  shimmersClicked: 2,
+};
+
+function syncCase(client, row = CEIL_ROW) {
+  return php(`
+    $r = DespertarService::validateSync(${phpJson(row)}, ${phpJson(client)}, $now);
+    $sps = App\\Services\\Despertar\\DespertarFormulas::calculateTotalSPS(['generators' => ${phpJson(row.generators_state)}]);
+    echo json_encode([
+      'ok' => $r['ok'], 'status' => $r['status'], 'sps' => $sps,
+      'action' => $r['ceiling']['action'] ?? null, 'limit' => $r['ceiling']['limit'] ?? null,
+      'souls' => $r['next']['souls'], 'lifetime' => $r['next']['lifetimeSouls'],
+      'generators' => $r['next']['generators'], 'clicks' => $r['next']['stats']['shimmersClicked'] ?? null,
+      'corrections' => array_column($r['corrections'], 'system'),
+      'antiCheat' => $r['next']['milestones']['antiCheat'] ?? null,
+    ]);
+  `);
+}
+
+run('Teto: jogador honesto (30 s de SPS) passa sem correção', () => {
+  const probe = syncCase(CEIL_CLIENT);
+  const gain = (Number(probe.sps) * 30).toFixed(2);
+  const out = syncCase({
+    ...CEIL_CLIENT,
+    souls: String(1000 + Number(gain)),
+    lifetimeSouls: String(50000 + Number(gain)),
+    runSouls: String(50000 + Number(gain)),
+  });
+  assert.equal(out.ok, true);
+  assert.equal(out.action, 'ok');
+  assert.deepEqual(out.corrections, []);
+  assert.equal(cmp(out.souls, String(1000 + Number(gain))), 0);
+});
+
+run('Teto: Lucky de 1 eco novo (900 s de SPS) passa', () => {
+  const probe = syncCase(CEIL_CLIENT);
+  const lucky = Number(probe.sps) * 900;
+  const out = syncCase({ ...CEIL_CLIENT, souls: String(1000 + lucky), lifetimeSouls: String(50000 + lucky), shimmersClicked: 3 });
+  assert.equal(out.ok, true);
+  assert.equal(out.action, 'ok');
+  assert.equal(out.clicks, 3);
+});
+
+run('Teto: edição absurda é cortada no limite, sem recusar', () => {
+  const out = syncCase({ ...CEIL_CLIENT, souls: '1e30', lifetimeSouls: '1e30' });
+  assert.equal(out.ok, true);
+  assert.equal(out.status, 200);
+  assert.equal(out.action, 'ganho acima do teto cortado');
+  assert.ok(cmp(out.souls, '1000000000') < 0, `almas cortadas (${out.souls})`);
+  assert.ok(cmp(out.lifetime, '1000000000') < 0, `lifetime cortado (${out.lifetime})`);
+  assert.equal(out.antiCheat.clamps, 1);
+});
+
+run('Teto: compra que nem o limite paga é desfeita', () => {
+  const out = syncCase({ ...CEIL_CLIENT, souls: '0', generators: { ...CEIL_ROW.generators_state, obsidian_throne: 1000 } });
+  assert.equal(out.ok, true);
+  assert.equal(out.action, 'compras impagáveis desfeitas');
+  assert.equal(out.generators.obsidian_throne ?? 0, 0);
+});
+
+run('Teto: venda de gerador reembolsa sem bandeira', () => {
+  const out = syncCase({ ...CEIL_CLIENT, souls: '1500', generators: { ...CEIL_ROW.generators_state, wandering_shade: 30 } });
+  assert.equal(out.ok, true);
+  assert.equal(out.action, 'ok');
+  assert.equal(out.generators.wandering_shade, 30);
+});
+
+run('Teto: ecos além das fichas não contam; lifetime não regride', () => {
+  const inflated = syncCase({ ...CEIL_CLIENT, shimmersClicked: 500 });
+  assert.equal(inflated.ok, true);
+  assert.ok(inflated.clicks <= 2 + 3, `ecos creditados ≤ fichas (${inflated.clicks})`);
+  const stale = syncCase({ ...CEIL_CLIENT, lifetimeSouls: '10', runSouls: '10' });
+  assert.equal(cmp(stale.lifetime, '50000'), 0);
+});
+
+run('Sem recusa por subsistema: buff vencido e Néctar com relógio errado', () => {
+  const buff = syncCase({ ...CEIL_CLIENT, activeBuffs: { mare_acheron: { id: 'mare_acheron', expiresAt: NOW_MS - 5 } } });
+  assert.equal(buff.ok, true);
+  assert.deepEqual(buff.corrections, ['buffs']);
+  const nectar = syncCase({ ...CEIL_CLIENT, nectarCycleStartedAt: NOW_MS + 999_999_999 });
+  assert.equal(nectar.ok, true);
+  assert.deepEqual(nectar.corrections, ['nectar']);
+});
+
 run('Toda DespertarCatalog::CONSTANTE usada no backend existe', () => {
   // Um gerador já apagou LEGACY_SYNERGY_COSTS e o PHP dava fatal em saves legados.
   const dir = path.join(root, 'backend', 'src');

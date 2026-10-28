@@ -481,9 +481,13 @@ final class DespertarService
     // -------------------------------------------------------------------------
 
     /**
+     * Gasto da janela de sync: compras de geradores/juramentos novos menos o reembolso
+     * máximo das vendas (`refundedMax`, 50% — o cliente pode ter recebido menos).
+     * Nunca falha: o teto suave do validateSync decide o que fazer com o resultado.
+     *
      * @param array<string, mixed> $db
      * @param array<string, mixed> $client
-     * @return array{ok: bool, spent?: string, biggestBuy?: int, error?: string}
+     * @return array{ok: true, spent: string, refundedMax: string, biggestBuy: int}
      */
     private static function computeSpend(array $db, array $client): array
     {
@@ -495,6 +499,7 @@ final class DespertarService
         }
 
         $spent = '0';
+        $refundedMax = '0';
         $biggestBuy = 0;
 
         foreach (DespertarCatalog::GENERATORS as $def) {
@@ -502,7 +507,12 @@ final class DespertarService
             $from = (int) ($db['generators'][$id] ?? 0);
             $to = (int) ($client['generators'][$id] ?? 0);
             if ($to < $from) {
-                return ['ok' => false, 'error' => 'Quantidade de gerador não pode cair no sync.'];
+                $soldValue = DespertarFormulas::generatorBatchCost($def['baseCost'], $to, $from - $to, $costMult);
+                $refundedMax = DespertarDecimal::add(
+                    $refundedMax,
+                    DespertarDecimal::mul($soldValue, DespertarCatalog::SYNC_SELL_REFUND_MAX)
+                );
+                continue;
             }
             $delta = $to - $from;
             if ($delta > 0) {
@@ -516,52 +526,32 @@ final class DespertarService
             }
         }
 
+        // Juramentos novos: cobra o custo base (requisito/descontos ficam com o cliente — 733a62d).
         $dbUpgradesSet = array_flip($db['upgrades']);
         $upById = DespertarCatalog::upgradesById();
         foreach ($client['upgrades'] as $id) {
-            if (isset($dbUpgradesSet[$id])) {
+            if (isset($dbUpgradesSet[$id]) || !isset($upById[$id])) {
                 continue;
             }
-            $upgrade = $upById[$id] ?? null;
-            if (!$upgrade) {
-                return ['ok' => false, 'error' => "Juramento desconhecido: {$id}"];
-            }
-            $clientCatabase = is_array($client['catabase'] ?? null)
-                ? $client['catabase']
-                : (is_array($client['milestones']['f6Catabase'] ?? null) ? $client['milestones']['f6Catabase'] : []);
-            if (!DespertarFormulas::meetsUpgradeRequirement($upgrade, [
-                'souls' => $client['souls'],
-                'generators' => $client['generators'],
-                'upgrades' => $client['upgrades'],
-                'talents' => $client['talents'] ?? $db['talents'] ?? [],
-                'catabase' => $clientCatabase,
-                'unlockedResearchIds' => is_array($clientCatabase['unlockedResearchIds'] ?? null)
-                    ? $clientCatabase['unlockedResearchIds']
-                    : [],
-                'dragon' => is_array($client['dragon'] ?? null) ? $client['dragon'] : [],
-                'seasons' => is_array($client['seasons'] ?? null) ? $client['seasons'] : [],
-                'fortunes' => is_array($client['fortunes'] ?? null) ? $client['fortunes'] : [],
-                'achievements' => $client['achievements'] ?? $db['achievements'] ?? [],
-            ])) {
-                return ['ok' => false, 'error' => "Juramento sem requisito: {$id}"];
-            }
-            $spent = DespertarDecimal::add($spent, $upgrade['cost']);
+            $spent = DespertarDecimal::add($spent, $upById[$id]['cost']);
         }
 
-        $clientUpgradesSet = array_flip($client['upgrades']);
-        foreach ($db['upgrades'] as $id) {
-            if (!isset($clientUpgradesSet[$id])) {
-                return ['ok' => false, 'error' => 'Juramento não pode ser removido no sync.'];
-            }
-        }
-
-        return ['ok' => true, 'spent' => DespertarDecimal::money($spent), 'biggestBuy' => $biggestBuy];
+        return [
+            'ok' => true,
+            'spent' => DespertarDecimal::money($spent),
+            'refundedMax' => DespertarDecimal::money($refundedMax),
+            'biggestBuy' => $biggestBuy,
+        ];
     }
 
     /**
-     * Sync econômico: confia no cliente (fluidez Cookie Clicker).
-     * Sanitiza IDs/contagens; não rejeita por maxGain / Estela antiga / spend.
-     * Anti-cheat de ganho propositalmente fraco — pedido explícito da turma.
+     * Sync econômico sem recusa (fluidez Cookie Clicker — pedido da turma em 733a62d).
+     * Só um payload que não é objeto devolve 400. O resto é saneado:
+     * - IDs/contagens fora do catálogo somem; buffs inválidos/vencidos são descartados;
+     * - subsistema inválido (Néctar, Dragão, Véu, Catábase) volta ao último estado bom
+     *   (listado em `corrections`), sem derrubar o resto do sync;
+     * - teto suave de ganho (applySoftGainCeiling): acima do teto só marca bandeira;
+     *   acima de teto × SAFETY corta o excesso e desfaz compras impagáveis.
      *
      * @param array<string, mixed> $dbRow
      * @return array<string, mixed>
@@ -639,10 +629,7 @@ final class DespertarService
         $client['shinyCounts'] = $shinyRes['shinyCounts'] ?? [];
 
         $spend = self::computeSpend($db, $client);
-        if (!$spend['ok']) {
-            // Trust client mesmo se a reconciliação de gasto falhar (qty caiu, etc.)
-            $spend = ['ok' => true, 'spent' => '0.00', 'biggestBuy' => 0];
-        }
+        $corrections = [];
 
         $eduSet = array_flip(DespertarCatalog::EDU_LOG_IDS);
         $seenLogs = array_flip(array_filter($db['eduLogsSeen'], static fn(string $id): bool => isset($eduSet[$id])));
@@ -698,26 +685,35 @@ final class DespertarService
         );
         $rawActiveBuffs = $clientState['activeBuffs'] ?? $clientState['active_buffs'] ?? null;
         $buffRes = DespertarFormulas::validateActiveBuffs($rawActiveBuffs, $nowMs, $catabaseActive);
-        if (!$buffRes['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => $buffRes['error'] ?? 'Buffs de Eco inválidos.',
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
-        }
         $validatedBuffs = $buffRes['activeBuffs'] ?? [];
-
-        // Fase F5: Validação autoritativa de Néctar, níveis de geradores e minigames (anti-clock-skew)
-        $f5Res = DespertarFormulas::validateNectarAndMinigames($db, $clientState, $nowMs);
-        if (!$f5Res['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => $f5Res['error'] ?? 'Estado de Néctar ou minigames inválido.',
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
+        if (($buffRes['dropped'] ?? []) !== []) {
+            $corrections[] = ['system' => 'buffs', 'reason' => 'Buffs inválidos ou vencidos descartados: ' . implode(', ', $buffRes['dropped'])];
         }
+
+        // Fase F5: Néctar, níveis de geradores e minigames (anti-clock-skew) — inválido volta ao último estado bom.
+        $f5Res = self::softValidate(
+            'nectar',
+            static fn(array $cs): array => DespertarFormulas::validateNectarAndMinigames($db, $cs, $nowMs),
+            $clientState,
+            $db,
+            ['nectarMeta', 'generatorLevels', 'generator_levels', 'nectar', 'totalNectarHarvested', 'nectarCycleStartedAt', 'nectarCurrentVariant', 'nectarFrenzyUsedThisRun', 'minigames'],
+            ['f5Nectar', 'f5Minigames'],
+            static function () use ($db): array {
+                $ms = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+                $n = is_array($ms['f5Nectar'] ?? null) ? $ms['f5Nectar'] : [];
+                return [
+                    'ok' => true,
+                    'nectar' => (int) ($n['nectar'] ?? 0),
+                    'totalNectarHarvested' => (int) ($n['totalNectarHarvested'] ?? 0),
+                    'nectarCycleStartedAt' => $n['nectarCycleStartedAt'] ?? null,
+                    'nectarCurrentVariant' => (string) ($n['nectarCurrentVariant'] ?? 'nectar_normal'),
+                    'nectarFrenzyUsedThisRun' => !empty($n['nectarFrenzyUsedThisRun']),
+                    'generatorLevels' => is_array($n['generatorLevels'] ?? null) ? $n['generatorLevels'] : [],
+                    'minigames' => is_array($ms['f5Minigames'] ?? null) ? $ms['f5Minigames'] : [],
+                ];
+            },
+            $corrections
+        );
         $mergedMilestones['f5Nectar'] = [
             'nectar' => $f5Res['nectar'],
             'totalNectarHarvested' => $f5Res['totalNectarHarvested'],
@@ -816,16 +812,33 @@ final class DespertarService
             'lastSyncAt' => $nowIso,
         ]);
 
-        // Fase F8: Validação autoritativa de Dragão Ctoniano, 4 Estações e Fortunas de Hermes
-        $f8Res = DespertarFormulas::validateDragonSeasonsFortunes($db, $clientState, $next, $nowMs);
-        if (!$f8Res['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => $f8Res['error'] ?? 'Estado de Dragão, Estações ou Fortunas inválido.',
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
+        // Teto suave antes de Véu/conquistas: lifetime inflado não pode liberar conquista.
+        $ceiling = self::applySoftGainCeiling($db, $next, $spend, $nowMs, $catabaseActive, $validatedBuffs);
+        $next = $ceiling['next'];
+        if ($ceiling['report']['action'] !== 'ok') {
+            $corrections[] = ['system' => 'almas', 'reason' => $ceiling['report']['action']];
         }
+
+        // Fase F8: Validação autoritativa de Dragão Ctoniano, 4 Estações e Fortunas de Hermes
+        $f8Res = self::softValidate(
+            'dragao',
+            static fn(array $cs): array => DespertarFormulas::validateDragonSeasonsFortunes($db, $cs, $next, $nowMs),
+            $clientState,
+            $db,
+            ['dragon', 'seasons', 'fortunes', 'generatorsSold'],
+            ['f8Dragon', 'f8Seasons', 'f8Fortunes'],
+            static function () use ($db): array {
+                $ms = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+                return [
+                    'ok' => true,
+                    'dragon' => is_array($ms['f8Dragon'] ?? null) ? $ms['f8Dragon'] : [],
+                    'seasons' => is_array($ms['f8Seasons'] ?? null) ? $ms['f8Seasons'] : [],
+                    'fortunes' => is_array($ms['f8Fortunes'] ?? null) ? $ms['f8Fortunes'] : [],
+                    'generatorsSold' => (int) ($db['stats']['generatorsSold'] ?? 0),
+                ];
+            },
+            $corrections
+        );
         $next['dragon'] = $f8Res['dragon'];
         $next['seasons'] = $f8Res['seasons'];
         $next['fortunes'] = $f8Res['fortunes'];
@@ -839,28 +852,48 @@ final class DespertarService
         }
 
         // Fase F4: Validação autoritativa de Conquistas, Véu e requisitos dos Filhotes do Cérbero
-        $f4Res = DespertarFormulas::validateVeilAndKittens($db, $clientState, $next, $baseAchievements);
-        if (!$f4Res['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => $f4Res['error'] ?? 'Estado de Véu ou Filhotes inválido.',
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
+        $f4Res = self::softValidate(
+            'veu',
+            static fn(array $cs): array => DespertarFormulas::validateVeilAndKittens($db, $cs, $next, $baseAchievements),
+            $clientState,
+            $db,
+            ['achievements', 'unlockedAchievements'],
+            [],
+            static fn(): array => ['ok' => true, 'achievements' => $baseAchievements],
+            $corrections
+        );
+        $blockedKittens = $f4Res['blockedUpgrades'] ?? [];
+        if ($blockedKittens !== []) {
+            $blockedSet = array_flip($blockedKittens);
+            $next['upgrades'] = array_values(array_filter(
+                $next['upgrades'],
+                static fn(string $id): bool => !isset($blockedSet[$id])
+            ));
+            $corrections[] = ['system' => 'veu', 'reason' => 'Filhotes sem Véu suficiente retirados: ' . implode(', ', $blockedKittens)];
         }
         $next['achievements'] = $f4Res['achievements'] ?? $baseAchievements;
         $echoOpts['achievements'] = $next['achievements'];
 
         // Fase F6: Validação autoritativa da Catábase das Avós e das Sanguessugas do Acheron
-        $f6Res = DespertarFormulas::validateCatabaseAndLeeches($db, $clientState, $next, $nowMs);
-        if (!$f6Res['ok']) {
-            return $withEcho([
-                'ok' => false,
-                'status' => 400,
-                'error' => $f6Res['error'] ?? 'Estado da Catábase ou Sanguessugas inválido.',
-                'state' => self::buildStateDto($db, $echoOpts),
-            ]);
-        }
+        $f6Res = self::softValidate(
+            'catabase',
+            static fn(array $cs): array => DespertarFormulas::validateCatabaseAndLeeches($db, $cs, $next, $nowMs),
+            $clientState,
+            $db,
+            ['catabase', 'catabaseActive', 'leechesPopped', 'shinyLeechesPopped'],
+            ['f6Catabase', 'catabaseActive'],
+            static function () use ($db): array {
+                $ms = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+                return [
+                    'ok' => true,
+                    'catabase' => is_array($ms['f6Catabase'] ?? null) ? $ms['f6Catabase'] : [],
+                    'catabaseActive' => !empty($ms['catabaseActive']),
+                    'leechesPopped' => (int) ($db['stats']['leechesPopped'] ?? 0),
+                    'shinyLeechesPopped' => (int) ($db['stats']['shinyLeechesPopped'] ?? 0),
+                ];
+            },
+            $corrections
+        );
         $next['catabase'] = $f6Res['catabase'];
         $next['catabaseActive'] = $f6Res['catabaseActive'];
         $next['leechesPopped'] = $f6Res['leechesPopped'];
@@ -888,7 +921,274 @@ final class DespertarService
             'state' => self::buildStateDto($next, $echoOpts),
             'patch' => self::canonicalToRowPatch($next, $nowIso),
             'next' => $next,
+            'corrections' => $corrections,
+            'ceiling' => $ceiling['report'],
         ]);
+    }
+
+    /**
+     * Roda o validador de um subsistema; se recusar, repete com o estado salvo daquele
+     * subsistema no lugar do que o cliente mandou; se ainda falhar, usa $fallback (DB puro).
+     * Nunca devolve ok=false — o sync segue e a correção fica registrada.
+     *
+     * @param callable(array<string, mixed>): array<string, mixed> $validate
+     * @param array<string, mixed> $clientState
+     * @param array<string, mixed> $db
+     * @param array<int, string> $clientKeys chaves top-level do subsistema no payload
+     * @param array<int, string> $milestoneKeys sub-árvores de milestones do subsistema
+     * @param callable(): array<string, mixed> $fallback
+     * @param array<int, array{system: string, reason: string}> $corrections
+     * @return array<string, mixed>
+     */
+    private static function softValidate(
+        string $system,
+        callable $validate,
+        array $clientState,
+        array $db,
+        array $clientKeys,
+        array $milestoneKeys,
+        callable $fallback,
+        array &$corrections
+    ): array {
+        $res = $validate($clientState);
+        if (!empty($res['ok'])) {
+            return $res;
+        }
+        $corrections[] = ['system' => $system, 'reason' => (string) ($res['error'] ?? 'estado inválido')];
+
+        $withDb = $clientState;
+        foreach ($clientKeys as $key) {
+            unset($withDb[$key]);
+        }
+        $clientMs = is_array($withDb['milestones'] ?? null) ? $withDb['milestones'] : [];
+        $dbMs = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+        foreach ($milestoneKeys as $key) {
+            if (array_key_exists($key, $dbMs)) {
+                $clientMs[$key] = $dbMs[$key];
+            } else {
+                unset($clientMs[$key]);
+            }
+        }
+        $withDb['milestones'] = $clientMs;
+
+        $retry = $validate($withDb);
+        return !empty($retry['ok']) ? $retry : $fallback();
+    }
+
+    /**
+     * Opções de SPS a partir de um estado canônico; subsistemas ainda não validados
+     * nesta janela vêm do último estado bom (milestones do DB).
+     *
+     * @param array<string, mixed> $state
+     * @param array<string, mixed> $dbMilestones
+     * @return array<string, mixed>
+     */
+    private static function ceilingSpsOpts(array $state, array $dbMilestones): array
+    {
+        $nectarMeta = is_array($dbMilestones['f5Nectar'] ?? null) ? $dbMilestones['f5Nectar'] : [];
+        return [
+            'generators' => $state['generators'] ?? [],
+            'upgrades' => $state['upgrades'] ?? [],
+            'talents' => $state['talents'] ?? [],
+            'obols' => $state['obols'] ?? '0',
+            'verdictPurchases' => $state['verdictPurchases'] ?? [],
+            'shinyCounts' => $state['shinyCounts'] ?? [],
+            'goldCounts' => $state['goldCounts'] ?? [],
+            'generatorLevels' => $state['generatorLevels'] ?? ($nectarMeta['generatorLevels'] ?? []),
+            'minigames' => $state['minigames'] ?? ($dbMilestones['f5Minigames'] ?? []),
+            'nectar' => $state['nectar'] ?? ($nectarMeta['nectar'] ?? 0),
+            'dragon' => is_array($dbMilestones['f8Dragon'] ?? null) ? $dbMilestones['f8Dragon'] : [],
+            'seasons' => is_array($dbMilestones['f8Seasons'] ?? null) ? $dbMilestones['f8Seasons'] : [],
+            'catabase' => is_array($dbMilestones['f6Catabase'] ?? null) ? $dbMilestones['f6Catabase'] : [],
+            'achievements' => $state['achievements'] ?? [],
+        ];
+    }
+
+    /**
+     * Teto suave de ganho do sync. Nunca recusa:
+     * - ganho ≤ teto: segue;
+     * - teto < ganho ≤ teto × SAFETY: segue e marca bandeira (milestones.antiCheat.flags);
+     * - ganho > teto × SAFETY: corta almas/runSouls/lifetimeSouls no limite e desfaz compras
+     *   que nem o limite pagaria (milestones.antiCheat.clamps).
+     * Ecos clicados além das fichas não contam (stats.shimmersClicked fica no creditado).
+     *
+     * @param array<string, mixed> $db
+     * @param array<string, mixed> $next
+     * @param array{spent: string, refundedMax: string} $spend
+     * @param array<string, array<string, mixed>> $activeBuffs
+     * @return array{next: array<string, mixed>, report: array<string, mixed>}
+     */
+    private static function applySoftGainCeiling(
+        array $db,
+        array $next,
+        array $spend,
+        int $nowMs,
+        bool $catabaseActive,
+        array $activeBuffs
+    ): array {
+        $dbMs = is_array($db['milestones'] ?? null) ? $db['milestones'] : [];
+        $prevAc = is_array($dbMs['antiCheat'] ?? null) ? $dbMs['antiCheat'] : [];
+
+        $lastMs = !empty($db['lastSyncAt']) ? Database::parseMs((string) $db['lastSyncAt']) : null;
+        $dtSec = $lastMs !== null
+            ? max(0.0, ($nowMs - $lastMs) / 1000.0)
+            : (float) DespertarCatalog::SYNC_FALLBACK_WINDOW_SEC;
+
+        // Ecos clicados e feitiços lançados na janela (o cliente declara; as fichas limitam).
+        $dbClicks = (int) ($db['stats']['shimmersClicked'] ?? 0);
+        $claimedClicks = max(0, (int) ($next['stats']['shimmersClicked'] ?? 0) - $dbClicks);
+        $dbSpells = (int) ($dbMs['f5Minigames']['grimoire']['spellsCast'] ?? 0);
+        $claimedSpells = max(0, (int) ($next['minigames']['grimoire']['spellsCast'] ?? 0) - $dbSpells);
+        $bucket = DespertarFormulas::syncBonusBucket($prevAc, $dtSec, $claimedClicks, $claimedSpells, $catabaseActive);
+        if ($claimedClicks > $bucket['shimmersCredited']) {
+            $next['stats']['shimmersClicked'] = $dbClicks + $bucket['shimmersCredited'];
+        }
+
+        // Buffs ativos no fim da janela valem para a janela inteira (estimativa generosa).
+        $carriedSps = '1';
+        $carriedClick = '1';
+        foreach ($activeBuffs as $buff) {
+            $mult = DespertarDecimal::decimalString($buff['mult'] ?? '1', '1');
+            if (DespertarDecimal::cmp($mult, '1') <= 0) {
+                continue;
+            }
+            if (($buff['kind'] ?? '') === 'clickBuff') {
+                $carriedClick = DespertarDecimal::mul($carriedClick, $mult);
+            } else {
+                $carriedSps = DespertarDecimal::mul($carriedSps, $mult);
+            }
+        }
+
+        $leechDigested = '0';
+        foreach ((array) ($dbMs['f6Catabase']['leeches'] ?? []) as $leech) {
+            if (is_array($leech)) {
+                $leechDigested = DespertarDecimal::add($leechDigested, DespertarDecimal::decimalString($leech['digested'] ?? '0', '0'));
+            }
+        }
+
+        $marketSec = '0';
+        $dbGoods = (array) ($dbMs['f5Minigames']['market']['goods'] ?? []);
+        $nextGoods = (array) ($next['minigames']['market']['goods'] ?? []);
+        foreach (array_unique(array_merge(array_keys($dbGoods), array_keys($nextGoods))) as $goodId) {
+            $a = is_array($dbGoods[$goodId] ?? null) ? $dbGoods[$goodId] : [];
+            $b = is_array($nextGoods[$goodId] ?? null) ? $nextGoods[$goodId] : [];
+            $stock = max((int) ($a['stock'] ?? 0), (int) ($b['stock'] ?? 0));
+            $price = max((float) ($a['price'] ?? 0), (float) ($b['price'] ?? 0));
+            if ($stock > 0 && $price > 0) {
+                $marketSec = DespertarDecimal::add($marketSec, DespertarDecimal::mul((string) $stock, number_format($price, 2, '.', '')));
+            }
+        }
+
+        $allowanceFor = static function (array $state) use ($dbMs, $dtSec, $carriedSps, $carriedClick, $catabaseActive, $leechDigested, $marketSec, $bucket): array {
+            $opts = self::ceilingSpsOpts($state, $dbMs);
+            $sps = DespertarFormulas::calculateTotalSPS($opts);
+            $click = DespertarFormulas::clickPower($opts + ['sps' => $sps]);
+            $window = DespertarFormulas::syncWindowAllowance([
+                'sps' => $sps,
+                'clickPower' => $click,
+                'dtSec' => $dtSec,
+                'carriedSpsMult' => $carriedSps,
+                'carriedClickMult' => $carriedClick,
+                'catabaseActive' => $catabaseActive,
+                'leechDigested' => $leechDigested,
+                'marketSpsSeconds' => $marketSec,
+            ]);
+            $bonus = DespertarDecimal::add(
+                DespertarDecimal::mul($window['spsUnit'], number_format($bucket['bonusSpsSec'], 3, '.', '')),
+                DespertarDecimal::mul($window['clickUnit'], number_format($bucket['bonusClickSec'], 3, '.', ''))
+            );
+            return ['base' => $window['base'], 'bonus' => $bonus, 'ceiling' => DespertarDecimal::add($window['base'], $bonus)];
+        };
+
+        $safety = DespertarCatalog::SYNC_CEILING_SAFETY;
+        $netSpend = DespertarDecimal::sub($spend['spent'] ?? '0', $spend['refundedMax'] ?? '0');
+        $dbSouls = DespertarDecimal::decimalString($db['souls'] ?? '0');
+
+        // Compras: só valem se o limite com o SPS de antes da janela as pagaria.
+        $atDb = $allowanceFor($db);
+        $purchasesReverted = false;
+        if (DespertarDecimal::cmp($netSpend, DespertarDecimal::add($dbSouls, DespertarDecimal::mul($atDb['ceiling'], $safety))) > 0) {
+            $next['generators'] = $db['generators'];
+            $next['shinyCounts'] = $db['shinyCounts'];
+            $next['goldCounts'] = $db['goldCounts'];
+            $next['upgrades'] = $db['upgrades'];
+            $netSpend = '0';
+            $purchasesReverted = true;
+        }
+        $atNext = $purchasesReverted ? $atDb : $allowanceFor($next);
+        $allowance = DespertarDecimal::cmp($atNext['ceiling'], $atDb['ceiling']) >= 0 ? $atNext : $atDb;
+        $ceiling = $allowance['ceiling'];
+        $limit = DespertarDecimal::mul($ceiling, $safety);
+
+        $earned = DespertarDecimal::add(DespertarDecimal::sub(DespertarDecimal::decimalString($next['souls'] ?? '0'), $dbSouls), $netSpend);
+        $action = $purchasesReverted ? 'compras impagáveis desfeitas' : 'ok';
+        $clamped = '0';
+        if (DespertarDecimal::cmp($earned, $limit) > 0) {
+            $clamped = DespertarDecimal::sub($earned, $limit);
+            $capped = DespertarDecimal::sub(DespertarDecimal::add($dbSouls, $limit), $netSpend);
+            $next['souls'] = DespertarDecimal::money(DespertarDecimal::cmp($capped, '0') > 0 ? $capped : '0');
+            $earned = $limit;
+            $action = 'ganho acima do teto cortado';
+        } elseif (DespertarDecimal::cmp($earned, $ceiling) > 0 && $action === 'ok') {
+            $action = 'flag';
+        }
+
+        // Contadores de corrida/vida: monótonos e com o mesmo limite.
+        foreach (['lifetimeSouls', 'runSouls'] as $key) {
+            $before = DespertarDecimal::decimalString($db[$key] ?? '0');
+            $after = DespertarDecimal::decimalString($next[$key] ?? '0');
+            if (DespertarDecimal::cmp($after, $before) < 0) {
+                $after = $before;
+            }
+            if (DespertarDecimal::cmp(DespertarDecimal::sub($after, $before), $limit) > 0) {
+                $after = DespertarDecimal::add($before, $limit);
+                if ($action === 'ok' || $action === 'flag') {
+                    $action = 'ganho acima do teto cortado';
+                }
+            }
+            $next[$key] = DespertarDecimal::money($after);
+        }
+
+        // Consome do balde a parte do ganho que passou da base da janela.
+        $bonusSps = $bucket['bonusSpsSec'];
+        $bonusClick = $bucket['bonusClickSec'];
+        $bonusValue = (float) $allowance['bonus'];
+        if ($bonusValue > 0) {
+            $used = max(0.0, (float) $earned - (float) $allowance['base']);
+            $ratio = min(1.0, $used / $bonusValue);
+            $bonusSps *= (1 - $ratio);
+            $bonusClick *= (1 - $ratio);
+        }
+
+        $isClamp = $action === 'ganho acima do teto cortado' || $purchasesReverted;
+        $ac = [
+            'shimmerTokens' => round($bucket['shimmerTokens'], 3),
+            'spellTokens' => round($bucket['spellTokens'], 3),
+            'bonusSpsSec' => round($bonusSps, 3),
+            'bonusClickSec' => round($bonusClick, 3),
+            'flags' => (int) ($prevAc['flags'] ?? 0) + ($action === 'flag' ? 1 : 0),
+            'clamps' => (int) ($prevAc['clamps'] ?? 0) + ($isClamp ? 1 : 0),
+            'clampedSouls' => DespertarDecimal::money(DespertarDecimal::add(
+                DespertarDecimal::decimalString($prevAc['clampedSouls'] ?? '0'),
+                $clamped
+            )),
+            'lastFlagAt' => $action === 'flag' ? $nowMs : ($prevAc['lastFlagAt'] ?? null),
+            'lastClampAt' => $isClamp ? $nowMs : ($prevAc['lastClampAt'] ?? null),
+        ];
+        // Sobrescreve qualquer milestones.antiCheat vindo do cliente.
+        $next['milestones']['antiCheat'] = $ac;
+
+        return [
+            'next' => $next,
+            'report' => [
+                'action' => $action,
+                'ceiling' => $ceiling,
+                'limit' => $limit,
+                'earned' => DespertarDecimal::money($earned),
+                'clamped' => DespertarDecimal::money($clamped),
+                'shimmersCredited' => $bucket['shimmersCredited'],
+            ],
+        ];
     }
 
     /**

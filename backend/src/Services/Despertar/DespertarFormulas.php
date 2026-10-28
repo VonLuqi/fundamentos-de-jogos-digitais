@@ -1350,51 +1350,45 @@ final class DespertarFormulas
     }
 
     /**
-     * Valida e sanitiza `activeBuffs` autoritativamente no servidor:
-     * - Rejeita IDs de buff desconhecidos ou não-buff
-     * - Rejeita buffs Wrath (`requiresCatabase: true`) quando Catábase está inativa
-     * - Rejeita buffs com `expiresAt` expirado ou inválido
-     * - Aplica cap de sobreposição (`SHIMMER_MAX_ACTIVE_BUFFS`)
+     * Sanitiza `activeBuffs` no servidor sem nunca derrubar o sync: entradas inválidas
+     * (ID desconhecido/instantâneo, Colérico sem Catábase, expiresAt ausente ou já vencido
+     * — ex.: buff que acabou durante o RTT) são descartadas e listadas em `dropped`.
+     * Aplica cap de sobreposição (`SHIMMER_MAX_ACTIVE_BUFFS`).
      *
-     * @return array{ok: bool, activeBuffs?: array<string, array<string, mixed>>, error?: string}
+     * @return array{ok: true, activeBuffs: array<string, array<string, mixed>>, dropped: array<int, string>}
      */
     public static function validateActiveBuffs(mixed $rawBuffs, int $nowMs, bool $catabaseActive = false): array
     {
-        if ($rawBuffs === null || $rawBuffs === [] || $rawBuffs === '') {
-            return ['ok' => true, 'activeBuffs' => []];
-        }
-        if (!is_array($rawBuffs)) {
-            return ['ok' => false, 'error' => 'Formato de activeBuffs inválido.'];
+        if ($rawBuffs === null || $rawBuffs === [] || $rawBuffs === '' || !is_array($rawBuffs)) {
+            return ['ok' => true, 'activeBuffs' => [], 'dropped' => []];
         }
 
         $shimmersById = DespertarCatalog::shimmersById();
         $valid = [];
         $seen = [];
+        $dropped = [];
 
         foreach ($rawBuffs as $key => $val) {
             if (!is_array($val)) {
-                return ['ok' => false, 'error' => 'Entrada de buff inválida.'];
+                $dropped[] = (string) $key;
+                continue;
             }
             $id = (string) ($val['id'] ?? (is_string($key) ? $key : ''));
-            if ($id === '' || !isset($shimmersById[$id])) {
-                return ['ok' => false, 'error' => "Buff de Eco desconhecido: {$id}"];
-            }
-            $def = $shimmersById[$id];
+            $def = $shimmersById[$id] ?? null;
             $kind = (string) ($def['kind'] ?? '');
-            if ($kind !== 'spsBuff' && $kind !== 'clickBuff' && $kind !== 'buildingSpecial') {
-                return ['ok' => false, 'error' => "Efeito instantâneo não pode permanecer como buff ativo: {$id}"];
-            }
-            if (!empty($def['requiresCatabase']) && !$catabaseActive) {
-                return ['ok' => false, 'error' => "Buff Colérico exige Catábase ativa: {$id}"];
-            }
-
-            if (!isset($val['expiresAt']) || !is_numeric($val['expiresAt'])) {
-                return ['ok' => false, 'error' => "Timestamp expiresAt ausente ou inválido em {$id}"];
+            $isBuff = $kind === 'spsBuff' || $kind === 'clickBuff' || $kind === 'buildingSpecial';
+            if (
+                $def === null
+                || !$isBuff
+                || (!empty($def['requiresCatabase']) && !$catabaseActive)
+                || !isset($val['expiresAt'])
+                || !is_numeric($val['expiresAt'])
+                || (int) floor((float) $val['expiresAt']) <= $nowMs
+            ) {
+                $dropped[] = $id;
+                continue;
             }
             $expiresAt = (int) floor((float) $val['expiresAt']);
-            if ($expiresAt <= $nowMs) {
-                return ['ok' => false, 'error' => "Buff de Eco já expirado: {$id}"];
-            }
 
             $durationSec = (int) ($def['durationSec'] ?? 0);
             $maxDurationMs = ($durationSec * 1000) + DespertarCatalog::SHIMMER_SYNC_TOLERANCE_MS;
@@ -1442,7 +1436,7 @@ final class DespertarFormulas
             $out[$b['id']] = $b;
         }
 
-        return ['ok' => true, 'activeBuffs' => $out];
+        return ['ok' => true, 'activeBuffs' => $out, 'dropped' => $dropped];
     }
 
     /**
@@ -1777,24 +1771,15 @@ final class DespertarFormulas
         $authoritative = array_values(array_unique(array_merge($baseUnlocked, $earnedNow)));
         $authSet = array_flip($authoritative);
 
-        // Cliente pode mandar lista explícita. IDs Despertar órfãos (ex.: despertar_catabase
-        // após ZERAR com prestigeCount 0) são ignorados — não derrubam o sync inteiro.
+        // A lista do cliente nunca entra: o resultado é $authoritative (perfil ∪ ganho agora).
+        // Desconhecidas, não autorizadas ou órfãs (ZERAR / sync atrasado) são só ignoradas.
         $rawClientAch = $clientState['achievements'] ?? $clientState['unlockedAchievements'] ?? null;
-        if ($rawClientAch !== null) {
-            if (!is_array($rawClientAch)) {
-                return ['ok' => false, 'error' => 'Formato de achievements inválido no sync.'];
-            }
+        $ignoredAchievements = [];
+        if (is_array($rawClientAch)) {
             foreach ($rawClientAch as $rawId) {
                 $cid = (string) $rawId;
-                if ($cid === '' || !isset($knownMap[$cid])) {
-                    return ['ok' => false, 'error' => "Conquista desconhecida ou inválida no sync: {$cid}"];
-                }
-                if (isset($despertarSet[$cid]) && !isset($authSet[$cid])) {
-                    // Stale local (ZERAR / sync atrasado): strip silencioso.
-                    continue;
-                }
-                if (!isset($despertarSet[$cid]) && !isset($baseSet[$cid])) {
-                    return ['ok' => false, 'error' => "Conquista de plataforma não autorizada no perfil: {$cid}"];
+                if (!isset($authSet[$cid])) {
+                    $ignoredAchievements[] = $cid;
                 }
             }
         }
@@ -1802,7 +1787,9 @@ final class DespertarFormulas
         $veilPct = self::veilPercent($authoritative);
         $veilFrac = self::veilFraction($authoritative);
 
-        // Verificar se algum upgrade Filhote do Cérbero (`veilMult` / `kittenMult`) foi enviado sem o Véu exigido
+        // Filhote do Cérbero (`veilMult` / `kittenMult`) novo sem o Véu exigido: listado em
+        // blockedUpgrades para o sync retirar só ele (sem derrubar o resto).
+        $blockedUpgrades = [];
         $dbUpgradesSet = array_flip(array_map('strval', is_array($dbCanonical['upgrades'] ?? null) ? $dbCanonical['upgrades'] : []));
         $upById = DespertarCatalog::upgradesById();
         foreach (($nextCanonical['upgrades'] ?? []) as $uidRaw) {
@@ -1820,10 +1807,7 @@ final class DespertarFormulas
             }
             $minVeil = (int) ($def['requires']['minVeilPercent'] ?? 0);
             if ($veilPct < $minVeil) {
-                return [
-                    'ok' => false,
-                    'error' => "Véu insuficiente ({$veilPct}%) para selar {$uid} (exige {$minVeil}% de Véu).",
-                ];
+                $blockedUpgrades[] = $uid;
             }
         }
 
@@ -1832,6 +1816,8 @@ final class DespertarFormulas
             'achievements' => $authoritative,
             'veilPercent' => $veilPct,
             'veilFraction' => $veilFrac,
+            'blockedUpgrades' => $blockedUpgrades,
+            'ignoredAchievements' => $ignoredAchievements,
         ];
     }
 
@@ -2804,6 +2790,126 @@ final class DespertarFormulas
             DespertarDecimal::add($fromSps, $fromClicks),
             DespertarCatalog::SYNC_GAIN_TOLERANCE
         );
+    }
+
+    /**
+     * Segundos de SPS que um eco creditado pode render (melhor efeito possível, com combos).
+     */
+    public static function syncShimmerBonusSec(bool $catabaseActive): float
+    {
+        return max(
+            (float) DespertarCatalog::SYNC_WINDFALL_SPS_SEC,
+            ((float) DespertarCatalog::SHIMMER_FRENZY_MULT - 1) * DespertarCatalog::SHIMMER_FRENZY_DURATION_SEC,
+            ((float) DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT - 1)
+                * DespertarCatalog::SHIMMER_BUILDING_SPECIAL_DURATION_SEC
+                * (float) DespertarCatalog::SHIMMER_FRENZY_MULT,
+            $catabaseActive
+                ? ((float) DespertarCatalog::SHIMMER_ELDER_FRENZY_MULT - 1)
+                    * DespertarCatalog::SHIMMER_ELDER_FRENZY_DURATION_SEC
+                    * (float) DespertarCatalog::SHIMMER_FRENZY_MULT
+                    * (float) DespertarCatalog::SHIMMER_BUILDING_SPECIAL_MAX_MULT
+                : 0.0
+        );
+    }
+
+    /** Segundos de clique a 20/s que um eco creditado pode render (Fúria da Foice + Voo Dracónico). */
+    public static function syncClickBonusSec(): float
+    {
+        return ((float) DespertarCatalog::SHIMMER_CLICK_FRENZY_MULT - 1) * DespertarCatalog::SHIMMER_CLICK_FRENZY_DURATION_SEC
+            + ((float) DespertarCatalog::DRAGONFLIGHT_CLICK_MULT - 1) * DespertarCatalog::DRAGONFLIGHT_DURATION_SEC;
+    }
+
+    /**
+     * Fichas e balde de bônus do teto do sync (estado em milestones.antiCheat).
+     * Fichas limitam quantos ecos/feitiços novos contam (1 a cada 60 s, até 3);
+     * cada um creditado enche o balde, que atravessa janelas (buff clicado no fim de
+     * uma janela ainda rende na próxima). Recarga lenta cobre Fortuna e Corça.
+     *
+     * @param array<string, mixed> $prev milestones.antiCheat anterior
+     * @return array{shimmerTokens: float, spellTokens: float, shimmersCredited: int, spellsCredited: int, bonusSpsSec: float, bonusClickSec: float}
+     */
+    public static function syncBonusBucket(array $prev, float $dtSec, int $shimmersClaimed, int $spellsClaimed, bool $catabaseActive): array
+    {
+        $dt = is_finite($dtSec) && $dtSec > 0 ? $dtSec : 0.0;
+        $shimmerMax = (float) DespertarCatalog::SYNC_SHIMMER_TOKEN_MAX;
+        $spellMax = (float) DespertarCatalog::SYNC_SPELL_TOKEN_MAX;
+        $shimmerTokens = min($shimmerMax, (float) ($prev['shimmerTokens'] ?? $shimmerMax) + $dt / DespertarCatalog::SYNC_SHIMMER_TOKEN_SEC);
+        $spellTokens = min($spellMax, (float) ($prev['spellTokens'] ?? $spellMax) + $dt / DespertarCatalog::SYNC_SPELL_TOKEN_SEC);
+
+        $shimmersCredited = min(max(0, $shimmersClaimed), (int) floor($shimmerTokens));
+        $spellsCredited = min(max(0, $spellsClaimed), (int) floor($spellTokens));
+        $shimmerTokens -= $shimmersCredited;
+        $spellTokens -= $spellsCredited;
+
+        $perShimmer = self::syncShimmerBonusSec($catabaseActive);
+        $spsCap = $perShimmer * DespertarCatalog::SYNC_BONUS_BUCKET_SHIMMERS
+            + (float) DespertarCatalog::SYNC_WINDFALL_SPS_SEC * DespertarCatalog::SYNC_SPELL_TOKEN_MAX;
+        $clickCap = self::syncClickBonusSec() * DespertarCatalog::SYNC_BONUS_BUCKET_SHIMMERS;
+        // Sem estado anterior (primeiro sync / pós-reset) o balde começa cheio: nunca pune o 1º sync.
+        $bonusSps = isset($prev['bonusSpsSec']) ? (float) $prev['bonusSpsSec'] : $spsCap;
+        $bonusClick = isset($prev['bonusClickSec']) ? (float) $prev['bonusClickSec'] : $clickCap;
+        $bonusSps += $dt * (float) DespertarCatalog::SYNC_BONUS_REFILL_PER_SEC
+            + $shimmersCredited * $perShimmer
+            + $spellsCredited * (float) DespertarCatalog::SYNC_WINDFALL_SPS_SEC;
+        $bonusClick += $shimmersCredited * self::syncClickBonusSec();
+
+        return [
+            'shimmerTokens' => $shimmerTokens,
+            'spellTokens' => $spellTokens,
+            'shimmersCredited' => $shimmersCredited,
+            'spellsCredited' => $spellsCredited,
+            'bonusSpsSec' => min($spsCap, $bonusSps),
+            'bonusClickSec' => min($clickCap, $bonusClick),
+        ];
+    }
+
+    /**
+     * Ganho plausível de uma janela de sync, separado em base da janela e no valor (em almas)
+     * de cada segundo do balde de bônus. Base: SPS × tempo com Frenesi de Néctar (×3) e buffs
+     * ativos, cliques a 20/s, sanguessugas (já digerido + digestão possível), estoque do Mercado.
+     *
+     * @param array{
+     *   sps: string, clickPower: string, dtSec: float,
+     *   carriedSpsMult?: string, carriedClickMult?: string, catabaseActive?: bool,
+     *   leechDigested?: string, marketSpsSeconds?: string
+     * } $ctx
+     * @return array{base: string, spsUnit: string, clickUnit: string}
+     */
+    public static function syncWindowAllowance(array $ctx): array
+    {
+        $sps = DespertarDecimal::decimalString($ctx['sps'] ?? '0', '0');
+        $click = DespertarDecimal::decimalString($ctx['clickPower'] ?? '0', '0');
+        $dtRaw = (float) ($ctx['dtSec'] ?? 0);
+        $dt = is_finite($dtRaw) && $dtRaw > 0 ? number_format($dtRaw, 3, '.', '') : '0';
+        $carriedSps = DespertarDecimal::decimalString($ctx['carriedSpsMult'] ?? '1', '1');
+        $carriedClick = DespertarDecimal::decimalString($ctx['carriedClickMult'] ?? '1', '1');
+
+        $spsUnit = DespertarDecimal::mul(DespertarDecimal::mul($sps, DespertarCatalog::NECTAR_FRENZY_MULT), $carriedSps);
+        $clickUnit = DespertarDecimal::mul(DespertarDecimal::mul($click, (string) DespertarCatalog::CLICK_CAP_PER_SECOND), $carriedClick);
+
+        $base = DespertarDecimal::add(DespertarCatalog::SYNC_CEILING_FLOOR, DespertarDecimal::mul($spsUnit, $dt));
+        $base = DespertarDecimal::add($base, DespertarDecimal::mul($clickUnit, $dt));
+
+        $leechDigested = DespertarDecimal::decimalString($ctx['leechDigested'] ?? '0', '0');
+        $base = DespertarDecimal::add($base, DespertarDecimal::mul($leechDigested, DespertarCatalog::SYNC_LEECH_PAYOUT_MAX));
+        if (!empty($ctx['catabaseActive'])) {
+            // n² do CC: cada sanguessuga acumula o dreno total (até 14 × 5%).
+            $maxDrain = DespertarDecimal::mul(DespertarCatalog::LEECH_DRAIN_PER_UNIT, (string) DespertarCatalog::LEECH_MAX_CAP);
+            $digestRate = DespertarDecimal::mul(DespertarDecimal::mul($sps, $maxDrain), (string) DespertarCatalog::LEECH_MAX_CAP);
+            $base = DespertarDecimal::add(
+                $base,
+                DespertarDecimal::mul(DespertarDecimal::mul($digestRate, $dt), DespertarCatalog::SYNC_LEECH_PAYOUT_MAX)
+            );
+        }
+
+        $marketSec = DespertarDecimal::decimalString($ctx['marketSpsSeconds'] ?? '0', '0');
+        $base = DespertarDecimal::add($base, DespertarDecimal::mul($spsUnit, $marketSec));
+
+        return [
+            'base' => DespertarDecimal::money($base),
+            'spsUnit' => $spsUnit,
+            'clickUnit' => $clickUnit,
+        ];
     }
 
     /**

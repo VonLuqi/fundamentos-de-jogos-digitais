@@ -44,6 +44,9 @@ const syncFn = validateSrc.slice(
 assert.ok(syncFn.length > 100, 'recorte validateSync ok');
 assert.ok(!syncFn.includes('JUDGES_REFUSED_MESSAGE'), 'validateSync não devolve JUDGES_REFUSED_MESSAGE');
 assert.ok(!syncFn.includes('status\' => 409') && !syncFn.includes("status' => 409"), 'validateSync sem 409');
+// Único 400: payload que nem é objeto. Subsistema inválido usa softValidate; ganho usa teto suave.
+assert.equal((syncFn.match(/'status' => 400/g) || []).length, 1, 'validateSync só recusa payload não-objeto');
+assert.ok(syncFn.includes('softValidate(') && syncFn.includes('applySoftGainCeiling('), 'validateSync usa fallback e teto suave');
 
 // Soft sanitize
 assert.ok(validateSrc.includes('normalizeGoldCounts') && validateSrc.includes(', true)'), 'gold soft');

@@ -336,9 +336,10 @@ run('4. Paridade JS ≡ PHP (veilFraction, cerberusPupMult, SPS) e Anti-Cheat no
       'syncLegitVeilPct' => $syncLegit['state']['veilPercent'] ?? null,
       'syncLegitLogs' => $syncLegit['next']['eduLogsSeen'] ?? [],
       'syncLowVeilOk' => $syncLowVeil['ok'],
-      'syncLowVeilErr' => $syncLowVeil['error'] ?? '',
+      'syncLowVeilUpgrades' => $syncLowVeil['next']['upgrades'] ?? [],
+      'syncLowVeilCorr' => array_column($syncLowVeil['corrections'] ?? [], 'system'),
       'syncFakeAchOk' => $syncFakeAch['ok'],
-      'syncFakeAchErr' => $syncFakeAch['error'] ?? '',
+      'syncFakeAchList' => $syncFakeAch['next']['achievements'] ?? [],
       'syncUnearnedAchOk' => $syncUnearnedAch['ok'],
       'syncUnearnedAchErr' => $syncUnearnedAch['error'] ?? '',
       'syncUnearnedAchList' => $syncUnearnedAch['next']['achievements'] ?? [],
@@ -365,11 +366,14 @@ run('4. Paridade JS ≡ PHP (veilFraction, cerberusPupMult, SPS) e Anti-Cheat no
   assert.ok(phpOut.syncLegitVeilPct >= 200);
   assert.ok(phpOut.syncLegitLogs.includes('log_veil_kittens'));
 
-  // Rejeições anti-cheat
-  assert.equal(phpOut.syncLowVeilOk, false);
-  assert.match(phpOut.syncLowVeilErr, /Véu insuficiente/i);
-  assert.equal(phpOut.syncFakeAchOk, false);
-  assert.match(phpOut.syncFakeAchErr, /Conquista desconhecida/i);
+  // Anti-cheat sem recusa: o sync segue e só o item ilegítimo fica de fora.
+  assert.equal(phpOut.syncLowVeilOk, true);
+  assert.ok(!phpOut.syncLowVeilUpgrades.includes('cerbero_conselheiro_tartaro'), 'filhote sem Véu retirado');
+  assert.ok(phpOut.syncLowVeilUpgrades.includes('umbras_despertas'), 'resto das compras mantido');
+  // Custa 9e25: o teto desfaz a compra (almas) antes do Véu; qualquer um dos dois serve.
+  assert.ok(phpOut.syncLowVeilCorr.includes('veu') || phpOut.syncLowVeilCorr.includes('almas'), `correção registrada (${phpOut.syncLowVeilCorr})`);
+  assert.equal(phpOut.syncFakeAchOk, true);
+  assert.ok(!phpOut.syncFakeAchList.includes('conquista_hacker_999'), 'conquista falsa ignorada');
   assert.equal(phpOut.syncUnearnedAchOk, true, 'Sync aceita mas strip despertar_* não elegível');
   assert.ok(
     !(phpOut.syncUnearnedAchList || []).includes('despertar_filhotes_15'),

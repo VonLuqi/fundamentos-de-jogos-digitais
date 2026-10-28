@@ -281,8 +281,8 @@ run('4. Paridade Estrita JS ≡ PHP (12 Geradores, 210 Upgrades, Fórmulas Big-N
       'lifetime_souls' => '900000000000000000000.00',
       'run_souls' => '500000000000000000000.00',
       'prestige_count' => 1,
-      'generators_state' => [],
-      'upgrades_state' => [],
+      'generators_state' => $gens, // já possuídos: o teste é de paridade, não de compra
+      'upgrades_state' => $ups,
       'talents_state' => ['juramento_eterno', 'foice_ancestral'],
       'verdict_purchases' => ['olho_do_tartarus', 'selo_do_juiz'],
       'edu_logs_seen' => [],

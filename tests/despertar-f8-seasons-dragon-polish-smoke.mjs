@@ -502,6 +502,8 @@ run('4. Auditoria Completa do Stack SPS (todas as camadas F0–F8 ativas), Parid
       'cubicObols' => $cubicObols,
       'syncOk' => $syncRes['ok'],
       'badAuraOk' => $badAuraRes['ok'],
+      'badAuraSlot' => $badAuraRes['next']['dragon']['auraSlot1'] ?? null,
+      'badAuraCorr' => array_column($badAuraRes['corrections'] ?? [], 'system'),
       'syncLogs' => $syncRes['next']['eduLogsSeen'] ?? [],
       'earnedAch' => $earnedAch,
     ]);
@@ -554,7 +556,10 @@ run('4. Auditoria Completa do Stack SPS (todas as camadas F0–F8 ativas), Parid
   assert.equal(phpOut.cubicObols, obolsFromLifetimeCubic('8000000000000'));
   assert.equal(phpOut.cubicObols, '2'); // cbrt(8e12 / 1e12) = 2
   assert.equal(phpOut.syncOk, true);
-  assert.equal(phpOut.badAuraOk, false, 'PHP deve rejeitar aura de estágio 3 quando Dragão está no estágio 1');
+  // Sem recusa: o sync segue e o Dragão volta ao último estado bom (aura não entra).
+  assert.equal(phpOut.badAuraOk, true, 'aura inválida não derruba o sync');
+  assert.notEqual(phpOut.badAuraSlot, 'apetite_radiante', 'aura de estágio 3 não entra com Dragão no estágio 1');
+  assert.ok(phpOut.badAuraCorr.includes('dragao'));
   assert.ok(phpOut.syncLogs.includes('log_incremental_architecture_f8'));
 
   for (const achId of [

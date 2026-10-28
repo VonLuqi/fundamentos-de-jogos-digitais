@@ -69,6 +69,33 @@ final class DespertarCatalog
     /** Copy legada (não retornada no sync econômico). */
     public const JUDGES_REFUSED_MESSAGE = 'Os Juízes recusaram o saldo declarado — o Submundo restaurou o estado verdadeiro.';
 
+    /**
+     * Teto suave do sync: nunca recusa. Ganho acima do teto só marca bandeira;
+     * acima de teto × SAFETY corta o excesso (e desfaz compras impagáveis).
+     */
+    public const SYNC_CEILING_SAFETY = '4';
+    public const SYNC_CEILING_FLOOR = '1000';
+    /** Janela usada quando a linha ainda não tem lastSyncAt. */
+    public const SYNC_FALLBACK_WINDOW_SEC = 3600;
+    /** Ecos clicados creditáveis: 1 ficha a cada 120 s (spawn real ≥ 420 s ÷ sorte ≈ 350 s), balde de 3. */
+    public const SYNC_SHIMMER_TOKEN_SEC = 120;
+    public const SYNC_SHIMMER_TOKEN_MAX = 3;
+    /** Feitiços do Grimório creditáveis no teto: mesma cadência. */
+    public const SYNC_SPELL_TOKEN_SEC = 60;
+    public const SYNC_SPELL_TOKEN_MAX = 3;
+    /** Maior reembolso de venda de gerador (Abalo do Tártaro). */
+    public const SYNC_SELL_REFUND_MAX = '0.5';
+    /** Maior payout por alma digerida (Sanguessuga shiny × talento). */
+    public const SYNC_LEECH_PAYOUT_MAX = '3.5';
+    /** Segundos de SPS de um eco instantâneo (Colheita/Lucky) ou feitiço de almas. */
+    public const SYNC_WINDFALL_SPS_SEC = '900';
+    /**
+     * Balde de bônus (em segundos de SPS / segundos de clique) que atravessa janelas:
+     * cada eco/feitiço creditado enche; recarga lenta cobre Fortuna (60 s) e Corça (60 s).
+     */
+    public const SYNC_BONUS_REFILL_PER_SEC = '0.5';
+    public const SYNC_BONUS_BUCKET_SHIMMERS = 3;
+
     public const NEGATIVO_MULT = '15';
     public const GOLD_MULT = '2';
     public const STYX_UNLOCK_SOULS = '100';
