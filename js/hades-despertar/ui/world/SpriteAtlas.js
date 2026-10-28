@@ -11,6 +11,8 @@ import { UPGRADES } from '../../config/upgrades.js';
 export const SPRITE_BASE = '../assets/despertar/sprites';
 /** Cache-bust de assets catabase (Sanguessugas estilo Foice). */
 export const CATABASE_ASSET_VER = 'leech-natural-307';
+/** Cache-bust de ícones de upgrade (WebP ilustrados). */
+export const UPGRADE_ASSET_VER = 'upgrade-art-311';
 
 const UPGRADE_BY_ID = Object.freeze(
   Object.fromEntries(UPGRADES.map((item) => [item.id, item])),
@@ -65,9 +67,11 @@ export function habitatSprite(id) {
 export function upgradeSprite(id) {
   const def = UPGRADE_BY_ID[id];
   const paths = spritePaths('upgrades', id);
+  const q = `?v=${UPGRADE_ASSET_VER}`;
   return {
     id,
-    ...paths,
+    webp: paths.webp ? `${paths.webp}${q}` : null,
+    svg: paths.svg ? `${paths.svg}${q}` : null,
     mark: markFrom(def?.name, id),
   };
 }
