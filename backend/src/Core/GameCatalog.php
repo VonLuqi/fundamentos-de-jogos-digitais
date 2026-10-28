@@ -314,13 +314,19 @@ final class GameCatalog
      * @param array<string, mixed>|null $u
      * @return array<string, mixed>|null
      */
-    public static function sanitizeUser(?array $u): ?array
+    public static function sanitizeUser(?array $u, bool $owner = false): ?array
     {
         if (!$u) {
             return null;
         }
         $safe = $u;
         unset($safe['password_hash'], $safe['password'], $safe['conquistas']);
+        // Colunas cruas de perfil não vazam; os campos camelCase entram via ProfileService::ownerFields.
+        unset(
+            $safe['display_name'], $safe['bio'], $safe['avatar_mode'], $safe['photo_path'],
+            $safe['photo_pending_path'], $safe['photo_status'], $safe['photo_updated_at'],
+            $safe['photo_reject_reason']
+        );
 
         $conquistas = is_array($u['conquistas'] ?? null)
             ? array_values($u['conquistas'])
@@ -349,7 +355,13 @@ final class GameCatalog
         $safe['emailVerifiedAt'] = $safe['email_verified_at'] ?? null;
         $safe['achievements'] = $role === 'admin' ? self::allAchievementIds() : $conquistas;
 
-        return $safe;
+        // `$owner = false` serializa TERCEIROS (ex.: Mestre listando alunos): só campos públicos,
+        // sem foto pendente nem motivo de rejeição.
+        $profile = $owner
+            ? \App\Services\Progress\ProfileService::ownerFields($u)
+            : \App\Services\Progress\ProfileService::publicFields($u);
+
+        return array_merge($safe, $profile);
     }
 
     /**

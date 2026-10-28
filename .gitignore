@@ -64,3 +64,13 @@ docs/load-results/raw/
 
 # Fonte bruta do modelo 3D da Foice (7 MB); o jogo usa foice-3d.glb (npm run despertar:foice3d)
 assets/despertar/sprites/foice/foice_3d.glb
+
+# ==================== Uploads de usuário ====================
+uploads/avatars/*
+!uploads/avatars/.gitkeep
+
+# Fotos de perfil pendentes (geradas em runtime)
+backend/storage/avatars-pending/*
+
+# Cópias de migração geradas no deploy. A fonte é db/migrate-*.sql.
+backend/migrations/

@@ -1,0 +1,139 @@
+.perfil-page {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 920px;
+  margin: 0 auto 3rem;
+  color: var(--hades-text);
+  font-family: var(--font-body);
+}
+
+.perfil-status {
+  min-height: 1.4rem;
+  margin: 0;
+  color: var(--hades-gold-bright);
+}
+
+.perfil-status.is-error {
+  color: var(--hades-blood-bright);
+}
+
+.perfil-card {
+  padding: 1.25rem 1.35rem 1.4rem;
+  background: var(--hades-panel);
+  border: 1px solid rgba(207, 167, 89, 0.45);
+  box-shadow: var(--shadow-panel);
+}
+
+.perfil-card h2 {
+  margin: 0 0 0.85rem;
+  font-family: var(--font-title);
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  color: var(--hades-gold-bright);
+}
+
+.perfil-hero {
+  display: flex;
+  gap: 1.1rem;
+  align-items: center;
+}
+
+.perfil-portrait {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: 1px solid var(--hades-gold);
+  background: #120e14;
+}
+
+.perfil-identity {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.perfil-identity strong {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+}
+
+.perfil-identity span,
+.perfil-note {
+  color: var(--hades-text-dim);
+}
+
+.perfil-form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.perfil-form label {
+  display: grid;
+  gap: 0.3rem;
+  color: var(--hades-parchment);
+}
+
+.perfil-form input,
+.perfil-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.55rem 0.7rem;
+  color: var(--hades-text);
+  background: rgba(8, 6, 10, 0.72);
+  border: 1px solid rgba(207, 167, 89, 0.35);
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+}
+
+.perfil-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.perfil-avatars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 0.45rem;
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 0.2rem;
+}
+
+.perfil-avatar {
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+}
+
+.perfil-avatar img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.perfil-avatar.is-current {
+  border-color: var(--hades-gold-bright);
+  box-shadow: var(--shadow-gold-glow);
+}
+
+.perfil-queue {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.perfil-queue article {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.perfil-queue img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border: 1px solid var(--hades-gold-dark);
+}

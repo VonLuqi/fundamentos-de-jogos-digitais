@@ -56,6 +56,7 @@ const APP_PAGE_SLUGS = new Set([
   'codigos',
   'despertar',
   'ranking',
+  'perfil',
   'classind-dle',
   'prova',
   'prova-admin',

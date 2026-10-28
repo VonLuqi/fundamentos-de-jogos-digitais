@@ -35,12 +35,21 @@ CREATE TABLE IF NOT EXISTS `users` (
   `completed_lessons` JSON NULL,
   `redeemed_codes` JSON NULL,
   `avatar_index` INT NOT NULL DEFAULT 0,
+  `display_name` VARCHAR(40) NULL DEFAULT NULL,
+  `bio` VARCHAR(160) NULL DEFAULT NULL,
+  `avatar_mode` VARCHAR(16) NOT NULL DEFAULT 'catalog',
+  `photo_path` VARCHAR(255) NULL DEFAULT NULL,
+  `photo_pending_path` VARCHAR(255) NULL DEFAULT NULL,
+  `photo_status` VARCHAR(16) NOT NULL DEFAULT 'none',
+  `photo_updated_at` DATETIME(3) NULL DEFAULT NULL,
+  `photo_reject_reason` VARCHAR(160) NULL DEFAULT NULL,
   `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_username_uidx` (`username`),
   UNIQUE KEY `users_email_uidx` (`email`),
   KEY `users_turma_role_idx` (`turma`, `role`),
   KEY `users_xp_idx` (`xp` DESC),
+  KEY `users_photo_status_idx` (`photo_status`, `photo_updated_at`),
   CONSTRAINT `users_turma_chk` CHECK (`turma` IN ('TCG01', 'TCG02'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

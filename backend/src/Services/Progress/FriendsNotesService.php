@@ -135,7 +135,7 @@ final class FriendsNotesService
         $limit = ($isAdmin && !$filterTurma) ? 300 : 100;
         if ($filterTurma) {
             $stmt = $pdo->prepare(
-                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users`
                  WHERE `role` = 'student' AND `id` <> :uid AND `turma` = :t
                  ORDER BY `username` ASC
@@ -144,7 +144,7 @@ final class FriendsNotesService
             $stmt->execute([':uid' => $userId, ':t' => $filterTurma]);
         } else {
             $stmt = $pdo->prepare(
-                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users`
                  WHERE `role` = 'student' AND `id` <> :uid
                  ORDER BY `username` ASC
@@ -204,7 +204,7 @@ final class FriendsNotesService
 
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
-            'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+            'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
              FROM `users`
              WHERE (`username` LIKE :q1 OR `full_name` LIKE :q2) AND `id` <> :uid
              ORDER BY `username` ASC
@@ -263,14 +263,14 @@ final class FriendsNotesService
         $target = null;
         if ($targetId && $targetId > 0) {
             $stmt = $pdo->prepare(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users` WHERE `id` = :id LIMIT 1'
             );
             $stmt->execute([':id' => $targetId]);
             $target = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } elseif ($targetUsername !== '') {
             $stmt = $pdo->prepare(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users` WHERE LOWER(`username`) = :u LIMIT 1'
             );
             $stmt->execute([':u' => $targetUsername]);
@@ -513,14 +513,14 @@ final class FriendsNotesService
         $target = null;
         if ($targetUsername !== '') {
             $stmt = $pdo->prepare(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users` WHERE LOWER(`username`) = :u LIMIT 1'
             );
             $stmt->execute([':u' => $targetUsername]);
             $target = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
         } elseif ($friendUserId > 0) {
             $stmt = $pdo->prepare(
-                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
+                'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
                  FROM `users` WHERE `id` = :id LIMIT 1'
             );
             $stmt->execute([':id' => $friendUserId]);
@@ -1130,7 +1130,7 @@ final class FriendsNotesService
             'note' => self::toNoteDetail($created, []),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'user' => GameCatalog::sanitizeUser($grimoire['user'], owner: true),
         ]);
     }
 
@@ -1237,7 +1237,7 @@ final class FriendsNotesService
             'note' => self::toNoteDetail($updatedRow, $sharedWith),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'user' => GameCatalog::sanitizeUser($grimoire['user'], owner: true),
         ]);
     }
 
@@ -1328,7 +1328,7 @@ final class FriendsNotesService
             'note' => self::toNoteDetail($existing, $sharedWith),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'user' => GameCatalog::sanitizeUser($grimoire['user'], owner: true),
         ]);
     }
 
@@ -1456,7 +1456,7 @@ final class FriendsNotesService
             'note' => self::toNoteDetail($created, [], ['clonedFrom' => $clonedFrom]),
             'awarded' => $grimoire['awarded'],
             'leveledUp' => $grimoire['leveledUp'],
-            'user' => GameCatalog::sanitizeUser($grimoire['user']),
+            'user' => GameCatalog::sanitizeUser($grimoire['user'], owner: true),
         ]);
     }
 

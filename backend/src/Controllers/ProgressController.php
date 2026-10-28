@@ -8,6 +8,7 @@ use App\Core\Http;
 use App\Services\Progress\FriendsNotesService;
 use App\Services\Progress\LeaderboardAdminService;
 use App\Services\Progress\LessonDuosService;
+use App\Services\Progress\ProfileService;
 use App\Services\Progress\RedeemLessonsService;
 use App\Services\SessionService;
 
@@ -51,12 +52,12 @@ final class ProgressController
             if ($action === '' || $action === 'profile' || $action === 'profileGet') {
                 Http::json(200, [
                     'ok' => true,
-                    'user' => GameCatalog::sanitizeUser($user),
+                    'user' => GameCatalog::sanitizeUser($user, owner: true),
                 ]);
             }
             Http::json(200, [
                 'ok' => true,
-                'user' => GameCatalog::sanitizeUser($user),
+                'user' => GameCatalog::sanitizeUser($user, owner: true),
             ]);
         }
 
@@ -66,6 +67,22 @@ final class ProgressController
         switch ($action) {
             case 'avatar':
                 RedeemLessonsService::avatar($userId, $body);
+            case 'profileUpdate':
+                ProfileService::profileUpdate($user, $userId, $body);
+            case 'profilePhotoUpload':
+                ProfileService::profilePhotoUpload($user, $userId, $body);
+            case 'profilePhotoRemove':
+                ProfileService::profilePhotoRemove($user, $userId);
+            case 'profileNameUpdate':
+                ProfileService::profileNameUpdate($user, $userId, $body);
+            case 'passwordChange':
+                ProfileService::passwordChange($user, $userId, $body);
+            case 'adminPhotoQueue':
+                ProfileService::adminPhotoQueue($user);
+            case 'adminPhotoReview':
+                ProfileService::adminPhotoReview($user, $userId, $body);
+            case 'adminPhotoRemove':
+                ProfileService::adminPhotoRemove($user, $userId, $body);
             case 'redeem':
                 RedeemLessonsService::redeem($user, $userId, $body);
             case 'generateCode':

@@ -118,7 +118,7 @@ final class ProgressShared
         $placeholders = implode(', ', array_fill(0, count($list), '?'));
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
-            "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`
+            "SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
              FROM `users` WHERE `id` IN ({$placeholders})"
         );
         $stmt->execute($list);
@@ -236,7 +236,7 @@ final class ProgressShared
     {
         $xp = (int) ($row['xp'] ?? 0);
         $isAdmin = ($row['role'] ?? '') === 'admin';
-        return [
+        return array_merge([
             'id' => (int) $row['id'],
             'username' => (string) ($row['username'] ?? ''),
             'fullName' => (string) (($row['full_name'] ?? '') ?: ($row['username'] ?? '')),
@@ -246,7 +246,7 @@ final class ProgressShared
             'xp' => $isAdmin ? null : $xp,
             'rank' => $isAdmin ? 'Mestre do Infinito' : GameCatalog::rankForXp($xp),
             'level' => $isAdmin ? '∞' : GameCatalog::levelForXp($xp),
-        ];
+        ], ProfileService::publicFields($row));
     }
 
     /**
@@ -261,6 +261,9 @@ final class ProgressShared
             'username' => $card['username'],
             'fullName' => $card['fullName'],
             'avatarIndex' => $card['avatarIndex'],
+            'displayName' => $card['displayName'],
+            'avatarMode' => $card['avatarMode'],
+            'photoUrl' => $card['photoUrl'],
             'turma' => $card['turma'],
             'role' => $card['role'],
             'xp' => $card['xp'],
@@ -305,6 +308,9 @@ final class ProgressShared
             'fullName' => $card['fullName'],
             'turma' => $card['turma'],
             'avatarIndex' => $card['avatarIndex'],
+            'displayName' => $card['displayName'],
+            'avatarMode' => $card['avatarMode'],
+            'photoUrl' => $card['photoUrl'],
             'rank' => $card['rank'],
             'level' => $card['level'],
             'role' => $card['role'],
