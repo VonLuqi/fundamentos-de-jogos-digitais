@@ -221,25 +221,12 @@
     },
     "minigames": {
       "total": 21,
-      "ilustrada": 9,
+      "ilustrada": 21,
       "vetorial": 0,
-      "placeholder": 12,
+      "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
-      "placeholders": [
-        "good_amalgama_aurica",
-        "good_areia_de_cronos",
-        "good_eter_condensado",
-        "good_ferro_estigio",
-        "good_incenso_sombrio",
-        "good_obolo_cobre",
-        "spell_conjurar_almas",
-        "spell_mao_do_destino",
-        "spirit_hypnos",
-        "spirit_nyx",
-        "spirit_persephone",
-        "spirit_thanatos"
-      ]
+      "placeholders": []
     },
     "veil": {
       "total": 5,
@@ -501,11 +488,11 @@
     {
       "id": "art_f5_minigames",
       "auditable": true,
-      "status": "open",
+      "status": "delivered",
       "counts": {
-        "ilustrada": 9,
+        "ilustrada": 21,
         "vetorial": 0,
-        "placeholder": 12,
+        "placeholder": 0,
         "faltando": 0
       }
     },

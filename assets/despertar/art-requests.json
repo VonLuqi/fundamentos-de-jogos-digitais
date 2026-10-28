@@ -596,7 +596,7 @@
       "id": "art_f5_minigames",
       "listId": "F5-MG",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Néctar do Lethe & 4 Minigames Temáticos (21 ícones F5)",
       "desc": "5 variantes de Néctar (normal, bifurcado, dourado, colérico, caramelizado), 4 sementes do Jardim de Perséfone, 4 espíritos do Panteão Ctoniano, 2 feitiços do Grimório de Hécate e 6 bens do Mercado de Caronte.",
       "sizes": [
@@ -630,9 +630,9 @@
       ],
       "notes": "Paths: assets/despertar/sprites/minigames/{id}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]",
       "detected": {
-        "ilustrada": 9,
+        "ilustrada": 21,
         "vetorial": 0,
-        "placeholder": 12,
+        "placeholder": 0,
         "faltando": 0
       }
     },

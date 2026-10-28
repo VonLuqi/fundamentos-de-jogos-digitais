@@ -4,26 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**190 ícones pendentes.**
-
-## L2 — Néctar e minigames (`minigames`, 12)
-
-Néctar no HUD; sementes, espíritos, feitiços e bens nas abas de minigame.
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `good_amalgama_aurica` | Amálgama Áurica | — |
-| `good_areia_de_cronos` | Areia de Cronos | — |
-| `good_eter_condensado` | Éter Condensado | — |
-| `good_ferro_estigio` | Ferro Estígio | — |
-| `good_incenso_sombrio` | Incenso Sombrio | — |
-| `good_obolo_cobre` | Óbolos de Cobre | — |
-| `spell_conjurar_almas` | Conjurar Almas | Materializa até 15 min de SPS (máx. 15% da carteira). Falha Crítica: drena 5 min de SPS. |
-| `spell_mao_do_destino` | Mão do Destino | Invoca um Eco Dourado imediato no Santuário (Falha Crítica: invoca um Eco Colérico). |
-| `spirit_hypnos` | Hipnos, Vigia do Repouso | Aumenta a produção contínua (+10% / +7% / +3% SPS), mas desacelera o surgimento de Ecos Dourados. |
-| `spirit_nyx` | Nyx, Senhora do Véu | Eleva o SPS passivo (+15% / +10% / +5%), mas amortece a Foice (−10% / −7% / −4% no clique). |
-| `spirit_persephone` | Perséfone, Rainha das Estações | Equilíbrio régio: concede +8% / +5% / +2% em SPS e clique e acelera Ecos do Acheron. |
-| `spirit_thanatos` | Tânatos, Lâmina Silente | Afila o corte ativo (+30% / +20% / +10% no clique) em troca de leve tributo passivo (−5% / −3% / −2% SPS). |
+**178 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
