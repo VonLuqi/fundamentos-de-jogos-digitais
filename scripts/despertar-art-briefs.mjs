@@ -18,7 +18,7 @@ const STATUS = path.join(ROOT, 'docs', 'status-despertar.json');
 const OUT = path.join(ROOT, 'docs', 'ARTE-PENDENTE.md');
 const CONFIG_MODULES = ['minigames', 'dragon', 'seasons', 'catabase', 'shimmers', 'achievements', 'fortunes'];
 
-/** Ordem de visibilidade na tela; talentos por último (nomes ainda genéricos — passo 5). */
+/** Ordem de visibilidade na tela; talentos por último (são muitos — dividir em vários chats). */
 export const ART_BATCHES = [
   { id: 'L1', folder: 'shimmers', title: 'Ecos do Acheron', why: 'Aparecem na tela toda a cada poucos minutos — o "Golden Cookie" do jogo.' },
   { id: 'L2', folder: 'minigames', title: 'Néctar e minigames', why: 'Néctar no HUD; sementes, espíritos, feitiços e bens nas abas de minigame.' },
@@ -26,7 +26,7 @@ export const ART_BATCHES = [
   { id: 'L4', folder: 'veil', title: 'Véus', why: 'Sabores do Véu sob a Foice.' },
   { id: 'L5', folder: 'catabase', title: 'Catábase', why: 'Estágios, Trégua e Aliança no Arquivo Estígio.' },
   { id: 'L6', folder: 'upgrades', title: 'Fortunas (juramentos)', why: 'Grade de juramentos da loja — os únicos upgrades ainda placeholder.' },
-  { id: 'L7', folder: 'talents', title: 'Talentos do Rio do Lethe', why: 'Árvore Heavenly. Esperar o passo 5 (nomes/textos próprios) antes de pintar.' },
+  { id: 'L7', folder: 'talents', title: 'Talentos do Rio do Lethe', why: 'Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.' },
 ];
 
 async function catalogEntries() {

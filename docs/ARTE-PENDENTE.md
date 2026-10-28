@@ -113,7 +113,7 @@ Grade de juramentos da loja — os únicos upgrades ainda placeholder.
 
 ## L7 — Talentos do Rio do Lethe (`talents`, 129)
 
-Árvore Heavenly. Esperar o passo 5 (nomes/textos próprios) antes de pintar.
+Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
