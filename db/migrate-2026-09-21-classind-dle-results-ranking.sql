@@ -1,10 +1,8 @@
--- Migração 2026-09-21 (b)
--- ClassInd-dle: fases results + ranking (fim de sessão / desempenho)
--- Pré-requisito: migrate-2026-09-21-classind-dle.sql
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Fases results e ranking.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE classind_rooms
-  DROP CONSTRAINT IF EXISTS classind_rooms_phase_check;
+SET NAMES utf8mb4;
 
-ALTER TABLE classind_rooms
-  ADD CONSTRAINT classind_rooms_phase_check
-  CHECK (phase IN ('lobby', 'voting', 'revealed', 'results', 'ranking', 'closed'));
+-- phase já é VARCHAR(32) e aceita 'results' e 'ranking'. Sem ALTER de tipo.
+SELECT 1;

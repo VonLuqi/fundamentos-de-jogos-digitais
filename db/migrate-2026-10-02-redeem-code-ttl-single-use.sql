@@ -1,17 +1,16 @@
--- Migração 2026-10-02 — TTL configurável + código de uso único.
---
--- `single_use = false` (default): compartilhamento de turma (regra atual).
--- `single_use = true`: o primeiro resgate invalida o código (redeemed_at).
--- A duração continua em `expires_at` (definida na geração).
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Código de uso único. single_use false compartilha na turma; true esgota no primeiro resgate.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE redeem_codes
-  ADD COLUMN IF NOT EXISTS single_use boolean NOT NULL DEFAULT false;
+SET NAMES utf8mb4;
 
-COMMENT ON COLUMN redeem_codes.single_use IS
-  'Se true, o primeiro resgate esgota o código. Se false, vale para a turma até expires_at.';
-
-COMMENT ON COLUMN redeem_codes.redeemed_at IS
-  'Primeiro resgate. Em códigos compartilhados é telemetria; em single_use invalida o código.';
-
-COMMENT ON COLUMN redeem_codes.redeemed_by IS
-  'Usuário do primeiro resgate (telemetria ou dono do uso único).';
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE redeem_codes ADD COLUMN single_use TINYINT(1) NOT NULL DEFAULT 0',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'redeem_codes' AND COLUMN_NAME = 'single_use'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

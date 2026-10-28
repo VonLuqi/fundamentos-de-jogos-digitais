@@ -24,6 +24,7 @@ use App\Controllers\ProvaController;
 use App\Controllers\SessionBootstrapController;
 use App\Core\Database;
 use App\Core\Http;
+use App\Core\MysqlMigrator;
 use App\Core\RateLimiter;
 
 // Resposta imediata para preflight CORS se aplicável
@@ -44,6 +45,13 @@ if ($route === '') {
 // Verifica configuração do banco MySQL
 if (!Database::isConfigured()) {
     Http::error(500, 'Servidor sem configuração de banco MySQL (.env ausente ou incompleto).');
+}
+
+try {
+    MysqlMigrator::apply();
+} catch (Throwable $e) {
+    error_log('[migrate] ' . $e->getMessage());
+    Http::error(500, $e->getMessage());
 }
 
 // Rate limit por IP na borda (espelho do `middleware.js` da Vercel)

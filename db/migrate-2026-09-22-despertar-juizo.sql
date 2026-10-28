@@ -1,43 +1,71 @@
--- Migração 2026-09-22
--- Objetivo: colunas do Juízo do Tartarus + Vereditos (Task 17)
--- docs/plano-hades-despertar.md Fase 7
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Colunas do Juízo.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS verdicts integer NOT NULL DEFAULT 0;
+SET NAMES utf8mb4;
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS juizo_best_streak integer NOT NULL DEFAULT 0;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN verdicts INT NOT NULL DEFAULT 0',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'verdicts'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS juizo_current_streak integer NOT NULL DEFAULT 0;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN juizo_best_streak INT NOT NULL DEFAULT 0',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'juizo_best_streak'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS juizo_milestones_claimed jsonb NOT NULL DEFAULT '[]'::jsonb;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN juizo_current_streak INT NOT NULL DEFAULT 0',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'juizo_current_streak'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS verdict_purchases jsonb NOT NULL DEFAULT '[]'::jsonb;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN juizo_milestones_claimed JSON NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'juizo_milestones_claimed'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE despertar_states
-  ADD COLUMN IF NOT EXISTS juizo_run jsonb NULL;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN verdict_purchases JSON NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'verdict_purchases'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'despertar_verdicts_nonneg'
-  ) THEN
-    ALTER TABLE despertar_states
-      ADD CONSTRAINT despertar_verdicts_nonneg CHECK (verdicts >= 0);
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'despertar_juizo_best_nonneg'
-  ) THEN
-    ALTER TABLE despertar_states
-      ADD CONSTRAINT despertar_juizo_best_nonneg CHECK (juizo_best_streak >= 0);
-  END IF;
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_constraint WHERE conname = 'despertar_juizo_current_nonneg'
-  ) THEN
-    ALTER TABLE despertar_states
-      ADD CONSTRAINT despertar_juizo_current_nonneg CHECK (juizo_current_streak >= 0);
-  END IF;
-END $$;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE despertar_states ADD COLUMN juizo_run JSON NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despertar_states' AND COLUMN_NAME = 'juizo_run'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

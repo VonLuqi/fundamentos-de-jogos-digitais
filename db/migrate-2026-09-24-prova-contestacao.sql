@@ -1,34 +1,71 @@
--- Migração 2026-09-24 (b)
--- Contestação de nota pelo aluno + resposta / reabertura pelo Mestre
--- docs/plano-prova-modulo1-online.md
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Contestação de nota.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE prova_attempts
-  ADD COLUMN IF NOT EXISTS contest_status text NULL
-    CHECK (
-      contest_status IS NULL
-      OR contest_status IN ('open', 'answered', 'revised', 'closed')
-    );
+SET NAMES utf8mb4;
 
-ALTER TABLE prova_attempts
-  ADD COLUMN IF NOT EXISTS contest_student_message text NULL
-    CHECK (
-      contest_student_message IS NULL
-      OR char_length(contest_student_message) <= 4000
-    );
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE prova_attempts ADD COLUMN contest_status VARCHAR(32) NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND COLUMN_NAME = 'contest_status'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE prova_attempts
-  ADD COLUMN IF NOT EXISTS contest_admin_message text NULL
-    CHECK (
-      contest_admin_message IS NULL
-      OR char_length(contest_admin_message) <= 4000
-    );
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE prova_attempts ADD COLUMN contest_student_message TEXT NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND COLUMN_NAME = 'contest_student_message'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE prova_attempts
-  ADD COLUMN IF NOT EXISTS contested_at timestamptz NULL;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE prova_attempts ADD COLUMN contest_admin_message TEXT NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND COLUMN_NAME = 'contest_admin_message'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-ALTER TABLE prova_attempts
-  ADD COLUMN IF NOT EXISTS contest_resolved_at timestamptz NULL;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE prova_attempts ADD COLUMN contested_at DATETIME(3) NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND COLUMN_NAME = 'contested_at'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
-CREATE INDEX IF NOT EXISTS prova_attempts_contest_status_idx
-  ON prova_attempts (contest_status)
-  WHERE contest_status IS NOT NULL;
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE prova_attempts ADD COLUMN contest_resolved_at DATETIME(3) NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND COLUMN_NAME = 'contest_resolved_at'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'CREATE INDEX prova_attempts_contest_status_idx ON prova_attempts (contest_status)',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.STATISTICS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'prova_attempts' AND INDEX_NAME = 'prova_attempts_contest_status_idx'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

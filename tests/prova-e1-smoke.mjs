@@ -152,20 +152,20 @@ assert(mwSrc.includes('/api/prova'), 'middleware matcher inclui /api/prova');
 assert(edgeSrc.includes('prova:'), 'edge-rate-limit declara prova');
 
 // --- RLS / service role ---
-assert(migrate.includes('ENABLE ROW LEVEL SECURITY'), 'migrate habilita RLS');
+assert(!migrate.includes('ENABLE ROW LEVEL SECURITY'), 'sem RLS no MySQL');
 assert(
-  /ALTER TABLE prova_exams ENABLE ROW LEVEL SECURITY/.test(migrate)
-    && /ALTER TABLE prova_attempts ENABLE ROW LEVEL SECURITY/.test(migrate)
-    && /ALTER TABLE prova_answers ENABLE ROW LEVEL SECURITY/.test(migrate),
-  'RLS nas 3 tabelas principais',
+  /prova_exams/.test(migrate)
+    && /prova_attempts/.test(migrate)
+    && /prova_answers/.test(migrate),
+  'tabelas da prova',
 );
 assert(
   !/CREATE POLICY/i.test(migrate),
-  'sem CREATE POLICY (só service role bypass)',
+  'sem CREATE POLICY',
 );
 assert(
-  /SERVICE_ROLE|service role|service-role/i.test(migrate),
-  'migrate documenta service role',
+  /PHP/.test(migrate),
+  'acesso pelo PHP',
 );
 assert(handler.includes("import supabase from './supabaseClient.js'"), 'API usa supabaseClient');
 

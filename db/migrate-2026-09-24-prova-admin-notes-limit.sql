@@ -1,13 +1,8 @@
--- Prova Módulo 1 — ampliar admin_notes
--- Comentários por discursiva (até 8 × 2000) + nota geral cabem no JSON;
--- o teto antigo (4000) fazia falhar "Falha ao atualizar a tentativa." ao salvar anotações.
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Notas do Mestre na prova.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE prova_attempts
-  DROP CONSTRAINT IF EXISTS prova_attempts_admin_notes_check;
+SET NAMES utf8mb4;
 
-ALTER TABLE prova_attempts
-  DROP CONSTRAINT IF EXISTS prova_attempts_admin_notes_len_chk;
-
-ALTER TABLE prova_attempts
-  ADD CONSTRAINT prova_attempts_admin_notes_len_chk
-  CHECK (admin_notes IS NULL OR char_length(admin_notes) <= 24000);
+-- admin_notes é MEDIUMTEXT no MySQL, acima do teto antigo de 24000 caracteres. Sem DROP CONSTRAINT.
+SELECT 1;

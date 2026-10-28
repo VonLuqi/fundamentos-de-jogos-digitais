@@ -1,18 +1,16 @@
--- Migração 2026-09-01
--- Registra a turma do aluno, limitada às turmas atualmente disponíveis.
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Coluna turma. O backfill para TCG01 e o CHECK users_turma_chk já estão no schema; não se repete UPDATE.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE users
-  ADD COLUMN IF NOT EXISTS turma text;
+SET NAMES utf8mb4;
 
-UPDATE users
-SET turma = 'TCG01'
-WHERE turma IS NULL OR turma NOT IN ('TCG01', 'TCG02');
-
-ALTER TABLE users
-  ALTER COLUMN turma SET NOT NULL;
-
-ALTER TABLE users
-  DROP CONSTRAINT IF EXISTS users_turma_check;
-
-ALTER TABLE users
-  ADD CONSTRAINT users_turma_check CHECK (turma IN ('TCG01', 'TCG02'));
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE users ADD COLUMN turma VARCHAR(16) NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'users' AND COLUMN_NAME = 'turma'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

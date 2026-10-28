@@ -41,7 +41,7 @@ const plan = read('docs/plano-ops-nav-email-perf-admin.md');
 
 assert(/CREATE TABLE IF NOT EXISTS admin_audit_events/.test(migrate), 'migrate cria admin_audit_events');
 assert(/actor_id/.test(migrate) && /target_user_id/.test(migrate), 'migrate tem actor/target');
-assert(/payload jsonb/.test(migrate), 'migrate tem payload jsonb');
+assert(/payload JSON/.test(migrate), 'migrate tem payload JSON');
 assert(/admin_audit_events/.test(setup), 'setup.sql inclui admin_audit_events');
 
 assert(auditLib.includes('recordAdminAudit'), 'admin-audit exporta recordAdminAudit');

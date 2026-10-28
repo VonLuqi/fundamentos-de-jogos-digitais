@@ -1,6 +1,16 @@
--- Migração 2026-09-28
--- Objetivo: meta jsonb em lesson_gates para Véu da Aula (classroom_pause)
--- docs/plano-despertar-producao-profundo.md Task A1
+-- MySQL 8 / MariaDB 10.5+ (HostGator). Idempotente.
+-- Pausa de aula. meta é JSON.
+-- Sem DELETE, UPDATE, DROP, TRUNCATE ou MODIFY COLUMN.
 
-ALTER TABLE lesson_gates
-  ADD COLUMN IF NOT EXISTS meta jsonb NOT NULL DEFAULT '{}'::jsonb;
+SET NAMES utf8mb4;
+
+SET @ddl := (
+  SELECT IF(COUNT(*) = 0,
+    'ALTER TABLE lesson_gates ADD COLUMN meta JSON NULL',
+    'SELECT 1')
+  FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'lesson_gates' AND COLUMN_NAME = 'meta'
+);
+PREPARE stmt FROM @ddl;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;

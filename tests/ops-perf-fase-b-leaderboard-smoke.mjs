@@ -44,10 +44,11 @@ const faseB = read('docs/otimizacoes/02-tasks-fase-b-rtt-batching.md');
 const contratos = read('docs/otimizacoes/contratos-fase-b.md');
 const pkg = read('package.json');
 
-assert(migrate.includes('CREATE OR REPLACE FUNCTION public.leaderboard_page'), 'migration cria RPC');
-assert(migrate.includes('ORDER BY'), 'RPC ordena no SQL');
-assert(migrate.includes('juizo_best_streak') || migrate.includes('juizo_best'), 'RPC join juizo');
-assert(migrate.includes('GRANT EXECUTE') && migrate.includes('service_role'), 'GRANT service_role');
+assert(migrate.includes('LeaderboardAdminService.php'), 'placar vive no PHP');
+assert(migrate.includes('ORDER BY'), 'cita a ordenação');
+assert(migrate.includes('juizo_best_streak') || migrate.includes('juizo_best'), 'cita o juízo');
+assert(!/CREATE\s+(OR\s+REPLACE\s+)?FUNCTION/i.test(migrate), 'sem função plpgsql');
+assert(!migrate.includes('GRANT EXECUTE'), 'sem GRANT no MySQL');
 assert(setup.includes('leaderboard_page'), 'setup.sql espelha RPC');
 
 assert(lib.includes('fetchLeaderboardPageRpc'), 'helper fetchLeaderboardPageRpc');

@@ -69,6 +69,11 @@ jobs:
             middleware.js
             migrate-passwords.js
 
+      - name: Stage MySQL migrations for the private backend
+        run: |
+          mkdir -p backend/migrations
+          cp db/migrate-*.sql backend/migrations/
+
       - name: Deploy Private Backend to HostGator (/projects/src)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:

@@ -110,7 +110,7 @@ notes.push('Helpers: normalize / validação / hash (sem Resend)');
 /* --- Schema --- */
 assert(migrate.includes('email_verified_at'), 'migration precisa de email_verified_at');
 assert(migrate.includes('auth_email_tokens'), 'migration precisa de auth_email_tokens');
-assert(migrate.includes('users_email_lower_uidx'), 'migration precisa do índice único lower(email)');
+assert(migrate.includes('users_email_uidx'), 'migration precisa do índice único de email');
 notes.push('Schema de e-mail / tokens');
 
 /* --- DTO público sem e-mail --- */
