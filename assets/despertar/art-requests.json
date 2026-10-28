@@ -768,7 +768,7 @@
       "id": "art_f8_seasons_dragon_fortunes",
       "listId": "F8-SD",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Dragão Pitão/Ladão (5 estágios + 5 Auras), 4 Estações Ctonianas e 24 Fortunas de Hermes",
       "desc": "5 estágios do Dragão Ctoniano (Ovo Primordial → Ladão de Cem Cabeças), 5 ícones de Auras, 4 emblemas de Estações (Antestéria, Lemúria, Saturnália, Feira de Hermes), Corça de Ártemis e 35 juramentos (Escama de Ladão + 10 relíquias sazonais + 24 Fortunas).",
       "sizes": [
@@ -779,9 +779,9 @@
       "filesGlob": "seasons/*.webp",
       "notes": "Paths: assets/despertar/sprites/seasons/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 396 upgrades. [2026-10-26: arte final upgrades + illustrated.json]",
       "detected": {
-        "ilustrada": 0,
+        "ilustrada": 15,
         "vetorial": 0,
-        "placeholder": 15,
+        "placeholder": 0,
         "faltando": 0
       }
     },

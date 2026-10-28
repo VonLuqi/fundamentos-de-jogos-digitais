@@ -16,5 +16,5 @@ export const ART_VERSIONS = Object.freeze({
   'minigames': 'e727991f',
   'veil': 'd2cef64b',
   'catabase': 'd3c869ed',
-  'seasons': '3c7a33d8',
+  'seasons': 'c44c3264',
 });

@@ -93,28 +93,12 @@
     },
     "seasons": {
       "total": 15,
-      "ilustrada": 0,
+      "ilustrada": 15,
       "vetorial": 0,
-      "placeholder": 15,
+      "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
-      "placeholders": [
-        "aura_abalo_do_tartaro",
-        "aura_apetite_radiante",
-        "aura_cursor_ancestral",
-        "aura_sopro_de_flegeton",
-        "aura_voo_draconico",
-        "corca_de_artemis",
-        "dragon_stage_0",
-        "dragon_stage_1",
-        "dragon_stage_2",
-        "dragon_stage_3",
-        "dragon_stage_4",
-        "season_antesteria",
-        "season_feira_de_hermes",
-        "season_lemuria",
-        "season_saturnalia"
-      ]
+      "placeholders": []
     }
   },
   "requests": [
@@ -376,11 +360,11 @@
     {
       "id": "art_f8_seasons_dragon_fortunes",
       "auditable": true,
-      "status": "open",
+      "status": "delivered",
       "counts": {
-        "ilustrada": 0,
+        "ilustrada": 15,
         "vetorial": 0,
-        "placeholder": 15,
+        "placeholder": 0,
         "faltando": 0
       }
     },
