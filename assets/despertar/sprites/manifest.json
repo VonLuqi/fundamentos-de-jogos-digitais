@@ -3399,14 +3399,16 @@
       "category": "leech",
       "webp": "catabase/sanguessuga_normal.webp",
       "svg": "catabase/sanguessuga_normal.svg",
-      "size": 128
+      "png": "catabase/sanguessuga_normal.png",
+      "size": 256
     },
     "sanguessuga_shiny": {
       "name": "Sanguessuga Abissal Dourada",
       "category": "leech_shiny",
       "webp": "catabase/sanguessuga_shiny.webp",
       "svg": "catabase/sanguessuga_shiny.svg",
-      "size": 128
+      "png": "catabase/sanguessuga_shiny.png",
+      "size": 256
     },
     "catabase_estagio_1": {
       "name": "Estágio 1 — Despertar Ctoniano",

@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" fill="none">
-  
-  <rect x="10" y="10" width="108" height="108" rx="22" fill="#12060c" stroke="#d90429" stroke-width="3"/>
-  <path d="M40 88 C36 60 52 38 64 26 C76 38 92 60 88 88 C76 102 52 102 40 88 Z" fill="#d90429" fill-opacity="0.32" stroke="#d90429" stroke-width="3"/>
-  <circle cx="56" cy="54" r="4" fill="#d90429"/>
-  <circle cx="72" cy="54" r="4" fill="#d90429"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" fill="none">
+  <!-- Fallback vector — estilo Foice: placas negras, ouro, gema Styx -->
+  <rect width="256" height="256" fill="#0a0a0f"/>
+  <!-- corpo segmentado -->
+  <path d="M128 28 C168 48 196 92 198 140 C200 188 168 228 128 236 C88 228 56 188 58 140 C60 92 88 48 128 28 Z"
+        fill="#12141a" stroke="#cfa759" stroke-width="3"/>
+  <path d="M78 96 C96 78 160 78 178 96 C186 118 186 150 176 178 C160 198 96 198 80 178 C70 150 70 118 78 96 Z"
+        fill="#1a1c24" stroke="#8a7040" stroke-width="2"/>
+  <!-- espinhos -->
+  <path d="M118 40 L128 18 L138 40" fill="#cfa759"/>
+  <path d="M168 70 L192 52 L178 88" fill="#8a7040"/>
+  <path d="M88 70 L64 52 L78 88" fill="#8a7040"/>
+  <!-- boca / ventosa -->
+  <ellipse cx="128" cy="196" rx="28" ry="18" fill="#0a0a0f" stroke="#cfa759" stroke-width="2.5"/>
+  <ellipse cx="128" cy="196" rx="14" ry="9" fill="#2a0a12" stroke="#d90429" stroke-width="1.5"/>
+  <!-- gema Styx + âmbar (como a Foice) -->
+  <circle cx="128" cy="112" r="16" fill="#003d38" stroke="#00a896" stroke-width="3"/>
+  <circle cx="128" cy="108" r="6" fill="#7ef0e0" fill-opacity="0.85"/>
+  <circle cx="128" cy="148" r="8" fill="#3a2808" stroke="#cfa759" stroke-width="2"/>
+  <circle cx="128" cy="146" r="3" fill="#e8d4a8"/>
 </svg>

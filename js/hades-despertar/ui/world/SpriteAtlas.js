@@ -9,6 +9,8 @@ import { UPGRADES } from '../../config/upgrades.js';
 
 /** Relativo a pages/*.html */
 export const SPRITE_BASE = '../assets/despertar/sprites';
+/** Cache-bust de assets catabase (Sanguessugas estilo Foice). */
+export const CATABASE_ASSET_VER = 'leech-foice-304';
 
 const UPGRADE_BY_ID = Object.freeze(
   Object.fromEntries(UPGRADES.map((item) => [item.id, item])),
@@ -93,6 +95,7 @@ export function shimmerSprite(id) {
 export function catabaseSprite(id) {
   const safe = String(id || '').replace(/[^\w-]/g, '');
   const paths = spritePaths('catabase', safe);
+  const q = `?v=${CATABASE_ASSET_VER}`;
   let mark = '?';
   if (safe.includes('shiny')) mark = '✦';
   else if (safe.includes('sanguessuga')) mark = 'ᚹ';
@@ -101,7 +104,8 @@ export function catabaseSprite(id) {
   else if (safe.includes('alianca')) mark = '⚔';
   return {
     id: safe,
-    ...paths,
+    webp: paths.webp ? `${paths.webp}${q}` : null,
+    svg: paths.svg ? `${paths.svg}${q}` : null,
     mark,
   };
 }
