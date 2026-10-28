@@ -439,10 +439,11 @@ function effectsFor(ccName) {
     case 'Cat ladies': return { catLadies: true };
     case 'Kitten wages': return { kittenUpgradeDiscount: true };
     case 'Milkhelp® lactose intolerance relief tablets': return { milkhelpServants: true };
-    case 'Elder spice': return { nectarReserveBonus: true };
-    case 'Sacrilegious corruption': return { allGeneratorsMult: '1.05' };
-    case 'Unholy bait': return {};
-    case 'Eye of the wrinkler': return { allGeneratorsMult: '1.05' };
+    // Ramo Sanguessugas (F6) — lidos por talentEffects() / CatabaseSystem.
+    case 'Elder spice': return { leechCapBonus: 2 };
+    case 'Sacrilegious corruption': return { leechPayoutMult: '1.05' };
+    case 'Unholy bait': return { leechSpawnMult: 5 };
+    case 'Eye of the wrinkler': return { leechDigestVisible: true };
     case 'Permanent upgrade slot I': return { permanentSlot: 1 };
     case 'Permanent upgrade slot II': return { permanentSlot: 2 };
     case 'Permanent upgrade slot III': return { permanentSlot: 3 };
@@ -493,7 +494,7 @@ function effectsFor(ccName) {
   if (/dairy|wallpaper|Wrapping paper|Box of|Tin of/.test(n)) {
     return { cosmeticId: slugId(n) };
   }
-  if (n === 'Persistent memory') return { buyAllUnlock: true };
+  if (n === 'Persistent memory') return { buyAllUnlock: true, researchDurationMult: 0.1 };
   if (n === 'Five-finger discount') return { generatorCostMult: '0.99' };
   if (n === 'Golden cookie alert sound' || n === 'Sound test') return { cosmeticId: slugId(n) };
   return {};
@@ -524,6 +525,18 @@ function ptLabel(ccName) {
   return [title, `Eco celestial espelhado: ${ccName}.`];
 }
 
+/** Raio polar visual (rings altos comprimidos — espelha talents.js). */
+function ringRadius(ring, ringGap = 88, rootR = 56) {
+  const n = Math.max(0, Math.floor(Number(ring) || 0));
+  if (n === 0) return rootR;
+  let r = 36;
+  for (let i = 1; i <= n; i += 1) {
+    const shrink = i <= 8 ? 1 : Math.max(0.45, 1 - 0.035 * (i - 8));
+    r += ringGap * shrink;
+  }
+  return r;
+}
+
 function spreadAnglesByRing(talents, { ringGap = 88, rootR = 56, nodeR = 26, padding = 6 } = {}) {
   const minChord = 2 * nodeR + padding;
   const byRing = new Map();
@@ -535,8 +548,8 @@ function spreadAnglesByRing(talents, { ringGap = 88, rootR = 56, nodeR = 26, pad
   for (const [, list] of byRing) {
     if (list.length < 2) continue;
     const ring = Math.max(0, Number(list[0].ring) || 0);
-    const r = ring === 0 ? rootR : ring * ringGap + 36;
-    const ratio = Math.min(1, minChord / (2 * r));
+    const r = ringRadius(ring, ringGap, rootR);
+    const ratio = Math.min(1, minChord / (2 * Math.max(r, 1)));
     const minDeg = 2 * Math.asin(ratio) * (180 / Math.PI) * 1.02;
     list.sort((a, b) => Number(a.angle) - Number(b.angle));
     for (let pass = 0; pass < 64; pass += 1) {
@@ -557,27 +570,57 @@ function spreadAnglesByRing(talents, { ringGap = 88, rootR = 56, nodeR = 26, pad
   return talents;
 }
 
+/**
+ * Wedges disjuntos no leque superior (−150…150).
+ * unshackled: flancos externos L/R; season/nectar no flanco direito interno.
+ */
 function assignBaseAngle(branch, indexInBranch, totalInBranch) {
   const ranges = {
-    misc: [-20, 20],
-    persistent: [-20, 20],
-    angel: [-100, -50],
-    demon: [50, 100],
-    golden: [-40, -10],
-    discount: [-40, -10],
-    production: [10, 40],
-    cookie: [10, 40],
-    season: [110, 140],
-    nectar: [110, 140],
-    unshackled: [-140, -110],
+    misc: [-12, -2],
+    persistent: [2, 12],
+    angel: [-78, -52],
+    golden: [-50, -32],
+    discount: [-30, -14],
+    demon: [52, 78],
+    cookie: [32, 50],
+    production: [14, 30],
+    season: [100, 122],
+    nectar: [124, 138],
+    unshackled: [-148, -100],
   };
-  let [lo, hi] = ranges[branch] || [-20, 20];
+  let [lo, hi] = ranges[branch] || [-12, 12];
+  // Metade do Liberto no flanco direito externo (sem invadir season/nectar).
   if (branch === 'unshackled' && indexInBranch % 2 === 1) {
-    lo = 110;
-    hi = 140;
+    lo = 140;
+    hi = 150;
   }
   const t = totalInBranch <= 1 ? 0.5 : indexInBranch / (totalInBranch - 1);
   return lo + (hi - lo) * t;
+}
+
+/** Puxa o ângulo em direção à média dos pais (arestas mais curtas). */
+function pullAngleTowardParents(talents, { weight = 0.55 } = {}) {
+  const byId = Object.fromEntries(talents.map((t) => [t.id, t]));
+  const byRing = new Map();
+  for (const t of talents) {
+    const ring = Math.max(0, Number(t.ring) || 0);
+    if (!byRing.has(ring)) byRing.set(ring, []);
+    byRing.get(ring).push(t);
+  }
+  const rings = [...byRing.keys()].sort((a, b) => a - b);
+  for (const ring of rings) {
+    if (ring === 0) continue;
+    for (const t of byRing.get(ring)) {
+      const parents = (t.requires?.talentIds || [])
+        .map((id) => byId[id])
+        .filter(Boolean);
+      if (!parents.length) continue;
+      const mean = parents.reduce((s, p) => s + (Number(p.angle) || 0), 0) / parents.length;
+      const base = Number(t.angle) || 0;
+      t.angle = base * (1 - weight) + mean * weight;
+    }
+  }
+  return talents;
 }
 
 function bfsRings(talents, rootId = 'legado') {
@@ -660,6 +703,7 @@ function buildHeavenly(ccMeta) {
     branchIdx[t.branch] = i + 1;
     t.angle = assignBaseAngle(t.branch, i, branchCounts[t.branch]);
   }
+  pullAngleTowardParents(raw);
   return spreadAnglesByRing(raw);
 }
 
@@ -909,11 +953,23 @@ export function meetsTalentRequirement(talent, { talents = [] } = {}) {
   return need.every((id) => owned.has(id));
 }
 
+/** Raio polar: rings 1–8 com gap cheio; rings altos comprimidos (árvore menos espalhada). */
+export function talentRingRadius(ring, { ringGap = 88, rootR = 56 } = {}) {
+  const n = Math.max(0, Math.floor(Number(ring) || 0));
+  if (n === 0) return rootR;
+  let r = 36;
+  for (let i = 1; i <= n; i += 1) {
+    const shrink = i <= 8 ? 1 : Math.max(0.45, 1 - 0.035 * (i - 8));
+    r += ringGap * shrink;
+  }
+  return r;
+}
+
 export function talentNodePosition(talent, { cx = 0, cy = 0, ringGap = 88, rootR = 56 } = {}) {
   const ring = Math.max(0, Number(talent?.ring) || 0);
   const angleDeg = Number(talent?.angle) || 0;
   const rad = (angleDeg * Math.PI) / 180;
-  const r = ring === 0 ? rootR : ring * ringGap + 36;
+  const r = talentRingRadius(ring, { ringGap, rootR });
   return {
     x: cx + Math.sin(rad) * r,
     y: cy - Math.cos(rad) * r,

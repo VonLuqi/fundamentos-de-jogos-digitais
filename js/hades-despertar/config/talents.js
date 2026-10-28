@@ -53,7 +53,7 @@ export const TALENTS = freezeAll([
     cost: "1",
     branch: "persistent",
     ring: 0,
-    angle: -20,
+    angle: 2,
     icon: "legado",
     requires: {},
     effects: {},
@@ -65,7 +65,7 @@ export const TALENTS = freezeAll([
     cost: "1",
     branch: "misc",
     ring: 1,
-    angle: -78.56,
+    angle: -67.98,
     icon: "portoes_gemeos",
     requires: {
       talentIds: [
@@ -83,7 +83,7 @@ export const TALENTS = freezeAll([
     cost: "3",
     branch: "cookie",
     ring: 1,
-    angle: 59.39,
+    angle: 69.97,
     icon: "bolachas_celestes",
     requires: {
       talentIds: [
@@ -101,7 +101,7 @@ export const TALENTS = freezeAll([
     cost: "7",
     branch: "angel",
     ring: 2,
-    angle: -100,
+    angle: -95.25,
     icon: "angels",
     requires: {
       talentIds: [
@@ -119,7 +119,7 @@ export const TALENTS = freezeAll([
     cost: "7",
     branch: "demon",
     ring: 2,
-    angle: 80.07,
+    angle: 14.45,
     icon: "belphegor",
     requires: {
       talentIds: [
@@ -137,7 +137,7 @@ export const TALENTS = freezeAll([
     cost: "9",
     branch: "misc",
     ring: 1,
-    angle: -23.38,
+    angle: -40.39,
     icon: "classic_dairy_selection",
     requires: {
       talentIds: [
@@ -155,7 +155,7 @@ export const TALENTS = freezeAll([
     cost: "9",
     branch: "misc",
     ring: 1,
-    angle: 31.8,
+    angle: -12.8,
     icon: "ovo_primordial",
     requires: {
       talentIds: [
@@ -173,7 +173,7 @@ export const TALENTS = freezeAll([
     cost: "25",
     branch: "cookie",
     ring: 2,
-    angle: 15.99,
+    angle: 30.12,
     icon: "box_of_brand_biscuits",
     requires: {
       talentIds: [
@@ -191,7 +191,7 @@ export const TALENTS = freezeAll([
     cost: "25",
     branch: "cookie",
     ring: 2,
-    angle: 31.99,
+    angle: 45.84,
     icon: "box_of_macarons",
     requires: {
       talentIds: [
@@ -209,7 +209,7 @@ export const TALENTS = freezeAll([
     cost: "25",
     branch: "cookie",
     ring: 2,
-    angle: 48.01,
+    angle: 61.64,
     icon: "tin_of_british_tea_biscuits",
     requires: {
       talentIds: [
@@ -227,7 +227,7 @@ export const TALENTS = freezeAll([
     cost: "25",
     branch: "cookie",
     ring: 2,
-    angle: 64.03,
+    angle: 77.51,
     icon: "tin_of_butter_cookies",
     requires: {
       talentIds: [
@@ -245,7 +245,7 @@ export const TALENTS = freezeAll([
     cost: "49",
     branch: "angel",
     ring: 3,
-    angle: -94.44,
+    angle: -59.15,
     icon: "archangels",
     requires: {
       talentIds: [
@@ -263,7 +263,7 @@ export const TALENTS = freezeAll([
     cost: "49",
     branch: "demon",
     ring: 3,
-    angle: 53.57,
+    angle: 39.22,
     icon: "mamon",
     requires: {
       talentIds: [
@@ -281,7 +281,7 @@ export const TALENTS = freezeAll([
     cost: "50",
     branch: "cookie",
     ring: 3,
-    angle: 26.37,
+    angle: 27.9,
     icon: "kit_inicial",
     requires: {
       talentIds: [
@@ -303,7 +303,7 @@ export const TALENTS = freezeAll([
     cost: "77",
     branch: "golden",
     ring: 1,
-    angle: -106.15,
+    angle: -95.57,
     icon: "heavenly_luck",
     requires: {
       talentIds: [
@@ -321,7 +321,7 @@ export const TALENTS = freezeAll([
     cost: "99",
     branch: "misc",
     ring: 2,
-    angle: -15.98,
+    angle: -32.39,
     icon: "basic_wallpaper_assortment",
     requires: {
       talentIds: [
@@ -339,7 +339,7 @@ export const TALENTS = freezeAll([
     cost: "100",
     branch: "cookie",
     ring: 1,
-    angle: 86.98,
+    angle: 97.56,
     icon: "heralds",
     requires: {
       talentIds: [
@@ -357,7 +357,7 @@ export const TALENTS = freezeAll([
     cost: "100",
     branch: "persistent",
     ring: 1,
-    angle: -50.97,
+    angle: 14.79,
     icon: "permanent_slot_i",
     requires: {
       talentIds: [
@@ -375,7 +375,7 @@ export const TALENTS = freezeAll([
     cost: "343",
     branch: "demon",
     ring: 4,
-    angle: 57.14,
+    angle: 44.93,
     icon: "abadao",
     requires: {
       talentIds: [
@@ -393,7 +393,7 @@ export const TALENTS = freezeAll([
     cost: "343",
     branch: "angel",
     ring: 4,
-    angle: -88.89,
+    angle: -62.42,
     icon: "virtues",
     requires: {
       talentIds: [
@@ -411,7 +411,7 @@ export const TALENTS = freezeAll([
     cost: "500",
     branch: "persistent",
     ring: 1,
-    angle: 4.21,
+    angle: 42.38,
     icon: "persistent_memory",
     requires: {
       talentIds: [
@@ -430,7 +430,7 @@ export const TALENTS = freezeAll([
     cost: "777",
     branch: "golden",
     ring: 2,
-    angle: -79.94,
+    angle: -79.42,
     icon: "lasting_fortune",
     requires: {
       talentIds: [
@@ -448,7 +448,7 @@ export const TALENTS = freezeAll([
     cost: "777",
     branch: "golden",
     ring: 2,
-    angle: -63.94,
+    angle: -63.69,
     icon: "lucky_digit",
     requires: {
       talentIds: [
@@ -467,7 +467,7 @@ export const TALENTS = freezeAll([
     cost: "999",
     branch: "golden",
     ring: 2,
-    angle: -47.95,
+    angle: -48.01,
     icon: "golden_switch",
     requires: {
       talentIds: [
@@ -485,7 +485,7 @@ export const TALENTS = freezeAll([
     cost: "1111",
     branch: "season",
     ring: 2,
-    angle: 110,
+    angle: 93.46,
     icon: "rodizio_das_estacoes",
     requires: {
       talentIds: [
@@ -503,7 +503,7 @@ export const TALENTS = freezeAll([
     cost: "2401",
     branch: "angel",
     ring: 5,
-    angle: -83.33,
+    angle: -65.53,
     icon: "dominions",
     requires: {
       talentIds: [
@@ -521,7 +521,7 @@ export const TALENTS = freezeAll([
     cost: "2401",
     branch: "demon",
     ring: 5,
-    angle: 60.71,
+    angle: 52.61,
     icon: "satan",
     requires: {
       talentIds: [
@@ -539,7 +539,7 @@ export const TALENTS = freezeAll([
     cost: "5000",
     branch: "cookie",
     ring: 4,
-    angle: 29.54,
+    angle: 36.18,
     icon: "cozinha_inicial",
     requires: {
       talentIds: [
@@ -558,7 +558,7 @@ export const TALENTS = freezeAll([
     cost: "7777",
     branch: "golden",
     ring: 3,
-    angle: -41.53,
+    angle: -47.84,
     icon: "decisive_fate",
     requires: {
       talentIds: [
@@ -576,7 +576,7 @@ export const TALENTS = freezeAll([
     cost: "9000",
     branch: "angel",
     ring: 6,
-    angle: -78.01,
+    angle: -70.33,
     icon: "kitten_angels",
     requires: {
       talentIds: [
@@ -594,7 +594,7 @@ export const TALENTS = freezeAll([
     cost: "16807",
     branch: "demon",
     ring: 6,
-    angle: 64.29,
+    angle: 49.39,
     icon: "asmodeus",
     requires: {
       talentIds: [
@@ -612,7 +612,7 @@ export const TALENTS = freezeAll([
     cost: "16807",
     branch: "angel",
     ring: 6,
-    angle: -71.99,
+    angle: -64.32,
     icon: "cherubim",
     requires: {
       talentIds: [
@@ -630,7 +630,7 @@ export const TALENTS = freezeAll([
     cost: "20000",
     branch: "persistent",
     ring: 2,
-    angle: -31.96,
+    angle: -1.18,
     icon: "permanent_slot_ii",
     requires: {
       talentIds: [
@@ -648,7 +648,7 @@ export const TALENTS = freezeAll([
     cost: "44444",
     branch: "demon",
     ring: 5,
-    angle: 67.86,
+    angle: 45.49,
     icon: "unholy_bait",
     requires: {
       talentIds: [
@@ -666,7 +666,7 @@ export const TALENTS = freezeAll([
     cost: "55555",
     branch: "discount",
     ring: 4,
-    angle: -45.37,
+    angle: -2.36,
     icon: "luvas_de_halo",
     requires: {
       talentIds: [
@@ -684,7 +684,7 @@ export const TALENTS = freezeAll([
     cost: "77777",
     branch: "golden",
     ring: 3,
-    angle: -30.21,
+    angle: -36.52,
     icon: "numero_da_sorte",
     requires: {
       talentIds: [
@@ -704,7 +704,7 @@ export const TALENTS = freezeAll([
     cost: "99999",
     branch: "discount",
     ring: 4,
-    angle: -36.62,
+    angle: -37.34,
     icon: "desconto_divino",
     requires: {
       talentIds: [
@@ -722,7 +722,7 @@ export const TALENTS = freezeAll([
     cost: "99999",
     branch: "discount",
     ring: 4,
-    angle: -27.88,
+    angle: -28.59,
     icon: "vendas_divinas",
     requires: {
       talentIds: [
@@ -740,7 +740,7 @@ export const TALENTS = freezeAll([
     cost: "99999",
     branch: "golden",
     ring: 3,
-    angle: -18.9,
+    angle: -25.2,
     icon: "residual_luck",
     requires: {
       talentIds: [
@@ -756,7 +756,7 @@ export const TALENTS = freezeAll([
     cost: "111111",
     branch: "season",
     ring: 3,
-    angle: 100.22,
+    angle: 57.27,
     icon: "starlove",
     requires: {
       talentIds: [
@@ -772,7 +772,7 @@ export const TALENTS = freezeAll([
     cost: "111111",
     branch: "season",
     ring: 3,
-    angle: 111.54,
+    angle: 68.59,
     icon: "starsnow",
     requires: {
       talentIds: [
@@ -788,7 +788,7 @@ export const TALENTS = freezeAll([
     cost: "111111",
     branch: "season",
     ring: 3,
-    angle: 122.86,
+    angle: 79.91,
     icon: "starspawn",
     requires: {
       talentIds: [
@@ -804,7 +804,7 @@ export const TALENTS = freezeAll([
     cost: "111111",
     branch: "season",
     ring: 3,
-    angle: 134.17,
+    angle: 91.22,
     icon: "starterror",
     requires: {
       talentIds: [
@@ -820,7 +820,7 @@ export const TALENTS = freezeAll([
     cost: "111111",
     branch: "season",
     ring: 3,
-    angle: 145.49,
+    angle: 102.54,
     icon: "startrade",
     requires: {
       talentIds: [
@@ -836,7 +836,7 @@ export const TALENTS = freezeAll([
     cost: "117649",
     branch: "demon",
     ring: 7,
-    angle: 71.43,
+    angle: 57.84,
     icon: "beelzebub",
     requires: {
       talentIds: [
@@ -854,7 +854,7 @@ export const TALENTS = freezeAll([
     cost: "117649",
     branch: "angel",
     ring: 7,
-    angle: -66.67,
+    angle: -66.36,
     icon: "seraphim",
     requires: {
       talentIds: [
@@ -872,7 +872,7 @@ export const TALENTS = freezeAll([
     cost: "222222",
     branch: "production",
     ring: 6,
-    angle: 10,
+    angle: 2.17,
     icon: "sinergias_vol_i",
     requires: {
       talentIds: [
@@ -891,7 +891,7 @@ export const TALENTS = freezeAll([
     cost: "399999",
     branch: "discount",
     ring: 5,
-    angle: -27.13,
+    angle: -28.1,
     icon: "divine_bakeries",
     requires: {
       talentIds: [
@@ -911,7 +911,7 @@ export const TALENTS = freezeAll([
     cost: "444444",
     branch: "demon",
     ring: 6,
-    angle: 73.78,
+    angle: 55.4,
     icon: "elder_spice",
     requires: {
       talentIds: [
@@ -929,7 +929,7 @@ export const TALENTS = freezeAll([
     cost: "444444",
     branch: "demon",
     ring: 6,
-    angle: 79.79,
+    angle: 61.41,
     icon: "sacrilegious_corruption",
     requires: {
       talentIds: [
@@ -947,7 +947,7 @@ export const TALENTS = freezeAll([
     cost: "555555",
     branch: "discount",
     ring: 5,
-    angle: -20,
+    angle: 1.95,
     icon: "five_finger_discount",
     requires: {
       talentIds: [
@@ -966,7 +966,7 @@ export const TALENTS = freezeAll([
     cost: "823543",
     branch: "angel",
     ring: 8,
-    angle: -61.11,
+    angle: -60.57,
     icon: "god",
     requires: {
       talentIds: [
@@ -984,7 +984,7 @@ export const TALENTS = freezeAll([
     cost: "823543",
     branch: "demon",
     ring: 8,
-    angle: 82.14,
+    angle: 61.34,
     icon: "lucifer",
     requires: {
       talentIds: [
@@ -1002,7 +1002,7 @@ export const TALENTS = freezeAll([
     cost: "900000",
     branch: "persistent",
     ring: 3,
-    angle: -7.58,
+    angle: 1.85,
     icon: "inspired_checklist",
     requires: {
       talentIds: [
@@ -1022,7 +1022,7 @@ export const TALENTS = freezeAll([
     cost: "999999",
     branch: "misc",
     ring: 4,
-    angle: -5.43,
+    angle: -19.85,
     icon: "golden_cookie_alert_sound",
     requires: {
       talentIds: [
@@ -1040,7 +1040,7 @@ export const TALENTS = freezeAll([
     cost: "999999",
     branch: "season",
     ring: 2,
-    angle: 135.71,
+    angle: 109.5,
     icon: "wrapping_paper",
     requires: {
       talentIds: [
@@ -1058,7 +1058,7 @@ export const TALENTS = freezeAll([
     cost: "1000000",
     branch: "misc",
     ring: 2,
-    angle: 0,
+    angle: -16.78,
     icon: "fanciful_dairy_selection",
     requires: {
       talentIds: [
@@ -1076,7 +1076,7 @@ export const TALENTS = freezeAll([
     cost: "2000000",
     branch: "persistent",
     ring: 4,
-    angle: 3.31,
+    angle: 6.38,
     icon: "contabilidade_genial",
     requires: {
       talentIds: [
@@ -1094,7 +1094,7 @@ export const TALENTS = freezeAll([
     cost: "2222222",
     branch: "production",
     ring: 8,
-    angle: 40,
+    angle: 13.27,
     icon: "sinergias_vol_ii",
     requires: {
       talentIds: [
@@ -1114,7 +1114,7 @@ export const TALENTS = freezeAll([
     cost: "3000000",
     branch: "persistent",
     ring: 3,
-    angle: 3.74,
+    angle: 13.16,
     icon: "permanent_slot_iii",
     requires: {
       talentIds: [
@@ -1132,7 +1132,7 @@ export const TALENTS = freezeAll([
     cost: "5000000",
     branch: "persistent",
     ring: 5,
-    angle: 9.91,
+    angle: 9.08,
     icon: "label_printer",
     requires: {
       talentIds: [
@@ -1150,7 +1150,7 @@ export const TALENTS = freezeAll([
     cost: "6666666",
     branch: "demon",
     ring: 7,
-    angle: 85.71,
+    angle: 63.04,
     icon: "wrinkly_cookies",
     requires: {
       talentIds: [
@@ -1169,7 +1169,7 @@ export const TALENTS = freezeAll([
     cost: "7777777",
     branch: "golden",
     ring: 6,
-    angle: -26,
+    angle: -36.68,
     icon: "distilled_essence_of_redoubled_luck",
     requires: {
       talentIds: [
@@ -1186,7 +1186,7 @@ export const TALENTS = freezeAll([
     cost: "10000000",
     branch: "misc",
     ring: 3,
-    angle: 15.05,
+    angle: -9.47,
     icon: "distinguished_wallpaper_assortment",
     requires: {
       talentIds: [
@@ -1204,7 +1204,7 @@ export const TALENTS = freezeAll([
     cost: "10000000",
     branch: "unshackled",
     ring: 6,
-    angle: -140,
+    angle: -58.3,
     icon: "unshackled_flavor",
     requires: {
       talentIds: [
@@ -1222,7 +1222,7 @@ export const TALENTS = freezeAll([
     cost: "15000000",
     branch: "unshackled",
     ring: 7,
-    angle: 110.88,
+    angle: 28.83,
     icon: "unshackled_cursors",
     requires: {
       talentIds: [
@@ -1240,7 +1240,7 @@ export const TALENTS = freezeAll([
     cost: "40353607",
     branch: "cookie",
     ring: 9,
-    angle: 30,
+    angle: 22.65,
     icon: "quimera",
     requires: {
       talentIds: [
@@ -1262,7 +1262,7 @@ export const TALENTS = freezeAll([
     cost: "77777777",
     branch: "golden",
     ring: 4,
-    angle: -19.13,
+    angle: -46.08,
     icon: "pagamento_da_sorte",
     requires: {
       talentIds: [
@@ -1282,7 +1282,7 @@ export const TALENTS = freezeAll([
     cost: "99999999",
     branch: "demon",
     ring: 8,
-    angle: 88.78,
+    angle: 65.93,
     icon: "eye_of_the_wrinkler",
     requires: {
       talentIds: [
@@ -1300,7 +1300,7 @@ export const TALENTS = freezeAll([
     cost: "100000000",
     branch: "demon",
     ring: 8,
-    angle: 93.36,
+    angle: 70.51,
     icon: "stevia_caelestis",
     requires: {
       talentIds: [
@@ -1316,7 +1316,7 @@ export const TALENTS = freezeAll([
     cost: "200000000",
     branch: "nectar",
     ring: 9,
-    angle: 110,
+    angle: 93.08,
     icon: "cozimento_de_acucar",
     requires: {
       talentIds: [
@@ -1334,7 +1334,7 @@ export const TALENTS = freezeAll([
     cost: "300000000",
     branch: "demon",
     ring: 9,
-    angle: 96.43,
+    angle: 71.58,
     icon: "diabetica_daemonicus",
     requires: {
       talentIds: [
@@ -1351,7 +1351,7 @@ export const TALENTS = freezeAll([
     cost: "400000000",
     branch: "persistent",
     ring: 4,
-    angle: 20.8,
+    angle: 15.13,
     icon: "permanent_slot_iv",
     requires: {
       talentIds: [
@@ -1369,7 +1369,7 @@ export const TALENTS = freezeAll([
     cost: "400000000",
     branch: "nectar",
     ring: 10,
-    angle: 120.82,
+    angle: 109.09,
     icon: "frenesi_de_acucar",
     requires: {
       talentIds: [
@@ -1387,7 +1387,7 @@ export const TALENTS = freezeAll([
     cost: "555555555",
     branch: "discount",
     ring: 5,
-    angle: -12.87,
+    angle: -5.17,
     icon: "aura_gloves",
     requires: {
       talentIds: [
@@ -1405,7 +1405,7 @@ export const TALENTS = freezeAll([
     cost: "600000000",
     branch: "nectar",
     ring: 11,
-    angle: 130,
+    angle: 109.32,
     icon: "sugar_aging_process",
     requires: {
       talentIds: [
@@ -1425,7 +1425,7 @@ export const TALENTS = freezeAll([
     cost: "999999999",
     branch: "golden",
     ring: 7,
-    angle: -22,
+    angle: -39.61,
     icon: "shimmering_veil",
     requires: {
       talentIds: [
@@ -1441,7 +1441,7 @@ export const TALENTS = freezeAll([
     cost: "1000000000",
     branch: "demon",
     ring: 10,
-    angle: 100,
+    angle: 74.57,
     icon: "sucralosia_inutilis",
     requires: {
       talentIds: [
@@ -1457,7 +1457,7 @@ export const TALENTS = freezeAll([
     cost: "1000000000",
     branch: "cookie",
     ring: 10,
-    angle: 32.5,
+    angle: 70.83,
     icon: "sugar_crystal_cookies",
     requires: {
       talentIds: [
@@ -1473,7 +1473,7 @@ export const TALENTS = freezeAll([
     cost: "1111111111",
     branch: "season",
     ring: 4,
-    angle: 140,
+    angle: 98.85,
     icon: "keepsakes",
     requires: {
       talentIds: [
@@ -1493,7 +1493,7 @@ export const TALENTS = freezeAll([
     cost: "1810193360",
     branch: "unshackled",
     ring: 7,
-    angle: -138.24,
+    angle: -99.63,
     icon: "unshackled_berrylium",
     requires: {
       talentIds: [
@@ -1511,7 +1511,7 @@ export const TALENTS = freezeAll([
     cost: "1920000000",
     branch: "unshackled",
     ring: 8,
-    angle: 111.24,
+    angle: 79.26,
     icon: "unshackled_grandmas",
     requires: {
       talentIds: [
@@ -1529,7 +1529,7 @@ export const TALENTS = freezeAll([
     cost: "9000000000",
     branch: "angel",
     ring: 7,
-    angle: -55.56,
+    angle: -61.16,
     icon: "cat_ladies",
     requires: {
       talentIds: [
@@ -1547,7 +1547,7 @@ export const TALENTS = freezeAll([
     cost: "9000000000",
     branch: "angel",
     ring: 7,
-    angle: -50,
+    angle: -55.96,
     icon: "kitten_wages",
     requires: {
       talentIds: [
@@ -1565,7 +1565,7 @@ export const TALENTS = freezeAll([
     cost: "14999999985",
     branch: "golden",
     ring: 8,
-    angle: -21.29,
+    angle: -39.92,
     icon: "cosmic_beginner_s_luck",
     requires: {
       talentIds: [
@@ -1581,7 +1581,7 @@ export const TALENTS = freezeAll([
     cost: "14999999985",
     branch: "golden",
     ring: 8,
-    angle: -16.71,
+    angle: -35.34,
     icon: "reinforced_membrane",
     requires: {
       talentIds: [
@@ -1597,7 +1597,7 @@ export const TALENTS = freezeAll([
     cost: "32805000000",
     branch: "unshackled",
     ring: 9,
-    angle: -136.47,
+    angle: -20.47,
     icon: "unshackled_farms",
     requires: {
       talentIds: [
@@ -1615,7 +1615,7 @@ export const TALENTS = freezeAll([
     cost: "37879951162",
     branch: "unshackled",
     ring: 8,
-    angle: 115.82,
+    angle: 8.68,
     icon: "unshackled_blueberrylium",
     requires: {
       talentIds: [
@@ -1633,7 +1633,7 @@ export const TALENTS = freezeAll([
     cost: "50000000000",
     branch: "persistent",
     ring: 5,
-    angle: 17.04,
+    angle: 16.2,
     icon: "permanent_slot_v",
     requires: {
       talentIds: [
@@ -1651,7 +1651,7 @@ export const TALENTS = freezeAll([
     cost: "55555555555",
     branch: "discount",
     ring: 6,
-    angle: -10,
+    angle: -9.3,
     icon: "luminous_gloves",
     requires: {
       talentIds: [
@@ -1669,7 +1669,7 @@ export const TALENTS = freezeAll([
     cost: "77777777777",
     branch: "golden",
     ring: 7,
-    angle: -16,
+    angle: -34.4,
     icon: "fortune_cookies",
     requires: {
       talentIds: [
@@ -1685,7 +1685,7 @@ export const TALENTS = freezeAll([
     cost: "99999999999",
     branch: "misc",
     ring: 4,
-    angle: 12.06,
+    angle: -11.11,
     icon: "pet_the_dragon",
     requires: {
       talentIds: [
@@ -1704,7 +1704,7 @@ export const TALENTS = freezeAll([
     cost: "99999999999",
     branch: "misc",
     ring: 5,
-    angle: 24.16,
+    angle: -12.3,
     icon: "sound_test",
     requires: {
       talentIds: [
@@ -1724,7 +1724,7 @@ export const TALENTS = freezeAll([
     cost: "149999999985",
     branch: "golden",
     ring: 9,
-    angle: -14,
+    angle: -36.03,
     icon: "delicate_touch",
     requires: {
       talentIds: [
@@ -1740,7 +1740,7 @@ export const TALENTS = freezeAll([
     cost: "245760000000",
     branch: "unshackled",
     ring: 10,
-    angle: -134.71,
+    angle: -74.05,
     icon: "unshackled_mines",
     requires: {
       talentIds: [
@@ -1758,7 +1758,7 @@ export const TALENTS = freezeAll([
     cost: "327680000000",
     branch: "unshackled",
     ring: 9,
-    angle: 116.18,
+    angle: 67.47,
     icon: "unshackled_chalcedhoney",
     requires: {
       talentIds: [
@@ -1776,7 +1776,7 @@ export const TALENTS = freezeAll([
     cost: "333000000000",
     branch: "cookie",
     ring: 11,
-    angle: 34.12,
+    angle: 57.8,
     icon: "box_of_maybe_cookies",
     requires: {
       talentIds: [
@@ -1794,7 +1794,7 @@ export const TALENTS = freezeAll([
     cost: "333000000000",
     branch: "cookie",
     ring: 11,
-    angle: 37.5,
+    angle: 61.24,
     icon: "box_of_not_cookies",
     requires: {
       talentIds: [
@@ -1812,7 +1812,7 @@ export const TALENTS = freezeAll([
     cost: "333000000000",
     branch: "cookie",
     ring: 11,
-    angle: 40.88,
+    angle: 64.68,
     icon: "box_of_pastries",
     requires: {
       talentIds: [
@@ -1830,7 +1830,7 @@ export const TALENTS = freezeAll([
     cost: "900000000000",
     branch: "nectar",
     ring: 8,
-    angle: 140,
+    angle: 28.57,
     icon: "comprimidos_milkhelp",
     requires: {
       talentIds: [
@@ -1848,7 +1848,7 @@ export const TALENTS = freezeAll([
     cost: "1171875000000",
     branch: "unshackled",
     ring: 11,
-    angle: -132.94,
+    angle: -102.24,
     icon: "unshackled_factories",
     requires: {
       talentIds: [
@@ -1866,7 +1866,7 @@ export const TALENTS = freezeAll([
     cost: "1746928107422",
     branch: "unshackled",
     ring: 10,
-    angle: 117.12,
+    angle: 102.03,
     icon: "unshackled_buttergold",
     requires: {
       talentIds: [
@@ -1884,7 +1884,7 @@ export const TALENTS = freezeAll([
     cost: "4199040000000",
     branch: "unshackled",
     ring: 12,
-    angle: -131.18,
+    angle: -116.48,
     icon: "unshackled_banks",
     requires: {
       talentIds: [
@@ -1902,7 +1902,7 @@ export const TALENTS = freezeAll([
     cost: "6857003606358",
     branch: "unshackled",
     ring: 11,
-    angle: 119.71,
+    angle: 120.57,
     icon: "unshackled_sugarmuck",
     requires: {
       talentIds: [
@@ -1920,7 +1920,7 @@ export const TALENTS = freezeAll([
     cost: "12353145000000",
     branch: "unshackled",
     ring: 13,
-    angle: -129.41,
+    angle: -123.04,
     icon: "unshackled_temples",
     requires: {
       talentIds: [
@@ -1938,7 +1938,7 @@ export const TALENTS = freezeAll([
     cost: "14999999999985",
     branch: "golden",
     ring: 10,
-    angle: -12,
+    angle: -34.75,
     icon: "steadfast_murmur",
     requires: {
       talentIds: [
@@ -1954,7 +1954,7 @@ export const TALENTS = freezeAll([
     cost: "21788899719681",
     branch: "unshackled",
     ring: 12,
-    angle: 121.47,
+    angle: 131.04,
     icon: "unshackled_jetmint",
     requires: {
       talentIds: [
@@ -1972,7 +1972,7 @@ export const TALENTS = freezeAll([
     cost: "31457280000000",
     branch: "unshackled",
     ring: 14,
-    angle: -127.65,
+    angle: -125.38,
     icon: "unshackled_wizard_towers",
     requires: {
       talentIds: [
@@ -1990,7 +1990,7 @@ export const TALENTS = freezeAll([
     cost: "59316416015158",
     branch: "unshackled",
     ring: 13,
-    angle: 123.24,
+    angle: 137.06,
     icon: "unshackled_cherrysilver",
     requires: {
       talentIds: [
@@ -2008,7 +2008,7 @@ export const TALENTS = freezeAll([
     cost: "71744535000000",
     branch: "unshackled",
     ring: 15,
-    angle: -125.88,
+    angle: -125.39,
     icon: "unshackled_shipments",
     requires: {
       talentIds: [
@@ -2026,7 +2026,7 @@ export const TALENTS = freezeAll([
     cost: "143489070000000",
     branch: "unshackled",
     ring: 14,
-    angle: 125,
+    angle: 140.63,
     icon: "unshackled_hazelrald",
     requires: {
       talentIds: [
@@ -2044,7 +2044,7 @@ export const TALENTS = freezeAll([
     cost: "150000000000000",
     branch: "unshackled",
     ring: 16,
-    angle: -124.12,
+    angle: -124.13,
     icon: "unshackled_alchemy_labs",
     requires: {
       talentIds: [
@@ -2062,7 +2062,7 @@ export const TALENTS = freezeAll([
     cost: "292307565000000",
     branch: "unshackled",
     ring: 17,
-    angle: 126.76,
+    angle: -2.76,
     icon: "unshackled_portals",
     requires: {
       talentIds: [
@@ -2080,7 +2080,7 @@ export const TALENTS = freezeAll([
     cost: "316227766016838",
     branch: "unshackled",
     ring: 15,
-    angle: -122.35,
+    angle: 23.45,
     icon: "unshackled_mooncandy",
     requires: {
       talentIds: [
@@ -2098,7 +2098,7 @@ export const TALENTS = freezeAll([
     cost: "537477120000000",
     branch: "unshackled",
     ring: 18,
-    angle: 128.53,
+    angle: 64.26,
     icon: "unshackled_time_machines",
     requires: {
       talentIds: [
@@ -2116,7 +2116,7 @@ export const TALENTS = freezeAll([
     cost: "646316344324949",
     branch: "unshackled",
     ring: 16,
-    angle: -120.59,
+    angle: -39.72,
     icon: "unshackled_astrofudge",
     requires: {
       talentIds: [
@@ -2134,7 +2134,7 @@ export const TALENTS = freezeAll([
     cost: "941227755000000",
     branch: "unshackled",
     ring: 19,
-    angle: 130.29,
+    angle: 101.39,
     icon: "unshackled_antimatter_condensers",
     requires: {
       talentIds: [
@@ -2152,7 +2152,7 @@ export const TALENTS = freezeAll([
     cost: "1241250239661060",
     branch: "unshackled",
     ring: 17,
-    angle: -118.82,
+    angle: -73.2,
     icon: "unshackled_alabascream",
     requires: {
       talentIds: [
@@ -2170,7 +2170,7 @@ export const TALENTS = freezeAll([
     cost: "1499999999999985",
     branch: "golden",
     ring: 11,
-    angle: -10,
+    angle: -33.52,
     icon: "glittering_edge",
     requires: {
       talentIds: [
@@ -2186,7 +2186,7 @@ export const TALENTS = freezeAll([
     cost: "1581202560000000",
     branch: "unshackled",
     ring: 20,
-    angle: 132.06,
+    angle: 122.07,
     icon: "unshackled_prisms",
     requires: {
       talentIds: [
@@ -2204,7 +2204,7 @@ export const TALENTS = freezeAll([
     cost: "2262429955028239",
     branch: "unshackled",
     ring: 18,
-    angle: -117.06,
+    angle: -90.34,
     icon: "unshackled_iridyum",
     requires: {
       talentIds: [
@@ -2222,7 +2222,7 @@ export const TALENTS = freezeAll([
     cost: "2562890625000000",
     branch: "unshackled",
     ring: 21,
-    angle: 133.8235294117647,
+    angle: 133.7134605468919,
     icon: "unshackled_chancemakers",
     requires: {
       talentIds: [
@@ -2240,7 +2240,7 @@ export const TALENTS = freezeAll([
     cost: "3944212159073245",
     branch: "unshackled",
     ring: 19,
-    angle: -115.29,
+    angle: -98.5,
     icon: "unshackled_glucosmium",
     requires: {
       talentIds: [
@@ -2258,7 +2258,7 @@ export const TALENTS = freezeAll([
     cost: "4026531840000000",
     branch: "unshackled",
     ring: 22,
-    angle: 135.58823529411765,
+    angle: 140.3806385949082,
     icon: "unshackled_fractal_engines",
     requires: {
       talentIds: [
@@ -2276,7 +2276,7 @@ export const TALENTS = freezeAll([
     cost: "6155080095000000",
     branch: "unshackled",
     ring: 23,
-    angle: -113.52941176470588,
+    angle: 29.668174756611272,
     icon: "unshackled_javascript_consoles",
     requires: {
       talentIds: [
@@ -2294,7 +2294,7 @@ export const TALENTS = freezeAll([
     cost: "6617355139184080",
     branch: "unshackled",
     ring: 20,
-    angle: 137.35,
+    angle: 12.93,
     icon: "unshackled_glimmeringue",
     requires: {
       talentIds: [
@@ -2312,7 +2312,7 @@ export const TALENTS = freezeAll([
     cost: "9183300480000000",
     branch: "unshackled",
     ring: 24,
-    angle: -111.76470588235294,
+    angle: -29.953092119157912,
     icon: "unshackled_idleverses",
     requires: {
       talentIds: [
@@ -2330,7 +2330,7 @@ export const TALENTS = freezeAll([
     cost: "13408076085000000",
     branch: "unshackled",
     ring: 25,
-    angle: 139.11764705882354,
+    angle: 50.893446393286666,
     icon: "unshackled_cortex_bakers",
     requires: {
       talentIds: [
@@ -2348,7 +2348,7 @@ export const TALENTS = freezeAll([
     cost: "19200000000000000",
     branch: "unshackled",
     ring: 26,
-    angle: -110,
+    angle: -17.008604483692324,
     icon: "unshackled_you",
     requires: {
       talentIds: [
@@ -2473,11 +2473,23 @@ export function meetsTalentRequirement(talent, { talents = [] } = {}) {
   return need.every((id) => owned.has(id));
 }
 
+/** Raio polar: rings 1–8 com gap cheio; rings altos comprimidos (árvore menos espalhada). */
+export function talentRingRadius(ring, { ringGap = 88, rootR = 56 } = {}) {
+  const n = Math.max(0, Math.floor(Number(ring) || 0));
+  if (n === 0) return rootR;
+  let r = 36;
+  for (let i = 1; i <= n; i += 1) {
+    const shrink = i <= 8 ? 1 : Math.max(0.45, 1 - 0.035 * (i - 8));
+    r += ringGap * shrink;
+  }
+  return r;
+}
+
 export function talentNodePosition(talent, { cx = 0, cy = 0, ringGap = 88, rootR = 56 } = {}) {
   const ring = Math.max(0, Number(talent?.ring) || 0);
   const angleDeg = Number(talent?.angle) || 0;
   const rad = (angleDeg * Math.PI) / 180;
-  const r = ring === 0 ? rootR : ring * ringGap + 36;
+  const r = talentRingRadius(ring, { ringGap, rootR });
   return {
     x: cx + Math.sin(rad) * r,
     y: cy - Math.cos(rad) * r,

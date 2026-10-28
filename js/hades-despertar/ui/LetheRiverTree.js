@@ -8,6 +8,7 @@ import {
   TALENT_BY_ID,
   meetsTalentRequirement,
   talentNodePosition,
+  talentRingRadius,
 } from '../config/talents.js';
 import { formatSouls } from './NumberFormatter.js';
 import { cmp } from '../core/decimal.js';
@@ -492,14 +493,15 @@ export function bindLetheRiverTree({
       labelsG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       labelsG.setAttribute('data-river-branches', '');
       stage.appendChild(labelsG);
-      // Ângulo mediano da vertente × raio externo ao anel 3 — acompanha o leque real.
-      const LABEL_RING = 3.6;
-      const labelR = LABEL_RING * RING_GAP + ROOT_R;
+      // Ângulo médio real × raio além do ring mediano do branch (evita pilha no centro).
       for (const key of Object.keys(TALENT_BRANCHES)) {
         const branchTalents = TALENTS.filter((t) => t.branch === key);
         if (!branchTalents.length) continue;
         const angles = branchTalents.map((t) => Number(t.angle) || 0).sort((a, b) => a - b);
-        const midAngle = angles[Math.floor(angles.length / 2)] || 0;
+        const midAngle = angles.reduce((s, a) => s + a, 0) / angles.length;
+        const rings = branchTalents.map((t) => Math.max(0, Number(t.ring) || 0)).sort((a, b) => a - b);
+        const medianRing = rings[Math.floor(rings.length / 2)] || 1;
+        const labelR = talentRingRadius(medianRing, { ringGap: RING_GAP, rootR: ROOT_R }) + NODE_R * 2.4;
         const rad = (midAngle * Math.PI) / 180;
         const x = CX + Math.sin(rad) * labelR;
         const y = CY - Math.cos(rad) * labelR;

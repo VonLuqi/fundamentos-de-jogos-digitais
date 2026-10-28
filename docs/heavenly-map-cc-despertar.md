@@ -1,6 +1,6 @@
 # Mapa Heavenly — Cookie Clicker → O Despertar
 
-Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
+Gerado em 2026-10-28 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 
 | CC name | id | branch | cost | requires | effects | status |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -24,7 +24,7 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Permanent upgrade slot I | permanent_slot_i | persistent | 100 | legado | permanentSlot=1 | keep |
 | Abaddon | abadao | demon | 343 | mamon | offlineExtraHours=16 | keep |
 | Virtues | virtues | angel | 343 | archangels | offlineRate=0.10 | new |
-| Persistent memory | persistent_memory | persistent | 500 | legado | buyAllUnlock=true | new |
+| Persistent memory | persistent_memory | persistent | 500 | legado | buyAllUnlock=true, researchDurationMult=0.1 | new |
 | Lasting fortune | lasting_fortune | golden | 777 | heavenly_luck | shimmerLuckMult=1.02 | new |
 | Lucky digit | lucky_digit | golden | 777 | heavenly_luck | prestigeEffectMult=1.01, shimmerLuckMult=1.01 | new |
 | Golden switch | golden_switch | golden | 999 | heavenly_luck | goldenSwitchUnlock=true | new |
@@ -33,11 +33,11 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Satan | satan | demon | 2401 | abadao | offlineExtraHours=32 | new |
 | Starter kitchen | cozinha_inicial | cookie | 5000 | kit_inicial | startingGeneratorId=charon_servants, startingGeneratorQty=5 | keep |
 | Decisive fate | decisive_fate | golden | 7777 | lasting_fortune | shimmerLuckMult=1.02 | new |
-| Kitten angels | kitten_angels | angel | 9000 | dominions | allGeneratorsMult=1.05 | new |
+| Kitten angels | kitten_angels | angel | 9000 | dominions | kittenVeilFactor=0.1 | new |
 | Asmodeus | asmodeus | demon | 16807 | satan | offlineExtraHours=64 | new |
 | Cherubim | cherubim | angel | 16807 | dominions | offlineRate=0.10 | new |
 | Permanent upgrade slot II | permanent_slot_ii | persistent | 20000 | permanent_slot_i | permanentSlot=2 | keep |
-| Unholy bait | unholy_bait | demon | 44444 | cozinha_inicial | — | new |
+| Unholy bait | unholy_bait | demon | 44444 | cozinha_inicial | leechSpawnMult=5 | new |
 | Halo gloves | luvas_de_halo | discount | 55555 | kit_inicial | clickTalentMult=1.10 | keep |
 | Lucky number | numero_da_sorte | golden | 77777 | lucky_digit, lasting_fortune | prestigeEffectMult=1.01, shimmerLuckMult=1.01 | keep |
 | Divine discount | desconto_divino | discount | 99999 | decisive_fate | generatorCostMult=0.99 | keep |
@@ -52,8 +52,8 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Seraphim | seraphim | angel | 117649 | cherubim | offlineRate=0.10 | new |
 | Synergies Vol. I | sinergias_vol_i | production | 222222 | satan, dominions | synergyVolUnlock=1 | keep |
 | Divine bakeries | divine_bakeries | discount | 399999 | vendas_divinas, desconto_divino | generatorCostMult=0.99, upgradeCostMult=0.99 | new |
-| Elder spice | elder_spice | demon | 444444 | unholy_bait | nectarReserveBonus=true | new |
-| Sacrilegious corruption | sacrilegious_corruption | demon | 444444 | unholy_bait | allGeneratorsMult=1.05 | new |
+| Elder spice | elder_spice | demon | 444444 | unholy_bait | leechCapBonus=2 | new |
+| Sacrilegious corruption | sacrilegious_corruption | demon | 444444 | unholy_bait | leechPayoutMult=1.05 | new |
 | Five-finger discount | five_finger_discount | discount | 555555 | luvas_de_halo, abadao | generatorCostMult=0.99 | new |
 | God | god | angel | 823543 | seraphim | offlineRate=0.05 | new |
 | Lucifer | lucifer | demon | 823543 | beelzebub | offlineExtraHours=256 | new |
@@ -72,7 +72,7 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Unshackled cursors | unshackled_cursors | unshackled | 15000000 | unshackled_flavor | unshackleFingers=true | new |
 | Chimera | quimera | cookie | 40353607 | god, lucifer, sinergias_vol_ii | offlineRate=0.05, offlineExtraHours=48, upgradeCostMult=0.99 | keep |
 | Lucky payout | pagamento_da_sorte | golden | 77777777 | numero_da_sorte, decisive_fate | prestigeEffectMult=1.01, shimmerLuckMult=1.01 | keep |
-| Eye of the wrinkler | eye_of_the_wrinkler | demon | 99999999 | wrinkly_cookies | allGeneratorsMult=1.05 | new |
+| Eye of the wrinkler | eye_of_the_wrinkler | demon | 99999999 | wrinkly_cookies | leechDigestVisible=true | new |
 | Stevia Caelestis | stevia_caelestis | demon | 100000000 | wrinkly_cookies | — | new |
 | Sugar baking | cozimento_de_acucar | nectar | 200000000 | stevia_caelestis | nectarReserveBonus=true | keep |
 | Diabetica Daemonicus | diabetica_daemonicus | demon | 300000000 | stevia_caelestis, lucifer | — | new |
@@ -86,8 +86,8 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Keepsakes | keepsakes | season | 1111111111 | starsnow, starlove, starterror, startrade, starspawn | — | new |
 | Unshackled berrylium | unshackled_berrylium | unshackled | 1810193360 | unshackled_flavor | cosmeticId=berrylium | new |
 | Unshackled grandmas | unshackled_grandmas | unshackled | 1920000000 | unshackled_cursors | unshackleGeneratorId=charon_servants | new |
-| Cat ladies | cat_ladies | angel | 9000000000 | kitten_angels | allGeneratorsMult=1.10 | new |
-| Kitten wages | kitten_wages | angel | 9000000000 | kitten_angels | upgradeCostMult=0.90 | new |
+| Cat ladies | cat_ladies | angel | 9000000000 | kitten_angels | catLadies=true | new |
+| Kitten wages | kitten_wages | angel | 9000000000 | kitten_angels | kittenUpgradeDiscount=true | new |
 | Cosmic beginner's luck | cosmic_beginner_s_luck | golden | 14999999985 | shimmering_veil | — | new |
 | Reinforced membrane | reinforced_membrane | golden | 14999999985 | shimmering_veil | — | new |
 | Unshackled farms | unshackled_farms | unshackled | 32805000000 | unshackled_grandmas | unshackleGeneratorId=cerberian_hound | new |
@@ -103,7 +103,7 @@ Gerado em 2026-10-27 por `scripts/gen-heavenly-talent-catalog.mjs` (129 nós).
 | Box of maybe cookies | box_of_maybe_cookies | cookie | 333000000000 | sugar_crystal_cookies | cosmeticId=box_of_maybe_cookies | new |
 | Box of not cookies | box_of_not_cookies | cookie | 333000000000 | sugar_crystal_cookies | cosmeticId=box_of_not_cookies | new |
 | Box of pastries | box_of_pastries | cookie | 333000000000 | sugar_crystal_cookies | cosmeticId=box_of_pastries | new |
-| Milkhelp® lactose intolerance relief tablets | comprimidos_milkhelp | nectar | 900000000000 | cat_ladies | allGeneratorsMult=1.05 | keep |
+| Milkhelp® lactose intolerance relief tablets | comprimidos_milkhelp | nectar | 900000000000 | cat_ladies | milkhelpServants=true | keep |
 | Unshackled factories | unshackled_factories | unshackled | 1171875000000 | unshackled_mines | unshackleGeneratorId=phlegethon_forge | new |
 | Unshackled buttergold | unshackled_buttergold | unshackled | 1746928107422 | unshackled_chalcedhoney | cosmeticId=buttergold | new |
 | Unshackled banks | unshackled_banks | unshackled | 4199040000000 | unshackled_factories | unshackleGeneratorId=obsidian_throne | new |
