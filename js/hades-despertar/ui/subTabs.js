@@ -7,7 +7,7 @@ export const PANTHEON_EMPTY_AVAILABLE = 'O Panteão está completo.';
 export const PANTHEON_EMPTY_OWNED = 'Ainda não selaste nenhum talento.';
 export const BANCADA_EMPTY_AVAILABLE = 'A Bancada não tem mais sentenças.';
 export const BANCADA_EMPTY_OWNED = 'Nenhuma sentença comprada.';
-export const SHOP_OWNED_BADGE = 'Ativo';
+export const SHOP_OWNED_BADGE = 'Na Bancada';
 
 /**
  * Particiona catálogo: owned vs available; available ordenado affordable → pobre → locked.

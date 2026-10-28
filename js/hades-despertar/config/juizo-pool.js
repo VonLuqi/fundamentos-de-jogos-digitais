@@ -15,9 +15,9 @@ export const JUIZO_CTA_LABEL = 'Juízo · ClassInd';
 export const JUIZO_CTA_READY_HINT =
   'Vereditos vêm dos marcos do teu melhor streak — não de cada acerto.';
 
-/** Bancada (B4 / J.1): Vereditos + distinção Q16. */
+/** Bancada (B4 / J.1): Vereditos + distinção Q16 — uma frase no painel. */
 export const JUIZO_BANCADA_HINT =
-  'Vereditos: marcos do melhor streak no Juízo (não cada acerto). Bancada sobrevive ao Lethe. Juízo ≠ Juiz do Tártaro (gerador) ≠ Juramentos do Styx.';
+  'Vereditos vêm dos marcos do teu melhor streak no Juízo; a Bancada sobrevive ao Lethe.';
 
 /** Modal play hint (J.1). */
 export const JUIZO_MODAL_EDU_HINT =

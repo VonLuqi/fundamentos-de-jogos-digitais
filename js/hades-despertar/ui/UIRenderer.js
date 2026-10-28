@@ -84,7 +84,11 @@ import { describeUnitPersona } from './unitPersona.js';
 import { WorldView } from './world/WorldView.js';
 import { ShimmerView } from './ShimmerView.js';
 import { MinigamesView } from './minigames/MinigamesView.js';
-import { ArquivoEstigioView, isArquivoTabUnlocked } from './ArquivoEstigioView.js';
+import {
+  ArquivoEstigioView,
+  arquivoBuyFailureMessage,
+  isArquivoTabUnlocked,
+} from './ArquivoEstigioView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
 import { withPerfMeasure } from './perfTelemetry.js';
@@ -2461,6 +2465,17 @@ export class UIRenderer {
     if (!this.state?.buyUpgrade) return;
     const res = this.state.buyUpgrade(id);
     if (res?.ok) this.markDirty('all');
+    else this.flashArquivoBuyFailure(id, res);
+  }
+
+  flashArquivoBuyFailure(id, result = {}) {
+    const message = arquivoBuyFailureMessage(result, id);
+    this._arquivoView?.showFeedback?.(message);
+    showTutorialToast({
+      text: message,
+      root: this.root,
+      holdMs: 4500,
+    });
   }
 
   #renderArquivo(state) {
@@ -3077,6 +3092,7 @@ export class UIRenderer {
       const blurb = this.root.createElement('p');
       blurb.className = 'despertar-card__blurb';
       blurb.textContent = def.blurb;
+      blurb.hidden = true;
 
       const meta = this.root.createElement('p');
       meta.className = 'despertar-card__meta';
@@ -3101,15 +3117,36 @@ export class UIRenderer {
         if (buy.disabled) return;
         this.onBuyVerdict?.(def.id);
       });
-      buy.addEventListener('pointerenter', () => this.#showBancadaTip(def.id, buy));
-      buy.addEventListener('pointerleave', () => this.#hideBancadaTip(def.id));
-      buy.addEventListener('focus', () => this.#showBancadaTip(def.id, buy));
+      buy.addEventListener('focus', () => this.#showBancadaTip(def.id, item));
       buy.addEventListener('blur', () => this.#hideBancadaTip(def.id));
+
+      // Tip no card inteiro (como Mercado) — botão disabled não recebe hover.
+      item.addEventListener('pointerenter', () => this.#showBancadaTip(def.id, item));
+      item.addEventListener('pointerleave', (event) => {
+        if (item.contains(event.relatedTarget)) return;
+        this.#hideBancadaTip(def.id);
+      });
 
       item.append(name, blurb, meta, badge, buy);
       listA.append(item);
       this._verdicts.set(def.id, { item, price, buy, badge, blurb });
     }
+
+    listA.addEventListener('pointerleave', (event) => {
+      if (event.currentTarget?.contains?.(event.relatedTarget)) return;
+      this.#hideBancadaTip();
+    });
+    listB.addEventListener('pointerleave', (event) => {
+      if (event.currentTarget?.contains?.(event.relatedTarget)) return;
+      this.#hideBancadaTip();
+    });
+
+    this._bancada.emptyOwned?.addEventListener?.('click', (event) => {
+      const cta = event.target?.closest?.('[data-bancada-open-juizo]');
+      if (!cta) return;
+      event.preventDefault();
+      this.root.getElementById('despertar-juizo-open')?.click?.();
+    });
   }
 
   #showBancadaTip(id, anchor) {
@@ -3121,10 +3158,13 @@ export class UIRenderer {
     setText(tip.effect || tip.blurb, view.blurb);
     setHidden(tip.flavor, true);
     this.#fillCosmeticTipPreview(tip, view.cosmetic);
-    setText(
-      tip.cost,
-      view.owned ? 'Na Bancada' : `Custo: ${view.cost} Vereditos`,
-    );
+    let costLine = 'Na Bancada';
+    if (!view.owned) {
+      costLine = view.canBuy
+        ? `Custo: ${view.cost} Vereditos · Pode comprar`
+        : `Custo: ${view.cost} Vereditos · Vereditos insuficientes`;
+    }
+    setText(tip.cost, costLine);
     tip.activeId = id;
     tip.activeAnchor = anchor;
     tip.root.hidden = false;
@@ -3164,6 +3204,7 @@ export class UIRenderer {
     tip.activeAnchor?.removeAttribute?.('aria-describedby');
     tip.activeAnchor = null;
     for (const nodes of this._verdicts.values()) {
+      nodes.item?.removeAttribute?.('aria-describedby');
       nodes.buy?.removeAttribute('aria-describedby');
     }
   }
@@ -3204,12 +3245,14 @@ export class UIRenderer {
       const nodes = this._verdicts.get(card.id);
       if (!nodes) continue;
       toggleClass(nodes.item, 'is-owned', false);
+      toggleClass(nodes.item, 'is-affordable', Boolean(card.canBuy));
+      toggleClass(nodes.item, 'is-unaffordable', !card.canBuy);
       setText(nodes.price, String(card.cost));
       setText(nodes.buy, 'Comprar');
       setDisabled(nodes.buy, !card.canBuy);
       setHidden(nodes.buy, false);
       setHidden(nodes.badge, true);
-      if (nodes.blurb) setText(nodes.blurb, card.blurb);
+      setHidden(nodes.blurb, true);
       if (remount) listA?.append(nodes.item);
     }
 
@@ -3217,13 +3260,15 @@ export class UIRenderer {
       const nodes = this._verdicts.get(card.id);
       if (!nodes) continue;
       toggleClass(nodes.item, 'is-owned', true);
+      toggleClass(nodes.item, 'is-affordable', false);
+      toggleClass(nodes.item, 'is-unaffordable', false);
       setText(nodes.price, String(card.cost));
       setText(nodes.buy, 'Na Bancada');
       setDisabled(nodes.buy, true);
       setHidden(nodes.buy, true);
       setHidden(nodes.badge, false);
       setText(nodes.badge, SHOP_OWNED_BADGE);
-      if (nodes.blurb) setText(nodes.blurb, card.blurb);
+      setHidden(nodes.blurb, true);
       if (remount) listB?.append(nodes.item);
     }
 
@@ -3237,17 +3282,30 @@ export class UIRenderer {
       setText(this._bancada.emptyAvailable, BANCADA_EMPTY_AVAILABLE);
     }
     if (emptyB && this._bancada.emptyOwned) {
-      setText(this._bancada.emptyOwned, BANCADA_EMPTY_OWNED);
+      const juizoCta = this.root.getElementById('despertar-juizo-open');
+      if (juizoCta && this._bancada.emptyOwned.replaceChildren) {
+        this._bancada.emptyOwned.replaceChildren();
+        const text = this.root.createElement('span');
+        text.textContent = `${BANCADA_EMPTY_OWNED} Ganhe Vereditos no Juízo. `;
+        const btn = this.root.createElement('button');
+        btn.type = 'button';
+        btn.className = 'despertar-ghost';
+        btn.setAttribute('data-bancada-open-juizo', '');
+        btn.textContent = 'Abrir o Juízo';
+        this._bancada.emptyOwned.append(text, btn);
+      } else {
+        setText(this._bancada.emptyOwned, BANCADA_EMPTY_OWNED);
+      }
     }
 
     this.#syncBancadaSubTab(partitioned.counts.available);
 
     if (this._bancadaTip?.activeId) {
       const active = this._verdicts.get(this._bancadaTip.activeId);
-      if (!active || active.buy?.hidden) {
+      if (!active?.item) {
         this.#hideBancadaTip();
-      } else if (active.buy && !this._bancadaTip.root.hidden) {
-        this.#showBancadaTip(this._bancadaTip.activeId, active.buy);
+      } else if (!this._bancadaTip.root.hidden) {
+        this.#showBancadaTip(this._bancadaTip.activeId, active.item);
       }
     }
   }

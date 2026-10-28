@@ -2372,8 +2372,8 @@ export class GameState {
 
   buyUpgrade(id) {
     const upgrade = getUpgrade(id);
-    if (!upgrade) return { ok: false };
-    if (this.upgrades.includes(id)) return { ok: false };
+    if (!upgrade) return { ok: false, reason: 'missing' };
+    if (this.upgrades.includes(id)) return { ok: false, reason: 'already_owned' };
     if (!meetsUpgradeRequirement(upgrade, {
       souls: this.souls,
       generators: this.quantities(),
@@ -2386,11 +2386,13 @@ export class GameState {
       seasons: this.seasons,
       fortunes: this.fortunes,
     })) {
-      return { ok: false };
+      return { ok: false, reason: 'requires' };
     }
     const free = this.isFreeShopping();
     const effCost = this.upgradeCost(upgrade);
-    if (!free && !this.#spendSouls(effCost)) return { ok: false };
+    if (!free && !this.#spendSouls(effCost)) {
+      return { ok: false, reason: 'insufficient_souls', cost: money(effCost) };
+    }
     this.upgrades = [...this.upgrades, id];
     this.catabase = normalizeCatabaseState(this.catabase, this.#catabaseNormalizeOpts());
     this.dragon = normalizeDragonState(this.dragon, { upgrades: this.upgrades });

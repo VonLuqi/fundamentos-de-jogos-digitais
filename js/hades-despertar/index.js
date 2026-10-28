@@ -1414,6 +1414,8 @@ async function init() {
         const reducedMotion = juicePrefersReducedMotion();
         flashStyx({ reducedMotion });
         sealUpgradeIcon(document, id, { reducedMotion });
+      } else {
+        uiRef.renderer?.flashArquivoBuyFailure?.(id, result);
       }
       if (!state.isFreeShopping?.()) {
         api.requestSync();

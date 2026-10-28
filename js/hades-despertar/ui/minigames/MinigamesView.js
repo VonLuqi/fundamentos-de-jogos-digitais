@@ -1,6 +1,6 @@
 /**
  * MinigamesView (Fase F5 — Néctar do Lethe + 4 Minigames Temáticos).
- * Renderiza sob demanda (on-dirty / quando visível) o HUD de Néctar, botões de nível de gerador
+ * Renderiza sob demanda (on-dirty / quando visível) o HUD de Néctar, colmeia de níveis de gerador
  * e as secções dos 4 minigames (Panteão Ctoniano, Grimório de Hécate, Jardim de Perséfone e Mercado de Caronte).
  * Zero `requestAnimationFrame` próprio; respeita o orçamento de render da Fase Perf.
  */
@@ -11,6 +11,8 @@ import {
   GARDEN_SOILS,
   GRIMOIRE_SPELLS,
   MARKET_GOODS,
+  MINIGAME_UNLOCK_GENERATORS,
+  NECTAR_CONFIG,
   NECTAR_VARIANT_BY_ID,
   PANTHEON_SLOTS,
   PANTHEON_SPIRITS,
@@ -19,7 +21,24 @@ import { nextGeneratorLevelCost } from '../../core/NectarSystem.js';
 import { calculateSpellCost } from '../../core/minigames/GrimoireSystem.js';
 import { calculateSeedPlantCost } from '../../core/minigames/GardenSystem.js';
 import { calculateGoodMaxStock, calculateMarketTradeSouls } from '../../core/minigames/MarketSystem.js';
+import { formatDuration } from '../../services/OfflineEngine.js';
 import { formatSouls } from '../NumberFormatter.js';
+import { createSpriteNode, generatorSprite } from '../world/SpriteAtlas.js';
+
+const HIVE_COLS = 5;
+
+const MINIGAME_UNLOCK_LABEL = Object.freeze({
+  pantheon: 'Panteão',
+  grimoire: 'Grimório',
+  garden: 'Jardim',
+  market: 'Mercado',
+});
+
+const MINIGAME_BY_GENERATOR = Object.freeze(
+  Object.fromEntries(
+    Object.entries(MINIGAME_UNLOCK_GENERATORS).map(([minigameId, genId]) => [genId, minigameId]),
+  ),
+);
 
 function setText(node, value) {
   if (!node) return;
@@ -37,6 +56,21 @@ function setDisabled(node, disabled) {
   if (node.disabled !== Boolean(disabled)) node.disabled = Boolean(disabled);
 }
 
+function setClass(node, className, on) {
+  if (!node?.classList) return;
+  node.classList.toggle(className, Boolean(on));
+}
+
+function chunk(list, size) {
+  const out = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
+}
+
+function formatNectarEta(ms) {
+  return formatDuration(Math.max(0, Math.ceil(Number(ms) || 0) / 1000));
+}
+
 export class MinigamesView {
   constructor(options = {}) {
     this._doc = options.document || (typeof document !== 'undefined' ? document : null);
@@ -52,8 +86,12 @@ export class MinigamesView {
     this._onSellGood = typeof options.onSellGood === 'function' ? options.onSellGood : null;
 
     this._host = null;
+    this._nectarPanel = null;
     this._nectarValEl = null;
     this._nectarStageEl = null;
+    this._nectarEtaEl = null;
+    this._nectarProgressEl = null;
+    this._nectarHintEl = null;
     this._harvestBtn = null;
     this._frenzyBtn = null;
     this._selectedSeedId = GARDEN_SEEDS[0]?.id || 'asfodelo_cinzento';
@@ -72,32 +110,79 @@ export class MinigamesView {
     if (!host || !this._doc?.createElement) return this;
     host.replaceChildren?.();
 
-    // 1. Bloco Néctar do Lethe
+    // 1. Bloco Néctar do Lethe (colmeia de Artes Ctonianas)
     const nectarBox = this._doc.createElement('section');
     nectarBox.className = 'despertar-nectar-panel';
     nectarBox.id = 'despertar-nectar-panel';
+    nectarBox.setAttribute('aria-labelledby', 'despertar-nectar-heading');
+    this._nectarPanel = nectarBox;
+
+    const header = this._doc.createElement('header');
+    header.className = 'despertar-nectar-panel__header';
 
     const title = this._doc.createElement('h3');
-    title.className = 'despertar-subsection';
+    title.className = 'despertar-nectar-panel__title';
+    title.id = 'despertar-nectar-heading';
     title.textContent = 'Néctar do Lethe & Artes Ctonianas';
 
-    const statusLine = this._doc.createElement('p');
-    statusLine.className = 'despertar-card__meta';
-    this._nectarValEl = this._doc.createElement('span');
-    this._nectarValEl.className = 'despertar-num';
+    const stock = this._doc.createElement('div');
+    stock.className = 'despertar-nectar-stock';
+    stock.setAttribute('aria-live', 'polite');
+
+    const drop = this._doc.createElement('span');
+    drop.className = 'despertar-nectar-stock__drop';
+    drop.setAttribute('aria-hidden', 'true');
+    drop.textContent = '◆';
+
+    const stockBody = this._doc.createElement('div');
+    stockBody.className = 'despertar-nectar-stock__body';
+
+    const stockLabel = this._doc.createElement('span');
+    stockLabel.className = 'despertar-nectar-stock__label';
+    stockLabel.textContent = 'Néctares';
+
+    this._nectarValEl = this._doc.createElement('strong');
+    this._nectarValEl.className = 'despertar-nectar-stock__value despertar-num';
     this._nectarValEl.dataset.nectarCount = '';
     this._nectarValEl.textContent = '0';
+
+    stockBody.append(stockLabel, this._nectarValEl);
+    stock.append(drop, stockBody);
+
+    const stageWrap = this._doc.createElement('div');
+    stageWrap.className = 'despertar-nectar-stage';
+
     this._nectarStageEl = this._doc.createElement('span');
-    this._nectarStageEl.dataset.nectarStage = '';
-    this._nectarStageEl.textContent = ' · Selado (requer 1B almas de vida)';
-    statusLine.append('Néctares: ', this._nectarValEl, this._nectarStageEl);
+    this._nectarStageEl.className = 'despertar-nectar-stage__chip';
+    this._nectarStageEl.dataset.nectarStage = 'locked';
+    this._nectarStageEl.textContent = 'Selado';
+
+    this._nectarEtaEl = this._doc.createElement('span');
+    this._nectarEtaEl.className = 'despertar-nectar-stage__eta';
+    this._nectarEtaEl.textContent = 'Requer 1B almas de vida';
+
+    const progressTrack = this._doc.createElement('div');
+    progressTrack.className = 'despertar-nectar-progress';
+    progressTrack.setAttribute('role', 'progressbar');
+    progressTrack.setAttribute('aria-valuemin', '0');
+    progressTrack.setAttribute('aria-valuemax', '100');
+    progressTrack.setAttribute('aria-valuenow', '0');
+    progressTrack.setAttribute('aria-label', 'Progresso do ciclo de Néctar');
+    this._nectarProgressTrack = progressTrack;
+
+    this._nectarProgressEl = this._doc.createElement('span');
+    this._nectarProgressEl.className = 'despertar-nectar-progress__fill';
+    progressTrack.append(this._nectarProgressEl);
+
+    stageWrap.append(this._nectarStageEl, this._nectarEtaEl, progressTrack);
+    header.append(title, stock, stageWrap);
 
     const actions = this._doc.createElement('div');
     actions.className = 'despertar-nectar-actions';
 
     const harvestBtn = this._doc.createElement('button');
     harvestBtn.type = 'button';
-    harvestBtn.className = 'btn-gold';
+    harvestBtn.className = 'btn-gold despertar-nectar-harvest';
     harvestBtn.dataset.action = 'harvest-nectar';
     harvestBtn.textContent = 'Colher Néctar';
     harvestBtn.disabled = true;
@@ -106,31 +191,39 @@ export class MinigamesView {
 
     const frenzyBtn = this._doc.createElement('button');
     frenzyBtn.type = 'button';
-    frenzyBtn.className = 'despertar-ghost';
+    frenzyBtn.className = 'despertar-ghost despertar-nectar-frenzy';
     frenzyBtn.dataset.action = 'nectar-frenzy';
-    frenzyBtn.textContent = 'Frenesi de Néctar (×3 SPS / 1h · 1 Néctar)';
+    frenzyBtn.title = 'Consagra 1 Néctar para ×3 SPS durante 1 hora (1× por corrida).';
+    frenzyBtn.textContent = 'Frenesi · ×3 SPS / 1h';
     frenzyBtn.disabled = true;
     frenzyBtn.addEventListener?.('click', () => this._onActivateFrenzy?.());
     this._frenzyBtn = frenzyBtn;
 
     actions.append(harvestBtn, frenzyBtn);
 
-    // Lista compacta de Níveis de Gerador
-    const levelsList = this._doc.createElement('div');
-    levelsList.className = 'despertar-nectar-levels';
-    for (const gen of GENERATORS) {
-      const btn = this._doc.createElement('button');
-      btn.type = 'button';
-      btn.className = 'despertar-debug__grant';
-      btn.dataset.levelUpGen = gen.id;
-      btn.textContent = `${gen.name} Lv.0 (1 Néctar)`;
-      btn.disabled = true;
-      btn.addEventListener?.('click', () => this._onLevelUpGenerator?.(gen.id));
-      levelsList.append(btn);
-      this._levelBtns.set(gen.id, btn);
+    this._nectarHintEl = this._doc.createElement('p');
+    this._nectarHintEl.className = 'despertar-nectar-hint';
+    this._nectarHintEl.textContent = 'Cada nível na colmeia concede +1% SPS daquela linha. Células com selo abrem minijogos no Lv.1.';
+
+    const hive = this._doc.createElement('div');
+    hive.className = 'despertar-nectar-hive';
+    hive.setAttribute('role', 'list');
+    hive.setAttribute('aria-label', 'Artes Ctonianas — níveis de gerador');
+
+    for (const [rowIndex, rowGens] of chunk(GENERATORS, HIVE_COLS).entries()) {
+      const row = this._doc.createElement('div');
+      row.className = 'despertar-nectar-hive__row';
+      if (rowIndex % 2 === 1) row.classList.add('despertar-nectar-hive__row--offset');
+
+      for (const gen of rowGens) {
+        const btn = this.#createHiveCell(gen);
+        row.append(btn);
+        this._levelBtns.set(gen.id, btn);
+      }
+      hive.append(row);
     }
 
-    nectarBox.append(title, statusLine, actions, levelsList);
+    nectarBox.append(header, actions, this._nectarHintEl, hive);
     host.append(nectarBox);
 
     // 2. Secções dos 4 Minigames (ocultas até que o gerador correspondente atinja Lv.1)
@@ -140,6 +233,67 @@ export class MinigamesView {
     this.#mountMarketSection(host);
 
     return this;
+  }
+
+  #createHiveCell(gen) {
+    const btn = this._doc.createElement('button');
+    btn.type = 'button';
+    btn.className = 'despertar-nectar-hex';
+    btn.dataset.levelUpGen = gen.id;
+    btn.setAttribute('role', 'listitem');
+    btn.disabled = true;
+    btn.addEventListener?.('click', () => this._onLevelUpGenerator?.(gen.id));
+
+    const face = this._doc.createElement('span');
+    face.className = 'despertar-nectar-hex__face';
+
+    const iconHost = this._doc.createElement('span');
+    iconHost.className = 'despertar-nectar-hex__icon';
+    iconHost.append(createSpriteNode(this._doc, generatorSprite(gen.id), {
+      className: 'despertar-sprite despertar-nectar-hex__sprite',
+    }));
+
+    const name = this._doc.createElement('span');
+    name.className = 'despertar-nectar-hex__name';
+    name.textContent = gen.name;
+
+    const lv = this._doc.createElement('span');
+    lv.className = 'despertar-nectar-hex__lv despertar-num';
+    lv.dataset.hexLv = '';
+    lv.textContent = '0';
+
+    const cost = this._doc.createElement('span');
+    cost.className = 'despertar-nectar-hex__cost';
+    cost.dataset.hexCost = '';
+    cost.textContent = '1 néctar';
+
+    face.append(iconHost, name, lv, cost);
+
+    const minigameId = MINIGAME_BY_GENERATOR[gen.id];
+    if (minigameId) {
+      btn.classList.add('despertar-nectar-hex--portal');
+      btn.dataset.minigameUnlock = minigameId;
+      const seal = this._doc.createElement('span');
+      seal.className = 'despertar-nectar-hex__seal';
+      seal.textContent = MINIGAME_UNLOCK_LABEL[minigameId] || 'Minijogo';
+      face.append(seal);
+    }
+
+    btn.append(face);
+    btn._hexLv = lv;
+    btn._hexCost = cost;
+    btn._hexName = gen.name;
+    return btn;
+  }
+
+  #setNectarProgress(ratio) {
+    const pct = Math.round(Math.min(1, Math.max(0, Number(ratio) || 0)) * 100);
+    if (this._nectarProgressEl) {
+      this._nectarProgressEl.style.width = `${pct}%`;
+    }
+    if (this._nectarProgressTrack) {
+      this._nectarProgressTrack.setAttribute('aria-valuenow', String(pct));
+    }
   }
 
   #mountPantheonSection(host) {
@@ -300,35 +454,104 @@ export class MinigamesView {
 
     const cycle = typeof state.nectarStatus === 'function'
       ? state.nectarStatus()
-      : { unlocked: false, stage: 'locked', canManualHarvest: false, variantId: 'nectar_normal' };
+      : {
+        unlocked: false,
+        stage: 'locked',
+        canManualHarvest: false,
+        variantId: 'nectar_normal',
+        elapsedMs: 0,
+        remainingToRipeMs: NECTAR_CONFIG.ripeMs,
+        remainingToMatureMs: NECTAR_CONFIG.matureMs,
+        remainingToAutoMs: NECTAR_CONFIG.autoHarvestMs,
+        harvestChance: 0,
+      };
     const vDef = NECTAR_VARIANT_BY_ID[cycle.variantId] || NECTAR_VARIANT_BY_ID.nectar_normal;
+    const stage = cycle.unlocked ? (cycle.stage || 'budding') : 'locked';
+
+    if (this._nectarStageEl) this._nectarStageEl.dataset.nectarStage = stage;
+    if (this._nectarPanel) this._nectarPanel.dataset.nectarStage = stage;
 
     if (!cycle.unlocked) {
-      setText(this._nectarStageEl, ' · Selado (requer 1B almas de vida)');
+      setText(this._nectarStageEl, 'Selado');
+      setText(this._nectarEtaEl, 'Requer 1B almas de vida');
       setDisabled(this._harvestBtn, true);
+      setClass(this._harvestBtn, 'is-ready', false);
+      this.#setNectarProgress(0);
     } else {
       const stageLabels = {
         budding: 'Brotando',
-        mature: 'Maduro (50% chance)',
-        ripe: 'Pronto (100%)',
+        mature: 'Maduro · 50%',
+        ripe: 'Pronto · 100%',
         autoharvest: 'Queda iminente',
       };
-      setText(this._nectarStageEl, ` · ${vDef.name}: ${stageLabels[cycle.stage] || cycle.stage}`);
+      setText(this._nectarStageEl, stageLabels[stage] || stage);
+
+      let eta = `${vDef.name}`;
+      if (stage === 'budding') {
+        eta = `${vDef.name} · maduro em ${formatNectarEta(cycle.remainingToMatureMs)}`;
+      } else if (stage === 'mature') {
+        eta = `${vDef.name} · pronto em ${formatNectarEta(cycle.remainingToRipeMs)}`;
+      } else if (stage === 'ripe') {
+        eta = `${vDef.name} · colha agora`;
+      } else if (stage === 'autoharvest') {
+        eta = `${vDef.name} · auto-colheita`;
+      }
+      setText(this._nectarEtaEl, eta);
+
+      const progress = Math.min(1, Math.max(0, Number(cycle.elapsedMs) || 0) / NECTAR_CONFIG.ripeMs);
+      this.#setNectarProgress(stage === 'ripe' || stage === 'autoharvest' ? 1 : progress);
       setDisabled(this._harvestBtn, !cycle.canManualHarvest);
+      setClass(this._harvestBtn, 'is-ready', Boolean(cycle.canManualHarvest));
+      setText(
+        this._harvestBtn,
+        cycle.stage === 'mature' ? 'Colher (50%)' : 'Colher Néctar',
+      );
     }
 
-    const canFrenzy = !state.nectarFrenzyUsedThisRun && (nectar >= 1 || state.isFreeShopping?.());
+    const frenzyUsed = Boolean(state.nectarFrenzyUsedThisRun);
+    const canFrenzy = !frenzyUsed && (nectar >= 1 || state.isFreeShopping?.());
     setDisabled(this._frenzyBtn, !canFrenzy);
+    setClass(this._frenzyBtn, 'is-spent', frenzyUsed);
+    setText(
+      this._frenzyBtn,
+      frenzyUsed ? 'Frenesi já usado nesta corrida' : 'Frenesi · ×3 SPS / 1h',
+    );
 
+    const free = Boolean(state.isFreeShopping?.());
+    const maxLv = NECTAR_CONFIG.maxGeneratorLevel;
     for (const gen of GENERATORS) {
       const btn = this._levelBtns.get(gen.id);
       if (!btn) continue;
       const lv = typeof state.generatorLevel === 'function'
         ? state.generatorLevel(gen.id)
         : Number(state.generatorLevels?.[gen.id] || 0);
-      const cost = nextGeneratorLevelCost(lv);
-      setText(btn, `${gen.name} Lv.${lv} (${cost} Néctar)`);
-      setDisabled(btn, !state.isFreeShopping?.() && nectar < cost);
+      const atMax = lv >= maxLv;
+      const cost = atMax ? 0 : nextGeneratorLevelCost(lv);
+      const affordable = free || (!atMax && nectar >= cost);
+
+      setText(btn._hexLv, String(lv));
+      setText(btn._hexCost, atMax ? 'Máx.' : `${cost} néctar${cost === 1 ? '' : 'es'}`);
+      setDisabled(btn, atMax || !affordable);
+      setClass(btn, 'is-affordable', affordable && !atMax);
+      setClass(btn, 'is-leveled', lv > 0);
+      setClass(btn, 'is-maxed', atMax);
+
+      const bonusPct = lv;
+      const unlockLabel = MINIGAME_UNLOCK_LABEL[MINIGAME_BY_GENERATOR[gen.id]];
+      const tipParts = [
+        `${gen.name} · Lv.${lv}`,
+        atMax ? 'Nível máximo' : `Próximo: ${cost} Néctar`,
+        `Bônus de linha: +${bonusPct}% SPS`,
+      ];
+      if (unlockLabel && lv < 1) tipParts.push(`Lv.1 abre ${unlockLabel}`);
+      else if (unlockLabel && lv >= 1) tipParts.push(`${unlockLabel} desbloqueado`);
+      btn.title = tipParts.join(' · ');
+      btn.setAttribute(
+        'aria-label',
+        atMax
+          ? `${gen.name}, nível ${lv}, máximo`
+          : `Subir ${gen.name} para nível ${lv + 1}, custa ${cost} néctar`,
+      );
     }
 
     const unlocked = typeof state.unlockedMinigames === 'function'

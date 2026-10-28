@@ -1,5 +1,5 @@
 /**
- * Aba Arquivo Estígio — hub da Catábase (pesquisas, timer, Sanguessugas, pactos).
+ * Aba Arquivo Estígio — hub da Catábase (árvore horizontal estilo ONI).
  */
 
 import {
@@ -14,8 +14,18 @@ import {
 } from '../core/CatabaseSystem.js';
 import { meetsUpgradeRequirement, talentEffects } from '../core/formulas.js';
 import { formatRate, formatSouls } from './NumberFormatter.js';
+import { createSpriteNode, upgradeSprite } from './world/SpriteAtlas.js';
 
 const SATELLITE_IDS = Object.freeze(['ninho_do_acheron', 'visceras_sacras']);
+const HUB_ID = 'concilio_das_moiras';
+
+const NODE_W = 168;
+const NODE_H = 78;
+const NODE_GAP_X = 56;
+const CHAIN_PAD_X = 16;
+const CHAIN_PAD_Y = 18;
+const SAT_GAP_Y = 36;
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 export function isArquivoTabUnlocked(state = {}) {
   const qty = typeof state.quantities === 'function'
@@ -23,7 +33,7 @@ export function isArquivoTabUnlocked(state = {}) {
     : (state.generators || {});
   const servants = Math.max(0, Math.floor(Number(qty.charon_servants) || 0));
   const upgrades = Array.isArray(state.upgrades) ? state.upgrades : [];
-  return servants >= 7 || upgrades.includes('concilio_das_moiras');
+  return servants >= 7 || upgrades.includes(HUB_ID);
 }
 
 export function formatResearchCountdown(sec = 0) {
@@ -37,6 +47,25 @@ export function formatResearchCountdown(sec = 0) {
   const m = Math.floor(s / 60);
   const r = s % 60;
   return `${m}:${String(r).padStart(2, '0')}`;
+}
+
+export function arquivoBuyFailureMessage(result = {}, id = '') {
+  const reason = result?.reason || '';
+  const name = getUpgrade(id)?.name || id || 'tese';
+  if (reason === 'insufficient_souls') {
+    const cost = result.cost != null ? ` (custo ${formatSouls(result.cost)})` : '';
+    return `Almas insuficientes para ${name}${cost}.`;
+  }
+  if (reason === 'requires') {
+    return `Requisitos não cumpridos para ${name}.`;
+  }
+  if (reason === 'already_owned') {
+    return `${name} já está selada.`;
+  }
+  if (reason === 'missing') {
+    return 'Tese desconhecida.';
+  }
+  return `Não foi possível comprar ${name}.`;
 }
 
 function ownedSet(state) {
@@ -66,13 +95,67 @@ function requirementContext(state) {
   };
 }
 
+function isFreeShopping(state) {
+  if (typeof state.isFreeShopping === 'function') return Boolean(state.isFreeShopping());
+  return Boolean(state.debugFlags?.freeShopping);
+}
+
+function enrichNode(item, state, { researchProgress = 0 } = {}) {
+  const free = isFreeShopping(state);
+  const cost = item.cost || '0';
+  const affordable = free || cmp(state.souls || '0', cost) >= 0;
+  const canClick = item.status === 'ready' && affordable;
+  const bits = [];
+  if (item.blurb) bits.push(item.blurb);
+  if (item.status === 'ready' && !affordable) {
+    bits.unshift(`Faltam almas (custo ${formatSouls(cost)}).`);
+  } else if (item.status === 'locked') {
+    bits.unshift(item.id === HUB_ID
+      ? 'Precisa de 7 Servos de Caronte.'
+      : 'Bloqueada — avance a cadeia.');
+  } else if (item.status === 'queued') {
+    bits.unshift('Na fila — aguarde a pesquisa atual.');
+  } else if (item.status === 'researching') {
+    bits.unshift('Pesquisando…');
+  } else if (item.status === 'owned') {
+    bits.unshift('Comprada.');
+  } else if (canClick) {
+    bits.unshift(`Clique para comprar (${formatSouls(cost)} almas).`);
+  }
+  return {
+    ...item,
+    affordable,
+    canClick,
+    tip: bits.filter(Boolean).join(' '),
+    researchProgress: item.status === 'researching' ? researchProgress : 0,
+  };
+}
+
+function idleResearchTitle({ hasHub, readyId, chain }) {
+  if (!hasHub) return 'Fundar o Concílio para iniciar as teses.';
+  if (readyId) return 'Tese pronta — clique no nó para avançar.';
+  const pending = (chain || []).some((c) => c.id !== HUB_ID && c.status !== 'owned');
+  return pending
+    ? 'Pesquisa em andamento na cadeia.'
+    : 'Cadeia de teses concluída.';
+}
+
+function statusLabel(status) {
+  if (status === 'owned') return 'Comprada';
+  if (status === 'researching') return 'Pesquisando…';
+  if (status === 'ready') return 'Pronta';
+  if (status === 'queued') return 'Na fila';
+  if (status === 'locked') return 'Bloqueada';
+  return status;
+}
+
 /**
  * Snapshot puro da cadeia + pesquisa (testável sem DOM).
  */
 export function describeArquivoPanel(state = {}) {
   const owned = ownedSet(state);
   const unlocked = unlockedSet(state);
-  const hasHub = owned.has('concilio_das_moiras');
+  const hasHub = owned.has(HUB_ID);
   const qty = typeof state.quantities === 'function'
     ? state.quantities()
     : (state.generators || {});
@@ -83,9 +166,10 @@ export function describeArquivoPanel(state = {}) {
   });
   const targetId = state.catabase?.researchTargetId || null;
   const remaining = Math.max(0, Number(state.catabase?.researchRemainingSec) || 0);
-  const progress = !targetId || duration <= 0
+  const progress = !targetId || duration <= 0 || remaining <= 0
     ? 0
     : Math.max(0, Math.min(1, 1 - (remaining / duration)));
+  const researching = Boolean(targetId && remaining > 0);
 
   const effStage = typeof state.catabaseStage === 'function'
     ? state.catabaseStage()
@@ -123,21 +207,27 @@ export function describeArquivoPanel(state = {}) {
   const pledgeCost = typeof state.pledgeCost === 'function' ? state.pledgeCost() : '64';
 
   const readyId = [...unlocked].find((id) => !owned.has(id)) || null;
-  const hubUp = getUpgrade('concilio_das_moiras');
+  const hubUp = getUpgrade(HUB_ID);
   const hubAffordable = hubUp
-    ? (Boolean(state.debugFlags?.freeShopping) || cmp(state.souls || '0', hubUp.cost) >= 0)
+    ? (isFreeShopping(state) || cmp(state.souls || '0', hubUp.cost) >= 0)
     : false;
   const canBuyHub = !hasHub && servants >= 7 && meetsUpgradeRequirement(hubUp, requirementContext(state));
 
-  const chain = [
+  const shortName = (full, fallback) => {
+    const raw = String(full || fallback || '').trim();
+    const cut = raw.replace(/\s*\([^)]*\)\s*$/, '').trim();
+    return cut || raw;
+  };
+
+  const rawChain = [
     {
-      id: 'concilio_das_moiras',
-      name: hubUp?.name || 'Concílio das Moiras (Arquivo Estígio)',
+      id: HUB_ID,
+      name: shortName(hubUp?.name, 'Concílio das Moiras'),
       blurb: hubUp?.blurb || '',
       cost: hubUp?.cost || '0',
       spsBonusFactor: null,
       setsStage: 0,
-      status: owned.has('concilio_das_moiras')
+      status: owned.has(HUB_ID)
         ? 'owned'
         : (servants >= 7 ? 'ready' : 'locked'),
     },
@@ -150,7 +240,7 @@ export function describeArquivoPanel(state = {}) {
       else if (hasHub && owned.has(step.prevUpgradeId)) status = 'queued';
       return {
         id: step.upgradeId,
-        name: up?.name || step.name,
+        name: shortName(up?.name, step.name),
         blurb: up?.blurb || '',
         cost: up?.cost || '0',
         spsBonusFactor: step.spsBonusFactor,
@@ -160,6 +250,8 @@ export function describeArquivoPanel(state = {}) {
     }),
   ];
 
+  const chain = rawChain.map((item) => enrichNode(item, state, { researchProgress: progress }));
+
   const ctx = requirementContext(state);
   const satellites = SATELLITE_IDS.map((id) => {
     const up = getUpgrade(id);
@@ -167,14 +259,20 @@ export function describeArquivoPanel(state = {}) {
     const isOwned = owned.has(id);
     const meets = meetsUpgradeRequirement(up, ctx);
     if (!isOwned && !meets && !owned.has(up.requires?.upgradeId)) return null;
-    return {
+    return enrichNode({
       id,
       name: up.name,
       blurb: up.blurb || '',
       cost: up.cost || '0',
       status: isOwned ? 'owned' : (meets ? 'ready' : 'locked'),
-    };
+      spsBonusFactor: null,
+      setsStage: null,
+    }, state);
   }).filter(Boolean);
+
+  const researchTitle = researching
+    ? (getUpgrade(targetId)?.name || targetId)
+    : idleResearchTitle({ hasHub, readyId, chain });
 
   return {
     unlockedTab: isArquivoTabUnlocked(state),
@@ -192,15 +290,14 @@ export function describeArquivoPanel(state = {}) {
     pledgeCost,
     research: {
       targetId,
-      title: targetId
-        ? (getUpgrade(targetId)?.name || targetId)
-        : (hasHub ? 'Cadeia concluída ou aguardando compra.' : 'Fundar o Concílio para iniciar as teses.'),
+      title: researchTitle,
       remainingSec: remaining,
       durationSec: duration,
       progress,
-      timeLabel: targetId && remaining > 0
+      researching,
+      timeLabel: researching
         ? formatResearchCountdown(remaining)
-        : (readyId ? 'Tese pronta para compra' : (hasHub ? '—' : '—')),
+        : (readyId ? 'Tese pronta para compra' : ''),
       readyId,
     },
     chain,
@@ -217,6 +314,24 @@ function setHidden(el, hidden) {
   if (el.hidden !== hidden) el.hidden = hidden;
 }
 
+function chainNodePosition(index) {
+  return {
+    x: CHAIN_PAD_X + index * (NODE_W + NODE_GAP_X),
+    y: CHAIN_PAD_Y,
+  };
+}
+
+function satelliteNodePosition(index, chainLen) {
+  const hub = chainNodePosition(0);
+  const underChain = CHAIN_PAD_Y + NODE_H + SAT_GAP_Y;
+  return {
+    x: hub.x + index * (NODE_W + NODE_GAP_X),
+    y: underChain,
+    // Keep satellites under the left of the chain even if chain is short.
+    _chainLen: chainLen,
+  };
+}
+
 export class ArquivoEstigioView {
   constructor(options = {}) {
     this._doc = options.document || (typeof document !== 'undefined' ? document : null);
@@ -226,6 +341,7 @@ export class ArquivoEstigioView {
     this._root = null;
     this._els = null;
     this._lastSig = '';
+    this._feedbackTimer = null;
   }
 
   mount(panel = null) {
@@ -243,12 +359,10 @@ export class ArquivoEstigioView {
       researchTime: this._root.querySelector('[data-arquivo="research-time"]'),
       researchBar: this._root.querySelector('[data-arquivo="research-bar"]'),
       researchFill: this._root.querySelector('[data-arquivo="research-fill"]'),
-      buyHub: this._root.querySelector('[data-arquivo-action="buy-hub"]'),
-      buyReady: this._root.querySelector('[data-arquivo-action="buy-ready"]'),
+      feedback: this._root.querySelector('[data-arquivo="feedback"]'),
       pledge: this._root.querySelector('[data-arquivo-action="pledge"]'),
       covenant: this._root.querySelector('[data-arquivo-action="covenant"]'),
-      chain: this._root.querySelector('[data-arquivo="chain"]'),
-      satellites: this._root.querySelector('[data-arquivo="satellites"]'),
+      tree: this._root.querySelector('[data-arquivo="tree"]'),
     };
 
     this._root.addEventListener?.('click', (event) => {
@@ -256,11 +370,7 @@ export class ArquivoEstigioView {
       if (!btn) return;
       const action = btn.getAttribute('data-arquivo-action');
       const buyId = btn.getAttribute('data-arquivo-buy');
-      if (action === 'buy-hub') this._onBuyUpgrade?.('concilio_das_moiras');
-      else if (action === 'buy-ready') {
-        const ready = btn.getAttribute('data-ready-id');
-        if (ready) this._onBuyUpgrade?.(ready);
-      } else if (action === 'pledge') this._onActivatePledge?.();
+      if (action === 'pledge') this._onActivatePledge?.();
       else if (action === 'covenant') this._onToggleCovenant?.();
       else if (buyId) this._onBuyUpgrade?.(buyId);
     });
@@ -268,46 +378,189 @@ export class ArquivoEstigioView {
     return this;
   }
 
-  #renderList(host, items, { buyAttr = 'data-arquivo-buy' } = {}) {
+  showFeedback(message = '') {
+    const text = String(message || '').trim();
+    if (!this._els?.feedback) return;
+    setText(this._els.feedback, text);
+    setHidden(this._els.feedback, !text);
+    if (this._feedbackTimer != null && typeof globalThis.clearTimeout === 'function') {
+      globalThis.clearTimeout(this._feedbackTimer);
+      this._feedbackTimer = null;
+    }
+    if (text && typeof globalThis.setTimeout === 'function') {
+      this._feedbackTimer = globalThis.setTimeout(() => {
+        setText(this._els.feedback, '');
+        setHidden(this._els.feedback, true);
+        this._feedbackTimer = null;
+      }, 4200);
+    }
+  }
+
+  #svgEl(tag, attrs = {}) {
+    const el = this._doc.createElementNS
+      ? this._doc.createElementNS(SVG_NS, tag)
+      : this._doc.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (v == null) continue;
+      if (typeof el.setAttribute === 'function') el.setAttribute(k, String(v));
+    }
+    return el;
+  }
+
+  #buildNodeButton(item, pos) {
+    const btn = this._doc.createElement('button');
+    btn.type = 'button';
+    const unaffordable = item.status === 'ready' && !item.affordable;
+    btn.className = [
+      'despertar-arquivo__node',
+      `despertar-arquivo__node--${item.status}`,
+      unaffordable ? 'despertar-arquivo__node--unaffordable' : '',
+      item.canClick ? 'is-clickable' : '',
+    ].filter(Boolean).join(' ');
+    btn.style.left = `${pos.x}px`;
+    btn.style.top = `${pos.y}px`;
+    btn.style.width = `${NODE_W}px`;
+    btn.style.height = `${NODE_H}px`;
+    btn.title = item.tip || item.blurb || item.name;
+    btn.disabled = !item.canClick;
+    if (item.canClick) btn.setAttribute('data-arquivo-buy', item.id);
+    else btn.removeAttribute?.('data-arquivo-buy');
+    btn.setAttribute('aria-label', `${item.name} — ${statusLabel(item.status)}`);
+
+    const icon = this._doc.createElement('span');
+    icon.className = 'despertar-arquivo__node-icon';
+    icon.setAttribute('aria-hidden', 'true');
+    const sprite = createSpriteNode(this._doc, upgradeSprite(item.id), {
+      className: 'despertar-arquivo__node-sprite',
+    });
+    if (sprite) icon.append?.(sprite);
+    else {
+      icon.textContent = (item.name || '?').slice(0, 1);
+    }
+
+    const body = this._doc.createElement('span');
+    body.className = 'despertar-arquivo__node-body';
+
+    const title = this._doc.createElement('span');
+    title.className = 'despertar-arquivo__node-title';
+    title.textContent = item.name;
+
+    const meta = this._doc.createElement('span');
+    meta.className = 'despertar-arquivo__node-meta';
+    const bits = [];
+    if (item.spsBonusFactor) bits.push(`×${item.spsBonusFactor}`);
+    if (item.setsStage != null && item.setsStage > 0) bits.push(`Est. ${item.setsStage}`);
+    if (item.status === 'owned') bits.push('Comprada');
+    else if (item.status === 'researching') {
+      bits.push(`${Math.round((item.researchProgress || 0) * 100)}%`);
+    } else {
+      bits.push(formatSouls(item.cost));
+      bits.push(statusLabel(item.status));
+    }
+    meta.textContent = bits.join(' · ');
+
+    body.append?.(title, meta);
+    btn.append?.(icon, body);
+
+    if (item.status === 'researching') {
+      const bar = this._doc.createElement('span');
+      bar.className = 'despertar-arquivo__node-progress';
+      bar.setAttribute('aria-hidden', 'true');
+      const fill = this._doc.createElement('span');
+      fill.className = 'despertar-arquivo__node-progress-fill';
+      fill.style.width = `${Math.round((item.researchProgress || 0) * 100)}%`;
+      bar.append?.(fill);
+      btn.append?.(bar);
+    }
+
+    return btn;
+  }
+
+  #renderTree(chain, satellites) {
+    const host = this._els?.tree;
     if (!host || !this._doc?.createElement) return;
+
+    const chainList = Array.isArray(chain) ? chain : [];
+    const satList = Array.isArray(satellites) ? satellites : [];
+    const positions = new Map();
+    chainList.forEach((item, i) => positions.set(item.id, chainNodePosition(i)));
+    satList.forEach((item, i) => positions.set(item.id, satelliteNodePosition(i, chainList.length)));
+
+    const maxX = Math.max(
+      ...[...positions.values()].map((p) => p.x + NODE_W),
+      CHAIN_PAD_X + NODE_W,
+    );
+    const maxY = Math.max(
+      ...[...positions.values()].map((p) => p.y + NODE_H),
+      CHAIN_PAD_Y + NODE_H,
+    );
+    const width = maxX + CHAIN_PAD_X;
+    const height = maxY + CHAIN_PAD_Y;
+
     host.replaceChildren?.();
-    for (const item of items) {
-      const li = this._doc.createElement('li');
-      li.className = `despertar-arquivo__item is-${item.status}`;
-      li.dataset.status = item.status;
+    host.style.minWidth = `${width}px`;
+    host.style.minHeight = `${height}px`;
 
-      const title = this._doc.createElement('p');
-      title.className = 'despertar-arquivo__item-title';
-      title.textContent = item.name;
+    const svg = this.#svgEl('svg', {
+      class: 'despertar-arquivo__edges',
+      width: String(width),
+      height: String(height),
+      viewBox: `0 0 ${width} ${height}`,
+      'aria-hidden': 'true',
+    });
 
-      const meta = this._doc.createElement('p');
-      meta.className = 'despertar-arquivo__item-meta';
-      const bits = [];
-      if (item.spsBonusFactor) bits.push(`×${item.spsBonusFactor} SPS`);
-      if (item.setsStage != null && item.setsStage > 0) bits.push(`Estágio ${item.setsStage}`);
-      bits.push(item.status === 'owned' ? 'Comprada' : `Custo ${formatSouls(item.cost)}`);
-      if (item.status === 'researching') bits.push('Pesquisando…');
-      if (item.status === 'ready') bits.push('Pronta');
-      if (item.status === 'queued') bits.push('Na fila');
-      if (item.status === 'locked') bits.push('Bloqueada');
-      meta.textContent = bits.join(' · ');
+    const edgeFromTo = (fromId, toId, ownedish) => {
+      const a = positions.get(fromId);
+      const b = positions.get(toId);
+      if (!a || !b) return;
+      const x1 = a.x + NODE_W;
+      const y1 = a.y + NODE_H / 2;
+      const x2 = b.x;
+      const y2 = b.y + NODE_H / 2;
+      const mid = (x1 + x2) / 2;
+      const path = this.#svgEl('path', {
+        class: `despertar-arquivo__edge${ownedish ? ' despertar-arquivo__edge--lit' : ''}`,
+        d: `M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`,
+        fill: 'none',
+      });
+      svg.append?.(path);
+    };
 
-      const blurb = this._doc.createElement('p');
-      blurb.className = 'despertar-arquivo__item-blurb';
-      blurb.textContent = item.blurb || '';
-
-      li.append?.(title, meta, blurb);
-
-      if (item.status === 'ready') {
-        const buy = this._doc.createElement('button');
-        buy.type = 'button';
-        buy.className = 'despertar-debug__grant despertar-arquivo__buy';
-        buy.setAttribute(buyAttr, item.id);
-        buy.textContent = 'Comprar';
-        li.append?.(buy);
+    for (let i = 1; i < chainList.length; i += 1) {
+      const prev = chainList[i - 1];
+      const cur = chainList[i];
+      const lit = prev.status === 'owned' || cur.status === 'owned'
+        || cur.status === 'ready' || cur.status === 'researching' || cur.status === 'queued';
+      edgeFromTo(prev.id, cur.id, lit);
+    }
+    if (satList.length && chainList[0]) {
+      for (const sat of satList) {
+        const lit = chainList[0].status === 'owned' || sat.status === 'owned' || sat.status === 'ready';
+        // Draw from hub bottom-center to satellite top-center via a short path.
+        const a = positions.get(chainList[0].id);
+        const b = positions.get(sat.id);
+        if (!a || !b) continue;
+        const x1 = a.x + NODE_W / 2;
+        const y1 = a.y + NODE_H;
+        const x2 = b.x + NODE_W / 2;
+        const y2 = b.y;
+        const midY = (y1 + y2) / 2;
+        const path = this.#svgEl('path', {
+          class: `despertar-arquivo__edge${lit ? ' despertar-arquivo__edge--lit' : ''}`,
+          d: `M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`,
+          fill: 'none',
+        });
+        svg.append?.(path);
       }
+    }
 
-      host.append?.(li);
+    host.append?.(svg);
+
+    for (const item of chainList) {
+      host.append?.(this.#buildNodeButton(item, positions.get(item.id)));
+    }
+    for (const item of satList) {
+      host.append?.(this.#buildNodeButton(item, positions.get(item.id)));
     }
   }
 
@@ -321,14 +574,16 @@ export class ArquivoEstigioView {
       view.research.targetId,
       Math.floor(view.research.remainingSec),
       view.research.readyId,
+      Math.round(view.research.progress * 100),
       view.pledgeOn,
       view.covOn,
-      view.chain.map((c) => `${c.id}:${c.status}`).join(','),
-      view.satellites.map((c) => `${c.id}:${c.status}`).join(','),
+      view.chain.map((c) => `${c.id}:${c.status}:${c.canClick ? 1 : 0}:${c.affordable ? 1 : 0}`).join(','),
+      view.satellites.map((c) => `${c.id}:${c.status}:${c.canClick ? 1 : 0}`).join(','),
       view.spsLine,
       view.digestedLine,
+      state.souls || '0',
     ].join('|');
-    // Timer precisa atualizar o texto mesmo com sig estável em segundos.
+
     setText(this._els.stage, view.stageName);
     setText(this._els.wrath, `${view.wrathPct}%`);
     setText(this._els.sps, view.spsLine);
@@ -336,29 +591,19 @@ export class ArquivoEstigioView {
     setText(this._els.researchTitle, view.research.title);
     setText(
       this._els.researchTime,
-      view.research.targetId && view.research.remainingSec > 0
+      view.research.researching
         ? `Restam ${view.research.timeLabel} (ciclo ${formatResearchCountdown(view.research.durationSec)})`
         : view.research.timeLabel,
     );
-    const pct = Math.round(view.research.progress * 100);
+
+    const showBar = view.research.researching;
+    setHidden(this._els.researchBar, !showBar);
+    const pct = showBar ? Math.round(view.research.progress * 100) : 0;
     if (this._els.researchFill?.style) {
       this._els.researchFill.style.width = `${pct}%`;
     }
     if (this._els.researchBar) {
       this._els.researchBar.setAttribute?.('aria-valuenow', String(pct));
-    }
-
-    setHidden(this._els.buyHub, !view.canBuyHub);
-    if (this._els.buyHub && view.canBuyHub) {
-      this._els.buyHub.textContent = `Fundar Concílio (${formatSouls(view.hubCost)} almas)`;
-    }
-    setHidden(this._els.buyReady, !view.research.readyId);
-    if (this._els.buyReady) {
-      this._els.buyReady.setAttribute('data-ready-id', view.research.readyId || '');
-      if (view.research.readyId) {
-        const name = getUpgrade(view.research.readyId)?.name || view.research.readyId;
-        this._els.buyReady.textContent = `Comprar ${name}`;
-      }
     }
 
     setHidden(this._els.pledge, !view.canPacts || view.covOn);
@@ -377,8 +622,25 @@ export class ArquivoEstigioView {
 
     if (sig !== this._lastSig) {
       this._lastSig = sig;
-      this.#renderList(this._els.chain, view.chain);
-      this.#renderList(this._els.satellites, view.satellites);
+      this.#renderTree(view.chain, view.satellites);
+    } else if (view.research.researching) {
+      // Atualiza só a barra do nó em pesquisa sem reconstruir a árvore.
+      const fill = this._els.tree?.querySelector?.(
+        `.despertar-arquivo__node--researching .despertar-arquivo__node-progress-fill`,
+      );
+      if (fill?.style) fill.style.width = `${pct}%`;
+      const meta = this._els.tree?.querySelector?.(
+        `.despertar-arquivo__node--researching .despertar-arquivo__node-meta`,
+      );
+      if (meta) {
+        const node = view.chain.find((c) => c.status === 'researching');
+        if (node) {
+          const bits = [];
+          if (node.spsBonusFactor) bits.push(`×${node.spsBonusFactor}`);
+          bits.push(`${pct}%`);
+          meta.textContent = bits.join(' · ');
+        }
+      }
     }
   }
 }
