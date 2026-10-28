@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**124 ícones pendentes.**
+**104 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 109)
+## L7 — Talentos do Rio do Lethe (`talents`, 89)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `cozimento_de_acucar` | Cozimento de Néctar | Néctar guardado é néctar que rende. Néctar em Reserva: +1% de SPS por Néctar guardado (até 100). |
-| `cozinha_inicial` | Cozinha Inicial | Os remadores já chegam ao cais. Cada corrida começa com 5 × Servos de Caronte. |
-| `decisive_fate` | Destino Decisivo | As Moiras cortam o fio na hora certa. Ecos do Acheron aparecem +2% mais. |
-| `delicate_touch` | Toque Delicado | A Foice passa sem rasgar o Manto. Todos os geradores +2%. |
-| `desconto_divino` | Desconto Divino | Os deuses pechincham por você. Geradores 1% mais baratos. |
-| `diabetica_daemonicus` | Diabetes Demoníaca | Açúcar demais deixa a Foice nervosa. Ceifar +5%. |
-| `distilled_essence_of_redoubled_luck` | Essência de Sorte Destilada | Uma gota que dobra o acaso. Ecos do Acheron aparecem +5% mais. |
-| `distinguished_wallpaper_assortment` | Tapeçarias do Olimpo | Fios de ouro roubados de cima. Todos os geradores +1%. |
-| `divine_bakeries` | Padarias Divinas | Tudo no Olimpo sai mais em conta. Geradores 1% mais baratos. Juramentos 1% mais baratos. |
-| `dominions` | Dominações | Ordens que seguem cumpridas na sua ausência. Offline rende +10% do SPS. |
-| `elder_spice` | Especiaria Anciã | Um tempero que atrai mais Sanguessugas. +2 vagas de Sanguessuga. |
-| `eye_of_the_wrinkler` | Olho da Sanguessuga | Você vê o que elas engoliram. Mostra quanto cada Sanguessuga digeriu. |
-| `fanciful_dairy_selection` | Ânforas de Néctar Raro | Leites de sabores que nenhum vivo provou. Todos os geradores +1%. |
-| `five_finger_discount` | Desconto dos Cinco Dedos | Ninguém viu nada. Geradores 1% mais baratos. |
-| `fortune_cookies` | Óbolos da Sorte | Moedas com uma profecia gravada. Todos os geradores +2%. |
-| `frenesi_de_acucar` | Desejo de Néctar | Uma vontade que só o Frenesi mata. Libera o Frenesi de Néctar (×3 SPS por 1 h, uma vez por corrida). |
-| `glittering_edge` | Fio Cintilante | A borda do Manto corta a escuridão. Todos os geradores +2%. |
-| `god` | Deus | Nada escapa ao olhar mais alto. Offline rende +5% do SPS. |
-| `golden_cookie_alert_sound` | Sino do Acheron | Um badalo que avisa antes da maré. Todos os geradores +1%. |
-| `golden_switch` | Chave Dourada | Um ferrolho de ouro que mantém a forja acesa. Todos os geradores +10%. |
 | `heavenly_luck` | Sorte Celeste | As correntes do Acheron sobem mais vezes. Ecos do Acheron aparecem +5% mais. |
 | `heralds` | Eco da Turma | Os arautos sussurram. Todos os geradores +1%. |
 | `inspired_checklist` | Lista Inspirada | Juramentos riscados um a um. Juramentos 2% mais baratos. |
