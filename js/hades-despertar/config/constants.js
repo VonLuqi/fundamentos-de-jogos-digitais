@@ -60,7 +60,7 @@ export const SYNC_MIN_INTERVAL_MS = 5_000;
 /** Legado — sync PHP confia no cliente; não disparam mais reject de ganho. */
 export const SYNC_GAIN_TOLERANCE = '1.08';
 export const SYNC_ABSURD_GAIN_FLOOR = '100';
-export const SYNC_MAX_PER_MINUTE = 12;
+export const SYNC_MAX_PER_MINUTE = 36;
 export const SYNC_OFFLINE_JITTER_SECONDS = 60;
 
 /** Copy legada (sync econômico não a devolve; cliente suprime toast se aparecer). */

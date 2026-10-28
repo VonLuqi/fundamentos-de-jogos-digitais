@@ -1034,7 +1034,9 @@ async function init() {
       // Não refresh a cada sync — evita nó “voltar” durante selo otimista.
       // Refresh explícito em onBuyTalent / open / close.
     },
-    onRejected: ({ error, pause, serverNow, payload }) => {
+    onRejected: ({ error, status, pause, serverNow, payload }) => {
+      // 429 de sync é retentado no Ritual / heartbeat — toast só atrapalha a Catábase.
+      if (Number(status) === 429 || /pede calma/i.test(String(error || ''))) return;
       if (error === DESPERTAR_PAUSED_ERROR) {
         rememberPauseWindow(payload?.pauseWindow || pause);
         const tokenNow = getSession()?.token ?? null;
@@ -1271,9 +1273,29 @@ async function init() {
 
   const letheUi = bindLetheModal(state, {
     onConfirm: async () => {
-      try {
+      const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+      const flushThenPrestige = async () => {
         await api.flush();
-        const remote = await api.prestige();
+        return api.prestige();
+      };
+      const openAscensionLocal = () => {
+        state.ascensionOpen = true;
+        state.milestones = { ...state.milestones, ascensionOpen: true };
+        uiRef.renderer?.resetShinyRumor?.();
+      };
+
+      try {
+        let remote;
+        try {
+          remote = await flushThenPrestige();
+        } catch (error) {
+          // Rate limit do sync não pode cancelar o Ritual: espera Retry-After e tenta de novo.
+          if (!(error instanceof ApiError) || error.status !== 429) throw error;
+          const waitSec = Math.min(Math.max(Number(error.retryAfterSec) || 5, 2), 45);
+          showApiWarning(`O Submundo pede calma — retomando o Ritual em ${waitSec}s…`);
+          await sleep(waitSec * 1000);
+          remote = await flushThenPrestige();
+        }
         // Sem token / resposta vazia: aplica Catábase local para abrir o Rio.
         if (!remote?.state && !state.ascensionOpen) {
           const local = state.applyPrestige();
@@ -1281,22 +1303,22 @@ async function init() {
             showApiWarning('O Ritual falhou.');
             return false;
           }
+          api.markDirty();
         }
-        // Garante a sessão de selo mesmo se o sync atrasar o flag.
-        state.ascensionOpen = true;
-        state.milestones = { ...state.milestones, ascensionOpen: true };
-        uiRef.renderer?.resetShinyRumor?.();
+        openAscensionLocal();
         return true;
       } catch (error) {
         const local = state.applyPrestige();
         if (local.ok) {
-          state.ascensionOpen = true;
-          state.milestones = { ...state.milestones, ascensionOpen: true };
-          uiRef.renderer?.resetShinyRumor?.();
+          openAscensionLocal();
+          api.markDirty();
+          api.requestSync?.();
           showApiWarning(
-            error instanceof ApiError
-              ? error.message
-              : 'O Submundo não responde… o Ritual ficou só na Estela local.'
+            error instanceof ApiError && error.status === 429
+              ? 'Ritual aplicado na Estela local — o Submundo sincroniza em breve.'
+              : error instanceof ApiError
+                ? error.message
+                : 'O Submundo não responde… o Ritual ficou só na Estela local.'
           );
           return true;
         }

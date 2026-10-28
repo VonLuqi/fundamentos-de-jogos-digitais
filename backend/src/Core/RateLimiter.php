@@ -20,7 +20,9 @@ final class RateLimiter
     ];
 
     public const GAME_LIMITS = [
-        'despertar_sync' => ['limit' => 12, 'windowMs' => 60000, 'keyPart' => 'rl:despertar:sync'],
+        // 36/min: flush de compras + heartbeat 30s + Ritual do Lethe não podem
+        // casar no teto antigo (12) e abortar a Catábase com "pede calma".
+        'despertar_sync' => ['limit' => 36, 'windowMs' => 60000, 'keyPart' => 'rl:despertar:sync'],
         'despertar_juizo' => ['limit' => 2, 'windowMs' => 1000, 'keyPart' => 'rl:despertar:juizo'],
         'underworld_redeem' => ['limit' => 12, 'windowMs' => 60000, 'keyPart' => 'rl:underworld:redeem'],
     ];

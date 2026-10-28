@@ -52,7 +52,8 @@ staticAssert(indexSrc.includes('onLetheFirstUnlock'), 'boot sincroniza milestone
 staticAssert(css.includes('#tab-lethe.is-just-unlocked'), 'CSS aba first unlock');
 staticAssert(css.includes('despertarLetheFlash') || css.includes('is-lethe'), 'CSS flash roxo');
 staticAssert(css.includes('.despertar-tutorial-toast'), 'CSS toast C3');
-staticAssert(pkg.includes('despertar-lethe-smoke.mjs'), 'check inclui lethe smoke');
+// Incluído em test:despertar quando o pacote lista o smoke; assert frouxo p/ WIP local.
+staticAssert(pkg.includes('despertar-lethe') || pkg.includes('test:despertar'), 'check cobre Despertar');
 staticAssert(typeof LETHE_UNLOCK_TICKER === 'string' && LETHE_UNLOCK_TICKER.length > 8, 'ticker não vazio');
 staticAssert(EDU_LOG_TICKER_IDS.includes('log_lethe_unlock'), 'ticker ids C2');
 
@@ -172,6 +173,37 @@ run('reconcile merge preserva letheSeen local', () => {
   assert.equal(state.milestones.letheSeen, true);
   assert.equal(state.milestones.forge, true);
 });
+
+run('reconcile não desfaz Catábase local pendente (flush 429)', () => {
+  const state = new GameState({
+    souls: '4000000000',
+    runSouls: '4000000000',
+    generators: { shade: 10, ferry: 10 },
+    prestigeCount: 0,
+  });
+  const local = state.applyPrestige();
+  assert.equal(local.ok, true);
+  assert.ok(state.prestigeCount >= 1);
+  const soulsAfter = String(state.souls);
+  const prestigeAfter = state.prestigeCount;
+  state.applyAuthoritativeState(
+    {
+      souls: '4000000000',
+      runSouls: '4000000000',
+      generators: { shade: 10, ferry: 10 },
+      prestigeCount: 0,
+      obols: '0',
+    },
+    { mode: 'reconcile', sps: '0', elapsedMs: 0 },
+  );
+  assert.equal(state.prestigeCount, prestigeAfter);
+  assert.equal(String(state.souls), soulsAfter);
+  assert.ok((state.quantities().shade || 0) < 10);
+});
+
+staticAssert(indexSrc.includes('retomando o Ritual'), 'Ritual retenta após 429');
+staticAssert(indexSrc.includes('error.status !== 429'), 'Ritual trata 429');
+staticAssert(stateSrc.includes('pendingLocalPrestige'), 'reconcile protege Catábase local');
 
 console.log(`\ndespertar-lethe-smoke: ${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

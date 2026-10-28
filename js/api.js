@@ -524,7 +524,14 @@ async function request(path, options = {}) {
   }
 
   if (!response.ok || payload.ok === false) {
-    throw new ApiError(payload?.error ?? 'Erro desconhecido no Domínio.', response.status, payload);
+    const retryRaw = response.headers.get('Retry-After');
+    const retryAfterSec = Number.parseInt(String(retryRaw || ''), 10);
+    throw new ApiError(
+      payload?.error ?? 'Erro desconhecido no Domínio.',
+      response.status,
+      payload,
+      Number.isFinite(retryAfterSec) && retryAfterSec > 0 ? retryAfterSec : null,
+    );
   }
 
   const method = String(fetchOptions.method || 'GET').toUpperCase();
@@ -578,11 +585,14 @@ function normalizeUser(raw) {
 
 /** Erro de API com status HTTP, para o frontend decidir a reação (shake, redirect...). */
 export class ApiError extends Error {
-  constructor(message, status = 0, payload = null) {
+  constructor(message, status = 0, payload = null, retryAfterSec = null) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.payload = payload;
+    this.retryAfterSec = Number.isFinite(Number(retryAfterSec)) && Number(retryAfterSec) > 0
+      ? Math.floor(Number(retryAfterSec))
+      : null;
   }
 }
 

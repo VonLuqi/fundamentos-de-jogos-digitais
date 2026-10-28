@@ -2773,13 +2773,24 @@ export class GameState {
   #reconcileFromSnapshot(snapshot, options = {}) {
     // Always-server (A-D1) — óbolos always-server; talentos unem (selo otimista).
     const localMnemosyne = this.mnemosyne;
-    if (snapshot.obols != null) this.obols = clampNonNegative(snapshot.obols);
-    if (snapshot.mnemosyne != null) this.mnemosyne = clampNonNegative(snapshot.mnemosyne);
+    const serverPrestigeCount = Math.max(
+      0,
+      Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10) || 0,
+    );
+    // Catábase local (ex.: flush 429 no Ritual) não pode ser desfeita por max(souls/gens)
+    // com a Estela antiga do servidor — senão a corrida "volta" e o toast "pede calma" fica
+    // como se o Lethe não tivesse rodado.
+    const pendingLocalPrestige = this.prestigeCount > serverPrestigeCount;
+    if (snapshot.obols != null && !pendingLocalPrestige) {
+      this.obols = clampNonNegative(snapshot.obols);
+    }
+    if (snapshot.mnemosyne != null && !pendingLocalPrestige) {
+      this.mnemosyne = clampNonNegative(snapshot.mnemosyne);
+    }
     if (snapshot.prestigeCount != null || snapshot.prestige_count != null) {
-      this.prestigeCount = Math.max(
-        0,
-        Number.parseInt(snapshot.prestigeCount ?? snapshot.prestige_count, 10) || 0,
-      );
+      this.prestigeCount = pendingLocalPrestige
+        ? Math.max(this.prestigeCount, serverPrestigeCount)
+        : serverPrestigeCount;
     }
     if (snapshot.talents != null || snapshot.talents_state != null) {
       const serverTalents = uniqueKnown(
@@ -2794,16 +2805,18 @@ export class GameState {
       const serverOnly = serverTalents.filter((id) => !localSet.has(id));
       const equalSets = localOnly.length === 0 && serverOnly.length === 0;
       this.talents = union;
-      const serverMne = snapshot.mnemosyne != null
-        ? clampNonNegative(snapshot.mnemosyne)
-        : localMnemosyne;
-      if (equalSets) {
-        this.mnemosyne = clampNonNegative(min(localMnemosyne, serverMne));
-      } else if (localOnly.length > 0) {
-        // Selos só-locais (otimista / offline): preserva essência já gasta.
-        this.mnemosyne = clampNonNegative(localMnemosyne);
-      } else {
-        this.mnemosyne = serverMne;
+      if (!pendingLocalPrestige) {
+        const serverMne = snapshot.mnemosyne != null
+          ? clampNonNegative(snapshot.mnemosyne)
+          : localMnemosyne;
+        if (equalSets) {
+          this.mnemosyne = clampNonNegative(min(localMnemosyne, serverMne));
+        } else if (localOnly.length > 0) {
+          // Selos só-locais (otimista / offline): preserva essência já gasta.
+          this.mnemosyne = clampNonNegative(localMnemosyne);
+        } else {
+          this.mnemosyne = serverMne;
+        }
       }
     }
     if (snapshot.ascensionOpen != null || snapshot.milestones?.ascensionOpen != null) {
@@ -2840,12 +2853,19 @@ export class GameState {
     const serverGens = asQuantities(snapshot.generators ?? snapshot.generators_state);
     const localGens = this.quantities();
     const mergedGens = {};
-    for (const id of new Set([...Object.keys(localGens), ...Object.keys(serverGens)])) {
-      const n = Math.max(
-        Math.floor(Number(localGens[id]) || 0),
-        Math.floor(Number(serverGens[id]) || 0),
-      );
-      if (n > 0) mergedGens[id] = n;
+    if (pendingLocalPrestige) {
+      for (const [id, qty] of Object.entries(localGens)) {
+        const n = Math.floor(Number(qty) || 0);
+        if (n > 0) mergedGens[id] = n;
+      }
+    } else {
+      for (const id of new Set([...Object.keys(localGens), ...Object.keys(serverGens)])) {
+        const n = Math.max(
+          Math.floor(Number(localGens[id]) || 0),
+          Math.floor(Number(serverGens[id]) || 0),
+        );
+        if (n > 0) mergedGens[id] = n;
+      }
     }
     this.generators.applyQuantities(mergedGens);
 
@@ -2853,7 +2873,9 @@ export class GameState {
       snapshot.upgrades ?? snapshot.upgrades_state ?? [],
       isKnownUpgradeId,
     );
-    this.upgrades = uniqueKnown([...this.upgrades, ...serverUp], isKnownUpgradeId);
+    this.upgrades = pendingLocalPrestige
+      ? uniqueKnown([...this.upgrades], isKnownUpgradeId)
+      : uniqueKnown([...this.upgrades, ...serverUp], isKnownUpgradeId);
 
     const serverGold = asRarityCounts(
       snapshot.goldCounts ?? snapshot.gold_counts ?? {},
@@ -3017,13 +3039,13 @@ export class GameState {
 
     const serverSouls = snapshot.souls != null ? clampNonNegative(snapshot.souls) : null;
     if (serverSouls != null) {
-      this.souls = this.#reconcileSouls(this.souls, serverSouls, options);
+      this.souls = pendingLocalPrestige
+        ? this.souls
+        : this.#reconcileSouls(this.souls, serverSouls, options);
     }
     if (snapshot.runSouls != null || snapshot.run_souls != null) {
-      this.runSouls = max(
-        this.runSouls,
-        clampNonNegative(snapshot.runSouls ?? snapshot.run_souls),
-      );
+      const serverRun = clampNonNegative(snapshot.runSouls ?? snapshot.run_souls);
+      this.runSouls = pendingLocalPrestige ? this.runSouls : max(this.runSouls, serverRun);
     }
     if (snapshot.lifetimeSouls != null || snapshot.lifetime_souls != null) {
       this.lifetimeSouls = max(
