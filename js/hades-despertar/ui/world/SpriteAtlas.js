@@ -10,7 +10,7 @@ import { UPGRADES } from '../../config/upgrades.js';
 /** Relativo a pages/*.html */
 export const SPRITE_BASE = '../assets/despertar/sprites';
 /** Cache-bust de assets catabase (Sanguessugas estilo Foice). */
-export const CATABASE_ASSET_VER = 'leech-foice-304';
+export const CATABASE_ASSET_VER = 'leech-wrinkler-305';
 
 const UPGRADE_BY_ID = Object.freeze(
   Object.fromEntries(UPGRADES.map((item) => [item.id, item])),

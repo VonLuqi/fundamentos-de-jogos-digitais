@@ -21,7 +21,8 @@ export function leechSlotPolarPosition(slot = 0, maxSlots = 10) {
   const cap = Math.max(1, Math.min(LEECH_MAX_CAP, Number(maxSlots) || 10));
   const idx = Math.max(0, Math.min(cap - 1, Math.floor(Number(slot) || 0)));
   const angleRad = ((idx / cap) * Math.PI * 2) - (Math.PI / 2);
-  const radiusPct = 36;
+  // Um pouco mais perto da Foice — boca ancora no ceifeiro como no Cookie Clicker.
+  const radiusPct = 32;
   const xPct = Number((50 + Math.cos(angleRad) * radiusPct).toFixed(2));
   const yPct = Number((50 + Math.sin(angleRad) * radiusPct).toFixed(2));
   const deg = Number(((angleRad * 180) / Math.PI + 90).toFixed(1));
