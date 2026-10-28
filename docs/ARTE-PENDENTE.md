@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**104 ícones pendentes.**
+**84 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 89)
+## L7 — Talentos do Rio do Lethe (`talents`, 69)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `heavenly_luck` | Sorte Celeste | As correntes do Acheron sobem mais vezes. Ecos do Acheron aparecem +5% mais. |
-| `heralds` | Eco da Turma | Os arautos sussurram. Todos os geradores +1%. |
-| `inspired_checklist` | Lista Inspirada | Juramentos riscados um a um. Juramentos 2% mais baratos. |
-| `keepsakes` | Relicários | Lembranças de festas passadas. Todos os geradores +2%. |
-| `kit_inicial` | Kit Inicial | Toda corrida começa com companhia. Cada corrida começa com 10 × Sombra Vagante. |
-| `kitten_angels` | Filhotes Alados | Até os cães do Cérbero ganham asas. Conta como mais um Filhote do Cérbero (+10% do Véu). |
-| `kitten_wages` | Salário dos Filhotes | Ossos mais baratos no mercado. Filhotes do Cérbero 10% mais baratos. |
-| `label_printer` | Selos de Bronze | Cada juramento ganha seu selo. Juramentos 1% mais baratos. |
-| `lasting_fortune` | Fortuna Duradoura | A maré dourada demora a baixar. Ecos do Acheron aparecem +2% mais. |
-| `legado` | Legado | Desbloqueia o sistema de Essência de Mnemosyne e juramentos permanentes. |
-| `lucifer` | Lúcifer | A estrela caída estende a noite inteira. Janela offline +256 h. |
-| `lucky_digit` | Dígito da Sorte | Um número que Caronte sempre aceita. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
-| `luminous_gloves` | Luvas Luminosas | Cada golpe acende a margem. Ceifar +5%. |
-| `luvas_de_halo` | Luvas de Auréola | A Foice pesa menos. Ceifar +10%. |
-| `mamon` | Mamon | O avarento estica a maré enquanto você descansa. Janela offline +8 h. |
-| `numero_da_sorte` | Número da Sorte | Sete, como os portões. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
-| `ovo_primordial` | Ovo Primordial | Uma casca morna sob as cinzas do Phlegethon. Desperta o Dragão Ctoniano. |
-| `pagamento_da_sorte` | Pagamento da Sorte | Caronte paga o troco em ouro. Ecos do Acheron aparecem +1% mais. Potência dos Óbolos +1%. |
-| `permanent_slot_i` | Eco do Styx I | Um juramento permanece selado entre corridas. 1 juramento(s) sobrevivem ao Lethe. |
-| `permanent_slot_ii` | Eco do Styx II | Dois juramentos permanentes na margem. 2 juramento(s) sobrevivem ao Lethe. |
 | `permanent_slot_iii` | Eco do Styx III | Três juramentos atravessam o Lethe. 3 juramento(s) sobrevivem ao Lethe. |
 | `permanent_slot_iv` | Eco do Styx IV | Quatro juramentos sobrevivem à Catábase. 4 juramento(s) sobrevivem ao Lethe. |
 | `permanent_slot_v` | Eco do Styx V | Cinco juramentos — memória máxima do rio. 5 juramento(s) sobrevivem ao Lethe. |

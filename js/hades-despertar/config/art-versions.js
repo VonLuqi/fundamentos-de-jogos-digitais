@@ -12,7 +12,7 @@ export const ART_VERSIONS = Object.freeze({
   'hud': '319af364',
   'shimmers': '71a7e8d7',
   'upgrades': '46fc69f8',
-  'talents': 'd961d68e',
+  'talents': 'b2e719fb',
   'minigames': 'e727991f',
   'veil': 'd2cef64b',
   'catabase': 'd3c869ed',

@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **227/660 (34%)** · vetorial interina: 329 · placeholder: **104** · faltando: 0
+Ilustrada: **247/660 (37%)** · vetorial interina: 329 · placeholder: **84** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -16,7 +16,7 @@ Ilustrada: **227/660 (34%)** · vetorial interina: 329 · placeholder: **104** �
 | `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 104 | 329 | 0 | 0 |
-| `talents` | 129 | 40 | 0 | 89 | 0 |
+| `talents` | 129 | 60 | 0 | 69 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
 | `catabase` | 7 | 7 | 0 | 0 | 0 |
@@ -26,9 +26,9 @@ Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-P
 
 Placeholders por pasta (IDs para gerar arte):
 
-<details><summary><code>talents</code> — 89</summary>
+<details><summary><code>talents</code> — 69</summary>
 
-`heavenly_luck` · `heralds` · `inspired_checklist` · `keepsakes` · `kit_inicial` · `kitten_angels` · `kitten_wages` · `label_printer` · `lasting_fortune` · `legado` · `lucifer` · `lucky_digit` · `luminous_gloves` · `luvas_de_halo` · `mamon` · `numero_da_sorte` · `ovo_primordial` · `pagamento_da_sorte` · `permanent_slot_i` · `permanent_slot_ii` · `permanent_slot_iii` · `permanent_slot_iv` · `permanent_slot_v` · `persistent_memory` · `pet_the_dragon` · `portoes_gemeos` · `quimera` · `reinforced_membrane` · `residual_luck` · `rodizio_das_estacoes` · `sacrilegious_corruption` · `satan` · `seraphim` · `shimmering_veil` · `sinergias_vol_i` · `sinergias_vol_ii` · `sound_test` · `starlove` · `starsnow` · `starspawn` · `starterror` · `startrade` · `steadfast_murmur` · `stevia_caelestis` · `sucralosia_inutilis` · `sugar_aging_process` · `sugar_crystal_cookies` · `tin_of_british_tea_biscuits` · `tin_of_butter_cookies` · `unholy_bait` · `unshackled_alabascream` · `unshackled_alchemy_labs` · `unshackled_antimatter_condensers` · `unshackled_astrofudge` · `unshackled_banks` · `unshackled_berrylium` · `unshackled_blueberrylium` · `unshackled_buttergold` · `unshackled_chalcedhoney` · `unshackled_chancemakers` · `unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
+`permanent_slot_iii` · `permanent_slot_iv` · `permanent_slot_v` · `persistent_memory` · `pet_the_dragon` · `portoes_gemeos` · `quimera` · `reinforced_membrane` · `residual_luck` · `rodizio_das_estacoes` · `sacrilegious_corruption` · `satan` · `seraphim` · `shimmering_veil` · `sinergias_vol_i` · `sinergias_vol_ii` · `sound_test` · `starlove` · `starsnow` · `starspawn` · `starterror` · `startrade` · `steadfast_murmur` · `stevia_caelestis` · `sucralosia_inutilis` · `sugar_aging_process` · `sugar_crystal_cookies` · `tin_of_british_tea_biscuits` · `tin_of_butter_cookies` · `unholy_bait` · `unshackled_alabascream` · `unshackled_alchemy_labs` · `unshackled_antimatter_condensers` · `unshackled_astrofudge` · `unshackled_banks` · `unshackled_berrylium` · `unshackled_blueberrylium` · `unshackled_buttergold` · `unshackled_chalcedhoney` · `unshackled_chancemakers` · `unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
 
 </details>
 
