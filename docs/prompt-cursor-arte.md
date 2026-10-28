@@ -74,7 +74,7 @@ Regras gerais: não marque nada como "delivered" à mão (o status é medido pel
 | L4 | `veil` | 5 | 1 | |
 | L5 | `catabase` | 5 | 1 | Estágios 1→3, Trégua, Aliança |
 | L6 | `upgrades` | 24 | 2 | Fortunas: 12 por chat |
-| L3 | `seasons` | 15 | 1 | Dragão 0→4, auras, estações, Corça. **Ainda não aparecem no jogo** (falta a tela do Dragão/estações); a arte já fica pronta |
+| L3 | `seasons` | 15 | 1 | Dragão 0→4, auras, estações, Corça — aparecem nas abas Dragão e Estações e na Corça da Saturnália |
 | L7 | `talents` | 129 | ~7 | Árvore do Rio do Lethe; ~20 por chat |
 
 Ordem sugerida: L2 → L4 → L5 → L6 → L3 → L7 (primeiro o que aparece na tela).
