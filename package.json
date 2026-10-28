@@ -24,7 +24,9 @@
     "despertar:status": "node scripts/despertar-status.mjs",
     "despertar:art": "node scripts/process-upgrade-art.mjs",
     "despertar:art-briefs": "node scripts/despertar-art-briefs.mjs",
-    "despertar:art-versions": "node scripts/update-art-versions.mjs"
+    "despertar:art-versions": "node scripts/update-art-versions.mjs",
+    "despertar:ensaio-ritmo": "node scripts/ensaio-ritmo.mjs",
+    "despertar:ensaio-temporada": "php scripts/ensaio-temporada.php"
   },
   "dependencies": {
     "@vfx-js/core": "^1.1.0",

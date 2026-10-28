@@ -1888,9 +1888,11 @@ final class DespertarService
     /**
      * @return array{seasonId: int, label: string, closedAt: string, boards: array<string, array<int, array<string, mixed>>>}|null
      */
-    public static function getSeasonArchive(int $seasonId): ?array
+    public static function getSeasonArchive(int $seasonId, bool $ensureTable = true): ?array
     {
-        self::ensureSeasonArchivesTable();
+        if ($ensureTable) {
+            self::ensureSeasonArchivesTable();
+        }
         $pdo = Database::pdo();
         $stmt = $pdo->prepare(
             'SELECT `season_id`, `label`, `closed_at`, `boards`
@@ -1986,9 +1988,12 @@ final class DespertarService
     /**
      * @return array{ok: bool, archive: array<string, mixed>}
      */
-    public static function snapshotSeasonArchive(int $seasonId, string $label = ''): array
+    public static function snapshotSeasonArchive(int $seasonId, string $label = '', bool $ensureTable = true): array
     {
-        self::ensureSeasonArchivesTable();
+        // DDL faz commit implícito no MySQL: dentro de transação, a tabela já deve existir.
+        if ($ensureTable) {
+            self::ensureSeasonArchivesTable();
+        }
         $boards = self::buildSeasonPodiumBoards(3);
         $nowSql = Database::nowSql();
         $pdo = Database::pdo();
@@ -2011,7 +2016,7 @@ final class DespertarService
             ':updated' => $nowSql,
         ]);
 
-        $archive = self::getSeasonArchive($seasonId);
+        $archive = self::getSeasonArchive($seasonId, $ensureTable);
         return ['ok' => true, 'archive' => $archive ?? [
             'seasonId' => $seasonId,
             'label' => $label,
@@ -2053,12 +2058,32 @@ final class DespertarService
             return ['ok' => false, 'error' => 'Confirmação inválida. Digite TEMPORADA 2.', 'archive' => [], 'deleted' => 0];
         }
 
-        $snap = self::snapshotSeasonArchive($archiveSeasonId, 'Temporada ' . $archiveSeasonId);
-        $pdo = Database::pdo();
-        $deleted = (int) $pdo->exec('DELETE FROM `despertar_states`');
+        // Só uma vez: rodar de novo sobrescreveria o pódio eterno da temporada arquivada com o
+        // placar da nova (ON DUPLICATE KEY UPDATE) e apagaria a temporada em andamento.
+        $existing = self::getSeasonArchive($archiveSeasonId);
+        if ($existing !== null) {
+            return [
+                'ok' => false,
+                'error' => "A Temporada {$archiveSeasonId} já foi arquivada em {$existing['closedAt']}; a seguinte já está aberta.",
+                'archive' => $existing,
+                'deleted' => 0,
+            ];
+        }
 
-        self::setDespertarGate('season_liberated', true, $adminUserId);
-        self::setDespertarGate('published', true, $adminUserId);
+        $pdo = Database::pdo();
+        $pdo->beginTransaction();
+        try {
+            $snap = self::snapshotSeasonArchive($archiveSeasonId, 'Temporada ' . $archiveSeasonId, false);
+            $deleted = (int) $pdo->exec('DELETE FROM `despertar_states`');
+            self::setDespertarGate('season_liberated', true, $adminUserId);
+            self::setDespertarGate('published', true, $adminUserId);
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
 
         return [
             'ok' => true,
