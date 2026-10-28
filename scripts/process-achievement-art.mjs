@@ -71,7 +71,7 @@ function estimateBorderBackgroundColor(data, width, height) {
  * Remove o fundo conectado às bordas da imagem com flood-fill + rampa suave de alpha
  * e descontaminação das bordas para evitar halo escuro.
  */
-function removeBackgroundBuffer(rawBuffer, width, height) {
+export function removeBackgroundBuffer(rawBuffer, width, height) {
   const data = new Uint8Array(rawBuffer);
   const totalPixels = width * height;
   const [bgR, bgG, bgB] = estimateBorderBackgroundColor(data, width, height);
@@ -263,7 +263,7 @@ function removeBackgroundBuffer(rawBuffer, width, height) {
 /**
  * Recorta a bounding-box não transparente e centraliza em um canvas quadrado com margem uniforme.
  */
-async function trimAndCenterIcon(rgbaBuffer, width, height, targetSize = TARGET_SIZE) {
+export async function trimAndCenterIcon(rgbaBuffer, width, height, targetSize = TARGET_SIZE) {
   let minX = width;
   let minY = height;
   let maxX = -1;
