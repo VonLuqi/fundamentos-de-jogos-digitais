@@ -27,7 +27,6 @@ function staticAssert(condition, message) {
 const manifestPath = path.join(spritesRoot, 'manifest.json');
 staticAssert(fs.existsSync(manifestPath), 'manifest.json presente');
 staticAssert(fs.existsSync(path.join(root, 'scripts/gen-despertar-sprites.mjs')), 'script de geração');
-staticAssert(fs.existsSync(path.join(root, 'scripts/p5/export-despertar-sprites.html')), 'sketch p5 export');
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 const rendererSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');

@@ -668,7 +668,7 @@ Usar estes defaults **exceto** onde marcar o contrário:
 9. [x] Task E2 (perf smoke + caps finais).  
 10. [x] Task E3 (docs GDD / plano-hades / README).  
 11. Plano Cookie **fechado** — arte residual via `PEDIDOS-MESTRE.md`.  
-12. [x] Polish pós-Fase 8: [`plano-despertar-polish-foice-juizo-upgrades.md`](./plano-despertar-polish-foice-juizo-upgrades.md) (F0–F5: prateleiras matriz · Foice · Juízo · Juramentos · copy Juízes · smokes/docs).
+12. [x] Polish pós-Fase 8: `plano-despertar-polish-foice-juizo-upgrades.md` (arquivado) (F0–F5: prateleiras matriz · Foice · Juízo · Juramentos · copy Juízes · smokes/docs).
 
 ---
 

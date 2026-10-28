@@ -1,7 +1,7 @@
 /**
  * Smoke Fase Perf (Perf-0 a Perf-5) — Orçamento de render, 1 RAF, UI dirty flags,
  * cache de SPS, ResizeObserver, Prefs na Estela, Auto-LOD e Object Pooling
- * (docs/plano-paridade-cookieclicker-producao.md · docs/paridade-cookieclicker-despertar.md).
+ * (docs/paridade-cookieclicker-despertar.md).
  *
  * Uso: node tests/despertar-perf-smoke.mjs
  */

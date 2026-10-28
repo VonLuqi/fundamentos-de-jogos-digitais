@@ -4,13 +4,13 @@
 
 **Status:** referência de paridade · **auditoria forense 2026-10-23** (código/disco ≠ checkboxes)  
 **Gate automatizado:** `node tests/despertar-full-parity-audit.mjs` (também em `npm run test:despertar`)  
-**Plano de produção (F0–F8):** [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md)  
+**Plano de produção (F0–F8):** `plano-paridade-cookieclicker-producao.md` (arquivado)  
 **Hub wiki:** [Cookie Clicker Wiki (Fandom)](https://cookieclicker.fandom.com/wiki/Cookie_Clicker_Wiki)  
 **Fontes Cookie Clicker:** [jogo original](https://orteil.dashnet.org/cookieclicker/) · [espelho ozh/cookieclicker](https://github.com/ozh/cookieclicker) · wiki.gg ([Buildings](https://cookieclicker.wiki.gg/wiki/Buildings) · [CpS](https://cookieclicker.wiki.gg/wiki/Cookies_per_Second) · [Milk](https://cookieclicker.wiki.gg/wiki/Milk) · [Upgrades](https://cookieclicker.wiki.gg/wiki/Upgrades) · [Ascension](https://cookieclicker.wiki.gg/wiki/Ascension) · [Golden Cookie](https://cookieclicker.wiki.gg/wiki/Golden_Cookie) · [Grandmapocalypse](https://cookieclicker.wiki.gg/wiki/Grandmapocalypse) · [Wrinkler](https://cookieclicker.wiki.gg/wiki/Wrinkler) · [Sugar Lumps](https://cookieclicker.wiki.gg/wiki/Sugar_Lumps) · [News Ticker](https://cookieclicker.wiki.gg/wiki/News_Ticker)) · [Heavenly Chips (Fandom)](https://cookieclicker.fandom.com/wiki/Heavenly_Chips)  
 **Fontes Despertar:** [`gdd-hades-despertar.md`](./gdd-hades-despertar.md) · [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md) · `js/hades-despertar/config/*` · `js/hades-despertar/core/formulas.js` · `backend/src/Services/Despertar/DespertarCatalog.php` · `DespertarFormulas.php`
 
 > Objetivo: paridade **completa** de mecânicas, ritmos **e identidade visual** do Cookie Clicker, temada no Submundo (arte/nomes próprios, com **geração de assets via Gemini** + pós-processamento WebP). **Não há anti-escopo** — o que a wiki descreve entra no backlog F0–F8 com seus respectivos sprites e ícones. Cada bloco tem “Despertar hoje” + fase de produção.  
-> **Clean Code:** implementação F* segue nomes claros, SRP, DRY de fórmulas (JS≡PHP), config ≠ lógica, módulos pequenos e smokes — ver § Regras em [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md). Sem god-objects nem “portar `main.js` do mirror”.
+> **Clean Code:** implementação F* segue nomes claros, SRP, DRY de fórmulas (JS≡PHP), config ≠ lógica, módulos pequenos e smokes — ver § Regras em `plano-paridade-cookieclicker-producao.md` (arquivado). Sem god-objects nem “portar `main.js` do mirror”.
 
 ---
 
@@ -99,7 +99,7 @@ Fonte de verdade: `tests/despertar-full-parity-audit.mjs` (não os `[x]` deste d
 6. Arte ainda `open`: cosméticos + juízo chrome (`art-requests.json`).
 7. 138 conquistas `despertar_*` reutilizam **24** ficheiros WebP únicos.
 
-Atualizar esta seção ao re-correr o audit. Plano: [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md).
+Atualizar esta seção ao re-correr o audit. Plano: `plano-paridade-cookieclicker-producao.md` (arquivado).
 
 ---
 
@@ -178,7 +178,7 @@ flowchart TB
 
 ### Backlog Perf (resumo)
 
-Detalhe e ordem: [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md) § Fase Perf (**antes de F2**).
+Detalhe e ordem: `plano-paridade-cookieclicker-producao.md` (arquivado) § Fase Perf (**antes de F2**).
 
 | Subfase | Entrega | Estado |
 | --- | --- | --- |
@@ -253,7 +253,7 @@ Para manter consistência artística e evitar halos escuros ou fundos sujos, tod
 | Achievements → economia | Milk → Kittens → CpS | Conquistas (ainda sem SPS) | **F4** |
 | Offline | Unlock heavenly | On de fábrica (8 h @ 80%) | Base ✓ (+ F8 polish) |
 
-**Veredito:** F0 alinhou T1–T6 ao CC. **Perf** antes de F2; depois F1→F8 — [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md).
+**Veredito:** F0 alinhou T1–T6 ao CC. **Perf** antes de F2; depois F1→F8 — `plano-paridade-cookieclicker-producao.md` (arquivado).
 
 ---
 
@@ -404,7 +404,7 @@ Fontes: [Buildings](https://cookieclicker.wiki.gg/wiki/Buildings) · `generators
 
 ### 5.2 T7–T12 — produção F3
 
-Números CC (wiki); nomes Submundo no [plano de produção](./plano-paridade-cookieclicker-producao.md). Payoff = baseCost / baseCpS.
+Números CC (wiki); nomes Submundo no plano de produção (arquivado). Payoff = baseCost / baseCpS.
 
 | Tier | Building | Base $ | Base CpS | Payoff ~ |
 | :---: | --- | ---: | ---: | ---: |
@@ -725,7 +725,7 @@ Offline generoso = feature pedagógica. Não copiar unlock tardio do CC. Não su
 
 ## 14. Backlog completo (zero anti-escopo)
 
-Detalhe operacional: [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md).
+Detalhe operacional: `plano-paridade-cookieclicker-producao.md` (arquivado).
 
 | Mecânica CC | Forma Despertar | Fase |
 | --- | --- | --- |
@@ -768,7 +768,7 @@ Detalhe operacional: [`plano-paridade-cookieclicker-producao.md`](./plano-parida
 - [x] **Leva Base (B1–B11):** Foice idle/pressed WebP; geradores T1–T20; juramentos; **12 cosméticos** (`sync-cosmetics-pixel.mjs` + `gen-cosmetics-art.mjs`). Soft: capas Juízo editoriais.
 - [ ] **Regra por fase (F1–F8):** cada fase só fecha 100% quando os novos geradores, upgrades, shimmers, minigames, sanguessugas e conquistas tiverem suas artes geradas via Gemini e registradas no `manifest.json` / `catalog.json`.
 
-Ver checklists por fase em [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md). Próximo: **Perf + Arte Base (Gemini)** e **F1 Styx tiers + sinergias**.
+Ver checklists por fase em `plano-paridade-cookieclicker-producao.md` (arquivado). Próximo: **Perf + Arte Base (Gemini)** e **F1 Styx tiers + sinergias**.
 
 ### Medição contínua (toda fase)
 
@@ -802,7 +802,7 @@ Ver checklists por fase em [`plano-paridade-cookieclicker-producao.md`](./plano-
 ### Despertar (interno)
 
 - [`gdd-hades-despertar.md`](./gdd-hades-despertar.md)  
-- [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md) — F0–F8  
+- `plano-paridade-cookieclicker-producao.md` (arquivado) — F0–F8  
 - [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md)  
 - `js/hades-despertar/core/formulas.js` · `config/generators.js` · `config/upgrades.js` · `config/constants.js`  
 - `backend/src/Services/Despertar/DespertarCatalog.php` · `DespertarFormulas.php`  

@@ -3,7 +3,7 @@
 **Status:** planejamento — **Fases A–F feitas** (0F + F1–F3)  
 **Data:** 2026-09-28  
 **Pai:** [`plano-hades-despertar.md`](./plano-hades-despertar.md) (inventário de produção)  
-**Vizinhos:** [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md) · [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md) · [`assets/despertar/PEDIDOS-MESTRE.md`](../assets/despertar/PEDIDOS-MESTRE.md)
+**Vizinhos:** `despertar-sync/00-master-plan.md` (arquivado) · `plano-despertar-aureolas-letreiro-shiny-hud-juizo.md` (arquivado) · [`assets/despertar/PEDIDOS-MESTRE.md`](../assets/despertar/PEDIDOS-MESTRE.md)
 
 **Objetivo:** Pacote de produção para turma ao vivo — **pausa com timer durante a aula**, mais **divertimento** (conquistas, cosméticos/VFX, profundidade Lethe/Bancada), e **UX pedagógica** (Códice como livro no canto + subabas de permanentes).
 

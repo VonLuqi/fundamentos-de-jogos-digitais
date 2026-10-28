@@ -3,8 +3,8 @@
 > **Status:** design atualizado (F3 polish + J.2 B1 Soft, 2026-09-22)  
 > **Pai:** [`gdd-hades-despertar.md`](./gdd-hades-despertar.md) · loop Fase 7 em [`plano-hades-despertar.md`](./plano-hades-despertar.md)  
 > **UI Cookie:** [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md) §3.3 / Fase D  
-> **Polish:** [`plano-despertar-polish-foice-juizo-upgrades.md`](./plano-despertar-polish-foice-juizo-upgrades.md) F3  
-> **Balance:** [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md) J.2  
+> **Polish:** `plano-despertar-polish-foice-juizo-upgrades.md` (arquivado) F3  
+> **Balance:** `plano-despertar-aureolas-letreiro-shiny-hud-juizo.md` (arquivado) J.2  
 > **Escopo desta página:** loop dle + tabela de Vereditos/Bancada (B1 Soft). Pool e anti-cheat de ratings do desafiante **não** reabrem.
 
 ---

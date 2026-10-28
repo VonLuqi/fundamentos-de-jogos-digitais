@@ -10,7 +10,7 @@ Este documento é a fonte operacional de implementação **e o inventário de st
 
 **Extensão UI (Fase 8 — feita):** layout Cookie Clicker + WorldView/AltarOrbit + Juízo Higher/Lower — [`plano-despertar-ui-cookieclicker.md`](./plano-despertar-ui-cookieclicker.md); GDD Juízo v2 em [`gdd-juizo-v2.md`](./gdd-juizo-v2.md).
 
-**Pós-Fase 8 (feitos):** sync anti-rubberband · debug admin · Lethe progressivo · Styx encadeado · cosméticos procedurais · Juramentos Selados · aureolas/letreiro/shiny/gold/HUD/Juízo B1 Soft — ver [`despertar-sync/00-master-plan.md`](./despertar-sync/00-master-plan.md) · [`plano-despertar-aureolas-letreiro-shiny-hud-juizo.md`](./plano-despertar-aureolas-letreiro-shiny-hud-juizo.md) · [`plano-despertar-polish-foice-juizo-upgrades.md`](./plano-despertar-polish-foice-juizo-upgrades.md).
+**Pós-Fase 8 (feitos):** sync anti-rubberband · debug admin · Lethe progressivo · Styx encadeado · cosméticos procedurais · Juramentos Selados · aureolas/letreiro/shiny/gold/HUD/Juízo B1 Soft — ver `despertar-sync/00-master-plan.md` (arquivado) · `plano-despertar-aureolas-letreiro-shiny-hud-juizo.md` (arquivado) · `plano-despertar-polish-foice-juizo-upgrades.md` (arquivado).
 
 **Roadmap produção profunda (planejamento):** pausa com timer na aula · Códice livro · subabas permanentes · conquistas · cosméticos/VFX · Lethe/Bancada profundos — [`plano-despertar-producao-profundo.md`](./plano-despertar-producao-profundo.md).
 
@@ -81,7 +81,7 @@ Design system: `css/hades-tokens.css` (`--hades-*`, Cinzel / Crimson Text) + `--
 | --- | --- | --- |
 | **Arte** | Placeholders WebP/SVG + Foice PNG; pipeline `despertar:sprites` | Visual “procgen”; pedidos abertos em [`PEDIDOS-MESTRE.md`](../assets/despertar/PEDIDOS-MESTRE.md) |
 | **Pool Juízo** | Stub ≥200; CTA exige ≥30 com `rating` | Sem ratings o Juízo fica disabled |
-| **SFX** | Stub `ui/audio.js` (`SFX_ENABLED = false`) | Silêncio total — intencional até polish |
+| **SFX** | Sem módulo de áudio (stub removido) | Silêncio total — intencional até polish |
 | **Cosméticos** | 12 shipped procedural; WebP P3 open | Entrega Mestre em `cosmetics/` |
 | **Shiny RNG** | Cliente rola; server só clampa bounds | Exploit teórico = linha ×15 (congelado) |
 | **Sync de idle** | Flush só se `_dirty` (compra/resume/…) | Clique puro pode atrasar push até o próximo evento |
@@ -1080,7 +1080,7 @@ Ver seção [Checklist de aceite](#checklist-de-aceite).
 | Juízo UI | Higher/Lower: Maior / Menor / Igual; campeão com faixa; desafiante `?` |
 | Juízo API | `normalizeJuizoChoice` — sem migration |
 | Arte | Placeholders WebP/SVG; pedidos ao Mestre em `assets/despertar/PEDIDOS-MESTRE.md` |
-| Áudio | SFX depois (`ui/audio.js` stub) |
+| Áudio | SFX depois (sem stub; criar o módulo quando houver áudio) |
 
 #### Tasks (rastreio no plano Cookie)
 

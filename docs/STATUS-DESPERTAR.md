@@ -6,14 +6,14 @@
 
 ## Arte por pasta
 
-Ilustrada: **181/666 (27%)** · vetorial interina: 329 · placeholder: **156** · faltando: 0
+Ilustrada: **175/660 (27%)** · vetorial interina: 329 · placeholder: **156** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | `foice` | 1 | 1 | 0 | 0 | 0 |
 | `generators` | 20 | 20 | 0 | 0 | 0 |
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
-| `hud` | 13 | 13 | 0 | 0 | 0 |
+| `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 92 | 329 | 12 | 0 |
 | `talents` | 129 | 0 | 0 | 129 | 0 |
@@ -21,8 +21,6 @@ Ilustrada: **181/666 (27%)** · vetorial interina: 329 · placeholder: **156** �
 | `veil` | 5 | 5 | 0 | 0 | 0 |
 | `catabase` | 7 | 7 | 0 | 0 | 0 |
 | `seasons` | 15 | 0 | 0 | 15 | 0 |
-
-Fora da conta (ícones que nenhum item usa): `upgrades` 20 · `talents` 110.
 
 Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-PENDENTE.md) (`npm run despertar:art-briefs`).
 
@@ -76,7 +74,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_f4_veil_kittens` | interim | 5 | 7 | 0 | 0 |
 | `art_f6_catabase_wrinklers` | interim | 7 | 8 | 0 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
-| `art_f7_upgrades_late` | open | 92 | 329 | 12 | 20 |
+| `art_f7_upgrades_late` | open | 92 | 329 | 12 | 0 |
 | `art_f8_seasons_dragon_fortunes` | open | 0 | 0 | 15 | 0 |
 | `art_synergy_vol_canon` | delivered | 36 | 0 | 0 | 0 |
 | `art_mil_foices_ladder` | delivered | 12 | 0 | 0 | 0 |

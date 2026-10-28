@@ -163,7 +163,7 @@ Cliente opcional: `limit`. Implementação: `ORDER BY …` + window rank no SQL;
 
 ## 5. Extensão opcional — `clientEpoch` (Despertar sync · Fase A)
 
-> **Origem:** [`docs/despertar-sync/01-tasks-fase-a-sync.md`](../despertar-sync/01-tasks-fase-a-sync.md) Task 0 / A3  
+> **Origem:** `docs/despertar-sync/01-tasks-fase-a-sync.md` (arquivado) Task 0 / A3  
 > **Status:** contrato documentado; eco no wire **implementado** (Task A3, 2026-09-22)
 
 Campo **opcional** no payload de `action: 'stateSync'` e no DTO de resposta. Clientes legados omitem; server **ignora** para validação de economia (é hint de rebase no client).

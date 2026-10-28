@@ -29,8 +29,8 @@
       "placeholders": []
     },
     "hud": {
-      "total": 13,
-      "ilustrada": 13,
+      "total": 7,
+      "ilustrada": 7,
       "vetorial": 0,
       "placeholder": 0,
       "faltando": 0,
@@ -52,7 +52,7 @@
       "vetorial": 329,
       "placeholder": 12,
       "faltando": 0,
-      "orphanFiles": 20,
+      "orphanFiles": 0,
       "placeholders": [
         "fortune_gen_mnemosyne_temple",
         "fortune_gen_moirai_prism",
@@ -74,7 +74,7 @@
       "vetorial": 0,
       "placeholder": 129,
       "faltando": 0,
-      "orphanFiles": 110,
+      "orphanFiles": 0,
       "placeholders": [
         "abadao",
         "angels",
@@ -513,7 +513,7 @@
         "ilustrada": 92,
         "vetorial": 329,
         "placeholder": 12,
-        "faltando": 20
+        "faltando": 0
       }
     },
     {

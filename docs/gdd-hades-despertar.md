@@ -1,6 +1,6 @@
 # Documento de Design de Jogo (GDD) & Arquitetura de Software: Hades - O Despertar do Submundo
 
-> **Implementação / status de produção:** [`docs/plano-hades-despertar.md`](plano-hades-despertar.md) (Fases 0–8 **feitas** + inventário P0–P2 para abrir o Acheron) · UI Cookie / Juízo dle: [`plano-despertar-ui-cookieclicker.md`](plano-despertar-ui-cookieclicker.md) · Paridade Cookie Clicker (referência): [`paridade-cookieclicker-despertar.md`](paridade-cookieclicker-despertar.md) · **Produção paridade completa:** [`plano-paridade-cookieclicker-producao.md`](plano-paridade-cookieclicker-producao.md) · Juízo v2: [`gdd-juizo-v2.md`](gdd-juizo-v2.md) · Sync A–F: [`despertar-sync/00-master-plan.md`](despertar-sync/00-master-plan.md) — este GDD é a referência de design; o plano rastreia o que já está no código e o que falta para produção.
+> **Implementação / status de produção:** [`docs/plano-hades-despertar.md`](plano-hades-despertar.md) (Fases 0–8 **feitas** + inventário P0–P2 para abrir o Acheron) · UI Cookie / Juízo dle: [`plano-despertar-ui-cookieclicker.md`](plano-despertar-ui-cookieclicker.md) · Paridade Cookie Clicker (referência): [`paridade-cookieclicker-despertar.md`](paridade-cookieclicker-despertar.md) · **Produção paridade completa:** `plano-paridade-cookieclicker-producao.md` (arquivado) · Juízo v2: [`gdd-juizo-v2.md`](gdd-juizo-v2.md) · Sync A–F: `despertar-sync/00-master-plan.md` (arquivado) — este GDD é a referência de design; o plano rastreia o que já está no código e o que falta para produção.
 
 ---
 
@@ -132,7 +132,7 @@ $$SPS = \left( \sum_{i=1}^{n} (Quantity_i \times BaseRate_i \times UpgradeMult_i
 | **5** | **Forja de Phlegethon** | $130.000$ almas | $260.0$ almas/s | $1.15$ | $500.0\text{ s}$ |
 | **6** | **Trono de Obsidiana** | $1.400.000$ almas | $1.400.0$ almas/s | $1.15$ | $1000.0\text{ s}$ |
 
-Paridade Cookie Clicker T1–T6 (Cursor→Bank) e roadmap T7–T20: [`paridade-cookieclicker-despertar.md`](./paridade-cookieclicker-despertar.md) · produção: [`plano-paridade-cookieclicker-producao.md`](./plano-paridade-cookieclicker-producao.md).
+Paridade Cookie Clicker T1–T6 (Cursor→Bank) e roadmap T7–T20: [`paridade-cookieclicker-despertar.md`](./paridade-cookieclicker-despertar.md) · produção: `plano-paridade-cookieclicker-producao.md` (arquivado).
 
 ### 4.2 Mecânica de Prestígio (A Catábase no Rio Lethe)
 Nas fases avançadas, a curva de custo exponencial cria uma barreira (a "parede de progressão"). O jogador pode acionar o **Ritual do Lethe**, que reseta todas as Almas e Geradores acumulados na corrida atual, convertendo-os em **Óbolos de Caronte**.

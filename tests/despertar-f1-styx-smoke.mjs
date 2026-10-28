@@ -1,6 +1,6 @@
 /**
  * Smoke Fase F1 — Styx: 15 tiers por gerador + Sinergias Vol. I/II + Mil Foices + Paridade JS ≡ PHP
- * (docs/plano-paridade-cookieclicker-producao.md · docs/paridade-cookieclicker-despertar.md).
+ * (docs/paridade-cookieclicker-despertar.md).
  *
  * Uso: node tests/despertar-f1-styx-smoke.mjs
  */
