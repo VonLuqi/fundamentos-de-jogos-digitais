@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **169/666 (25%)** · vetorial interina: 329 · placeholder: **168** · faltando: 0
+Ilustrada: **181/666 (27%)** · vetorial interina: 329 · placeholder: **156** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -15,7 +15,7 @@ Ilustrada: **169/666 (25%)** · vetorial interina: 329 · placeholder: **168** �
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
 | `hud` | 13 | 13 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
-| `upgrades` | 433 | 80 | 329 | 24 | 0 |
+| `upgrades` | 433 | 92 | 329 | 12 | 0 |
 | `talents` | 129 | 0 | 0 | 129 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
@@ -28,9 +28,9 @@ Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-P
 
 Placeholders por pasta (IDs para gerar arte):
 
-<details><summary><code>upgrades</code> — 24</summary>
+<details><summary><code>upgrades</code> — 12</summary>
 
-`contrato_de_hermes` · `fortune_100` · `fortune_101` · `fortune_102` · `fortune_gen_cerberian_hound` · `fortune_gen_charon_servants` · `fortune_gen_chronos_loom` · `fortune_gen_chthonic_idleverse` · `fortune_gen_cortex_baker` · `fortune_gen_erebus_portal` · `fortune_gen_fate_forge` · `fortune_gen_fractal_engine` · `fortune_gen_mnemosyne_temple` · `fortune_gen_moirai_prism` · `fortune_gen_obsidian_throne` · `fortune_gen_oracle_console` · `fortune_gen_phlegethon_forge` · `fortune_gen_star_barge` · `fortune_gen_styx_tower` · `fortune_gen_tartarus_judge` · `fortune_gen_tartarus_lab` · `fortune_gen_the_emperor` · `fortune_gen_void_condenser` · `fortune_gen_wandering_shade`
+`fortune_gen_mnemosyne_temple` · `fortune_gen_moirai_prism` · `fortune_gen_obsidian_throne` · `fortune_gen_oracle_console` · `fortune_gen_phlegethon_forge` · `fortune_gen_star_barge` · `fortune_gen_styx_tower` · `fortune_gen_tartarus_judge` · `fortune_gen_tartarus_lab` · `fortune_gen_the_emperor` · `fortune_gen_void_condenser` · `fortune_gen_wandering_shade`
 
 </details>
 
@@ -76,7 +76,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_f4_veil_kittens` | interim | 5 | 7 | 0 | 0 |
 | `art_f6_catabase_wrinklers` | interim | 7 | 8 | 0 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
-| `art_f7_upgrades_late` | open | 80 | 329 | 24 | 20 |
+| `art_f7_upgrades_late` | open | 92 | 329 | 12 | 20 |
 | `art_f8_seasons_dragon_fortunes` | open | 0 | 0 | 15 | 0 |
 | `art_synergy_vol_canon` | delivered | 36 | 0 | 0 | 0 |
 | `art_mil_foices_ladder` | delivered | 12 | 0 | 0 | 0 |

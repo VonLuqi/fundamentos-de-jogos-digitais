@@ -48,24 +48,12 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 80,
+      "ilustrada": 92,
       "vetorial": 329,
-      "placeholder": 24,
+      "placeholder": 12,
       "faltando": 0,
       "orphanFiles": 20,
       "placeholders": [
-        "contrato_de_hermes",
-        "fortune_100",
-        "fortune_101",
-        "fortune_102",
-        "fortune_gen_cerberian_hound",
-        "fortune_gen_charon_servants",
-        "fortune_gen_chronos_loom",
-        "fortune_gen_chthonic_idleverse",
-        "fortune_gen_cortex_baker",
-        "fortune_gen_erebus_portal",
-        "fortune_gen_fate_forge",
-        "fortune_gen_fractal_engine",
         "fortune_gen_mnemosyne_temple",
         "fortune_gen_moirai_prism",
         "fortune_gen_obsidian_throne",
@@ -522,9 +510,9 @@
       "auditable": true,
       "status": "open",
       "counts": {
-        "ilustrada": 80,
+        "ilustrada": 92,
         "vetorial": 329,
-        "placeholder": 24,
+        "placeholder": 12,
         "faltando": 20
       }
     },
