@@ -252,6 +252,14 @@ final class Database
             'completed_lessons' => self::decodeJsonArray($row['completed_lessons'] ?? null),
             'redeemed_codes' => self::decodeJsonArray($row['redeemed_codes'] ?? null),
             'avatar_index' => (int) ($row['avatar_index'] ?? 0),
+            'display_name' => $row['display_name'] ?? null,
+            'bio' => $row['bio'] ?? null,
+            'avatar_mode' => (string) ($row['avatar_mode'] ?? 'catalog'),
+            'photo_path' => $row['photo_path'] ?? null,
+            'photo_pending_path' => $row['photo_pending_path'] ?? null,
+            'photo_status' => (string) ($row['photo_status'] ?? 'none'),
+            'photo_updated_at' => self::sqlToIso($row['photo_updated_at'] ?? null),
+            'photo_reject_reason' => $row['photo_reject_reason'] ?? null,
             'created_at' => self::sqlToIso($row['created_at'] ?? null),
         ];
     }

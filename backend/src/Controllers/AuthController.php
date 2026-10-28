@@ -59,7 +59,7 @@ final class AuthController
             }
             Http::json(200, [
                 'ok' => true,
-                'user' => GameCatalog::sanitizeUser($user),
+                'user' => GameCatalog::sanitizeUser($user, owner: true),
             ]);
         }
 
@@ -163,7 +163,7 @@ final class AuthController
                 Http::json(201, [
                     'ok' => true,
                     'token' => $sessionRes['token'],
-                    'user' => GameCatalog::sanitizeUser($user),
+                    'user' => GameCatalog::sanitizeUser($user, owner: true),
                     'mailSent' => $mailSent,
                 ]);
             }
@@ -222,7 +222,7 @@ final class AuthController
                 Http::json(200, [
                     'ok' => true,
                     'token' => $sessionRes['token'],
-                    'user' => GameCatalog::sanitizeUser($user),
+                    'user' => GameCatalog::sanitizeUser($user, owner: true),
                 ]);
             }
 
@@ -292,7 +292,7 @@ final class AuthController
                     'email' => $email,
                     'emailVerifiedAt' => null,
                     'mailSent' => (bool) ($dispatched['sent'] ?? false),
-                    'user' => GameCatalog::sanitizeUser($updated),
+                    'user' => GameCatalog::sanitizeUser($updated, owner: true),
                 ]);
             }
 
@@ -327,11 +327,14 @@ final class AuthController
                 AuthEmailService::markTokenUsed((int) $row['id']);
                 AuthEmailService::invalidateOpenTokens((int) $owner['id'], AuthEmailService::PURPOSE_VERIFY);
 
-                Http::json(200, [
-                    'ok' => true,
-                    'email' => $updated['email'],
-                    'user' => GameCatalog::sanitizeUser($updated),
-                ]);
+                $response = ['ok' => true, 'email' => $updated['email']];
+                // O token do e-mail NÃO é sessão: só devolve o usuário completo (foto pendente etc.)
+                // se a requisição também traz uma sessão autenticada do mesmo usuário.
+                $sessionUser = SessionService::loadUserBySessionToken(SessionService::extractRequestToken());
+                if ($sessionUser && (int) $sessionUser['id'] === (int) $updated['id']) {
+                    $response['user'] = GameCatalog::sanitizeUser($updated, owner: true);
+                }
+                Http::json(200, $response);
             }
 
             case 'requestPasswordReset': {
@@ -434,7 +437,7 @@ final class AuthController
                 Http::json(200, [
                     'ok' => true,
                     'status' => Mailer::getStatus(),
-                    'user' => GameCatalog::sanitizeUser($admin),
+                    'user' => GameCatalog::sanitizeUser($admin, owner: true),
                 ]);
             }
 

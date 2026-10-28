@@ -41,7 +41,7 @@ final class RedeemLessonsService
         if (!$updated) {
             Http::error(500, 'Erro ao atualizar avatar.');
         }
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: true)]);
     }
 
     // -------------------------------------------------------------------------
@@ -219,7 +219,7 @@ final class RedeemLessonsService
 
         Http::json(200, [
             'ok' => true,
-            'user' => GameCatalog::sanitizeUser($updated),
+            'user' => GameCatalog::sanitizeUser($updated, owner: true),
             'awarded' => [
                 'xp' => $rewardXp,
                 'achievements' => $awardedAchievements,
@@ -510,7 +510,7 @@ final class RedeemLessonsService
                 'lessonId' => $lessonId,
                 'paragraph' => $text,
                 'updatedAt' => $nowIso,
-                'user' => GameCatalog::sanitizeUser($updatedUser),
+                'user' => GameCatalog::sanitizeUser($updatedUser, owner: true),
                 'awarded' => $awarded,
             ],
         ];
@@ -1103,7 +1103,7 @@ final class RedeemLessonsService
                 'ok' => true,
                 'alreadyOwned' => true,
                 'awarded' => ['xp' => 0, 'achievements' => [], 'achievementDetails' => []],
-                'user' => GameCatalog::sanitizeUser($user),
+                'user' => GameCatalog::sanitizeUser($user, owner: true),
             ]);
         }
 
@@ -1112,7 +1112,7 @@ final class RedeemLessonsService
             'ok' => true,
             'alreadyOwned' => false,
             'awarded' => $res['awarded'],
-            'user' => GameCatalog::sanitizeUser($res['user']),
+            'user' => GameCatalog::sanitizeUser($res['user'], owner: true),
             'leveledUp' => $res['leveledUp'],
         ]);
     }

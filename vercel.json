@@ -72,6 +72,8 @@
     { "source": "/despertar/", "destination": "/pages/despertar.html" },
     { "source": "/ranking", "destination": "/pages/ranking.html" },
     { "source": "/ranking/", "destination": "/pages/ranking.html" },
+    { "source": "/perfil", "destination": "/pages/perfil.html" },
+    { "source": "/perfil/", "destination": "/pages/perfil.html" },
     { "source": "/classind-dle", "destination": "/pages/classind-dle.html" },
     { "source": "/classind-dle/", "destination": "/pages/classind-dle.html" },
     { "source": "/prova", "destination": "/pages/prova.html" },

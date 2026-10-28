@@ -10,6 +10,7 @@ import {
   getBootstrapGates,
 } from './api.js';
 import { DESPERTAR_SEASON_CLOSED } from './hades-despertar/config/season-closed.js';
+import { initProfileChip, syncProfileChip } from './profile-chip.js';
 import { maybeOfferInstall } from './pwa-install.js';
 
 const mobileQuery = window.matchMedia('(max-width: 980px)');
@@ -215,6 +216,7 @@ export function applyNavCollapsed(shell, sidebar, toggle, collapsed) {
     shell.classList.remove('is-nav-collapsed');
     document.body.classList.remove('is-shell-nav-collapsed');
     sidebar?.removeAttribute('inert');
+    syncProfileChip(shell);
     return false;
   }
 
@@ -235,6 +237,7 @@ export function applyNavCollapsed(shell, sidebar, toggle, collapsed) {
     toggle?.setAttribute('aria-label', 'Recolher navegação');
   }
 
+  syncProfileChip(shell);
   return wantCollapsed;
 }
 
@@ -268,6 +271,7 @@ function syncShellState(shell, sidebar, toggle, overlay) {
 }
 
 function closeDrawer(shell, toggle, overlay, { restoreFocus = true } = {}) {
+  syncProfileChip(shell);
   shell.classList.remove('is-open');
   document.body.classList.remove('is-shell-locked');
   toggle?.setAttribute('aria-expanded', 'false');
@@ -318,6 +322,7 @@ export function initAppShell({
   route,
   role = 'student',
   onLogout,
+  user = null,
   token = null,
   despertarPublished,
 } = {}) {
@@ -327,7 +332,7 @@ export function initAppShell({
   const sidebar = shell.querySelector('[data-shell-sidebar]');
   const toggle = shell.querySelector('[data-shell-toggle]');
   const overlay = shell.querySelector('[data-shell-overlay]');
-  const logoutButton = shell.querySelector('[data-shell-logout]');
+  initProfileChip(shell, { user, token, onLogout });
   const mainRegion = shell.querySelector('.app-shell__main');
   const activeNav = mapRouteToNavItem(route || document.body.dataset.route || '');
 
@@ -405,7 +410,7 @@ export function initAppShell({
 
   window.addEventListener('keydown', (event) => {
     if (event.key === 'Tab' && shell.classList.contains('is-open') && mobileQuery.matches && sidebar) {
-      const focusable = Array.from(sidebar.querySelectorAll(FOCUSABLE_SELECTOR)).filter((item) => !item.hasAttribute('hidden'));
+      const focusable = Array.from(sidebar.querySelectorAll(FOCUSABLE_SELECTOR)).filter((item) => item.tabIndex >= 0 && !item.closest('[hidden], [inert]') && item.getClientRects().length > 0);
       if (focusable.length > 0) {
         const first = focusable[0];
         const last = focusable[focusable.length - 1];
@@ -451,11 +456,6 @@ export function initAppShell({
     mobileQuery.addListener(handleMediaChange);
   }
 
-  if (typeof onLogout === 'function' && logoutButton) {
-    logoutButton.addEventListener('click', async () => {
-      await onLogout();
-    });
-  }
 
   maybeOfferInstall();
 

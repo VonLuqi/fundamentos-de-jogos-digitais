@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Meu Perfil | Fundamentos de Jogos Digitais." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Meu Perfil | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/app-shell.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/perfil.css" />
+  <link rel="stylesheet" href="../css/despertar.css?v=season-t2-2" />
+  <script src="../js/devtools-guard.boot.js"></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "../js/api.js": "../js/api.js?v=season-t2-2",
+      "../js/app-shell.js": "../js/app-shell.js?v=season-t2-2",
+      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=season-t2-2"
+    }
+  }
+  </script>
+</head>
+<body class="app-shell-page" data-route="perfil" data-role-scope="protected">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div class="app-shell" data-shell>
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="dashboard" href="../dashboard/">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="../aulas/">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="../conquistas/">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="ranking" href="../ranking/">Placar do Domínio</a>
+        <a class="app-shell__link" data-nav-item="salao" href="../salao-espiritual/">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="../grimorio/">Grimório Pessoal</a>
+        <a class="app-shell__link is-locked" data-nav-item="despertar" href="../despertar/" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="../souls/" hidden>Almas Registradas</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Fundamentos de Jogos Digitais</p>
+            <h1 class="app-shell__title" id="ranking-page-title">PLACAR DO <span class="accent">DOMÍNIO</span></h1>
+          </div>
+        </div>
+
+        <div class="app-shell__header-actions" data-shell-actions>
+          <span class="app-shell__context-chip">Placar</span>
+        </div>
+      </header>
+
+      <div class="ornate-divider hades-svg-divider" aria-hidden="true">
+        <img
+          src="../assets/ui/hades/dividers/divider-styx-gems.svg"
+          alt=""
+          width="680"
+          height="36"
+          loading="eager"
+          decoding="async"
+        />
+      </div>
+
+      <main class="app-shell__content" id="main-content">
+        <section class="perfil-page" id="perfil-root" aria-label="Perfil do herói"></section>
+      </main>
+    </div>
+  </div>
+
+  <script type="module" src="../js/perfil.js"></script>
+</body>
+</html>

@@ -357,6 +357,7 @@ const APP_PAGE_SLUGS = new Set([
   'classind-dle',
   'prova',
   'prova-admin',
+  'perfil',
 ]);
 
 /**
@@ -430,6 +431,7 @@ export const ROUTES = {
   classindDle: () => appRoute('classind-dle'),
   prova: () => appRoute('prova'),
   provaAdmin: () => appRoute('prova-admin'),
+  perfil: () => appRoute('perfil'),
   lesson: (id) => appRoute(String(id || '').replace(/\.html$/i, '')),
 };
 
@@ -579,6 +581,13 @@ function normalizeUser(raw) {
     achievements: raw.achievements ?? raw.conquistas ?? [],
     email: raw.email ?? null,
     emailVerifiedAt: raw.emailVerifiedAt ?? raw.email_verified_at ?? null,
+    displayName: raw.displayName ?? raw.display_name ?? null,
+    bio: raw.bio ?? null,
+    avatarMode: raw.avatarMode ?? raw.avatar_mode ?? 'catalog',
+    photoUrl: raw.photoUrl ?? null,
+    photoPendingUrl: raw.photoPendingUrl ?? null,
+    photoStatus: raw.photoStatus ?? 'none',
+    photoRejectReason: raw.photoRejectReason ?? null,
     hasDespertarState: Boolean(raw.hasDespertarState),
   };
 }
@@ -917,12 +926,123 @@ export async function underworldRedeem(token, submittedHash) {
   };
 }
 
-export async function setAvatar(token, avatarIndex) {
+export function setAvatar(token, avatarIndex) {
+  // Mesmo helper do perfil: normaliza, invalida o bootstrap e emite `profile:updated`.
+  return profileAction(token, { action: 'avatar', avatarIndex });
+}
+
+/* ============================================================
+   PERFIL (nome de exibição, bio, foto, senha) + moderação
+   ============================================================ */
+
+/** Avisa o app (chip, shell, páginas) que o perfil do usuário logado mudou. */
+function emitProfileUpdated(user) {
+  invalidateSessionBootstrapCache();
+  try {
+    window.dispatchEvent(new CustomEvent('profile:updated', { detail: { user } }));
+  } catch {
+    /* ambiente sem window/CustomEvent */
+  }
+}
+
+async function profileAction(token, body) {
   const payload = await request('/progress', {
     method: 'POST',
-    body: JSON.stringify({ token, action: 'avatar', avatarIndex }),
+    body: JSON.stringify({ token, ...body }),
   });
-  return { ...payload, user: normalizeUser(payload.user) };
+  const user = payload.user ? normalizeUser(payload.user) : null;
+  emitProfileUpdated(user);
+  return { ...payload, user };
+}
+
+/** @param {{displayName?: string|null, bio?: string|null, avatarMode?: 'catalog'|'photo'}} fields */
+export function updateProfile(token, fields = {}) {
+  const { displayName, bio, avatarMode } = fields;
+  const body = { action: 'profileUpdate' };
+  if (displayName !== undefined) body.displayName = displayName;
+  if (bio !== undefined) body.bio = bio;
+  if (avatarMode !== undefined) body.avatarMode = avatarMode;
+  return profileAction(token, body);
+}
+
+/** @param {string} dataUrl `data:image/webp|png|jpeg;base64,...` (≤ 1,5 MB). */
+export function uploadProfilePhoto(token, dataUrl) {
+  return profileAction(token, { action: 'profilePhotoUpload', image: dataUrl });
+}
+
+export function removeProfilePhoto(token) {
+  return profileAction(token, { action: 'profilePhotoRemove' });
+}
+
+export function updateFullName(token, fullName, currentPassword) {
+  return profileAction(token, { action: 'profileNameUpdate', fullName, currentPassword });
+}
+
+export async function changePassword(token, currentPassword, newPassword) {
+  const payload = await request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'passwordChange', currentPassword, newPassword }),
+  });
+  invalidateSessionBootstrapCache();
+  return payload;
+}
+
+export function adminPhotoQueue(token) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'adminPhotoQueue' }),
+  });
+}
+
+/** @param {'approve'|'reject'} decision */
+export function adminPhotoReview(token, targetUserId, decision, reason = '') {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'adminPhotoReview', targetUserId, decision, reason }),
+  });
+}
+
+export function adminPhotoRemove(token, targetUserId) {
+  return request('/progress', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'adminPhotoRemove', targetUserId }),
+  });
+}
+
+/**
+ * Decide o que mostrar como avatar de `user`.
+ * Foto aprovada vale para todos; a pendente só aparece para o próprio dono (`isSelf`).
+ * @returns {{kind: 'photo'|'catalog', src?: string, avatarIndex: number, pending: boolean}}
+ */
+export function resolveUserAvatar(user, { isSelf = false } = {}) {
+  const avatarIndex = Number(user?.avatarIndex ?? user?.avatar_index ?? 0) || 0;
+  // Prévia do dono primeiro: a pendente chega como data URL (arquivo não é público); não prefixar.
+  if (isSelf && user?.photoPendingUrl) {
+    return { kind: 'photo', src: user.photoPendingUrl, avatarIndex, pending: true };
+  }
+  const photoMode = (user?.avatarMode ?? user?.avatar_mode) === 'photo';
+  if (photoMode && user?.photoUrl) {
+    return { kind: 'photo', src: `${rootPath()}/${user.photoUrl}`, avatarIndex, pending: false };
+  }
+  return { kind: 'catalog', avatarIndex, pending: false };
+}
+
+/** Carrega em `imgEl` a foto do usuário; sem foto (ou se falhar) cai no personagem do catálogo. */
+export async function loadUserAvatar(imgEl, user, { isSelf = false } = {}) {
+  const avatar = resolveUserAvatar(user, { isSelf });
+  if (avatar.kind === 'photo') {
+    const ok = await new Promise((resolve) => {
+      imgEl.onload = () => { imgEl.onload = imgEl.onerror = null; resolve(true); };
+      imgEl.onerror = () => { imgEl.onload = imgEl.onerror = null; resolve(false); };
+      imgEl.src = avatar.src;
+    });
+    if (ok) {
+      imgEl.dataset.avatarPending = avatar.pending ? '1' : '0';
+      return true;
+    }
+  }
+  imgEl.dataset.avatarPending = '0';
+  return loadAvatarImage(imgEl, avatar.avatarIndex);
 }
 
 export function listCodes(token) {

@@ -97,7 +97,7 @@ final class SessionBootstrapController
 
         Http::json(200, [
             'ok' => true,
-            'user' => GameCatalog::sanitizeUser($user),
+            'user' => GameCatalog::sanitizeUser($user, owner: true),
             'gates' => [
                 'despertar' => [
                     'published' => $published,

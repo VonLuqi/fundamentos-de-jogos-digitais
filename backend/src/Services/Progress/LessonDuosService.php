@@ -379,7 +379,7 @@ final class LessonDuosService
 
         $pdo = Database::pdo();
         $tStmt = $pdo->prepare(
-            'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`
+            'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `avatar_index`, `display_name`, `avatar_mode`, `photo_path`, `photo_updated_at`
              FROM `users` WHERE LOWER(`username`) = :u LIMIT 1'
         );
         $tStmt->execute([':u' => $targetUsername]);
@@ -711,7 +711,7 @@ final class LessonDuosService
 
         Http::json(200, [
             'ok' => true,
-            'user' => GameCatalog::sanitizeUser($awardResult['user']),
+            'user' => GameCatalog::sanitizeUser($awardResult['user'], owner: true),
             'awarded' => $awardResult['awarded'],
             'journal' => self::journalPayload($journal),
         ]);

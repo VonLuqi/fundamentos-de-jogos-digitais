@@ -110,6 +110,10 @@ final class LeaderboardAdminService
                     `u`.`role`,
                     `u`.`xp`,
                     `u`.`avatar_index`,
+                    `u`.`display_name`,
+                    `u`.`avatar_mode`,
+                    `u`.`photo_path`,
+                    `u`.`photo_updated_at`,
                     `u`.`conquistas`,
                     `u`.`completed_lessons`,
                     COALESCE(`d`.`juizo_best_streak`, 0) AS `juizo_best`,
@@ -208,6 +212,9 @@ final class LeaderboardAdminService
                 'fullName' => $card['fullName'],
                 'turma' => $card['turma'],
                 'avatarIndex' => $card['avatarIndex'],
+                'displayName' => $card['displayName'],
+                'avatarMode' => $card['avatarMode'],
+                'photoUrl' => $card['photoUrl'],
                 'xp' => $item['xp'],
                 'rankTitle' => $card['rank'],
                 'level' => $card['level'],
@@ -261,7 +268,9 @@ final class LeaderboardAdminService
 
         $uStmt = $pdo->query(
             'SELECT `id`, `full_name`, `username`, `turma`, `role`, `xp`, `conquistas`, `completed_lessons`,
-                    `redeemed_codes`, `avatar_index`, `created_at`, `email`, `email_verified_at`
+                    `redeemed_codes`, `avatar_index`, `created_at`, `email`, `email_verified_at`,
+                    `display_name`, `bio`, `avatar_mode`, `photo_path`, `photo_pending_path`,
+                    `photo_status`, `photo_updated_at`, `photo_reject_reason`
              FROM `users`'
         );
         $users = $uStmt ? $uStmt->fetchAll(PDO::FETCH_ASSOC) : [];
@@ -330,7 +339,7 @@ final class LeaderboardAdminService
             if (!$hydrated) {
                 continue;
             }
-            $s = GameCatalog::sanitizeUser($hydrated);
+            $s = GameCatalog::sanitizeUser($hydrated, owner: false);
             $uid = (int) $hydrated['id'];
             $userViews = $viewsByUser[$uid] ?? [];
             $entry = array_merge($s, [
@@ -371,6 +380,9 @@ final class LeaderboardAdminService
                 'username' => $activityUser['username'],
                 'turma' => $activityUser['turma'],
                 'avatarIndex' => (int) ($activityUser['avatar_index'] ?? $activityUser['avatarIndex'] ?? 0),
+                'displayName' => $activityUser['displayName'] ?? null,
+                'avatarMode' => $activityUser['avatarMode'] ?? 'catalog',
+                'photoUrl' => $activityUser['photoUrl'] ?? null,
             ];
         }
 
@@ -454,7 +466,7 @@ final class LeaderboardAdminService
         AdminAudit::record($actor, AdminAudit::ACTIONS['updateProfile'], $targetId, ['updates' => $auditUpdates]);
 
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: false)]);
     }
 
     /**
@@ -527,7 +539,7 @@ final class LeaderboardAdminService
         ]);
 
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: false)]);
     }
 
     /**
@@ -575,7 +587,7 @@ final class LeaderboardAdminService
         ]);
 
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: false)]);
     }
 
     /**
@@ -604,7 +616,7 @@ final class LeaderboardAdminService
 
         Http::json(200, [
             'ok' => true,
-            'user' => GameCatalog::sanitizeUser($result['user']),
+            'user' => GameCatalog::sanitizeUser($result['user'], owner: false),
             'awarded' => $result['awarded'],
         ]);
     }
@@ -626,7 +638,7 @@ final class LeaderboardAdminService
 
         $current = is_array($target['conquistas'] ?? null) ? array_values($target['conquistas']) : [];
         if (!in_array($achievementId, $current, true)) {
-            Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($target), 'revoked' => false]);
+            Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($target, owner: false), 'revoked' => false]);
         }
 
         $xpLoss = GameCatalog::getAchievementXp($achievementId);
@@ -648,7 +660,7 @@ final class LeaderboardAdminService
         ]);
 
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated), 'revoked' => true]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: false), 'revoked' => true]);
     }
 
     /**
@@ -674,7 +686,7 @@ final class LeaderboardAdminService
         ]);
 
         $updated = ProgressShared::loadUserById($targetId);
-        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated)]);
+        Http::json(200, ['ok' => true, 'user' => GameCatalog::sanitizeUser($updated, owner: false)]);
     }
 
     /**
