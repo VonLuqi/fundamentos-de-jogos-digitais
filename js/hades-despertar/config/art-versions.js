@@ -15,6 +15,6 @@ export const ART_VERSIONS = Object.freeze({
   'talents': 'fc265a14',
   'minigames': 'e727991f',
   'veil': 'd2cef64b',
-  'catabase': '001d0848',
+  'catabase': 'd3c869ed',
   'seasons': '3c7a33d8',
 });

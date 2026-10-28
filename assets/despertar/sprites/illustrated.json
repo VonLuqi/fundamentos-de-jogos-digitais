@@ -1,5 +1,10 @@
 {
   "preserveWebp": [
+    "catabase/alianca_eterna",
+    "catabase/catabase_estagio_1",
+    "catabase/catabase_estagio_2",
+    "catabase/catabase_estagio_3",
+    "catabase/tregua_estigia",
     "generators/cerberian_hound",
     "generators/charon_servants",
     "generators/chronos_loom",

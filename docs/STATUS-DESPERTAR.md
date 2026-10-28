@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **164/666 (25%)** · vetorial interina: 329 · placeholder: **173** · faltando: 0
+Ilustrada: **169/666 (25%)** · vetorial interina: 329 · placeholder: **168** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -19,7 +19,7 @@ Ilustrada: **164/666 (25%)** · vetorial interina: 329 · placeholder: **173** �
 | `talents` | 129 | 0 | 0 | 129 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
-| `catabase` | 7 | 2 | 0 | 5 | 0 |
+| `catabase` | 7 | 7 | 0 | 0 | 0 |
 | `seasons` | 15 | 0 | 0 | 15 | 0 |
 
 Fora da conta (ícones que nenhum item usa): `upgrades` 20 · `talents` 110.
@@ -37,12 +37,6 @@ Placeholders por pasta (IDs para gerar arte):
 <details><summary><code>talents</code> — 129</summary>
 
 `abadao` · `angels` · `archangels` · `asmodeus` · `aura_gloves` · `basic_wallpaper_assortment` · `beelzebub` · `belphegor` · `bolachas_celestes` · `box_of_brand_biscuits` · `box_of_macarons` · `box_of_maybe_cookies` · `box_of_not_cookies` · `box_of_pastries` · `cat_ladies` · `cherubim` · `classic_dairy_selection` · `comprimidos_milkhelp` · `contabilidade_genial` · `cosmic_beginner_s_luck` · `cozimento_de_acucar` · `cozinha_inicial` · `decisive_fate` · `delicate_touch` · `desconto_divino` · `diabetica_daemonicus` · `distilled_essence_of_redoubled_luck` · `distinguished_wallpaper_assortment` · `divine_bakeries` · `dominions` · `elder_spice` · `eye_of_the_wrinkler` · `fanciful_dairy_selection` · `five_finger_discount` · `fortune_cookies` · `frenesi_de_acucar` · `glittering_edge` · `god` · `golden_cookie_alert_sound` · `golden_switch` · `heavenly_luck` · `heralds` · `inspired_checklist` · `keepsakes` · `kit_inicial` · `kitten_angels` · `kitten_wages` · `label_printer` · `lasting_fortune` · `legado` · `lucifer` · `lucky_digit` · `luminous_gloves` · `luvas_de_halo` · `mamon` · `numero_da_sorte` · `ovo_primordial` · `pagamento_da_sorte` · `permanent_slot_i` · `permanent_slot_ii` · `permanent_slot_iii` · `permanent_slot_iv` · `permanent_slot_v` · `persistent_memory` · `pet_the_dragon` · `portoes_gemeos` · `quimera` · `reinforced_membrane` · `residual_luck` · `rodizio_das_estacoes` · `sacrilegious_corruption` · `satan` · `seraphim` · `shimmering_veil` · `sinergias_vol_i` · `sinergias_vol_ii` · `sound_test` · `starlove` · `starsnow` · `starspawn` · `starterror` · `startrade` · `steadfast_murmur` · `stevia_caelestis` · `sucralosia_inutilis` · `sugar_aging_process` · `sugar_crystal_cookies` · `tin_of_british_tea_biscuits` · `tin_of_butter_cookies` · `unholy_bait` · `unshackled_alabascream` · `unshackled_alchemy_labs` · `unshackled_antimatter_condensers` · `unshackled_astrofudge` · `unshackled_banks` · `unshackled_berrylium` · `unshackled_blueberrylium` · `unshackled_buttergold` · `unshackled_chalcedhoney` · `unshackled_chancemakers` · `unshackled_cherrysilver` · `unshackled_cortex_bakers` · `unshackled_cursors` · `unshackled_factories` · `unshackled_farms` · `unshackled_flavor` · `unshackled_fractal_engines` · `unshackled_glimmeringue` · `unshackled_glucosmium` · `unshackled_grandmas` · `unshackled_hazelrald` · `unshackled_idleverses` · `unshackled_iridyum` · `unshackled_javascript_consoles` · `unshackled_jetmint` · `unshackled_mines` · `unshackled_mooncandy` · `unshackled_portals` · `unshackled_prisms` · `unshackled_shipments` · `unshackled_sugarmuck` · `unshackled_temples` · `unshackled_time_machines` · `unshackled_wizard_towers` · `unshackled_you` · `vendas_divinas` · `virtues` · `wrapping_paper` · `wrinkly_cookies`
-
-</details>
-
-<details><summary><code>catabase</code> — 5</summary>
-
-`alianca_eterna` · `catabase_estagio_1` · `catabase_estagio_2` · `catabase_estagio_3` · `tregua_estigia`
 
 </details>
 
@@ -80,7 +74,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_f3_upgrades` | open | 0 | 0 | 0 | 8 |
 | `art_f5_minigames` | delivered | 21 | 0 | 0 | 0 |
 | `art_f4_veil_kittens` | interim | 5 | 7 | 0 | 0 |
-| `art_f6_catabase_wrinklers` | open | 2 | 8 | 5 | 0 |
+| `art_f6_catabase_wrinklers` | interim | 7 | 8 | 0 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
 | `art_f7_upgrades_late` | open | 80 | 329 | 24 | 20 |
 | `art_f8_seasons_dragon_fortunes` | open | 0 | 0 | 15 | 0 |

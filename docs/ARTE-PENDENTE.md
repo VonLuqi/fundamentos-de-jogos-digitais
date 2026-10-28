@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**173 ícones pendentes.**
+**168 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -27,18 +27,6 @@ Painel do Dragão e seletor de estações.
 | `season_feira_de_hermes` | Feira de Hermes (Mercadores de Almas) | Ecos do Acheron surgem +5% mais rápido e libera o Contrato de Hermes (−2% custo de todos os geradores). |
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
-
-## L5 — Catábase (`catabase`, 5)
-
-Estágios, Trégua e Aliança no Arquivo Estígio.
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `alianca_eterna` | Aliança Eterna (Elder Covenant) | — |
-| `catabase_estagio_1` | Estágio 1 — Despertar Ctoniano | — |
-| `catabase_estagio_2` | Estágio 2 — Comunhão Abissal | — |
-| `catabase_estagio_3` | Estágio 3 — Pacto Primordial | — |
-| `tregua_estigia` | Juramento de Trégua (Elder Pledge) | — |
 
 ## L6 — Fortunas (juramentos) (`upgrades`, 24)
 

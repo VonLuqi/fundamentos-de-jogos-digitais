@@ -677,7 +677,7 @@
       "id": "art_f6_catabase_wrinklers",
       "listId": "F6-CW",
       "priority": "P1",
-      "status": "open",
+      "status": "interim",
       "title": "Catábase das Avós & Sanguessugas do Acheron (7 sprites F6 + 8 juramentos)",
       "desc": "Sanguessuga do Acheron normal e Abissal Dourada (Shiny), ícones dos 3 estágios da Catábase (Despertar Ctoniano, Comunhão Abissal, Pacto Primordial), Juramento de Trégua, Aliança Eterna e 8 ícones da cadeia de pesquisa do Arquivo Estígio.",
       "sizes": [
@@ -707,9 +707,9 @@
       ],
       "notes": "Paths: assets/despertar/sprites/catabase/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 2,
+        "ilustrada": 7,
         "vetorial": 8,
-        "placeholder": 5,
+        "placeholder": 0,
         "faltando": 0
       }
     },
