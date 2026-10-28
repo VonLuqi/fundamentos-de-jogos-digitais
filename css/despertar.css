@@ -6169,6 +6169,15 @@ button.despertar-juizo-card:disabled {
   max-height: none;
   margin: 0;
   pointer-events: none;
+  /* Bordas suaves: empunhada em primeira pessoa, o cabo/rastro saem do quadro sem corte reto. */
+  -webkit-mask-image:
+    linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%),
+    linear-gradient(180deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-composite: intersect;
   /* Filtro CSS num canvas WebGL animado custa caro por frame e contornava o retângulo do canvas:
      o brilho dos cosméticos é feito em 3D (Foice3D, emissive/rim). */
   filter: none !important;

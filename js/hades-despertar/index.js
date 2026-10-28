@@ -1551,9 +1551,10 @@ async function init() {
     const perfPrefs = renderer.getPerfPrefs();
     pulseReapButton(reap, { reducedMotion });
     playFoiceSlash(reap, { reducedMotion });
-    // Corte diagonal 3D (sorteado a cada clique) + rastro de luz no mesmo ângulo.
+    // Corte diagonal 3D (sorteado a cada clique; a fita do fio é desenhada no próprio 3D).
+    // Sem 3D (imagem estática), o rastro 2D faz o papel da fita.
     const slash = foice3d?.slash(performance.now(), { reducedMotion });
-    if (slash && foice3d.ready) {
+    if (slash && !foice3d.ready) {
       spawnSlashTrail(reapStage, {
         angleDeg: slash.angleDeg,
         dir: slash.dir,

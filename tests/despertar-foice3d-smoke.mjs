@@ -8,40 +8,54 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { Foice3D, rollSlash, slashPose } from '../js/hades-despertar/ui/world/Foice3D.js';
+import { Foice3D, rollSlash, slashPose, stepGrab } from '../js/hades-despertar/ui/world/Foice3D.js';
 import { foiceModelUrl } from '../js/hades-despertar/ui/world/SpriteAtlas.js';
 import { ART_VERSIONS } from '../js/hades-despertar/config/art-versions.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
 
-// 1. Cada clique sorteia uma diagonal diferente, alternando de lado com frequência.
+// 1. Cada clique sorteia uma diagonal diferente — mas sempre no sentido do fio (puxão para a mão,
+//    giro horário). Cortar com o dorso da lâmina não faz sentido.
 let seed = 11;
 const random = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
-const slashes = [];
-let lastDir = 0;
-for (let i = 0; i < 40; i += 1) {
-  const s = rollSlash(random, { lastDir });
-  lastDir = s.dir;
-  slashes.push(s);
-}
-assert.ok(slashes.every((s) => s.tiltDeg >= 20 && s.tiltDeg <= 65), 'inclinação 20°–65°');
-assert.ok(new Set(slashes.map((s) => Math.round(s.tiltDeg))).size > 15, 'ângulos variam entre cliques');
-const flips = slashes.slice(1).filter((s, i) => s.dir !== slashes[i].dir).length;
-assert.ok(flips >= 20 && flips < 39, `alterna de lado na maioria das vezes, sem ficar previsível (${flips}/39)`);
-assert.ok(slashes.some((s) => s.dir > 0) && slashes.some((s) => s.dir < 0));
+const slashes = Array.from({ length: 40 }, () => rollSlash(random));
+assert.ok(slashes.every((s) => s.tiltDeg >= 30 && s.tiltDeg <= 65), 'inclinação 30°–65°');
+assert.ok(new Set(slashes.map((s) => Math.round(s.tiltDeg))).size > 15, 'diagonais variam entre cliques');
+assert.ok(slashes.every((s) => s.dir === 1 && s.angleDeg === s.tiltDeg), 'rastro 2D sempre desce para a direita');
+assert.ok(slashes.every((s) => s.lunge[0] > 0 && s.lunge[1] < 0), 'golpe puxa para baixo/direita (para a mão)');
+assert.ok(slashes.every((s) => s.axis[2] > 0.7), 'eixo perto da tela: o sentido do giro não inverte');
+const leans = slashes.map((s) => Math.hypot(s.axis[0], s.axis[1]));
+assert.ok(Math.min(...leans) > 0.25 && new Set(leans.map((l) => l.toFixed(2))).size > 15, 'plano do golpe inclinado e variado (3D)');
 
-// 2. O corte começa e termina na pose de descanso (sem "pulo"), e passa pelo golpe.
+// 2. O corte começa e termina na pose base (sem "pulo"); no golpe gira no sentido do fio.
 for (const s of slashes.slice(0, 8)) {
   const start = slashPose(s, 0);
   const end = slashPose(s, 2000);
-  assert.ok(Math.abs(start.rotZ) < 1e-9 && start.scale === 1, 'começa no descanso');
-  assert.ok(Math.abs(end.rotZ) < 1e-6 && Math.abs(end.scale - 1) < 1e-6 && end.flash < 1e-6, 'termina no descanso');
+  assert.ok(Math.abs(start.angle) < 1e-9 && start.scale === 1, 'começa na pose base');
+  assert.ok(Math.abs(end.angle) < 1e-6 && Math.abs(end.scale - 1) < 1e-6 && end.flash < 1e-6, 'termina na pose base');
   assert.equal(end.done, true);
-  const peak = slashPose(s, 230);
-  assert.ok(Math.sign(peak.rotZ) === s.dir && Math.abs(peak.rotZ) > 1, 'golpe gira na direção sorteada');
-  assert.equal(peak.flash, 1, 'flash no hit-stop');
+  const windup = slashPose(s, 100);
+  assert.ok(windup.angle > 0 && windup.offX < 0 && windup.offY > 0, 'preparação: sobe para o alto/esquerda');
+  assert.ok(windup.offZ < 0, 'preparação: afasta da câmera');
+  const mid = slashPose(s, 150);
+  const later = slashPose(s, 190);
+  assert.ok(later.angle < mid.angle && later.offX > mid.offX && later.offY < mid.offY, 'golpe: horário, descendo para a direita');
+  assert.equal(mid.emit, true, 'o fio deixa rastro no golpe');
+  const hit = slashPose(s, 240);
+  assert.ok(hit.angle < 0 && hit.flash === 1 && hit.shake > 0.5, 'hit-stop passa da mão com flash e tranco');
+  assert.equal(slashPose(s, 50).emit, false, 'preparação não deixa rastro');
 }
+
+// 2b. Pegada: a mola leva de solta (0) a empunhada (1) rápido, com leve tranco, e volta.
+let g = { value: 0, velocity: 0 };
+let peak = 0;
+for (let i = 0; i < 30; i += 1) { g = stepGrab(g.value, g.velocity, 1, 1 / 60); peak = Math.max(peak, g.value); }
+assert.ok(Math.abs(g.value - 1) < 0.03, `empunha em ~0,5 s (${g.value.toFixed(3)})`);
+assert.ok(peak > 1 && peak < 1.12, `tranco curto ao agarrar (pico ${peak.toFixed(3)})`);
+for (let i = 0; i < 60; i += 1) g = stepGrab(g.value, g.velocity, 0, 1 / 60);
+assert.ok(Math.abs(g.value) < 0.03, 'solta de novo');
+assert.ok(Number.isFinite(stepGrab(0, 0, 1, 5).value), 'dt enorme (aba voltando) não explode');
 
 // 3. Sem WebGL: não baixa o modelo, não mexe na imagem estática.
 const img = { hidden: false };
@@ -55,6 +69,7 @@ assert.equal(imported, false, 'three.js nem é importado sem WebGL');
 assert.equal(img.hidden, false, 'imagem estática continua visível');
 foice.frame(1000); // não quebra sem renderer
 assert.ok(foice.slash(1000).dir, 'clique ainda sorteia o corte (rastro) mesmo sem 3D');
+assert.equal(foice.grab, 0, 'sem 3D não há pegada');
 
 // 4. three.js falhou ao carregar → fallback para a imagem.
 const glDoc = { createElement: () => ({ getContext: () => ({}) }) };
@@ -92,5 +107,8 @@ const rule = css.match(/\.despertar-reap\.has-foice-3d \.despertar-reap__foice--
 assert.match(rule, /position: absolute;/, 'canvas fora do fluxo do grid');
 assert.match(rule, /pointer-events: none;/, 'canvas não rouba o clique do botão');
 assert.match(rule, /filter: none !important;/, 'sem filtro CSS no canvas WebGL');
+assert.match(rule, /mask-image:/, 'bordas do canvas suaves (empunhada sai do quadro sem corte reto)');
+assert.match(src, /pointerenter/, 'ponteiro no altar empunha a Foice');
+assert.match(indexSrc, /if \(slash && !foice3d\.ready\)/, 'rastro 2D só sem 3D (no 3D a fita é do próprio fio)');
 
 console.log('despertar-foice3d-smoke: ok');
