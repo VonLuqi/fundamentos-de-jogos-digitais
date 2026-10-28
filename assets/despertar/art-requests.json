@@ -630,9 +630,9 @@
       ],
       "notes": "Paths: assets/despertar/sprites/minigames/{id}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]",
       "detected": {
-        "ilustrada": 0,
+        "ilustrada": 9,
         "vetorial": 0,
-        "placeholder": 21,
+        "placeholder": 12,
         "faltando": 0
       }
     },

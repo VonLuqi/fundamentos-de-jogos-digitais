@@ -4,9 +4,9 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**199 ícones pendentes.**
+**190 ícones pendentes.**
 
-## L2 — Néctar e minigames (`minigames`, 21)
+## L2 — Néctar e minigames (`minigames`, 12)
 
 Néctar no HUD; sementes, espíritos, feitiços e bens nas abas de minigame.
 
@@ -18,15 +18,6 @@ Néctar no HUD; sementes, espíritos, feitiços e bens nas abas de minigame.
 | `good_ferro_estigio` | Ferro Estígio | — |
 | `good_incenso_sombrio` | Incenso Sombrio | — |
 | `good_obolo_cobre` | Óbolos de Cobre | — |
-| `nectar_bifurcado` | Néctar Bifurcado | Cálice duplo de âmbar ctônico: rende +1 ou +2 Néctares na colheita. |
-| `nectar_caramelizado` | Néctar Caramelizado | Destilado no calor do Phlegethon: rende de +1 a +3 Néctares e restaura recargas místicas. |
-| `nectar_colerico` | Néctar Colérico | Pulsante com sangue antigo da Catábase: rende de 0 a +2 Néctares. |
-| `nectar_dourado` | Néctar Dourado | Raridade imperial: concede de +2 a +7 Néctares e desperta a Maré do Acheron. |
-| `nectar_normal` | Néctar do Lethe | Gota cristalina condensada após 24 h nas margens da memória (+1 Néctar). |
-| `seed_asfodelo_cinzento` | Asfódelo Cinzento | Flor pálida dos Campos de Asfódelos: cada planta madura concede +1% de SPS. |
-| `seed_lirio_do_lethe` | Lírio do Lethe | Pétalas que vibram ao corte da Foice: cada planta madura concede +3% no poder de clique. |
-| `seed_papoula_de_hipnos` | Papoula de Hipnos | Atrai sonhos dourados para a margem: +1% SPS, +1% clique e +2% frequência de Ecos por planta. |
-| `seed_roma_de_persefone` | Romã de Perséfone | Fruto carmesim do pacto invernal: cada planta madura concede +2% de SPS. |
 | `spell_conjurar_almas` | Conjurar Almas | Materializa até 15 min de SPS (máx. 15% da carteira). Falha Crítica: drena 5 min de SPS. |
 | `spell_mao_do_destino` | Mão do Destino | Invoca um Eco Dourado imediato no Santuário (Falha Crítica: invoca um Eco Colérico). |
 | `spirit_hypnos` | Hipnos, Vigia do Repouso | Aumenta a produção contínua (+10% / +7% / +3% SPS), mas desacelera o surgimento de Ecos Dourados. |

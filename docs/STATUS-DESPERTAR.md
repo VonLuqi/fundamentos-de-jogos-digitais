@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **138/666 (21%)** · vetorial interina: 329 · placeholder: **199** · faltando: 0
+Ilustrada: **147/666 (22%)** · vetorial interina: 329 · placeholder: **190** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -17,7 +17,7 @@ Ilustrada: **138/666 (21%)** · vetorial interina: 329 · placeholder: **199** �
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 80 | 329 | 24 | 0 |
 | `talents` | 129 | 0 | 0 | 129 | 0 |
-| `minigames` | 21 | 0 | 0 | 21 | 0 |
+| `minigames` | 21 | 9 | 0 | 12 | 0 |
 | `veil` | 5 | 0 | 0 | 5 | 0 |
 | `catabase` | 7 | 2 | 0 | 5 | 0 |
 | `seasons` | 15 | 0 | 0 | 15 | 0 |
@@ -40,9 +40,9 @@ Placeholders por pasta (IDs para gerar arte):
 
 </details>
 
-<details><summary><code>minigames</code> — 21</summary>
+<details><summary><code>minigames</code> — 12</summary>
 
-`good_amalgama_aurica` · `good_areia_de_cronos` · `good_eter_condensado` · `good_ferro_estigio` · `good_incenso_sombrio` · `good_obolo_cobre` · `nectar_bifurcado` · `nectar_caramelizado` · `nectar_colerico` · `nectar_dourado` · `nectar_normal` · `seed_asfodelo_cinzento` · `seed_lirio_do_lethe` · `seed_papoula_de_hipnos` · `seed_roma_de_persefone` · `spell_conjurar_almas` · `spell_mao_do_destino` · `spirit_hypnos` · `spirit_nyx` · `spirit_persephone` · `spirit_thanatos`
+`good_amalgama_aurica` · `good_areia_de_cronos` · `good_eter_condensado` · `good_ferro_estigio` · `good_incenso_sombrio` · `good_obolo_cobre` · `spell_conjurar_almas` · `spell_mao_do_destino` · `spirit_hypnos` · `spirit_nyx` · `spirit_persephone` · `spirit_thanatos`
 
 </details>
 
@@ -90,7 +90,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_t11` | delivered | 1 | 0 | 0 | 0 |
 | `art_t12` | delivered | 1 | 0 | 0 | 0 |
 | `art_f3_upgrades` | open | 0 | 0 | 0 | 8 |
-| `art_f5_minigames` | open | 0 | 0 | 21 | 0 |
+| `art_f5_minigames` | open | 9 | 0 | 12 | 0 |
 | `art_f4_veil_kittens` | open | 0 | 7 | 5 | 0 |
 | `art_f6_catabase_wrinklers` | open | 2 | 8 | 5 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |

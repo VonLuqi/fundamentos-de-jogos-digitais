@@ -221,9 +221,9 @@
     },
     "minigames": {
       "total": 21,
-      "ilustrada": 0,
+      "ilustrada": 9,
       "vetorial": 0,
-      "placeholder": 21,
+      "placeholder": 12,
       "faltando": 0,
       "orphanFiles": 0,
       "placeholders": [
@@ -233,15 +233,6 @@
         "good_ferro_estigio",
         "good_incenso_sombrio",
         "good_obolo_cobre",
-        "nectar_bifurcado",
-        "nectar_caramelizado",
-        "nectar_colerico",
-        "nectar_dourado",
-        "nectar_normal",
-        "seed_asfodelo_cinzento",
-        "seed_lirio_do_lethe",
-        "seed_papoula_de_hipnos",
-        "seed_roma_de_persefone",
         "spell_conjurar_almas",
         "spell_mao_do_destino",
         "spirit_hypnos",
@@ -512,9 +503,9 @@
       "auditable": true,
       "status": "open",
       "counts": {
-        "ilustrada": 0,
+        "ilustrada": 9,
         "vetorial": 0,
-        "placeholder": 21,
+        "placeholder": 12,
         "faltando": 0
       }
     },
