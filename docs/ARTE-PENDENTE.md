@@ -4,16 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**201 ícones pendentes.**
-
-## L1 — Ecos do Acheron (`shimmers`, 2)
-
-Aparecem na tela toda a cada poucos minutos — o "Golden Cookie" do jogo.
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `eco_colerico` | Coágulo do Acheron | As águas engrossam em sangue antigo: Almas / s reduzidas a ×0,5 por 66 s. |
-| `eco_dourado` | Maré do Acheron | As correntes do Acheron transbordam: produção de Almas / s multiplicada por ×7 durante 77 s. |
+**199 ícones pendentes.**
 
 ## L2 — Néctar e minigames (`minigames`, 21)
 

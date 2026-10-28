@@ -39,15 +39,12 @@
     },
     "shimmers": {
       "total": 2,
-      "ilustrada": 0,
+      "ilustrada": 2,
       "vetorial": 0,
-      "placeholder": 2,
+      "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
-      "placeholders": [
-        "eco_colerico",
-        "eco_dourado"
-      ]
+      "placeholders": []
     },
     "upgrades": {
       "total": 433,
@@ -425,11 +422,11 @@
     {
       "id": "art_shimmers",
       "auditable": true,
-      "status": "open",
+      "status": "delivered",
       "counts": {
-        "ilustrada": 0,
+        "ilustrada": 2,
         "vetorial": 0,
-        "placeholder": 2,
+        "placeholder": 0,
         "faltando": 0
       }
     },

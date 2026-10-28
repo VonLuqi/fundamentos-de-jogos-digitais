@@ -409,7 +409,7 @@
       "id": "art_shimmers",
       "listId": "B12",
       "priority": "P1",
-      "status": "open",
+      "status": "delivered",
       "title": "Ecos do Acheron (Shimmers Golden / Wrath — Fase F2)",
       "desc": "Fragmentos flutuantes clicáveis no Santuário (Eco Dourado e Eco Colérico) gerados via Gemini + Sharp WebP.",
       "sizes": [
@@ -424,9 +424,9 @@
       ],
       "notes": "Paths: assets/despertar/sprites/shimmers/{eco_dourado,eco_colerico}.webp (+ .svg fallback). [reconciliado 2026-10-23: ficheiros em disco]",
       "detected": {
-        "ilustrada": 0,
+        "ilustrada": 2,
         "vetorial": 0,
-        "placeholder": 2,
+        "placeholder": 0,
         "faltando": 0
       }
     },

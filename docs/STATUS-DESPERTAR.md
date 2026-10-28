@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **136/666 (20%)** · vetorial interina: 329 · placeholder: **201** · faltando: 0
+Ilustrada: **138/666 (21%)** · vetorial interina: 329 · placeholder: **199** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -14,7 +14,7 @@ Ilustrada: **136/666 (20%)** · vetorial interina: 329 · placeholder: **201** �
 | `generators` | 20 | 20 | 0 | 0 | 0 |
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
 | `hud` | 13 | 13 | 0 | 0 | 0 |
-| `shimmers` | 2 | 0 | 0 | 2 | 0 |
+| `shimmers` | 2 | 2 | 0 | 0 | 0 |
 | `upgrades` | 433 | 80 | 329 | 24 | 0 |
 | `talents` | 129 | 0 | 0 | 129 | 0 |
 | `minigames` | 21 | 0 | 0 | 21 | 0 |
@@ -27,12 +27,6 @@ Fora da conta (ícones que nenhum item usa): `upgrades` 20 · `talents` 110.
 Lista de pedidos por lote, com nome e descrição: [`ARTE-PENDENTE.md`](./ARTE-PENDENTE.md) (`npm run despertar:art-briefs`).
 
 Placeholders por pasta (IDs para gerar arte):
-
-<details><summary><code>shimmers</code> — 2</summary>
-
-`eco_colerico` · `eco_dourado`
-
-</details>
 
 <details><summary><code>upgrades</code> — 24</summary>
 
@@ -88,7 +82,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_juizo_covers` | não auditável | — | — | — | — |
 | `art_cosmetics` | não auditável | — | — | — | — |
 | `art_cosmetics_line` | não auditável | — | — | — | — |
-| `art_shimmers` | open | 0 | 0 | 2 | 0 |
+| `art_shimmers` | delivered | 2 | 0 | 0 | 0 |
 | `art_t7` | delivered | 1 | 0 | 0 | 0 |
 | `art_t8` | delivered | 1 | 0 | 0 | 0 |
 | `art_t9` | delivered | 1 | 0 | 0 | 0 |
