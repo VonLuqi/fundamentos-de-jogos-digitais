@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**84 ícones pendentes.**
+**64 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -28,32 +28,12 @@ Painel do Dragão e seletor de estações.
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
 
-## L7 — Talentos do Rio do Lethe (`talents`, 69)
+## L7 — Talentos do Rio do Lethe (`talents`, 49)
 
 Árvore do Rio do Lethe (nomes e textos próprios já definidos). Dividir em chats de ~20 ícones.
 
 | id | Nome no jogo | O que é |
 | --- | --- | --- |
-| `permanent_slot_iii` | Eco do Styx III | Três juramentos atravessam o Lethe. 3 juramento(s) sobrevivem ao Lethe. |
-| `permanent_slot_iv` | Eco do Styx IV | Quatro juramentos sobrevivem à Catábase. 4 juramento(s) sobrevivem ao Lethe. |
-| `permanent_slot_v` | Eco do Styx V | Cinco juramentos — memória máxima do rio. 5 juramento(s) sobrevivem ao Lethe. |
-| `persistent_memory` | Memória Persistente | O Arquivo Estígio lembra onde parou. Pesquisas do Arquivo Estígio 10× mais rápidas. |
-| `pet_the_dragon` | Afagar o Dragão | Ele ronrona fogo. Todos os geradores +2%. |
-| `portoes_gemeos` | Portões Gêmeos | Duas portas que não fecham nem quando você dorme. Offline rende +5% do SPS. |
-| `quimera` | Quimera | Três bestas, uma só vigília. Juramentos 1% mais baratos. Offline rende +5% do SPS. Janela offline +48 h. |
-| `reinforced_membrane` | Membrana Reforçada | O Manto não rasga tão fácil. Todos os geradores +2%. |
-| `residual_luck` | Sorte Residual | Restos de ouro no fundo do rio. Ecos do Acheron aparecem +3% mais. |
-| `rodizio_das_estacoes` | Roda das Estações | Gire o ano do Submundo. Libera a troca de estações. |
-| `sacrilegious_corruption` | Corrupção Sacrílega | O que é digerido volta mais gordo. Sanguessugas devolvem +5%. |
-| `satan` | Satanás | O adversário prolonga a noite. Janela offline +32 h. |
-| `seraphim` | Serafins | Fogo que vigia de longe. Offline rende +10% do SPS. |
-| `shimmering_veil` | Manto Cintilante | Um tecido de luz sobre o Domínio. Todos os geradores +10%. |
-| `sinergias_vol_i` | Sinergias Vol. I | Malha Styx Vol. I. Libera as Sinergias Vol. I. |
-| `sinergias_vol_ii` | Sinergias Vol. II | Malha Styx Vol. II. Libera as Sinergias Vol. II. |
-| `sound_test` | Teste de Lira | Afinando a lira de Orfeu. Todos os geradores +1%. |
-| `starlove` | Estrela de Antestéria | O festival das flores chama os Ecos. Ecos do Acheron aparecem +2% mais. |
-| `starsnow` | Estrela de Saturnália | A neve de Saturno brilha no Acheron. Ecos do Acheron aparecem +2% mais. |
-| `starspawn` | Estrela de Perséfone | A primavera da rainha agita o rio. Ecos do Acheron aparecem +2% mais. |
 | `starterror` | Estrela de Lemúria | Os mortos inquietos atraem Ecos. Ecos do Acheron aparecem +2% mais. |
 | `startrade` | Estrela de Hermes | Dia de feira, dia de sorte. Ecos do Acheron aparecem +2% mais. |
 | `steadfast_murmur` | Murmúrio Firme | O Manto sussurra e não cede. Todos os geradores +2%. |
