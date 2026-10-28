@@ -6533,3 +6533,207 @@ button.despertar-juizo-card:disabled {
   .despertar-slash-trail { display: none; }
   .despertar-reap__foice--3d { animation: none; }
 }
+
+/* ─── Abas Dragão e Estações (DragonSeasonsView) ─────────────────────────── */
+.despertar-rites {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding: 0.25rem 0 1rem;
+}
+.despertar-rites__hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem;
+  background: var(--despertar-card);
+  border: 1px solid rgba(207, 167, 89, 0.28);
+}
+.despertar-rites__art {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+}
+.despertar-rites__art--hero {
+  width: 96px;
+  height: 96px;
+}
+.despertar-rites__hero-text { min-width: 0; }
+.despertar-rites__eyebrow {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--despertar-styx-text);
+}
+.despertar-rites__title,
+.despertar-rites__card-title {
+  margin: 0.15rem 0;
+  font-family: var(--font-title);
+  color: var(--despertar-gold);
+}
+.despertar-rites__title { font-size: 1.15rem; }
+.despertar-rites__card-title { font-size: 0.92rem; }
+.despertar-rites__sub {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--despertar-purple-text);
+}
+.despertar-rites__blurb,
+.despertar-rites__note {
+  margin: 0.2rem 0 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: #cfc6b6;
+}
+.despertar-rites__label {
+  margin: 0 0 0.45rem;
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--despertar-gold);
+}
+.despertar-rites__block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.despertar-rites__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+}
+.despertar-rites__card {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.7rem;
+  background: var(--despertar-card);
+  border: 1px solid rgba(207, 167, 89, 0.18);
+}
+.despertar-rites__card.is-active { border-color: var(--despertar-styx); box-shadow: inset 0 0 0 1px rgba(0, 168, 150, 0.35); }
+.despertar-rites__card.is-locked { opacity: 0.55; }
+.despertar-rites__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+.despertar-rites__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.2rem;
+}
+.despertar-rites__btn {
+  padding: 0.4rem 0.7rem;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  color: var(--despertar-gold);
+  background: rgba(207, 167, 89, 0.08);
+  border: 1px solid rgba(207, 167, 89, 0.45);
+  cursor: pointer;
+}
+.despertar-rites__btn:hover:not(:disabled) { background: rgba(207, 167, 89, 0.18); }
+.despertar-rites__btn:focus-visible { outline: 2px solid var(--despertar-styx); outline-offset: 2px; }
+.despertar-rites__btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.despertar-rites__btn--primary { color: #120d06; background: linear-gradient(180deg, #e8d4a8, #cfa759); border-color: #cfa759; }
+.despertar-rites__btn--primary:hover:not(:disabled) { background: linear-gradient(180deg, #f3e3bd, #d8b46a); }
+.despertar-rites__btn--ghost { background: transparent; }
+.despertar-rites__select {
+  padding: 0.35rem 0.5rem;
+  color: #e8d4a8;
+  background: var(--despertar-bg-2);
+  border: 1px solid rgba(207, 167, 89, 0.4);
+  font: inherit;
+  font-size: 0.85rem;
+}
+.despertar-rites__slot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.despertar-rites__slot-label {
+  min-width: 3.5rem;
+  font-family: var(--font-title);
+  font-size: 0.78rem;
+  color: var(--despertar-styx-text);
+}
+.despertar-rites__slot-aura { color: var(--despertar-gold); }
+.despertar-rites__slot.is-locked { opacity: 0.6; }
+.despertar-rites__deer { flex-direction: row; align-items: center; }
+.despertar-rites__feedback {
+  min-height: 1.2em;
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f0a3a3;
+}
+
+/* Corça de Ártemis: atravessa o Acheron na Saturnália. */
+.despertar-corca {
+  position: absolute;
+  top: var(--corca-y, 40%);
+  left: 0;
+  z-index: 7;
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 10px rgba(232, 212, 168, 0.75));
+  animation: despertarCorcaRun var(--corca-ms, 8000ms) linear forwards;
+}
+.despertar-corca.is-from-right { animation-name: despertarCorcaRunBack; }
+.despertar-corca.is-still { left: 50%; translate: -50% 0; animation: despertarCorcaFade var(--corca-ms, 8000ms) ease-in forwards; }
+.despertar-corca:focus-visible { outline: 2px solid var(--despertar-styx); outline-offset: 3px; }
+.despertar-corca__art { width: 100%; height: 100%; }
+.despertar-corca.is-from-right .despertar-corca__art { transform: scaleX(-1); }
+.despertar-corca__pop {
+  position: absolute;
+  top: var(--corca-y, 40%);
+  left: 50%;
+  z-index: 8;
+  translate: -50% 0;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-title);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  color: #f3e3bd;
+  text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
+  animation: despertarCorcaPop 1400ms ease-out forwards;
+}
+@keyframes despertarCorcaRun {
+  0% { transform: translate(-70px, 0); }
+  25% { transform: translate(calc(25cqw - 32px), -10px); }
+  50% { transform: translate(calc(50cqw - 32px), 0); }
+  75% { transform: translate(calc(75cqw - 32px), -10px); }
+  100% { transform: translate(calc(100cqw + 10px), 0); }
+}
+@keyframes despertarCorcaRunBack {
+  0% { transform: translate(calc(100cqw + 10px), 0); }
+  50% { transform: translate(calc(50cqw - 32px), -10px); }
+  100% { transform: translate(-70px, 0); }
+}
+@keyframes despertarCorcaFade {
+  0%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes despertarCorcaPop {
+  0% { opacity: 0; transform: translateY(6px); }
+  15% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-28px); }
+}
+.despertar-shimmer-layer { container-type: inline-size; }
+
+@media (prefers-reduced-motion: reduce) {
+  .despertar-corca { animation: despertarCorcaFade var(--corca-ms, 8000ms) ease-in forwards; left: 50%; translate: -50% 0; }
+  .despertar-corca__pop { animation: none; opacity: 0; }
+}

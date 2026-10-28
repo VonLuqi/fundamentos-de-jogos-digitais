@@ -34,6 +34,7 @@ import { applyHarnessGrant, harnessEnabled, logSyncDiag, syncDiagEnabled } from 
 import { bindReapFeel, bindFoiceAsset, pulseReapButton, spawnReapParticles } from './ui/particles.js';
 import { JuizoModal } from './ui/JuizoModal.js';
 import { Foice3D } from './ui/world/Foice3D.js';
+import { ArtemisDeerView } from './ui/ArtemisDeerView.js';
 import { foiceModelUrl } from './ui/world/SpriteAtlas.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, spawnSlashTrail, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
@@ -1547,6 +1548,7 @@ async function init() {
   const unbindFoice = bindFoiceAsset(reap);
   // Foice 3D: desenha dentro deste loop (sem RAF próprio); a imagem fica até o modelo carregar.
   let foice3d = null;
+  let artemisDeer = null;
 
   const loop = new GameLoop(
     (dt) => {
@@ -1555,6 +1557,7 @@ async function init() {
     (alpha, meta) => {
       renderer.render(alpha, meta);
       foice3d?.frame(performance.now());
+      artemisDeer?.frame(performance.now());
     },
     {
       onResume: (seconds) => {
@@ -1585,6 +1588,22 @@ async function init() {
     if (typeof requestIdleCallback === 'function') requestIdleCallback(startFoice3d, { timeout: 2000 });
     else setTimeout(startFoice3d, 400);
   }
+
+  // Corça de Ártemis: só na Saturnália, cruza o Acheron; clicar rende 1 min de produção.
+  artemisDeer = new ArtemisDeerView({
+    document,
+    layer: document.getElementById('despertar-shimmer-layer'),
+    getState: () => stateRef.current || state,
+    reducedMotion: () => loop.prefersReducedMotion(),
+    onCatch: () => {
+      const res = (stateRef.current || state).catchArtemisDeer();
+      if (res?.ok) {
+        renderer.markDirty('all');
+        api.markDirty();
+      }
+      return res;
+    },
+  });
 
   reap?.addEventListener('click', () => {
     const { gained } = state.click();

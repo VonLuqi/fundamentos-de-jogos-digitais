@@ -122,6 +122,15 @@ export function minigameSprite(spriteId, name = '') {
   };
 }
 
+/** Dragão (estágios e auras), estações e Corça — pasta sprites/seasons. */
+export function seasonSprite(spriteId, name = '') {
+  return {
+    id: spriteId,
+    ...spritePaths('seasons', spriteId),
+    mark: markFrom(name, spriteId),
+  };
+}
+
 /**
  * Monta <img> com cadeia WebP → SVG → marca de texto.
  * @param {Document} doc

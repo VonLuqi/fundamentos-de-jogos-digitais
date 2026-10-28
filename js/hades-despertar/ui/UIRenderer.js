@@ -89,6 +89,13 @@ import {
   arquivoBuyFailureMessage,
   isArquivoTabUnlocked,
 } from './ArquivoEstigioView.js';
+import {
+  DragonSeasonsView,
+  dragonFailureMessage,
+  isDragonTabUnlocked,
+  isSeasonsTabUnlocked,
+  seasonFailureMessage,
+} from './DragonSeasonsView.js';
 import { bindMarquee, setMarqueeText } from './Marquee.js';
 import { juiceBumpClass, juicePrefersReducedMotion, flashLetheUnlock, showTutorialToast } from './juice.js';
 import { withPerfMeasure } from './perfTelemetry.js';
@@ -1218,6 +1225,7 @@ export class UIRenderer {
       lethe: true,
       bancada: true,
       arquivo: true,
+      rites: true,
     };
     this._lastStructureVersion = -1;
     this._lastSlowSyncAt = -Infinity;
@@ -1259,6 +1267,7 @@ export class UIRenderer {
     this.#mountLethe();
     this.#mountBancada();
     this.#mountArquivo();
+    this.#mountDragonSeasons();
     this.#mountMinigames();
     this.#mountCodexBook();
     this.#mountLoopBoard();
@@ -1298,6 +1307,7 @@ export class UIRenderer {
       this._uiDirty.lethe = true;
       this._uiDirty.bancada = true;
       this._uiDirty.arquivo = true;
+      this._uiDirty.rites = true;
       return;
     }
     if (section in this._uiDirty) {
@@ -1455,7 +1465,8 @@ export class UIRenderer {
         || this._uiDirty.stats
         || this._uiDirty.lethe
         || this._uiDirty.bancada
-        || this._uiDirty.arquivo;
+        || this._uiDirty.arquivo
+        || this._uiDirty.rites;
 
       if (slowDue || anyDirty) {
         if (slowDue) this._lastSlowSyncAt = nowMs;
@@ -1496,6 +1507,10 @@ export class UIRenderer {
         if (slowDue || this._uiDirty.arquivo) {
           this.#renderArquivo(state);
           this._uiDirty.arquivo = false;
+        }
+        if (slowDue || this._uiDirty.rites) {
+          this.#renderDragonSeasons(state);
+          this._uiDirty.rites = false;
         }
         this._shimmerView?.sync(state, {
           reducedMotion,
@@ -2457,6 +2472,48 @@ export class UIRenderer {
       onActivatePledge: () => this.#handleActivatePledge(),
       onToggleCovenant: () => this.#handleToggleCovenant(),
     }).mount(panel);
+  }
+
+  #mountDragonSeasons() {
+    const dragonPanel = this.root.getElementById?.('panel-dragao');
+    const seasonsPanel = this.root.getElementById?.('panel-estacoes');
+    if (!dragonPanel && !seasonsPanel) return;
+    const act = (which, run, failure) => {
+      const res = run();
+      if (res?.ok) {
+        this.markDirty('all');
+        return res;
+      }
+      const message = failure(res);
+      this._ritesView?.showFeedback(which, message);
+      showTutorialToast({ text: message, root: this.root, holdMs: 4500 });
+      return res;
+    };
+    this._ritesView = new DragonSeasonsView({
+      document: this.root,
+      onEvolve: (targetGeneratorId) => act('dragon',
+        () => this.state?.evolveDragon?.({ targetGeneratorId }), dragonFailureMessage),
+      onSetAura: (slot, auraId) => act('dragon',
+        () => this.state?.setDragonAura?.(slot, auraId), dragonFailureMessage),
+      onActivateSeason: (seasonId) => act('seasons',
+        () => this.state?.activateSeason?.(seasonId), seasonFailureMessage),
+      onUpgradeSaturn: () => act('seasons',
+        () => this.state?.upgradeSaturnKing?.(), seasonFailureMessage),
+    }).mount(dragonPanel, seasonsPanel);
+  }
+
+  #renderDragonSeasons(state) {
+    for (const [tabId, unlocked] of [
+      ['tab-dragao', isDragonTabUnlocked(state)],
+      ['tab-estacoes', isSeasonsTabUnlocked(state)],
+    ]) {
+      const tab = this.root.getElementById?.(tabId);
+      if (!tab) continue;
+      const wasHidden = tab.hidden;
+      tab.hidden = !unlocked;
+      if (wasHidden !== tab.hidden) this.#fallbackHiddenDomainTab(tab);
+    }
+    this._ritesView?.sync(state);
   }
 
   #handleArquivoBuy(id) {
