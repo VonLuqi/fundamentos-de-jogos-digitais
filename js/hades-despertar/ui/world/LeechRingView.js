@@ -295,15 +295,31 @@ export class LeechRingView {
     const doc = this._doc || host?.ownerDocument;
     if (!host || !doc?.createElement) return null;
 
-    const node = acquirePooledNode(doc, 'leech-float', 'despertar-reap-float despertar-leech-float');
+    const node = acquirePooledNode(doc, 'leech-float', 'despertar-float despertar-leech-float');
     if (!node) return null;
     const prefix = result.leech?.shiny ? 'Sanguessuga Dourada!' : 'Sanguessuga estourada';
     node.textContent = `${prefix} · +${formatSouls(result.payout || '0')} almas`;
+    // Espalha pra não empilhar "almas" + próximo título na mesma célula.
+    const x = 42 + Math.random() * 16;
+    const y = 48 + Math.random() * 14;
+    node.style?.setProperty?.('--float-x', `${x}%`);
+    node.style?.setProperty?.('--float-y', `${y}%`);
+    if (node.style) node.style.animation = 'none';
     host.appendChild?.(node);
-    const timer = setTimeout(() => {
-      releasePooledNode('leech-float', node);
-    }, 900);
-    if (typeof timer?.unref === 'function') timer.unref();
+    try { void node.offsetWidth; } catch { /* mock */ }
+    if (node.style) node.style.animation = '';
+
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      releasePooledNode(doc, 'leech-float', node);
+    };
+    node.addEventListener?.('animationend', release, { once: true });
+    if (typeof globalThis.setTimeout === 'function') {
+      const timer = globalThis.setTimeout(release, 1200);
+      if (typeof timer?.unref === 'function') timer.unref();
+    }
     return node;
   }
 }

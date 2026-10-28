@@ -103,7 +103,7 @@ export class ShimmerView {
     const text = formatShimmerFeedback(result);
     if (!text) return null;
 
-    const node = acquirePooledNode(doc, 'shimmer-float', 'despertar-reap-float despertar-shimmer-float');
+    const node = acquirePooledNode(doc, 'shimmer-float', 'despertar-float despertar-shimmer-float');
     if (!node) return null;
     node.textContent = text;
     if (node.dataset) {

@@ -418,7 +418,10 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
         hidden: false,
         dataset: {},
         children: [],
-        style: { props: {}, setProperty(k, v) { this.props[k] = v; } },
+        offsetWidth: 1,
+        textContent: '',
+        removed: false,
+        style: { props: {}, animation: '', setProperty(k, v) { this.props[k] = v; } },
         classList: {
           _s: new Set(),
           toggle(c, on) { if (on) this._s.add(c); else this._s.delete(c); },
@@ -426,6 +429,7 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
         },
         setAttribute(k, v) { this[k] = v; },
         addEventListener() {},
+        remove() { this.removed = true; },
         append(...nodes) { this.children.push(...nodes); },
         prepend(...nodes) { this.children.unshift(...nodes); },
         replaceChildren(...nodes) { this.children = [...nodes]; },
@@ -447,6 +451,32 @@ run('5. LeechRingView (A11y + reduced-motion), Estela Auditável, Códice e Asse
   assert.equal(ringEl.children[1].classList.contains('is-shiny'), true);
   assert.equal(ringEl.children[1].dataset.spriteId, 'sanguessuga_shiny');
   assert.equal(ringEl.children[2].hidden, true);
+
+  // Float de estouro: precisa sair da tela (releasePooledNode com doc).
+  const particleLayer = fakeDoc.createElement('div');
+  particleLayer.appendChild = (n) => { particleLayer.children.push(n); };
+  const floatView = new LeechRingView({ document: fakeDoc }).mount({
+    stageHost: fakeDoc.createElement('div'),
+    particleLayer,
+  });
+  const floatTimers = [];
+  const prevSetTimeout = globalThis.setTimeout;
+  globalThis.setTimeout = (fn) => { floatTimers.push(fn); return 0; };
+  try {
+    const floatNode = floatView.spawnPopFeedback(
+      { ok: true, popped: true, payout: '1000', leech: { shiny: false } },
+      { reducedMotion: false, particles: true },
+    );
+    assert.ok(floatNode, 'spawnPopFeedback cria nó');
+    assert.match(String(floatNode.className), /despertar-float/);
+    assert.match(String(floatNode.textContent), /Sanguessuga estourada/);
+    assert.equal(particleLayer.children.includes(floatNode), true);
+    assert.equal(floatTimers.length >= 1, true, 'fallback de release agendado');
+    floatTimers[0]();
+    assert.equal(floatNode.removed, true, 'release remove o float (não gruda na tela)');
+  } finally {
+    globalThis.setTimeout = prevSetTimeout;
+  }
 
   // Códice e Assets
   assert.ok(EDU_LOG_BY_ID.log_catabase_wrinklers);
