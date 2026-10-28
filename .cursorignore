@@ -1,7 +1,12 @@
-# Imagens que provedores de modelo rejeitam ("Invalid Image": proporção extrema).
-# Trilhos 1px da moldura da HUD — não precisam ser vistos pelo agente.
+# Imagens que provedores de modelo rejeitam ("Invalid Image": proporção extrema ou < 32 px).
+# Trilhos 1px da moldura da HUD e sprites pixel-art 16×16 / 16×20 (órbita, corpos, cosméticos).
+# Para mexer neles, leia o código que os desenha; não anexe a imagem.
 assets/despertar/sprites/hud/moldura-rail-h.webp
 assets/despertar/sprites/hud/moldura-rail-v.webp
+assets/despertar/sprites/hud/cursor_*.webp
+assets/despertar/sprites/habitats/wandering_shade.webp
+assets/despertar/sprites/habitats/variants/
+assets/despertar/cosmetics/
 
 # Saídas soltas de scripts de arte/auditoria (dezenas de MB, ruído para o agente).
 .tmp-*

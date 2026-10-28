@@ -284,5 +284,50 @@ run('G1.2: gancho shiny — primeiros N marcados; sync lê shinyCounts', () => {
   assert.ok(shadowBlurCalls > 0, 'shiny aplica glow (shadowBlur)');
 });
 
+run('Sombra dourada com sprite WebP fica dourada mesmo sem fancy/reduced motion', () => {
+  const calls = { goldTint: 0, invert: 0, plain: 0 };
+  const sprite = { naturalWidth: 16, naturalHeight: 20 };
+  const ctx = {
+    clearRect() {}, beginPath() {}, arc() {}, stroke() {}, setLineDash() {}, save() {}, restore() {},
+    translate() {}, rotate() {}, scale() {}, fill() {}, strokeRect() {},
+    fillRect() { if (this.globalCompositeOperation === 'source-atop') calls.goldTint += 1; },
+    drawImage(img) {
+      if (img !== sprite) calls.goldTint += 1;
+      else if (this.filter && this.filter !== 'none') calls.invert += 1;
+      else calls.plain += 1;
+    },
+    globalCompositeOperation: 'source-over', filter: 'none', imageSmoothingEnabled: true,
+    strokeStyle: '', fillStyle: '', lineWidth: 1, shadowBlur: 0, shadowColor: '', globalAlpha: 1,
+  };
+  const doc = {
+    createElement(tag) {
+      if (tag === 'canvas') return { className: '', width: 200, height: 200, setAttribute() {}, getContext: () => ctx };
+      return { className: '', setAttribute() {}, append() {}, replaceChildren() {} };
+    },
+  };
+  const orbitHost = {
+    childNodes: [],
+    replaceChildren(...kids) { this.childNodes = [...kids]; },
+    append(...kids) { kids.forEach((k) => this.childNodes.push(k)); },
+    getBoundingClientRect() { return { width: 200, height: 200 }; },
+  };
+  const altar = new AltarOrbit({
+    document: doc,
+    matchMedia: () => ({ matches: true }), // prefers-reduced-motion: sem aura animada
+    now: () => 0,
+  }).mount({ orbitHost });
+  altar._shadeSprite = sprite;
+  altar.sync({
+    generators: { wandering_shade: 4 },
+    goldCounts: { wandering_shade: 1 },
+    shinyCounts: { wandering_shade: 1 },
+  });
+  altar.frame(16);
+  assert.ok(calls.goldTint >= 1, `corpo dourado pintado (${JSON.stringify(calls)})`);
+  assert.equal(calls.invert, 1, 'negativo invertido no sprite');
+  // Sem canvas no Node, drawImageAsGold desenha o sprite e tinge por cima (fallback): 2 normais + 1 base.
+  assert.equal(calls.plain, 3, 'normais sem tinta + base do fallback dourado');
+});
+
 console.log(`\nOrbit smoke: ${passed} pass, ${failed} fail`);
 process.exit(failed ? 1 : 0);
