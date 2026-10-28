@@ -43,7 +43,6 @@ staticAssert(altarSrc.includes('wandering_shade'), 'órbita = T1');
 staticAssert(altarSrc.includes('applyReapCosmeticClasses') || altarSrc.includes('blade_glow'), 'E3 cosmético Foice');
 staticAssert(css.includes('has-cosmetic-blade_glow'), 'CSS blade_glow');
 staticAssert(css.includes('despertarBladeGlow') || css.includes('prefers-reduced-motion'), 'glow + reduced-motion');
-staticAssert(pkg.includes('despertar-altar-smoke.mjs'), 'check inclui altar smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/world/AltarOrbit.js'), 'check cobre AltarOrbit.js');
 
 if (errors.length) {

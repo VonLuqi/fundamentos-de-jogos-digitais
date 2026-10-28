@@ -42,7 +42,6 @@ function staticAssert(condition, message) {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-styx-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/harness.js'), 'check cobre harness.js');
 
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');

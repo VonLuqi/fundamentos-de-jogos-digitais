@@ -62,7 +62,7 @@ assert(html.includes('id="tab-lethe"') && html.includes('>Lethe<'), 'aba Lethe')
 assert(html.includes('id="tab-stele"') && html.includes('>Estela<'), 'aba Estela');
 assert(/id="tab-lethe"[^>]*\bhidden\b/.test(html) || /id="tab-lethe"[^>]*hidden/.test(html), 'Lethe começa oculta até o unlock');
 assert(/id="tab-stele"[^>]*\bhidden\b/.test(html) || /id="tab-stele"[^>]*hidden/.test(html), 'Estela começa oculta (só admin)');
-assert(!html.includes('id="tab-codex"') && !html.includes('>Arquivo<'), 'aba Arquivo removida (livro)');
+assert(!html.includes('id="tab-codex"'), 'aba do Códice removida (virou livro)');
 assert(html.includes('id="despertar-codex-book"'), 'livro flutuante do Códice');
 assert(html.includes('id="tab-mundo"'), 'aba Mundo (Cookie center)');
 assert(html.includes('despertar-layout'), 'grid Cookie 3 colunas');
@@ -96,8 +96,6 @@ assert(boot.includes('showSealedState'), 'empty state quando selado');
 assert(shell.includes("route === 'despertar'"), 'app-shell mapeia rota despertar');
 assert(shell.includes('applyDespertarNavState'), 'shell sincroniza nav do Despertar');
 assert(pkg.includes('js/hades-despertar/index.js'), 'npm run check cobre o bootstrap');
-assert(pkg.includes('despertar-pages-smoke.mjs'), 'npm run check inclui este smoke');
-assert(pkg.includes('api/_lib/despertar-gate.js'), 'npm run check cobre despertar-gate');
 
 /* —— Task 11: shell pages + preview no Painel —— */
 const shellPages = [
@@ -119,7 +117,7 @@ shellPages.forEach((rel) => {
   assert(!page.includes('data-nav-item="minigame"'), `${rel}: sem Minigame legado`);
   assert(!page.includes('Minigame em breve'), `${rel}: sem copy Minigame em breve`);
   assert(page.includes('data-nav-item="despertar"'), `${rel}: tem O Despertar na nav`);
-  assert(page.includes('href="./despertar.html"') || page.includes("href='./despertar.html'"), `${rel}: href despertar`);
+  assert(/data-nav-item="despertar"[^>]*href="(\.\.\/despertar\/|\.\/despertar\.html)"/.test(page), `${rel}: href despertar (URL limpa)`);
 });
 
 const dashboardHtml = read('pages/dashboard.html');

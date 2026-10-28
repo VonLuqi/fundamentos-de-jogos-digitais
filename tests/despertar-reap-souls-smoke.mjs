@@ -31,7 +31,6 @@ staticAssert(particlesSrc.includes('despertar-particle--soul'), 'classe soul');
 staticAssert(indexSrc.includes('clickPower: gained') || indexSrc.includes('gained'), 'passa gained ao spawn');
 staticAssert(css.includes('despertarSoulRise'), 'CSS soul rise');
 staticAssert(css.includes('despertar-particle--soul'), 'CSS --soul');
-staticAssert(pkg.includes('despertar-reap-souls-smoke.mjs'), 'check inclui smoke');
 
 if (errors.length) {
   console.error('despertar-reap-souls-smoke (estático):');

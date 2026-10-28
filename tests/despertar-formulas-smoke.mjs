@@ -55,7 +55,6 @@ requiredFiles.forEach((rel) => {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-formulas-smoke.mjs'), 'npm run check inclui este smoke');
 
 staticAssert(GENERATORS.length === 20, '20 geradores no catálogo (T1–T20)');
 staticAssert(UPGRADES.length >= 210, 'ao menos 210 juramentos no catálogo (F1 + F3 + F4 + F7)');

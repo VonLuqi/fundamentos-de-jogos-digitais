@@ -70,7 +70,6 @@ staticAssert(css.includes('despertar-npc-tooltip') || css.includes('upgrade-tool
 staticAssert(css.includes('despertar-npc-tooltip__portrait'), 'CSS portrait maior');
 staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/ui/unitPersona.js')), 'unitPersona.js');
 staticAssert(css.includes('is-buy-pulse') || css.includes('despertarOrbitBuyPulse'), 'CSS orbit buy pulse');
-staticAssert(pkg.includes('despertar-npc-hover-smoke.mjs'), 'check inclui npc hover smoke');
 
 if (errors.length) {
   console.error('despertar-npc-hover-smoke (estático):');

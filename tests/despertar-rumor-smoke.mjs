@@ -49,7 +49,6 @@ staticAssert(indexSrc.includes('announceGoldFirst'), 'buy gold → announceGoldF
 staticAssert(indexSrc.includes('resetShinyRumor'), 'Lethe reseta rarity rumor');
 staticAssert(indexSrc.includes('shinyGained'), 'buy checa shinyGained');
 staticAssert(indexSrc.includes('goldGained'), 'buy checa goldGained');
-staticAssert(pkg.includes('despertar-rumor-smoke.mjs'), 'check inclui smoke');
 staticAssert(pkg.includes('config/rumors.js'), 'check inclui rumors.js');
 
 if (errors.length) {

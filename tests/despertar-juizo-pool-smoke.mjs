@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildStateDto, rowToCanonical } from '../api/_lib/despertar-validate.js';
+
 import {
   CLASSIND_SHARED_COVERS,
   JUIZO_BANCADA_HINT,
@@ -50,7 +50,6 @@ const migrate = read('db/migrate-2026-09-22-despertar-juizo.sql');
 const setup = read('db/setup.sql');
 const html = read('pages/despertar.html');
 const indexJs = read('js/hades-despertar/index.js');
-const apiSrc = read('api/despertar.js');
 const pkg = read('package.json');
 const readme = read('README.md');
 
@@ -76,7 +75,6 @@ staticAssert(migrate.includes('juizo_run'), 'migration juizo_run');
 staticAssert(setup.includes('juizo_best_streak'), 'setup.sql espelha Juízo');
 staticAssert(setup.includes('verdicts'), 'setup.sql tem verdicts');
 
-staticAssert(apiSrc.includes('juizo_best_streak'), 'ROW_SELECT inclui Juízo');
 staticAssert(html.includes('id="despertar-juizo-open"'), 'CTA Abrir o Juízo');
 staticAssert(html.includes(JUIZO_POOL_SHORT_COPY), 'copy pool curto no HTML');
 staticAssert(html.includes(JUIZO_BANCADA_HINT), 'Bancada hint J.1 no HTML');
@@ -106,7 +104,6 @@ staticAssert(
 const juizoModalSrc = read('js/hades-despertar/ui/JuizoModal.js');
 staticAssert(juizoModalSrc.includes('JUIZO_COVER_FALLBACK_URL'), 'modal importa fallback de capa');
 staticAssert(juizoModalSrc.includes('bindJuizoCoverFallback') || juizoModalSrc.includes('error'), 'modal trata onerror da capa');
-staticAssert(pkg.includes('despertar-juizo-pool-smoke.mjs'), 'check inclui este smoke');
 staticAssert(
   readme.includes('despertar-juizo-pool.stub') || readme.includes('Juízo'),
   'README menciona Juízo/stub',
@@ -177,28 +174,6 @@ await run('toPublicJuizoCard não vaza rating', () => {
   assert.equal(pub.title, sample.title);
   assert.ok(pub.coverUrl);
   assert.equal('rating' in pub, false);
-});
-
-await run('DTO stateGet inclui campos Juízo zerados', () => {
-  const dto = buildStateDto(rowToCanonical({
-    souls: 0,
-    obols: 0,
-    mnemosyne: 0,
-    lifetime_souls: 0,
-    run_souls: 0,
-    prestige_count: 0,
-    generators_state: {},
-    upgrades_state: [],
-    talents_state: [],
-    edu_logs_seen: [],
-    milestones: {},
-  }));
-  assert.equal(dto.verdicts, 0);
-  assert.equal(dto.juizoBestStreak, 0);
-  assert.equal(dto.juizoCurrentStreak, 0);
-  assert.deepEqual(dto.juizoMilestonesClaimed, []);
-  assert.deepEqual(dto.verdictPurchases, []);
-  assert.equal('juizoRun' in dto, false, 'juizo_run não vaza no DTO público');
 });
 
 console.log(`\ndespertar-juizo-pool-smoke: ${passed} passed, ${failed} failed`);

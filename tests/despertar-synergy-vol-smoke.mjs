@@ -22,7 +22,11 @@ assert.equal(servos.length, 8);
 assert.equal(Object.keys(LEGACY_SYNERGY_COSTS).length, 20);
 assert.ok(TALENT_BY_ID.sinergias_vol_i);
 assert.ok(TALENT_BY_ID.sinergias_vol_ii);
-assert.deepEqual(TALENT_BY_ID.sinergias_vol_ii.requires?.talentIds, ['sinergias_vol_i']);
+assert.deepEqual(
+  [...TALENT_BY_ID.sinergias_vol_ii.requires.talentIds].sort(),
+  ['beelzebub', 'seraphim', 'sinergias_vol_i'],
+  'Vol. II pede Vol. I + Beelzebub + Seraphim (árvore Heavenly 129)',
+);
 
 assert.ok(!UPGRADE_BY_ID.cortejo_das_margens_i);
 assert.ok(UPGRADE_BY_ID.almanaques_do_destino_i);

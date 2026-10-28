@@ -32,7 +32,6 @@ staticAssert(fs.existsSync(path.join(root, 'scripts/p5/export-despertar-sprites.
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 const rendererSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
 staticAssert(pkg.includes('despertar:sprites'), 'npm script despertar:sprites');
-staticAssert(pkg.includes('despertar-sprites-smoke.mjs'), 'check inclui sprites smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/world/SpriteAtlas.js'), 'check cobre SpriteAtlas');
 staticAssert(rendererSrc.includes('createSpriteNode'), 'mercado usa SpriteAtlas');
 staticAssert(rendererSrc.includes('generatorSprite'), 'ícones de gerador');

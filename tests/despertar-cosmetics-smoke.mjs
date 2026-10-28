@@ -61,7 +61,6 @@ staticAssert(cfgSrc.includes("target: 'altar'"), 'target altar E1');
 staticAssert(cfgSrc.includes('cosmeticsForAltar'), 'cosmeticsForAltar export');
 staticAssert(cfgSrc.includes('indexMatchesCoverage'), 'mask helper');
 staticAssert(cfgSrc.includes('activeCosmetics'), 'activeCosmetics export');
-staticAssert(pkg.includes('despertar-cosmetics-smoke.mjs'), 'check inclui cosmetics smoke');
 staticAssert(UPGRADE_COSMETIC_IDS.includes('moeda_no_barquinho'), 'ids list');
 staticAssert(UPGRADE_COSMETICS.moeda_no_barquinho.coverage === 0.5, 'coverage 0.5');
 staticAssert(UPGRADE_COSMETICS.foice_afilada.coverage === 1, 'coverage 1 foice');

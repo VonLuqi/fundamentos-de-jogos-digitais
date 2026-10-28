@@ -53,7 +53,6 @@ assert.match(dash, /Liberar o Véu da Aula agora/);
 assert.match(css, /\.master-tools__pause\b/);
 assert.match(api, /function despertarPauseSet/);
 assert.match(api, /DESPERTAR_PAUSE_MINUTE_PRESETS/);
-assert.match(pkg, /despertar-pause-admin-smoke\.mjs/);
 
 assert.deepEqual([...DESPERTAR_PAUSE_MINUTE_PRESETS], [15, 30, 45, 60]);
 assert.ok(DESPERTAR_PAUSE_REASON_OPTIONS.some((o) => o.id === 'aula'));

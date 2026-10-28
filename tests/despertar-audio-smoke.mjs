@@ -23,7 +23,6 @@ const indexJs = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 
 
 staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/ui/audio.js')), 'audio.js existe');
 staticAssert(audioSrc.includes('Q18') || audioSrc.includes('deferido'), 'documenta decisão Q18');
-staticAssert(pkg.includes('despertar-audio-smoke.mjs'), 'check inclui audio smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/audio.js'), 'check cobre audio.js');
 staticAssert(/### Task C3[\s\S]*?- \[x\] Decidir/.test(plan), 'Task C3 marcada no plano');
 staticAssert(!indexJs.includes('playSfx('), 'index não dispara SFX nesta leva');

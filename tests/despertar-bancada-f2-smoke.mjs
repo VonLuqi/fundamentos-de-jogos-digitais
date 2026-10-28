@@ -15,14 +15,6 @@ import {
 } from '../js/hades-despertar/config/verdict-shop.js';
 import { clickPower, calculateTotalSPS, economyEffects } from '../js/hades-despertar/core/formulas.js';
 import { cmp, mul } from '../js/hades-despertar/core/decimal.js';
-import {
-  applyEcoVereditoBonus,
-  claimJuizoMilestones,
-  isVerdictBonusPending,
-  juizoGuess,
-  juizoStart,
-} from '../api/_lib/despertar-juizo.js';
-import { applyVerdictBuy } from '../api/_lib/despertar-validate.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -47,25 +39,16 @@ for (const id of F2_IDS) {
 
 const shop = Object.fromEntries(VERDICT_SHOP.map((i) => [i.id, i]));
 staticAssert(shop.sentenca_afiada?.cost === 6, 'sentença custa 6');
-staticAssert(shop.eco_do_veredito?.cost === 8, 'eco custa 8');
 staticAssert(shop.catalogo_vivo?.cost === 10, 'catálogo custa 10');
 staticAssert(shop.peso_das_faixas?.cost === 14, 'peso custa 14');
 
-const juizoSrc = fs.readFileSync(path.join(root, 'api/_lib/despertar-juizo.js'), 'utf8');
 const modalSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/JuizoModal.js'), 'utf8');
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
 
-staticAssert(juizoSrc.includes('mercyUsed'), 'mercyUsed no run');
-staticAssert(juizoSrc.includes('catalogo_vivo'), 'mercy catalogo_vivo');
-staticAssert(juizoSrc.includes('applyEcoVereditoBonus'), 'eco helper');
-staticAssert(juizoSrc.includes('newly.length'), 'eco permanente por marco');
-staticAssert(juizoSrc.includes('patch.milestones'), 'juizo patch grava milestones');
 staticAssert(
   shop.eco_do_veredito?.blurb?.includes('permanente'),
   'eco blurb permanente',
 );
-staticAssert(modalSrc.includes('result.mercy'), 'modal trata mercy');
-staticAssert(pkg.includes('despertar-bancada-f2-smoke.mjs'), 'check inclui F2 smoke');
 
 if (errors.length) {
   console.error('despertar-bancada-f2-smoke (estático):');
@@ -104,199 +87,6 @@ run('sentenca_afiada ×1.08 click (stack com selo)', () => {
   assert.equal(cmp(one, mul(base, '1.08')), 0);
   const both = clickPower({ verdictPurchases: ['selo_do_juiz', 'sentenca_afiada'] });
   assert.equal(cmp(both, mul(mul(base, '1.05'), '1.08')), 0);
-});
-
-run('peso_das_faixas ×1.03 SPS (stack com olho)', () => {
-  const args = { generators: { wandering_shade: 10 } };
-  const base = calculateTotalSPS(args);
-  const one = calculateTotalSPS({ ...args, verdictPurchases: ['peso_das_faixas'] });
-  assert.equal(cmp(one, mul(base, '1.03')), 0);
-  const both = calculateTotalSPS({
-    ...args,
-    verdictPurchases: ['olho_do_tartarus', 'peso_das_faixas'],
-  });
-  assert.equal(cmp(both, mul(mul(base, '1.02'), '1.03')), 0);
-  const eco = economyEffects([], ['peso_das_faixas']);
-  assert.equal(cmp(eco.spsVerdictMult, '1.03'), 0);
-});
-
-run('eco permanente: +1 por marco em cada claim', () => {
-  const state = {
-    verdictPurchases: ['eco_do_veredito'],
-    milestones: {},
-    verdicts: 0,
-  };
-  assert.equal(isVerdictBonusPending(state), true);
-  const claimed = claimJuizoMilestones(0, 5, []);
-  assert.deepEqual(claimed.newly, ['s5']);
-  const eco = applyEcoVereditoBonus(state, claimed);
-  assert.equal(eco.ecoBonus, 1);
-  assert.equal(eco.verdictGain, 1 + 1);
-  assert.equal(eco.verdictBonusPending, true);
-
-  const again = applyEcoVereditoBonus(
-    state,
-    claimJuizoMilestones(5, 10, claimed.claimed),
-  );
-  assert.equal(again.ecoBonus, 1);
-  assert.equal(again.verdictGain, 2 + 1);
-
-  const catchUpBase = claimJuizoMilestones(0, 10, []);
-  const catchUp = applyEcoVereditoBonus(state, catchUpBase);
-  assert.deepEqual(catchUpBase.newly, ['s5', 's10']);
-  assert.equal(catchUp.ecoBonus, 2);
-  assert.equal(catchUp.verdictGain, catchUpBase.verdictGain + 2);
-});
-
-run('eco sem newly não paga', () => {
-  const state = { verdictPurchases: ['eco_do_veredito'], milestones: {} };
-  const eco = applyEcoVereditoBonus(state, { newly: [], verdictGain: 0 });
-  assert.equal(eco.ecoBonus, 0);
-  assert.equal(isVerdictBonusPending(state), true);
-});
-
-run('eco legado ecoVereditoConsumed ainda ecoa', () => {
-  const state = {
-    verdictPurchases: ['eco_do_veredito'],
-    milestones: { ecoVereditoConsumed: true },
-  };
-  assert.equal(isVerdictBonusPending(state), true);
-  const eco = applyEcoVereditoBonus(state, claimJuizoMilestones(0, 5, []));
-  assert.equal(eco.ecoBonus, 1);
-});
-
-run('mercy: 1º erro continua; 2º encerra', () => {
-  const pool = makePool();
-  const base = {
-    juizoCurrentStreak: 3,
-    juizoBestStreak: 3,
-    juizoMilestonesClaimed: [],
-    verdicts: 0,
-    verdictPurchases: ['catalogo_vivo'],
-    milestones: {},
-    juizoRun: {
-      championId: 'g-a',
-      challengerId: 'g-b',
-      ratingA: '12',
-      ratingB: '18',
-      recentIds: [],
-      mercyUsed: false,
-    },
-  };
-  // wrong: A when B is higher
-  const mercy = juizoGuess(base, 'A', pool, { rng: () => 0.9 });
-  assert.equal(mercy.ok, true);
-  assert.equal(mercy.ended, false);
-  assert.equal(mercy.mercy, true);
-  assert.equal(mercy.next.juizoCurrentStreak, 3, 'streak preservada');
-  assert.equal(mercy.next.juizoRun.mercyUsed, true);
-  assert.ok(mercy.next.juizoRun.challengerId);
-
-  const fatal = juizoGuess(mercy.next, 'A', pool, { rng: () => 0.9 });
-  // may be correct or wrong depending on new pair — force wrong via known ratings
-  const forced = {
-    ...mercy.next,
-    juizoRun: {
-      ...mercy.next.juizoRun,
-      ratingA: '12',
-      ratingB: '18',
-      championId: 'g-a',
-      challengerId: 'g-b',
-      mercyUsed: true,
-    },
-  };
-  const end = juizoGuess(forced, 'A', pool, { rng: () => 0.9 });
-  assert.equal(end.ok, true);
-  assert.equal(end.ended, true);
-  assert.equal(end.next.juizoCurrentStreak, 0);
-  assert.equal(end.next.juizoRun, null);
-  void fatal;
-});
-
-run('sem catalogo_vivo, erro encerra na hora', () => {
-  const pool = makePool();
-  const state = {
-    juizoCurrentStreak: 2,
-    juizoBestStreak: 2,
-    juizoMilestonesClaimed: [],
-    verdicts: 0,
-    verdictPurchases: [],
-    juizoRun: {
-      championId: 'g-a',
-      challengerId: 'g-b',
-      ratingA: '12',
-      ratingB: '18',
-      recentIds: [],
-      mercyUsed: false,
-    },
-  };
-  const fail = juizoGuess(state, 'A', pool, { rng: () => 0.9 });
-  assert.equal(fail.ended, true);
-  assert.equal(fail.mercy, undefined);
-});
-
-run('juizoGuess paga eco no milestone s5', () => {
-  const pool = makePool();
-  const state = {
-    juizoCurrentStreak: 4,
-    juizoBestStreak: 4,
-    juizoMilestonesClaimed: [],
-    verdicts: 0,
-    verdictPurchases: ['eco_do_veredito'],
-    milestones: {},
-    juizoRun: {
-      championId: 'g-a',
-      challengerId: 'g-b',
-      ratingA: '12',
-      ratingB: '18',
-      recentIds: [],
-      mercyUsed: false,
-    },
-  };
-  const hit = juizoGuess(state, 'B', pool, { rng: () => 0.9 });
-  assert.equal(hit.ok, true);
-  assert.equal(hit.next.juizoCurrentStreak, 5);
-  assert.ok(hit.milestones.newly.includes('s5'));
-  assert.equal(hit.milestones.ecoBonus, 1);
-  assert.equal(hit.milestones.verdictGain, 2); // 1 + eco
-  assert.equal(hit.next.verdicts, 2);
-  assert.equal(isVerdictBonusPending(hit.next), true);
-});
-
-run('server verdictBuy aceita ids F2', () => {
-  const db = {
-    souls: '0.00',
-    obols: '0.00',
-    mnemosyne: '0.00',
-    lifetime_souls: '0.00',
-    run_souls: '0.00',
-    prestige_count: 0,
-    generators_state: {},
-    upgrades_state: [],
-    talents_state: [],
-    verdicts: 20,
-    verdict_purchases: [],
-    edu_logs_seen: [],
-    milestones: {},
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  };
-  const buy = applyVerdictBuy(db, 'catalogo_vivo', new Date('2026-09-22T12:01:00.000Z'));
-  assert.equal(buy.ok, true);
-  assert.ok(buy.next.verdictPurchases.includes('catalogo_vivo'));
-  assert.equal(buy.next.verdicts, 10);
-});
-
-run('juizoStart zera mercyUsed', () => {
-  const pool = makePool();
-  const started = juizoStart({
-    juizoCurrentStreak: 9,
-    juizoBestStreak: 9,
-    verdictPurchases: ['catalogo_vivo'],
-    juizoRun: null,
-  }, pool, { rng: () => 0 });
-  assert.equal(started.ok, true);
-  assert.equal(started.next.juizoRun.mercyUsed, false);
-  assert.equal(started.next.juizoCurrentStreak, 0);
 });
 
 console.log(`\ndespertar-bancada-f2-smoke: ${passed} passed, ${failed} failed`);

@@ -67,7 +67,7 @@ staticAssert(html.includes('viewport'), 'viewport meta (mobile)');
 
 staticAssert(indexJs.includes('ArrowRight'), 'setas nas abas');
 staticAssert(indexJs.includes('Home') && indexJs.includes('End'), 'Home/End nas abas');
-staticAssert(indexJs.includes("closest('[role=\"tab\"]')") || indexJs.includes('closest(\'[role="tab"]\')'),
+staticAssert(indexJs.includes('tabs.includes(event.target)') || indexJs.includes("closest('[role=\"tab\"]')"),
   'setas só quando o foco está numa aba');
 
 staticAssert(css.includes('--despertar-styx: #00a896'), 'token atmosfera Styx preservado');
@@ -146,7 +146,6 @@ staticAssert(
   `Lethe texto #a855f7 vs fundo ≥ 4.5 (tem ${contrastRatio(purpleText, bg).toFixed(2)})`,
 );
 
-staticAssert(pkg.includes('despertar-a11y-smoke.mjs'), 'npm run check inclui este smoke');
 
 if (errors.length) {
   console.error('despertar-a11y-smoke (estático):');

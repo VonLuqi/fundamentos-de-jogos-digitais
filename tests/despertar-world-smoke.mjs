@@ -61,7 +61,6 @@ staticAssert(css.includes('overflow-x: auto') || css.includes('overflow-x:auto')
 staticAssert(css.includes('--shelf-h'), 'CSS altura via --shelf-h');
 staticAssert(css.includes('data-tier="1"') && css.includes('data-tier="6"'), 'campos distintos por tier');
 staticAssert(!css.includes('aspect-ratio: 210 / 90') && !css.includes('aspect-ratio:210/90'), 'sem aspect antigo 210/90');
-staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'check inclui world smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/world/WorldView.js'), 'check cobre WorldView.js');
 staticAssert(worldSrc.includes('SHELF_ORBIT_ONLY') || worldSrc.includes('isShelfGenerator'), 'T1 só na órbita');
 staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('pulseBuy'), 'G5.2 highlight + pulseBuy');

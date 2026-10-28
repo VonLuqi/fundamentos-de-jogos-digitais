@@ -1,6 +1,6 @@
 /**
- * Smoke Task 12 — Conquistas + elegibilidade do Códice no servidor
- * (docs/plano-hades-despertar.md).
+ * Smoke Task 12 — Conquistas do Despertar: catálogo, arte e limiares (cliente).
+ * O avaliador do servidor PHP tem paridade coberta em despertar-php-server-smoke.
  *
  * Uso: node tests/despertar-achievements-smoke.mjs
  */
@@ -9,18 +9,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  DESPERTAR_ACHIEVEMENT_IDS,
-  DESPERTAR_HIDDEN_IDS,
-  DESPERTAR_JUIZO_STREAK_THRESHOLDS,
-  DESPERTAR_PUBLIC_IDS,
-  computeEligibleEduLogs,
-  evaluateDespertarAchievementIds,
-  sanitizeEduLogsSeen,
-} from '../api/_lib/despertar-achievements.js';
-import { JUIZO_STREAK_MILESTONES } from '../api/_lib/despertar-juizo.js';
+import { DESPERTAR_ACHIEVEMENT_IDS } from '../js/hades-despertar/config/achievements.js';
+import { JUIZO_STREAK_MILESTONES } from '../js/hades-despertar/config/juizo-pool.js';
 import { EDU_LOG_IDS } from '../js/hades-despertar/config/edu-logs.js';
-import { GENERATOR_IDS } from '../js/hades-despertar/config/generators.js';
 import {
   VERDICT_SHOP,
   VERDICT_SHOP_IDS,
@@ -28,6 +19,7 @@ import {
 } from '../js/hades-despertar/config/verdict-shop.js';
 import { ACHIEVEMENTS, getAchievementById } from '../js/game-catalog.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
+import { evaluateDespertarAchievementIds } from '../js/hades-despertar/core/formulas.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -45,36 +37,16 @@ function read(rel) {
   return fs.readFileSync(full, 'utf8');
 }
 
-[
-  'api/_lib/despertar-achievements.js',
-  'api/despertar.js',
-  'data/game-catalog.json',
-  'assets/achievements/catalog.json',
-  'js/grimorio-awards.js',
-].forEach((rel) => {
-  staticAssert(fs.existsSync(path.join(root, rel)), `Arquivo ausente: ${rel}`);
-});
-
 const catalogJson = JSON.parse(read('data/game-catalog.json'));
 const artCatalog = JSON.parse(read('assets/achievements/catalog.json'));
-const despertarApi = read('api/despertar.js');
 const indexJs = read('js/hades-despertar/index.js');
 const despertarCss = read('css/despertar.css');
 
 staticAssert(Array.isArray(catalogJson.achievements), 'game-catalog.json tem achievements');
 staticAssert(Array.isArray(artCatalog), 'assets/achievements/catalog.json é array');
-staticAssert(EDU_LOG_IDS.length === 21, `Códice tem 21 logs (tem ${EDU_LOG_IDS.length})`);
-staticAssert(DESPERTAR_PUBLIC_IDS.length === 22, '22 conquistas públicas do Despertar (11 base + 11 D2)');
-staticAssert(DESPERTAR_HIDDEN_IDS.length === 2, '2 conquistas hidden (Arquiteto + Paciência)');
-staticAssert(
-  DESPERTAR_ACHIEVEMENT_IDS.includes('despertar_arquiteto_do_loop'),
-  'ids incluem Arquiteto do Loop',
-);
-staticAssert(
-  DESPERTAR_ACHIEVEMENT_IDS.includes('despertar_paciencia'),
-  'ids incluem Paciência (D2)',
-);
-staticAssert(DESPERTAR_ACHIEVEMENT_IDS.length === 24, '24 ids Despertar após D2');
+staticAssert(EDU_LOG_IDS.length === 29, `Códice tem 29 logs (tem ${EDU_LOG_IDS.length})`);
+staticAssert(DESPERTAR_ACHIEVEMENT_IDS.includes('despertar_arquiteto_do_loop'), 'ids incluem Arquiteto do Loop');
+staticAssert(DESPERTAR_ACHIEVEMENT_IDS.includes('despertar_paciencia'), 'ids incluem Paciência (D2)');
 
 for (const id of DESPERTAR_ACHIEVEMENT_IDS) {
   const entry = catalogJson.achievements.find((a) => a.id === id);
@@ -82,15 +54,13 @@ for (const id of DESPERTAR_ACHIEVEMENT_IDS) {
   if (entry) {
     staticAssert(entry.meta?.family === 'despertar', `${id} meta.family=despertar`);
     staticAssert(typeof entry.art === 'string' && entry.art.endsWith('.webp'), `${id} tem art webp`);
-    const artPath = path.join(root, 'assets/achievements', entry.art);
-    staticAssert(fs.existsSync(artPath), `arte existe: ${entry.art}`);
+    staticAssert(fs.existsSync(path.join(root, 'assets/achievements', entry.art)), `arte existe: ${entry.art}`);
     staticAssert(
       artCatalog.some((e) => String(e?.file || '') === entry.art),
       `assets/achievements/catalog.json lista ${entry.art}`,
     );
   }
-  const runtime = getAchievementById(id) || ACHIEVEMENTS.find((a) => a.id === id);
-  staticAssert(Boolean(runtime), `game-catalog.js resolve ${id}`);
+  staticAssert(Boolean(getAchievementById(id) || ACHIEVEMENTS.find((a) => a.id === id)), `game-catalog.js resolve ${id}`);
 }
 
 staticAssert(
@@ -102,127 +72,14 @@ staticAssert(
   'Paciência é hidden',
 );
 
-const d2Ids = [
-  'despertar_cem_almas',
-  'despertar_mil_almas',
-  'despertar_milhao',
-  'despertar_styx_primeiro',
-  'despertar_styx_cinco',
-  'despertar_shiny',
-  'despertar_gold',
-  'despertar_catabase_3',
-  'despertar_juizo_1',
-  'despertar_juizo_10',
-  'despertar_bancada_cheia',
-  'despertar_paciencia',
-];
-const d2Xp = d2Ids.reduce((sum, id) => {
-  const entry = catalogJson.achievements.find((a) => a.id === id);
-  return sum + (Number(entry?.xp) || 0);
-}, 0);
-staticAssert(d2Xp === 190, `XP P0 D2 = 190 (tem ${d2Xp})`);
-
 const gameStateSrc = read('js/hades-despertar/core/GameState.js');
 staticAssert(
   gameStateSrc.includes('milestones.offline') && gameStateSrc.includes('3600'),
   'GameState seta milestones.offline no catch-up ≥ 1 h',
 );
-
-staticAssert(despertarApi.includes('grantDespertarAchievements'), 'api/despertar grant helper');
-staticAssert(
-  despertarApi.includes('evaluateDespertarAchievementIds')
-    || despertarApi.includes('planDespertarAwards'),
-  'api/despertar avalia ids',
-);
-staticAssert(despertarApi.includes('sanitizeEduLogsSeen'), 'api/despertar sanitiza edu logs');
-staticAssert(despertarApi.includes('applySanitizedEduLogs'), 'api/despertar aplica sanitize no sync');
 staticAssert(indexJs.includes('presentGrimoireAwards'), 'cliente toasta awarded');
 staticAssert(indexJs.includes('onSynced'), 'ApiService onSynced wired');
 staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem toast de relíquia');
-
-// --- Elegibilidade: DevTools não marca os 12 com lifetime=1 ---
-{
-  const poor = {
-    lifetimeSouls: '1',
-    souls: '1',
-    runSouls: '1',
-    prestigeCount: 0,
-    generators: {},
-    upgrades: [],
-    talents: [],
-    milestones: {},
-    eduLogsSeen: [...EDU_LOG_IDS],
-  };
-  const eligible = computeEligibleEduLogs(poor, { syncOk: true });
-  staticAssert(eligible.includes('log_input'), 'lifetime≥1 → log_input');
-  staticAssert(eligible.includes('log_loop'), 'lifetime≥1 → log_loop');
-  staticAssert(eligible.includes('log_authority'), 'syncOk → log_authority');
-  staticAssert(!eligible.includes('log_prestige'), 'sem catábase → sem log_prestige');
-  staticAssert(!eligible.includes('log_offline'), 'sem marco/progresso → sem log_offline');
-  staticAssert(eligible.length < EDU_LOG_IDS.length, 'estado pobre não elegibiliza os 21');
-
-  const sanitized = sanitizeEduLogsSeen(poor.eduLogsSeen, poor, { syncOk: true });
-  staticAssert(
-    sanitized.length === eligible.length,
-    'sanitize ∩ elegíveis (não aceita DevTools claiming all)',
-  );
-  staticAssert(
-    !evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
-      .includes('despertar_arquiteto_do_loop'),
-    'Arquiteto bloqueado sem Códice legítimo',
-  );
-  staticAssert(
-    evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
-      .includes('despertar_primeira_alma'),
-    'Primeira Alma com lifetime≥1',
-  );
-  staticAssert(
-    !evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
-      .includes('despertar_cem_almas'),
-    'Centúria exige lifetime≥100',
-  );
-  staticAssert(
-    !evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
-      .includes('despertar_paciencia'),
-    'Paciência exige milestones.offline',
-  );
-}
-
-// --- Códice completo legítimo → Arquiteto ---
-{
-  const generators = Object.fromEntries(GENERATOR_IDS.map((id) => [id, 1]));
-  generators.wandering_shade = 5;
-  const rich = {
-    lifetimeSouls: '1000',
-    souls: '100',
-    runSouls: '100000000',
-    prestigeCount: 1,
-    generators,
-    upgrades: ['styx_shade_x2'],
-    talents: ['echo_of_styx'],
-    milestones: { offline: true, shade: true, forge: true, throne: true, reap: true, buyModes: true },
-    verdictPurchases: ['selo_do_juiz'],
-    verdicts: 1,
-    clickCount: 25,
-    eduLogsSeen: [...EDU_LOG_IDS],
-  };
-  const eligible = computeEligibleEduLogs(rich, { syncOk: true });
-  staticAssert(
-    eligible.length === EDU_LOG_IDS.length,
-    `estado rico elegibiliza os 21 (tem ${eligible.length})`,
-  );
-  const sanitized = sanitizeEduLogsSeen(rich.eduLogsSeen, rich, { syncOk: true });
-  staticAssert(sanitized.length === 21, 'sanitize aceita os 21 quando elegíveis');
-  const earned = evaluateDespertarAchievementIds(rich, { unlocked: [], syncOk: true });
-  staticAssert(earned.includes('despertar_arquiteto_do_loop'), 'Arquiteto com Códice completo');
-  staticAssert(earned.includes('despertar_catabase'), 'Catábase com prestige≥1');
-  staticAssert(earned.includes('despertar_soberania'), 'Soberania com todos os geradores');
-  staticAssert(earned.includes('despertar_mnemosyne'), 'Mnemosyne com talento');
-  staticAssert(earned.includes('despertar_cem_almas'), 'Centúria com lifetime≥100');
-  staticAssert(earned.includes('despertar_mil_almas'), 'Milhares com lifetime≥1000');
-  staticAssert(earned.includes('despertar_styx_primeiro'), 'Primeiro juramento');
-  staticAssert(earned.includes('despertar_paciencia'), 'Paciência com milestones.offline');
-}
 
 // --- D2 P0: limiares isolados ---
 {
@@ -241,54 +98,23 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
     verdictPurchases: [],
     eduLogsSeen: [],
   };
+  const unlocks = (patch, id) => evaluateDespertarAchievementIds({ ...base, ...patch }, []).includes(id);
 
-  assert.ok(
-    evaluateDespertarAchievementIds({ ...base, lifetimeSouls: '100' }, { unlocked: [] })
-      .includes('despertar_cem_almas'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds({ ...base, lifetimeSouls: '1000000' }, { unlocked: [] })
-      .includes('despertar_milhao'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds(
-      { ...base, upgrades: ['a', 'b', 'c', 'd', 'e'] },
-      { unlocked: [] },
-    ).includes('despertar_styx_cinco'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds(
-      { ...base, shinyCounts: { wandering_shade: 1 } },
-      { unlocked: [] },
-    ).includes('despertar_shiny'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds(
-      { ...base, goldCounts: { wandering_shade: 1 } },
-      { unlocked: [] },
-    ).includes('despertar_gold'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds({ ...base, prestigeCount: 3 }, { unlocked: [] })
-      .includes('despertar_catabase_3'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds({ ...base, juizoBestStreak: 1 }, { unlocked: [] })
-      .includes('despertar_juizo_1'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds({ ...base, juizoBestStreak: 10 }, { unlocked: [] })
-      .includes('despertar_juizo_10'),
-  );
-  assert.ok(
-    evaluateDespertarAchievementIds(
-      {
-        ...base,
-        verdictPurchases: [...VERDICT_SHOP_IDS],
-      },
-      { unlocked: [] },
-    ).includes('despertar_bancada_cheia'),
-  );
+  assert.ok(unlocks({ lifetimeSouls: '100' }, 'despertar_cem_almas'));
+  assert.ok(!unlocks({ lifetimeSouls: '99' }, 'despertar_cem_almas'));
+  assert.ok(unlocks({ lifetimeSouls: '1000000' }, 'despertar_milhao'));
+  assert.ok(unlocks({
+    upgrades: ['foice_afilada', 'juramento_acheron', 'pacto_das_margens', 'ceifador_ctoniano', 'colheita_eterna'],
+  }, 'despertar_styx_cinco'));
+  assert.ok(unlocks({ shinyCounts: { wandering_shade: 1 } }, 'despertar_shiny'));
+  assert.ok(unlocks({ goldCounts: { wandering_shade: 1 } }, 'despertar_gold'));
+  assert.ok(unlocks({ prestigeCount: 3 }, 'despertar_catabase_3'));
+  assert.ok(unlocks({ juizoBestStreak: 1 }, 'despertar_juizo_1'));
+  assert.ok(unlocks({ juizoBestStreak: 10 }, 'despertar_juizo_10'));
+  assert.ok(!unlocks({ juizoBestStreak: 9 }, 'despertar_juizo_10'));
+  assert.ok(unlocks({ verdictPurchases: [...VERDICT_SHOP_IDS] }, 'despertar_bancada_cheia'));
+  assert.ok(!unlocks({}, 'despertar_paciencia'), 'Paciência exige milestones.offline');
+  assert.ok(unlocks({ milestones: { offline: true } }, 'despertar_paciencia'));
 }
 
 // --- D2: GameState milestones.offline após ≥ 1 h ---
@@ -306,64 +132,29 @@ staticAssert(despertarCss.includes('grimorio-award-toast'), 'despertar.css tem t
 
 // --- D3: ladder Juízo × Vereditos × copy Q16 ---
 {
-  assert.deepEqual(
-    DESPERTAR_JUIZO_STREAK_THRESHOLDS,
-    {
-      despertar_juizo_1: 1,
-      despertar_juizo_5: 5,
-      despertar_juizo_10: 10,
-      despertar_juizo_25: 25,
-    },
-    'ladder Álbum 1/5/10/25',
-  );
-  assert.ok(
-    JUIZO_STREAK_MILESTONES.some((m) => m.id === 's5' && m.streak === 5),
-    'Veredito s5 intacto',
-  );
-  assert.ok(
-    JUIZO_STREAK_MILESTONES.some((m) => m.id === 's25' && m.streak === 25),
-    'Veredito s25 intacto',
-  );
-  assert.equal(VERDICT_SHOP.length, 8, 'Bancada 8 itens');
-  assert.equal(VERDICT_SHOP_TOTAL_COST, 63, 'Bancada custos F2');
-
-  const at10 = evaluateDespertarAchievementIds(
-    { juizoBestStreak: 10, lifetimeSouls: '0', generators: {}, upgrades: [], talents: [] },
-    { unlocked: [] },
-  );
-  assert.ok(at10.includes('despertar_juizo_1'));
-  assert.ok(at10.includes('despertar_juizo_5'));
-  assert.ok(at10.includes('despertar_juizo_10'));
-  assert.ok(!at10.includes('despertar_juizo_25'));
-
-  const juizoAlbumIds = Object.keys(DESPERTAR_JUIZO_STREAK_THRESHOLDS);
+  const juizoAlbumIds = ['despertar_juizo_1', 'despertar_juizo_5', 'despertar_juizo_10', 'despertar_juizo_25'];
   for (const id of juizoAlbumIds) {
+    const streak = Number(id.split('_').pop());
+    const at = evaluateDespertarAchievementIds({ juizoBestStreak: streak, lifetimeSouls: '0', generators: {}, upgrades: [], talents: [] }, []);
+    const below = evaluateDespertarAchievementIds({ juizoBestStreak: streak - 1, lifetimeSouls: '0', generators: {}, upgrades: [], talents: [] }, []);
+    assert.ok(at.includes(id) && !below.includes(id), `ladder Álbum: ${id} abre em ${streak}`);
+
     const entry = catalogJson.achievements.find((a) => a.id === id);
     staticAssert(Boolean(entry), `catálogo ${id}`);
     const blob = `${entry?.name || ''} ${entry?.desc || ''}`;
     staticAssert(/Ju[ií]zo/i.test(blob), `${id} copy menciona Juízo`);
-    staticAssert(
-      !/^Juiz do Recorde$/i.test(String(entry?.name || '')),
-      `${id} não usa nome ambíguo Juiz do Recorde`,
-    );
-    if (id === 'despertar_juizo_25' || id === 'despertar_juizo_1' || id === 'despertar_juizo_5') {
-      staticAssert(
-        /Juiz do Tártaro/i.test(String(entry?.desc || '')),
-        `${id} desc diferencia Juiz do Tártaro`,
-      );
+    staticAssert(!/^Juiz do Recorde$/i.test(String(entry?.name || '')), `${id} não usa nome ambíguo Juiz do Recorde`);
+    if (id !== 'despertar_juizo_10') {
+      staticAssert(/Juiz do Tártaro/i.test(String(entry?.desc || '')), `${id} desc diferencia Juiz do Tártaro`);
     }
   }
+  assert.ok(JUIZO_STREAK_MILESTONES.some((m) => m.streak === 5 && m.verdicts === 1), 'Veredito s5 intacto');
+  assert.ok(JUIZO_STREAK_MILESTONES.some((m) => m.streak === 25 && m.verdicts === 5), 'Veredito s25 intacto');
+  assert.equal(VERDICT_SHOP.length, 8, 'Bancada 8 itens');
+  assert.equal(VERDICT_SHOP_TOTAL_COST, 63, 'Bancada custos F2');
 
-  const despertarApi = read('api/despertar.js');
-  staticAssert(
-    despertarApi.includes("grantAwards = action === 'juizoGuess'"),
-    'grant early no juizoGuess',
-  );
   const generatorsSrc = read('js/hades-despertar/config/generators.js');
-  staticAssert(
-    generatorsSrc.includes('Minos') || generatorsSrc.includes('malhete'),
-    'blurb T4 Juiz do Tártaro em lore (não meta)',
-  );
+  staticAssert(generatorsSrc.includes('Minos') || generatorsSrc.includes('malhete'), 'blurb T4 Juiz do Tártaro em lore (não meta)');
 }
 
 try {

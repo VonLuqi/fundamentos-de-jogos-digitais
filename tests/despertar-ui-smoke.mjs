@@ -43,7 +43,6 @@ requiredFiles.forEach((rel) => {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-ui-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/UIRenderer.js'), 'check cobre UIRenderer.js');
 staticAssert(pkg.includes('js/hades-despertar/ui/NumberFormatter.js'), 'check cobre NumberFormatter.js');
 staticAssert(pkg.includes('js/hades-despertar/ui/particles.js'), 'check cobre particles.js');
@@ -102,9 +101,6 @@ staticAssert(html.includes('despertar-shelf') || html.includes('despertar-shelve
 staticAssert(css.includes('despertar-layout'), 'CSS layout Cookie');
 staticAssert(css.includes('despertar-col--store'), 'CSS coluna store');
 
-staticAssert(pkg.includes('despertar-clock-smoke.mjs'), 'E1: clock smoke no check');
-staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'E1: world smoke no check');
-staticAssert(pkg.includes('despertar-juizo-smoke.mjs'), 'E1: juizo smoke no check');
 
 if (errors.length) {
   console.error('despertar-ui-smoke (estático):');

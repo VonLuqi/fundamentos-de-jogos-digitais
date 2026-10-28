@@ -45,8 +45,6 @@ staticAssert(indexJs.includes('playFoiceSlash'), 'index dispara slash');
 staticAssert(indexJs.includes('bindFoiceAsset'), 'index bind asset');
 staticAssert(juiceSrc.includes('playFoiceSlash'), 'juice exporta playFoiceSlash');
 staticAssert(particlesSrc.includes('bindFoiceAsset'), 'particles bindFoiceAsset');
-staticAssert(pkg.includes('despertar-foice-smoke.mjs'), 'check inclui este smoke');
-staticAssert(pkg.includes('despertar-world-smoke.mjs'), 'check inclui world smoke (F5)');
 
 if (errors.length) {
   console.error('despertar-foice-smoke (estático):');

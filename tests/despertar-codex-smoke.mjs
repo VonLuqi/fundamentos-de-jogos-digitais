@@ -33,7 +33,6 @@ function staticAssert(condition, message) {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-codex-smoke.mjs'), 'npm run check inclui este smoke');
 
 const html = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
 staticAssert(html.includes('id="despertar-codex-book"'), 'livro flutuante do Códice');

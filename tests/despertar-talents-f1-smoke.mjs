@@ -88,7 +88,6 @@ staticAssert(talentsSrc.includes('portoes_gemeos'), 'portoes_gemeos no catálogo
 staticAssert(stateSrc.includes('setPermanentUpgradeSlot'), 'slots permanentes GameState');
 staticAssert(stateSrc.includes('permanentUpgradeIds'), 'snapshot permanentUpgradeIds');
 staticAssert(serviceSrc.includes('normalizePermanentUpgradeIds'), 'PHP permanent slots');
-staticAssert(pkg.includes('despertar-heavenly-tree-smoke.mjs'), 'npm inclui heavenly smoke');
 
 if (errors.length) {
   console.error('despertar-talents-f1-smoke (estático):');

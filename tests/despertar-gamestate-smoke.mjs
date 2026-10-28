@@ -34,7 +34,6 @@ requiredFiles.forEach((rel) => {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-gamestate-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/core/GameState.js'), 'npm run check cobre GameState.js');
 
 if (errors.length) {

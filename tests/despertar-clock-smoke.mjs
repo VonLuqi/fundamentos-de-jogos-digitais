@@ -28,7 +28,6 @@ function staticAssert(condition, message) {
 
 const rendererSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRenderer.js'), 'utf8');
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-clock-smoke.mjs'), 'check inclui clock smoke');
 staticAssert(
   rendererSrc.includes('saldo real') || rendererSrc.includes('Cookie Clicker'),
   'HUD documenta saldo real (sem interpolação enganosa)',

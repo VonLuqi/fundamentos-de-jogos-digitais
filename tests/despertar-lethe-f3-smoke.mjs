@@ -39,7 +39,6 @@ staticAssert(uiSrc.includes('memoryPreviewText'), 'describeLethe memory');
 staticAssert(indexSrc.includes('formatLetheMemoryPreview'), 'modal open usa preview');
 staticAssert(indexSrc.includes('formatLetheMemoryToast'), 'toast pós-ritual');
 staticAssert(indexSrc.includes('showTutorialToast'), 'showTutorialToast no ritual');
-staticAssert(pkg.includes('despertar-lethe-f3-smoke.mjs'), 'check inclui F3 smoke');
 staticAssert(plan.includes('Memória que permanece'), 'copy 0F no plano');
 
 if (errors.length) {

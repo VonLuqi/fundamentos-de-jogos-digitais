@@ -73,7 +73,6 @@ const rendererSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/UIRen
 const particlesSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/ui/particles.js'), 'utf8');
 const htmlSrc = fs.readFileSync(path.join(root, 'pages/despertar.html'), 'utf8');
 
-staticAssert(pkg.includes('despertar-perf-smoke.mjs'), 'test:despertar / check inclui perf smoke');
 staticAssert(plan.includes('Caps finais') || plan.includes('SHELF_NPC_CAP'), 'caps documentados no plano');
 staticAssert(/SHELF_NPC_CAP\s*=\s*400/.test(worldSrc), 'SHELF_NPC_CAP=400');
 staticAssert(/ORBIT_CURSOR_CAP\s*=\s*200/.test(altarSrc), 'ORBIT_CURSOR_CAP=200');

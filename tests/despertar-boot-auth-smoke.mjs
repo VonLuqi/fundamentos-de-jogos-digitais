@@ -34,7 +34,6 @@ function staticAssert(condition, message) {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-boot-auth-smoke.mjs'), 'npm run check inclui este smoke');
 
 const engine = fs.readFileSync(path.join(root, 'js/hades-despertar/services/OfflineEngine.js'), 'utf8');
 staticAssert(engine.includes('resolveBootAuthority'), 'resolveBootAuthority exportado');

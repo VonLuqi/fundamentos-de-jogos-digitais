@@ -26,7 +26,6 @@ const plan = fs.readFileSync(planPath, 'utf8');
 staticAssert(fs.existsSync(reqPath), 'art-requests.json');
 staticAssert(fs.existsSync(briefPath), 'PEDIDOS-MESTRE.md');
 staticAssert(pkg.includes('despertar:art-requests'), 'npm script despertar:art-requests');
-staticAssert(pkg.includes('despertar-art-requests-smoke.mjs'), 'check inclui smoke B4');
 staticAssert(plan.includes('Task B4'), 'plano menciona B4');
 staticAssert(/### Task B4[\s\S]*?- \[x\] Abrir lista/.test(plan), 'Task B4 marcada no plano');
 

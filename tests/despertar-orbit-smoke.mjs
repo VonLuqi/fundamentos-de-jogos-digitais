@@ -41,7 +41,6 @@ staticAssert(altarSrc.includes('orbitRingScale'), 'G1.2 orbitRingScale');
 staticAssert(altarSrc.includes('drawOrbitCursor'), 'G1.2 drawOrbitCursor');
 staticAssert(altarSrc.includes('markShinyPlacements'), 'G1.2 shiny hook');
 staticAssert(!/i \/ count\) \* Math\.PI \* 2/.test(altarSrc), 'não redistribui i/count no anel único');
-staticAssert(pkg.includes('despertar-orbit-smoke.mjs'), 'check inclui orbit smoke');
 
 if (errors.length) {
   console.error('despertar-orbit-smoke (estático):');

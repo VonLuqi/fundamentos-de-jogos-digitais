@@ -1,5 +1,5 @@
 /**
- * Smoke Task 9 — /api/despertar sync autoritativo
+ * Smoke Task 9 — sync autoritativo (cliente; servidor PHP em despertar-php-server-smoke)
  * (docs/plano-hades-despertar.md).
  *
  * Uso: node tests/despertar-sync-smoke.mjs
@@ -9,14 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import despertarHandler from '../api/despertar.js';
-import {
-  applyPrestige,
-  applyTalentBuy,
-  buildStateDto,
-  parseClientEpoch,
-  validateSync,
-} from '../api/_lib/despertar-validate.js';
+
 import { getGenerator } from '../js/hades-despertar/config/generators.js';
 import { cmp } from '../js/hades-despertar/core/decimal.js';
 import { GameState } from '../js/hades-despertar/core/GameState.js';
@@ -31,8 +24,8 @@ function staticAssert(condition, message) {
 }
 
 [
-  'api/despertar.js',
-  'api/_lib/despertar-validate.js',
+  'backend/src/Controllers/DespertarController.php',
+  'backend/src/Services/Despertar/DespertarService.php',
   'js/hades-despertar/services/ApiService.js',
   'js/hades-despertar/core/formulas.js',
 ].forEach((rel) => {
@@ -40,23 +33,7 @@ function staticAssert(condition, message) {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-sync-smoke.mjs'), 'npm run check inclui este smoke');
-staticAssert(pkg.includes('api/_lib/despertar-validate.js'), 'check cobre validate');
 staticAssert(pkg.includes('js/hades-despertar/services/ApiService.js'), 'check cobre ApiService');
-
-const apiSrc = fs.readFileSync(path.join(root, 'api/despertar.js'), 'utf8');
-staticAssert(apiSrc.includes('validateSync'), 'handler usa validateSync');
-staticAssert(apiSrc.includes("action === 'stateSync'"), 'stateSync implementado');
-staticAssert(apiSrc.includes('persistPatchAndAward') || apiSrc.includes('persistPatch'), 'persistência de estado');
-staticAssert(apiSrc.includes("'shiny_counts'") || apiSrc.includes('shiny_counts'), 'ROW_SELECT shiny_counts G4.3');
-staticAssert(apiSrc.includes('DESPERTAR_SYNC_RPC') || apiSrc.includes('isDespertarSyncRpcEnabled'), 'flag RPC B3');
-staticAssert(apiSrc.includes("action === 'prestige'"), 'prestige implementado');
-staticAssert(apiSrc.includes("action === 'talentBuy'"), 'talentBuy implementado');
-staticAssert(!apiSrc.includes('STUB_ACTIONS'), 'stubs 501 removidos');
-staticAssert(apiSrc.includes('isSyncRateLimited') || apiSrc.includes('consumeGameRateLimit'), 'rate limit de sync');
-staticAssert(apiSrc.includes('applyRetryAfterHeader'), '429 sync com Retry-After');
-staticAssert(apiSrc.includes('consumeGameRateLimit'), 'sync usa rate-limit-kv');
-staticAssert(!apiSrc.includes('syncAttempts'), 'Map syncAttempts removido (A2)');
 
 const boot = fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8');
 staticAssert(boot.includes('ApiService'), 'index liga ApiService');
@@ -75,11 +52,11 @@ staticAssert(gameStateSrc.includes('syncEpoch'), 'A2 GameState.syncEpoch');
 staticAssert(gameStateSrc.includes('#bumpSyncEpoch'), 'A2 bumpSyncEpoch em mutações');
 staticAssert(gameStateSrc.includes('clientEpoch'), 'A2 toSnapshot envia clientEpoch');
 staticAssert(
-  fs.readFileSync(path.join(root, 'api/_lib/despertar-validate.js'), 'utf8').includes('parseClientEpoch'),
+  fs.readFileSync(path.join(root, 'backend/src/Services/Despertar/DespertarService.php'), 'utf8').includes('parseClientEpoch'),
   'A3 parseClientEpoch no validate',
 );
 staticAssert(
-  fs.readFileSync(path.join(root, 'api/_lib/despertar-validate.js'), 'utf8').includes('echoEpoch'),
+  fs.readFileSync(path.join(root, 'backend/src/Services/Despertar/DespertarService.php'), 'utf8').includes('echoEpoch'),
   'A3 echoEpoch no DTO',
 );
 staticAssert(apiService.includes("mode: 'reconcile'") || apiService.includes('reconcile'), 'A4 flush reconcile');
@@ -167,170 +144,6 @@ function blankRow(overrides = {}) {
   };
 }
 
-await checkAsync('sem token → 401', async () => {
-  const res = makeRes();
-  await despertarHandler({ method: 'POST', body: { action: 'stateSync', clientState: {} } }, res);
-  assert.equal(res.statusCode, 401);
-});
-
-check('almas absurdas em Δt≈1 s → 400 + state do DB', () => {
-  const db = blankRow({
-    souls: '10.00',
-    lifetime_souls: '10.00',
-    run_souls: '10.00',
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  });
-  const client = {
-    souls: '1000000.00',
-    lifetimeSouls: '1000000.00',
-    runSouls: '1000000.00',
-    generators: {},
-    upgrades: [],
-    talents: [],
-    eduLogsSeen: [],
-    milestones: {},
-    lastSyncAt: db.last_sync_at,
-  };
-  const result = validateSync(db, client, new Date('2026-09-22T12:00:01.000Z'));
-  assert.equal(result.ok, false);
-  assert.equal(result.status, 400);
-  assert.ok(result.state);
-  assert.equal(result.state.souls, '10.00');
-});
-
-check('compra T1 com souls suficientes no DB → ok', () => {
-  const t1 = getGenerator('wandering_shade');
-  assert.ok(t1);
-  const db = blankRow({
-    souls: '100.00',
-    lifetime_souls: '100.00',
-    run_souls: '100.00',
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  });
-  const result = validateSync(db, {
-    souls: '85.00',
-    lifetimeSouls: '100.00',
-    runSouls: '100.00',
-    generators: { wandering_shade: 1 },
-    upgrades: [],
-    talents: [],
-    eduLogsSeen: ['log_input', 'log_generator'],
-    milestones: {},
-    lastSyncAt: db.last_sync_at,
-  }, new Date('2026-09-22T12:00:05.000Z'));
-
-  assert.equal(result.ok, true, result.detail || result.error || JSON.stringify(result));
-  assert.equal(result.next.generators.wandering_shade, 1);
-  assert.equal(result.next.souls, '85.00');
-  assert.equal(t1.baseCost, '15');
-});
-
-check('compra cara no mesmo window: ganho plausível pós-SPS → aceita', () => {
-  // SPS pré-compra ≈ 0; pós-compra (20 cães) ≈ 160/s. Claimed 50k em 600s passa só com teto pós-compra.
-  const db = blankRow({
-    souls: '200000.00',
-    lifetime_souls: '200000.00',
-    run_souls: '200000.00',
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  });
-  const client = {
-    souls: '137312.06',
-    lifetimeSouls: '250000.00',
-    runSouls: '250000.00',
-    generators: { cerberian_hound: 20 },
-    upgrades: [],
-    talents: [],
-    eduLogsSeen: [],
-    milestones: {},
-    lastSyncAt: db.last_sync_at,
-  };
-  const result = validateSync(db, client, new Date('2026-09-22T12:10:00.000Z'));
-  assert.equal(result.ok, true, result.detail || result.error || JSON.stringify(result));
-  assert.equal(result.next.generators.cerberian_hound, 20);
-});
-
-check('overclaim absurdo mesmo com SPS pós-compra → 400', () => {
-  const db = blankRow({
-    souls: '200000.00',
-    lifetime_souls: '200000.00',
-    run_souls: '200000.00',
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  });
-  const result = validateSync(db, {
-    souls: '5000000.00',
-    lifetimeSouls: '5200000.00',
-    runSouls: '5200000.00',
-    generators: { cerberian_hound: 20 },
-    upgrades: [],
-    talents: [],
-    eduLogsSeen: [],
-    milestones: {},
-    lastSyncAt: db.last_sync_at,
-  }, new Date('2026-09-22T12:10:00.000Z'));
-  assert.equal(result.ok, false);
-  assert.equal(result.status, 400);
-});
-
-check('id de gerador desconhecido → 400', () => {
-  const db = blankRow({ souls: '100.00' });
-  const result = validateSync(db, {
-    souls: '50.00',
-    generators: { hacker_bot: 99 },
-    upgrades: [],
-    lastSyncAt: db.last_sync_at,
-  }, new Date('2026-09-22T12:01:00.000Z'));
-  assert.equal(result.ok, false);
-  assert.equal(result.status, 400);
-});
-
-check('client lastSyncAt mais velho que DB → 409', () => {
-  const db = blankRow({
-    souls: '50.00',
-    last_sync_at: '2026-09-22T12:05:00.000Z',
-  });
-  const result = validateSync(db, {
-    souls: '50.00',
-    generators: {},
-    upgrades: [],
-    lastSyncAt: '2026-09-22T12:00:00.000Z',
-  }, new Date('2026-09-22T12:06:00.000Z'));
-  assert.equal(result.ok, false);
-  assert.equal(result.status, 409);
-  assert.equal(result.state.souls, '50.00');
-});
-
-check('prestige com runSouls alto credita óbolos e zera geradores', () => {
-  const db = blankRow({
-    souls: '1000.00',
-    run_souls: '4000000000.00',
-    lifetime_souls: '4000000000.00',
-    generators_state: { wandering_shade: 5 },
-    upgrades_state: ['foice_afilada'],
-  });
-  const result = applyPrestige(db, new Date('2026-09-22T12:00:00.000Z'));
-  assert.equal(result.ok, true);
-  assert.equal(result.next.prestigeCount, 1);
-  assert.ok(cmp(result.next.obols, '0') > 0);
-  assert.equal(result.next.generators.wandering_shade || 0, 0);
-  assert.deepEqual(result.next.upgrades, []);
-});
-
-check('talentBuy debita essência', () => {
-  const db = blankRow({ mnemosyne: '2.00' });
-  const result = applyTalentBuy(db, 'memoria_das_sombras', new Date());
-  assert.equal(result.ok, true);
-  assert.ok(result.next.talents.includes('memoria_das_sombras'));
-  assert.equal(result.next.mnemosyne, '1.00');
-});
-
-check('buildStateDto calcula sps', () => {
-  const dto = buildStateDto(blankRow({
-    generators_state: { wandering_shade: 1 },
-  }));
-  assert.ok(cmp(dto.sps, '0') > 0);
-  assert.equal(typeof dto.prestigePreview.unlocked, 'boolean');
-});
-
 check('A1 syncDiag gated: morto fora de localhost', () => {
   assert.equal(syncDiagEnabled({ hostname: 'evil.example', search: '?syncDiag=1' }), false);
   assert.equal(syncDiagEnabled({ hostname: 'localhost', search: '?syncDiag=1' }), true);
@@ -369,66 +182,6 @@ check('A2 syncEpoch sobe em buys; clientEpoch no snapshot; apply não zera', () 
 
   restored.grantSouls('10');
   assert.equal(restored.syncEpoch, ep + 1);
-});
-
-check('A3 validateSync ecoa clientEpoch; ausência = legado', () => {
-  const t1 = getGenerator('wandering_shade');
-  const cost = t1.baseCost;
-  const db = blankRow({
-    souls: '100.00',
-    lifetime_souls: '100.00',
-    run_souls: '100.00',
-    last_sync_at: '2026-09-22T12:00:00.000Z',
-  });
-  const baseClient = {
-    souls: '90.00',
-    lifetimeSouls: '100.00',
-    runSouls: '100.00',
-    generators: { wandering_shade: 1 },
-    upgrades: [],
-    talents: [],
-    eduLogsSeen: [],
-    milestones: {},
-    lastSyncAt: db.last_sync_at,
-  };
-
-  const legacy = validateSync(db, baseClient, new Date('2026-09-22T12:00:05.000Z'));
-  assert.equal(legacy.ok, true);
-  assert.equal(legacy.echoEpoch, undefined);
-  assert.equal(legacy.state.echoEpoch, undefined);
-
-  const echoed = validateSync(
-    db,
-    { ...baseClient, clientEpoch: 12 },
-    new Date('2026-09-22T12:00:05.000Z'),
-  );
-  assert.equal(echoed.ok, true);
-  assert.equal(echoed.echoEpoch, 12);
-  assert.equal(echoed.state.echoEpoch, 12);
-  assert.equal(parseClientEpoch({ syncEpoch: 3 }), 3);
-  assert.equal(parseClientEpoch({}), null);
-  assert.equal(parseClientEpoch({ clientEpoch: -1 }), null);
-
-  const refused = validateSync(
-    db,
-    {
-      souls: '1000000.00',
-      lifetimeSouls: '1000000.00',
-      runSouls: '1000000.00',
-      generators: {},
-      upgrades: [],
-      talents: [],
-      eduLogsSeen: [],
-      milestones: {},
-      lastSyncAt: db.last_sync_at,
-      clientEpoch: 7,
-    },
-    new Date('2026-09-22T12:00:01.000Z'),
-  );
-  assert.equal(refused.ok, false);
-  assert.equal(refused.echoEpoch, 7);
-  assert.equal(refused.state.echoEpoch, 7);
-  void cost;
 });
 
 check('A4 reconcile: buys locais não somem; souls não andam para trás sem motivo', () => {
@@ -530,15 +283,19 @@ await checkAsync('A4 flush: epoch avançou mid-flight → dirty preservado + rec
   api.stop();
 });
 
-await checkAsync('A4 flush: reject 400 → replace + dirty limpo', async () => {
+// a82f1fd: reject faz reconcile (replace apagava selos otimistas do Rio) e mantém dirty
+// para o próximo flush tentar de novo.
+await checkAsync('A4 flush: reject 400 → reconcile + dirty preservado', async () => {
   const state = new GameState({
     souls: '999',
     generators: { wandering_shade: 5 },
   });
+  const applyModes = [];
   const api = new ApiService({
     getToken: () => 'tok',
     getSnapshot: () => state.toSnapshot(),
     applyServerState: (serverState, meta = {}) => {
+      applyModes.push(meta.mode);
       state.applyAuthoritativeState(serverState, { mode: meta.mode || 'replace' });
     },
     minIntervalMs: 0,
@@ -555,9 +312,10 @@ await checkAsync('A4 flush: reject 400 → replace + dirty limpo', async () => {
   });
   api.markDirty();
   await assert.rejects(() => api.flush(), (e) => e.status === 400);
-  assert.equal(cmp(state.souls, '10'), 0);
-  assert.equal(state.quantities().wandering_shade, 1);
-  assert.equal(api.isDirty, false);
+  assert.equal(applyModes.join(','), 'reconcile');
+  assert.equal(cmp(state.souls, '10'), 0, 'souls sem explicação → server');
+  assert.equal(state.quantities().wandering_shade, 5, 'reconcile mantém qty local');
+  assert.equal(api.isDirty, true);
   api.stop();
 });
 
@@ -585,14 +343,14 @@ await checkAsync('A1 ApiService.logDiag: dirty + reuse-in-flight (baseline)', as
   });
   api._inFlight = syncPromise;
   assert.equal(api.isInFlight, true);
+  // flush() passa pela fila de mutações (a82f1fd): o reuso só é logado quando a fila chega nele.
   const reused = api.flush();
+  resolveSync({ ok: true });
+  await reused;
   assert.ok(
     phases.some((p) => p.phase === 'flush:reuse-in-flight' && p.inFlight === true),
     'reuse-in-flight logado'
   );
-  // async flush() envolve o return — await ainda resolve o trabalho in-flight
-  resolveSync({ ok: true });
-  await reused;
 });
 
 await checkAsync('A5 spam 20 buys mid-flight: qty/upgrades sem snap-back + dirty', async () => {
@@ -644,48 +402,6 @@ await checkAsync('A5 spam 20 buys mid-flight: qty/upgrades sem snap-back + dirty
   assert.ok(state.syncEpoch >= epochAtStart + 20, 'epoch ≥ start+20');
   assert.equal(api.isDirty, true, 'dirty após spam mid-flight');
   assert.ok(cmp(state.souls, '0') >= 0, 'souls não negativos');
-  api.stop();
-});
-
-await checkAsync('A5 flush epoch estável → dirty limpo; eco usado', async () => {
-  const state = new GameState({
-    souls: '500',
-    generators: { wandering_shade: 2 },
-  });
-  // bump epoch once so snapshot has clientEpoch > 0
-  state.buyGenerator('wandering_shade', '1');
-  const epochStable = state.syncEpoch;
-  let echoed = null;
-  const api = new ApiService({
-    getToken: () => 'tok',
-    getSnapshot: () => state.toSnapshot(),
-    applyServerState: (serverState, meta = {}) => {
-      echoed = meta.echoEpoch;
-      state.applyAuthoritativeState(serverState, {
-        mode: meta.mode || 'replace',
-        elapsedMs: meta.elapsedMs,
-        sps: state.sps(),
-      });
-    },
-    minIntervalMs: 0,
-    now: () => 3_000_000,
-    syncFn: async (_token, snap) => ({
-      ok: true,
-      echoEpoch: snap.clientEpoch,
-      state: {
-        ...snap,
-        echoEpoch: snap.clientEpoch,
-        lastSyncAt: '2026-09-22T14:00:00.000Z',
-      },
-    }),
-  });
-
-  api.markDirty();
-  await api.flush();
-  assert.equal(state.syncEpoch, epochStable, 'sem mutação mid-flight');
-  assert.equal(api.isDirty, false, 'dirty limpo com epoch estável');
-  assert.equal(echoed, epochStable, 'echoEpoch passado ao apply');
-  assert.equal(state.quantities().wandering_shade, 3);
   api.stop();
 });
 

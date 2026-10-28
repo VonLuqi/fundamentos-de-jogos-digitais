@@ -597,7 +597,8 @@ run('5. Códice (log_incremental_architecture_f8) e Assets Gemini (manifest.json
     fs.readFileSync(path.join(root, 'assets/despertar/sprites/manifest.json'), 'utf8'),
   );
   assert.equal(Object.keys(manifest.generators).length, 20);
-  assert.equal(Object.keys(manifest.upgrades).length, 396);
+  assert.equal(Object.keys(manifest.upgrades).length, UPGRADES.length, 'manifest cobre o catálogo de upgrades');
+  for (const u of UPGRADES) assert.ok(manifest.upgrades[u.id], `manifest tem ícone de ${u.id}`);
   assert.ok(manifest.seasons.dragon_stage_0);
   assert.ok(manifest.seasons.dragon_stage_4);
   assert.ok(manifest.seasons.aura_apetite_radiante);

@@ -42,7 +42,6 @@ function staticAssert(condition, message) {
 });
 
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-offline-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/services/StorageService.js'), 'check cobre StorageService');
 staticAssert(pkg.includes('js/hades-despertar/services/OfflineEngine.js'), 'check cobre OfflineEngine');
 

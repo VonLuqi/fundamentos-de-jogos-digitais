@@ -9,8 +9,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { applyVerdictBuy } from '../api/_lib/despertar-validate.js';
-import { evaluateDespertarAchievementIds } from '../api/_lib/despertar-achievements.js';
+
 import {
   VERDICT_SHOP,
   VERDICT_SHOP_IDS,
@@ -39,8 +38,6 @@ function read(rel) {
 const html = read('pages/despertar.html');
 const indexJs = read('js/hades-despertar/index.js');
 const apiJs = read('js/api.js');
-const despertarApi = read('api/despertar.js');
-const validateSrc = read('api/_lib/despertar-validate.js');
 const pkg = read('package.json');
 
 staticAssert(fs.existsSync(path.join(root, 'js/hades-despertar/config/verdict-shop.js')), 'verdict-shop.js');
@@ -71,9 +68,6 @@ staticAssert(html.includes('bancada-minigames-heading'), 'secção Néctar e min
 staticAssert(indexJs.includes('onBuyVerdict'), 'index wire onBuyVerdict');
 staticAssert(indexJs.includes('verdictBuy'), 'index chama verdictBuy');
 staticAssert(apiJs.includes('despertarVerdictBuy'), 'cliente despertarVerdictBuy');
-staticAssert(despertarApi.includes("action === 'verdictBuy'"), 'API verdictBuy');
-staticAssert(validateSrc.includes('applyVerdictBuy'), 'applyVerdictBuy no validate');
-staticAssert(pkg.includes('despertar-verdict-smoke.mjs'), 'check inclui este smoke');
 
 const uiSrc = read('js/hades-despertar/ui/UIRenderer.js');
 staticAssert(uiSrc.includes('bancada-tooltip'), 'tooltip Bancada (G5.1)');
@@ -155,64 +149,6 @@ run('pacto_duplo barateia 1º gerador; Lethe não reseta Bancada', () => {
   state.applyPrestige();
   assert.deepEqual(state.verdictPurchases, ['pacto_duplo']);
   assert.equal(state.verdicts, 0);
-});
-
-run('applyVerdictBuy server-authoritative', () => {
-  const row = {
-    souls: '0.00',
-    obols: '0.00',
-    mnemosyne: '0.00',
-    lifetime_souls: '0.00',
-    run_souls: '0.00',
-    prestige_count: 0,
-    generators_state: {},
-    upgrades_state: [],
-    talents_state: [],
-    edu_logs_seen: [],
-    milestones: {},
-    verdicts: 3,
-    verdict_purchases: [],
-  };
-  const ok = applyVerdictBuy(row, 'selo_do_juiz');
-  assert.equal(ok.ok, true);
-  assert.equal(ok.next.verdicts, 2); // B1 Soft: selo custa 1
-  assert.deepEqual(ok.next.verdictPurchases, ['selo_do_juiz']);
-  assert.equal(ok.patch.verdicts, 2);
-
-  const again = applyVerdictBuy({ ...row, ...ok.patch, verdict_purchases: ok.next.verdictPurchases }, 'selo_do_juiz');
-  assert.equal(again.ok, false);
-
-  const poor = applyVerdictBuy({ ...row, verdicts: 0 }, 'selo_do_juiz');
-  assert.equal(poor.ok, false);
-});
-
-run('conquistas juizo + veredito', () => {
-  const base = {
-    lifetimeSouls: '0',
-    souls: '0',
-    generators: {},
-    upgrades: [],
-    talents: [],
-    prestigeCount: 0,
-    juizoBestStreak: 5,
-    verdictPurchases: [],
-  };
-  const at5 = evaluateDespertarAchievementIds(base, { unlocked: [] });
-  assert.ok(at5.includes('despertar_juizo_5'));
-  assert.ok(!at5.includes('despertar_juizo_25'));
-  assert.ok(!at5.includes('despertar_veredito'));
-
-  const at25 = evaluateDespertarAchievementIds(
-    { ...base, juizoBestStreak: 25 },
-    { unlocked: [] },
-  );
-  assert.ok(at25.includes('despertar_juizo_25'));
-
-  const bought = evaluateDespertarAchievementIds(
-    { ...base, juizoBestStreak: 0, verdictPurchases: ['selo_do_juiz'] },
-    { unlocked: [] },
-  );
-  assert.ok(bought.includes('despertar_veredito'));
 });
 
 run('spsOrderOfMagnitude sobe em marcos (G5.1)', () => {

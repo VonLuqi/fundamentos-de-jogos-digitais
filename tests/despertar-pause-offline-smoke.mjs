@@ -19,7 +19,6 @@ import {
   previewCatchUp,
   resumeFromHidden,
 } from '../js/hades-despertar/services/OfflineEngine.js';
-import { pauseWindowDto } from '../api/_lib/despertar-gate.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -30,22 +29,17 @@ function read(rel) {
 const engineSrc = read('js/hades-despertar/services/OfflineEngine.js');
 const indexSrc = read('js/hades-despertar/index.js');
 const shellSrc = read('js/app-shell.js');
-const apiSrc = read('api/despertar.js');
-const gateSrc = read('api/_lib/despertar-gate.js');
 const pkgSrc = read('package.json');
 
 assert.match(engineSrc, /effectiveOfflineSeconds/);
 assert.match(engineSrc, /clampHiddenSeconds/);
 assert.match(engineSrc, /normalizePauseWindow/);
 assert.match(engineSrc, /pauseExcluded/);
-assert.match(gateSrc, /pauseWindowDto/);
-assert.match(apiSrc, /pauseWindow/);
 assert.match(indexSrc, /pauseWindowRef/);
 assert.match(indexSrc, /rememberPauseWindow/);
 assert.match(indexSrc, /resumeFromHidden\(state, seconds,\s*\{\s*pause:/);
 assert.match(shellSrc, /pauseActive/);
 assert.match(shellSrc, /Em aula/);
-assert.match(pkgSrc, /despertar-pause-offline-smoke\.mjs/);
 
 const now = Date.parse('2026-09-28T16:00:00.000Z');
 const pauseActive = {
@@ -157,14 +151,7 @@ assert.equal(
     reason: 'Aula',
     pauseStartedAt: '2026-09-28T15:00:00.000Z',
   };
-  const during = pauseWindowDto(raw, Date.parse('2026-09-28T15:10:00.000Z'));
-  assert.equal(during.active, true);
-  assert.equal(during.pauseUntil, raw.pauseUntil);
 
-  const after = pauseWindowDto(raw, now);
-  assert.equal(after.active, false);
-  assert.equal(after.pauseUntil, raw.pauseUntil);
-  assert.equal(after.pauseStartedAt, raw.pauseStartedAt);
 }
 
 // bootAuthoritativeSession honra pause do fetch

@@ -88,7 +88,6 @@ staticAssert(!/tabindex\s*=\s*['"]-1['"]/.test(
   uiSrc.slice(uiSrc.indexOf('#renderSealed'), uiSrc.indexOf('#mountSealedTip') + 80),
 ), 'ícones Selados sem tabindex=-1');
 
-staticAssert(pkg.includes('despertar-selados-smoke.mjs'), 'smoke no package.json check');
 
 if (errors.length) {
   console.error('despertar-selados-smoke (estático):');

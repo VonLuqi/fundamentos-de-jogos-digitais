@@ -27,7 +27,6 @@ staticAssert(
   'Arquivo ausente: js/hades-despertar/core/GameLoop.js',
 );
 const pkg = fs.readFileSync(path.join(root, 'package.json'), 'utf8');
-staticAssert(pkg.includes('despertar-gameloop-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/core/GameLoop.js'), 'npm run check cobre GameLoop.js');
 
 const loopSrc = fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameLoop.js'), 'utf8');

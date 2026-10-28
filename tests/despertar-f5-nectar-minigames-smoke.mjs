@@ -127,17 +127,17 @@ run('2. Níveis de Gerador (+1% SPS/nível), Néctar em Reserva (cap 100) e Fren
   assert.equal(cmp(generatorLevelMult(10), '1.1'), 0);
 
   // Néctar em Reserva (Sugar Baking): +1% por Néctar até cap 100 (×2.0)
-  assert.equal(cmp(nectarReserveMult(50, []), '1'), 0, 'Sem talento nectar_em_reserva = ×1');
-  assert.equal(cmp(nectarReserveMult(50, ['nectar_em_reserva']), '1.5'), 0);
-  assert.equal(cmp(nectarReserveMult(100, ['nectar_em_reserva']), '2'), 0);
-  assert.equal(cmp(nectarReserveMult(250, ['nectar_em_reserva']), '2'), 0, 'Cap estrito em 100 Néctares');
+  assert.equal(cmp(nectarReserveMult(50, []), '1'), 0, 'Sem talento cozimento_de_acucar (Sugar baking) = ×1');
+  assert.equal(cmp(nectarReserveMult(50, ['cozimento_de_acucar']), '1.5'), 0);
+  assert.equal(cmp(nectarReserveMult(100, ['cozimento_de_acucar']), '2'), 0);
+  assert.equal(cmp(nectarReserveMult(250, ['cozimento_de_acucar']), '2'), 0, 'Cap estrito em 100 Néctares');
 
   const state = new GameState({
     souls: '1000',
     nectar: 150,
     totalNectarHarvested: 150,
     generators: { charon_servants: 100 }, // Base SPS = 100 * 1 = 100
-    talents: ['nectar_em_reserva'],
+    talents: ['cozimento_de_acucar'],
   }, { initialNowMs: 50_000 });
 
   // Com 150 Néctares (cap 100 -> ×2.0): SPS = 200
@@ -257,7 +257,7 @@ run('4. Paridade JS ≡ PHP (Stack SPS/Click com Níveis + Néctar em Reserva + 
       styx_tower: 10,
     },
     upgrades: ['foice_afilada', 'umbras_despertas'],
-    talents: ['nectar_em_reserva'],
+    talents: ['cozimento_de_acucar'],
     obols: '10',
     verdictPurchases: ['olho_do_tartarus'],
     shinyCounts: {},

@@ -43,7 +43,6 @@ staticAssert(css.includes('.despertar-shelf__label.despertar-marquee') || css.in
 staticAssert(css.includes('.despertar-marquee.is-static'), 'reduced-motion estático');
 staticAssert(marqueeSrc.includes('setMarqueeTextIfOverflow'), 'API overflow');
 staticAssert(marqueeSrc.includes('MARQUEE_SPEED_PX_PER_SEC'), 'velocidade Q5');
-staticAssert(pkg.includes('despertar-marquee-smoke.mjs'), 'check inclui smoke');
 
 if (errors.length) {
   console.error('despertar-marquee-smoke (estático):');

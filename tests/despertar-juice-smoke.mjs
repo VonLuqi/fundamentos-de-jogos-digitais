@@ -66,7 +66,6 @@ const worldSrc = read('js/hades-despertar/ui/world/WorldView.js');
 staticAssert(worldSrc.includes('SHELF_MOTE_MAX_PER_SEC'), 'C2 budget de motes');
 staticAssert(worldSrc.includes('drawShelfCellHighlight') && worldSrc.includes('buyPulseScale'), 'G5.2 highlight + scale');
 staticAssert(css.includes('despertar-shelf__mote') || css.includes('despertarShelfMote'), 'CSS mote prateleira');
-staticAssert(pkg.includes('despertar-juice-smoke.mjs'), 'npm run check inclui este smoke');
 staticAssert(pkg.includes('js/hades-despertar/ui/juice.js') || pkg.includes('ui/juice.js'), 'check cobre juice.js');
 
 if (errors.length) {

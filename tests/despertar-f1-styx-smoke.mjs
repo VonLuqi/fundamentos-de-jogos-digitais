@@ -259,7 +259,7 @@ run('4. Rejeição de IDs desconhecidos e requisitos não atendidos + UI blurbs/
     unknownCatalogIds({
       generators: { wandering_shade: 1, fake_gen: 2 },
       upgrades: ['foice_afilada', 'fake_upgrade_xyz'],
-      talents: ['memoria_das_sombras', 'fake_talent_xyz'],
+      talents: ['legado', 'fake_talent_xyz'],
     }),
     ['fake_gen', 'fake_upgrade_xyz', 'fake_talent_xyz'],
   );

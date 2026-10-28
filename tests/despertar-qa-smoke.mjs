@@ -30,12 +30,7 @@ import {
   prestigeBonus,
 } from '../js/hades-despertar/core/formulas.js';
 import { formatSouls } from '../js/hades-despertar/ui/NumberFormatter.js';
-import {
-  DESPERTAR_HIDDEN_IDS,
-  DESPERTAR_PUBLIC_IDS,
-  evaluateDespertarAchievementIds,
-  sanitizeEduLogsSeen,
-} from '../api/_lib/despertar-achievements.js';
+
 import { ROUTES } from '../js/api.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -86,7 +81,7 @@ staticAssert(
 );
 staticAssert(html.includes('despertar-layout'), 'três colunas no markup');
 staticAssert(html.includes('despertar-codex-book') || html.includes('despertar-codex-drawer'), 'Códice na UI');
-staticAssert(EDU_LOG_IDS.length === 21, '21 logs do Códice');
+staticAssert(EDU_LOG_IDS.length === 29, '29 logs do Códice');
 staticAssert(!rendererSrc.includes('innerHTML'), 'UIRenderer sem innerHTML');
 
 // —— Ecossistema ——
@@ -97,14 +92,6 @@ staticAssert(apiJs.includes("despertar:"), 'rota despertar no cliente');
 staticAssert(shellSrc.includes('despertar') && shellSrc.includes('syncDespertarNavFromToken'), 'nav O Despertar com gate');
 staticAssert(!shellSrc.toLowerCase().includes('minigame'), 'sem Minigame no shell');
 staticAssert(dashboardHtml.includes('id="despertar-preview"'), 'preview no Painel');
-staticAssert(DESPERTAR_PUBLIC_IDS.length === 22, '22 conquistas públicas');
-staticAssert(DESPERTAR_HIDDEN_IDS.includes('despertar_arquiteto_do_loop'), 'Arquiteto hidden');
-staticAssert(DESPERTAR_HIDDEN_IDS.includes('despertar_paciencia'), 'Paciência hidden D2');
-staticAssert(DESPERTAR_HIDDEN_IDS.length === 2, '2 hidden Despertar');
-staticAssert(pkg.includes('despertar-qa-smoke.mjs'), 'npm run check inclui QA');
-staticAssert(pkg.includes('despertar-sync-smoke.mjs'), 'check inclui sync smoke');
-staticAssert(pkg.includes('despertar-achievements-smoke.mjs'), 'check inclui conquistas smoke');
-staticAssert(pkg.includes('despertar-verdict-smoke.mjs'), 'check inclui Bancada smoke');
 
 // —— Qualidade ——
 staticAssert(css.includes('prefers-reduced-motion'), 'reduced-motion');
@@ -148,16 +135,26 @@ await run('Preço Base×1.15^n; lote 10 usa série', () => {
   assert.ok(cmp(lot10, naive) > 0, 'lote 10 > 10×base');
 });
 
+const HEAVENLY_POWER_LADDER = [
+  'segredo_do_obolo',
+  'banca_do_obolo',
+  'forja_do_obolo',
+  'confeitaria_do_obolo',
+  'chave_do_obolo',
+];
+
 await run('SPS HUD = 2 geradores + 1 juramento + 1 óbolo', () => {
-  // 10 sombras × 0.1 = 1; ×2 umbras = 2; + 1 servo ×0.8 = 2.8; × prestige(1 óbolo)=1.01 → 2.828
+  // 10 sombras × 0.1 = 1; ×2 umbras = 2; + 1 servo ×1 (F0) = 3;
+  // × prestige(1 óbolo, escada heavenlyPower completa) = 1.01 → 3.03
   const sps = calculateTotalSPS({
     generators: { wandering_shade: 10, charon_servants: 1 },
-    upgrades: ['umbras_despertas'],
+    upgrades: ['umbras_despertas', ...HEAVENLY_POWER_LADDER],
     talents: [],
     obols: '1',
   });
-  assert.equal(cmp(sps, '2.828'), 0, `SPS esperado 2.828, got ${sps}`);
-  assert.equal(cmp(prestigeBonus('1', []), '1.01'), 0);
+  assert.equal(cmp(sps, '3.03'), 0, `SPS esperado 3.03, got ${sps}`);
+  assert.equal(cmp(prestigeBonus('1', []), '1'), 0, 'sem escada heavenlyPower o óbolo não rende');
+  assert.equal(cmp(prestigeBonus('1', [], { upgrades: HEAVENLY_POWER_LADDER }), '1.01'), 0);
 });
 
 await run('Juramentos ×2 no alvo; resetam no Lethe', () => {
@@ -185,7 +182,7 @@ await run('Ritual só com obolsGain≥1; mantém óbolos/essência/talentos', ()
     lifetimeSouls: '16000000000',
     generators: { wandering_shade: 2 },
     upgrades: ['foice_afilada'],
-    talents: ['memoria_das_sombras'],
+    talents: ['legado'],
     obols: '3',
     mnemosyne: '2',
   });
@@ -195,7 +192,7 @@ await run('Ritual só com obolsGain≥1; mantém óbolos/essência/talentos', ()
   assert.equal(ripe.applyPrestige().ok, true);
   assert.ok(cmp(ripe.obols, beforeObols) > 0);
   assert.ok(cmp(ripe.mnemosyne, beforeMnemo) > 0);
-  assert.deepEqual(ripe.talents, ['memoria_das_sombras']);
+  assert.deepEqual(ripe.talents, ['legado']);
   assert.equal(Object.keys(ripe.quantities()).length, 0);
 });
 
@@ -205,27 +202,8 @@ await run('Números grandes formatados (sem 1e+21 cru)', () => {
   assert.ok(huge.length < 24);
 });
 
-await run('Arquiteto hidden só com Códice legítimo', () => {
-  const poor = {
-    lifetimeSouls: '1',
-    souls: '1',
-    runSouls: '1',
-    prestigeCount: 0,
-    generators: {},
-    upgrades: [],
-    talents: [],
-    milestones: {},
-    eduLogsSeen: [...EDU_LOG_IDS],
-  };
-  const sanitized = sanitizeEduLogsSeen(poor.eduLogsSeen, poor, { syncOk: true });
-  assert.ok(sanitized.length < 16);
-  assert.ok(
-    !evaluateDespertarAchievementIds(poor, { unlocked: [], syncOk: true })
-      .includes('despertar_arquiteto_do_loop'),
-  );
-});
-
-await run('Smokes do checklist estão no npm run check', () => {
+// npm run test:despertar descobre tests/despertar-*.mjs; basta o arquivo existir.
+await run('Smokes do checklist existem (rodam no test:despertar)', () => {
   const required = [
     'despertar-formulas-smoke.mjs',
     'despertar-gamestate-smoke.mjs',
@@ -233,7 +211,7 @@ await run('Smokes do checklist estão no npm run check', () => {
     'despertar-offline-smoke.mjs',
     'despertar-sync-smoke.mjs',
     'despertar-codex-smoke.mjs',
-    'despertar-achievements-smoke.mjs',
+    'despertar-php-server-smoke.mjs',
     'despertar-a11y-smoke.mjs',
     'despertar-juice-smoke.mjs',
     'despertar-pages-smoke.mjs',
@@ -241,8 +219,9 @@ await run('Smokes do checklist estão no npm run check', () => {
     'despertar-verdict-smoke.mjs',
   ];
   for (const name of required) {
-    assert.ok(pkg.includes(name), `check inclui ${name}`);
+    assert.ok(fs.existsSync(path.join(root, 'tests', name)), `tests/${name} existe`);
   }
+  assert.ok(pkg.includes('run-despertar-tests.mjs'), 'test:despertar usa o runner');
 });
 
 console.log(`\ndespertar-qa-smoke: ${passed} passed, ${failed} failed`);

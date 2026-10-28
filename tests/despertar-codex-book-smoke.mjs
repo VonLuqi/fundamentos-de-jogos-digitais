@@ -46,7 +46,8 @@ assert.match(html, /id="despertar-codex-drawer"/);
 assert.match(html, /id="despertar-codex-tip"/);
 assert.match(html, /id="codex-drawer-list"/);
 assert.doesNotMatch(html, /id="tab-codex"/);
-assert.doesNotMatch(html, />Arquivo</);
+// "Arquivo" hoje é a aba Arquivo Estígio (tab-arquivo, Catábase), não o Códice.
+assert.match(html, /id="tab-arquivo"/);
 assert.match(css, /\.despertar-codex-book\b/);
 assert.match(css, /z-index:\s*35/);
 assert.match(css, /\.despertar-codex-drawer\b/);
@@ -60,7 +61,6 @@ assert.match(eduSrc, /CODEX_TIP_MS/);
 assert.match(rendererSrc, /CodexBook/);
 assert.match(rendererSrc, /mountCodexBook|_codexBook/);
 assert.match(indexSrc, /getUserId/);
-assert.match(pkg, /despertar-codex-book-smoke\.mjs/);
 
 assert.equal(CODEX_TIP_MS, 5_000);
 assert.ok(EDU_LOG_TIP_IDS.includes('log_input'));

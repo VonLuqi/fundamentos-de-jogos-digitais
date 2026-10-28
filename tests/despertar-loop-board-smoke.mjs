@@ -12,11 +12,6 @@ import {
   LOOP_BOARD_LIMIT,
   LOOP_BOARD_SORTS,
 } from '../js/hades-despertar/ui/LoopLeaderboard.js';
-import {
-  normalizeLeaderboardSort,
-  rankLeaderboardEntries,
-  toLeaderboardEntry,
-} from '../api/_lib/leaderboard.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -49,7 +44,6 @@ const rankingJs = read('js/ranking.js');
 const indexSrc = read('js/hades-despertar/index.js');
 const migrate = read('db/migrate-2026-10-02-leaderboard-lifetime-souls.sql');
 const setup = read('db/setup.sql');
-const lib = read('api/_lib/leaderboard.js');
 const pkg = read('package.json');
 
 staticAssert(html.includes('id="despertar-loop-board"'), 'FAB do Placar do Loop');
@@ -73,11 +67,8 @@ staticAssert(indexSrc.includes('getToken:'), 'boot passa getToken');
 staticAssert(migrate.includes('lifetimeSouls'), 'migration aceita lifetimeSouls');
 staticAssert(migrate.includes('lifetime_souls'), 'migration seleciona lifetime_souls');
 staticAssert(setup.includes('lifetimeSouls'), 'setup.sql espelha lifetimeSouls');
-staticAssert(lib.includes("'lifetimeSouls'"), 'LEADERBOARD_SORTS inclui lifetimeSouls');
 
-staticAssert(pkg.includes('despertar-loop-board-smoke.mjs'), 'check inclui smoke');
 staticAssert(LOOP_BOARD_LIMIT === 15, 'limit padrão 15');
-staticAssert(normalizeLeaderboardSort('lifetimeSouls') === 'lifetimeSouls', 'normalize lifetimeSouls');
 staticAssert(
   describeLoopBoardSelf({ rank: 1, prestigeCount: 2, juizoBest: 9, lifetimeSouls: 1000 }, 10, 'juizoBest').includes('recorde'),
   'self juizo',
@@ -88,14 +79,7 @@ staticAssert(
 );
 
 {
-  const ranked = rankLeaderboardEntries([
-    toLeaderboardEntry({ id: 1, username: 'a', full_name: 'A', turma: 'TCG01', xp: 10, conquistas: [] }, { juizoBest: 9, prestigeCount: 1, lifetimeSouls: 50 }),
-    toLeaderboardEntry({ id: 2, username: 'b', full_name: 'B', turma: 'TCG01', xp: 10, conquistas: [] }, { juizoBest: 2, prestigeCount: 3, lifetimeSouls: 900 }),
-    toLeaderboardEntry({ id: 3, username: 'c', full_name: 'C', turma: 'TCG01', xp: 10, conquistas: [] }, { juizoBest: 40, prestigeCount: 3, lifetimeSouls: 900 }),
-  ], 'lifetimeSouls');
-  staticAssert(ranked[0].username === 'c', 'almas empatadas → prestige/juizo desempata');
   staticAssert(formatLoopBoardScore(1200, 'prestigeCount') === (1200).toLocaleString('pt-BR'), 'format int');
-  staticAssert(typeof ranked[0].lifetimeSouls === 'string', 'lifetimeSouls DTO é string');
   // Idle-scale: Number > MAX_SAFE_INTEGER quebrava formatSouls → "inacessível".
   const huge = '9007199254740993000.00';
   staticAssert(
@@ -109,11 +93,6 @@ staticAssert(
     })(),
     'almas grandes formatam sem throw',
   );
-  const byHuge = rankLeaderboardEntries([
-    toLeaderboardEntry({ id: 1, username: 'small', full_name: 'S', turma: 'TCG01', xp: 1, conquistas: [] }, { lifetimeSouls: '100' }),
-    toLeaderboardEntry({ id: 2, username: 'big', full_name: 'B', turma: 'TCG01', xp: 1, conquistas: [] }, { lifetimeSouls: huge }),
-  ], 'lifetimeSouls');
-  staticAssert(byHuge[0].username === 'big', 'sort string decimal acima de MAX_SAFE_INTEGER');
 }
 
 if (errors.length) {

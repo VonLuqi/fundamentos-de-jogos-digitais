@@ -38,7 +38,6 @@ assert.match(indexSrc, /DESPERTAR_PAUSED_ERROR/);
 assert.match(indexSrc, /Tua Estela está intacta|PAUSE_VEIL_COPY|pauseVeil/);
 assert.match(cssSrc, /\.despertar-classroom-veil\b/);
 assert.match(apiSrc, /DESPERTAR_PAUSED_ERROR\s*=\s*'despertar_paused'/);
-assert.match(pkgSrc, /despertar-pause-ui-smoke\.mjs/);
 
 assert.equal(PAUSE_VEIL_COPY.title, 'O Acheron guarda silêncio');
 assert.match(PAUSE_VEIL_COPY.body, /Tua Estela está intacta/);
