@@ -11,7 +11,7 @@ export const ART_VERSIONS = Object.freeze({
   'habitats/backgrounds': '80dd7bf1',
   'hud': '319af364',
   'shimmers': '71a7e8d7',
-  'upgrades': '5d412fb5',
+  'upgrades': '46fc69f8',
   'talents': 'a9136160',
   'minigames': 'e727991f',
   'veil': 'd2cef64b',

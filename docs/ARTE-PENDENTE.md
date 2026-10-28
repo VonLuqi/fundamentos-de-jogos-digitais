@@ -4,7 +4,7 @@
 > Cada linha é um placeholder no disco. Arquivo final: `assets/despertar/sprites/<pasta>/<id>.webp` (128×128, RGBA).
 > Processar com `npm run despertar:art -- --folder <pasta> --in-dir <pasta-bruta>`; conferir com `npm run despertar:status`.
 
-**156 ícones pendentes.**
+**144 ícones pendentes.**
 
 ## L3 — Dragão, auras e estações (`seasons`, 15)
 
@@ -27,25 +27,6 @@ Painel do Dragão e seletor de estações.
 | `season_feira_de_hermes` | Feira de Hermes (Mercadores de Almas) | Ecos do Acheron surgem +5% mais rápido e libera o Contrato de Hermes (−2% custo de todos os geradores). |
 | `season_lemuria` | Lemúria (Noite dos Espectros Famintos) | Os espíritos famintos rondam a Foice: estourar Sanguessugas do Acheron pode revelar oferendas espectrais (+2% SPS cada). |
 | `season_saturnalia` | Saturnália Ctoniana (Solstício no Hades) | Desperta o Rei Saturno (até 5 níveis: +5% SPS e −1% custos por nível) e atrai Corças de Ártemis ao Santuário. |
-
-## L6 — Fortunas (juramentos) (`upgrades`, 12)
-
-Grade de juramentos da loja — os únicos upgrades ainda placeholder.
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `fortune_gen_mnemosyne_temple` | Fortuna #007 — Sorte de Templo de Mnemosyne | Templo de Mnemosyne produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_moirai_prism` | Fortuna #014 — Sorte de Prisma das Moiras | Prisma das Moiras produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_obsidian_throne` | Fortuna #006 — Sorte de Trono de Obsidiana | Trono de Obsidiana produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_oracle_console` | Fortuna #017 — Sorte de Console do Oráculo | Console do Oráculo produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_phlegethon_forge` | Fortuna #005 — Sorte de Forja de Phlegethon | Forja de Phlegethon produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_star_barge` | Fortuna #009 — Sorte de Barca das Estrelas | Barca das Estrelas produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_styx_tower` | Fortuna #008 — Sorte de Torre do Estige | Torre do Estige produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_tartarus_judge` | Fortuna #004 — Sorte de Juiz do Tártaro | Juiz do Tártaro produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_tartarus_lab` | Fortuna #010 — Sorte de Laboratório do Tártaro | Laboratório do Tártaro produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_the_emperor` | Fortuna #020 — Sorte de O Imperador (You) | O Imperador (You) produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_void_condenser` | Fortuna #013 — Sorte de Condensador do Vazio | Condensador do Vazio produz +7% Almas / s e custa 7% menos para contratar. |
-| `fortune_gen_wandering_shade` | Fortuna #001 — Sorte de Sombra Vagante | Sombra Vagante produz +7% Almas / s e custa 7% menos para contratar. |
 
 ## L7 — Talentos do Rio do Lethe (`talents`, 129)
 
