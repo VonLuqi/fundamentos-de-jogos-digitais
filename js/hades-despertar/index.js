@@ -322,7 +322,16 @@ function bindTabs(root) {
   });
 }
 
-function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
+function bindDebugSandbox({
+  api,
+  storage,
+  userId,
+  isAdmin,
+  getState,
+  openRiver,
+  openLetheModal,
+  markDirty,
+} = {}) {
   const panel = document.getElementById('despertar-debug');
   const resetBtn = document.getElementById('despertar-debug-reset');
   const sandboxBtn = document.getElementById('despertar-debug-sandbox');
@@ -338,6 +347,9 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
     : [];
   const flagInputs = panel
     ? [...panel.querySelectorAll('[data-debug-flag]')]
+    : [];
+  const mechanicButtons = panel
+    ? [...panel.querySelectorAll('[data-debug-action]')]
     : [];
   if (!panel) return;
   const steleTab = document.getElementById('tab-stele');
@@ -365,6 +377,14 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
     flagInputs.forEach((input) => {
       input.disabled = busy;
     });
+    mechanicButtons.forEach((button) => {
+      if (button === exitTestBtn || button === shinyHalfBtn || button === goldHalfBtn) return;
+      button.disabled = busy;
+    });
+  };
+
+  const refreshUi = () => {
+    if (typeof markDirty === 'function') markDirty('all');
   };
 
   const applyResult = async (result) => {
@@ -576,6 +596,120 @@ function bindDebugSandbox({ api, storage, userId, isAdmin, getState }) {
     if (!state.isFreeShopping?.()) {
       api.requestSync();
     }
+  });
+
+  const runMechanic = (action) => {
+    const state = typeof getState === 'function' ? getState() : null;
+    if (!state) {
+      if (status) status.textContent = 'Estela ainda não carregou.';
+      return;
+    }
+
+    if (action === 'spawnShimmer') {
+      const select = panel.querySelector('[data-debug-shimmer-effect]');
+      const effectId = select?.value || 'mare_acheron';
+      const needsCatabase = /^(clot_acheron|elder_frenzy_acheron)$/.test(effectId);
+      if (needsCatabase && !state.catabaseActive) {
+        state.setCatabaseStage?.(1);
+      }
+      const result = state.spawnShimmer?.({ effectId, force: true });
+      if (!result?.ok) {
+        if (status) {
+          status.textContent = result?.reason === 'requires_catabase'
+            ? 'Esse Eco exige Catábase — ative o estágio 1.'
+            : `Falha ao spawnar Eco (${result?.reason || 'desconhecido'}).`;
+        }
+        return;
+      }
+      if (status) status.textContent = `Eco forçado: ${effectId}.`;
+      refreshUi();
+      return;
+    }
+
+    if (action === 'spawnLeech' || action === 'spawnShinyLeech') {
+      if (!state.catabaseActive) state.setCatabaseStage?.(1);
+      const result = state.spawnLeech?.({
+        shiny: action === 'spawnShinyLeech',
+      });
+      if (!result?.ok) {
+        if (status) {
+          status.textContent = result?.reason === 'capacity_full'
+            ? 'Cap de Sanguessugas atingido.'
+            : `Falha ao spawnar verme (${result?.reason || 'desconhecido'}).`;
+        }
+        return;
+      }
+      if (status) {
+        status.textContent = action === 'spawnShinyLeech'
+          ? 'Sanguessuga shiny na Foice.'
+          : 'Sanguessuga na Foice.';
+      }
+      refreshUi();
+      return;
+    }
+
+    if (action === 'clearLeeches') {
+      state.debugLocalPatch?.({ clearLeeches: true });
+      if (status) status.textContent = 'Vermes limpos (sem payout).';
+      refreshUi();
+      return;
+    }
+
+    if (action === 'catabase0') {
+      state.setCatabaseStage?.(0);
+      if (status) status.textContent = 'Catábase desligada.';
+      refreshUi();
+      return;
+    }
+    if (action === 'catabase1') {
+      state.setCatabaseStage?.(1);
+      if (status) status.textContent = 'Catábase estágio 1.';
+      refreshUi();
+      return;
+    }
+    if (action === 'catabase3') {
+      state.setCatabaseStage?.(3);
+      if (status) status.textContent = 'Catábase estágio 3.';
+      refreshUi();
+      return;
+    }
+
+    if (action === 'openLetheUnlimited') {
+      state.setDebugFlag?.('freeShopping', true);
+      const freeFlag = panel.querySelector('[data-debug-flag="freeShopping"]');
+      if (freeFlag) freeFlag.checked = true;
+      state.debugLocalPatch?.({ mnemosyne: '999999' });
+      state.ascensionOpen = true;
+      state.milestones = { ...state.milestones, ascensionOpen: true };
+      if (typeof openRiver === 'function') openRiver();
+      if (status) {
+        status.textContent = 'Lethe sem limites: free shop + essência alta + Rio aberto.';
+      }
+      refreshUi();
+      return;
+    }
+
+    if (action === 'openLetheModal') {
+      if (typeof openLetheModal === 'function') openLetheModal();
+      if (status) status.textContent = 'Ritual do Lethe aberto.';
+      return;
+    }
+
+    if (action === 'openRiver') {
+      state.ascensionOpen = true;
+      state.milestones = { ...state.milestones, ascensionOpen: true };
+      if (typeof openRiver === 'function') openRiver();
+      if (status) status.textContent = 'Rio do Lethe aberto.';
+      refreshUi();
+    }
+  };
+
+  mechanicButtons.forEach((button) => {
+    const action = button.getAttribute('data-debug-action');
+    if (!action || action === 'exitTestMode' || action === 'shinyHalf' || action === 'goldHalf') {
+      return;
+    }
+    button.addEventListener('click', () => runMechanic(action));
   });
 }
 
@@ -1353,6 +1487,9 @@ async function init() {
     userId: user.id,
     isAdmin: user.role === 'admin',
     getState: () => stateRef.current,
+    openRiver: () => riverUi.open(),
+    openLetheModal: () => letheUi.open(),
+    markDirty: (scope) => uiRef.renderer?.markDirty?.(scope || 'all'),
   });
 
   harvestUi.show(catchUp.harvest);

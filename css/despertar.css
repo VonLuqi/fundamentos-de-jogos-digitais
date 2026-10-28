@@ -1892,12 +1892,79 @@
 }
 
 .despertar-upgrade-tooltip__blurb,
+.despertar-upgrade-tooltip__effect,
+.despertar-upgrade-tooltip__flavor,
 .despertar-upgrade-tooltip__cost,
+.despertar-upgrade-tooltip__status,
 .despertar-upgrade-tooltip__req {
   margin: 0.35rem 0 0;
   font-size: 0.82rem;
   line-height: 1.35;
   color: var(--hades-parchment);
+}
+
+.despertar-upgrade-tooltip__effect {
+  color: var(--hades-parchment);
+}
+
+.despertar-upgrade-tooltip__flavor {
+  font-style: italic;
+  color: var(--hades-text-dim);
+}
+
+.despertar-upgrade-tooltip__flavor[hidden],
+.despertar-upgrade-tooltip__effect[hidden],
+.despertar-upgrade-tooltip__status[hidden],
+.despertar-upgrade-tooltip__cosmetic[hidden] {
+  display: none;
+}
+
+.despertar-upgrade-tooltip__cosmetic {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.45rem 0 0;
+  padding: 0.35rem 0 0;
+  border-top: 1px solid rgba(0, 168, 150, 0.28);
+}
+
+.despertar-upgrade-tooltip__cosmetic-thumb {
+  flex: 0 0 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.despertar-upgrade-tooltip__cosmetic-sprite,
+.despertar-upgrade-tooltip__cosmetic-swatch {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(207, 167, 89, 0.4);
+  background: rgba(12, 18, 24, 0.9);
+}
+
+.despertar-upgrade-tooltip__cosmetic-sprite .despertar-sprite__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.despertar-upgrade-tooltip__cosmetic-swatch {
+  font-family: var(--font-title);
+  font-size: 0.75rem;
+  color: hsl(var(--cos-hue, 160), 55%, 65%);
+  background:
+    radial-gradient(circle at 40% 35%, hsl(var(--cos-hue, 160), 50%, 42%), transparent 65%),
+    rgba(12, 18, 24, 0.95);
+}
+
+.despertar-upgrade-tooltip__cosmetic-label {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  color: var(--despertar-styx-text, #00a896);
 }
 
 .despertar-upgrade-tooltip__cost {
@@ -1910,12 +1977,38 @@
   color: var(--hades-gold-bright);
 }
 
+.despertar-upgrade-tooltip__status {
+  margin-top: 0.2rem;
+  font-family: var(--font-title);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--despertar-styx-text, #00a896);
+}
+
 .despertar-upgrade-tooltip__req {
   color: var(--hades-text-dim);
 }
 
 .despertar-upgrade-tooltip__req[hidden] {
   display: none;
+}
+
+.despertar-upgrade-icon--has-cosmetic {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--despertar-styx) 70%, transparent);
+}
+
+.despertar-upgrade-icon--has-cosmetic::after {
+  content: '';
+  position: absolute;
+  top: 0.2rem;
+  right: 0.2rem;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--despertar-styx, #00a896);
+  box-shadow: 0 0 4px rgba(0, 168, 150, 0.7);
+  pointer-events: none;
 }
 
 .despertar-upgrade-tooltip__mark {
@@ -2726,11 +2819,16 @@
 
 .despertar-debug__setters,
 .despertar-debug__flags,
-.despertar-debug__shiny-line {
+.despertar-debug__shiny-line,
+.despertar-debug__mechanics {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
   margin-bottom: 0.85rem;
+}
+
+.despertar-debug__mechanics .despertar-debug__actions {
+  margin-bottom: 0.35rem;
 }
 
 .despertar-debug__setter-row,

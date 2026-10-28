@@ -707,6 +707,60 @@
                   </button>
                 </div>
 
+                <h4 class="despertar-debug__label">Mecânicas (forçar)</h4>
+                <div class="despertar-debug__mechanics" role="group" aria-label="Forçar mecânicas de teste">
+                  <div class="despertar-debug__setter-row">
+                    <label class="despertar-debug__setter-label" for="despertar-debug-shimmer-effect">Eco</label>
+                    <select class="despertar-debug__setter-input" id="despertar-debug-shimmer-effect" data-debug-shimmer-effect>
+                      <option value="mare_acheron">Maré do Acheron (×7)</option>
+                      <option value="colheita_acheron">Colheita do Acheron</option>
+                      <option value="furia_foice">Fúria da Foice (×777)</option>
+                      <option value="selo_juizo">Selo do Juízo</option>
+                      <option value="voo_draconico_acheron">Voo Dracónico</option>
+                      <option value="frenesi_nectar">Frenesi de Néctar</option>
+                      <option value="clot_acheron">Coágulo (Wrath)</option>
+                      <option value="elder_frenzy_acheron">Fúria Anciã (Wrath)</option>
+                    </select>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="spawnShimmer">
+                      Spawn Eco
+                    </button>
+                  </div>
+                  <div class="despertar-debug__actions" role="group" aria-label="Sanguessugas e Catábase">
+                    <button class="despertar-debug__grant" type="button" data-debug-action="spawnLeech">
+                      Sanguessuga
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="spawnShinyLeech">
+                      Sanguessuga shiny
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="clearLeeches">
+                      Limpar vermes
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="catabase1">
+                      Catábase 1
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="catabase3">
+                      Catábase 3
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="catabase0">
+                      Catábase off
+                    </button>
+                  </div>
+                  <div class="despertar-debug__actions" role="group" aria-label="Lethe e UIs">
+                    <button class="btn-gold" type="button" data-debug-action="openLetheUnlimited">
+                      Lethe sem limites
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="openLetheModal">
+                      Abrir ritual
+                    </button>
+                    <button class="despertar-debug__grant" type="button" data-debug-action="openRiver">
+                      Abrir Rio
+                    </button>
+                  </div>
+                </div>
+                <p class="despertar-debug__hint">
+                  Spawn Eco / vermes / Catábase são locais. Lethe sem limites liga compras grátis, concede essência e abre o Rio.
+                </p>
+
                 <h4 class="despertar-debug__label">Conceder</h4>
                 <div class="despertar-debug__grants" role="group" aria-label="Conceder recursos">
                   <button class="despertar-debug__grant" type="button" data-debug-grant="souls_1k">+1K almas</button>
@@ -952,15 +1006,20 @@
 
   <div
     id="sealed-tooltip"
-    class="despertar-upgrade-tooltip"
+    class="despertar-upgrade-tooltip is-fixed"
     role="tooltip"
     hidden
   >
     <p class="despertar-upgrade-tooltip__name" data-tip="name"></p>
-    <p class="despertar-upgrade-tooltip__blurb" data-tip="blurb"></p>
+    <p class="despertar-upgrade-tooltip__effect" data-tip="effect"></p>
+    <p class="despertar-upgrade-tooltip__flavor" data-tip="flavor" hidden></p>
+    <div class="despertar-upgrade-tooltip__cosmetic" data-tip="cosmetic" hidden>
+      <div class="despertar-upgrade-tooltip__cosmetic-thumb" data-tip="cosmetic-thumb"></div>
+      <p class="despertar-upgrade-tooltip__cosmetic-label" data-tip="cosmetic-label"></p>
+    </div>
     <p class="despertar-upgrade-tooltip__mark" data-tip="mark">Selado</p>
   </div>
 
-  <script type="module" src="../js/hades-despertar/index.js?v=catabase-100"></script>
+  <script type="module" src="../js/hades-despertar/index.js?v=debug-mechanics-301"></script>
 </body>
 </html>

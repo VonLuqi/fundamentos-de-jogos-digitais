@@ -47,7 +47,20 @@ staticAssert(html.includes('data-debug-flag="forceShiny"'), 'B1 force shiny');
 staticAssert(html.includes('data-debug-action="shinyHalf"'), 'B1 shiny 50%');
 staticAssert(html.includes('data-debug-action="exitTestMode"'), 'B1 sair do modo teste');
 staticAssert(html.includes('1%'), 'B1 nota chance natural 1%');
+staticAssert(html.includes('data-debug-action="spawnShimmer"'), 'forçar Eco do Acheron');
+staticAssert(html.includes('data-debug-action="spawnLeech"'), 'forçar Sanguessuga');
+staticAssert(html.includes('data-debug-action="spawnShinyLeech"'), 'forçar Sanguessuga shiny');
+staticAssert(html.includes('data-debug-action="openLetheUnlimited"'), 'Lethe sem limites');
+staticAssert(html.includes('data-debug-action="catabase1"'), 'forçar Catábase');
 staticAssert(html.includes('id="despertar-debug"') && html.includes('hidden'), 'painel debug gated (hidden até admin)');
+staticAssert(
+  fs.readFileSync(path.join(root, 'js/hades-despertar/core/GameState.js'), 'utf8').includes('debugLocalPatch'),
+  'GameState.debugLocalPatch para Estela do Mestre',
+);
+staticAssert(
+  fs.readFileSync(path.join(root, 'js/hades-despertar/index.js'), 'utf8').includes('openLetheUnlimited'),
+  'index wire openLetheUnlimited',
+);
 staticAssert(apiSrc.includes("action === 'debugReset'"), 'API debugReset');
 staticAssert(apiSrc.includes("action === 'debugGrant'"), 'API debugGrant');
 staticAssert(apiSrc.includes('buildDebugSetPatch'), 'B2 buildDebugSetPatch no handler');

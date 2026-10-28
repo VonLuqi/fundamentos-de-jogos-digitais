@@ -531,6 +531,27 @@ export class GameState {
     return this.debugFlags;
   }
 
+  /**
+   * Patch local só para Estela do Mestre (não vai sozinho ao Submundo).
+   * @param {{ mnemosyne?: string, clearLeeches?: boolean }} patch
+   */
+  debugLocalPatch(patch = {}) {
+    if (patch.mnemosyne != null) {
+      this.mnemosyne = clampNonNegative(patch.mnemosyne);
+    }
+    if (patch.clearLeeches) {
+      this.catabase = normalizeCatabaseState(
+        { ...this.catabase, leeches: [] },
+        this.#catabaseNormalizeOpts(),
+      );
+      this.#syncCatabaseFlags();
+    }
+    this.invalidateEconomyCache();
+    this.unlockLogs();
+    this.#bump();
+    return { ok: true, mnemosyne: this.mnemosyne, leeches: this.catabase?.leeches?.length || 0 };
+  }
+
   clearDebugFlags() {
     this.debugFlags = { freeShopping: false, forceShiny: false, forceGold: false };
     this.#bump();
