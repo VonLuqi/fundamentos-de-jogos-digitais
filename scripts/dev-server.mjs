@@ -131,6 +131,27 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+    // Fotos aprovadas vivem em uploads/ no HostGator. Sem este encaminhamento
+    // o <img> local recebe 404 e o avatar cai no personagem do catálogo.
+    if ((req.method === 'GET' || req.method === 'HEAD') && pathname.startsWith('/uploads/')) {
+      const targetUrl = `${PROD_API_BASE}${pathname}${search}`;
+      const upstream = await fetch(targetUrl, {
+        method: req.method,
+        headers: { Accept: req.headers.accept || '*/*' },
+      });
+      const responseBuffer = Buffer.from(await upstream.arrayBuffer());
+      const headers = {
+        'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff',
+      };
+      const type = upstream.headers.get('content-type');
+      if (type) headers['Content-Type'] = type;
+      res.writeHead(upstream.status, headers);
+      if (req.method === 'HEAD') res.end();
+      else res.end(responseBuffer);
+      return;
+    }
+
     // Legado: /pages/<slug>.html → /<slug>/
     const pagesLegacy = pathname.match(/^\/pages\/([a-z0-9-]+)\.html$/i);
     if (pagesLegacy && APP_PAGE_SLUGS.has(pagesLegacy[1])) {
@@ -138,11 +159,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // /<slug> (sem barra) → /<slug>/
+    // /<slug> e /<slug>/ servem o HTML direto.
+    // Um 301 de /despertar → /despertar/ entra em loop no Browser do Cursor,
+    // que pede de novo sem a barra final.
     const noSlash = pathname.match(/^\/([a-z0-9-]+)$/i);
     if (noSlash && APP_PAGE_SLUGS.has(noSlash[1])) {
-      sendRedirect(res, `${basePrefix}/${noSlash[1]}/${search}`);
-      return;
+      pathname = `/pages/${noSlash[1]}.html`;
     }
 
     // /<slug>/ → pages/<slug>.html
@@ -169,7 +191,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.writeHead(404, {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'no-store',
+      });
       res.end(`Not Found: ${pathname}`);
       return;
     }

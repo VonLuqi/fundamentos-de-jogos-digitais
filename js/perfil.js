@@ -315,21 +315,178 @@ async function applyUser(next) {
 
 // ─── Eventos ────────────────────────────────────────────────────────────────
 
-function readImage(file) {
+const CROP_SOURCE_MAX_BYTES = 12 * 1024 * 1024;
+
+function readImageFile(file) {
   return new Promise((resolve, reject) => {
     if (!/^image\/(webp|png|jpeg)$/.test(file.type)) {
       reject(new Error('Formato inválido. Envie WEBP, PNG ou JPEG.'));
       return;
     }
-    if (file.size > PHOTO_MAX_BYTES) {
-      reject(new Error('Imagem grande demais (máx. 1,5 MB).'));
+    if (file.size > CROP_SOURCE_MAX_BYTES) {
+      reject(new Error('Imagem grande demais para recortar.'));
       return;
     }
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => resolve({ img, url });
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Não foi possível ler a imagem.'));
+    };
+    img.src = url;
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result || ''));
-    reader.onerror = () => reject(new Error('Não foi possível ler a imagem.'));
-    reader.readAsDataURL(file);
+    reader.onerror = () => reject(new Error('Não foi possível preparar o recorte.'));
+    reader.readAsDataURL(blob);
   });
+}
+
+/**
+ * Recorte quadrado. A máscara é circular; o arquivo enviado preenche o quadrado
+ * para o servidor não cortar de novo por fora do que a pessoa escolheu.
+ * @returns {Promise<string|null>} data URL, ou null se cancelou
+ */
+function openCropper(img) {
+  let viewport = 320;
+  let cover = 1;
+  let scale = 1;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'perfil-crop';
+  dialog.setAttribute('aria-labelledby', 'perfil-crop-title');
+  dialog.innerHTML = `
+    <form class="perfil-crop__form" method="dialog">
+      <h2 class="perfil-card__title" id="perfil-crop-title">Recortar foto</h2>
+      <p class="perfil-field__hint">Arrasta para posicionar. Aproxima com a roda do mouse ou com o controle.</p>
+      <div class="perfil-crop__stage" data-stage tabindex="0">
+        <img alt="" draggable="false">
+      </div>
+      <label class="perfil-crop__zoom">
+        <span>Aproximar</span>
+        <input type="range" min="0" max="100" value="0" data-zoom>
+      </label>
+      <div class="perfil-actions">
+        <button class="btn-gold btn-gold--ghost" type="button" data-crop-cancel>Cancelar</button>
+        <button class="btn-gold" type="submit" value="ok">Usar este recorte</button>
+      </div>
+    </form>`;
+  const stage = dialog.querySelector('[data-stage]');
+  const preview = dialog.querySelector('img');
+  const zoom = dialog.querySelector('[data-zoom]');
+  preview.src = img.src;
+  dialog.querySelector('[data-crop-cancel]').addEventListener('click', () => dialog.close(''));
+
+  function clamp() {
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    offsetX = Math.min(0, Math.max(viewport - w, offsetX));
+    offsetY = Math.min(0, Math.max(viewport - h, offsetY));
+  }
+
+  function paint(fromZoom = false) {
+    clamp();
+    preview.style.width = `${img.naturalWidth * scale}px`;
+    preview.style.height = `${img.naturalHeight * scale}px`;
+    preview.style.left = `${offsetX}px`;
+    preview.style.top = `${offsetY}px`;
+    if (fromZoom) return;
+    const span = cover * 4 - cover;
+    zoom.value = String(span <= 0 ? 0 : Math.round(((scale - cover) / span) * 100));
+  }
+
+  function setScale(next, anchorX = viewport / 2, anchorY = viewport / 2, fromZoom = false) {
+    const clamped = Math.min(cover * 4, Math.max(cover, next));
+    const imageX = (anchorX - offsetX) / scale;
+    const imageY = (anchorY - offsetY) / scale;
+    scale = clamped;
+    offsetX = anchorX - imageX * scale;
+    offsetY = anchorY - imageY * scale;
+    paint(fromZoom);
+  }
+
+  zoom.addEventListener('input', () => {
+    const t = Number(zoom.value) / 100;
+    setScale(cover + (cover * 4 - cover) * t, viewport / 2, viewport / 2, true);
+  });
+
+  stage.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    const rect = stage.getBoundingClientRect();
+    const factor = event.deltaY < 0 ? 1.08 : 1 / 1.08;
+    setScale(scale * factor, event.clientX - rect.left, event.clientY - rect.top);
+  }, { passive: false });
+
+  let drag = null;
+  stage.addEventListener('pointerdown', (event) => {
+    drag = { id: event.pointerId, x: event.clientX, y: event.clientY, ox: offsetX, oy: offsetY };
+    stage.setPointerCapture(event.pointerId);
+    stage.classList.add('is-dragging');
+  });
+  stage.addEventListener('pointermove', (event) => {
+    if (!drag || drag.id !== event.pointerId) return;
+    offsetX = drag.ox + (event.clientX - drag.x);
+    offsetY = drag.oy + (event.clientY - drag.y);
+    paint();
+  });
+  function endDrag(event) {
+    if (!drag || drag.id !== event.pointerId) return;
+    drag = null;
+    stage.classList.remove('is-dragging');
+  }
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+
+  document.body.append(dialog);
+  dialog.showModal();
+  viewport = stage.clientWidth || 320;
+  cover = Math.max(viewport / img.naturalWidth, viewport / img.naturalHeight);
+  scale = cover;
+  offsetX = (viewport - img.naturalWidth * scale) / 2;
+  offsetY = (viewport - img.naturalHeight * scale) / 2;
+  paint();
+  stage.focus();
+
+  return new Promise((resolve, reject) => {
+    dialog.addEventListener('close', () => {
+      const use = dialog.returnValue === 'ok';
+      const size = stage.clientWidth || viewport;
+      const frame = { offsetX, offsetY, scale, size };
+      dialog.remove();
+      if (!use) {
+        resolve(null);
+        return;
+      }
+      exportCrop(img, frame.offsetX, frame.offsetY, frame.scale, frame.size).then(resolve, reject);
+    }, { once: true });
+  });
+}
+
+async function exportCrop(img, offsetX, offsetY, scale, viewport) {
+  let side = 512;
+  let quality = 0.92;
+  const sx = -offsetX / scale;
+  const sy = -offsetY / scale;
+  const sw = viewport / scale;
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const canvas = document.createElement('canvas');
+    canvas.width = side;
+    canvas.height = side;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, sx, sy, sw, sw, 0, 0, side, side);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+    if (blob && blob.size <= PHOTO_MAX_BYTES) return blobToDataUrl(blob);
+    if (quality > 0.56) quality -= 0.12;
+    else side = Math.max(256, Math.round(side * 0.8));
+  }
+  throw new Error('Imagem grande demais (máx. 1,5 MB).');
 }
 
 function bind() {
@@ -373,15 +530,21 @@ function bind() {
   const fileInput = q('[data-photo-input]');
   fileInput.addEventListener('change', async () => {
     const file = fileInput.files?.[0];
+    fileInput.value = '';
     if (!file) return;
+    let loaded = null;
     try {
-      pendingPhoto = await readImage(file);
+      loaded = await readImageFile(file);
+      const cropped = await openCropper(loaded.img);
+      if (!cropped) return;
+      pendingPhoto = cropped;
       say('photo', 'Confere a prévia e envia para análise.');
     } catch (err) {
       pendingPhoto = null;
       say('photo', errorText(err), true);
+    } finally {
+      if (loaded) URL.revokeObjectURL(loaded.url);
     }
-    fileInput.value = '';
     paintAvatar(currentUser);
   });
 

@@ -330,6 +330,52 @@
   cursor: pointer;
 }
 .perfil-file:focus-within { outline: 2px solid var(--hades-gold-bright); outline-offset: 2px; }
+
+.perfil-crop {
+  width: min(26rem, calc(100vw - 2rem));
+  max-height: calc(100vh - 2rem);
+  margin: auto;
+  padding: 1.1rem 1.15rem 1.2rem;
+  border: 1px solid var(--hades-gold-dark);
+  background:
+    radial-gradient(circle at top, rgba(122, 31, 43, 0.16), transparent 42%),
+    #120e0a;
+  color: var(--hades-text);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.perfil-crop::backdrop { background: rgba(6, 6, 10, 0.78); }
+.perfil-crop__form { display: grid; gap: 0.75rem; margin: 0; }
+.perfil-crop__stage {
+  position: relative;
+  width: min(100%, 20rem);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid var(--hades-gold);
+  background: #0e0905;
+  cursor: grab;
+  touch-action: none;
+}
+.perfil-crop__stage.is-dragging { cursor: grabbing; }
+.perfil-crop__stage:focus-visible { outline: 2px solid var(--hades-gold-bright); outline-offset: 3px; }
+.perfil-crop__stage img {
+  position: absolute;
+  max-width: none;
+  user-select: none;
+  pointer-events: none;
+}
+.perfil-crop__zoom {
+  display: grid;
+  gap: 0.3rem;
+  font-family: var(--font-title);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hades-text-muted);
+}
+.perfil-crop__zoom input { width: 100%; accent-color: var(--hades-gold); }
+
 .perfil-picker .avatar-picker-grid { max-height: 52vh; }
 
 /* ── Moderação (Mestre) ──────────────────────────────────────────── */

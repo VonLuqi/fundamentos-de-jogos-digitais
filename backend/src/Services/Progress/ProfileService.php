@@ -474,7 +474,8 @@ final class ProfileService
                     $stmt = $pdo->prepare(
                         "UPDATE `users`
                          SET `photo_path` = :pub, `photo_pending_path` = NULL, `photo_updated_at` = :ts,
-                             `photo_status` = 'approved', `photo_reject_reason` = NULL
+                             `photo_status` = 'approved', `photo_reject_reason` = NULL,
+                             `avatar_mode` = 'photo'
                          WHERE `id` = :id"
                     );
                     $stmt->execute([':pub' => $publicPath, ':ts' => Database::nowSql(), ':id' => $targetId]);
