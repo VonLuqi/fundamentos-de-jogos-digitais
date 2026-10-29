@@ -22,10 +22,10 @@ import { computeArtVersions } from '../scripts/update-art-versions.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const doc = JSON.parse(fs.readFileSync(path.join(root, 'assets/despertar/art-requests.json'), 'utf8'));
 
-// Âncoras calibradas: pintado, vetorial e placeholder conhecidos.
+// Âncoras calibradas: pintado e faltando (fila vetorial de upgrades fechada).
 assert.equal((await classifySprite('generators', 'wandering_shade')).status, 'ilustrada', 'arte escura pintada não vira placeholder');
 assert.equal((await classifySprite('upgrades', 'ceifador_ctoniano')).status, 'ilustrada');
-assert.equal((await classifySprite('upgrades', 'vontade_pura_sem_intermediarios')).status, 'vetorial');
+assert.equal((await classifySprite('upgrades', 'vontade_pura_sem_intermediarios')).status, 'ilustrada');
 assert.equal((await classifySprite('upgrades', 'nao_existe_xyz')).status, 'faltando');
 
 const { byKey } = await auditArt();

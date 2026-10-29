@@ -48,8 +48,8 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 424,
-      "vetorial": 9,
+      "ilustrada": 433,
+      "vetorial": 0,
       "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
@@ -349,10 +349,10 @@
     {
       "id": "art_f7_upgrades_late",
       "auditable": true,
-      "status": "interim",
+      "status": "delivered",
       "counts": {
-        "ilustrada": 424,
-        "vetorial": 9,
+        "ilustrada": 433,
+        "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
       }

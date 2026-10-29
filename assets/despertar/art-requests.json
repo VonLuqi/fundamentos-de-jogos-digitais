@@ -747,7 +747,7 @@
       "id": "art_f7_upgrades_late",
       "listId": "F7-UP",
       "priority": "P2",
-      "status": "interim",
+      "status": "delivered",
       "title": "Juramentos Styx T13–T20 (120 tiers ×2 + 8 Sinergias Vol. I/II + 8 Tipos de Servos)",
       "desc": "136 ícones de juramentos late-game cobrindo os 15 marcos (1..300) de T13–T20, os 4 pares finais de sinergia Vol. I/II e os 8 Servos especializados.",
       "sizes": [
@@ -758,8 +758,8 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 424,
-        "vetorial": 9,
+        "ilustrada": 433,
+        "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
       }
