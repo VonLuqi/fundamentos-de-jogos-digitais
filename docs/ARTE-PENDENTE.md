@@ -11,37 +11,10 @@
 ## Upgrades ainda vetoriais
 
 > **Gerado por `node scripts/despertar-art-lotes.mjs`. Não editar à mão.**
-> 89 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
+> 69 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
 > PNG em `.art-raw/upgrades/<id>.png`, depois `npm run despertar:art -- --folder upgrades --in-dir .art-raw/upgrades`. O SVG não se edita.
 
 ## U01 — upgrades (20)
-
-Custo de `2125000000000000000000` (`oceano_de_dirac_subterraneo`) até `120000000000000000000000` (`fenda_para_o_submundo_vizinho`).
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `oceano_de_dirac_subterraneo` | Oceano de Dirac Subterrâneo | Um mar infinito de estados negativos prontos para a ceifa. |
-| `abobada_de_diamante_astral` | Abóbada de Diamante Astral | Duzentos prismas formam um céu artificial sobre o trono. |
-| `colapso_de_onda_favoravel` | Colapso de Onda Favorável | O observador real garante que toda superposição resulte em almas. |
-| `laco_while_true_da_eternidade` | Laço while(true) da Eternidade | Executa a colheita sem jamais encontrar um break. |
-| `floco_de_koch_do_cocytus` | Floco de Koch do Cocytus | Geometria glacial que aprisiona espíritos em cada vértice. |
-| `coroa_da_nao_existencia` | Coroa da Não-Existência | Até o que jamais nasceu paga pedágio a Caronte. |
-| `lei_dos_grandes_numeros_estigios` | Lei dos Grandes Números Estígios | Quanto maior a amostra, mais rápido transborda a carteira. |
-| `polarizacao_do_destino_puro` | Polarização do Destino Puro | Elimina toda incerteza óptica: cada fóton é uma alma. |
-| `autosimilaridade_imperial` | Autossimilaridade Imperial | Cem motores: cada átomo de bronze contém uma réplica do Submundo. |
-| `oraculo_de_monte_carlo_ctoniano` | Oráculo de Monte Carlo Ctoniano | Simula bilhões de tragédias e colhe o resultado real de todas. |
-| `soberania_do_vazio_absoluto` | Soberania do Vazio Absoluto | Trezentos condensadores fundem o Caos primordial ao Acheron. |
-| `arco_iris_do_submundo` | Arco-Íris do Submundo | Íris e Hermes entregam mensagens diretamente em forma de tributo. |
-| `cidadela_do_acaso_soberano` | Cidadela do Acaso Soberano | Duzentas forjas dobram a curva normal a favor do Trono. |
-| `ponteiro_direto_para_o_acheron` | Ponteiro Direto para o Acheron | Endereça a memória bruta das almas sem cópias intermediárias. |
-| `atrator_estranho_do_tartaro` | Atrator Estranho do Tártaro | Órbitas caóticas que jamais se repetem, mas sempre convergem. |
-| `dimensao_de_hausdorff_ctoniana` | Dimensão de Hausdorff Ctoniana | Opera entre a terceira e a quarta dimensão espacial. |
-| `fulgor_primordial_de_nyx` | Fulgor Primordial de Nyx | A luz que existia antes da primeira estrela. |
-| `filhote_arauto_lethe` | Filhote Arauto do Lethe | Bebem da espuma sagrada do Véu sem esquecer um único comando do Trono. |
-| `determinismo_dourado` | Determinismo Dourado | O acaso deixa de existir: tudo o que pode render almas, renderá. |
-| `fenda_para_o_submundo_vizinho` | Fenda para o Submundo Vizinho | Drena um universo paralelo onde o Acheron corre duas vezes mais rápido. |
-
-## U02 — upgrades (20)
 
 Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000000000000000` (`servos_psionicos`).
 
@@ -68,7 +41,7 @@ Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000
 | `lobo_frontal_de_tita` | Lobo Frontal de Titã | Um único pensamento seu pesa mais que montanhas de ouro. |
 | `servos_psionicos` | Servos Psiônicos | Movem os remos com a força mental dos Padeiros do Córtex. |
 
-## U03 — upgrades (20)
+## U02 — upgrades (20)
 
 Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9500000000000000000000000000` (`noosfera_do_submundo`).
 
@@ -95,7 +68,7 @@ Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9
 | `arquiteto_supremo_da_simulacao` | Arquiteto Supremo da Simulação | Trezentos consoles convertem o próprio loop em soberania. |
 | `noosfera_do_submundo` | Noosfera do Submundo | Cinquenta mentes colossais formam uma camada pensante ao redor do Tártaro. |
 
-## U04 — upgrades (20)
+## U03 — upgrades (20)
 
 Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `67500000000000000000000000000000` (`dinastia_autogerada`).
 
@@ -122,7 +95,7 @@ Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `675000
 | `centuria_de_imperadores_imortais` | Centúria de Imperadores Imortais | Cem avatares de Hades: nenhum canto do Submundo fica sem os teus olhos. |
 | `dinastia_autogerada` | Dinastia Autogerada | Sucedes a ti mesmo num ciclo real inquebrável. |
 
-## U05 — upgrades (9)
+## U04 — upgrades (9)
 
 Custo de `71250000000000000000000000000000` (`vontade_pura_sem_intermediarios`) até `67500000000000000000000000000000000` (`o_imperador_eterno_trezentos`).
 
