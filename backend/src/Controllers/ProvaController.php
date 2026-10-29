@@ -74,6 +74,9 @@ final class ProvaController
         try {
             $nowMs = (int) round(microtime(true) * 1000);
             $pdo = Database::get();
+            if ($def->releasesGradeOnSubmit()) {
+                ProvaService::releasePendingAutoGrades($examId, $nowMs);
+            }
 
             // -----------------------------------------------------------------
             // getExamStatus
@@ -339,11 +342,18 @@ final class ProvaController
                     $attempt = ProvaService::gradeAndCloseAttempt($attempt, $expired ? 'timed_out' : 'submitted', $nowMs);
                 }
 
-                Http::json(200, [
+                $out = [
                     'ok' => true,
                     'serverNow' => Database::nowIso($nowMs),
                     'attempt' => ProvaService::attemptStudentDto($attempt, $nowMs),
-                ]);
+                ];
+                if (($attempt['status'] ?? '') === 'graded') {
+                    $out['review'] = ProvaService::buildStudentReview(
+                        $attempt,
+                        ProvaService::loadAnswers((string) $attempt['id'])
+                    );
+                }
+                Http::json(200, $out);
             }
 
             // -----------------------------------------------------------------

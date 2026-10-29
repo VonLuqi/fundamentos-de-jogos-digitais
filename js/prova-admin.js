@@ -227,7 +227,7 @@ function paintExamChrome() {
       : 'A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.'
         + (examInfo?.hasDiscursive
           ? ' <strong>Saídas</strong> = vezes que o aluno tirou o foco da prova (mudou de aba / saiu da página).'
-          : ' Correção de múltipla escolha é automática; use <em>Fechar nota</em> para o aluno ver o resultado.');
+          : ' Correção de múltipla escolha é automática: a nota vai para o aluno no envio.');
   }
   const closesLabel = $('prova-admin-closes-label');
   if (closesLabel) closesLabel.textContent = project ? 'Prazo de entrega (opcional)' : 'Fecha em (opcional)';
@@ -508,7 +508,7 @@ function paintDetail(attempt) {
     } else if (!grading.canScore) {
       hint.textContent = 'Ainda em andamento — só dá para notar depois do envio (ou tempo esgotado).';
     } else if (!hasDisc) {
-      hint.textContent = 'Múltipla escolha corrigida automaticamente. Use Fechar nota para o aluno ver o resultado e o gabarito.';
+      hint.textContent = 'Múltipla escolha: a nota já foi enviada ao aluno no momento do envio.';
     } else if (attempt.contest?.isOpen) {
       hint.textContent = 'Correção reaberta. Ajuste as notas e use Fechar nota — aí você escreve a mensagem da revisão para o aluno.';
     } else {

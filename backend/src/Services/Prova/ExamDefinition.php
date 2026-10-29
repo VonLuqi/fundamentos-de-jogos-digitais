@@ -66,6 +66,18 @@ final class ExamDefinition
         return !$this->isProject();
     }
 
+    /**
+     * Quiz só de múltipla escolha: a nota e o gabarito vão ao aluno no envio
+     * (ou no tempo esgotado), sem o Mestre clicar em Fechar nota.
+     */
+    public function releasesGradeOnSubmit(): bool
+    {
+        return !$this->isProject()
+            && !$this->placeholder
+            && $this->questionCount() > 0
+            && $this->discursiveQuestionCount() === 0;
+    }
+
     public function questionCount(): int
     {
         return count($this->questions);

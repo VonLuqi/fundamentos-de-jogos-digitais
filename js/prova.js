@@ -1064,7 +1064,7 @@ async function submitExam(opts = {}) {
     stopExamTimer();
     dirty = false;
     examLocked = true;
-    void openDonePanel(attempt);
+    void openDonePanel(attempt, res.review || null);
     if (!auto) setSaveStatus('');
     return true;
   } catch (error) {
@@ -1413,7 +1413,7 @@ async function bootStatus() {
     }
 
     if (att && (att.status === 'submitted' || att.status === 'timed_out' || att.status === 'graded')) {
-      void openDonePanel(att);
+      void openDonePanel(att, status.review || null);
       return;
     }
 

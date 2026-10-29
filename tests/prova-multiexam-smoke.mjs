@@ -49,6 +49,7 @@ assert.ok(provaJs.includes("typeof exam.kind !== 'string'"), 'exame não-M1 exig
 assert.ok(read('scripts/dev-server.mjs').includes('DEV_API_BASE'), 'dev-server aceita DEV_API_BASE');
 const svc = read('backend/src/Services/Prova/ProvaService.php');
 assert.ok(!/ProvaCatalog::(QUESTIONS|MC_ANSWER_KEY|QUESTION_COUNT|MC_POINTS_EACH|DISCURSIVE_POINTS_EACH)/.test(svc), 'ProvaService não deve fixar constantes do M1');
+assert.ok(svc.includes('releasePendingAutoGrades') && ctrl.includes('releasePendingAutoGrades'), 'M2 promove entregas antigas a graded');
 
 const migration = read('db/migrate-2026-10-29-prova-modulo2-trabalho-final.sql');
 assert.ok(!/\b(DELETE|DROP|TRUNCATE|MODIFY)\b/i.test(migration.replace(/--.*$/gm, '').replace(/ON DELETE (CASCADE|RESTRICT|SET NULL)/gi, '')), 'Migração não pode ter DELETE/DROP/TRUNCATE/MODIFY');
@@ -89,6 +90,7 @@ if (ProvaCatalog::forExam('nao-existe') !== null) fail('exame inexistente deve s
 
 $m1 = ProvaCatalog::forExam('modulo1-provacao');
 if ($m1->questionCount() !== 20 || $m1->mcQuestionCount() !== 12 || $m1->discursiveQuestionCount() !== 8) fail('M1 contagens');
+if ($m1->releasesGradeOnSubmit()) fail('M1 continua com Fechar nota');
 if ((int) $m1->totalPoints !== 20 || $m1->durationMinutes !== 90) fail('M1 total/duração');
 if ($m1->mcAnswerKey !== ProvaCatalog::MC_ANSWER_KEY) fail('M1 gabarito idêntico');
 if ($m1->sanitizeQuestionsForClient() !== ProvaCatalog::sanitizeQuestionsForClient()) fail('M1 sanitize idêntico');
@@ -96,6 +98,7 @@ if ($m1->questionsForAdmin() !== ProvaCatalog::questionsForAdmin()) fail('M1 adm
 
 $m2 = ProvaCatalog::forExam('modulo2-prova');
 if ($m2->questionCount() !== 10 || $m2->mcQuestionCount() !== 10 || $m2->discursiveQuestionCount() !== 0) fail('M2 contagens');
+if (!$m2->releasesGradeOnSubmit()) fail('M2 libera a nota no envio');
 if ((int) $m2->totalPoints !== 20 || $m2->durationMinutes !== 45 || $m2->placeholder) fail('M2 regras');
 if (implode('', $m2->mcAnswerKey) !== 'BDAECADBEC') fail('M2 gabarito');
 foreach ($m2->sanitizeQuestionsForClient() as $q) {
@@ -117,6 +120,7 @@ if (ProvaService::clampQuestionIndex(19, $m1) !== 19) fail('clamp M1');
 
 $tf = ProvaCatalog::forExam('trabalho-final');
 if (!$tf->isProject() || $tf->hasTimer() || $tf->questionCount() !== 0) fail('TF kind');
+if ($tf->releasesGradeOnSubmit()) fail('Trabalho Final não libera nota sozinho');
 if (($tf->projectPublic()['maxBytes'] ?? 0) !== 50 * 1024 * 1024) fail('TF 50MB');
 if (!str_contains((string) $tf->projectPublic()['guideUrl'], 'guia-trabalho-final')) fail('TF guia');
 

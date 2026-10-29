@@ -137,19 +137,22 @@ export function buildExamCopy(meta) {
       'As respostas salvam sozinhas. No fim, aperte Enviar prova.',
       hasDisc
         ? 'Depois do envio, o Mestre corrige as questões escritas.'
-        : 'Depois do envio, a correção é automática e o Mestre libera a sua nota.',
+        : 'Depois do envio, a nota e o gabarito aparecem na hora.',
     ]),
     introReady: `Leia as regras. Ao apertar Iniciar prova, o cronômetro de ${time} começa.`,
     submitBody: hasDisc
       ? PROVA_COPY.submitBody
-      : 'Depois de enviar, você não pode mudar as respostas. O Mestre libera a nota depois.',
+      : 'Depois de enviar, você não pode mudar as respostas. A nota aparece em seguida.',
     submitAllAnswered: `Todas as ${total} questões têm resposta. Pode enviar.`,
     expiredSending: `Os ${minutes} minutos acabaram. Estamos enviando sua prova…`,
-    expiredSent: 'Tempo esgotado. Sua prova foi enviada. Agora é só esperar o Mestre liberar a nota.',
+    expiredSent: 'Tempo esgotado. Sua prova foi enviada. A nota já está disponível.',
     doneWaiting: hasDisc
       ? PROVA_COPY.doneWaiting
-      : 'Sua prova foi enviada e corrigida automaticamente. A nota aparece quando o Mestre liberar.',
-    doneTimedOut: 'O tempo acabou e a prova foi enviada. A nota aparece quando o Mestre liberar.',
+      : 'Sua prova foi enviada. A nota aparece nesta página.',
+    doneTimedOut: 'O tempo acabou e a prova foi enviada. A nota aparece nesta página.',
+    doneGradedMessage: hasDisc
+      ? PROVA_COPY.doneGradedMessage
+      : 'A correção é automática. Confira o resultado e o gabarito abaixo.',
     doneBreakdownMc: 'Múltipla escolha',
     introClosed: 'A prova ainda não foi aberta pelo Mestre para a sua turma.',
   });

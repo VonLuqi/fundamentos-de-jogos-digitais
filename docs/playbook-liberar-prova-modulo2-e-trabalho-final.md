@@ -5,7 +5,7 @@ Operação do **Mestre** para os dois exames novos. Ambos nascem **fechados** e 
 | Exame | `examId` | Tipo | Regras |
 |-------|----------|------|--------|
 | Provação do Módulo 1 | `modulo1-provacao` | quiz | 20 questões (12 MC + 8 discursivas), 20 pts, 90 min, 1 tentativa |
-| Provação do Módulo 2 · O Balcão e o Labirinto do Submundo | `modulo2-prova` | quiz (só MC) | 10 questões A–E, 2 pts cada, 20 pts, 45 min, 1 tentativa. Corrige no envio; a nota só aparece ao **Fechar nota** |
+| Provação do Módulo 2 · O Balcão e o Labirinto do Submundo | `modulo2-prova` | quiz (só MC) | 10 questões A–E, 2 pts cada, 20 pts, 45 min, 1 tentativa. Corrige e libera a nota no envio (também quem já entregou). **Fechar nota** não é necessário |
 | Trabalho Final | `trabalho-final` | project | Sem timer. Aluno envia **1 `.zip`** (máx. 50 MB), pode **reenviar** até o prazo (`closes_at`) ou até você selar; vale o último. Nota 0–30 (Aulas 02–08) + feedback |
 
 Conteúdo: [`avaliacao-modulo2-provacao.md`](./avaliacao-modulo2-provacao.md) (gabarito `B D A E C A D B E C`) · guia do aluno: [`pages/guia-trabalho-final.html`](../pages/guia-trabalho-final.html).
@@ -51,7 +51,7 @@ Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). 
 
 ## 4. Corrigir
 
-**Prova do M2 (só MC):** o aluno entrega → status *Enviada* → abra a tentativa (mostra respostas, gabarito e justificativas) → **Fechar nota** (não há discursivas). Só então o aluno vê nota e revisão. Contestação: igual ao M1 (*Responder* ou *Reabrir correção*).
+**Prova do M2 (só MC):** no envio (ou no tempo esgotado) a nota e o gabarito vão direto para o aluno. Quem já tinha entregue e ainda esperava **Fechar nota** recebe a nota na próxima vez que a prova é aberta. Contestação: igual ao M1 (*Responder* ou *Reabrir correção*).
 
 **Trabalho Final:**
 

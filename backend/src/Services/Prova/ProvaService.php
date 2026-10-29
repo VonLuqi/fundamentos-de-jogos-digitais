@@ -862,20 +862,69 @@ final class ProvaService
         }
 
         $submittedSql = !empty($attempt['submitted_at']) ? (string) $attempt['submitted_at'] : $nowSql;
-        $upAtt = $pdo->prepare(
-            'UPDATE prova_attempts
-             SET status = :st, submitted_at = :sub, mc_score = :mcs, updated_at = :now
-             WHERE id = :id AND status = \'in_progress\''
-        );
-        $upAtt->execute([
-            ':st' => $nextStatus,
-            ':sub' => $submittedSql,
-            ':mcs' => $mc['mcScore'],
-            ':now' => $nowSql,
-            ':id' => $attempt['id'],
-        ]);
+        if ($def !== null && $def->releasesGradeOnSubmit()) {
+            $upAtt = $pdo->prepare(
+                'UPDATE prova_attempts
+                 SET status = \'graded\', submitted_at = :sub, mc_score = :mcs,
+                     discursive_score = :ds, final_score = :fs, graded_at = :gat, updated_at = :now
+                 WHERE id = :id AND status = \'in_progress\''
+            );
+            $upAtt->execute([
+                ':sub' => $submittedSql,
+                ':mcs' => $mc['mcScore'],
+                ':ds' => 0,
+                ':fs' => $mc['mcScore'],
+                ':gat' => $nowSql,
+                ':now' => $nowSql,
+                ':id' => $attempt['id'],
+            ]);
+        } else {
+            $upAtt = $pdo->prepare(
+                'UPDATE prova_attempts
+                 SET status = :st, submitted_at = :sub, mc_score = :mcs, updated_at = :now
+                 WHERE id = :id AND status = \'in_progress\''
+            );
+            $upAtt->execute([
+                ':st' => $nextStatus,
+                ':sub' => $submittedSql,
+                ':mcs' => $mc['mcScore'],
+                ':now' => $nowSql,
+                ':id' => $attempt['id'],
+            ]);
+        }
 
         return self::loadAttemptById((string) $attempt['id']) ?? $attempt;
+    }
+
+    /**
+     * Prova só de múltipla escolha: quem já entregou (ou estourou o tempo) e ainda
+     * espera o Mestre passa a `graded`, com a nota que a correção automática já gravou.
+     */
+    public static function releasePendingAutoGrades(string $examId, int $nowMs): int
+    {
+        $def = ProvaCatalog::forExam($examId);
+        if ($def === null || !$def->releasesGradeOnSubmit()) {
+            return 0;
+        }
+        $pdo = Database::get();
+        $nowSql = Database::nowSql($nowMs);
+        $stmt = $pdo->prepare(
+            'UPDATE prova_attempts
+             SET status = \'graded\',
+                 discursive_score = 0,
+                 final_score = mc_score,
+                 graded_at = :gat,
+                 updated_at = :uat
+             WHERE exam_id = :eid
+               AND status IN (\'submitted\', \'timed_out\')
+               AND mc_score IS NOT NULL'
+        );
+        $stmt->execute([
+            ':gat' => $nowSql,
+            ':uat' => $nowSql,
+            ':eid' => $examId,
+        ]);
+        return $stmt->rowCount();
     }
 
     /**
