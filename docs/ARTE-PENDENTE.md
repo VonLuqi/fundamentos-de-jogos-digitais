@@ -11,37 +11,10 @@
 ## Upgrades ainda vetoriais
 
 > **Gerado por `node scripts/despertar-art-lotes.mjs`. Não editar à mão.**
-> 129 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
+> 109 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
 > PNG em `.art-raw/upgrades/<id>.png`, depois `npm run despertar:art -- --folder upgrades --in-dir .art-raw/upgrades`. O SVG não se edita.
 
 ## U01 — upgrades (20)
-
-Custo de `2550000000000000000` (`simetria_reversa_do_erebo`) até `52500000000000000000` (`lacos_de_retroalimentacao_eterna`).
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `simetria_reversa_do_erebo` | Simetria Reversa do Érebo | Inverte a polaridade espiritual para dobrar o rendimento. |
-| `quintessencia_do_erebo` | Quintessência do Érebo | O quinto elemento do Submundo estabiliza a produção máxima. |
-| `semente_de_mandelbrot_estigia` | Semente de Mandelbrot Estígia | Uma equação curta que se desdobra em abismos infinitos. |
-| `servos_fractais` | Servos Fractais | Cada remador subdivide-se recursivamente em infinitos ajudantes. |
-| `tapecaria_das_eras_mortas` | Tapeçaria das Eras Mortas | Toda a história antiga é retecida como tributo ao Submundo. |
-| `vortice_de_caos_domado` | Vórtice de Caos Domado | A energia bruta de Khaos é canalizada em fluxo ordenado. |
-| `triangulo_de_sierpinski_funebre` | Triângulo de Sierpinski Fúnebre | Cada metade vazia abriga três novos motores trabalhando. |
-| `nucleo_de_singularidade_fria` | Núcleo de Singularidade Fria | Cem câmaras condensam o abismo num cristal líquido de almas. |
-| `paradoxo_da_colheita_dupla` | Paradoxo da Colheita Dupla | A mesma alma é colhida no ontem e no amanhã sem conflito. |
-| `crisopeia_absoluta_de_hades` | Crisopeia Absoluta de Hades | Trezentos laboratórios transmutam o próprio abismo em riqueza infinita. |
-| `espectro_invisivel_do_acheron` | Espectro Invisível do Acheron | Comprimentos de onda que só os mortos conseguem enxergar. |
-| `singularidade_ctoniana` | Singularidade Ctoniana | Um ponto de densidade espiritual infinita no centro de cada arco. |
-| `bigorna_da_improbabilidade` | Bigorna da Improbabilidade | Martela eventos de 1 em 1 milhão até torná-los rotina. |
-| `esponja_de_menger_de_obsidiana` | Esponja de Menger de Obsidiana | Área superficial infinita para absorver o lamento dos rios. |
-| `santuario_de_cronos_desperto` | Santuário de Cronos Desperto | Duzentos teares curvam os séculos ao redor do Acheron. |
-| `destilador_de_entropia_negra` | Destilador de Entropia Negra | Converte o decaimento universal em trabalho perpétuo. |
-| `rede_de_cristais_de_atropos` | Rede de Cristais de Átropos | Setenta e cinco prismas alinhados com precisão fatal. |
-| `onipresenca_dimensional` | Onipresença Dimensional | Todos os caminhos de todas as realidades terminam nas portas de Hades. |
-| `matriz_de_positrons_ctonianos` | Matriz de Pósitrons Ctonianos | Partículas espelhadas que ecoam cada batida da Foice. |
-| `lacos_de_retroalimentacao_eterna` | Laços de Retroalimentação Eterna | O futuro alimenta o passado num ciclo fechado de abundância. |
-
-## U02 — upgrades (20)
 
 Custo de `90000000000000000000` (`filhote_intendente_erebo`) até `1775000000000000000000` (`compilador_de_juramentos_estigios`).
 
@@ -68,7 +41,7 @@ Custo de `90000000000000000000` (`filhote_intendente_erebo`) até `1775000000000
 | `dominio_sobre_o_principio_e_o_fim` | Domínio sobre o Princípio e o Fim | Trezentos teares entrelaçam o alfa e o ômega na Foice de Hades. |
 | `compilador_de_juramentos_estigios` | Compilador de Juramentos Estígios | Otimiza o código da morte eliminando toda latência. |
 
-## U03 — upgrades (20)
+## U02 — upgrades (20)
 
 Custo de `2125000000000000000000` (`oceano_de_dirac_subterraneo`) até `120000000000000000000000` (`fenda_para_o_submundo_vizinho`).
 
@@ -95,7 +68,7 @@ Custo de `2125000000000000000000` (`oceano_de_dirac_subterraneo`) até `12000000
 | `determinismo_dourado` | Determinismo Dourado | O acaso deixa de existir: tudo o que pode render almas, renderá. |
 | `fenda_para_o_submundo_vizinho` | Fenda para o Submundo Vizinho | Drena um universo paralelo onde o Acheron corre duas vezes mais rápido. |
 
-## U04 — upgrades (20)
+## U03 — upgrades (20)
 
 Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000000000000000` (`servos_psionicos`).
 
@@ -122,7 +95,7 @@ Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000
 | `lobo_frontal_de_tita` | Lobo Frontal de Titã | Um único pensamento seu pesa mais que montanhas de ouro. |
 | `servos_psionicos` | Servos Psiônicos | Movem os remos com a força mental dos Padeiros do Córtex. |
 
-## U05 — upgrades (20)
+## U04 — upgrades (20)
 
 Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9500000000000000000000000000` (`noosfera_do_submundo`).
 
@@ -149,7 +122,7 @@ Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9
 | `arquiteto_supremo_da_simulacao` | Arquiteto Supremo da Simulação | Trezentos consoles convertem o próprio loop em soberania. |
 | `noosfera_do_submundo` | Noosfera do Submundo | Cinquenta mentes colossais formam uma camada pensante ao redor do Tártaro. |
 
-## U06 — upgrades (20)
+## U05 — upgrades (20)
 
 Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `67500000000000000000000000000000` (`dinastia_autogerada`).
 
@@ -176,7 +149,7 @@ Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `675000
 | `centuria_de_imperadores_imortais` | Centúria de Imperadores Imortais | Cem avatares de Hades: nenhum canto do Submundo fica sem os teus olhos. |
 | `dinastia_autogerada` | Dinastia Autogerada | Sucedes a ti mesmo num ciclo real inquebrável. |
 
-## U07 — upgrades (9)
+## U06 — upgrades (9)
 
 Custo de `71250000000000000000000000000000` (`vontade_pura_sem_intermediarios`) até `67500000000000000000000000000000000` (`o_imperador_eterno_trezentos`).
 
