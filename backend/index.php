@@ -50,8 +50,9 @@ if (!Database::isConfigured()) {
 try {
     MysqlMigrator::apply();
 } catch (Throwable $e) {
+    // Detalhe do banco só no log do servidor; o aluno vê uma mensagem genérica.
     error_log('[migrate] ' . $e->getMessage());
-    Http::error(500, $e->getMessage());
+    Http::error(503, 'O Domínio está em manutenção. Tente de novo em instantes.');
 }
 
 // Rate limit por IP na borda (espelho do `middleware.js` da Vercel)

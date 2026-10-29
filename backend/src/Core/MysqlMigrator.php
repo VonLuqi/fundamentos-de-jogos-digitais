@@ -16,9 +16,41 @@ final class MysqlMigrator
 {
     private const LOCK = 'fjd_mysql_migrations';
 
+    /**
+     * Roda em toda requisição da API: o caminho normal só compara a assinatura dos arquivos com o
+     * carimbo da última aplicação bem-sucedida (sem tocar no banco). Arquivo novo ou alterado no
+     * deploy muda a assinatura → aplica uma vez e regrava o carimbo. Apagar o carimbo força rodar.
+     */
     public static function apply(): void
     {
+        $files = self::files();
+        $signature = self::signature($files);
+        $stamp = self::stampPath();
+        if (is_file($stamp) && trim((string) @file_get_contents($stamp)) === $signature) {
+            return;
+        }
         self::run(Database::pdo());
+        $dir = dirname($stamp);
+        if (is_dir($dir) || @mkdir($dir, 0775, true)) {
+            // Sem permissão de escrita só fica mais lento (verifica o banco a cada requisição).
+            @file_put_contents($stamp, $signature, LOCK_EX);
+        }
+    }
+
+    /** @param list<string> $files */
+    private static function signature(array $files): string
+    {
+        $parts = [];
+        foreach ($files as $path) {
+            $parts[] = basename($path) . ':' . (int) @filesize($path);
+        }
+        return sha1(implode('|', $parts));
+    }
+
+    private static function stampPath(): string
+    {
+        $backend = defined('FJD_BACKEND_ROOT') ? FJD_BACKEND_ROOT : dirname(__DIR__, 2);
+        return $backend . '/storage/.mysql-migrations';
     }
 
     public static function run(PDO $pdo): int

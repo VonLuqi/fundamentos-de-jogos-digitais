@@ -71,6 +71,8 @@ uploads/avatars/*
 
 # Fotos de perfil pendentes (geradas em runtime)
 backend/storage/avatars-pending/*
+# Carimbo do MysqlMigrator (gerado em runtime)
+backend/storage/.mysql-migrations
 
 # Cópias de migração geradas no deploy. A fonte é db/migrate-*.sql.
 backend/migrations/
