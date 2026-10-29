@@ -667,8 +667,8 @@
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp e assets/despertar/sprites/veil/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 9,
-        "vetorial": 3,
+        "ilustrada": 10,
+        "vetorial": 2,
         "placeholder": 0,
         "faltando": 0
       }
@@ -758,8 +758,8 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 324,
-        "vetorial": 109,
+        "ilustrada": 344,
+        "vetorial": 89,
         "placeholder": 0,
         "faltando": 0
       }
