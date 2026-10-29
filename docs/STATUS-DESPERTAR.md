@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **591/660 (90%)** · vetorial interina: 69 · placeholder: **0** · faltando: 0
+Ilustrada: **611/660 (93%)** · vetorial interina: 49 · placeholder: **0** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -15,7 +15,7 @@ Ilustrada: **591/660 (90%)** · vetorial interina: 69 · placeholder: **0** · f
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
 | `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
-| `upgrades` | 433 | 364 | 69 | 0 | 0 |
+| `upgrades` | 433 | 384 | 49 | 0 | 0 |
 | `talents` | 129 | 129 | 0 | 0 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
@@ -56,7 +56,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_f4_veil_kittens` | interim | 11 | 1 | 0 | 0 |
 | `art_f6_catabase_wrinklers` | delivered | 15 | 0 | 0 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
-| `art_f7_upgrades_late` | interim | 364 | 69 | 0 | 0 |
+| `art_f7_upgrades_late` | interim | 384 | 49 | 0 | 0 |
 | `art_f8_seasons_dragon_fortunes` | delivered | 15 | 0 | 0 | 0 |
 | `art_synergy_vol_canon` | delivered | 36 | 0 | 0 | 0 |
 | `art_mil_foices_ladder` | delivered | 12 | 0 | 0 | 0 |

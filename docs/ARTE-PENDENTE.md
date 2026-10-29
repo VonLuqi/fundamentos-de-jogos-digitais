@@ -11,37 +11,10 @@
 ## Upgrades ainda vetoriais
 
 > **Gerado por `node scripts/despertar-art-lotes.mjs`. Não editar à mão.**
-> 69 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
+> 49 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
 > PNG em `.art-raw/upgrades/<id>.png`, depois `npm run despertar:art -- --folder upgrades --in-dir .art-raw/upgrades`. O SVG não se edita.
 
 ## U01 — upgrades (20)
-
-Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000000000000000` (`servos_psionicos`).
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `servos_transversais` | Servos Transversais | Navegam simultaneamente pelos rios de todos os Idleversos Ctonianos. |
-| `conjunto_de_julia_noturno` | Conjunto de Julia Noturno | Fronteiras complexas onde cada ponto floresce em produção. |
-| `onividencia_prismatica_das_moiras` | Onividência Prismática das Moiras | Trezentos prismas iluminam todas as linhas de tempo simultaneamente. |
-| `sifao_interdimensional_de_almas` | Sifão Interdimensional de Almas | Canaliza o tributo de cinco realidades alternativas. |
-| `roda_da_fortuna_inapelavel` | Roda da Fortuna Inapelável | Nenhuma aposta contra a Casa de Hades jamais venceu. |
-| `garbage_collector_do_tartaro` | Garbage Collector do Tártaro | Recicla fragmentos esquecidos em milhões de almas limpas. |
-| `labirinto_de_hilbert_perpetuo` | Labirinto de Hilbert Perpétuo | Uma única curva contínua que preenche todo o espaço do Domínio. |
-| `tratado_dos_dez_hades` | Tratado dos Dez Hades | Dez versões tuas assinam um pacto de livre comércio espiritual. |
-| `providencia_abissal` | Providência Abissal | As coincidências alinham-se em fileiras militares. |
-| `injecao_de_dependencia_divina` | Injeção de Dependência Divina | Acopla os deuses diretamente ao pipeline de produção. |
-| `arvore_de_pitagoras_de_ouro` | Árvore de Pitágoras de Ouro | Ramos que se bifurcam eternamente carregados de frutos áureos. |
-| `senhor_de_todas_as_probabilidades` | Senhor de Todas as Probabilidades | Trezentas forjas selam 100% de certeza na colheita eterna. |
-| `kernel_ctoniano_em_anel_zero` | Kernel Ctoniano em Anel Zero | Cem consoles com privilégio máximo sobre a física do mundo. |
-| `caleidoscopio_recursivo_do_erebo` | Caleidoscópio Recursivo do Érebo | O todo está na parte e a parte multiplica o todo. |
-| `malha_de_branas_ctoniana` | Malha de Branas Ctoniana | Colide membranas cosmológicas para sacudir almas soltas. |
-| `assincronia_multithread_das_moiras` | Assincronia Multithread das Moiras | Paraleliza o destino em milhares de fibras simultâneas. |
-| `abismo_dentro_do_abismo` | Abismo Dentro do Abismo | Queda livre geométrica que gera potência a cada escala. |
-| `bigint_sem_limite_de_precisao` | BigInt Sem Limite de Precisão | Transcende os 53 bits dos mortais rumo a grandezas arbitrárias. |
-| `lobo_frontal_de_tita` | Lobo Frontal de Titã | Um único pensamento seu pesa mais que montanhas de ouro. |
-| `servos_psionicos` | Servos Psiônicos | Movem os remos com a força mental dos Padeiros do Córtex. |
-
-## U02 — upgrades (20)
 
 Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9500000000000000000000000000` (`noosfera_do_submundo`).
 
@@ -68,7 +41,7 @@ Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9
 | `arquiteto_supremo_da_simulacao` | Arquiteto Supremo da Simulação | Trezentos consoles convertem o próprio loop em soberania. |
 | `noosfera_do_submundo` | Noosfera do Submundo | Cinquenta mentes colossais formam uma camada pensante ao redor do Tártaro. |
 
-## U03 — upgrades (20)
+## U02 — upgrades (20)
 
 Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `67500000000000000000000000000000` (`dinastia_autogerada`).
 
@@ -95,7 +68,7 @@ Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `675000
 | `centuria_de_imperadores_imortais` | Centúria de Imperadores Imortais | Cem avatares de Hades: nenhum canto do Submundo fica sem os teus olhos. |
 | `dinastia_autogerada` | Dinastia Autogerada | Sucedes a ti mesmo num ciclo real inquebrável. |
 
-## U04 — upgrades (9)
+## U03 — upgrades (9)
 
 Custo de `71250000000000000000000000000000` (`vontade_pura_sem_intermediarios`) até `67500000000000000000000000000000000` (`o_imperador_eterno_trezentos`).
 
