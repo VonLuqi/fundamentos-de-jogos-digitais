@@ -295,8 +295,8 @@
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]",
       "detected": {
-        "ilustrada": 35,
-        "vetorial": 29,
+        "ilustrada": 41,
+        "vetorial": 23,
         "placeholder": 0,
         "faltando": 0
       }
@@ -677,7 +677,7 @@
       "id": "art_f6_catabase_wrinklers",
       "listId": "F6-CW",
       "priority": "P1",
-      "status": "interim",
+      "status": "delivered",
       "title": "Catábase das Avós & Sanguessugas do Acheron (7 sprites F6 + 8 juramentos)",
       "desc": "Sanguessuga do Acheron normal e Abissal Dourada (Shiny), ícones dos 3 estágios da Catábase (Despertar Ctoniano, Comunhão Abissal, Pacto Primordial), Juramento de Trégua, Aliança Eterna e 8 ícones da cadeia de pesquisa do Arquivo Estígio.",
       "sizes": [
@@ -707,8 +707,8 @@
       ],
       "notes": "Paths: assets/despertar/sprites/catabase/{id}.webp e assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). [2026-10-26: upgrades do lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 14,
-        "vetorial": 1,
+        "ilustrada": 15,
+        "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
       }
@@ -758,8 +758,8 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 184,
-        "vetorial": 249,
+        "ilustrada": 204,
+        "vetorial": 229,
         "placeholder": 0,
         "faltando": 0
       }

@@ -48,8 +48,8 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 184,
-      "vetorial": 249,
+      "ilustrada": 204,
+      "vetorial": 229,
       "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
@@ -184,8 +184,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 35,
-        "vetorial": 29,
+        "ilustrada": 41,
+        "vetorial": 23,
         "placeholder": 0,
         "faltando": 0
       }
@@ -327,10 +327,10 @@
     {
       "id": "art_f6_catabase_wrinklers",
       "auditable": true,
-      "status": "interim",
+      "status": "delivered",
       "counts": {
-        "ilustrada": 14,
-        "vetorial": 1,
+        "ilustrada": 15,
+        "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
       }
@@ -351,8 +351,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 184,
-        "vetorial": 249,
+        "ilustrada": 204,
+        "vetorial": 229,
         "placeholder": 0,
         "faltando": 0
       }
