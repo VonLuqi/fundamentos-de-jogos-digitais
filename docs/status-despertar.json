@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-28",
+  "generatedAt": "2026-10-29",
   "art": {
     "foice": {
       "total": 1,
@@ -48,8 +48,8 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 104,
-      "vetorial": 329,
+      "ilustrada": 124,
+      "vetorial": 309,
       "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
@@ -184,8 +184,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 16,
-        "vetorial": 48,
+        "ilustrada": 21,
+        "vetorial": 43,
         "placeholder": 0,
         "faltando": 0
       }
@@ -318,8 +318,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 5,
-        "vetorial": 7,
+        "ilustrada": 6,
+        "vetorial": 6,
         "placeholder": 0,
         "faltando": 0
       }
@@ -351,8 +351,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 104,
-        "vetorial": 329,
+        "ilustrada": 124,
+        "vetorial": 309,
         "placeholder": 0,
         "faltando": 0
       }
