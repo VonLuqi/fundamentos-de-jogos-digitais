@@ -295,8 +295,8 @@
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]",
       "detected": {
-        "ilustrada": 41,
-        "vetorial": 23,
+        "ilustrada": 48,
+        "vetorial": 16,
         "placeholder": 0,
         "faltando": 0
       }
@@ -758,8 +758,8 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 204,
-        "vetorial": 229,
+        "ilustrada": 224,
+        "vetorial": 209,
         "placeholder": 0,
         "faltando": 0
       }
