@@ -6,7 +6,7 @@
 
 ## Arte por pasta
 
-Ilustrada: **491/660 (74%)** · vetorial interina: 169 · placeholder: **0** · faltando: 0
+Ilustrada: **511/660 (77%)** · vetorial interina: 149 · placeholder: **0** · faltando: 0
 
 | Pasta | Total | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -15,7 +15,7 @@ Ilustrada: **491/660 (74%)** · vetorial interina: 169 · placeholder: **0** · 
 | `habitats` | 20 | 20 | 0 | 0 | 0 |
 | `hud` | 7 | 7 | 0 | 0 | 0 |
 | `shimmers` | 2 | 2 | 0 | 0 | 0 |
-| `upgrades` | 433 | 264 | 169 | 0 | 0 |
+| `upgrades` | 433 | 284 | 149 | 0 | 0 |
 | `talents` | 129 | 129 | 0 | 0 | 0 |
 | `minigames` | 21 | 21 | 0 | 0 | 0 |
 | `veil` | 5 | 5 | 0 | 0 | 0 |
@@ -39,7 +39,7 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_t4` | delivered | 1 | 0 | 0 | 0 |
 | `art_t5` | delivered | 1 | 0 | 0 | 0 |
 | `art_t6` | delivered | 1 | 0 | 0 | 0 |
-| `art_upgrades` | interim | 60 | 4 | 0 | 0 |
+| `art_upgrades` | interim | 63 | 1 | 0 | 0 |
 | `art_juizo_chrome` | não auditável | — | — | — | — |
 | `art_juizo_covers` | não auditável | — | — | — | — |
 | `art_cosmetics` | não auditável | — | — | — | — |
@@ -53,10 +53,10 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_t12` | delivered | 1 | 0 | 0 | 0 |
 | `art_f3_upgrades` | open | 0 | 0 | 0 | 8 |
 | `art_f5_minigames` | delivered | 21 | 0 | 0 | 0 |
-| `art_f4_veil_kittens` | interim | 8 | 4 | 0 | 0 |
+| `art_f4_veil_kittens` | interim | 9 | 3 | 0 | 0 |
 | `art_f6_catabase_wrinklers` | delivered | 15 | 0 | 0 | 0 |
 | `art_f7_generators_t13_t20` | delivered | 8 | 0 | 0 | 0 |
-| `art_f7_upgrades_late` | interim | 264 | 169 | 0 | 0 |
+| `art_f7_upgrades_late` | interim | 284 | 149 | 0 | 0 |
 | `art_f8_seasons_dragon_fortunes` | delivered | 15 | 0 | 0 | 0 |
 | `art_synergy_vol_canon` | delivered | 36 | 0 | 0 | 0 |
 | `art_mil_foices_ladder` | delivered | 12 | 0 | 0 | 0 |
