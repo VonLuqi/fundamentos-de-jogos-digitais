@@ -1841,6 +1841,9 @@ final class DespertarService
      */
     public const SEASON_CLOSED_HOLD = true;
 
+    /** Mesmo instante de js/hades-despertar/config/season-closed.js (Brasília). */
+    public const SEASON_OPENS_AT = '2026-11-01T00:00:00-03:00';
+
     public static function isSeasonLiberated(): bool
     {
         $pdo = Database::pdo();
@@ -2025,7 +2028,7 @@ final class DespertarService
         ]];
     }
 
-    public static function setDespertarGate(string $gateKey, bool $released, int $adminUserId): void
+    public static function setDespertarGate(string $gateKey, bool $released, ?int $adminUserId): void
     {
         $nowSql = Database::nowSql();
         $pdo = Database::pdo();
@@ -2048,11 +2051,79 @@ final class DespertarService
     }
 
     /**
-     * Congela T1, zera despertar_states de todos, abre Temporada 2.
-     * As conquistas do Despertar saem dos perfis (voltam a ser conquistáveis na T2) sem tirar
-     * o XP; o que já foi pago fica em `despertar_paid_achievements` e não paga XP de novo.
-     * @return array{ok: bool, archive: array<string, mixed>, deleted: int, achievementsReset?: array{users: int, removed: int}, error?: string}
+     * Na meia-noite de Brasília, a primeira leitura dos portões do Despertar abre a Temporada 2
+     * com o mesmo efeito do botão do Mestre. Antes do instante, não escreve nada.
      */
+    public static function openNextSeasonIfDue(): bool
+    {
+        try {
+            $opens = new \DateTimeImmutable(self::SEASON_OPENS_AT);
+        } catch (\Throwable $e) {
+            error_log('[season-open] instante inválido: ' . $e->getMessage());
+            return false;
+        }
+        if (new \DateTimeImmutable('now') < $opens) {
+            return false;
+        }
+
+        try {
+            if (self::isSeasonLiberated()) {
+                return false;
+            }
+            $pdo = Database::pdo();
+            $got = self::lockScalar($pdo, 'SELECT GET_LOCK(' . $pdo->quote('fjd_season2_open') . ', 15)');
+            if ((string) $got !== '1') {
+                return false;
+            }
+            try {
+                if (self::isSeasonLiberated()) {
+                    return false;
+                }
+                $adminId = self::firstAdminUserId();
+                $existing = self::getSeasonArchive(1);
+                if ($existing !== null) {
+                    self::setDespertarGate('season_liberated', true, $adminId);
+                    self::setDespertarGate('published', true, $adminId);
+                    return true;
+                }
+                $result = self::performSeasonOpen($adminId, 1);
+                return (bool) ($result['ok'] ?? false);
+            } finally {
+                self::lockScalar($pdo, 'SELECT RELEASE_LOCK(' . $pdo->quote('fjd_season2_open') . ')');
+            }
+        } catch (\Throwable $e) {
+            error_log('[season-open] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    private static function lockScalar(PDO $pdo, string $statement): mixed
+    {
+        $stmt = $pdo->query($statement);
+        if (!$stmt instanceof \PDOStatement) {
+            return null;
+        }
+        $value = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        return $value;
+    }
+
+    private static function firstAdminUserId(): ?int
+    {
+        $stmt = Database::pdo()->query(
+            'SELECT `id` FROM `users` WHERE `role` = \'admin\' ORDER BY `id` ASC LIMIT 1'
+        );
+        if (!$stmt instanceof \PDOStatement) {
+            return null;
+        }
+        $id = $stmt->fetchColumn();
+        $stmt->closeCursor();
+        if ($id === false || $id === null) {
+            return null;
+        }
+        return (int) $id;
+    }
+
     public static function openNextSeason(int $adminUserId, string $confirm, int $archiveSeasonId = 1): array
     {
         $token = strtoupper(trim($confirm));
@@ -2060,6 +2131,16 @@ final class DespertarService
             return ['ok' => false, 'error' => 'Confirmação inválida. Digite TEMPORADA 2.', 'archive' => [], 'deleted' => 0];
         }
 
+        return self::performSeasonOpen($adminUserId, $archiveSeasonId);
+    }
+
+    /**
+     * Congela o pódio, zera o Despertar e liga os portões. Só uma vez por temporada arquivada.
+     * As conquistas do Despertar saem dos perfis (voltam a ser conquistáveis) sem tirar o XP.
+     * @return array{ok: bool, archive: array<string, mixed>, deleted: int, achievementsReset?: array{users: int, removed: int}, error?: string}
+     */
+    private static function performSeasonOpen(?int $adminUserId, int $archiveSeasonId): array
+    {
         // Só uma vez: rodar de novo sobrescreveria o pódio eterno da temporada arquivada com o
         // placar da nova (ON DUPLICATE KEY UPDATE) e apagaria a temporada em andamento.
         $existing = self::getSeasonArchive($archiveSeasonId);

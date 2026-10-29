@@ -7,6 +7,7 @@ use App\Core\Database;
 use App\Core\GameCatalog;
 use App\Core\Http;
 use App\Core\RateLimiter;
+use App\Services\Despertar\DespertarService;
 use PDO;
 
 /**
@@ -526,6 +527,10 @@ final class RedeemLessonsService
             Http::error(400, 'Aula inválida.');
         }
 
+        if ($lessonId === 'despertar') {
+            DespertarService::openNextSeasonIfDue();
+        }
+
         $gates = ProgressShared::defaultGatesForLesson($lessonId);
         $pdo = Database::pdo();
         $stmt = $pdo->prepare('SELECT `gate_key`, `released` FROM `lesson_gates` WHERE `lesson_id` = :lid');
@@ -563,6 +568,10 @@ final class RedeemLessonsService
         }
         if ($ids === []) {
             Http::error(400, 'Nenhuma aula válida no lote.');
+        }
+
+        if (in_array('despertar', $ids, true)) {
+            DespertarService::openNextSeasonIfDue();
         }
 
         $gatesByLesson = [];

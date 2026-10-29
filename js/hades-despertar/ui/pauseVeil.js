@@ -8,6 +8,7 @@ import {
   SEASON_CLOSED_CATEGORIES,
   SEASON_CLOSED_COPY,
   SEASON_HALL_COPY,
+  SEASON_OPENS_AT,
 } from '../config/season-closed.js';
 import { formatSouls } from './NumberFormatter.js';
 
@@ -68,6 +69,23 @@ export function formatCountdown(ms) {
   const ss = String(seconds).padStart(2, '0');
   if (hours > 0) return `${hours}:${mm}:${ss}`;
   return `${mm}:${ss}`;
+}
+
+/**
+ * Countdown da abertura da Temporada 2. Não altera formatCountdown do Véu da Aula.
+ * @param {number} ms
+ * @returns {string} `N dias hh:mm:ss`, `1 dia hh:mm:ss` ou `hh:mm:ss`
+ */
+export function formatSeasonCountdown(ms) {
+  const total = Math.max(0, Math.ceil(Number(ms) / 1000) || 0);
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  const minutes = Math.floor((total % 3600) / 60);
+  const seconds = total % 60;
+  const hms = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  if (days === 1) return `1 dia ${hms}`;
+  if (days > 1) return `${days} dias ${hms}`;
+  return hms;
 }
 
 /**
@@ -334,6 +352,8 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
       <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.eyebrow)}</p>
       <h2 class="despertar-classroom-veil__title app-shell__title">${escapeHtml(SEASON_CLOSED_COPY.title)}</h2>
       <p class="despertar-classroom-veil__body">${escapeHtml(SEASON_CLOSED_COPY.body)}</p>
+      <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.countdownLabel)}</p>
+      <p class="despertar-classroom-veil__timer despertar-num" data-season-open-countdown data-season-opens-at="${escapeAttr(SEASON_OPENS_AT)}"></p>
       <p class="despertar-season-prize" data-season-prize>${escapeHtml(SEASON_CLOSED_COPY.prizeNote)}</p>
       <p class="despertar-classroom-veil__eyebrow despertar-season-boards__eyebrow">${escapeHtml(SEASON_CLOSED_COPY.boardsEyebrow)}</p>
       <div class="despertar-season-boards" data-season-boards>

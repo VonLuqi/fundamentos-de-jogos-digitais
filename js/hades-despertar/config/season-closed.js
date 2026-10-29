@@ -16,10 +16,18 @@ export const CURRENT_SEASON = 2;
  */
 export const DESPERTAR_SEASON_CLOSED = true;
 
+/**
+ * Instante em que o servidor abre a Temporada 2 sozinho (Brasília).
+ * O mesmo literal está em DespertarService::SEASON_OPENS_AT.
+ */
+export const SEASON_OPENS_AT = '2026-11-01T00:00:00-03:00';
+
 export const SEASON_CLOSED_COPY = Object.freeze({
   eyebrow: 'Temporada 1 encerrada · abrindo Temporada 2',
   title: 'O Acheron guarda silêncio',
   body: 'A Temporada 1 fechou. O pódio abaixo fica eterno no Hall e no Placar. A Temporada 2 começa do zero.',
+  countdownLabel: 'A Temporada 2 abre em',
+  countdownDone: 'O Acheron abre…',
   prizeNote:
     'Quem ficou em 1º em cada categoria do Despertar (Juízo, Catábases e Almas totais) ganha um prêmio.',
   tabletNote:
