@@ -21,6 +21,8 @@ DirectoryIndex index.html index.php
   RewriteRule ^(?:db|scripts|tests|docs|node_modules|\.git|\.cursor|\.github|\.vscode)(?:/|$) - [F,L,NC]
   RewriteRule ^backend/(?!index\.php$) - [F,L,NC]
   RewriteRule ^api/.*\.js$ - [F,L,NC]
+  # Entregas do Trabalho Final: nunca servidas diretamente (download só via /api/prova, admin)
+  RewriteRule ^uploads/trabalhos(?:/|$) - [F,L,NC]
   RewriteRule ^(?:middleware\.js|local-server\.mjs|migrate-passwords\.js|package(?:-lock)?\.json|vercel\.json)$ - [F,L,NC]
 
   # ---------------------------------------------------------------------------
@@ -37,14 +39,14 @@ DirectoryIndex index.html index.php
   # Slugs = arquivos em pages/*.html (exceto submundo/)
   # THE_REQUEST: só no request do browser (não após rewrite interno).
   # Location absoluta via %1 (prefixo público) — evita /home4/... no HostGator.
-  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin)\.html[\s?] [NC]
-  RewriteRule ^pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin)\.html$ %1/%2/ [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|guia-trabalho-final)\.html[\s?] [NC]
+  RewriteRule ^pages/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|guia-trabalho-final)\.html$ %1/%2/ [R=301,L,QSA]
 
   # Sem barra final → canônico com barra (../css e ../js resolvem na raiz do site)
-  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin)(?:\s|\?) [NC]
-  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin)$ %1/%2/ [R=301,L,QSA]
+  RewriteCond %{THE_REQUEST} ^[A-Z]+\s((?:/[^?\s]+)*)/(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|guia-trabalho-final)(?:\s|\?) [NC]
+  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|guia-trabalho-final)$ %1/%2/ [R=301,L,QSA]
 
-  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin)/$ pages/$1.html [L,END]
+  RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|guia-trabalho-final)/$ pages/$1.html [L,END]
 
   # ---------------------------------------------------------------------------
   # 4. Rewrites do ARG do Submundo (espelho do vercel.json)
@@ -137,4 +139,12 @@ DirectoryIndex index.html index.php
     Header set CDN-Cache-Control "no-store"
     Header set Cloudflare-CDN-Cache-Control "no-store"
   </If>
+</IfModule>
+
+# Upload do Trabalho Final (.zip até 50 MB). Em PHP-FPM/FastCGI estas diretivas são ignoradas:
+# configure upload_max_filesize/post_max_size em .user.ini (ver docs/playbook-liberar-prova-modulo2-e-trabalho-final.md)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 52M
+  php_value post_max_size 56M
+  php_value max_execution_time 120
 </IfModule>

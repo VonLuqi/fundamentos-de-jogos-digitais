@@ -67,7 +67,7 @@
           20 questões · 12 de marcar · 8 para escrever · vale <strong>20 pontos</strong>.
         </p>
 
-        <ul class="prova-rules">
+        <ul class="prova-rules" id="prova-intro-rules">
           <li>Você tem <strong>1 hora e 30 minutos</strong>. O tempo começa quando apertar <em>Iniciar prova</em>.</li>
           <li>Aparece <strong>1 questão por vez</strong>. Use Anterior e Próxima para navegar.</li>
           <li><strong>Não saia desta página</strong>. Se sair, o tempo <strong>não pausa</strong>.</li>
@@ -85,6 +85,60 @@
             Voltar ao Painel
           </button>
         </div>
+      </article>
+    </section>
+
+    <!-- Trabalho Final: entrega de .zip (exame kind=project) -->
+    <section class="prova-panel" id="prova-project" hidden>
+      <article class="prova-card">
+        <p class="prova-card__eyebrow">Entrega</p>
+        <h2 class="prova-card__heading" id="prova-project-heading">Trabalho Final</h2>
+        <p class="prova-card__lead" id="prova-project-statement"></p>
+        <p class="prova-card__note" id="prova-project-deadline" hidden></p>
+
+        <div class="prova-card__actions prova-project__guide">
+          <a class="prova-btn prova-btn--ghost" id="prova-project-guide" href="../guia-trabalho-final/">
+            Abrir o guia do Trabalho Final ↗
+          </a>
+        </div>
+
+        <ul class="prova-rules">
+          <li>Envie <strong>um único arquivo .zip</strong> com o projeto (máx. <span id="prova-project-max">50</span> MB).</li>
+          <li>Pode <strong>reenviar</strong> até o prazo (ou até o Mestre encerrar as entregas). <strong>Vale o último envio.</strong></li>
+          <li>Não tem cronômetro. Depois da correção, a nota e o feedback aparecem aqui.</li>
+        </ul>
+
+        <div class="prova-project__current" id="prova-project-current" hidden>
+          <p class="prova-project__current-title">Seu último envio</p>
+          <dl class="prova-project__meta">
+            <div><dt>Arquivo</dt><dd id="prova-project-current-name">—</dd></div>
+            <div><dt>Tamanho</dt><dd id="prova-project-current-size">—</dd></div>
+            <div><dt>Enviado em</dt><dd id="prova-project-current-when">—</dd></div>
+            <div><dt>Envios</dt><dd id="prova-project-current-count">—</dd></div>
+          </dl>
+        </div>
+
+        <form class="prova-project__form" id="prova-project-form" novalidate>
+          <label class="prova-project__label" for="prova-project-file">Arquivo .zip</label>
+          <input
+            class="prova-project__file"
+            type="file"
+            id="prova-project-file"
+            name="file"
+            accept=".zip,application/zip,application/x-zip-compressed"
+          />
+          <progress class="prova-project__progress" id="prova-project-progress" max="100" value="0" hidden></progress>
+          <p class="prova-card__note" id="prova-project-status" role="status" aria-live="polite"></p>
+          <div class="prova-card__actions">
+            <button type="submit" class="prova-btn prova-btn--primary" id="prova-project-submit" disabled>
+              Enviar trabalho
+            </button>
+            <button type="button" class="prova-btn prova-btn--ghost" id="prova-project-refresh">
+              Atualizar status
+            </button>
+            <a class="prova-btn prova-btn--ghost" href="../dashboard/">Voltar ao Painel</a>
+          </div>
+        </form>
       </article>
     </section>
 

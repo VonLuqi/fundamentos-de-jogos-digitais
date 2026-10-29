@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Guia completo do Trabalho Final: sete aulas, códigos Godot 4, checklist e envio do projeto em ZIP." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Trabalho de Conclusão — A Última Forja | Fundamentos de Jogos Digitais</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021i" />
+  <link rel="stylesheet" href="../css/hades-components.css?v=20261021i" />
+  <link rel="stylesheet" href="../css/app-shell.css?v=20261028a" />
+  <link rel="stylesheet" href="../css/aula.css?v=20261021i" />
+  
+
+  <link rel="stylesheet" href="../css/guia-trabalho-final.css" />
+</head>
+<body class="app-shell-page guia-page">
+<a class="guia-skip" href="#conteudo">Ir para o conteúdo</a>
+<div class="vignette" aria-hidden="true"></div>
+<div class="app-shell">
+<aside class="app-shell__sidebar guia-nav" aria-label="Índice do guia">
+<div class="app-shell__brand"><p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p><p class="app-shell__brand-title">A Última Forja</p></div>
+<nav class="app-shell__nav"><a href="#etapa-0">Objetivo</a><a href="#etapa-1">O que entregar</a><a href="#etapa-2">Checklist de avaliação — 30 pontos</a><a href="#etapa-3">Aula 02 — O Player e o vocabulário do desenvolvedor</a><a href="#etapa-4">Aula 03 — A máscara cultural e o pixel nítido</a><a href="#etapa-5">Aula 04 — O contrato da tela retrô</a><a href="#etapa-6">Aula 05 — Design saudável</a><a href="#etapa-7">Aula 06 — O balcão sem azar</a><a href="#etapa-8">Aula 07 — Arte, coleta e trabalho organizado</a><a href="#etapa-9">Aula 08 — O labirinto feito para alguém</a><a href="#etapa-10">Conferência antes de enviar</a><a href="#etapa-11">Como zipar o projeto — Windows</a><a href="#etapa-12">Problemas comuns</a><a href="#etapa-13">Materiais de origem</a></nav>
+<a class="guia-download" href="../docs/guia-trabalho-final.md" download>Baixar guia em Markdown</a>
+</aside>
+<div class="app-shell__main">
+<header class="app-shell__header"><div class="app-shell__titles"><p class="app-shell__eyebrow">Aulas 02–08 · Guia de reconstrução</p><h1 class="app-shell__title">Trabalho de <span class="accent">Conclusão</span></h1><p class="guia-subtitle">A Última Forja do Labirinto</p></div></header>
+<div class="ornate-divider" aria-hidden="true"><span class="ornate-divider__line"></span><span class="ornate-divider__gem">◆</span><span class="ornate-divider__line"></span></div>
+<main id="conteudo" class="app-shell__content lesson-shell__content guia-content">
+<div class="guia-deadline"><strong>Seu desafio final</strong><br>Um projeto Godot completo · Um arquivo ZIP · Até o último dia de aula</div>
+<article class="hades-frame lesson-md">
+<h2 class="lesson-title" id="etapa-0">Objetivo</h2>
+<p>Reconstrua, com autonomia e ajuda apenas dos colegas, algo parecido com o que fizemos nas Aulas 02–08. O objetivo é demonstrar que você consegue montar, entender e testar um pequeno projeto Godot 4: personagem, identidade visual, tela retrô, decisões de design saudável, loja cosmética e labirinto com coleta orientado a um perfil de jogador.</p>
+<p>Não precisa reproduzir a arte pixel por pixel. Faça um projeto pequeno que funcione e cujas decisões você consiga explicar. Consulte este guia e os materiais das aulas; teste uma etapa antes de avançar.</p>
+<h2 class="lesson-title" id="etapa-1">O que entregar</h2>
+<p>Envie <strong>um arquivo .zip com o projeto Godot inteiro</strong>, incluindo <strong>project.godot</strong>, cenas, scripts, imagens e demais recursos utilizados, <strong>SEM a pasta .godot/</strong>. Envie pelo site, na área <strong>Trabalho Final</strong>, <strong>até o último dia de aula</strong>. Um executável, vídeo ou print sozinho não substitui o projeto editável.</p>
+<p>Inclua na raiz um <code>LEIA-ME.txt</code> com seu nome, colegas que ajudaram, versão da Godot, controles, cenas de demonstração, perfil escolhido, decisões de design saudável e um pequeno diário de testes. Este texto permite ao avaliador encontrar cada parte.</p>
+<p>Para reunir as sete aulas em uma entrega, este guia usa um projeto chamado <code>TrabalhoFinal</code>, com a loja em cena independente e o labirinto como cena principal. <strong>Essa organização é uma versão de referência para a entrega</strong>: em sala, a Aula 07 iniciou um projeto novo. Não é necessário integrar o saldo da loja à coleta do labirinto; a Aula 06 usa uma simulação própria.</p>
+<h2 class="lesson-title" id="etapa-2">Checklist de avaliação — 30 pontos</h2>
+<p>O <strong>Trabalho Final vale 30 pontos</strong>. A avaliação considera as evidências abaixo; os pesos somam <strong>2 + 4 + 4 + 2 + 6 + 6 + 6 = 30 pontos</strong>.</p>
+<ul>
+<li>[ ] <strong>2 pontos — Entrega:</strong> o ZIP abre como projeto na Godot 4, contém <code>project.godot</code> e os recursos e não contém <code>.godot/</code>.</li>
+<li>[ ] <strong>4 pontos — Aula 02:</strong> Player com sprite, colisão, quatro ações no Input Map e movimento.</li>
+<li>[ ] <strong>4 pontos — Aulas 03–04:</strong> identidade visual explicada, pixel art nítida e viewport retrô proporcional.</li>
+<li>[ ] <strong>2 pontos — Aula 05:</strong> explicação de uma decisão de design saudável e de como preservar o loop do jogo.</li>
+<li>[ ] <strong>6 pontos — Aula 06:</strong> loja com três cosméticos, preços fixos, saldo visível, coleta simulada e bloqueios de compra.</li>
+<li>[ ] <strong>6 pontos — Aula 07:</strong> moeda desenhada/importada, coleta que remove a moeda e conta pontos, pastas organizadas e diário.</li>
+<li>[ ] <strong>6 pontos — Aula 08:</strong> câmera acompanhando o Player e <strong>uma</strong> trilha implementada — Conquista ou Ação — com justificativa do perfil e playtest.</li>
+</ul>
+<h2 class="lesson-title" id="etapa-3">Aula 02 — O Player e o vocabulário do desenvolvedor</h2>
+<p><strong>O que construir:</strong> personagem controlável em quatro direções. O core loop futuro será andar → coletar → explorar.</p>
+<h3 class="lesson-subtitle">Comece aqui — criar o projeto</h3>
+<ol>
+<li>Abra a Godot 4 → <strong>New Project / Novo Projeto</strong> → nome <code>TrabalhoFinal</code>; escolha uma pasta local fora de OneDrive/Drive. Use o renderizador <strong>Compatibility</strong> para este projeto 2D simples.</li>
+<li>Em <strong>FileSystem</strong>, botão direito na raiz → <strong>New Folder</strong>. Crie <code>cenas</code>, <code>scripts</code>, <code>sprites</code>, <code>ui</code> e <code>audio</code>.</li>
+<li>Para criar uma cena: <strong>Scene → New Scene → Other Node</strong>, escolha o tipo e renomeie a raiz. Para adicionar filhos: selecione o pai e use <strong>Add Child Node</strong>. Salve com Ctrl+S.</li>
+<li><strong>F6</strong> executa a cena aberta; <strong>F5</strong> executa a cena principal; <strong>F8</strong> para. Salve antes de testar. Nomes e maiúsculas dos nós precisam corresponder aos scripts.</li>
+<li>Nos códigos abaixo, cada bloco com caminho de arquivo representa o <strong>arquivo completo</strong> daquela etapa. Substitua o conteúdo do arquivo indicado; não cole um segundo <code>extends</code> ou duas funções <code>_ready()</code> no mesmo script.</li>
+</ol>
+<h3 class="lesson-subtitle">Monte o Player e a cena principal</h3>
+<ol>
+<li>Crie <code>Player</code> (<code>CharacterBody2D</code>) e salve em <code>cenas/player.tscn</code>. Filhos: <code>Sprite2D</code> e <code>CollisionShape2D</code>.</li>
+<li>No Inspector do Sprite2D, arraste <code>icon.svg</code> (criado pela Godot na raiz do projeto) para <strong>Texture</strong> e ajuste <strong>Transform → Scale</strong> para <code>(0.25, 0.25)</code>. Esse ícone é provisório; você o trocará pela sua arte na Aula 03. Na colisão: <strong>New RectangleShape2D</strong>, Size <code>(16, 20)</code>, centralizado no personagem.</li>
+<li>Em <strong>Project → Project Settings → Input Map</strong>, crie <code>ir_esquerda</code>, <code>ir_direita</code>, <code>ir_cima</code> e <code>ir_baixo</code>. Em cada ação, use <strong>+ → Key</strong> e associe, respectivamente, A/seta esquerda, D/seta direita, W/seta cima e S/seta baixo.</li>
+<li>No Inspector do Player → <strong>Motion Mode</strong>, use <strong>Floating</strong> para esta movimentação vista de cima. Em <strong>Collision</strong>, deixe Layer <code>1</code> e Mask <code>1</code> ligados.</li>
+<li>Anexe <code>scripts/player.gd</code> à raiz. Copie o código ensinado na Aula 02.</li>
+<li>Crie <code>Cenario</code> (<code>Node2D</code>), salve em <code>cenas/cenario.tscn</code> e arraste <code>player.tscn</code> do FileSystem para a árvore. Posicione a instância em <code>(80, 100)</code>.</li>
+<li>Em <strong>Project Settings → Application → Run → Main Scene</strong>, selecione <code>cenas/cenario.tscn</code>; também pode pressionar F5 e escolher essa cena quando solicitado.</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/player.gd — movimento da Aula 02</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 1" data-copy="codigo-0" type="button">Copiar</button></div><pre id="codigo-0" tabindex="0"><code class="language-gdscript">extends CharacterBody2D
+
+@export var speed: float = 200.0
+
+func _physics_process(_delta: float) -&gt; void:
+	var direction := Input.get_vector("ir_esquerda", "ir_direita", "ir_cima", "ir_baixo")
+	velocity = direction * speed
+	move_and_slide()
+</code></pre></div>
+<p><strong>Teste de passagem:</strong> F5, clique na janela do jogo e mova em todas as direções. Neste movimento não há gravidade nem pulo; <code>ir_cima</code> move o personagem para cima. Essa escolha será preservada no labirinto.</p>
+<h2 class="lesson-title" id="etapa-4">Aula 03 — A máscara cultural e o pixel nítido</h2>
+<p><strong>O que construir:</strong> identidade visual própria para o personagem, inspirada em folclore, fauna, paisagem ou cotidiano brasileiro.</p>
+<ol>
+<li>No LibreSprite, crie ou personalize uma pequena imagem (por exemplo, 16×16 ou 32×32). Exporte um <strong>PNG</strong> com transparência para <code>sprites/hero.png</code>. Se usar um asset do material da aula, registre sua origem e respeite a licença fornecida.</li>
+<li>Abra <code>cenas/player.tscn</code>, selecione <code>Sprite2D</code> e arraste o PNG para <strong>Texture</strong>. Se antes usou o ícone reduzido, restaure o Scale do Sprite para <code>(1, 1)</code>.</li>
+<li>No Inspector do Sprite: <strong>CanvasItem → Texture → Filter → Nearest</strong>. Isso evita suavizar os pixels.</li>
+<li>Ajuste o tamanho da <strong>Shape</strong> da <code>CollisionShape2D</code> para cobrir o corpo; não deixe a colisão enorme por causa da textura anterior.</li>
+<li>Salve e teste o Player em <code>cenario.tscn</code>. Explique no LEIA-ME qual referência cultural aparece na arte e que papel tem no jogo.</li>
+</ol>
+<p><strong>Código nesta aula:</strong> mantenha integralmente <code>scripts/player.gd</code> da Aula 02. O mínimo funcional desta etapa é a configuração do Sprite pelo Inspector; não há um script novo na oficina.</p>
+<p><strong>Teste de passagem:</strong> personagem visível, pixels nítidos e colisão alinhada. Animações não são necessárias.</p>
+<h2 class="lesson-title" id="etapa-5">Aula 04 — O contrato da tela retrô</h2>
+<p><strong>O que construir:</strong> uma tela de baixa resolução que cresce sem deformar os pixels.</p>
+<ol>
+<li>Abra <strong>Project → Project Settings → Display → Window</strong>. Ative <strong>Advanced Settings</strong> se uma opção estiver oculta.</li>
+<li>Em <strong>Size</strong>, defina <strong>Viewport Width = 480</strong> e <strong>Viewport Height = 270</strong> (uma das resoluções propostas na aula).</li>
+<li>Defina <strong>Window Width Override = 960</strong> e <strong>Window Height Override = 540</strong> para abrir uma janela confortável.</li>
+<li>Em <strong>Stretch</strong>, escolha <strong>Mode = viewport</strong>, <strong>Aspect = keep</strong> e <strong>Scale Mode = integer</strong>. Se sua versão não exibir Scale Mode, use a versão Godot 4 adotada na turma que oferece essa opção.</li>
+<li>Confirme o filtro Nearest nos sprites. Rode F5 e redimensione a janela: barras nas bordas são aceitáveis; deformação do personagem não.</li>
+<li>Registre a resolução e uma relação com as restrições dos consoles clássicos: poucos pixels exigem silhuetas e informação visual claras.</li>
+</ol>
+<p><strong>Código nesta aula:</strong> preserve o script do Player. As configurações ficam salvas em <code>project.godot</code>; não é preciso editar esse arquivo à mão nem adicionar código.</p>
+<p><strong>Teste de passagem:</strong> personagem mantém a proporção e os pixels ao mudar o tamanho da janela.</p>
+<h2 class="lesson-title" id="etapa-6">Aula 05 — Design saudável</h2>
+<p><strong>O que construir:</strong> uma decisão documentada de adequação do conteúdo. Esta aula foi <strong>sem Godot e sem script novo</strong>: ClassInd-dle e Patch Note de Higienização.</p>
+<ol>
+<li>Descreva o loop do seu projeto: explorar, desviar e coletar.</li>
+<li>Escreva no LEIA-ME um pequeno <strong>antes → depois</strong> de feedback. Versão de referência: “Antes: a recompensa usava imagens de ferimentos; depois: a coleta mostra um brilho e uma contagem. O objetivo de alcançar a recompensa permanece”. Se esse conteúdo nunca existiu no seu jogo, identifique-o como uma proposta hipotética de redesign.</li>
+<li>Explique qual conteúdo foi suavizado e por que isso preserva a mecânica. Registre uma faixa pretendida como exercício pedagógico, sem apresentar o texto como classificação oficial.</li>
+<li>Na Godot, confira as texturas do <code>Sprite2D</code>, os textos dos <code>Label</code> e os sons que realmente utiliza. Substitua o recurso no Inspector se ele não combinar com sua decisão.</li>
+</ol>
+<p><strong>Código nesta aula:</strong> o jogo continua usando o movimento completo da Aula 02. Uma mudança visual/documental não exige um script artificial.</p>
+<p><strong>Teste de passagem:</strong> o texto descreve o que o avaliador encontra no jogo e distingue proposta de mudança de mudança realmente aplicada.</p>
+<h2 class="lesson-title" id="etapa-7">Aula 06 — O balcão sem azar</h2>
+<p><strong>O que construir:</strong> cena separada de loja, com saldo inicial 10, coleta simulada de +5 e três cosméticos de preços 5, 12 e 20. Compras não usam dinheiro real nem sorte e não precisam trocar o sprite do personagem.</p>
+<ol>
+<li>Crie a raiz <code>Loja</code> (<code>Control</code>), salve em <code>ui/loja.tscn</code> e selecione <strong>Layout → Anchors Preset → Full Rect</strong>.</li>
+<li>Adicione os nós abaixo, respeitando nomes, maiúsculas e hierarquia. O tipo aparece entre parênteses. Use <strong>Add Child Node</strong> no pai correto.</li>
+</ol>
+<pre id="codigo-1" tabindex="0"><code class="language-text">Loja (Control)
+└── PainelFundo (PanelContainer)
+    └── Margem (MarginContainer)
+        └── VBoxPrincipal (VBoxContainer)
+            ├── Titulo (Label)
+            ├── LabelMoedas (Label)
+            ├── PainelItemChapeu (PanelContainer)
+            │   └── HBoxChapeu (HBoxContainer)
+            │       ├── LabelChapeu (Label)
+            │       └── BtnComprarChapeu (Button)
+            ├── PainelItemCapa (PanelContainer)
+            │   └── HBoxCapa (HBoxContainer)
+            │       ├── LabelCapa (Label)
+            │       └── BtnComprarCapa (Button)
+            ├── PainelItemAura (PanelContainer)
+            │   └── HBoxAura (HBoxContainer)
+            │       ├── LabelAura (Label)
+            │       └── BtnComprarAura (Button)
+            ├── BtnGanharMoeda (Button)
+            └── LabelStatus (Label)
+</code></pre>
+<ol start="3">
+<li>Selecione <code>PainelFundo</code>, use <strong>Full Rect</strong> e offsets zero. Em <code>Margem → Theme Overrides → Constants</code>, configure as quatro margens como <code>8</code>. Os Containers organizam os filhos automaticamente.</li>
+<li>Para caber em 480×270, selecione <code>Loja → Theme → New Theme</code>; expanda o recurso e use <strong>Default Font Size = 12</strong>. Em <code>VBoxPrincipal → Theme Overrides → Constants → Separation</code>, use <code>4</code>. Essa compactação é uma <strong>versão de referência de layout</strong> para reunir as aulas.</li>
+<li>Em <strong>Text</strong>, preencha: Titulo = “Loja do Submundo”; LabelMoedas = “Moedas: 10”; LabelChapeu = “Chapéu espectral — 5 moedas”; LabelCapa = “Capa de névoa — 12 moedas”; LabelAura = “Aura de carvão — 20 moedas”. Botões de compra = “Comprar”; BtnGanharMoeda = “Coletar moeda da fase (+5)”.</li>
+<li>Nos três Labels de produto, marque <strong>Layout → Container Sizing → Horizontal → Expand + Fill</strong>, para o botão ficar ao lado. Em <code>LabelStatus</code>, escolha <strong>Autowrap Mode → Word Smart</strong> e tamanho mínimo vertical <code>34</code>; isso acomoda as mensagens em duas linhas.</li>
+<li>Anexe <code>ui/loja.gd</code> à raiz e copie o código completo abaixo, do material da Aula 06 (sem o apêndice opcional).</li>
+<li>Selecione cada Button → <strong>Node → Signals → pressed → Connect</strong>; receptor <code>Loja</code>. Informe os métodos: BtnGanharMoeda → <code>_on_btn_ganhar_moeda_pressed</code>; BtnComprarChapeu → <code>_on_btn_comprar_chapeu_pressed</code>; BtnComprarCapa → <code>_on_btn_comprar_capa_pressed</code>; BtnComprarAura → <code>_on_btn_comprar_aura_pressed</code>. As funções já existem; não crie duplicatas.</li>
+<li>Execute a loja com <strong>F6</strong>. Ela é uma demonstração independente e reinicia o saldo quando aberta novamente. F5 continua abrindo o labirinto.</li>
+</ol>
+<h3 class="lesson-subtitle">ui/loja.gd — código do material da Aula 06</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 3" data-copy="codigo-2" type="button">Copiar</button></div><pre id="codigo-2" tabindex="0"><code class="language-gdscript">extends Control
+## Aula 06 — Loja ética (script-espelho)
+## Preferir construir por etapas na sala (Blocos 3–4 do README).
+## Hierarquia esperada: Loja → PainelFundo → Margem → VBoxPrincipal → …
+## Sem loot box / randi() / IAP real — só moedas ganhas jogando + preço fixo.
+
+## Saldo inicial — moedas "já coletadas" na fase (simulação pedagógica).
+var moedas: int = 10
+
+## Itens possuídos (false = ainda não comprou).
+var tem_chapeu: bool = false
+var tem_capa: bool = false
+var tem_aura: bool = false
+
+## Preços fixos — determinísticos (sem sorte).
+const PRECO_CHAPEU: int = 5
+const PRECO_CAPA: int = 12
+const PRECO_AURA: int = 20
+const GANHO_FASE: int = 5
+
+@onready var label_moedas: Label = $PainelFundo/Margem/VBoxPrincipal/LabelMoedas
+@onready var label_status: Label = $PainelFundo/Margem/VBoxPrincipal/LabelStatus
+@onready var btn_chapeu: Button = $PainelFundo/Margem/VBoxPrincipal/PainelItemChapeu/HBoxChapeu/BtnComprarChapeu
+@onready var btn_capa: Button = $PainelFundo/Margem/VBoxPrincipal/PainelItemCapa/HBoxCapa/BtnComprarCapa
+@onready var btn_aura: Button = $PainelFundo/Margem/VBoxPrincipal/PainelItemAura/HBoxAura/BtnComprarAura
+
+
+func _ready() -&gt; void:
+	_atualizar_hud()
+	label_status.text = "Bem-vindo. Só moedas ganhas jogando."
+
+
+func _atualizar_hud() -&gt; void:
+	label_moedas.text = "Moedas: %d" % moedas
+
+
+func _on_btn_ganhar_moeda_pressed() -&gt; void:
+	moedas += GANHO_FASE
+	label_status.text = "Você coletou +%d moedas na fase." % GANHO_FASE
+	_atualizar_hud()
+
+
+func _on_btn_comprar_chapeu_pressed() -&gt; void:
+	if tem_chapeu:
+		label_status.text = "Você já possui o Chapéu. Sem recompra forçada."
+		return
+	if moedas &lt; PRECO_CHAPEU:
+		label_status.text = "Moedas insuficientes. Volte à fase e colete mais."
+		return
+	moedas -= PRECO_CHAPEU
+	tem_chapeu = true
+	btn_chapeu.disabled = true
+	btn_chapeu.text = "Adquirido"
+	label_status.text = "Chapéu espectral adquirido. Cosmético — sem vantagem injusta."
+	_atualizar_hud()
+
+
+func _on_btn_comprar_capa_pressed() -&gt; void:
+	if tem_capa:
+		label_status.text = "Você já possui a Capa. Sem recompra forçada."
+		return
+	if moedas &lt; PRECO_CAPA:
+		label_status.text = "Moedas insuficientes. Volte à fase e colete mais."
+		return
+	moedas -= PRECO_CAPA
+	tem_capa = true
+	btn_capa.disabled = true
+	btn_capa.text = "Adquirido"
+	label_status.text = "Capa de névoa adquirida. Cosmético — sem vantagem injusta."
+	_atualizar_hud()
+
+
+func _on_btn_comprar_aura_pressed() -&gt; void:
+	if tem_aura:
+		label_status.text = "Você já possui a Aura. Sem recompra forçada."
+		return
+	if moedas &lt; PRECO_AURA:
+		label_status.text = "Moedas insuficientes. Volte à fase e colete mais."
+		return
+	moedas -= PRECO_AURA
+	tem_aura = true
+	btn_aura.disabled = true
+	btn_aura.text = "Adquirido"
+	label_status.text = "Aura de carvão adquirida. Cosmético — sem vantagem injusta."
+	_atualizar_hud()
+</code></pre></div>
+<p><strong>Teste de passagem:</strong> com 10 moedas, tente a Capa (nega por falta de saldo); compre o Chapéu (saldo 5 e botão Adquirido); colete duas vezes (saldo 15); compre a Capa (saldo 3). Aura só libera quando você juntar 20. Nenhuma compra deixa saldo negativo ou permite recompra.</p>
+<h2 class="lesson-title" id="etapa-8">Aula 07 — Arte, coleta e trabalho organizado</h2>
+<p><strong>O que construir:</strong> a moeda e sua coleta no labirinto. Em sala, os ofícios eram Arte da moeda × Programação da coleta. Aqui você refaz ambos, podendo trocar ajuda com colegas.</p>
+<ol>
+<li>No diário, liste os ofícios, o que foi feito e pelo menos três itens fora do escopo, por exemplo combate, multiplayer e NPCs. Use etapas pequenas: ideia → MVP → produção → integração → playtest.</li>
+<li>Desenhe a moeda no LibreSprite e exporte <code>sprites/moeda.png</code> (16×16 ou 32×32). O projeto permanece no disco local. Registre versões com data e combine quem edita cada cena; o diário compartilhado do site não sincroniza os arquivos Godot.</li>
+<li>Crie <code>Moeda</code> (<code>Area2D</code>) em <code>cenas/moeda.tscn</code>, com filhos <code>Sprite2D</code> (Texture = moeda.png, Filter = Nearest) e <code>CollisionShape2D</code> (Shape = New CircleShape2D cobrindo a moeda).</li>
+<li>Na raiz Moeda → <strong>Monitoring = On</strong>; em Collision, Mask <code>1</code>. O Player deve ter Collision Layer <code>1</code>. A Area2D detecta o corpo e não funciona como parede.</li>
+<li>Substitua <code>scripts/player.gd</code> pelo arquivo completo abaixo: é o movimento da Aula 02 acrescido do grupo e contador da Aula 07. Não altere as ações do Input Map.</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/player.gd — movimento e coleta do material da Aula 07</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 4" data-copy="codigo-3" type="button">Copiar</button></div><pre id="codigo-3" tabindex="0"><code class="language-gdscript">extends CharacterBody2D
+
+@export var speed: float = 200.0
+
+var moedas: int = 0
+
+func _ready() -&gt; void:
+	add_to_group("player")
+
+func _physics_process(_delta: float) -&gt; void:
+	var direction := Input.get_vector("ir_esquerda", "ir_direita", "ir_cima", "ir_baixo")
+	velocity = direction * speed
+	move_and_slide()
+
+func coletar_moeda() -&gt; void:
+	moedas += 1
+	print("Moedas: %d" % moedas)
+</code></pre></div>
+<ol start="6">
+<li>Anexe <code>scripts/moeda.gd</code> à raiz <code>Moeda</code> e copie o script abaixo, presente na aula.</li>
+<li>Selecione <code>Moeda</code> → <strong>Node → Signals → body_entered → Connect</strong> → receptor Moeda, método <code>_on_body_entered</code>. Salve. Faça a conexão <strong>uma vez</strong>, pelo editor.</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/moeda.gd — código do material da Aula 07</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 5" data-copy="codigo-4" type="button">Copiar</button></div><pre id="codigo-4" tabindex="0"><code class="language-gdscript">extends Area2D
+## Aula 07 — Moeda (script-espelho)
+## Preferir construir por etapas na sala (Bloco E2.3 do README).
+## Hierarquia esperada:
+##   Moeda (Area2D)
+##   ├── Sprite2D          ← textura = sprites/moeda.png (arte do LibreSprite)
+##   └── CollisionShape2D  ← CircleShape2D cobrindo o sprite
+##
+## Conectar no editor (Node → Signals):
+##   body_entered → Moeda → _on_body_entered
+##
+## O Player já tem movimento (Aula 02). Só precisa de:
+##   add_to_group("player") + func coletar_moeda()
+
+func _on_body_entered(body: Node2D) -&gt; void:
+	if not body.is_in_group("player"):
+		return
+	if body.has_method("coletar_moeda"):
+		body.coletar_moeda()
+	queue_free()
+</code></pre></div>
+<ol start="8">
+<li>Abra <code>cenas/cenario.tscn</code>, que já contém o Player. Arraste <code>moeda.tscn</code> três vezes e coloque as instâncias em <code>(140, 100)</code>, <code>(210, 100)</code> e <code>(280, 140)</code>, sem sobrepor o Player.</li>
+<li>Execute F5 e acompanhe o painel <strong>Output</strong> do editor: tocar cada moeda deve removê-la e mostrar <code>Moedas: 1</code>, depois <code>2</code> e <code>3</code>.</li>
+<li>Registre quem fez a arte, quem ajudou na programação, o teste e a correção realizada. Na atividade original, cada aluno finalizava o diário na Oficina; para este trabalho, inclua o resumo no LEIA-ME do ZIP.</li>
+</ol>
+<p><strong>Teste de passagem:</strong> todas as moedas somem ao contato e contam uma vez. Ao reiniciar, os contadores voltam a zero; salvar progresso não faz parte deste exercício.</p>
+<h2 class="lesson-title" id="etapa-9">Aula 08 — O labirinto feito para alguém</h2>
+<p><strong>O que construir:</strong> nível com câmera e uma trilha ligada às motivações do jogador: <strong>Conquista</strong> (segredo e moeda especial) ou <strong>Ação</strong> (obstáculo móvel e timing). Escolha apenas uma. Design do perfil decide a experiência; programação implementa a mecânica.</p>
+<h3 class="lesson-subtitle">Primeiro: desenhe e monte o mapa</h3>
+<ol>
+<li>Antes da Godot, desenhe um mapa pequeno: entrada, caminho principal, moedas comuns e uma passagem lateral secreta ou corredor com obstáculo móvel. Escreva o perfil escolhido e por que essa mecânica o atende. A folha Fase 1 da aula é uma referência.</li>
+<li><strong>Adaptação de referência:</strong> o script de movimento ensinado é visto de cima, sem pulo. Neste guia, os blocos do mapa funcionam como paredes/corredores, e a plataforma móvel como obstáculo. Você pode recriar o desenho da aula de modo parecido, mantendo as áreas acessíveis com as quatro direções. Não adicione saltos que este código não implementa.</li>
+<li>Em <code>cenas/cenario.tscn</code>, adicione paredes <code>StaticBody2D</code>, cada uma com <code>CollisionShape2D → RectangleShape2D</code> e um <code>Polygon2D</code> colorido cobrindo a mesma região. Mantenha Collision Layer <code>1</code>. Dimensione o recurso Shape, sem esticar o corpo físico.</li>
+<li>Uma montagem inicial funcional: parede superior com centro <code>(480, -10)</code> e Size <code>(960, 20)</code>; inferior <code>(480, 280)</code> e Size <code>(960, 20)</code>; esquerda <code>(-10, 135)</code> e Size <code>(20, 270)</code>; direita <code>(970, 135)</code> e Size <code>(20, 270)</code>. Deixe o Player em <code>(80, 100)</code>.</li>
+<li>Para criar o corredor e uma passagem lateral, adicione uma parede interior em <code>(400, 110)</code>, Size <code>(20, 220)</code>. Ela deixa uma passagem por baixo, entre y=220 e y=270. Coloque moedas à direita, por exemplo em <code>(520, 100)</code> e <code>(700, 160)</code>. O Player de 16×20 cabe no vão de 50 pixels.</li>
+<li>Se duplicar paredes e editar o tamanho da Shape, escolha <strong>Make Unique</strong> no recurso antes de alterar: duplicatas podem compartilhar a mesma forma. Deixe visuais alinhados às colisões.</li>
+</ol>
+<h3 class="lesson-subtitle">A câmera acompanha o herói</h3>
+<ol>
+<li>Abra <code>cenas/player.tscn</code>, adicione <code>Camera2D</code> como <strong>filha direta</strong> de Player. Position <code>(0, 0)</code>, <strong>Enabled = On</strong>, Zoom <code>(1, 1)</code>. Deixe Position Smoothing desligado neste primeiro teste.</li>
+<li>Salve e execute F5: o personagem fica acompanhado, inclusive ao passar de x=480. A câmera do editor 2D não é a câmera do jogo.</li>
+<li>O Inspector já basta. Se precisar tornar essa câmera atual explicitamente, anexe <strong>somente à Camera2D</strong> <code>scripts/camera-player.gd</code>, com o código fornecido na aula:</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/camera-player.gd — código opcional do material da Aula 08</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 6" data-copy="codigo-5" type="button">Copiar</button></div><pre id="codigo-5" tabindex="0"><code class="language-gdscript">extends Camera2D
+## Aula 08 — câmera segue o Player (script-espelho · Encontro 1)
+## Preferir: Camera2D filha do Player + Enabled no Inspector.
+## Use este script só se a câmera não ficar ativa sozinha.
+
+func _ready() -&gt; void:
+	make_current()
+</code></pre></div>
+<h3 class="lesson-subtitle">Trilha Conquista — segredo e moeda brilhante</h3>
+<ol>
+<li>Posicione a moeda especial depois da passagem lateral, por exemplo <code>(700, 80)</code>, de modo que o caminho exija explorar. Teste se há passagem real; “difícil” não significa bloqueado por colisão.</li>
+<li>Crie uma nova cena <code>MoedaBrilhante</code> (<code>Area2D</code>) em <code>cenas/moeda-brilhante.tscn</code>. Filhos <code>Sprite2D</code> e <code>CollisionShape2D</code>, configurados como a moeda comum. Não precisa herdar a cena nem manter o script antigo.</li>
+<li>Anexe <code>scripts/moeda-brilhante.gd</code> à raiz. Conecte <strong>body_entered → _on_body_entered</strong> no editor, uma vez. Coloque uma instância na posição planejada.</li>
+<li>Substitua <code>scripts/player.gd</code> pela versão completa abaixo. Ela reúne o movimento e os dois contadores ensinados nas aulas; a coleta especial é separada da comum.</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/player.gd — versão consolidada de referência das Aulas 02, 07 e 08</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 7" data-copy="codigo-6" type="button">Copiar</button></div><pre id="codigo-6" tabindex="0"><code class="language-gdscript">extends CharacterBody2D
+
+@export var speed: float = 200.0
+
+var moedas: int = 0
+var moedas_secretas: int = 0
+
+func _ready() -&gt; void:
+	add_to_group("player")
+
+func _physics_process(_delta: float) -&gt; void:
+	var direction := Input.get_vector("ir_esquerda", "ir_direita", "ir_cima", "ir_baixo")
+	velocity = direction * speed
+	move_and_slide()
+
+func coletar_moeda() -&gt; void:
+	moedas += 1
+	print("Moedas: %d" % moedas)
+
+func coletar_moeda_secreta() -&gt; void:
+	moedas_secretas += 1
+	print("Moedas secretas: %d" % moedas_secretas)
+</code></pre></div>
+<h3 class="lesson-subtitle">scripts/moeda-brilhante.gd — código do material da Aula 08</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 8" data-copy="codigo-7" type="button">Copiar</button></div><pre id="codigo-7" tabindex="0"><code class="language-gdscript">extends Area2D
+## Aula 08 — moeda brilhante (script-espelho · trilha Conquista)
+## Preferir construir por etapas na Oficina (bloco Copiar código).
+## Hierarquia: Moeda (Area2D) → Sprite2D + CollisionShape2D
+## Conectar body_entered → _on_body_entered
+##
+## No player.gd (além da coleta da Aula 07):
+##   var moedas_secretas: int = 0
+##   func coletar_moeda_secreta() -&gt; void:
+##       moedas_secretas += 1
+##       print("Moedas secretas: %d" % moedas_secretas)
+
+@export var pulse_speed: float = 4.0
+@export var pulse_amount: float = 0.15
+
+var _base_scale: Vector2 = Vector2.ONE
+
+
+func _ready() -&gt; void:
+	_base_scale = scale
+
+
+func _process(_delta: float) -&gt; void:
+	var t := sin(Time.get_ticks_msec() * 0.001 * pulse_speed)
+	var s := 1.0 + t * pulse_amount
+	scale = _base_scale * s
+	modulate = Color(1.0, 1.0, 0.7 + t * 0.3, 1.0)
+
+
+func _on_body_entered(body: Node2D) -&gt; void:
+	if not body.is_in_group("player"):
+		return
+	if body.has_method("coletar_moeda_secreta"):
+		body.coletar_moeda_secreta()
+	queue_free()
+</code></pre></div>
+<p><strong>Teste Conquista:</strong> moeda pulsa, pode ser alcançada pelo caminho, desaparece ao toque e mostra <code>Moedas secretas: 1</code> no Output. As moedas comuns continuam usando <code>scripts/moeda.gd</code> e o contador <code>Moedas</code>.</p>
+<h3 class="lesson-subtitle">Trilha Ação — obstáculo que vai e volta</h3>
+<p>Escolha esta seção <strong>em vez da trilha Conquista</strong> se seu perfil enfatiza ação e desafio. Pode manter <code>player.gd</code> da Aula 07; não é necessário contador secreto.</p>
+<ol>
+<li>Crie <code>Plataforma</code> (<code>AnimatableBody2D</code>) em <code>cenas/plataforma.tscn</code>. Filhos <code>Sprite2D</code> com uma textura visível e <code>CollisionShape2D</code> com RectangleShape2D de <code>(32, 16)</code>. Ajuste a imagem para cobrir a colisão.</li>
+<li>Mantenha <strong>Sync to Physics = On</strong> e Collision Layer <code>1</code>. Anexe <code>scripts/plataforma.gd</code>, abaixo.</li>
+<li>Instancie em <code>cenario.tscn</code> em <code>(530, 135)</code>, numa área livre. O Inspector expõe <strong>Distance = 120</strong> e <strong>Speed = 80</strong>. Use distância positiva. O obstáculo percorrerá x=530 até x=650 e retornará.</li>
+<li>Deixe espaço para o jogador desviar e moedas depois do trajeto. Não coloque o corpo dentro de paredes estáticas, do Player ou de outras plataformas. No movimento visto de cima, ele bloqueia o caminho; não causa dano nem exige pulo.</li>
+</ol>
+<h3 class="lesson-subtitle">scripts/plataforma.gd — código do material da Aula 08</h3>
+<div class="guia-code"><div class="guia-code-bar"><span>GDScript · Godot 4</span><button aria-label="Copiar código GDScript 9" data-copy="codigo-8" type="button">Copiar</button></div><pre id="codigo-8" tabindex="0"><code class="language-gdscript">extends AnimatableBody2D
+## Aula 08 — plataforma móvel (script-espelho · trilha Ação)
+## Preferir construir por etapas na Oficina (bloco Copiar código).
+## Hierarquia: Plataforma (AnimatableBody2D) → Sprite2D + CollisionShape2D
+## Ajuste distance e speed no Inspector.
+## Dica: deixe a plataforma no ar (não encravada no chão StaticBody2D).
+
+@export var distance: float = 120.0
+@export var speed: float = 80.0
+
+var _origin: Vector2
+var _traveled: float = 0.0
+
+
+func _ready() -&gt; void:
+	_origin = global_position
+
+
+func _physics_process(delta: float) -&gt; void:
+	_traveled += speed * delta
+	# 0 → distance → 0 → … sem inverter direção (evita teleporte/pisca).
+	global_position.x = _origin.x + pingpong(_traveled, distance)
+</code></pre></div>
+<p><strong>Teste Ação:</strong> obstáculo vai e volta suavemente; Player colide e consegue passar escolhendo o momento. Ajuste a velocidade no Inspector até o desafio ficar possível para um iniciante.</p>
+<h3 class="lesson-subtitle">Playtest e diário final</h3>
+<p>Peça a um colega para experimentar sem você explicar cada movimento. Registre: perfil-alvo, mecânica escolhida, o que o colega fez/sentiu e um ajuste que você realizou após observar. Explique como a motivação virou uma decisão concreta de mapa. Não é necessário implementar as duas trilhas ou acrescentar combate, chefe e loja dentro do labirinto.</p>
+<h2 class="lesson-title" id="etapa-10">Conferência antes de enviar</h2>
+<ol>
+<li>Feche e reabra o projeto pelo <code>project.godot</code>.</li>
+<li>F5 deve abrir <code>cenas/cenario.tscn</code>, com Player, moedas, câmera e trilha escolhida.</li>
+<li>Abra <code>ui/loja.tscn</code> e use F6 para testar os quatro botões.</li>
+<li>Confira o painel Debugger: resolva erros de script, recurso ausente e caminho de nó antes de compactar.</li>
+<li>Finalize <code>LEIA-ME.txt</code>: autor; colegas; Godot 4.x usada; WASD/setas; F5 labirinto; F6 loja; identidade cultural; tela; design saudável; perfil; diário e teste.</li>
+</ol>
+<h2 class="lesson-title" id="etapa-11">Como zipar o projeto — Windows</h2>
+<ol>
+<li>Salve todas as cenas e feche a Godot.</li>
+<li>Abra o <strong>Explorador de Arquivos</strong> na pasta que contém <code>project.godot</code>. Em <strong>Exibir → Mostrar → Itens ocultos</strong>, habilite a visualização para identificar <code>.godot</code>.</li>
+<li>Selecione <code>project.godot</code>, <code>cenas</code>, <code>scripts</code>, <code>sprites</code>, <code>ui</code>, <code>audio</code>, <code>LEIA-ME.txt</code> e os demais recursos usados (inclusive <code>icon.svg</code>, se alguma cena o referencia). Inclua arquivos <code>.uid</code> e <code>.import</code> existentes ao lado de scripts/imagens. <strong>Não selecione a pasta <code>.godot/</code></strong>, que é cache gerado pela engine. Não confunda arquivos <code>.import</code> ao lado das imagens com a pasta de cache.</li>
+<li>Com a seleção feita, botão direito → <strong>Compactar para arquivo ZIP</strong>. No Windows 10: <strong>Enviar para → Pasta compactada</strong>. Nome sugerido: <code>TrabalhoFinal_SeuNome.zip</code>. Não coloque o próprio ZIP dentro de um segundo ZIP.</li>
+<li>Abra o ZIP e confira que <code>project.godot</code> e suas pastas estão presentes, sem <code>.godot/</code>. O projeto deve estar na raiz do ZIP ou dentro de uma única pasta claramente identificada.</li>
+<li><strong>Teste de verdade:</strong> extraia o ZIP para uma pasta local diferente. Na Godot Project Manager → <strong>Import → Browse</strong>, selecione o <code>project.godot</code> extraído, abra e aguarde a importação. Execute F5 no labirinto e F6 na loja. A Godot recriará <code>.godot/</code> na pasta extraída; isso é normal.</li>
+<li>No site, abra <strong>Trabalho Final</strong>, escolha o ZIP conferido e conclua o envio <strong>até o último dia de aula</strong>. Aguarde a confirmação do site; selecionar o arquivo sem enviar não conclui a entrega.</li>
+</ol>
+<h2 class="lesson-title" id="etapa-12">Problemas comuns</h2>
+<ul>
+<li><strong>Player não anda:</strong> confirme os quatro nomes <code>ir_*</code> no Input Map, as teclas e o foco na janela do jogo. O script precisa estar no CharacterBody2D.</li>
+<li><strong>Player desaparece ou não pula:</strong> esta referência usa movimento em quatro direções, sem gravidade/pulo. Faça corredores acessíveis e confirme a câmera Enabled no Player.</li>
+<li><strong>Colisão não funciona:</strong> cada corpo/área precisa de CollisionShape2D com Shape definida e não desabilitada. Para detectar o Player, a Mask da moeda deve incluir a Layer do Player (<code>1</code>). Use Debug → Visible Collision Shapes durante o teste.</li>
+<li><strong>Moeda não some:</strong> verifique Monitoring, conexão <code>body_entered</code>, grupo <code>player</code> adicionado em <code>_ready()</code> e script anexado à raiz Area2D.</li>
+<li><strong>Moeda some, contador não cresce:</strong> comum chama <code>coletar_moeda</code>; brilhante chama <code>coletar_moeda_secreta</code>. Confira a versão completa do Player e veja o Output.</li>
+<li><strong>Function already defined / extends inesperado:</strong> você colou versões inteiras juntas. Use um único arquivo completo para a etapa atual, sem duplicar funções.</li>
+<li><strong>Node not found / acesso a null na loja:</strong> confira cada nome e pai da árvore. Os caminhos <code>$PainelFundo/Margem/VBoxPrincipal/...</code> devem existir exatamente.</li>
+<li><strong>Botão não responde:</strong> confira o sinal pressed conectado ao método certo da raiz Loja. Não conecte o mesmo sinal pelo editor e pelo script simultaneamente.</li>
+<li><strong>Loja cortada:</strong> confirme fonte 12 no Theme da raiz, painel Full Rect, margens 8, separação 4 e quebra de linha no LabelStatus. Não aumente o tamanho mínimo dos filhos além do viewport 480×270.</li>
+<li><strong>Sprite borrado ou esticado:</strong> Nearest no Sprite; viewport/keep/integer no Project Settings; verifique se não deformou o Scale do Sprite.</li>
+<li><strong>Todas as paredes mudam juntas:</strong> Shape compartilhada; faça Make Unique antes de redimensionar uma duplicata.</li>
+<li><strong>Recurso ausente depois de extrair:</strong> inclua todos os PNGs, SVGs, sons, cenas e scripts referenciados. Caminhos devem apontar para dentro do projeto (<code>res://</code>). Refaça o ZIP e o teste de extração.</li>
+</ul>
+<h2 class="lesson-title" id="etapa-13">Materiais de origem</h2>
+<p>Este roteiro segue as páginas e os materiais das Aulas 02–08. As adaptações para reunir tudo num projeto, os exemplos de mapa e a consolidação do Player foram identificados como versões de referência.</p>
+<ul>
+<li><a href="../pages/aula2.html">Aula 02 — Player e Input Map</a> · <a href="../assets/docs/aulas/aula02-player/README.md">material</a></li>
+<li><a href="../pages/aula3.html">Aula 03 — pixel art e cultura</a></li>
+<li><a href="../pages/aula4.html">Aula 04 — viewport retrô</a></li>
+<li><a href="../pages/aula5.html">Aula 05 — design saudável</a></li>
+<li><a href="../pages/aula6.html">Aula 06 — loja ética</a> · <a href="../assets/docs/aulas/aula06-loja-etica/README.md">material</a></li>
+<li><a href="../pages/aula7.html">Aula 07 — organização e coleta</a> · <a href="../assets/docs/aulas/aula07-equipe-labirinto/README.md">material</a></li>
+<li><a href="../pages/aula8.html">Aula 08 — perfis e mecânicas</a></li>
+</ul>
+</article>
+<footer class="guia-footer"><a href="#conteudo">Voltar ao início do guia ↑</a></footer>
+</main></div></div>
+<p id="copy-status" class="guia-copy-status" role="status" aria-live="polite"></p>
+<script>document.querySelectorAll('[data-copy]').forEach((button) => {
+  button.addEventListener('click', async () => {
+    const block = document.getElementById(button.dataset.copy);
+    const status = document.getElementById('copy-status');
+    try {
+      await navigator.clipboard.writeText(block.textContent);
+      status.textContent = 'Código copiado. Cole no arquivo indicado da Godot.';
+      button.textContent = 'Copiado!';
+      setTimeout(() => { button.textContent = 'Copiar'; }, 1800);
+    } catch {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(block);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      status.textContent = 'Cópia automática indisponível. Código selecionado: use Ctrl+C ou o comando Copiar.';
+      block.focus();
+    }
+  });
+});</script>
+</body></html>

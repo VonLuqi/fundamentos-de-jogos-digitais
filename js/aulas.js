@@ -8,6 +8,7 @@ import { initAppShell } from './app-shell.js';
 import {
   ApiError,
   LESSONS,
+  MODULES,
   ROUTES,
   fetchLessonsPublishMap,
   getSession,
@@ -104,7 +105,7 @@ function resolveProvaAssessmentState(status) {
   if (attempt?.status === 'in_progress' || status.mustResume) return 'in_progress';
   if (attempt?.status === 'graded') return 'completed';
   if (attempt?.status === 'submitted' || attempt?.status === 'timed_out') return 'awaiting';
-  if (status.canStart) return 'available';
+  if (status.canStart || status.canSubmit) return 'available';
   const exam = status.exam;
   if (exam?.isOpen && exam?.openTurma && exam.openTurma === currentUser?.turma) {
     return 'available';
@@ -113,17 +114,24 @@ function resolveProvaAssessmentState(status) {
   return 'coming-soon';
 }
 
+/** Provas/trabalhos da trilha (M1, M2, Trabalho Final): um gate por exame. */
+const TRAIL_ASSESSMENTS = MODULES
+  .flatMap((module) => module.lessons || [])
+  .filter(isAssessmentLesson);
+
 async function refreshAssessmentStates() {
   assessmentStates = {};
   if (!currentToken) return;
-  try {
-    const status = await provaGetExamStatus(currentToken);
-    assessmentStates['prova-modulo1'] = resolveProvaAssessmentState(status);
-  } catch {
-    assessmentStates['prova-modulo1'] = currentUser?.role === 'admin'
-      ? 'available'
-      : 'coming-soon';
-  }
+  await Promise.all(TRAIL_ASSESSMENTS.map(async (lesson) => {
+    try {
+      const status = await provaGetExamStatus(currentToken, { examId: lesson.examId });
+      assessmentStates[lesson.id] = resolveProvaAssessmentState(status);
+    } catch {
+      assessmentStates[lesson.id] = currentUser?.role === 'admin'
+        ? 'available'
+        : 'coming-soon';
+    }
+  }));
 }
 
 function renderTrail() {

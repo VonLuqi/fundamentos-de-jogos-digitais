@@ -1,5 +1,6 @@
 /**
- * Hub admin — Prova Módulo 1 (Tasks D2–D3).
+ * Hub admin — Provas (M1, M2) e Trabalho Final (Tasks D2–D3 + multi-exame).
+ * `?exam=<id>` escolhe o exame; a UI de correção se adapta ao tipo (quiz com/sem discursivas · project).
  */
 
 'use strict';
@@ -10,13 +11,16 @@ import {
   ROUTES,
   getSession,
   logout,
+  provaAdminDownloadSubmission,
   provaAdminFinalizeGrade,
+  provaAdminGradeProject,
   provaAdminGetAttempt,
   provaAdminListAttempts,
   provaAdminRespondContest,
   provaAdminResetAttempt,
   provaAdminResetAllAttempts,
   provaAdminScoreDiscursive,
+  provaAdminSetExamOpen,
   requireAdmin,
 } from './api.js';
 
@@ -43,9 +47,78 @@ const EVENT_LABELS = {
   beforeunload: 'Tentou fechar / recarregar',
 };
 
+const DEFAULT_EXAM_ID = 'modulo1-provacao';
+const EXAM_TITLES = {
+  'modulo1-provacao': ['PROVA', 'MÓDULO 1'],
+  'modulo2-prova': ['PROVA', 'MÓDULO 2'],
+  'trabalho-final': ['TRABALHO', 'FINAL'],
+};
+
+/** Exame da URL (`?exam=`); sem parâmetro = Módulo 1. */
+function resolveExamId() {
+  try {
+    const id = String(new URLSearchParams(window.location.search).get('exam') || '').trim();
+    return Object.prototype.hasOwnProperty.call(EXAM_TITLES, id) ? id : DEFAULT_EXAM_ID;
+  } catch {
+    return DEFAULT_EXAM_ID;
+  }
+}
+
 let currentToken = null;
+let examId = resolveExamId();
+/** `exam` do último list/detail (kind, mcMax, hasDiscursive, totalPoints…). @type {object|null} */
+let examInfo = null;
 /** @type {object|null} */
 let currentDetail = null;
+/** Contagens do último list (repintar o gate após salvar). */
+let lastCounts = {};
+
+function isProjectExam() {
+  return examInfo?.kind === 'project';
+}
+
+function withExam(payload = {}) {
+  return { ...payload, examId };
+}
+
+/** Ações do detalhe usam o exame da própria tentativa aberta (nunca o seletor, que pode ter mudado). */
+function withDetailExam(payload = {}) {
+  return { ...payload, examId: currentDetail?.examId || examId };
+}
+
+/** Gerações: respostas de requests antigos (outro exame/filtro) são descartadas. */
+let listGen = 0;
+let detailGen = 0;
+
+function examMax() {
+  return {
+    mc: Number(examInfo?.mcMax ?? 12),
+    disc: Number(examInfo?.discursiveMax ?? 8),
+    total: Number(examInfo?.totalPoints ?? 20),
+  };
+}
+
+function isoToLocalInput(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function localInputToIso(value) {
+  const v = String(value || '').trim();
+  if (!v) return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function formatBytes(bytes) {
+  const n = Number(bytes) || 0;
+  if (n >= 1048576) return `${(n / 1048576).toFixed(1).replace('.', ',')} MB`;
+  if (n >= 1024) return `${Math.round(n / 1024)} KB`;
+  return `${n} B`;
+}
 
 function $(id) {
   return document.getElementById(id);
@@ -114,12 +187,14 @@ function readFilters() {
 }
 
 function detailUrl(attemptId) {
-  const base = ROUTES.provaAdmin();
-  return `${base}?attempt=${encodeURIComponent(attemptId)}`;
+  const url = new URL(ROUTES.provaAdminExam(examId), window.location.href);
+  url.searchParams.set('attempt', attemptId);
+  return url.pathname + url.search;
 }
 
 function setListVisible(visible) {
   const nodes = [
+    $('prova-admin-exams'),
     $('prova-admin-gate-label')?.closest('.prova-admin-gate'),
     document.querySelector('.prova-admin-filters'),
     $('prova-admin-meta'),
@@ -135,24 +210,138 @@ function setListVisible(visible) {
   if (detail) detail.hidden = visible;
 }
 
+function paintExamChrome() {
+  const [first, second] = EXAM_TITLES[examId] || EXAM_TITLES[DEFAULT_EXAM_ID];
+  const title = $('prova-admin-page-title');
+  if (title) title.innerHTML = `${escapeHtml(first)} <span class="accent">${escapeHtml(second)}</span>`;
+  const select = /** @type {HTMLSelectElement|null} */ ($('prova-admin-exam'));
+  if (select) select.value = examId;
+  const asStudent = $('prova-admin-as-student');
+  if (asStudent) asStudent.setAttribute('href', ROUTES.provaExam(examId));
+
+  const project = isProjectExam();
+  const hint = $('prova-admin-gate-hint');
+  if (hint) {
+    hint.innerHTML = project
+      ? 'As entregas começam fechadas. Libere uma turma por vez; o aluno pode reenviar o .zip até o <strong>prazo</strong> ou até você selar. Vale o último envio.'
+      : 'A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.'
+        + (examInfo?.hasDiscursive
+          ? ' <strong>Saídas</strong> = vezes que o aluno tirou o foco da prova (mudou de aba / saiu da página).'
+          : ' Correção de múltipla escolha é automática; use <em>Fechar nota</em> para o aluno ver o resultado.');
+  }
+  const closesLabel = $('prova-admin-closes-label');
+  if (closesLabel) closesLabel.textContent = project ? 'Prazo de entrega (opcional)' : 'Fecha em (opcional)';
+  const resetHint = $('prova-admin-reset-all-hint');
+  if (resetHint) {
+    resetHint.textContent = project
+      ? 'Apaga as entregas da lista (e os arquivos .zip; respeita o filtro de turma). Cada aluno poderá enviar de novo.'
+      : 'Apaga as provas da lista (respeita o filtro de turma). Cada aluno poderá fazer de novo.';
+  }
+  document.title = `${first} ${second} | Hub do Mestre`;
+}
+
+function setGateStatus(text, isError = false) {
+  const el = $('prova-admin-gate-status');
+  if (!el) return;
+  el.textContent = text || '';
+  el.classList.toggle('is-error', Boolean(isError));
+}
+
 function paintGate(overview) {
   const label = $('prova-admin-gate-label');
   const countsEl = $('prova-admin-gate-counts');
-  const gate = overview?.gate || {};
+  const exam = overview?.exam || examInfo || {};
+  const gate = overview?.gate || exam.gate || {};
   const counts = overview?.counts || {};
   if (label) {
     label.textContent = gate.openTurma
       ? `Gate: liberada só para ${gate.openTurma}`
       : 'Gate: fechada';
+    if (exam.contentReady === false) label.textContent += ' · conteúdo pendente (não pode ser liberada)';
   }
   if (countsEl) {
-    countsEl.textContent = [
-      `Em andamento: ${counts.inProgress ?? 0}`,
-      `Aguardando nota: ${counts.awaitingGrade ?? 0}`,
-      `Fechadas: ${counts.graded ?? 0}`,
-      `Total: ${counts.total ?? 0}`,
-    ].join(' · ');
+    countsEl.textContent = isProjectExam()
+      ? [
+        `Entregas: ${counts.total ?? 0}`,
+        `Aguardando nota: ${counts.awaitingGrade ?? 0}`,
+        `Corrigidas: ${counts.graded ?? 0}`,
+      ].join(' · ')
+      : [
+        `Em andamento: ${counts.inProgress ?? 0}`,
+        `Aguardando nota: ${counts.awaitingGrade ?? 0}`,
+        `Fechadas: ${counts.graded ?? 0}`,
+        `Total: ${counts.total ?? 0}`,
+      ].join(' · ');
   }
+  document.querySelectorAll('[data-gate-mode]').forEach((btn) => {
+    const mode = btn.getAttribute('data-gate-mode');
+    const active = mode === 'closed' ? !gate.openTurma : gate.openTurma === mode;
+    btn.classList.toggle('is-active', active);
+    btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+  });
+  const opens = /** @type {HTMLInputElement|null} */ ($('prova-admin-opens'));
+  const closes = /** @type {HTMLInputElement|null} */ ($('prova-admin-closes'));
+  if (opens && document.activeElement !== opens) opens.value = isoToLocalInput(exam.opensAt);
+  if (closes && document.activeElement !== closes) closes.value = isoToLocalInput(exam.closesAt);
+}
+
+async function setGateMode(mode) {
+  if (!currentToken) return;
+  setGateStatus('Salvando…');
+  const reqExam = examId;
+  try {
+    const res = await provaAdminSetExamOpen(currentToken, withExam({ mode }));
+    if (reqExam !== examId) return;
+    examInfo = res.exam || examInfo;
+    paintGate({ exam: examInfo, gate: res.gate, counts: lastCounts });
+    setGateStatus(res.message || 'Gate atualizado.');
+  } catch (error) {
+    setGateStatus(error instanceof ApiError ? error.message : 'Falha ao atualizar o gate.', true);
+  }
+}
+
+async function saveGateDates() {
+  if (!currentToken) return;
+  const opensRaw = /** @type {HTMLInputElement|null} */ ($('prova-admin-opens'))?.value || '';
+  const closesRaw = /** @type {HTMLInputElement|null} */ ($('prova-admin-closes'))?.value || '';
+  const opensAt = localInputToIso(opensRaw);
+  const closesAt = localInputToIso(closesRaw);
+  if ((opensRaw && !opensAt) || (closesRaw && !closesAt)) {
+    setGateStatus('Data inválida.', true);
+    return;
+  }
+  if (opensAt && closesAt && Date.parse(closesAt) <= Date.parse(opensAt)) {
+    setGateStatus('O prazo precisa ser depois da abertura.', true);
+    return;
+  }
+  setGateStatus('Salvando…');
+  const reqExam = examId;
+  try {
+    const res = await provaAdminSetExamOpen(currentToken, withExam({ opensAt, closesAt }));
+    if (reqExam !== examId) return;
+    examInfo = res.exam || examInfo;
+    paintGate({ exam: examInfo, gate: res.gate, counts: lastCounts });
+    setGateStatus('Datas salvas.');
+  } catch (error) {
+    setGateStatus(error instanceof ApiError ? error.message : 'Falha ao salvar as datas.', true);
+  }
+}
+
+function paintTableHead() {
+  const row = document.querySelector('#prova-admin-table thead tr');
+  if (!row) return;
+  const cols = isProjectExam()
+    ? ['Aluno', 'Turma', 'Status', 'Envio', 'Arquivo', 'Nota']
+    : [
+      'Aluno', 'Turma', 'Status', 'Tempo / envio',
+      { label: 'Saídas', title: 'Quantas vezes o aluno saiu da aba ou perdeu o foco da janela durante a prova' },
+      examInfo?.hasDiscursive ? 'MC' : 'Acertos',
+      'Nota',
+    ];
+  row.innerHTML = cols.map((c) => (typeof c === 'string'
+    ? `<th scope="col">${escapeHtml(c)}</th>`
+    : `<th scope="col" title="${escapeHtml(c.title)}">${escapeHtml(c.label)}</th>`)).join('')
+    + '<th scope="col"><span class="visually-hidden">Ações</span></th>';
 }
 
 function paintTable(attempts) {
@@ -160,6 +349,8 @@ function paintTable(attempts) {
   const empty = $('prova-admin-empty');
   const meta = $('prova-admin-meta');
   if (!tbody) return;
+  paintTableHead();
+  const max = examMax();
 
   tbody.replaceChildren();
   const list = Array.isArray(attempts) ? attempts : [];
@@ -176,15 +367,20 @@ function paintTable(attempts) {
     if (row.hasAlerts) tr.classList.add('has-alert');
 
     const student = row.student || {};
+    const sub = row.submission || null;
     const name = student.fullName || '—';
     const user = student.username ? `@${student.username}` : '';
 
     const timeCell = row.status === 'in_progress'
       ? `resta ${formatRemaining(row.remainingMs)}`
-      : formatWhen(row.submittedAt);
+      : formatWhen(isProjectExam() ? (sub?.uploadedAt || row.submittedAt) : row.submittedAt);
 
-    const mc = row.mcScore != null ? `${row.mcScore}/12` : '—';
-    const final = row.finalScore != null ? `${row.finalScore}/20` : '—';
+    const mc = row.mcScore != null ? `${row.mcScore}/${max.mc}` : '—';
+    const showFinal = !isProjectExam() || row.status === 'graded' || row.finalScore != null;
+    const final = row.finalScore != null && showFinal ? `${row.finalScore}/${max.total}` : '—';
+    const fileCell = sub
+      ? `${sub.originalName || 'arquivo.zip'} · ${formatBytes(sub.sizeBytes)}${sub.uploadCount > 1 ? ` · ${sub.uploadCount} envios` : ''}`
+      : 'sem arquivo';
     const blurN = Number(row.blurCount) || 0;
     const leaveN = Number(row.leaveCount) || 0;
     const exitsTitle = `Saiu da aba: ${blurN} · Saiu da página: ${leaveN}`;
@@ -200,8 +396,10 @@ function paintTable(attempts) {
       <td>${escapeHtml(student.turma || '—')}</td>
       <td>${escapeHtml(STATUS_LABELS[row.status] || row.status || '—')}</td>
       <td>${escapeHtml(timeCell)}</td>
-      <td title="${escapeHtml(exitsTitle)}">${escapeHtml(exitsLabel)}</td>
-      <td>${escapeHtml(mc)}</td>
+      ${isProjectExam()
+    ? `<td>${escapeHtml(fileCell)}</td>`
+    : `<td title="${escapeHtml(exitsTitle)}">${escapeHtml(exitsLabel)}</td>
+      <td>${escapeHtml(mc)}</td>`}
       <td>${escapeHtml(final)}</td>
       <td class="prova-admin-row-actions">
         <span class="prova-admin-row-actions__inner">
@@ -253,16 +451,32 @@ function paintDetail(attempt) {
       attempt.hasAlerts ? 'com alertas' : null,
     ].filter(Boolean).join(' · ');
   }
+  const project = attempt.kind === 'project' || isProjectExam();
+  const max = examMax();
+  const discTotal = grading.discursiveTotal ?? max.disc;
+  const hasDisc = !project && discTotal > 0;
   if (summary) {
-    const mc = grading.mcScore != null ? `${grading.mcScore}/12` : '—';
-    const disc = grading.discursiveScore != null ? `${grading.discursiveScore}/8` : '—';
-    const fin = grading.finalScore != null ? `${grading.finalScore}/20` : '—';
-    summary.innerHTML = `
+    const mc = grading.mcScore != null ? `${grading.mcScore}/${max.mc}` : '—';
+    const disc = grading.discursiveScore != null ? `${grading.discursiveScore}/${max.disc}` : '—';
+    const fin = grading.finalScore != null ? `${grading.finalScore}/${max.total}` : '—';
+    if (project) {
+      summary.innerHTML = `<p><strong>Nota:</strong> ${escapeHtml(fin)} · Enviado: ${escapeHtml(formatWhen(attempt.submittedAt))}</p>`;
+    } else if (hasDisc) {
+      summary.innerHTML = `
       <p><strong>MC:</strong> ${escapeHtml(mc)} · <strong>Discursivas:</strong> ${escapeHtml(disc)}
-      (${grading.discursiveScored ?? 0}/${grading.discursiveTotal ?? 8}) · <strong>Final:</strong> ${escapeHtml(fin)}</p>
+      (${grading.discursiveScored ?? 0}/${discTotal}) · <strong>Final:</strong> ${escapeHtml(fin)}</p>
       <p>Enviada: ${escapeHtml(formatWhen(attempt.submittedAt))} · Saídas de aba: ${attempt.blurCount ?? 0} · Saídas de página: ${attempt.leaveCount ?? 0}</p>
     `;
+    } else {
+      summary.innerHTML = `
+      <p><strong>Acertos (automático):</strong> ${escapeHtml(mc)} · <strong>Final:</strong> ${escapeHtml(fin)}</p>
+      <p>Enviada: ${escapeHtml(formatWhen(attempt.submittedAt))} · Saídas de aba: ${attempt.blurCount ?? 0} · Saídas de página: ${attempt.leaveCount ?? 0}</p>
+    `;
+    }
   }
+  const integritySection = $('prova-admin-integrity');
+  if (integritySection) integritySection.hidden = project;
+  paintProjectDetail(attempt, project);
 
   if (actions) {
     actions.hidden = false;
@@ -270,11 +484,11 @@ function paintDetail(attempt) {
     const finBtn = $('prova-admin-finalize');
     const resetBtn = $('prova-admin-reset');
     if (saveBtn) {
-      saveBtn.hidden = Boolean(grading.locked) || !grading.canScore;
+      saveBtn.hidden = project || !hasDisc || Boolean(grading.locked) || !grading.canScore;
       saveBtn.disabled = saveBtn.hidden;
     }
     if (finBtn) {
-      finBtn.hidden = Boolean(grading.locked) || !grading.canFinalize;
+      finBtn.hidden = project || Boolean(grading.locked) || !grading.canFinalize;
       finBtn.disabled = finBtn.hidden;
     }
     if (resetBtn) {
@@ -287,8 +501,14 @@ function paintDetail(attempt) {
       hint.textContent = 'Contestação aberta — responda abaixo ou reabra a correção.';
     } else if (grading.locked) {
       hint.textContent = 'Nota fechada. Se o aluno contestar, você poderá responder ou reabrir.';
+    } else if (project) {
+      hint.textContent = grading.canScore
+        ? 'Baixe o .zip, avalie e publique a nota (0–30) com feedback.'
+        : 'Sem arquivo enviado ainda.';
     } else if (!grading.canScore) {
       hint.textContent = 'Ainda em andamento — só dá para notar depois do envio (ou tempo esgotado).';
+    } else if (!hasDisc) {
+      hint.textContent = 'Múltipla escolha corrigida automaticamente. Use Fechar nota para o aluno ver o resultado e o gabarito.';
     } else if (attempt.contest?.isOpen) {
       hint.textContent = 'Correção reaberta. Ajuste as notas e use Fechar nota — aí você escreve a mensagem da revisão para o aluno.';
     } else {
@@ -300,7 +520,7 @@ function paintDetail(attempt) {
 
   if (host) {
     host.replaceChildren();
-    for (const q of attempt.answers || []) {
+    for (const q of (project ? [] : (attempt.answers || []))) {
       const article = document.createElement('article');
       article.className = `prova-admin-q prova-admin-q--${q.type}`;
       article.dataset.questionId = q.questionId;
@@ -378,6 +598,139 @@ function paintDetail(attempt) {
   paintIntegrity(attempt.integrityEvents || []);
 }
 
+/** Carrega `exam` (kind/máximos) quando o hub abre direto no detalhe (?attempt=). */
+async function loadExamInfo() {
+  try {
+    const payload = await provaAdminListAttempts(currentToken, withExam({}));
+    examInfo = payload.exam || examInfo;
+    lastCounts = payload.counts || {};
+  } catch {
+    // o detalhe ainda abre; só perde os máximos por exame
+  }
+  paintExamChrome();
+}
+
+function setProjectStatus(text, isError = false) {
+  const el = $('prova-admin-project-status');
+  if (!el) return;
+  el.textContent = text || '';
+  el.classList.toggle('is-error', Boolean(isError));
+}
+
+/**
+ * Bloco do Trabalho Final no detalhe: arquivo, download, nota 0–30 e feedback.
+ * @param {object} attempt
+ * @param {boolean} project
+ */
+function paintProjectDetail(attempt, project) {
+  const box = $('prova-admin-project');
+  if (!box) return;
+  box.hidden = !project;
+  if (!project) return;
+
+  const sub = attempt.submission || null;
+  const grading = attempt.grading || {};
+  const meta = $('prova-admin-project-meta');
+  if (meta) {
+    meta.innerHTML = sub
+      ? `<div><dt>Arquivo</dt><dd>${escapeHtml(sub.originalName || '—')}</dd></div>
+         <div><dt>Tamanho</dt><dd>${escapeHtml(formatBytes(sub.sizeBytes))}</dd></div>
+         <div><dt>Último envio</dt><dd>${escapeHtml(formatWhen(sub.uploadedAt))}</dd></div>
+         <div><dt>Envios</dt><dd>${escapeHtml(String(sub.uploadCount ?? 1))}</dd></div>
+         <div><dt>SHA-256</dt><dd>${escapeHtml(String(sub.sha256 || '—').slice(0, 16))}…</dd></div>`
+      : '<div><dt>Arquivo</dt><dd>Nenhum envio.</dd></div>';
+  }
+  const dl = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-download'));
+  if (dl) dl.disabled = !sub;
+
+  const locked = Boolean(grading.locked);
+  const scoreInput = /** @type {HTMLInputElement|null} */ ($('prova-admin-project-score'));
+  const feedback = /** @type {HTMLTextAreaElement|null} */ ($('prova-admin-project-feedback'));
+  const scoreMax = grading.scoreMax ?? examInfo?.totalPoints ?? 30;
+  const label = $('prova-admin-project-score-label');
+  if (label) label.textContent = `Nota (0–${scoreMax})`;
+  if (scoreInput) {
+    scoreInput.max = String(scoreMax);
+    scoreInput.value = grading.finalScore != null ? String(grading.finalScore) : '';
+    scoreInput.disabled = locked || !sub;
+  }
+  if (feedback) {
+    feedback.value = attempt.feedback || attempt.adminNotesGeneral || '';
+    feedback.disabled = locked || !sub;
+  }
+  const saveBtn = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-save'));
+  const pubBtn = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-publish'));
+  if (saveBtn) saveBtn.disabled = locked || !sub;
+  if (pubBtn) pubBtn.disabled = locked || !sub;
+  setProjectStatus(locked ? 'Nota publicada. Para editar, reabra pela contestação ou zere a entrega.' : '');
+}
+
+async function downloadSubmission() {
+  if (!currentToken || !currentDetail?.id) return;
+  const btn = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-download'));
+  if (btn) btn.disabled = true;
+  setProjectStatus('Preparando o download…');
+  try {
+    const { blob, fileName } = await provaAdminDownloadSubmission(currentToken, currentDetail.id, { examId: currentDetail.examId || examId });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 10000);
+    setProjectStatus(`Download iniciado: ${fileName}`);
+  } catch (error) {
+    setProjectStatus(error instanceof ApiError ? error.message : 'Falha ao baixar o arquivo.', true);
+  } finally {
+    if (btn) btn.disabled = !currentDetail?.submission;
+  }
+}
+
+/**
+ * @param {boolean} finalize — true publica a nota (aluno passa a ver); false salva rascunho.
+ */
+async function gradeProject(finalize) {
+  if (!currentToken || !currentDetail?.id) return;
+  const scoreRaw = /** @type {HTMLInputElement|null} */ ($('prova-admin-project-score'))?.value ?? '';
+  const feedback = /** @type {HTMLTextAreaElement|null} */ ($('prova-admin-project-feedback'))?.value ?? '';
+  if (scoreRaw === '' || Number.isNaN(Number(scoreRaw))) {
+    setProjectStatus('Informe a nota.', true);
+    return;
+  }
+  if (finalize && !window.confirm('Publicar a nota? O aluno passa a ver a nota e o feedback.')) return;
+  setProjectStatus(finalize ? 'Publicando…' : 'Salvando…');
+  try {
+    const revising = Boolean(currentDetail.contest?.isOpen);
+    const contestMessage = revising ? String($('prova-admin-contest-message')?.value || '').trim() : '';
+    if (finalize && revising && !contestMessage) {
+      setProjectStatus('Escreva a mensagem da revisão no painel de contestação antes de publicar.', true);
+      return;
+    }
+    const res = await provaAdminGradeProject(currentToken, withDetailExam({
+      attemptId: currentDetail.id,
+      score: Number(scoreRaw),
+      feedback,
+      finalize,
+      sha256: currentDetail.submission?.sha256 || '',
+      revision: currentDetail.submission?.uploadCount,
+      ...(contestMessage ? { contestAdminMessage: contestMessage } : {}),
+    }));
+    paintDetail(res.attempt);
+    setProjectStatus(finalize ? 'Nota publicada.' : 'Rascunho salvo.');
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 409 && currentDetail?.id) {
+      // reenvio/nota concorrente: recarrega a entrega atual antes de qualquer nova ação
+      const id = currentDetail.id;
+      await loadDetail(id);
+      setProjectStatus(`${error.message} (tela atualizada)`, true);
+      return;
+    }
+    setProjectStatus(error instanceof ApiError ? error.message : 'Falha ao salvar a nota.', true);
+  }
+}
+
 function collectScoresFromDom() {
   /** @type {Array<{questionId:string,points:number,comment:string}>} */
   const scores = [];
@@ -440,16 +793,24 @@ async function loadList() {
   const filters = readFilters();
   const meta = $('prova-admin-meta');
   if (meta) meta.textContent = 'Carregando…';
+  const gen = ++listGen;
+  const reqExam = examId;
 
   try {
     const payload = await provaAdminListAttempts(currentToken, {
       turma: filters.turma === 'all' ? undefined : filters.turma,
       status: filters.status === 'all' ? undefined : filters.status,
       alertsOnly: filters.alertsOnly || undefined,
+      examId: reqExam,
     });
+    if (gen !== listGen || reqExam !== examId) return;
+    examInfo = payload.exam || examInfo;
+    lastCounts = payload.counts || {};
+    paintExamChrome();
     paintGate(payload);
     paintTable(payload.attempts || []);
   } catch (error) {
+    if (gen !== listGen || reqExam !== examId) return;
     console.error('[prova-admin]', error);
     showWarning(error instanceof ApiError ? error.message : 'Falha ao listar tentativas.');
     if (meta) meta.textContent = 'Erro ao carregar.';
@@ -458,10 +819,16 @@ async function loadList() {
 
 async function loadDetail(attemptId) {
   if (!currentToken || !attemptId) return;
+  const gen = ++detailGen;
+  const reqExam = examId;
   try {
-    const payload = await provaAdminGetAttempt(currentToken, attemptId);
+    if (!examInfo) await loadExamInfo();
+    if (gen !== detailGen || reqExam !== examId) return;
+    const payload = await provaAdminGetAttempt(currentToken, attemptId, { examId: reqExam });
+    if (gen !== detailGen || reqExam !== examId) return;
     paintDetail(payload.attempt);
   } catch (error) {
+    if (gen !== detailGen || reqExam !== examId) return;
     console.error('[prova-admin] detail', error);
     showWarning(error instanceof ApiError ? error.message : 'Falha ao carregar o detalhe.');
     clearAttemptQuery();
@@ -492,10 +859,10 @@ async function saveScores() {
   const btn = $('prova-admin-save-scores');
   if (btn) btn.disabled = true;
   try {
-    const res = await provaAdminScoreDiscursive(currentToken, {
+    const res = await provaAdminScoreDiscursive(currentToken, withDetailExam({
       attemptId: currentDetail.id,
       scores,
-    });
+    }));
     paintDetail(res.attempt);
     const hint = $('prova-admin-detail-hint');
     if (hint) hint.textContent = res.message || 'Notas salvas.';
@@ -510,7 +877,7 @@ async function saveScores() {
 
 async function finalizeGrade() {
   if (!currentToken || !currentDetail?.id) return;
-  const missing = (currentDetail.grading?.discursiveTotal || 8)
+  const missing = (currentDetail.grading?.discursiveTotal ?? 8)
     - (currentDetail.grading?.discursiveScored || 0);
   const allowPartial = missing > 0;
   const revisingContest = Boolean(currentDetail.contest?.isOpen);
@@ -607,16 +974,16 @@ async function finalizeGrade() {
     // Garante notas do DOM salvas antes de fechar
     const scores = collectScoresFromDom();
     if (scores.length && currentDetail.grading?.canScore) {
-      await provaAdminScoreDiscursive(currentToken, {
+      await provaAdminScoreDiscursive(currentToken, withDetailExam({
         attemptId: currentDetail.id,
         scores,
-      });
+      }));
     }
-    const res = await provaAdminFinalizeGrade(currentToken, {
+    const res = await provaAdminFinalizeGrade(currentToken, withDetailExam({
       attemptId: currentDetail.id,
       allowPartial,
       ...(contestMessage ? { contestMessage } : {}),
-    });
+    }));
     paintDetail(res.attempt);
     const hint = $('prova-admin-detail-hint');
     if (hint) hint.textContent = res.message || 'Nota fechada.';
@@ -630,6 +997,40 @@ async function finalizeGrade() {
 }
 
 function bindFilters() {
+  $('prova-admin-exam')?.addEventListener('change', (event) => {
+    const next = /** @type {HTMLSelectElement} */ (event.target).value;
+    if (!Object.prototype.hasOwnProperty.call(EXAM_TITLES, next) || next === examId) return;
+    examId = next;
+    examInfo = null;
+    currentDetail = null;
+    listGen += 1;
+    detailGen += 1;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('attempt');
+    if (examId === DEFAULT_EXAM_ID) url.searchParams.delete('exam');
+    else url.searchParams.set('exam', examId);
+    window.history.replaceState({}, '', url.pathname + url.search);
+    setGateStatus('');
+    setListVisible(true);
+    void loadList();
+  });
+  document.querySelectorAll('[data-gate-mode]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      void setGateMode(btn.getAttribute('data-gate-mode') || 'closed');
+    });
+  });
+  $('prova-admin-save-dates')?.addEventListener('click', () => {
+    void saveGateDates();
+  });
+  $('prova-admin-project-download')?.addEventListener('click', () => {
+    void downloadSubmission();
+  });
+  $('prova-admin-project-save')?.addEventListener('click', () => {
+    void gradeProject(false);
+  });
+  $('prova-admin-project-publish')?.addEventListener('click', () => {
+    void gradeProject(true);
+  });
   ['prova-admin-filter-turma', 'prova-admin-filter-status', 'prova-admin-filter-alerts']
     .forEach((id) => {
       $(id)?.addEventListener('change', () => {
@@ -696,7 +1097,9 @@ async function resetAttempt(opts = {}) {
   const dialog = $('prova-admin-dialog-reset');
   const bodyEl = $('prova-admin-dialog-reset-body');
   if (bodyEl) {
-    bodyEl.textContent = `Apaga a prova de ${name} (respostas, nota e alertas). É como se nunca tivesse feito — poderá iniciar de novo se o gate estiver aberto para a turma.`;
+    bodyEl.textContent = isProjectExam()
+      ? `Apaga a entrega de ${name} (arquivo .zip e nota). Ele poderá enviar de novo se o gate estiver aberto para a turma.`
+      : `Apaga a prova de ${name} (respostas, nota e alertas). É como se nunca tivesse feito — poderá iniciar de novo se o gate estiver aberto para a turma.`;
   }
 
   const confirmed = await new Promise((resolve) => {
@@ -718,7 +1121,7 @@ async function resetAttempt(opts = {}) {
   const btn = $('prova-admin-reset');
   if (btn) btn.disabled = true;
   try {
-    const res = await provaAdminResetAttempt(currentToken, { attemptId });
+    const res = await provaAdminResetAttempt(currentToken, withExam({ attemptId, examId: currentDetail?.examId || examId }));
     currentDetail = null;
     clearAttemptQuery();
     setListVisible(true);
@@ -782,10 +1185,10 @@ async function resetAllAttempts() {
   const btn = $('prova-admin-reset-all');
   if (btn) btn.disabled = true;
   try {
-    const res = await provaAdminResetAllAttempts(currentToken, {
+    const res = await provaAdminResetAllAttempts(currentToken, withExam({
       confirm: 'RESETAR',
       turma: turma || undefined,
-    });
+    }));
     currentDetail = null;
     clearAttemptQuery();
     setListVisible(true);
@@ -810,11 +1213,11 @@ async function respondContest(contestAction) {
   }
   if (statusEl) statusEl.textContent = contestAction === 'reopen' ? 'Reabrindo…' : 'Enviando…';
   try {
-    const res = await provaAdminRespondContest(currentToken, {
+    const res = await provaAdminRespondContest(currentToken, withDetailExam({
       attemptId: currentDetail.id,
       contestAction,
       message: message || undefined,
-    });
+    }));
     if (messageEl) messageEl.value = '';
     paintDetail(res.attempt);
     if (statusEl) statusEl.textContent = res.message || 'Ok.';
@@ -856,6 +1259,7 @@ async function init() {
   });
 
   bindFilters();
+  paintExamChrome();
 
   const params = new URLSearchParams(window.location.search);
   const attemptId = params.get('attempt');

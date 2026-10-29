@@ -357,6 +357,7 @@ const APP_PAGE_SLUGS = new Set([
   'classind-dle',
   'prova',
   'prova-admin',
+  'guia-trabalho-final',
   'perfil',
 ]);
 
@@ -401,6 +402,16 @@ function appRoute(slug) {
   return `${rootPath()}/${slug}/`;
 }
 
+const PROVA_DEFAULT_EXAM_ID = 'modulo1-provacao';
+
+/** `?exam=` só aparece quando não é o Módulo 1 (URL do M1 permanece idêntica). */
+function provaRoute(slug, examId) {
+  const base = appRoute(slug);
+  const id = String(examId || '').trim();
+  if (!id || id === PROVA_DEFAULT_EXAM_ID) return base;
+  return `${base}?exam=${encodeURIComponent(id)}`;
+}
+
 export const ROUTES = {
   home: () => `${rootPath()}/`,
   auth: () => appRoute('auth'),
@@ -431,6 +442,10 @@ export const ROUTES = {
   classindDle: () => appRoute('classind-dle'),
   prova: () => appRoute('prova'),
   provaAdmin: () => appRoute('prova-admin'),
+  /** `prova/?exam=<id>` (M1 mantém a URL sem parâmetro). */
+  provaExam: (examId) => provaRoute('prova', examId),
+  provaAdminExam: (examId) => provaRoute('prova-admin', examId),
+  guiaTrabalhoFinal: () => appRoute('guia-trabalho-final'),
   perfil: () => appRoute('perfil'),
   lesson: (id) => appRoute(String(id || '').replace(/\.html$/i, '')),
 };
@@ -855,7 +870,7 @@ export function redirectIfProvaInProgress(user, gates) {
       },
     }).catch(() => {});
   }
-  window.location.replace(ROUTES.prova());
+  window.location.replace(ROUTES.provaExam(gates.prova.examId));
   return true;
 }
 
@@ -869,7 +884,7 @@ export async function enforceProvaInProgressRedirect(token, user) {
   try {
     const status = await provaGetExamStatus(token);
     if (status?.attempt?.status === 'in_progress' || status?.mustResume) {
-      window.location.replace(ROUTES.prova());
+      window.location.replace(ROUTES.provaExam(status?.attempt?.examId));
       return true;
     }
   } catch {
@@ -2259,6 +2274,86 @@ export function provaReportIntegrityEvent(token, payload = {}) {
   return provaRequest(token, 'reportIntegrityEvent', payload);
 }
 
+/**
+ * Trabalho Final: envia UM .zip (multipart). Último envio vale até closes_at / Mestre fechar.
+ * @param {string} token
+ * @param {File} file
+ * @param {{ examId?: string, onProgress?: (fraction: number) => void }} [options]
+ */
+export function provaSubmitProject(token, file, options = {}) {
+  const { examId = 'trabalho-final', onProgress } = options;
+  const url = `${siteBasePath()}${API_BASE}/prova?action=submitProject&examId=${encodeURIComponent(examId)}`;
+  const resolvedToken = String(token || getSession()?.token || '').trim();
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append('action', 'submitProject');
+    form.append('examId', examId);
+    form.append('file', file, file.name);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url);
+    if (resolvedToken) xhr.setRequestHeader('Authorization', `Bearer ${resolvedToken}`);
+    xhr.responseType = 'json';
+    if (xhr.upload && typeof onProgress === 'function') {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable && event.total > 0) onProgress(event.loaded / event.total);
+      };
+    }
+    xhr.onerror = () => reject(new ApiError('Falha de rede no envio. Tente de novo.', 0));
+    xhr.onabort = () => reject(new ApiError('Envio cancelado.', 0));
+    xhr.onload = () => {
+      let payload = xhr.response;
+      if (typeof payload === 'string') {
+        try { payload = JSON.parse(payload); } catch { payload = null; }
+      }
+      if (!payload) {
+        reject(new ApiError(
+          xhr.status === 413
+            ? 'O servidor recusou o arquivo por tamanho (limite do PHP). Avise o Mestre.'
+            : 'A API do Domínio não respondeu ao envio.',
+          xhr.status,
+        ));
+        return;
+      }
+      if (xhr.status < 200 || xhr.status >= 300 || payload.ok === false) {
+        reject(new ApiError(payload?.error ?? 'Erro desconhecido no envio.', xhr.status, payload));
+        return;
+      }
+      invalidateSessionBootstrapCache();
+      resolve(payload);
+    };
+    xhr.send(form);
+  });
+}
+
+/**
+ * Baixa o .zip de uma entrega (admin). Retorna { blob, fileName }.
+ */
+export async function provaAdminDownloadSubmission(token, attemptId, options = {}) {
+  const examId = options.examId || 'trabalho-final';
+  const url = `${siteBasePath()}${API_BASE}/prova?action=adminDownloadSubmission`
+    + `&examId=${encodeURIComponent(examId)}&attemptId=${encodeURIComponent(attemptId)}`;
+  const resolvedToken = String(token || getSession()?.token || '').trim();
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: resolvedToken ? { Authorization: `Bearer ${resolvedToken}` } : {},
+  });
+  if (!response.ok) {
+    let message = 'Não foi possível baixar o arquivo.';
+    try {
+      const payload = await response.json();
+      if (payload?.error) message = payload.error;
+    } catch { /* corpo não-JSON */ }
+    throw new ApiError(message, response.status);
+  }
+  const disposition = response.headers.get('Content-Disposition') || '';
+  const match = /filename="([^"]+)"/.exec(disposition);
+  return { blob: await response.blob(), fileName: match ? match[1] : 'trabalho.zip' };
+}
+
+export function provaAdminGradeProject(token, payload = {}) {
+  return provaRequest(token, 'adminGradeProject', payload);
+}
+
 export function provaAdminGetOverview(token, options = {}) {
   return provaRequest(token, 'adminGetProvaOverview', options);
 }
@@ -2534,6 +2629,7 @@ export const MODULES = [
       },
       {
         id: 'prova-modulo1',
+        examId: 'modulo1-provacao',
         number: 'P',
         kind: 'assessment',
         title: 'Provação do Círculo Mágico',
@@ -2569,6 +2665,27 @@ export const MODULES = [
         title: 'Perfis de Jogadores e o Modelo Quantic Foundry',
         subtitle: 'Individual ou dupla · Design do perfil × mecânicas · Labirinto direcionado',
         rewardXp: 30,
+      },
+      {
+        id: 'prova-modulo2',
+        examId: 'modulo2-prova',
+        number: 'P',
+        kind: 'assessment',
+        title: 'Provação do Balcão e do Labirinto',
+        subtitle: 'Avaliação do módulo · 10 questões · 45 min · 1 tentativa',
+        href: 'prova',
+        rewardXp: 0,
+      },
+      {
+        id: 'trabalho-final',
+        examId: 'trabalho-final',
+        examKind: 'project',
+        number: 'T',
+        kind: 'assessment',
+        title: 'Trabalho Final',
+        subtitle: 'Entrega de um .zip pelo site · nota 0–30 · reenvio até o prazo',
+        href: 'prova',
+        rewardXp: 0,
       },
     ],
   },

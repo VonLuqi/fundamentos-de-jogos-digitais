@@ -60,6 +60,7 @@ const APP_PAGE_SLUGS = new Set([
   'classind-dle',
   'prova',
   'prova-admin',
+  'guia-trabalho-final',
 ]);
 
 const SUBMUNDO_ROUTES = {

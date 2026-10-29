@@ -607,6 +607,24 @@ CREATE TABLE IF NOT EXISTS `prova_integrity_events` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- 27b. prova_submissions (Trabalho Final: entrega .zip; arquivo em uploads/trabalhos/)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `prova_submissions` (
+  `attempt_id` CHAR(36) NOT NULL,
+  `stored_name` CHAR(40) NOT NULL,
+  `original_name` VARCHAR(255) NOT NULL,
+  `size_bytes` BIGINT NOT NULL DEFAULT 0,
+  `sha256` CHAR(64) NULL DEFAULT NULL,
+  `upload_count` INT NOT NULL DEFAULT 1,
+  `first_uploaded_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `uploaded_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`attempt_id`),
+  UNIQUE KEY `prova_submissions_stored_uidx` (`stored_name`),
+  CONSTRAINT `prova_submissions_attempt_fk`
+    FOREIGN KEY (`attempt_id`) REFERENCES `prova_attempts` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- 28. rate_limit_buckets (Substitui @vercel/kv na HostGator)
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `rate_limit_buckets` (
@@ -643,5 +661,11 @@ INSERT INTO `prova_exams` (
   `title` = VALUES(`title`),
   `duration_minutes` = VALUES(`duration_minutes`),
   `total_points` = VALUES(`total_points`);
+
+-- Exames Módulo 2 e Trabalho Final (nascem fechados)
+INSERT IGNORE INTO `prova_exams` (`id`, `title`, `duration_minutes`, `total_points`, `is_open`, `open_turmas`)
+VALUES
+  ('modulo2-prova', 'Provação do Módulo 2: O Balcão e o Labirinto do Submundo', 45, 20.00, 0, '[]'),
+  ('trabalho-final', 'Trabalho Final do Módulo 2', 0, 30.00, 0, '[]');
 
 SET FOREIGN_KEY_CHECKS = 1;

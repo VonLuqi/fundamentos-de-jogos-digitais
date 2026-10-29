@@ -1,12 +1,18 @@
 /**
- * Prova Módulo 1 — UI Forms (Tasks B1–B3 + C2–C3).
+ * Prova (M1, M2) e Trabalho Final — UI do aluno. `?exam=<id>` escolhe o exame (padrão: modulo1-provacao).
+ * Tasks B1–B3 + C2–C3 (M1) · multi-exame (M2 + entrega .zip).
  */
 
 'use strict';
 
 import { createProvaTimer } from './prova/timer.js';
 import { createProvaIntegrityMonitor } from './prova/integrity.js';
-import { PROVA_COPY, formatSubmitUnansweredSummary } from './prova/copy.js';
+import {
+  PROJECT_COPY,
+  PROVA_COPY,
+  buildExamCopy,
+  formatSubmitUnansweredSummary,
+} from './prova/copy.js';
 import {
   ApiError,
   ROUTES,
@@ -19,6 +25,7 @@ import {
   provaSetCurrentQuestion,
   provaStartAttempt,
   provaSubmitAttempt,
+  provaSubmitProject,
   requireSession,
 } from './api.js';
 import {
@@ -33,7 +40,24 @@ const QUESTION_COUNT = 20;
 const AUTOSAVE_MS = 800;
 const EXPIRE_RETRY_MS = 2500;
 const EXPIRE_MAX_RETRIES = 8;
-const PANEL_IDS = ['loading', 'intro', 'exam', 'done', 'blocked'];
+const PANEL_IDS = ['loading', 'intro', 'exam', 'project', 'done', 'blocked'];
+const DEFAULT_EXAM_ID = 'modulo1-provacao';
+const ZIP_SIGNATURE = [0x50, 0x4b, 0x03, 0x04];
+
+/** Exame da URL (`prova/?exam=modulo2-prova`); sem parâmetro = Módulo 1 (compatibilidade). */
+function resolveExamId() {
+  try {
+    const raw = new URLSearchParams(window.location.search).get('exam');
+    const id = String(raw || '').trim();
+    return /^[a-z0-9][a-z0-9_-]{0,63}$/i.test(id) ? id : DEFAULT_EXAM_ID;
+  } catch {
+    return DEFAULT_EXAM_ID;
+  }
+}
+
+const EXAM_ID = resolveExamId();
+/** Copy do exame atual (M1 = PROVA_COPY idêntico; M2 deriva de `exam`). */
+let copy = PROVA_COPY;
 
 const els = {};
 
@@ -68,7 +92,9 @@ function $(id) {
 }
 
 function asStudentOpts() {
-  return currentUser?.role === 'admin' ? { asStudent: true } : {};
+  return currentUser?.role === 'admin'
+    ? { examId: EXAM_ID, asStudent: true }
+    : { examId: EXAM_ID };
 }
 
 function cacheEls() {
@@ -113,6 +139,27 @@ function cacheEls() {
   els.doneReviewTitle = $('prova-done-review-title');
   els.doneReviewGeneral = $('prova-done-review-general');
   els.doneReviewList = $('prova-done-review-list');
+  els.introHeading = $('prova-intro-heading');
+  els.introLead = $('prova-intro-lead');
+  els.introRules = $('prova-intro-rules');
+  els.doneBreakdown = $('prova-done-breakdown');
+  els.project = $('prova-project');
+  els.projectHeading = $('prova-project-heading');
+  els.projectStatement = $('prova-project-statement');
+  els.projectDeadline = $('prova-project-deadline');
+  els.projectGuide = $('prova-project-guide');
+  els.projectMax = $('prova-project-max');
+  els.projectCurrent = $('prova-project-current');
+  els.projectCurrentName = $('prova-project-current-name');
+  els.projectCurrentSize = $('prova-project-current-size');
+  els.projectCurrentWhen = $('prova-project-current-when');
+  els.projectCurrentCount = $('prova-project-current-count');
+  els.projectForm = $('prova-project-form');
+  els.projectFile = $('prova-project-file');
+  els.projectProgress = $('prova-project-progress');
+  els.projectStatus = $('prova-project-status');
+  els.projectSubmit = $('prova-project-submit');
+  els.projectRefresh = $('prova-project-refresh');
   els.doneContest = $('prova-done-contest');
   els.doneContestTitle = $('prova-done-contest-title');
   els.doneContestLead = $('prova-done-contest-lead');
@@ -264,7 +311,7 @@ function showExpiredDialog(message, { allowClose = false } = {}) {
   }
   if (els.dialogExpiredOk) {
     els.dialogExpiredOk.disabled = !allowClose;
-    els.dialogExpiredOk.textContent = allowClose ? PROVA_COPY.expiredOk : PROVA_COPY.expiredWait;
+    els.dialogExpiredOk.textContent = allowClose ? copy.expiredOk : copy.expiredWait;
   }
   if (els.dialogExpired && typeof els.dialogExpired.showModal === 'function') {
     if (!els.dialogExpired.open) els.dialogExpired.showModal();
@@ -289,12 +336,12 @@ async function autoSubmitOnExpire() {
   if (examLocked && expireRetries === 0) return;
   captureLocalAnswer();
   lockExamUi();
-  showExpiredDialog(PROVA_COPY.expiredSending);
+  showExpiredDialog(copy.expiredSending);
   setSaveStatus('Tempo esgotado — enviando…', true);
 
   const ok = await submitExam({ auto: true });
   if (ok) {
-    showExpiredDialog(PROVA_COPY.expiredSent, {
+    showExpiredDialog(copy.expiredSent, {
       allowClose: true,
     });
     return;
@@ -302,7 +349,7 @@ async function autoSubmitOnExpire() {
 
   expireRetries += 1;
   if (expireRetries >= EXPIRE_MAX_RETRIES) {
-    showExpiredDialog(PROVA_COPY.expiredRetryFail, { allowClose: true });
+    showExpiredDialog(copy.expiredRetryFail, { allowClose: true });
     setSaveStatus('Envio automático falhou após várias tentativas.', true);
     return;
   }
@@ -476,7 +523,7 @@ async function flushSave(opts = {}) {
   }
 
   try {
-    if (!opts.quiet) setSaveStatus(PROVA_COPY.saveSaving);
+    if (!opts.quiet) setSaveStatus(copy.saveSaving);
     const payload = {
       ...asStudentOpts(),
       questionId: question.id,
@@ -490,7 +537,7 @@ async function flushSave(opts = {}) {
     dirty = false;
     if (res.attempt) attempt = res.attempt;
     syncTimerFromPayload(res);
-    if (!opts.quiet) setSaveStatus(PROVA_COPY.saveSaved);
+    if (!opts.quiet) setSaveStatus(copy.saveSaved);
     syncProgressDots(els.progress, displayIndex, questions, answersById);
     return true;
   } catch (error) {
@@ -531,7 +578,7 @@ function clearContestUi() {
   if (els.doneContestStatus) els.doneContestStatus.textContent = '';
   if (els.doneContestSubmit) {
     els.doneContestSubmit.disabled = false;
-    els.doneContestSubmit.textContent = PROVA_COPY.contestSubmit;
+    els.doneContestSubmit.textContent = copy.contestSubmit;
   }
 }
 
@@ -557,17 +604,17 @@ function renderContest(contest) {
   els.doneContest.hidden = false;
 
   if (status === 'open') {
-    if (els.doneContestTitle) els.doneContestTitle.textContent = PROVA_COPY.contestOpenTitle;
-    if (els.doneContestLead) els.doneContestLead.textContent = PROVA_COPY.contestOpenBody;
+    if (els.doneContestTitle) els.doneContestTitle.textContent = copy.contestOpenTitle;
+    if (els.doneContestLead) els.doneContestLead.textContent = copy.contestOpenBody;
   } else if (status === 'answered') {
-    if (els.doneContestTitle) els.doneContestTitle.textContent = PROVA_COPY.contestAnsweredTitle;
+    if (els.doneContestTitle) els.doneContestTitle.textContent = copy.contestAnsweredTitle;
     if (els.doneContestLead) els.doneContestLead.textContent = '';
   } else if (status === 'revised') {
-    if (els.doneContestTitle) els.doneContestTitle.textContent = PROVA_COPY.contestRevisedTitle;
-    if (els.doneContestLead) els.doneContestLead.textContent = PROVA_COPY.contestRevisedBody;
+    if (els.doneContestTitle) els.doneContestTitle.textContent = copy.contestRevisedTitle;
+    if (els.doneContestLead) els.doneContestLead.textContent = copy.contestRevisedBody;
   } else {
-    if (els.doneContestTitle) els.doneContestTitle.textContent = PROVA_COPY.contestTitle;
-    if (els.doneContestLead) els.doneContestLead.textContent = PROVA_COPY.contestLead;
+    if (els.doneContestTitle) els.doneContestTitle.textContent = copy.contestTitle;
+    if (els.doneContestLead) els.doneContestLead.textContent = copy.contestLead;
   }
 
   if (els.doneContestThread) {
@@ -576,13 +623,13 @@ function renderContest(contest) {
       let html = '';
       if (contest.studentMessage) {
         html += `<div class="prova-contest__bubble prova-contest__bubble--student">
-          <span class="prova-contest__bubble-label">${escapeHtml(PROVA_COPY.contestYourMessage)}</span>
+          <span class="prova-contest__bubble-label">${escapeHtml(copy.contestYourMessage)}</span>
           <p>${escapeHtml(contest.studentMessage)}</p>
         </div>`;
       }
       if (contest.adminMessage) {
         html += `<div class="prova-contest__bubble prova-contest__bubble--admin">
-          <span class="prova-contest__bubble-label">${escapeHtml(PROVA_COPY.contestAdminReply)}</span>
+          <span class="prova-contest__bubble-label">${escapeHtml(copy.contestAdminReply)}</span>
           <p>${escapeHtml(contest.adminMessage)}</p>
         </div>`;
       }
@@ -597,12 +644,12 @@ function renderContest(contest) {
     const showForm = canContest;
     els.doneContestForm.hidden = !showForm;
     if (showForm && els.doneContestMessage) {
-      els.doneContestMessage.placeholder = PROVA_COPY.contestPlaceholder;
+      els.doneContestMessage.placeholder = copy.contestPlaceholder;
     }
     if (showForm && els.doneContestSubmit) {
       els.doneContestSubmit.textContent = status
-        ? PROVA_COPY.contestAgain
-        : PROVA_COPY.contestSubmit;
+        ? copy.contestAgain
+        : copy.contestSubmit;
     }
   }
   if (els.doneContestStatus) els.doneContestStatus.textContent = '';
@@ -631,14 +678,14 @@ function renderReview(review) {
 
   els.doneReview.hidden = false;
   if (els.doneReviewTitle) {
-    els.doneReviewTitle.textContent = PROVA_COPY.doneReviewTitle;
+    els.doneReviewTitle.textContent = copy.doneReviewTitle;
   }
 
   if (els.doneReviewGeneral) {
     const note = String(review?.generalNote || '').trim();
     if (note) {
       els.doneReviewGeneral.hidden = false;
-      els.doneReviewGeneral.innerHTML = `<span class="prova-review__comment-label">${escapeHtml(PROVA_COPY.doneReviewGeneral)}</span>${escapeHtml(note)}`;
+      els.doneReviewGeneral.innerHTML = `<span class="prova-review__comment-label">${escapeHtml(copy.doneReviewGeneral)}</span>${escapeHtml(note)}`;
     } else {
       els.doneReviewGeneral.hidden = true;
       els.doneReviewGeneral.textContent = '';
@@ -664,8 +711,8 @@ function renderReview(review) {
 
     let body = `
       <div class="prova-review__head">
-        <p class="prova-review__qnum">${escapeHtml(qLabel)}${isMc && ok === true ? ` · ${escapeHtml(PROVA_COPY.doneReviewOk)}` : ''}${isMc && ok === false ? ` · ${escapeHtml(PROVA_COPY.doneReviewMiss)}` : ''}</p>
-        <p class="prova-review__points">${escapeHtml(PROVA_COPY.doneReviewPoints)}: ${pts} / ${max}</p>
+        <p class="prova-review__qnum">${escapeHtml(qLabel)}${isMc && ok === true ? ` · ${escapeHtml(copy.doneReviewOk)}` : ''}${isMc && ok === false ? ` · ${escapeHtml(copy.doneReviewMiss)}` : ''}</p>
+        <p class="prova-review__points">${escapeHtml(copy.doneReviewPoints)}: ${pts} / ${max}</p>
       </div>
       <p class="prova-review__prompt">${escapeHtml(item.prompt || '')}</p>
     `;
@@ -673,16 +720,16 @@ function renderReview(review) {
     if (isMc) {
       const yours = item.studentChoice
         ? `${item.studentChoice}) ${item.choices?.[item.studentChoice] || ''}`.trim()
-        : PROVA_COPY.doneReviewBlank;
+        : copy.doneReviewBlank;
       const correct = item.correctChoice
         ? `${item.correctChoice}) ${item.choices?.[item.correctChoice] || ''}`.trim()
         : '—';
       body += `
-        <p class="prova-review__meta"><strong>${escapeHtml(PROVA_COPY.doneReviewYourChoice)}:</strong> ${escapeHtml(yours)}</p>
-        <p class="prova-review__meta"><strong>${escapeHtml(PROVA_COPY.doneReviewCorrect)}:</strong> ${escapeHtml(correct)}</p>
+        <p class="prova-review__meta"><strong>${escapeHtml(copy.doneReviewYourChoice)}:</strong> ${escapeHtml(yours)}</p>
+        <p class="prova-review__meta"><strong>${escapeHtml(copy.doneReviewCorrect)}:</strong> ${escapeHtml(correct)}</p>
       `;
     } else {
-      const text = String(item.studentText || '').trim() || PROVA_COPY.doneReviewBlank;
+      const text = String(item.studentText || '').trim() || copy.doneReviewBlank;
       body += `<div class="prova-review__answer">${escapeHtml(text)}</div>`;
     }
 
@@ -690,7 +737,7 @@ function renderReview(review) {
     if (comment) {
       body += `
         <div class="prova-review__comment">
-          <span class="prova-review__comment-label">${escapeHtml(PROVA_COPY.doneReviewComment)}</span>
+          <span class="prova-review__comment-label">${escapeHtml(copy.doneReviewComment)}</span>
           ${escapeHtml(comment)}
         </div>
       `;
@@ -722,7 +769,7 @@ function showDonePanel(att, review = null) {
           hour: '2-digit',
           minute: '2-digit',
         });
-        els.doneSubmitted.textContent = `${PROVA_COPY.doneSubmittedAt} ${when}.`;
+        els.doneSubmitted.textContent = `${copy.doneSubmittedAt} ${when}.`;
       } catch {
         els.doneSubmitted.textContent = '';
         els.doneSubmitted.hidden = true;
@@ -735,44 +782,57 @@ function showDonePanel(att, review = null) {
   if (els.btnRefreshStatus) {
     els.btnRefreshStatus.hidden = isGraded;
     els.btnRefreshStatus.disabled = false;
-    els.btnRefreshStatus.textContent = PROVA_COPY.doneRefresh;
+    els.btnRefreshStatus.textContent = copy.doneRefresh;
   }
 
   if (isGraded) {
-    if (els.doneHeading) els.doneHeading.textContent = PROVA_COPY.doneGradedHeading;
-    if (els.doneMessage) els.doneMessage.textContent = PROVA_COPY.doneGradedMessage;
+    if (els.doneHeading) {
+      els.doneHeading.textContent = examMeta?.kind === 'project' ? PROJECT_COPY.gradedHeading : copy.doneGradedHeading;
+    }
+    if (els.doneMessage) {
+      els.doneMessage.textContent = examMeta?.kind === 'project' ? PROJECT_COPY.gradedMessage : copy.doneGradedMessage;
+    }
     if (els.doneResult) els.doneResult.hidden = false;
 
     const finalScore = att.finalScore != null ? Number(att.finalScore) : null;
     const mcScore = att.mcScore != null ? Number(att.mcScore) : null;
     const discScore = att.discursiveScore != null ? Number(att.discursiveScore) : null;
+    // Máximos vêm da API (M1 = 12/8/20; M2 = 20/0/20; Trabalho = 30).
+    const totalMax = att.totalMax != null ? Number(att.totalMax) : 20;
+    const mcMax = att.mcMax != null ? Number(att.mcMax) : 12;
+    const discMax = att.discursiveMax != null ? Number(att.discursiveMax) : 8;
+    const isProjectExam = examMeta?.kind === 'project';
 
     if (els.doneScore) {
-      els.doneScore.textContent = finalScore != null ? `${finalScore} / 20` : '— / 20';
+      els.doneScore.textContent = finalScore != null ? `${finalScore} / ${totalMax}` : `— / ${totalMax}`;
     }
-    if (els.doneMcLabel) els.doneMcLabel.textContent = PROVA_COPY.doneBreakdownMc;
-    if (els.doneDiscLabel) els.doneDiscLabel.textContent = PROVA_COPY.doneBreakdownDisc;
-    if (els.doneTotalLabel) els.doneTotalLabel.textContent = PROVA_COPY.doneBreakdownTotal;
+    if (els.doneMcLabel) els.doneMcLabel.textContent = copy.doneBreakdownMc;
+    if (els.doneDiscLabel) els.doneDiscLabel.textContent = copy.doneBreakdownDisc;
+    if (els.doneTotalLabel) els.doneTotalLabel.textContent = copy.doneBreakdownTotal;
     if (els.doneMcValue) {
-      els.doneMcValue.textContent = mcScore != null ? `${mcScore} / 12` : '— / 12';
+      els.doneMcValue.textContent = mcScore != null ? `${mcScore} / ${mcMax}` : `— / ${mcMax}`;
+      if (els.doneMcValue.parentElement) els.doneMcValue.parentElement.hidden = isProjectExam || mcMax <= 0;
     }
     if (els.doneDiscValue) {
-      els.doneDiscValue.textContent = discScore != null ? `${discScore} / 8` : '— / 8';
+      els.doneDiscValue.textContent = discScore != null ? `${discScore} / ${discMax}` : `— / ${discMax}`;
+      if (els.doneDiscValue.parentElement) els.doneDiscValue.parentElement.hidden = isProjectExam || discMax <= 0;
     }
     if (els.doneTotalValue) {
-      els.doneTotalValue.textContent = finalScore != null ? `${finalScore} / 20` : '— / 20';
+      els.doneTotalValue.textContent = finalScore != null ? `${finalScore} / ${totalMax}` : `— / ${totalMax}`;
     }
+    if (els.doneBreakdown) els.doneBreakdown.hidden = isProjectExam;
     renderReview(review);
+    if (isProjectExam) renderProjectFeedback(review);
     renderContest(att.contest);
     return;
   }
 
   clearReviewUi();
-  if (els.doneHeading) els.doneHeading.textContent = PROVA_COPY.doneHeading;
+  if (els.doneHeading) els.doneHeading.textContent = copy.doneHeading;
   if (els.doneMessage) {
     els.doneMessage.textContent = isTimedOut
-      ? PROVA_COPY.doneTimedOut
-      : PROVA_COPY.doneWaiting;
+      ? copy.doneTimedOut
+      : copy.doneWaiting;
   }
   if (els.doneResult) els.doneResult.hidden = true;
 }
@@ -792,7 +852,9 @@ async function loadDoneWithReview(fallbackAttempt = null) {
     return;
   }
   try {
-    const payload = await provaGetAttempt(currentToken, asStudentOpts());
+    const payload = examMeta?.kind === 'project'
+      ? await provaGetExamStatus(currentToken, asStudentOpts())
+      : await provaGetAttempt(currentToken, asStudentOpts());
     attempt = payload.attempt || fallbackAttempt || attempt;
     showDonePanel(attempt, payload.review || null);
   } catch (error) {
@@ -829,7 +891,7 @@ async function refreshDoneStatus() {
     busy = false;
     if (els.btnRefreshStatus && attempt?.status !== 'graded') {
       els.btnRefreshStatus.disabled = false;
-      els.btnRefreshStatus.textContent = PROVA_COPY.doneRefresh;
+      els.btnRefreshStatus.textContent = copy.doneRefresh;
     }
   }
 }
@@ -861,7 +923,7 @@ async function enterExamFromPayload(payload) {
   applyAttemptPayload(payload);
   showPanel('exam');
   paintCurrentQuestion();
-  setSaveStatus(payload.resumed ? PROVA_COPY.examResumed : PROVA_COPY.examStarted);
+  setSaveStatus(payload.resumed ? copy.examResumed : copy.examStarted);
 }
 
 async function startExam() {
@@ -869,7 +931,7 @@ async function startExam() {
   busy = true;
   if (els.btnStart) els.btnStart.disabled = true;
   if (els.introStatus) {
-    els.introStatus.textContent = PROVA_COPY.introStarting;
+    els.introStatus.textContent = copy.introStarting;
     els.introStatus.classList.remove('is-error');
   }
   try {
@@ -879,7 +941,7 @@ async function startExam() {
     await enterExamFromPayload(payload);
   } catch (error) {
     console.error('[prova] start', error);
-    const msg = error instanceof ApiError ? error.message : PROVA_COPY.startFail;
+    const msg = error instanceof ApiError ? error.message : copy.startFail;
     if (els.introStatus) {
       els.introStatus.textContent = msg;
       els.introStatus.classList.add('is-error');
@@ -905,7 +967,7 @@ async function resumeExam() {
     if (els.blockedMessage) {
       els.blockedMessage.textContent = error instanceof ApiError
         ? error.message
-        : PROVA_COPY.blockedResume;
+        : copy.blockedResume;
     }
   }
 }
@@ -924,7 +986,7 @@ async function submitExam(opts = {}) {
   }
 
   busy = true;
-  if (!auto) setSaveStatus(PROVA_COPY.saveSending);
+  if (!auto) setSaveStatus(copy.saveSending);
   updateChromeForIndex(displayIndex);
   try {
     if (!examLocked) await flushSave({ quiet: true });
@@ -955,7 +1017,7 @@ async function submitExam(opts = {}) {
     return true;
   } catch (error) {
     console.error('[prova] submit', error);
-    const msg = error instanceof ApiError ? error.message : PROVA_COPY.submitFail;
+    const msg = error instanceof ApiError ? error.message : copy.submitFail;
     if (!auto) setSaveStatus(msg, true);
     if (error instanceof ApiError && error.status === 409) {
       await handleLockedAttempt(error);
@@ -981,7 +1043,7 @@ function openSubmitDialog() {
   const unanswered = countUnansweredQuestions();
   if (els.dialogSubmitSummary) {
     els.dialogSubmitSummary.hidden = false;
-    els.dialogSubmitSummary.textContent = formatSubmitUnansweredSummary(unanswered);
+    els.dialogSubmitSummary.textContent = formatSubmitUnansweredSummary(unanswered, copy);
     els.dialogSubmitSummary.classList.toggle('is-ok', unanswered === 0);
   }
   if (els.dialogSubmit && typeof els.dialogSubmit.showModal === 'function') {
@@ -989,14 +1051,214 @@ function openSubmitDialog() {
     return;
   }
   const fallback = unanswered > 0
-    ? `${formatSubmitUnansweredSummary(unanswered)}\n\n${PROVA_COPY.submitConfirmFallback}`
-    : PROVA_COPY.submitConfirmFallback;
+    ? `${formatSubmitUnansweredSummary(unanswered, copy)}\n\n${copy.submitConfirmFallback}`
+    : copy.submitConfirmFallback;
   if (window.confirm(fallback)) {
     void submitExam();
   }
 }
 
+/**
+ * Trabalho Final graded: o feedback do Mestre vem em `review.generalNote` (sem itens de questão).
+ * @param {object|null|undefined} review
+ */
+function renderProjectFeedback(review) {
+  const note = String(review?.generalNote || '').trim();
+  if (!els.doneReview || !els.doneReviewGeneral) return;
+  if (!note) return;
+  els.doneReview.hidden = false;
+  if (els.doneReviewTitle) els.doneReviewTitle.textContent = PROJECT_COPY.feedbackTitle;
+  els.doneReviewGeneral.hidden = false;
+  els.doneReviewGeneral.textContent = note;
+}
+
+function formatBytes(bytes) {
+  const n = Number(bytes) || 0;
+  if (n >= 1048576) return `${(n / 1048576).toFixed(1).replace('.', ',')} MB`;
+  if (n >= 1024) return `${Math.round(n / 1024)} KB`;
+  return `${n} B`;
+}
+
+function formatWhenFull(iso) {
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleString('pt-BR', {
+      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
+    });
+  } catch {
+    return '—';
+  }
+}
+
+function setProjectStatus(text, isError = false) {
+  if (!els.projectStatus) return;
+  els.projectStatus.textContent = text || '';
+  els.projectStatus.classList.toggle('is-error', Boolean(isError));
+}
+
+/**
+ * Lê os 4 primeiros bytes do arquivo (assinatura PK\x03\x04).
+ * @param {File} file
+ */
+async function hasZipSignature(file) {
+  try {
+    const head = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+    return ZIP_SIGNATURE.every((b, i) => head[i] === b);
+  } catch {
+    return false;
+  }
+}
+
+/** Valida no cliente (o servidor valida de novo). Retorna mensagem de erro ou null. */
+async function validateProjectFile(file) {
+  const maxBytes = Number(examMeta?.project?.maxBytes) || 50 * 1024 * 1024;
+  if (!file) return PROJECT_COPY.noFile;
+  if (!/\.zip$/i.test(file.name)) return PROJECT_COPY.notZip;
+  if (file.size <= 0) return PROJECT_COPY.empty;
+  if (file.size > maxBytes) return PROJECT_COPY.tooBig(Math.round(maxBytes / 1048576));
+  if (!(await hasZipSignature(file))) return PROJECT_COPY.badSignature;
+  return null;
+}
+
+/**
+ * @param {object} status — payload do getExamStatus do exame `project`
+ */
+function paintProjectPanel(status) {
+  const exam = status.exam || examMeta || {};
+  const proj = exam.project || {};
+  const sub = status.submission || null;
+  const canSubmit = Boolean(status.canSubmit);
+
+  if (els.projectHeading) els.projectHeading.textContent = exam.title || 'Trabalho Final';
+  if (els.projectStatement) els.projectStatement.textContent = proj.statement || '';
+  if (els.projectMax) els.projectMax.textContent = String(proj.maxMb || 50);
+  if (els.projectGuide) els.projectGuide.href = ROUTES.guiaTrabalhoFinal();
+  if (els.projectDeadline) {
+    if (exam.closesAt) {
+      els.projectDeadline.hidden = false;
+      els.projectDeadline.textContent = `Prazo para envio: ${formatWhenFull(exam.closesAt)}.`;
+    } else {
+      els.projectDeadline.hidden = true;
+    }
+  }
+
+  if (els.projectCurrent) {
+    els.projectCurrent.hidden = !sub;
+    if (sub) {
+      if (els.projectCurrentName) els.projectCurrentName.textContent = sub.originalName || '—';
+      if (els.projectCurrentSize) els.projectCurrentSize.textContent = formatBytes(sub.sizeBytes);
+      if (els.projectCurrentWhen) els.projectCurrentWhen.textContent = formatWhenFull(sub.uploadedAt);
+      if (els.projectCurrentCount) {
+        els.projectCurrentCount.textContent = sub.uploadCount > 1 ? `${sub.uploadCount} (vale o último)` : '1';
+      }
+    }
+  }
+
+  if (els.projectFile) els.projectFile.disabled = !canSubmit || busy;
+  if (els.projectSubmit) els.projectSubmit.disabled = !canSubmit || busy || !els.projectFile?.files?.length;
+  if (els.projectProgress) els.projectProgress.hidden = true;
+
+  if (!canSubmit) {
+    const closed = Boolean(exam.closesAt) && Date.parse(exam.closesAt) < Date.now();
+    setProjectStatus(sub ? PROJECT_COPY.waiting : (closed ? PROJECT_COPY.closedAfter : PROJECT_COPY.closed), !sub);
+  } else if (sub) {
+    setProjectStatus(PROJECT_COPY.waiting);
+  } else {
+    setProjectStatus(PROJECT_COPY.noFile);
+  }
+}
+
+async function bootProject(status) {
+  attempt = status.attempt || null;
+  if (attempt?.status === 'graded') {
+    void openDonePanel(attempt, status.review || null);
+    return;
+  }
+  showPanel('project');
+  paintProjectPanel(status);
+}
+
+async function refreshProject() {
+  if (!currentToken || busy) return;
+  try {
+    const status = await provaGetExamStatus(currentToken, asStudentOpts());
+    examMeta = status.exam || examMeta;
+    await bootProject(status);
+  } catch (error) {
+    console.warn('[prova] refresh project', error);
+    setProjectStatus(error instanceof ApiError ? error.message : PROJECT_COPY.sendFail, true);
+  }
+}
+
+async function submitProject() {
+  if (!currentToken || busy) return;
+  const file = els.projectFile?.files?.[0] || null;
+  const problem = await validateProjectFile(file);
+  if (problem) {
+    setProjectStatus(problem, true);
+    return;
+  }
+  busy = true;
+  if (els.projectSubmit) els.projectSubmit.disabled = true;
+  if (els.projectFile) els.projectFile.disabled = true;
+  if (els.projectProgress) {
+    els.projectProgress.hidden = false;
+    els.projectProgress.value = 0;
+  }
+  setProjectStatus(PROJECT_COPY.sending);
+  try {
+    await provaSubmitProject(currentToken, file, {
+      examId: EXAM_ID,
+      onProgress: (fraction) => {
+        if (els.projectProgress) els.projectProgress.value = Math.round(fraction * 100);
+      },
+    });
+    busy = false;
+    if (els.projectFile) els.projectFile.value = '';
+    const status = await provaGetExamStatus(currentToken, asStudentOpts());
+    examMeta = status.exam || examMeta;
+    await bootProject(status);
+    setProjectStatus(PROJECT_COPY.sent);
+  } catch (error) {
+    console.error('[prova] submit project', error);
+    busy = false;
+    setProjectStatus(error instanceof ApiError ? error.message : PROJECT_COPY.sendFail, true);
+    if (els.projectFile) els.projectFile.disabled = false;
+    if (els.projectSubmit) els.projectSubmit.disabled = !els.projectFile?.files?.length;
+    if (els.projectProgress) els.projectProgress.hidden = true;
+  } finally {
+    busy = false;
+  }
+}
+
+/** Intro dos exames de múltipla escolha que não são o M1 (título, resumo e regras vêm da API). */
+function paintIntroForExam(meta) {
+  if (!meta || meta.id === DEFAULT_EXAM_ID) return;
+  if (els.introHeading) els.introHeading.textContent = meta.title || els.introHeading.textContent;
+  if (els.introLead) els.introLead.textContent = copy.introLead;
+  if (els.introRules && Array.isArray(copy.introRules)) {
+    els.introRules.replaceChildren();
+    for (const rule of copy.introRules) {
+      const li = document.createElement('li');
+      li.textContent = rule;
+      els.introRules.appendChild(li);
+    }
+  }
+}
+
 function bindChrome() {
+  els.projectForm?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    void submitProject();
+  });
+  els.projectFile?.addEventListener('change', () => {
+    if (els.projectSubmit) els.projectSubmit.disabled = busy || !els.projectFile?.files?.length;
+    setProjectStatus('');
+  });
+  els.projectRefresh?.addEventListener('click', () => {
+    void refreshProject();
+  });
+
   els.btnLeaveIntro?.addEventListener('click', () => {
     window.location.href = ROUTES.dashboard();
   });
@@ -1042,12 +1304,12 @@ async function submitContest() {
   if (!currentToken || !els.doneContestMessage) return;
   const message = String(els.doneContestMessage.value || '').trim();
   if (!message) {
-    if (els.doneContestStatus) els.doneContestStatus.textContent = PROVA_COPY.contestEmpty;
+    if (els.doneContestStatus) els.doneContestStatus.textContent = copy.contestEmpty;
     return;
   }
   if (els.doneContestSubmit) {
     els.doneContestSubmit.disabled = true;
-    els.doneContestSubmit.textContent = PROVA_COPY.contestSending;
+    els.doneContestSubmit.textContent = copy.contestSending;
   }
   if (els.doneContestStatus) els.doneContestStatus.textContent = '';
   try {
@@ -1062,11 +1324,11 @@ async function submitContest() {
     if (els.doneContestStatus) {
       els.doneContestStatus.textContent = error instanceof ApiError
         ? error.message
-        : PROVA_COPY.contestFail;
+        : copy.contestFail;
     }
     if (els.doneContestSubmit) {
       els.doneContestSubmit.disabled = false;
-      els.doneContestSubmit.textContent = PROVA_COPY.contestSubmit;
+      els.doneContestSubmit.textContent = copy.contestSubmit;
     }
   }
 }
@@ -1075,9 +1337,16 @@ async function bootStatus() {
   try {
     const status = await provaGetExamStatus(currentToken, asStudentOpts());
     examMeta = status.exam || null;
+    copy = buildExamCopy(examMeta);
     if (examMeta?.title && els.examTitle) {
       els.examTitle.textContent = examMeta.title;
     }
+
+    if (examMeta?.kind === 'project') {
+      await bootProject(status);
+      return;
+    }
+    paintIntroForExam(examMeta);
 
     const att = status.attempt;
     if (att?.status === 'in_progress' || status.mustResume) {
@@ -1098,13 +1367,13 @@ async function bootStatus() {
     }
     if (els.introStatus) {
       if (canStart) {
-        els.introStatus.textContent = PROVA_COPY.introReady;
+        els.introStatus.textContent = copy.introReady;
         els.introStatus.classList.remove('is-error');
       } else if (!status.exam?.isOpen) {
-        els.introStatus.textContent = PROVA_COPY.introClosed;
+        els.introStatus.textContent = copy.introClosed;
         els.introStatus.classList.add('is-error');
       } else {
-        els.introStatus.textContent = PROVA_COPY.introCantStart;
+        els.introStatus.textContent = copy.introCantStart;
         els.introStatus.classList.add('is-error');
       }
     }
@@ -1114,7 +1383,7 @@ async function bootStatus() {
     if (els.blockedMessage) {
       els.blockedMessage.textContent = error instanceof ApiError
         ? error.message
-        : PROVA_COPY.blockedLoad;
+        : copy.blockedLoad;
     }
   }
 }

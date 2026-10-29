@@ -104,11 +104,72 @@ export const PROVA_COPY = Object.freeze({
  * Resumo do confirm de envio (Task E2).
  * @param {number} unansweredCount
  */
-export function formatSubmitUnansweredSummary(unansweredCount) {
+export function formatSubmitUnansweredSummary(unansweredCount, copy = PROVA_COPY) {
   const n = Math.max(0, Number(unansweredCount) || 0);
-  if (n <= 0) return PROVA_COPY.submitAllAnswered;
+  if (n <= 0) return copy.submitAllAnswered;
   if (n === 1) {
     return 'Atenção: 1 questão ainda está em branco. Em branco vale 0. Enviar mesmo assim?';
   }
   return `Atenção: ${n} questões ainda estão em branco. Em branco vale 0. Enviar mesmo assim?`;
 }
+
+const M1_EXAM_ID = 'modulo1-provacao';
+
+/**
+ * Copy por exame. Módulo 1 (ou sem metadados) usa `PROVA_COPY` idêntico; os demais
+ * provas de múltipla escolha derivam duração/contagem/pontos do `exam` da API.
+ * @param {object|null|undefined} meta — `exam` do getExamStatus
+ */
+export function buildExamCopy(meta) {
+  if (!meta || meta.id === M1_EXAM_ID || meta.kind === 'project') return PROVA_COPY;
+  const minutes = Math.max(1, Number(meta.durationMinutes) || 45);
+  const total = Math.max(1, Number(meta.questionCount) || 10);
+  const points = Number(meta.totalPoints) || total;
+  const time = `${minutes} minutos`;
+  const hasDisc = Boolean(meta.hasDiscursive);
+  return Object.freeze({
+    ...PROVA_COPY,
+    introLead: `${total} questões de marcar · vale ${points} pontos.`,
+    introRules: Object.freeze([
+      `Você tem ${time}. O tempo começa quando apertar Iniciar prova.`,
+      'Aparece 1 questão por vez. Use Anterior e Próxima para navegar.',
+      'Não saia desta página. Se sair, o tempo não pausa.',
+      'As respostas salvam sozinhas. No fim, aperte Enviar prova.',
+      hasDisc
+        ? 'Depois do envio, o Mestre corrige as questões escritas.'
+        : 'Depois do envio, a correção é automática e o Mestre libera a sua nota.',
+    ]),
+    introReady: `Leia as regras. Ao apertar Iniciar prova, o cronômetro de ${time} começa.`,
+    submitBody: hasDisc
+      ? PROVA_COPY.submitBody
+      : 'Depois de enviar, você não pode mudar as respostas. O Mestre libera a nota depois.',
+    submitAllAnswered: `Todas as ${total} questões têm resposta. Pode enviar.`,
+    expiredSending: `Os ${minutes} minutos acabaram. Estamos enviando sua prova…`,
+    expiredSent: 'Tempo esgotado. Sua prova foi enviada. Agora é só esperar o Mestre liberar a nota.',
+    doneWaiting: hasDisc
+      ? PROVA_COPY.doneWaiting
+      : 'Sua prova foi enviada e corrigida automaticamente. A nota aparece quando o Mestre liberar.',
+    doneTimedOut: 'O tempo acabou e a prova foi enviada. A nota aparece quando o Mestre liberar.',
+    doneBreakdownMc: 'Múltipla escolha',
+    introClosed: 'A prova ainda não foi aberta pelo Mestre para a sua turma.',
+  });
+}
+
+/** Trabalho Final (exame `project`): textos do painel de entrega. */
+export const PROJECT_COPY = Object.freeze({
+  loading: 'Preparando a entrega…',
+  closed: 'As entregas ainda não foram abertas pelo Mestre para a sua turma.',
+  closedAfter: 'As entregas deste trabalho estão encerradas.',
+  noFile: 'Escolha um arquivo .zip para enviar.',
+  notZip: 'O arquivo precisa ter a extensão .zip.',
+  badSignature: 'Esse arquivo não parece ser um .zip válido.',
+  tooBig: (maxMb) => `O arquivo passa do limite de ${maxMb} MB.`,
+  empty: 'O arquivo está vazio.',
+  sending: 'Enviando… não feche esta página.',
+  sent: 'Trabalho enviado! Você pode reenviar até o prazo; vale o último envio.',
+  sendFail: 'Não foi possível enviar o trabalho.',
+  waiting: 'Entrega recebida. O Mestre ainda vai corrigir — a nota aparece aqui quando ele liberar.',
+  gradedHeading: 'Nota liberada',
+  gradedMessage: 'O Mestre corrigiu o seu trabalho. Veja a nota e o feedback abaixo.',
+  feedbackTitle: 'Feedback do Mestre',
+});

@@ -76,3 +76,8 @@ backend/storage/.mysql-migrations
 
 # Cópias de migração geradas no deploy. A fonte é db/migrate-*.sql.
 backend/migrations/
+
+# ==================== Entregas do Trabalho Final (privadas) ====================
+uploads/trabalhos/*
+!uploads/trabalhos/.htaccess
+!uploads/trabalhos/.gitkeep

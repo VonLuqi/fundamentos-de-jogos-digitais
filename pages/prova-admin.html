@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Hub de correção — Provação do Círculo Mágico." />
+  <meta name="description" content="Hub de correção — Provações e Trabalho Final." />
   <meta name="theme-color" content="#0d0a10" />
-  <title>Prova Módulo 1 | Hub do Mestre</title>
+  <title>Provas e Trabalho Final | Hub do Mestre</title>
 
   <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
   <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
@@ -48,7 +48,7 @@
         <a class="app-shell__link is-locked" data-nav-item="despertar" href="../despertar/" aria-disabled="true" tabindex="-1" title="Em breve">O Despertar · em breve</a>
         <a class="app-shell__link" data-nav-item="codigos" data-admin-only href="../codigos/" hidden>Códigos de Acesso</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="../souls/" hidden>Almas Registradas</a>
-        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="../prova-admin/" hidden>Prova Módulo 1</a>
+        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="../prova-admin/" hidden>Provas &amp; Trabalho</a>
       </nav>
 
       <div class="app-shell__footer">
@@ -101,16 +101,46 @@
           <p id="api-warning-text"></p>
         </div>
 
+        <section class="prova-admin-exams" id="prova-admin-exams" aria-label="Exame">
+          <label class="prova-admin-filters__field">
+            <span>Exame</span>
+            <select id="prova-admin-exam">
+              <option value="modulo1-provacao">Prova do Módulo 1 · Círculo Mágico</option>
+              <option value="modulo2-prova">Prova do Módulo 2 · Balcão e Labirinto</option>
+              <option value="trabalho-final">Trabalho Final · entrega de .zip</option>
+            </select>
+          </label>
+        </section>
+
         <section class="prova-admin-gate hades-mirror-frame" aria-label="Estado do gate">
           <p class="prova-admin-gate__label" id="prova-admin-gate-label">Gate: …</p>
           <p class="prova-admin-gate__counts" id="prova-admin-gate-counts"></p>
-          <p class="prova-admin-gate__hint">
-            A prova começa bloqueada. Liberar uma turma por vez no Painel. Cada aluno só faz 1 vez.
+          <p class="prova-admin-gate__hint" id="prova-admin-gate-hint">
+            A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.
             <strong>Saídas</strong> = vezes que o aluno tirou o foco da prova (mudou de aba / saiu da página).
           </p>
+          <div class="prova-admin-gate__controls" id="prova-admin-gate-controls">
+            <div class="prova-admin-gate__modes" role="group" aria-label="Liberação por turma">
+              <button type="button" class="btn-refresh" data-gate-mode="closed">Selar (fechada)</button>
+              <button type="button" class="btn-refresh" data-gate-mode="TCG01">Liberar TCG01</button>
+              <button type="button" class="btn-refresh" data-gate-mode="TCG02">Liberar TCG02</button>
+            </div>
+            <div class="prova-admin-gate__dates">
+              <label class="prova-admin-filters__field">
+                <span>Abre em (opcional)</span>
+                <input type="datetime-local" id="prova-admin-opens" />
+              </label>
+              <label class="prova-admin-filters__field">
+                <span id="prova-admin-closes-label">Fecha em (opcional)</span>
+                <input type="datetime-local" id="prova-admin-closes" />
+              </label>
+              <button type="button" class="btn-refresh" id="prova-admin-save-dates">Salvar datas</button>
+            </div>
+            <p class="prova-admin-gate__status" id="prova-admin-gate-status" role="status" aria-live="polite"></p>
+          </div>
           <div class="prova-admin-gate__actions">
-            <a class="prova-admin-link" href="../dashboard/">Abrir / fechar no Painel</a>
-            <a class="prova-admin-link" href="../prova/">Ver como aluno (teste)</a>
+            <a class="prova-admin-link" href="../dashboard/">Painel do Mestre</a>
+            <a class="prova-admin-link" id="prova-admin-as-student" href="../prova/">Ver como aluno (teste)</a>
           </div>
         </section>
 
@@ -186,6 +216,28 @@
 
           <div class="prova-admin-detail__summary" id="prova-admin-detail-summary"></div>
 
+          <!-- Trabalho Final: entrega, download, nota e feedback -->
+          <section class="prova-admin-project" id="prova-admin-project" hidden aria-labelledby="prova-admin-project-title">
+            <h3 id="prova-admin-project-title">Entrega do aluno</h3>
+            <dl class="prova-admin-project__meta" id="prova-admin-project-meta"></dl>
+            <div class="prova-admin-project__download">
+              <button type="button" class="btn-refresh" id="prova-admin-project-download">Baixar .zip</button>
+            </div>
+            <label class="prova-admin-q__score">
+              <span id="prova-admin-project-score-label">Nota (0–30)</span>
+              <input type="number" id="prova-admin-project-score" min="0" max="30" step="0.25" inputmode="decimal" />
+            </label>
+            <label class="prova-admin-q__comment">
+              <span>Feedback para o aluno (até 4000 caracteres)</span>
+              <textarea id="prova-admin-project-feedback" rows="6" maxlength="4000"></textarea>
+            </label>
+            <div class="prova-admin-project__actions">
+              <button type="button" class="btn-refresh" id="prova-admin-project-save">Salvar rascunho</button>
+              <button type="button" class="btn-refresh prova-admin-finalize" id="prova-admin-project-publish">Publicar nota</button>
+            </div>
+            <p class="prova-admin-detail__hint" id="prova-admin-project-status" role="status" aria-live="polite"></p>
+          </section>
+
           <section class="prova-admin-contest" id="prova-admin-contest" hidden aria-labelledby="prova-admin-contest-title">
             <h3 id="prova-admin-contest-title">Contestação do aluno</h3>
             <div class="prova-admin-contest__thread" id="prova-admin-contest-thread"></div>
@@ -214,7 +266,7 @@
 
           <div id="prova-admin-answers" class="prova-admin-answers"></div>
 
-          <section class="prova-admin-integrity" aria-labelledby="prova-admin-integrity-title">
+          <section class="prova-admin-integrity" id="prova-admin-integrity" aria-labelledby="prova-admin-integrity-title">
             <h3 id="prova-admin-integrity-title">Linha do tempo de integridade</h3>
             <ol class="prova-admin-integrity__list" id="prova-admin-integrity-list"></ol>
             <p class="prova-admin-empty" id="prova-admin-integrity-empty" hidden>Nenhum evento registrado.</p>

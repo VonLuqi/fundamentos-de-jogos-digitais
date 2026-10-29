@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Services\Prova;
 
+use App\Services\Prova\Exams\Modulo2Exam;
+use App\Services\Prova\Exams\TrabalhoFinalExam;
+
 /**
  * Questões, gabarito oficial e rubricas da Prova Módulo 1 (`api/_lib/prova/questions-modulo1.js` + `answer-key-modulo1.js`).
  * Server-only: o gabarito nunca é enviado ao cliente antes de `status = 'graded'`.
@@ -479,5 +482,60 @@ final class ProvaCatalog
             return null;
         }
         return round($n * 100.0) / 100.0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Registro multi-exame
+    // -------------------------------------------------------------------------
+
+    /** @var array<string, ExamDefinition> */
+    private static array $registry = [];
+
+    /**
+     * @return array<int, string>
+     */
+    public static function examIds(): array
+    {
+        return [self::EXAM_ID, Modulo2Exam::ID, TrabalhoFinalExam::ID];
+    }
+
+    public static function exists(string $examId): bool
+    {
+        return in_array($examId, self::examIds(), true);
+    }
+
+    /**
+     * Definição do exame, ou null se o id não existir.
+     */
+    public static function forExam(string $examId): ?ExamDefinition
+    {
+        if (!self::exists($examId)) {
+            return null;
+        }
+        if (!isset(self::$registry[$examId])) {
+            self::$registry[$examId] = match ($examId) {
+                self::EXAM_ID => self::modulo1Definition(),
+                Modulo2Exam::ID => Modulo2Exam::definition(),
+                TrabalhoFinalExam::ID => TrabalhoFinalExam::definition(),
+            };
+        }
+        return self::$registry[$examId];
+    }
+
+    private static function modulo1Definition(): ExamDefinition
+    {
+        return new ExamDefinition([
+            'id' => self::EXAM_ID,
+            'kind' => ExamDefinition::KIND_QUIZ,
+            'title' => self::EXAM_TITLE,
+            'durationMinutes' => 90,
+            'totalPoints' => self::TOTAL_POINTS,
+            'mcPointsEach' => self::MC_POINTS_EACH,
+            'discursivePointsEach' => self::DISCURSIVE_POINTS_EACH,
+            'questions' => self::QUESTIONS,
+            'mcAnswerKey' => self::MC_ANSWER_KEY,
+            'mcJustifications' => self::MC_JUSTIFICATIONS,
+            'discursiveRubrics' => self::DISCURSIVE_RUBRICS,
+        ]);
     }
 }

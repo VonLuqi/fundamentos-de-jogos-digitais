@@ -80,6 +80,8 @@
     { "source": "/prova/", "destination": "/pages/prova.html" },
     { "source": "/prova-admin", "destination": "/pages/prova-admin.html" },
     { "source": "/prova-admin/", "destination": "/pages/prova-admin.html" },
+    { "source": "/guia-trabalho-final", "destination": "/pages/guia-trabalho-final.html" },
+    { "source": "/guia-trabalho-final/", "destination": "/pages/guia-trabalho-final.html" },
     { "source": "/submundo/tartaro-oculto", "destination": "/pages/submundo/tartaro-oculto.html" },
     { "source": "/submundo/asfodelos-sussurros", "destination": "/pages/submundo/asfodelos-sussurros.html" },
     { "source": "/submundo/hecate-encruzilhada", "destination": "/pages/submundo/hecate-encruzilhada.html" },

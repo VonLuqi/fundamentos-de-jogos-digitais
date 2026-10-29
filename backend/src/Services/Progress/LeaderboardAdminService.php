@@ -990,6 +990,20 @@ final class LeaderboardAdminService
         $provaCounts['openContests'] = $openContests;
         $provaCounts['integrityAlerts'] = $integrityAlerts;
 
+        // Demais exames (M2, Trabalho Final) no mesmo hub; M1 segue em `prova` por compatibilidade.
+        $provaExams = [];
+        foreach (ProvaCatalog::examIds() as $pxId) {
+            $pxStmt = $pdo->prepare('SELECT `status`, `contest_status` FROM `prova_attempts` WHERE `exam_id` = :eid');
+            $pxStmt->execute([':eid' => $pxId]);
+            $pxRows = $pxStmt->fetchAll(PDO::FETCH_ASSOC);
+            $pxCounts = ProvaService::countAttemptsByStatus($pxRows);
+            $pxCounts['openContests'] = count(array_filter($pxRows, static fn(array $r): bool => ($r['contest_status'] ?? '') === 'open'));
+            $provaExams[] = [
+                'exam' => ProvaService::examPublicDto(ProvaService::loadExam($pxId)),
+                'counts' => $pxCounts,
+            ];
+        }
+
         $totalLessons = count(GameCatalog::LESSON_CATALOG);
         $sealedPercent = $totalStudents > 0 ? (int) round(($verifiedEmailCount / $totalStudents) * 100) : 0;
         $publishedPercent = $totalLessons > 0 ? (int) round(($publishedLessonsCount / $totalLessons) * 100) : 0;
@@ -1033,6 +1047,7 @@ final class LeaderboardAdminService
                 'exam' => ProvaService::examPublicDto($exam),
                 'counts' => $provaCounts,
             ],
+            'provas' => $provaExams,
             'mailer' => Mailer::getStatus(),
             'auditLog' => self::fetchAuditEvents(15),
         ]);

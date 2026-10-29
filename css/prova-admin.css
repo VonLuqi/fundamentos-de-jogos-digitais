@@ -682,3 +682,87 @@
     min-height: 2.75rem;
   }
 }
+
+/* ---- Multi-exame: seletor, controles de liberação e Trabalho Final ---- */
+.prova-admin-exams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  margin-bottom: 0.9rem;
+}
+
+.prova-admin-gate__controls {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.prova-admin-gate__modes,
+.prova-admin-gate__dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.6rem 1rem;
+}
+
+.prova-admin-gate__modes .btn-refresh.is-active {
+  border-color: var(--hades-gold, #c9a227);
+  box-shadow: 0 0 10px rgba(201, 162, 39, 0.35);
+}
+
+.prova-admin-gate__status {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: rgba(232, 220, 200, 0.85);
+}
+
+.prova-admin-gate__dates input[type="datetime-local"] {
+  min-height: 2.2rem;
+  padding: 0.3rem 0.5rem;
+  color: inherit;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(194, 160, 72, 0.35);
+  border-radius: 4px;
+  font: inherit;
+}
+
+.prova-admin-project {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1rem 0;
+  padding: 1rem 1.15rem;
+  border: 1px solid rgba(194, 160, 72, 0.35);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.prova-admin-project__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.prova-admin-project__meta dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.prova-admin-project__meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.prova-admin-project__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+}
+
+.prova-admin-project textarea {
+  width: 100%;
+  box-sizing: border-box;
+}

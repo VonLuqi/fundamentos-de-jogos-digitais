@@ -54,6 +54,18 @@ export function resolveLessonState(lesson, user, { published = true, assessmentS
 }
 
 function defaultSubtitle(lesson, state, assessmentState = null) {
+  if (isAssessmentLesson(lesson) && lesson.examKind === 'project') {
+    if (assessmentState === 'awaiting') {
+      return 'Entrega enviada — você pode reenviar até o prazo. Aguardando correção do Mestre.';
+    }
+    if (state === 'completed') {
+      return 'Nota liberada — veja a nota e o feedback do Mestre.';
+    }
+    if (state === 'coming-soon' || state === 'locked') {
+      return 'Aguardando o Mestre abrir as entregas para a sua turma.';
+    }
+    return lesson.subtitle || 'Trabalho final';
+  }
   if (isAssessmentLesson(lesson)) {
     if (assessmentState === 'in_progress') {
       return 'Em andamento — o tempo não pausa. Continue a prova.';
@@ -77,9 +89,9 @@ function defaultSubtitle(lesson, state, assessmentState = null) {
 function defaultHref(lesson, user, assessmentState = null) {
   if (isAssessmentLesson(lesson)) {
     if (user?.role === 'admin' && assessmentState !== 'in_progress') {
-      return ROUTES.provaAdmin();
+      return ROUTES.provaAdminExam(lesson.examId);
     }
-    return ROUTES.prova();
+    return ROUTES.provaExam(lesson.examId);
   }
   if (lesson.href && typeof ROUTES[lesson.href] === 'function') {
     return ROUTES[lesson.href]();
@@ -87,7 +99,12 @@ function defaultHref(lesson, user, assessmentState = null) {
   return ROUTES.lesson(lesson.id);
 }
 
-function assessmentActionLabel(user, state, assessmentState) {
+function assessmentActionLabel(user, state, assessmentState, lesson = null) {
+  if (lesson?.examKind === 'project' && user?.role !== 'admin') {
+    if (state === 'completed') return 'Ver nota';
+    if (assessmentState === 'awaiting') return 'Ver entrega';
+    return 'Enviar trabalho';
+  }
   if (assessmentState === 'in_progress') return 'Continuar';
   if (assessmentState === 'awaiting') return 'Ver status';
   if (state === 'completed') return 'Ver nota';
@@ -202,7 +219,7 @@ export function renderLessonsList(container, user, options = {}) {
       const label = typeof getActionLabel === 'function'
         ? getActionLabel(lesson, state)
         : (isAssessmentLesson(lesson)
-          ? assessmentActionLabel(user, state, assessmentState)
+          ? assessmentActionLabel(user, state, assessmentState, lesson)
           : (state === 'completed' ? 'Rever' : 'Iniciar'));
       action.textContent = label;
       action.setAttribute('aria-label', `${label} — ${lesson.title}`);

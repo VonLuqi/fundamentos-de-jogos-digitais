@@ -1,0 +1,12 @@
+# Entregas do Trabalho Final: NUNCA servidas diretamente. Download só via /api/prova (admin autenticado).
+Options -Indexes
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>

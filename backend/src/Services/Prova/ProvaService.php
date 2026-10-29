@@ -189,15 +189,24 @@ final class ProvaService
             return null;
         }
         $gate = self::examGateFromRow($exam);
+        $def = ProvaCatalog::forExam((string) $exam['id']);
         return [
             'id' => (string) $exam['id'],
-            'title' => !empty($exam['title']) ? (string) $exam['title'] : ProvaCatalog::EXAM_TITLE,
-            'durationMinutes' => (int) ($exam['duration_minutes'] ?? 90),
-            'totalPoints' => (float) ($exam['total_points'] ?? ProvaCatalog::TOTAL_POINTS),
+            'kind' => $def ? $def->kind : ExamDefinition::KIND_QUIZ,
+            'title' => !empty($exam['title']) ? (string) $exam['title'] : ($def ? $def->title : (string) $exam['id']),
+            'durationMinutes' => (int) ($exam['duration_minutes'] ?? ($def ? $def->durationMinutes : 90)),
+            'totalPoints' => (float) ($exam['total_points'] ?? ($def ? $def->totalPoints : ProvaCatalog::TOTAL_POINTS)),
+            'questionCount' => $def ? $def->questionCount() : 0,
+            'hasDiscursive' => $def ? $def->discursiveQuestionCount() > 0 : false,
+            'contentReady' => $def ? !$def->placeholder : false,
+            'project' => $def && $def->isProject() ? $def->projectPublic() : null,
             'isOpen' => $gate['isOpen'],
             'openTurmas' => $gate['openTurmas'],
             'openTurma' => $gate['openTurma'],
             'gateState' => $gate['state'],
+            'gate' => $gate,
+            'mcMax' => $def ? $def->mcMax() : 0,
+            'discursiveMax' => $def ? $def->discursiveMax() : 0,
             'opensAt' => Database::sqlToIso($exam['opens_at'] ?? null),
             'closesAt' => Database::sqlToIso($exam['closes_at'] ?? null),
         ];
@@ -382,6 +391,7 @@ final class ProvaService
         if (!$attempt) {
             return null;
         }
+        $def = ProvaCatalog::forExam((string) $attempt['exam_id']);
         $status = (string) $attempt['status'];
         $dto = [
             'id' => (string) $attempt['id'],
@@ -401,9 +411,9 @@ final class ProvaService
             $dto['finalScore'] = isset($attempt['final_score']) ? (float) $attempt['final_score'] : null;
             $dto['mcScore'] = isset($attempt['mc_score']) ? (float) $attempt['mc_score'] : null;
             $dto['discursiveScore'] = isset($attempt['discursive_score']) ? (float) $attempt['discursive_score'] : null;
-            $dto['mcMax'] = 12;
-            $dto['discursiveMax'] = 8;
-            $dto['totalMax'] = ProvaCatalog::TOTAL_POINTS;
+            $dto['mcMax'] = $def ? $def->mcMax() : 0;
+            $dto['discursiveMax'] = $def ? $def->discursiveMax() : 0;
+            $dto['totalMax'] = $def ? $def->totalPoints : ProvaCatalog::TOTAL_POINTS;
             $dto['gradedAt'] = Database::sqlToIso($attempt['graded_at'] ?? null);
         }
         $dto['contest'] = self::contestDtoFromAttempt($attempt);
@@ -426,11 +436,15 @@ final class ProvaService
                 $byId[(string) $row['question_id']] = $row;
             }
         }
+        $def = ProvaCatalog::forExam((string) $attempt['exam_id']);
+        if (!$def) {
+            return null;
+        }
         $notes = self::parseAttemptAdminNotes($attempt['admin_notes'] ?? null);
         $comments = $notes['discursiveComments'];
 
         $items = [];
-        foreach (ProvaCatalog::QUESTIONS as $q) {
+        foreach ($def->questions as $q) {
             $qid = $q['id'];
             $row = $byId[$qid] ?? null;
             $base = [
@@ -442,28 +456,28 @@ final class ProvaService
             ];
             if ($q['type'] === 'mc') {
                 $studentChoice = $row['choice'] ?? null;
-                $correctChoice = ProvaCatalog::MC_ANSWER_KEY[$qid] ?? null;
+                $correctChoice = $def->mcAnswerKey[$qid] ?? null;
                 $isCorrect = isset($row['is_correct'])
                     ? (bool) $row['is_correct']
                     : ($correctChoice !== null && $studentChoice === $correctChoice);
                 $pointsAwarded = isset($row['points_awarded'])
                     ? (float) $row['points_awarded']
-                    : ($isCorrect ? 1.0 : 0.0);
+                    : ($isCorrect ? (float) $def->mcPointsEach : 0.0);
                 $items[] = array_merge($base, [
                     'choices' => $q['choices'],
                     'studentChoice' => $studentChoice,
                     'correctChoice' => $correctChoice,
                     'isCorrect' => $isCorrect,
                     'pointsAwarded' => $pointsAwarded,
-                    'maxPoints' => 1,
-                    'comment' => ProvaCatalog::MC_JUSTIFICATIONS[$qid] ?? '',
+                    'maxPoints' => $def->mcPointsEach,
+                    'comment' => $def->mcJustifications[$qid] ?? '',
                 ]);
             } else {
                 $pointsAwarded = isset($row['points_awarded']) ? (float) $row['points_awarded'] : 0.0;
                 $items[] = array_merge($base, [
                     'studentText' => isset($row['text_answer']) ? (string) $row['text_answer'] : '',
                     'pointsAwarded' => $pointsAwarded,
-                    'maxPoints' => ProvaCatalog::DISCURSIVE_POINTS_EACH,
+                    'maxPoints' => $def->discursivePointsEach,
                     'comment' => $comments[$qid] ?? '',
                 ]);
             }
@@ -503,16 +517,18 @@ final class ProvaService
     public static function studentAttemptPayload(array $attempt, array $answerRows, ?int $nowMs = null): array
     {
         $now = $nowMs ?? (int) round(microtime(true) * 1000);
+        $def = ProvaCatalog::forExam((string) $attempt['exam_id']);
         $payload = [
             'serverNow' => Database::nowIso($now),
             'exam' => [
                 'id' => (string) $attempt['exam_id'],
-                'title' => ProvaCatalog::EXAM_TITLE,
+                'kind' => $def ? $def->kind : ExamDefinition::KIND_QUIZ,
+                'title' => $def ? $def->title : (string) $attempt['exam_id'],
                 'durationMinutes' => null,
-                'totalPoints' => ProvaCatalog::TOTAL_POINTS,
+                'totalPoints' => $def ? $def->totalPoints : ProvaCatalog::TOTAL_POINTS,
             ],
             'attempt' => self::attemptStudentDto($attempt, $now),
-            'questions' => ProvaCatalog::sanitizeQuestionsForClient(),
+            'questions' => $def ? $def->sanitizeQuestionsForClient() : [],
             'answers' => (object) self::answersToClientMap($answerRows),
         ];
         if (($attempt['status'] ?? '') === 'graded') {
@@ -521,7 +537,7 @@ final class ProvaService
         return $payload;
     }
 
-    public static function clampQuestionIndex(mixed $index): ?int
+    public static function clampQuestionIndex(mixed $index, ExamDefinition $def): ?int
     {
         if ($index === null || $index === '' || !is_numeric($index)) {
             return null;
@@ -530,7 +546,7 @@ final class ProvaService
         if ((string) $n !== trim((string) $index) && (float) $index != $n) {
             return null;
         }
-        if ($n < 0 || $n >= ProvaCatalog::QUESTION_COUNT) {
+        if ($n < 0 || $n >= $def->questionCount()) {
             return null;
         }
         return $n;
@@ -540,20 +556,20 @@ final class ProvaService
      * @param array<string, mixed> $body
      * @return array{ok: bool, questionId?: string, choice?: string|null, textAnswer?: string|null, error?: string}
      */
-    public static function parseSaveAnswerPayload(array $body): array
+    public static function parseSaveAnswerPayload(array $body, ExamDefinition $def): array
     {
         $questionId = trim((string) ($body['questionId'] ?? $body['question_id'] ?? ''));
-        if ($questionId === '' || !ProvaCatalog::getQuestionById($questionId)) {
+        if ($questionId === '' || !$def->getQuestionById($questionId)) {
             return ['ok' => false, 'error' => 'Questão inválida.'];
         }
-        if (ProvaCatalog::isMcQuestionId($questionId)) {
+        if ($def->isMcQuestionId($questionId)) {
             $choice = ProvaCatalog::normalizeMcChoice($body['choice'] ?? null);
             if (!$choice) {
                 return ['ok' => false, 'error' => 'Escolha uma alternativa (A–E).'];
             }
             return ['ok' => true, 'questionId' => $questionId, 'choice' => $choice, 'textAnswer' => null];
         }
-        if (ProvaCatalog::isDiscursiveQuestionId($questionId)) {
+        if ($def->isDiscursiveQuestionId($questionId)) {
             $textAnswer = (string) ($body['textAnswer'] ?? $body['text_answer'] ?? '');
             if (mb_strlen($textAnswer, 'UTF-8') > 12000) {
                 return ['ok' => false, 'error' => 'Resposta longa demais (máx. 12000 caracteres).'];
@@ -567,8 +583,9 @@ final class ProvaService
      * @param array<int, array<string, mixed>> $answerRows
      * @return array{mcScore: float, updates: array<int, array{questionId: string, isCorrect: bool, pointsAwarded: float, choice: string|null}>}
      */
-    public static function buildMcGradeUpdates(array $answerRows): array
+    public static function buildMcGradeUpdates(array $answerRows, ?ExamDefinition $def = null): array
     {
+        $def ??= ProvaCatalog::forExam(ProvaCatalog::EXAM_ID);
         $byId = [];
         foreach ($answerRows as $row) {
             $qid = (string) ($row['question_id'] ?? '');
@@ -578,11 +595,11 @@ final class ProvaService
         }
         $mcScore = 0.0;
         $updates = [];
-        foreach (ProvaCatalog::listMcQuestionIds() as $qid) {
-            $correct = ProvaCatalog::MC_ANSWER_KEY[$qid];
+        foreach ($def->listMcQuestionIds() as $qid) {
+            $correct = $def->mcAnswerKey[$qid];
             $choice = ProvaCatalog::normalizeMcChoice($byId[$qid] ?? null);
             $isCorrect = $choice !== null && $choice === $correct;
-            $pts = $isCorrect ? (float) ProvaCatalog::MC_POINTS_EACH : 0.0;
+            $pts = $isCorrect ? (float) $def->mcPointsEach : 0.0;
             if ($isCorrect) {
                 $mcScore += $pts;
             }
@@ -599,16 +616,17 @@ final class ProvaService
     /**
      * @param array<int, array<string, mixed>> $answerRows
      */
-    public static function sumDiscursivePoints(array $answerRows): float
+    public static function sumDiscursivePoints(array $answerRows, ?ExamDefinition $def = null): float
     {
-        $discSet = array_flip(ProvaCatalog::listDiscursiveQuestionIds());
+        $def ??= ProvaCatalog::forExam(ProvaCatalog::EXAM_ID);
+        $discSet = array_flip($def->listDiscursiveQuestionIds());
         $sum = 0.0;
         foreach ($answerRows as $row) {
             $id = (string) ($row['question_id'] ?? '');
             if (!isset($discSet[$id])) {
                 continue;
             }
-            $pts = ProvaCatalog::normalizeDiscursivePoints($row['points_awarded'] ?? null);
+            $pts = $def->normalizeDiscursivePoints($row['points_awarded'] ?? null);
             if ($pts !== null) {
                 $sum += $pts;
             }
@@ -683,7 +701,7 @@ final class ProvaService
                 }
             }
             if ($status !== '' && $status !== 'all') {
-                if ($status === 'awaiting_grade') {
+                if ($status === 'awaiting_grade' || $status === 'awaiting') {
                     if ($item['status'] !== 'submitted' && $item['status'] !== 'timed_out') {
                         return false;
                     }
@@ -738,7 +756,7 @@ final class ProvaService
     /**
      * @return array<string, mixed>|null
      */
-    public static function loadExam(string $examId = ProvaCatalog::EXAM_ID): ?array
+    public static function loadExam(string $examId): ?array
     {
         $pdo = Database::get();
         $stmt = $pdo->prepare('SELECT * FROM prova_exams WHERE id = :id LIMIT 1');
@@ -757,6 +775,16 @@ final class ProvaService
         $stmt->execute([':eid' => $examId, ':uid' => $userId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
+    }
+
+    /**
+     * SELECT ... FOR UPDATE (exige transação aberta).
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function lockAttemptRow(string $attemptId): ?array
+    {
+        return ProvaProjectService::lockAttempt($attemptId);
     }
 
     /**
@@ -809,7 +837,8 @@ final class ProvaService
     {
         $pdo = Database::get();
         $answers = self::loadAnswers((string) $attempt['id']);
-        $mc = self::buildMcGradeUpdates($answers);
+        $def = ProvaCatalog::forExam((string) $attempt['exam_id']);
+        $mc = self::buildMcGradeUpdates($answers, $def);
         $nowSql = Database::nowSql($nowMs);
 
         $upAns = $pdo->prepare(
@@ -887,7 +916,8 @@ final class ProvaService
                 $byId[(string) $row['question_id']] = $row;
             }
         }
-        $questions = ProvaCatalog::questionsForAdmin();
+        $def = ProvaCatalog::forExam((string) $attempt['exam_id']);
+        $questions = $def ? $def->questionsForAdmin() : [];
         $comments = $notes['discursiveComments'];
 
         $answers = [];
@@ -907,13 +937,13 @@ final class ProvaService
                 'isCorrect' => isset($row['is_correct']) ? (bool) $row['is_correct'] : null,
             ];
             if ($q['type'] === 'mc') {
-                $correctChoice = $q['correctChoice'] ?? (ProvaCatalog::MC_ANSWER_KEY[$qid] ?? null);
+                $correctChoice = $q['correctChoice'] ?? ($def->mcAnswerKey[$qid] ?? null);
                 $studentChoice = $row['choice'] ?? null;
                 $isCorrect = $correctChoice && $studentChoice
                     ? ($studentChoice === $correctChoice)
                     : ($correctChoice && !$studentChoice ? false : $base['isCorrect']);
                 $pointsAwarded = $studentChoice
-                    ? ($isCorrect ? 1.0 : 0.0)
+                    ? ($isCorrect ? (float) $def->mcPointsEach : 0.0)
                     : $base['pointsAwarded'];
                 $answers[] = array_merge($base, [
                     'studentChoice' => $studentChoice,
@@ -925,17 +955,17 @@ final class ProvaService
             } else {
                 $answers[] = array_merge($base, [
                     'rubric' => $q['rubric'] ?? null,
-                    'maxPoints' => ProvaCatalog::DISCURSIVE_POINTS_EACH,
+                    'maxPoints' => $def ? $def->discursivePointsEach : 1,
                     'comment' => $comments[$qid] ?? '',
                 ]);
             }
         }
 
-        $discursiveIds = ProvaCatalog::listDiscursiveQuestionIds();
+        $discursiveIds = $def ? $def->listDiscursiveQuestionIds() : [];
         $scoredDiscursive = 0;
         foreach ($discursiveIds as $did) {
             $r = $byId[$did] ?? null;
-            if (ProvaCatalog::normalizeDiscursivePoints($r['points_awarded'] ?? null) !== null) {
+            if ($def->normalizeDiscursivePoints($r['points_awarded'] ?? null) !== null) {
                 $scoredDiscursive += 1;
             }
         }
@@ -958,7 +988,8 @@ final class ProvaService
             ];
         }
 
-        return array_merge($listItem, [
+        $detail = array_merge($listItem, [
+            'kind' => $def ? $def->kind : ExamDefinition::KIND_QUIZ,
             'adminNotesGeneral' => $notes['general'],
             'answers' => $answers,
             'contest' => [
@@ -978,11 +1009,27 @@ final class ProvaService
                 'mcScore' => isset($attempt['mc_score']) ? (float) $attempt['mc_score'] : null,
                 'discursiveScore' => isset($attempt['discursive_score'])
                     ? (float) $attempt['discursive_score']
-                    : self::sumDiscursivePoints($answerRows),
+                    : self::sumDiscursivePoints($answerRows, $def),
                 'finalScore' => isset($attempt['final_score']) ? (float) $attempt['final_score'] : null,
                 'canFinalize' => $canScore && !$locked,
                 'canReopen' => $locked && ($attempt['contest_status'] ?? '') === 'open',
             ],
         ]);
+
+        if ($def && $def->isProject()) {
+            $sub = ProvaProjectService::loadSubmission((string) $attempt['id']);
+            $detail['submission'] = ProvaProjectService::submissionDto($sub);
+            $detail['feedback'] = $notes['general'];
+            $detail['grading'] = [
+                'canScore' => $sub !== null && $status !== 'graded',
+                'locked' => $locked,
+                'scoreMax' => (float) ($def->project['scoreMax'] ?? 30),
+                'finalScore' => isset($attempt['final_score']) ? (float) $attempt['final_score'] : null,
+                'canFinalize' => $sub !== null && $status !== 'graded',
+                'canReopen' => $locked && ($attempt['contest_status'] ?? '') === 'open',
+            ];
+        }
+
+        return $detail;
     }
 }

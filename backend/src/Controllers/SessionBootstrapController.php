@@ -28,7 +28,7 @@ final class SessionBootstrapController
     /**
      * @return array<string, mixed>
      */
-    public static function loadProvaGateForUser(int $userId, string $examId = 'modulo1-provacao'): array
+    public static function loadProvaGateForUser(int $userId, ?string $examId = null): array
     {
         $empty = ['inProgress' => false];
         if ($userId <= 0) {
@@ -40,10 +40,11 @@ final class SessionBootstrapController
             $stmt = $pdo->prepare(
                 'SELECT `id`, `exam_id`, `status`, `ends_at`, `current_question_index`
                  FROM `prova_attempts`
-                 WHERE `user_id` = :uid AND `exam_id` = :eid AND `status` = \'in_progress\'
-                 LIMIT 1'
+                 WHERE `user_id` = :uid AND `status` = \'in_progress\''
+                . ($examId !== null ? ' AND `exam_id` = :eid' : '')
+                . ' ORDER BY `started_at` DESC LIMIT 1'
             );
-            $stmt->execute([':uid' => $userId, ':eid' => $examId]);
+            $stmt->execute($examId !== null ? [':uid' => $userId, ':eid' => $examId] : [':uid' => $userId]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
                 return $empty;
@@ -57,7 +58,7 @@ final class SessionBootstrapController
             return [
                 'inProgress' => true,
                 'attemptId' => (string) $row['id'],
-                'examId' => (string) ($row['exam_id'] ?? $examId),
+                'examId' => (string) ($row['exam_id'] ?? ''),
                 'endsAt' => $endsAtIso,
                 'remainingMs' => $remainingMs,
                 'currentQuestionIndex' => (int) ($row['current_question_index'] ?? 0),
