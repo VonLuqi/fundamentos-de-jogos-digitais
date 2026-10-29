@@ -107,7 +107,10 @@ function resolveProvaAssessmentState(status) {
   if (attempt?.status === 'submitted' || attempt?.status === 'timed_out') return 'awaiting';
   if (status.canStart || status.canSubmit) return 'available';
   const exam = status.exam;
-  if (exam?.isOpen && exam?.openTurma && exam.openTurma === currentUser?.turma) {
+  const openTurmas = Array.isArray(exam?.openTurmas)
+    ? exam.openTurmas
+    : (exam?.openTurma ? [exam.openTurma] : []);
+  if (exam?.isOpen && currentUser?.turma && openTurmas.includes(currentUser.turma)) {
     return 'available';
   }
   if (currentUser?.role === 'admin') return 'available';

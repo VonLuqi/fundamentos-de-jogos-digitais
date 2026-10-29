@@ -455,6 +455,7 @@ function formatProvaGateLabel(state) {
     closed: 'Portão Selado',
     TCG01: 'Aberta · Só TCG01',
     TCG02: 'Aberta · Só TCG02',
+    all: 'Aberta · Todas as Turmas',
     open_turma_1: 'Aberta · Só TCG01',
     open_turma_2: 'Aberta · Só TCG02',
     open_all: 'Aberta · Todas as Turmas',
@@ -464,7 +465,7 @@ function formatProvaGateLabel(state) {
 }
 
 /**
- * Modal do Mestre: Fechada · Só TCG01 · Só TCG02 (Task D1).
+ * Modal do Mestre: Fechada · Só TCG01 · Só TCG02 · Todas (Task D1).
  */
 async function openProvaGateModal() {
   if (!currentToken || currentUser?.role !== 'admin') return;
@@ -474,7 +475,7 @@ async function openProvaGateModal() {
 
   const help = document.createElement('p');
   help.className = 'scroll-modal__note';
-  help.textContent = 'A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.';
+  help.textContent = 'A prova começa bloqueada. Libere uma turma ou todas. Cada aluno só faz 1 vez.';
   wrapper.appendChild(help);
 
   const statusEl = document.createElement('p');
@@ -504,6 +505,7 @@ async function openProvaGateModal() {
     { mode: 'closed', label: 'Fechada' },
     { mode: 'TCG01', label: 'Só TCG01' },
     { mode: 'TCG02', label: 'Só TCG02' },
+    { mode: 'all', label: 'Todas' },
   ];
 
   /** @type {Record<string, HTMLButtonElement>} */
@@ -582,8 +584,9 @@ async function openProvaGateModal() {
 function syncProvaMasterButton(gateState) {
   const btn = document.getElementById('btn-prova-modulo1');
   if (!btn) return;
-  const open = gateState === 'TCG01' || gateState === 'TCG02';
-  btn.textContent = open ? `Prova (${gateState})` : 'Prova Módulo 1';
+  const open = gateState === 'TCG01' || gateState === 'TCG02' || gateState === 'all' || gateState === 'open_all';
+  const label = gateState === 'all' || gateState === 'open_all' ? 'todas' : gateState;
+  btn.textContent = open ? `Prova (${label})` : 'Prova Módulo 1';
   btn.classList.toggle('btn-gold--pulse', open);
   btn.classList.toggle('btn-gold--ghost', !open);
   btn.setAttribute('aria-pressed', String(open));

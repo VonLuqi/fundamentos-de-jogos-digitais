@@ -96,7 +96,14 @@ async function main() {
   }
   L.splice(6, 0, `**${total} ícones pendentes.**`, '');
   fs.writeFileSync(OUT, `${L.join('\n')}\n`);
+  const { renderVetorialLots } = await import('./despertar-art-lotes.mjs');
+  const lots = await renderVetorialLots();
+  const written = fs.readFileSync(OUT, 'utf8');
+  const cut = written.indexOf('<!-- lotes-vetoriais -->');
+  const head = (cut === -1 ? written : written.slice(0, cut)).replace(/\s*$/, '');
+  fs.writeFileSync(OUT, `${head}\n\n${lots.markdown}`);
   console.log(`${total} pendentes → ${path.relative(ROOT, OUT)}`);
+  console.log(`${lots.count} vetoriais em ${lots.lots} lotes`);
 }
 
 await main();

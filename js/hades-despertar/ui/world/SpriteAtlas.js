@@ -107,6 +107,26 @@ export function catabaseSprite(id) {
   };
 }
 
+/** Sabores do Véu que têm WebP pintado. Os seis tiers seguintes ficam só com a névoa. */
+const VEIL_SPRITE_IDS = new Set([
+  'veu_nevoa_cinzenta',
+  'veu_aguas_estige',
+  'veu_corrente_lethe',
+  'veu_chama_phlegethon',
+  'veu_ouro_ancestral',
+]);
+
+/** Ícone do sabor atual do Véu, ou null se esse tier ainda não tem arte. */
+export function veilSprite(id) {
+  const safe = String(id || '').replace(/[^\w-]/g, '');
+  if (!VEIL_SPRITE_IDS.has(safe)) return null;
+  return {
+    id: safe,
+    ...spritePaths('veil', safe),
+    mark: 'V',
+  };
+}
+
 /** Modelo 3D da Foice (gerado por npm run despertar:foice3d), com versão de cache da pasta. */
 export function foiceModelUrl() {
   const v = ART_VERSIONS.foice ? `?v=${ART_VERSIONS.foice}` : '';

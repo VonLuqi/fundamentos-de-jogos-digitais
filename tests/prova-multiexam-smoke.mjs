@@ -50,6 +50,10 @@ assert.ok(read('scripts/dev-server.mjs').includes('DEV_API_BASE'), 'dev-server a
 const svc = read('backend/src/Services/Prova/ProvaService.php');
 assert.ok(!/ProvaCatalog::(QUESTIONS|MC_ANSWER_KEY|QUESTION_COUNT|MC_POINTS_EACH|DISCURSIVE_POINTS_EACH)/.test(svc), 'ProvaService não deve fixar constantes do M1');
 assert.ok(svc.includes('releasePendingAutoGrades') && ctrl.includes('releasePendingAutoGrades'), 'M2 promove entregas antigas a graded');
+assert.ok(svc.includes("'all', 'todas', 'both', 'open_all'"), 'gate aceita mode=all');
+assert.ok(!svc.includes('apenas uma turma por vez'), 'gate não rejeita múltiplas turmas');
+assert.ok(adminJs.includes("data-gate-mode") && read('pages/prova-admin.html').includes('data-gate-mode="all"'), 'hub tem Liberar todas');
+assert.ok(read('js/aulas.js').includes('openTurmas.includes'), 'trilha usa openTurmas (não só openTurma)');
 
 const migration = read('db/migrate-2026-10-29-prova-modulo2-trabalho-final.sql');
 assert.ok(!/\b(DELETE|DROP|TRUNCATE|MODIFY)\b/i.test(migration.replace(/--.*$/gm, '').replace(/ON DELETE (CASCADE|RESTRICT|SET NULL)/gi, '')), 'Migração não pode ter DELETE/DROP/TRUNCATE/MODIFY');
@@ -156,6 +160,23 @@ if (ProvaProjectService::normalizeProjectScore('30', 30.0) !== 30.0 || ProvaProj
 if ((int) $tf->totalPoints !== 30 || $tf->project['scoreMax'] !== 30) fail('TF total/scoreMax 30');
 if ($m2->mcMax() !== 20.0 || $m2->mcPointsEach !== 2) fail('M2 2 pts por questão');
 if (str_contains(json_encode($tf->project, JSON_UNESCAPED_UNICODE), 'bola')) fail('TF sem bola');
+
+// --- gate multi-turma (Trabalho Final / provas)
+$gClosed = ProvaService::examGateFromRow(['is_open' => 1, 'open_turmas' => []]);
+if ($gClosed['isOpen'] || $gClosed['state'] !== 'closed') fail('is_open sem turma = fechada');
+$g1 = ProvaService::examGateFromRow(['is_open' => 1, 'open_turmas' => ['TCG01']]);
+if (!$g1['isOpen'] || $g1['state'] !== 'TCG01' || $g1['openTurma'] !== 'TCG01') fail('só TCG01');
+$gAll = ProvaService::examGateFromRow(['is_open' => 1, 'open_turmas' => ['TCG01', 'TCG02']]);
+if (!$gAll['isOpen'] || $gAll['state'] !== 'all' || $gAll['openTurma'] !== null || count($gAll['openTurmas']) !== 2) fail('duas turmas = all');
+$pAll = ProvaService::parseAdminSetExamOpenBody(['mode' => 'all']);
+if (!$pAll['ok'] || !$pAll['is_open'] || $pAll['open_turmas'] !== ProvaService::PROVA_GATE_TURMAS) fail('parse mode=all');
+$pBoth = ProvaService::parseAdminSetExamOpenBody(['isOpen' => true, 'openTurmas' => ['TCG01', 'TCG02']]);
+if (!$pBoth['ok'] || count($pBoth['open_turmas']) !== 2) fail('parse openTurmas ambas');
+$examAll = ['is_open' => 1, 'open_turmas' => ['TCG01', 'TCG02']];
+if (!ProvaService::isExamOpenForUser($examAll, ['turma' => 'TCG01']) || !ProvaService::isExamOpenForUser($examAll, ['turma' => 'TCG02'])) fail('all libera TCG01 e TCG02');
+if (ProvaService::isExamOpenForUser($examAll, ['turma' => 'TCG99'])) fail('turma desconhecida bloqueada');
+$exam1 = ['is_open' => 1, 'open_turmas' => ['TCG01']];
+if (!ProvaService::isExamOpenForUser($exam1, ['turma' => 'TCG01']) || ProvaService::isExamOpenForUser($exam1, ['turma' => 'TCG02'])) fail('só TCG01 respeita a outra turma');
 echo "OK";
 `;
 

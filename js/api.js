@@ -2360,7 +2360,7 @@ export function provaAdminGetOverview(token, options = {}) {
 
 /**
  * @param {string} token
- * @param {{ mode?: 'closed'|'TCG01'|'TCG02', examId?: string }} payload
+ * @param {{ mode?: 'closed'|'all'|'TCG01'|'TCG02', examId?: string }} payload
  */
 export function provaAdminSetExamOpen(token, payload = {}) {
   return provaRequest(token, 'adminSetExamOpen', payload);

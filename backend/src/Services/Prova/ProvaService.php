@@ -75,7 +75,7 @@ final class ProvaService
     {
         $openTurmas = self::normalizeOpenTurmas($exam['open_turmas'] ?? []);
         $isOpenFlag = !empty($exam['is_open']);
-        if (!$isOpenFlag || count($openTurmas) !== 1) {
+        if (!$isOpenFlag || $openTurmas === []) {
             return [
                 'state' => 'closed',
                 'openTurma' => null,
@@ -83,11 +83,13 @@ final class ProvaService
                 'openTurmas' => [],
             ];
         }
+        $allOpen = count($openTurmas) === count(self::PROVA_GATE_TURMAS)
+            && count(array_diff(self::PROVA_GATE_TURMAS, $openTurmas)) === 0;
         return [
-            'state' => $openTurmas[0],
-            'openTurma' => $openTurmas[0],
+            'state' => $allOpen ? 'all' : $openTurmas[0],
+            'openTurma' => count($openTurmas) === 1 ? $openTurmas[0] : null,
             'isOpen' => true,
-            'openTurmas' => [$openTurmas[0]],
+            'openTurmas' => $openTurmas,
         ];
     }
 
@@ -103,11 +105,14 @@ final class ProvaService
             if (in_array(strtolower($mode), ['closed', 'fechada', 'off', 'false'], true)) {
                 return ['ok' => true, 'is_open' => false, 'open_turmas' => []];
             }
+            if (in_array(strtolower($mode), ['all', 'todas', 'both', 'open_all'], true)) {
+                return ['ok' => true, 'is_open' => true, 'open_turmas' => self::PROVA_GATE_TURMAS];
+            }
             $turma = strtoupper($mode);
             if (in_array($turma, self::PROVA_GATE_TURMAS, true)) {
                 return ['ok' => true, 'is_open' => true, 'open_turmas' => [$turma]];
             }
-            return ['ok' => false, 'error' => 'Modo inválido. Use closed, TCG01 ou TCG02.'];
+            return ['ok' => false, 'error' => 'Modo inválido. Use closed, all, TCG01 ou TCG02.'];
         }
 
         $openTurmas = self::normalizeOpenTurmas($body['openTurmas'] ?? $body['open_turmas'] ?? []);
@@ -115,9 +120,6 @@ final class ProvaService
 
         if (!$isOpen || $openTurmas === []) {
             return ['ok' => true, 'is_open' => false, 'open_turmas' => []];
-        }
-        if (count($openTurmas) > 1) {
-            return ['ok' => false, 'error' => 'Na v1 liberar apenas uma turma por vez (TCG01 ou TCG02).'];
         }
         return ['ok' => true, 'is_open' => true, 'open_turmas' => $openTurmas];
     }
@@ -160,7 +162,7 @@ final class ProvaService
     public static function isExamOpenForUser(?array $exam, array $user): bool
     {
         $gate = self::examGateFromRow($exam);
-        if (!$gate['isOpen'] || !$gate['openTurma']) {
+        if (!$gate['isOpen'] || $gate['openTurmas'] === []) {
             return false;
         }
         $nowMs = (int) round(microtime(true) * 1000);
@@ -176,7 +178,7 @@ final class ProvaService
                 return false;
             }
         }
-        return !empty($user['turma']) && $user['turma'] === $gate['openTurma'];
+        return !empty($user['turma']) && in_array((string) $user['turma'], $gate['openTurmas'], true);
     }
 
     /**

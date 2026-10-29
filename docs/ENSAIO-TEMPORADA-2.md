@@ -43,12 +43,12 @@ Metas de `paridade-cookieclicker-despertar.md` §8.4. Bot: clica, clica Ecos, co
 | 1ª Forja | 15–25 min | 19min | 16min | 17min | 10min |
 | 1º Trono | 25–40 min | 31min | 27min | 31min | 21min |
 | Preview Lethe (1e8) | 35–50 min | 50min | 50min | 60min | 45min |
-| **1ª Catábase (1 óbolo)** | **45–70 min** | 69min | **89min** | **97min** | **89min** |
+| **1ª Catábase (1 óbolo)** | **45–70 min** | 68min 11s | **70min 01s** | 57min 06s | 89min |
 
 Leitura:
-- O meio do jogo (Forja, Trono) está no alvo; a variação vem dos Ecos (Colheita/Maré).
-- O 1º juramento custa 100 almas (como o 1º upgrade do Cookie Clicker): a meta "2–5 min" do doc é que parece desatualizada.
-- **A 1ª Catábase passa da meta na maioria dos perfis** (o 1º óbolo exige 4e9 almas na corrida, `PRESTIGE_RUN_DIVISOR`). Se a ideia é a turma chegar à Catábase dentro de uma aula, as opções são baixar o divisor (2e9 → ~75–80 min; 1e9 → ~65–70 min) ou acelerar o fim do 1º terço (Trono → Templo). É decisão de design; mexe em JS e PHP juntos.
+- O meio do jogo (Forja, Trono) está no alvo na medição de 2026-10-29 (5 cliques/s, semente 7); a variação antiga vinha dos Ecos e de um `Math.random` na cópia que escolhe o gerador. Essa cópia agora usa aleatório fixo.
+- O 1º juramento custa 100 almas (como o 1º upgrade do Cookie Clicker): a meta "2–5 min" do doc é que parece desatualizada. A 2 e a 8 cliques/s o juramento continua antes da meta; isso já era assim e não muda com o piso da Catábase. A 8 cliques/s o Trono chega 37 s antes da faixa (24min 23s). Sombra, Forja e Lethe ficam dentro.
+- **Decidido (2026-10-29):** a 1ª Catábase espera `FIRST_CATABASE_RUN_SOULS = 5,1e8` (JS e PHP). A 5 cliques/s, semente 7, o óbolo sai em 70min 01s. O divisor `PRESTIGE_RUN_DIVISOR = 4e9` fica: de 5,1e8 até 4e9 a primeira Catábase continua rendendo 1 óbolo, e da 2ª em diante a conta não muda.
 - O bot é um jogador "otimizado ingênuo"; números indicativos, não definitivos.
 
 ## Checklist de lançamento
@@ -57,7 +57,7 @@ Leitura:
 - [ ] Telas que faltam para mecânicas F8 que já existem no código: **Dragão** (alimentar, escolher auras), **troca de estação** e **Corça de Ártemis** — hoje não há botão para o aluno. Sem isso, os ícones do lote L3 também não aparecem.
 - [ ] Ícones de Véu e estágios da Catábase na interface (lotes L4/L5 hoje não têm onde aparecer).
 - [x] Decidir conquistas entre temporadas (acima).
-- [ ] Decidir o ritmo da 1ª Catábase (acima).
+- [x] Decidir o ritmo da 1ª Catábase (acima).
 - [ ] `npm run test:despertar` verde e `despertar:ensaio-temporada` 15/15 na véspera.
 - [ ] Deploy na HostGator de tudo desde o último envio (PHP do Despertar, `js/hades-despertar/**`, `pages/despertar.html`, `css/despertar.css`, `assets/despertar/sprites/**`).
 - [ ] Só então: "Abrir Temporada 2" no painel (uma vez).

@@ -223,8 +223,8 @@ function paintExamChrome() {
   const hint = $('prova-admin-gate-hint');
   if (hint) {
     hint.innerHTML = project
-      ? 'As entregas começam fechadas. Libere uma turma por vez; o aluno pode reenviar o .zip até o <strong>prazo</strong> ou até você selar. Vale o último envio.'
-      : 'A prova começa bloqueada. Liberar uma turma por vez. Cada aluno só faz 1 vez.'
+      ? 'As entregas começam fechadas. Libere uma turma ou <strong>todas</strong>; o aluno pode reenviar o .zip até o <strong>prazo</strong> ou até você selar. Vale o último envio.'
+      : 'A prova começa bloqueada. Libere uma turma ou todas. Cada aluno só faz 1 vez.'
         + (examInfo?.hasDiscursive
           ? ' <strong>Saídas</strong> = vezes que o aluno tirou o foco da prova (mudou de aba / saiu da página).'
           : ' Correção de múltipla escolha é automática: a nota vai para o aluno no envio.');
@@ -254,9 +254,15 @@ function paintGate(overview) {
   const gate = overview?.gate || exam.gate || {};
   const counts = overview?.counts || {};
   if (label) {
-    label.textContent = gate.openTurma
-      ? `Gate: liberada só para ${gate.openTurma}`
-      : 'Gate: fechada';
+    if (!gate.isOpen) {
+      label.textContent = 'Gate: fechada';
+    } else if (gate.state === 'all' || (Array.isArray(gate.openTurmas) && gate.openTurmas.length > 1)) {
+      label.textContent = 'Gate: liberada para todas as turmas';
+    } else if (gate.openTurma) {
+      label.textContent = `Gate: liberada só para ${gate.openTurma}`;
+    } else {
+      label.textContent = 'Gate: fechada';
+    }
     if (exam.contentReady === false) label.textContent += ' · conteúdo pendente (não pode ser liberada)';
   }
   if (countsEl) {
@@ -275,7 +281,11 @@ function paintGate(overview) {
   }
   document.querySelectorAll('[data-gate-mode]').forEach((btn) => {
     const mode = btn.getAttribute('data-gate-mode');
-    const active = mode === 'closed' ? !gate.openTurma : gate.openTurma === mode;
+    const active = mode === 'closed'
+      ? !gate.isOpen
+      : mode === 'all'
+        ? gate.state === 'all'
+        : gate.state === mode || gate.openTurma === mode;
     btn.classList.toggle('is-active', active);
     btn.setAttribute('aria-pressed', active ? 'true' : 'false');
   });

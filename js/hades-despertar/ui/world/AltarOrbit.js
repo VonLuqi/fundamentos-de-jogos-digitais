@@ -8,6 +8,7 @@ import {
   veilPercent as economicVeilPercent,
 } from '../../core/formulas.js';
 import { veilTierForPercent } from '../../config/achievements.js';
+import { createSpriteNode, veilSprite } from './SpriteAtlas.js';
 import {
   DEFAULT_PERF_PREFS,
   PERF_ANIMATED_VARIANT_CAP_PER_SHELF,
@@ -191,6 +192,27 @@ export function veilPercent(state = {}) {
 }
 
 /**
+ * Troca o ícone do sabor dentro da névoa. Tiers sem arquivo ficam só com a cor.
+ * @param {HTMLElement} veilEl
+ * @param {{ spriteId?: string, name?: string }} tier
+ */
+function syncVeilIcon(veilEl, tier) {
+  if (typeof veilEl?.querySelector !== 'function' || typeof veilEl.append !== 'function') return;
+  const sprite = veilSprite(tier?.spriteId);
+  const current = veilEl.querySelector('.despertar-veil__icon');
+  const nextId = sprite?.id || '';
+  if ((veilEl.dataset?.veilSprite || '') === nextId && (nextId ? current : !current)) return;
+  current?.remove();
+  if (veilEl.dataset) veilEl.dataset.veilSprite = nextId;
+  if (!sprite) return;
+  const doc = veilEl.ownerDocument;
+  if (!doc?.createElement) return;
+  veilEl.append(createSpriteNode(doc, sprite, {
+    className: 'despertar-sprite despertar-veil__icon',
+  }));
+}
+
+/**
  * Aplica variáveis CSS, tier ctoniano e estado de animação no elemento `#despertar-veil`.
  */
 export function applyVeilElementStyle(veilEl, state = {}, opts = {}) {
@@ -217,6 +239,7 @@ export function applyVeilElementStyle(veilEl, state = {}, opts = {}) {
     || opts.particles === false,
   );
   veilEl.classList?.toggle?.('is-milk', econPct >= 52 || heightPct > 10);
+  syncVeilIcon(veilEl, tier);
   veilEl.classList?.toggle?.('is-wave-frozen', freezeWaves);
   veilEl.hidden = false;
   return { heightPct, econPct, tier, freezeWaves };

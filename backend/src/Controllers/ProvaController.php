@@ -453,7 +453,7 @@ final class ProvaController
                     $dateSets[$col] = $sql;
                 }
                 if (!$hasGateIntent && $dateSets === []) {
-                    Http::json(400, ['error' => 'Informe mode (closed, TCG01 ou TCG02) e/ou opensAt/closesAt.']);
+                    Http::json(400, ['error' => 'Informe mode (closed, all, TCG01 ou TCG02) e/ou opensAt/closesAt.']);
                 }
                 $parsed = $hasGateIntent ? ProvaService::parseAdminSetExamOpenBody($body) : ['ok' => true];
                 if (!$parsed['ok']) {
@@ -483,9 +483,16 @@ final class ProvaController
                 $up->execute($params);
                 $exam = ProvaService::loadExam($examId);
                 $gate = ProvaService::examGateFromRow($exam);
+                if (!$gate['isOpen']) {
+                    $gateMessage = 'Portão selado.';
+                } elseif ($gate['state'] === 'all') {
+                    $gateMessage = 'Liberada para todas as turmas.';
+                } else {
+                    $gateMessage = 'Liberada para ' . ($gate['openTurma'] ?? implode(', ', $gate['openTurmas'])) . '.';
+                }
                 Http::json(200, [
                     'ok' => true,
-                    'message' => $gate['openTurma'] ? "Liberada para {$gate['openTurma']}." : 'Portão selado.',
+                    'message' => $gateMessage,
                     'exam' => ProvaService::examPublicDto($exam),
                     'gate' => $gate,
                 ]);

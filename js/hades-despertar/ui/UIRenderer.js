@@ -79,6 +79,7 @@ import {
   habitatSprite,
   habitatVariantSprite,
   upgradeSprite,
+  veilSprite,
 } from './world/SpriteAtlas.js';
 import { describeUnitPersona } from './unitPersona.js';
 import { WorldView } from './world/WorldView.js';
@@ -189,6 +190,19 @@ function setText(node, value) {
   if (!node) return;
   const next = String(value);
   if (node.textContent !== next) node.textContent = next;
+}
+
+function syncVeilStatIcon(host, tier) {
+  if (!host || typeof host.replaceChildren !== 'function') return;
+  const sprite = veilSprite(tier?.spriteId);
+  const nextId = sprite?.id || '';
+  if ((host.dataset?.veilSprite || '') === nextId) return;
+  host.dataset.veilSprite = nextId;
+  host.replaceChildren();
+  if (!sprite) return;
+  host.append(createSpriteNode(host.ownerDocument, sprite, {
+    className: 'despertar-sprite despertar-veil-stat__sprite',
+  }));
 }
 
 function setHidden(node, hidden) {
@@ -2767,7 +2781,11 @@ export class UIRenderer {
     set('nectar', formatOwned(state.nectar || 0));
     set('totalNectar', formatOwned(state.totalNectarHarvested || 0));
     const veilSummary = describeVeilSummary(state);
-    set('veil', veilSummary.label);
+    const veilText = this._stats.querySelector('[data-veil-stat-text]');
+    const veilIcon = this._stats.querySelector('[data-veil-stat-icon]');
+    if (veilText) setText(veilText, veilSummary.label);
+    else set('veil', veilSummary.label);
+    syncVeilStatIcon(veilIcon, veilSummary.tier);
     const catSummary = describeCatabaseSummary(state);
     set('effectiveSps', catSummary.spsLine);
     const bdSummary = describeSpsBreakdownSummary(state);

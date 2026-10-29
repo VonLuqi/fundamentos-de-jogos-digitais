@@ -79,3 +79,7 @@ Regras gerais: não marque nada como "delivered" à mão (o status é medido pel
 
 Ordem sugerida: L2 → L4 → L5 → L6 → L3 → L7 (primeiro o que aparece na tela).
 A lista exata, sempre atualizada, está em `docs/ARTE-PENDENTE.md`. Depois de cada lote, recarregue o jogo com **Ctrl+F5** para ver a arte nova.
+
+## Lotes U — upgrades ainda vetoriais
+
+329 ícones em `upgrades/` cujo WebP ainda é o SVG. Um chat por lote, na ordem U01 → U17 (custo crescente, 20 ícones; o último lote fecha o resto). A tabela de ids, nome e função está em `docs/ARTE-PENDENTE.md`, seções `U01`…`U17`. Gerar de novo: `node scripts/despertar-art-lotes.mjs`.

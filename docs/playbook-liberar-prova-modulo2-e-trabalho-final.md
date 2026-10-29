@@ -43,9 +43,9 @@ Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). 
 ## 3. Liberar
 
 1. Login **admin** → `/prova-admin/` → seletor **Exame** (M1 / M2 / Trabalho Final).
-2. Bloco de gate: **Liberar TCG01** ou **TCG02** (uma turma por vez) · **Selar (fechada)** fecha para todos.
+2. Bloco de gate: **Liberar TCG01**, **TCG02** ou **Liberar todas** · **Selar (fechada)** fecha para todos.
 3. Datas opcionais (**Abre em** / **Fecha em** ou **Prazo de entrega**) → *Salvar datas*. Fora da janela o gate fecha sozinho; no Trabalho Final o prazo encerra os reenvios.
-4. Alunos da turma liberada veem a linha **P/T** habilitada em *Aulas → Módulo 2*.
+4. Alunos das turmas liberadas veem a linha **P/T** habilitada em *Aulas → Módulo 2*.
 
 > O Painel do Mestre continua tendo o gate rápido do Módulo 1 e links diretos para o hub do M2 e do Trabalho Final.
 

@@ -56,6 +56,8 @@ const mark = (key, t) => { if (marks[key] == null) marks[key] = t; };
 /** Ganho de SPS de comprar 1 unidade, medido numa cópia do estado. */
 function spsGain(id) {
   const copy = GameState.fromSnapshot(state.toSnapshot());
+  // A cópia não pode consumir Math.random: um shiny hipotético mudava a compra e o tempo da Catábase.
+  copy._random = () => 0;
   copy.debugFlags.freeShopping = true;
   copy.buyGenerator(id, '1');
   return Number(copy.sps()) - Number(state.sps());
