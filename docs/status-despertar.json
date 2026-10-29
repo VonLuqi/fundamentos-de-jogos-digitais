@@ -48,8 +48,8 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 244,
-      "vetorial": 189,
+      "ilustrada": 264,
+      "vetorial": 169,
       "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
@@ -184,8 +184,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 55,
-        "vetorial": 9,
+        "ilustrada": 60,
+        "vetorial": 4,
         "placeholder": 0,
         "faltando": 0
       }
@@ -351,8 +351,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 244,
-        "vetorial": 189,
+        "ilustrada": 264,
+        "vetorial": 169,
         "placeholder": 0,
         "faltando": 0
       }

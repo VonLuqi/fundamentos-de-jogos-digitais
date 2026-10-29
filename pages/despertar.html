@@ -31,15 +31,15 @@
       "../js/api.js": "../js/api.js?v=perfil-ui-1",
       "../js/app-shell.js": "../js/app-shell.js?v=lethe-429-301",
       "../js/grimorio-awards.js": "../js/grimorio-awards.js?v=lethe-429-301",
-      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=conquistas-t2-321",
+      "../js/hades-despertar/config/season-closed.js": "../js/hades-despertar/config/season-closed.js?v=temporada2-abre-1101",
       "../js/hades-despertar/config/admin-preview.js": "../js/hades-despertar/config/admin-preview.js?v=lethe-429-301",
-      "../js/hades-despertar/ui/pauseVeil.js": "../js/hades-despertar/ui/pauseVeil.js?v=lethe-429-301",
+      "../js/hades-despertar/ui/pauseVeil.js": "../js/hades-despertar/ui/pauseVeil.js?v=temporada2-abre-1101",
       "../js/hades-despertar/core/GameState.js": "../js/hades-despertar/core/GameState.js?v=ecos-multiplos-316",
       "../js/hades-despertar/config/talents.js": "../js/hades-despertar/config/talents.js?v=talentos-reais-313",
       "../js/hades-despertar/ui/minigames/MinigamesView.js": "../js/hades-despertar/ui/minigames/MinigamesView.js?v=minigame-icons-315",
       "../js/hades-despertar/core/formulas.js": "../js/hades-despertar/core/formulas.js?v=lethe-429-301",
       "../js/hades-despertar/services/OfflineEngine.js": "../js/hades-despertar/services/OfflineEngine.js?v=lethe-429-301",
-      "../js/hades-despertar/config/art-versions.js": "../js/hades-despertar/config/art-versions.js?v=ef9f4dce",
+      "../js/hades-despertar/config/art-versions.js": "../js/hades-despertar/config/art-versions.js?v=287f6547",
       "../js/hades-despertar/ui/world/SpriteAtlas.js": "../js/hades-despertar/ui/world/SpriteAtlas.js?v=veu-icones-326",
       "../js/hades-despertar/ui/world/LeechRingView.js": "../js/hades-despertar/ui/world/LeechRingView.js?v=nomes-sanguessugas-320",
       "../js/hades-despertar/ui/UIRenderer.js": "../js/hades-despertar/ui/UIRenderer.js?v=veu-icones-326",
@@ -386,6 +386,8 @@
             <p class="despertar-classroom-veil__body">
               A Temporada 1 fechou. O pódio fica eterno no Hall e no Placar. A Temporada 2 começa do zero.
             </p>
+            <p class="despertar-classroom-veil__eyebrow">A Temporada 2 abre em</p>
+            <p class="despertar-classroom-veil__timer despertar-num" data-season-open-countdown data-season-opens-at="2026-11-01T00:00:00-03:00"></p>
             <p class="despertar-season-prize">
               Quem ficou em 1º em cada categoria do Despertar (Juízo, Catábases e Almas totais) ganha um prêmio.
             </p>
@@ -1150,6 +1152,43 @@
     <p class="despertar-upgrade-tooltip__mark" data-tip="mark">Selado</p>
   </div>
 
+  <script>
+    (function () {
+      var DONE = 'O Acheron abre…';
+      var sawPositive = false;
+      var reloaded = false;
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function format(ms) {
+        var total = Math.max(0, Math.ceil(ms / 1000));
+        var days = Math.floor(total / 86400);
+        var hours = Math.floor((total % 86400) / 3600);
+        var minutes = Math.floor((total % 3600) / 60);
+        var seconds = total % 60;
+        var hms = pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+        if (days === 1) return '1 dia ' + hms;
+        if (days > 1) return days + ' dias ' + hms;
+        return hms;
+      }
+      function tick() {
+        var node = document.querySelector('[data-season-open-countdown]');
+        if (!node) return;
+        var opens = Date.parse(node.getAttribute('data-season-opens-at') || '');
+        if (!isFinite(opens)) return;
+        var left = opens - Date.now();
+        if (left > 0) {
+          sawPositive = true;
+          node.textContent = format(left);
+          return;
+        }
+        node.textContent = DONE;
+        if (!sawPositive || reloaded) return;
+        reloaded = true;
+        window.location.reload();
+      }
+      tick();
+      window.setInterval(tick, 1000);
+    })();
+  </script>
   <script type="module" src="../js/hades-despertar/index.js?v=dragao-estacoes-323"></script>
 </body>
 </html>
