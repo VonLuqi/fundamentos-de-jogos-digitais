@@ -9,7 +9,8 @@ import {
   ApiError,
   ROUTES,
   describeLevelProgress,
-  loadAvatarImage,
+  loadUserAvatar,
+  userDisplayName,
   listFriends,
   searchFriends,
   requestFriend,
@@ -146,7 +147,7 @@ export function confirmBreakBond(label) {
 function buildCompanionRow(entry, { mode, onAction }) {
   const user = entry.user || {};
   const username = user.username || '—';
-  const fullName = user.fullName || username;
+  const fullName = userDisplayName(user, username);
   const handle = `@${username}`;
   const li = el('li', 'companions-list__item');
   li.dataset.friendshipId = String(entry.friendshipId || '');
@@ -167,7 +168,7 @@ function buildCompanionRow(entry, { mode, onAction }) {
   img.alt = '';
   img.width = 40;
   img.height = 40;
-  loadAvatarImage(img, user.avatarIndex ?? 0);
+  loadUserAvatar(img, user);
   avatarBtn.appendChild(img);
 
   const meta = el('div', 'companions-list__meta');
@@ -294,7 +295,7 @@ export function initCompanionsPanel({ root, getToken, onChange } = {}) {
       option.setAttribute('aria-selected', 'false');
 
       const handle = el('span', 'companions-suggestions__handle', `@${row.username}`);
-      const label = el('span', 'companions-suggestions__name', row.fullName || row.username);
+      const label = el('span', 'companions-suggestions__name', userDisplayName(row, row.username));
       option.append(handle, label);
 
       option.addEventListener('mousedown', (event) => {

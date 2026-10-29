@@ -26,16 +26,8 @@ import { initUnderworldGate } from './underworld-gate.js?v=20261021i';
 
 import {
   detectAvatarCount,
-  getAvatarCount,
-  getAvatarCatalog,
-  getAvatarFilterTagDefinitions,
-  getAvatarMetaByIndex,
-  getAvatarParentTagId,
-  getAvatarPrimaryTagDefinitions,
-  getAvatarSubTagDefinitions,
-  isAvatarFilterAllTag,
-  avatarSafeIndex,
-  loadAvatarImage,
+  loadUserAvatar,
+  userDisplayName,
   ACHIEVEMENTS,
   LESSONS,
   ROUTES,
@@ -45,9 +37,6 @@ import {
   rotateRecoveryCode,
   adminMailerStatus,
   adminProbeMailer,
-  setAvatar,
-  bindEmail,
-  requestEmailVerification,
   logout,
   getSession,
   describeLevelProgress,
@@ -61,7 +50,7 @@ import {
   despertarResetStudents,
   despertarRebalanceLetheWallets,
   despertarStateGet,
-  needsMessengerSeal,
+  messengerSealDashboardUrl,
   normalizeAchievementRarity,
   listFriends,
   listClassmates,
@@ -83,13 +72,7 @@ let currentToken = null;
 let publishMap = {};
 let shellApi = null;
 let despertarPublished = false;
-let messengerShowForm = false;
-let messengerBound = false;
-let messengerGateFocused = false;
 
-const MESSENGER_RESEND_COPY = 'Se o selo ainda estiver pendente, o Mensageiro já partiu. Olhe a caixa — e o reino das promoções.';
-const MESSENGER_FAILED_COPY = 'O Mensageiro não partiu. Olhe o spam ou avise o Mestre — canal de e-mail.';
-const MESSENGER_BIND_FAILED_COPY = 'O endereço foi gravado, mas o Mensageiro não partiu. Avise o Mestre — canal de e-mail.';
 const DASH_PUBLISH_CACHE_KEY = 'hades_publish_map_v1';
 const DASH_RAIL_CACHE_KEY = 'hades_rail_preview_v1';
 const DASH_CACHE_TTL_MS = 30_000;
@@ -192,212 +175,11 @@ function mergeSelfUser(next) {
   return currentUser;
 }
 
-function maskEmail(email) {
-  const value = String(email || '').trim().toLowerCase();
-  const at = value.lastIndexOf('@');
-  if (at < 1 || at === value.length - 1) return '•••';
-  const local = value.slice(0, at);
-  const domain = value.slice(at + 1);
-  const keep = local.length >= 2 ? 2 : 1;
-  return `${local.slice(0, keep)}***@${domain}`;
-}
 
-function messengerSealKind(user) {
-  const email = String(user?.email || '').trim();
-  if (!email) return 'empty';
-  if (user.emailVerifiedAt) return 'confirmed';
-  return 'pending';
-}
 
-function applyMessengerSoftNudge(user) {
-  const wantsNudge = needsMessengerSeal(user);
-  document.body.classList.remove('is-messenger-gate');
-  if (!wantsNudge) {
-    messengerGateFocused = false;
-    return;
-  }
 
-  const seal = document.getElementById('messenger-seal');
-  if (!seal) return;
 
-  // ?selo=1 ainda foca o bloco uma vez — sem travar o Domínio.
-  if (messengerGateFocused) return;
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('selo') !== '1') return;
-  messengerGateFocused = true;
-  window.requestAnimationFrame(() => {
-    seal.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    document.getElementById('messenger-input')?.focus();
-  });
-}
 
-function setMessengerStatus(message, isError = false) {
-  const statusEl = document.getElementById('messenger-status');
-  if (!statusEl) return;
-  statusEl.textContent = message || '';
-  statusEl.classList.toggle('is-error', Boolean(isError && message));
-}
-
-function renderMessengerSeal(user) {
-  const root = document.getElementById('messenger-seal');
-  const shortcut = document.getElementById('messenger-shortcut');
-  if (!root) return;
-
-  if (!user || user.role === 'admin') {
-    root.hidden = true;
-    root.classList.remove('messenger-seal--gate');
-    if (shortcut) shortcut.hidden = true;
-    document.body.classList.remove('is-messenger-gate');
-    return;
-  }
-
-  const kind = messengerSealKind(user);
-  const wantsNudge = needsMessengerSeal(user);
-  const showForm = kind === 'empty' || messengerShowForm;
-  const hideConfirmedBlock = kind === 'confirmed' && !messengerShowForm;
-
-  root.hidden = hideConfirmedBlock;
-  root.classList.toggle('messenger-seal--nudge', wantsNudge && kind !== 'confirmed');
-  root.classList.remove('messenger-seal--gate');
-  if (shortcut) shortcut.hidden = kind !== 'confirmed' || messengerShowForm;
-
-  applyMessengerSoftNudge(user);
-
-  if (hideConfirmedBlock) return;
-
-  const stateEl = document.getElementById('messenger-state');
-  const emailEl = document.getElementById('messenger-email');
-  const form = document.getElementById('messenger-form');
-  const actions = document.getElementById('messenger-actions');
-  const resendBtn = document.getElementById('messenger-resend');
-  const changeBtn = document.getElementById('messenger-change');
-  const bindBtn = document.getElementById('messenger-bind');
-  const cancelBtn = document.getElementById('messenger-cancel');
-  const input = document.getElementById('messenger-input');
-
-  if (stateEl) {
-    stateEl.textContent = kind === 'empty'
-      ? 'O Mensageiro é opcional — sem ele, peça ao Mestre se a Palavra se perder. Vincule um e-mail se quiser recuperar sozinho.'
-      : kind === 'pending'
-        ? 'O selo ainda não foi reconhecido. Abra o Mensageiro na caixa de entrada — e o reino das promoções. Você já pode usar o Domínio.'
-        : 'Selo reconhecido. A Palavra pode ser recuperada por este endereço.';
-  }
-
-  if (emailEl) {
-    if (kind === 'empty') {
-      emailEl.hidden = true;
-      emailEl.textContent = '';
-    } else {
-      emailEl.hidden = false;
-      emailEl.textContent = maskEmail(user.email);
-    }
-  }
-
-  if (form) form.hidden = !showForm;
-  if (cancelBtn) {
-    cancelBtn.hidden = kind === 'empty' || !showForm;
-  }
-  if (bindBtn) {
-    bindBtn.textContent = kind === 'empty' ? 'Vincular e-mail' : 'Selar novo endereço';
-  }
-  if (input && !showForm) input.value = '';
-
-  // Form e ações nunca juntos; resend só em pending com form fechado.
-  if (actions) actions.hidden = kind === 'empty' || showForm;
-  if (resendBtn) resendBtn.hidden = !(kind === 'pending' && !showForm);
-  if (changeBtn) {
-    changeBtn.hidden = kind !== 'pending' || showForm;
-    changeBtn.textContent = 'Trocar endereço';
-  }
-}
-
-function initMessengerSeal() {
-  if (messengerBound) return;
-  messengerBound = true;
-
-  const form = document.getElementById('messenger-form');
-  const resendBtn = document.getElementById('messenger-resend');
-  const changeBtn = document.getElementById('messenger-change');
-  const cancelBtn = document.getElementById('messenger-cancel');
-  const bindBtn = document.getElementById('messenger-bind');
-
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const email = String(form.elements.email.value || '').trim();
-    if (!email) {
-      setMessengerStatus('Informe um e-mail.', true);
-      return;
-    }
-    if (!currentToken) return;
-
-    bindBtn.disabled = true;
-    setMessengerStatus('Chamando o Mensageiro...');
-    try {
-      const result = await bindEmail(currentToken, email);
-      messengerShowForm = false;
-      if (result.user) mergeSelfUser(result.user);
-      else mergeSelfUser({ email: result.email, emailVerifiedAt: result.emailVerifiedAt ?? null });
-      if (result.mailSent === false) {
-        setMessengerStatus(MESSENGER_BIND_FAILED_COPY, true);
-      } else {
-        setMessengerStatus('O Mensageiro partiu. Confirme o selo na caixa de entrada — e o reino das promoções.');
-      }
-      renderMessengerSeal(currentUser);
-    } catch (error) {
-      const message = error instanceof ApiError ? error.message : 'Falha ao vincular o e-mail.';
-      setMessengerStatus(message, true);
-    } finally {
-      bindBtn.disabled = false;
-    }
-  });
-
-  resendBtn?.addEventListener('click', async () => {
-    if (!currentToken) return;
-    resendBtn.disabled = true;
-    setMessengerStatus('Chamando o Mensageiro...');
-    try {
-      const result = await requestEmailVerification(currentToken);
-      if (result?.mailSent === false) {
-        setMessengerStatus(MESSENGER_FAILED_COPY, true);
-      } else {
-        setMessengerStatus(MESSENGER_RESEND_COPY);
-      }
-    } catch (error) {
-      const message = error instanceof ApiError
-        ? error.message
-        : 'Falha ao chamar o Mensageiro. Avise o Mestre — canal de e-mail.';
-      setMessengerStatus(message, true);
-    } finally {
-      resendBtn.disabled = false;
-    }
-  });
-
-  const openChangeForm = () => {
-    messengerShowForm = true;
-    setMessengerStatus('');
-    renderMessengerSeal(currentUser);
-    document.getElementById('messenger-input')?.focus();
-  };
-
-  changeBtn?.addEventListener('click', openChangeForm);
-  document.getElementById('messenger-shortcut')?.addEventListener('click', openChangeForm);
-
-  cancelBtn?.addEventListener('click', () => {
-    messengerShowForm = false;
-    const input = document.getElementById('messenger-input');
-    if (input) input.value = '';
-    setMessengerStatus('');
-    renderMessengerSeal(currentUser);
-  });
-}
-
-function normalizeSearchText(value) {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .trim();
-}
 
 /* ============================================================
    1. RENDERIZAÇÃO DO PERFIL
@@ -406,7 +188,7 @@ function renderProfile(user) {
   const isAdmin = user.role === 'admin';
   const collection = getAchievementCollectionStats(user);
   const username = user.username || user.name || '—';
-  const fullName = user.fullName || user.name || username;
+  const fullName = userDisplayName(user, username);
 
   const usernameEl = document.getElementById('profile-username');
   if (usernameEl) usernameEl.textContent = `@${username}`;
@@ -438,29 +220,21 @@ function renderProfile(user) {
   document.getElementById('profile-rank').textContent = progress.rank;
   document.getElementById('level-value').textContent = progress.levelLabel;
   const avatarImg = document.getElementById('avatar-glyph');
-  if (avatarImg) loadAvatarImage(avatarImg, user.avatarIndex);
-  updateAvatarCounter(user.avatarIndex);
+  if (avatarImg) loadUserAvatar(avatarImg, user, { isSelf: true });
+  const pendingEl = document.getElementById('avatar-pending');
+  if (pendingEl) pendingEl.hidden = !(user.photoPendingUrl || user.photoStatus === 'pending');
+  const bioEl = document.getElementById('profile-bio');
+  if (bioEl) {
+    bioEl.hidden = !user.bio;
+    bioEl.textContent = user.bio ? `“${user.bio}”` : '';
+  }
   document.getElementById('stat-lessons').textContent = String(isAdmin ? LESSONS.length : user.completedLessons.length);
   document.getElementById('stat-achievements').textContent =
     `${collection.unlocked} / ${collection.total}`;
 
   applyAdminSkin(user);
-  renderMessengerSeal(user);
 }
 
-/**
- * Atualiza o indicador textual "Avatar X de N" abaixo da moldura,
- * mantendo o jogador ciente de qual avatar está selecionado dentro
- * da sequência progressiva (1-based para leitura humana).
- */
-function updateAvatarCounter(avatarIndex) {
-  const counter = document.getElementById('avatar-counter');
-  if (!counter) return;
-  const safeIndex = avatarSafeIndex(avatarIndex);
-  const avatarMeta = getAvatarMetaByIndex(safeIndex);
-  const name = avatarMeta?.label || `Avatar ${safeIndex + 1}`;
-  counter.textContent = `Avatar ${safeIndex + 1} de ${getAvatarCount()} - ${name}`;
-}
 
 /**
  * PAINEL DO ADMIN — a interface se adapta ao papel do usuário.
@@ -1193,471 +967,6 @@ function initAltar() {
   });
 }
 
-/* ============================================================
-   7. TROCA DE AVATAR (persistida na API)
-   ============================================================ */
-function initAvatarSwap() {
-  const frame = document.getElementById('avatar-frame');
-  if (!frame) return;
-
-  function buildAvatarPickerContent() {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'avatar-picker';
-
-    const head = document.createElement('div');
-    head.className = 'avatar-picker__head';
-
-    const tagsGroup = document.createElement('div');
-    tagsGroup.className = 'avatar-picker__tags';
-    tagsGroup.setAttribute('role', 'group');
-    tagsGroup.setAttribute('aria-label', 'Filtrar por categoria');
-
-    const moreBtn = document.createElement('button');
-    moreBtn.type = 'button';
-    moreBtn.className = 'avatar-picker__tag avatar-picker__tag--more';
-    moreBtn.textContent = '+';
-    moreBtn.setAttribute('aria-haspopup', 'dialog');
-    moreBtn.setAttribute('aria-expanded', 'false');
-    moreBtn.setAttribute('aria-controls', 'avatar-picker-more-modal');
-    moreBtn.setAttribute('aria-label', 'Abrir tags específicas');
-
-    const moreModal = document.createElement('div');
-    moreModal.id = 'avatar-picker-more-modal';
-    moreModal.className = 'avatar-picker__more-modal';
-    moreModal.hidden = true;
-    moreModal.setAttribute('role', 'dialog');
-    moreModal.setAttribute('aria-modal', 'true');
-    moreModal.setAttribute('aria-labelledby', 'avatar-picker-more-title');
-
-    const moreDialog = document.createElement('div');
-    moreDialog.className = 'avatar-picker__more-dialog';
-
-    const moreTitle = document.createElement('h3');
-    moreTitle.id = 'avatar-picker-more-title';
-    moreTitle.className = 'avatar-picker__more-title';
-    moreTitle.textContent = 'Tags específicas';
-
-    const moreHint = document.createElement('p');
-    moreHint.className = 'avatar-picker__more-hint';
-    moreHint.textContent = 'Filtros menores e mais precisos.';
-
-    const moreBody = document.createElement('div');
-    moreBody.className = 'avatar-picker__more-body';
-
-    const moreClose = document.createElement('button');
-    moreClose.type = 'button';
-    moreClose.className = 'btn-gold btn-gold--ghost avatar-picker__more-close';
-    moreClose.textContent = 'Fechar';
-
-    moreDialog.append(moreTitle, moreHint, moreBody, moreClose);
-    moreModal.appendChild(moreDialog);
-
-    const searchWrap = document.createElement('div');
-    searchWrap.className = 'avatar-picker__search';
-
-    const searchLabel = document.createElement('label');
-    searchLabel.className = 'avatar-picker__search-label';
-    searchLabel.htmlFor = 'avatar-picker-search';
-    searchLabel.textContent = 'Buscar avatar';
-
-    const searchInput = document.createElement('input');
-    searchInput.id = 'avatar-picker-search';
-    searchInput.className = 'avatar-picker__search-input';
-    searchInput.type = 'search';
-    searchInput.placeholder = 'Ex.: Kratos';
-    searchInput.autocomplete = 'off';
-    searchInput.spellcheck = false;
-
-    searchWrap.append(searchLabel, searchInput);
-
-    const grid = document.createElement('div');
-    grid.className = 'avatar-picker-grid';
-
-    const empty = document.createElement('p');
-    empty.className = 'avatar-picker__empty';
-    empty.textContent = 'Nenhum avatar encontrado para esse filtro.';
-    empty.hidden = true;
-
-    const meta = document.createElement('p');
-    meta.className = 'avatar-picker__meta';
-
-    const status = document.createElement('p');
-    status.className = 'avatar-picker__status';
-    status.setAttribute('role', 'status');
-    status.setAttribute('aria-live', 'polite');
-    status.textContent = 'Carregando galeria...';
-
-    const actions = document.createElement('div');
-    actions.className = 'avatar-picker__actions';
-
-    const cancelBtn = document.createElement('button');
-    cancelBtn.type = 'button';
-    cancelBtn.className = 'btn-gold btn-gold--ghost';
-    cancelBtn.textContent = 'Cancelar';
-
-    const confirmBtn = document.createElement('button');
-    confirmBtn.type = 'button';
-    confirmBtn.className = 'btn-gold avatar-picker__confirm';
-    confirmBtn.textContent = 'Confirmar Avatar';
-
-    actions.append(cancelBtn, confirmBtn);
-
-    const avatars = getAvatarCatalog().map((avatar, index) => ({
-      ...avatar,
-      index,
-      tags: Array.isArray(avatar.tags) ? avatar.tags : [],
-      searchableText: normalizeSearchText([
-        avatar.label,
-        ...(avatar.searchTerms || []),
-        `avatar ${index + 1}`,
-        String(index + 1),
-      ].join(' ')),
-    }));
-
-    const tagCounts = new Map();
-    avatars.forEach((avatar) => {
-      avatar.tags.forEach((tagId) => {
-        tagCounts.set(tagId, (tagCounts.get(tagId) || 0) + 1);
-      });
-    });
-
-    const filterTags = getAvatarFilterTagDefinitions().filter((tag) => (
-      isAvatarFilterAllTag(tag.id) || (tagCounts.get(tag.id) || 0) > 0
-    ));
-
-    const visibleSubTags = getAvatarSubTagDefinitions()
-      .filter((tag) => (tagCounts.get(tag.id) || 0) > 0);
-
-    const selectedIndex = avatarSafeIndex(currentUser?.avatarIndex ?? 0);
-    let pendingIndex = selectedIndex;
-    let activeTagId = 'todos';
-    const allButtons = [];
-    const primaryTagButtons = [];
-    let subTagButtons = [];
-    let loadedOk = 0;
-    let loadFailed = 0;
-
-    function currentTagButtons() {
-      return [...primaryTagButtons, ...subTagButtons];
-    }
-
-    function setBusy(busy) {
-      allButtons.forEach((button) => {
-        button.disabled = busy;
-      });
-      currentTagButtons().forEach((button) => {
-        button.disabled = busy;
-      });
-      moreBtn.disabled = busy;
-      moreClose.disabled = busy;
-      searchInput.disabled = busy;
-      confirmBtn.disabled = busy;
-      cancelBtn.disabled = busy;
-    }
-
-    function isMoreModalOpen() {
-      return !moreModal.hidden;
-    }
-
-    function closeMoreModal() {
-      if (moreModal.hidden) return;
-      moreModal.hidden = true;
-      moreBtn.setAttribute('aria-expanded', 'false');
-      moreBtn.focus();
-    }
-
-    function rebuildMoreModalBody() {
-      moreBody.innerHTML = '';
-      subTagButtons = [];
-
-      if (visibleSubTags.length === 0) {
-        const emptyMore = document.createElement('p');
-        emptyMore.className = 'avatar-picker__more-empty';
-        emptyMore.textContent = 'Nenhuma tag específica disponível.';
-        moreBody.appendChild(emptyMore);
-        return;
-      }
-
-      getAvatarPrimaryTagDefinitions().forEach((parent) => {
-        const children = visibleSubTags.filter((tag) => tag.parent === parent.id);
-        if (children.length === 0) return;
-
-        const section = document.createElement('section');
-        section.className = 'avatar-picker__more-section';
-
-        const heading = document.createElement('h4');
-        heading.className = 'avatar-picker__more-section-title';
-        heading.textContent = parent.label;
-
-        const chips = document.createElement('div');
-        chips.className = 'avatar-picker__more-chips';
-        chips.setAttribute('role', 'group');
-        chips.setAttribute('aria-label', `Tags de ${parent.label}`);
-
-        children.forEach((tag) => {
-          const chip = document.createElement('button');
-          chip.type = 'button';
-          chip.className = 'avatar-picker__tag avatar-picker__tag--sub';
-          chip.dataset.tagId = tag.id;
-          chip.textContent = tag.label;
-          const pressed = activeTagId === tag.id;
-          chip.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-          if (pressed) chip.classList.add('is-active');
-
-          chip.addEventListener('click', () => {
-            if (chip.disabled) return;
-            setActiveTag(tag.id);
-            closeMoreModal();
-          });
-
-          subTagButtons.push(chip);
-          chips.appendChild(chip);
-        });
-
-        section.append(heading, chips);
-        moreBody.appendChild(section);
-      });
-    }
-
-    function openMoreModal() {
-      rebuildMoreModalBody();
-      moreModal.hidden = false;
-      moreBtn.setAttribute('aria-expanded', 'true');
-      moreClose.focus();
-    }
-
-    function updateTagUi() {
-      const parentOfActive = getAvatarParentTagId(activeTagId);
-      const secondaryActive = Boolean(parentOfActive);
-
-      primaryTagButtons.forEach((button) => {
-        const pressed = button.dataset.tagId === activeTagId;
-        const context = button.dataset.tagId === parentOfActive;
-        button.classList.toggle('is-active', pressed);
-        button.classList.toggle('is-context', context);
-        button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
-      });
-
-      moreBtn.classList.toggle('is-active', secondaryActive || isMoreModalOpen());
-      moreBtn.setAttribute('aria-expanded', isMoreModalOpen() ? 'true' : 'false');
-
-      if (isMoreModalOpen()) {
-        rebuildMoreModalBody();
-      }
-    }
-
-    function updateSelectionUi() {
-      allButtons.forEach((button) => {
-        const buttonIndex = Number(button.dataset.avatarIndex);
-        button.classList.toggle('is-selected', buttonIndex === pendingIndex);
-      });
-
-      const selectedAvatar = avatars[pendingIndex];
-      const selectedName = selectedAvatar?.label || `Avatar ${pendingIndex + 1}`;
-      meta.textContent = `Selecionado: Avatar ${pendingIndex + 1} - ${selectedName}`;
-      confirmBtn.disabled = pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0);
-    }
-
-    function applyFilter() {
-      const query = normalizeSearchText(searchInput.value);
-      const filterByTag = !isAvatarFilterAllTag(activeTagId);
-      const filterActive = query.length > 0 || filterByTag;
-      let visibleCount = 0;
-
-      allButtons.forEach((button) => {
-        const searchableText = button.dataset.searchableText || '';
-        const buttonTags = String(button.dataset.tags || '')
-          .split(/\s+/)
-          .filter(Boolean);
-        const matchesQuery = query.length === 0 || searchableText.includes(query);
-        const matchesTag = !filterByTag || buttonTags.includes(activeTagId);
-        const visible = matchesQuery && matchesTag;
-        button.hidden = !visible;
-        if (visible) visibleCount += 1;
-      });
-
-      empty.hidden = visibleCount > 0;
-
-      // Meta/confirm usam pendingIndex — seleção sobrevive ao filtro mesmo se o card sumir.
-      // Status ocioso sem contador: só filtro ativo, erro de imagem ou vazio.
-      if (count > 0 && loadFailed + loadedOk === count) {
-        if (filterActive) {
-          status.textContent = visibleCount === 0
-            ? 'Nenhum avatar encontrado para esse filtro.'
-            : `${visibleCount} avatar${visibleCount === 1 ? '' : 'es'} encontrado${visibleCount === 1 ? '' : 's'}.`;
-        } else if (loadFailed > 0) {
-          status.textContent = `${loadFailed} avatar${loadFailed === 1 ? '' : 'es'} com falha de imagem.`;
-        } else {
-          status.textContent = '';
-        }
-      }
-    }
-
-    function setActiveTag(nextTagId) {
-      const normalized = String(nextTagId || 'todos');
-      if (normalized === activeTagId && !isAvatarFilterAllTag(normalized)) {
-        activeTagId = 'todos';
-      } else {
-        activeTagId = normalized;
-      }
-      updateTagUi();
-      applyFilter();
-    }
-
-    filterTags.forEach((tag) => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'avatar-picker__tag';
-      chip.dataset.tagId = tag.id;
-      chip.textContent = tag.label;
-      chip.setAttribute('aria-pressed', isAvatarFilterAllTag(tag.id) ? 'true' : 'false');
-      if (isAvatarFilterAllTag(tag.id)) {
-        chip.classList.add('is-active');
-      }
-      chip.addEventListener('click', () => {
-        if (chip.disabled) return;
-        setActiveTag(tag.id);
-      });
-      primaryTagButtons.push(chip);
-      tagsGroup.appendChild(chip);
-    });
-
-    if (visibleSubTags.length > 0) {
-      moreBtn.addEventListener('click', () => {
-        if (moreBtn.disabled) return;
-        if (isMoreModalOpen()) closeMoreModal();
-        else openMoreModal();
-      });
-      tagsGroup.appendChild(moreBtn);
-    }
-
-    moreClose.addEventListener('click', closeMoreModal);
-    moreModal.addEventListener('click', (event) => {
-      if (event.target === moreModal) closeMoreModal();
-    });
-
-    head.appendChild(tagsGroup);
-
-    const count = avatars.length;
-    if (count === 0) {
-      status.textContent = 'Galeria vazia. Adicione avatares para habilitar a seleção.';
-      confirmBtn.disabled = true;
-      searchInput.disabled = true;
-      primaryTagButtons.forEach((button) => {
-        button.disabled = true;
-      });
-      moreBtn.disabled = true;
-    }
-
-    avatars.forEach((avatar) => {
-      const option = document.createElement('button');
-      option.type = 'button';
-      option.className = 'avatar-picker__option';
-      option.dataset.avatarIndex = String(avatar.index);
-      option.dataset.searchableText = avatar.searchableText;
-      option.dataset.tags = avatar.tags.join(' ');
-      option.setAttribute('aria-label', `Selecionar ${avatar.label}`);
-
-      const image = document.createElement('img');
-      image.className = 'avatar-picker__image';
-      image.alt = avatar.label;
-
-      const label = document.createElement('span');
-      label.className = 'avatar-picker__label';
-      label.textContent = avatar.label;
-
-      option.append(image, label);
-      allButtons.push(option);
-
-      loadAvatarImage(image, avatar.index)
-        .then((ok) => {
-          if (ok) loadedOk += 1;
-          else loadFailed += 1;
-
-          if (loadedOk + loadFailed === count) {
-            if (loadedOk === 0) {
-              status.textContent = 'Falha ao carregar os avatares agora.';
-              confirmBtn.disabled = true;
-            } else {
-              applyFilter();
-            }
-          }
-        });
-
-      option.addEventListener('click', () => {
-        if (option.disabled) return;
-        pendingIndex = avatar.index;
-        updateSelectionUi();
-      });
-
-      grid.appendChild(option);
-    });
-
-    searchInput.addEventListener('input', applyFilter);
-    cancelBtn.addEventListener('click', () => {
-      closeMoreModal();
-      closeScrollModal();
-    });
-
-    confirmBtn.addEventListener('click', async () => {
-      if (confirmBtn.disabled) {
-        if (pendingIndex === avatarSafeIndex(currentUser?.avatarIndex ?? 0)) {
-          closeMoreModal();
-          closeScrollModal();
-        }
-        return;
-      }
-
-      setBusy(true);
-      closeMoreModal();
-      status.textContent = 'Salvando avatar...';
-
-      frame.classList.remove('is-swapping');
-      void frame.offsetHeight;
-      frame.classList.add('is-swapping');
-
-      try {
-        const { user } = await setAvatar(currentToken, pendingIndex);
-        currentUser = mergeSelfUser(user);
-        renderProfile(currentUser);
-        closeScrollModal();
-      } catch (error) {
-        status.textContent = error instanceof ApiError
-          ? error.message
-          : 'Não foi possível trocar o avatar agora.';
-        setBusy(false);
-      }
-    });
-
-    updateTagUi();
-    updateSelectionUi();
-    applyFilter();
-
-    const chrome = document.createElement('div');
-    chrome.className = 'avatar-picker__chrome';
-    chrome.append(head, searchWrap);
-
-    const scrollRegion = document.createElement('div');
-    scrollRegion.className = 'avatar-picker__scroll';
-    scrollRegion.append(grid);
-
-    const footer = document.createElement('div');
-    footer.className = 'avatar-picker__footer';
-    footer.append(empty, meta, status, actions);
-
-    wrapper.append(chrome, scrollRegion, footer, moreModal);
-    return { wrapper, focusElement: searchInput };
-  }
-
-  frame.addEventListener('click', () => {
-    const picker = buildAvatarPickerContent();
-    openScrollModal('Escolha seu Avatar', picker.wrapper, {
-      closeLabel: 'Fechar galeria',
-      focusElement: picker.focusElement,
-      variant: 'avatar',
-    });
-  });
-}
 
 /* ============================================================
    8. MODAL "PERGAMINHO" (substitui o alert nativo)
@@ -2824,12 +2133,10 @@ async function init() {
   currentUser = result.user;
   currentToken = getSession()?.token ?? null;
 
-  // Soft-nudge: ?selo=1 foca o formulário se ainda está empty/pending.
-  if (needsMessengerSeal(currentUser)) {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('selo') === '1' && messengerSealKind(currentUser) === 'empty') {
-      messengerShowForm = true;
-    }
+  // O Selo do Mensageiro mora na Conta do Perfil: links antigos (?selo=1) vão para lá.
+  if (new URLSearchParams(window.location.search).get('selo') === '1') {
+    window.location.replace(messengerSealDashboardUrl());
+    return;
   }
 
   shellApi = initAppShell({
@@ -2863,9 +2170,7 @@ async function init() {
   }
 
   initAltar();
-  initAvatarSwap();
   initAdminTools();
-  initMessengerSeal();
   initUnderworldGate();
   renderRailPreviews(currentToken).catch((error) => {
     console.error('[dashboard] Falha ao renderizar previews do trilho:', error);

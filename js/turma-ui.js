@@ -9,7 +9,8 @@ import {
   ApiError,
   ROUTES,
   describeLevelProgress,
-  loadAvatarImage,
+  loadUserAvatar,
+  userDisplayName,
   listClassmates,
   requestFriend,
   respondFriend,
@@ -65,7 +66,7 @@ function mirrorHref(username) {
 
 function buildTurmaRow(classmate, { onAction, showTurma = false }) {
   const username = classmate.username || '—';
-  const fullName = classmate.fullName || username;
+  const fullName = userDisplayName(classmate, username);
   const handle = `@${username}`;
   const bondStatus = classmate.bondStatus || 'none';
   const li = el('li', 'companions-list__item turma-list__item');
@@ -86,7 +87,7 @@ function buildTurmaRow(classmate, { onAction, showTurma = false }) {
   img.alt = '';
   img.width = 40;
   img.height = 40;
-  loadAvatarImage(img, classmate.avatarIndex ?? 0);
+  loadUserAvatar(img, classmate);
   avatarBtn.appendChild(img);
 
   const meta = el('div', 'companions-list__meta');

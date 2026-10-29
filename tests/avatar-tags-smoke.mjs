@@ -153,7 +153,9 @@ assert(mkSco.length === 1 && mkSco[0].label === 'Scorpion', 'subtag + busca AND'
 const todos = filterAvatars(catalog, { activeTagId: 'todos', query: '' });
 assert(todos.length === catalog.length, 'Todos + busca vazia deve mostrar a galeria inteira');
 
-const dashboard = read('js/dashboard.js');
+// A galeria saiu do Painel do Herói (js/dashboard.js) para o Perfil (js/avatar-picker.js).
+const dashboard = read('js/avatar-picker.js');
+assert(!read('js/dashboard.js').includes('avatar-picker__tags'), 'galeria não está mais no Painel');
 assert(!dashboard.includes('Biblioteca de Avatares'), 'copy Biblioteca removida');
 assert(!dashboard.includes('Selecione um avatar da galeria'), 'subtitulo instrutivo removido');
 assert(!dashboard.includes('disponíveis na biblioteca'), 'contador ocioso removido');
@@ -168,14 +170,15 @@ assert(!dashboard.includes('avatar-picker__tag-toggle'), 'sem + por tag primaria
 assert(!dashboard.includes('toggleExpand'), 'sem acordeao por tag');
 assert(dashboard.includes('dataset.tags'), 'data-tags nos cards');
 
-const css = read('css/dashboard.css');
+const css = read('css/avatar-picker.css');
 assert(css.includes('.avatar-picker__tag'), 'estilo dos chips presente');
 assert(css.includes('.avatar-picker__tag--more'), 'estilo do + final presente');
 assert(css.includes('.avatar-picker__more-modal'), 'estilo do modal de subtags');
 assert(!css.includes('.avatar-picker__tag-toggle'), 'CSS do + por tag removido');
-assert(css.includes('.scroll-modal--avatar .avatar-picker__chrome'), 'chrome fixo do modal avatar');
-assert(css.includes('.scroll-modal--avatar .avatar-picker__scroll'), 'scroll so na grade');
-assert(css.includes('.scroll-modal--avatar .avatar-picker__footer'), 'footer fixo com acoes');
+// Embutida no Perfil (sem o modal do Painel): a grade rola dentro da seção Avatar.
+assert(css.includes('.avatar-picker-grid'), 'grade da galeria estilizada');
+assert(read('css/perfil.css').includes('.perfil-picker .avatar-picker-grid'), 'grade com altura limitada no Perfil');
+assert(read('pages/perfil.html').includes('css/avatar-picker.css'), 'Perfil carrega o CSS da galeria');
 
 if (errors.length) {
   console.error('avatar-tags-smoke FALHOU:');

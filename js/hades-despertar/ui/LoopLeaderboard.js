@@ -2,7 +2,7 @@
  * Placar do Loop — 3 leaderboards in-game (Juízo / Catábases / Almas).
  */
 
-import { leaderboardGet } from '../../api.js';
+import { leaderboardGet, userDisplayName } from '../../api.js';
 import { applyPodiumClasses, podiumTierForRank } from '../../podium-vfx.js';
 import { formatSouls } from './NumberFormatter.js';
 
@@ -283,7 +283,7 @@ export class LoopLeaderboard {
 
     const name = this.root.createElement('span');
     name.className = 'despertar-loop-board-row__name';
-    name.textContent = row.fullName || row.username || '—';
+    name.textContent = userDisplayName(row);
     if (row.username) name.title = `@${row.username}`;
 
     const score = this.root.createElement('span');

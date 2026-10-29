@@ -3,7 +3,7 @@
 import { initAppShell } from './app-shell.js';
 import {
   detectAvatarCount,
-  loadAvatarImage,
+  loadUserAvatar,
   ROUTES,
   ApiError,
   requireAdmin,
@@ -183,7 +183,7 @@ function buildSoulCard(user, index) {
   const avatar = document.createElement('img');
   avatar.className = 'soul-card__avatar';
   avatar.alt = `Avatar de ${user.fullName || user.name || user.username}`;
-  loadAvatarImage(avatar, user.avatarIndex ?? 0);
+  loadUserAvatar(avatar, user);
 
   const identify = document.createElement('div');
 
@@ -281,7 +281,7 @@ function buildActivityOwnerCard(owner, index) {
   const avatar = document.createElement('img');
   avatar.className = 'activity-owner__avatar';
   avatar.alt = `Avatar de ${user.fullName || user.name || user.username || 'aluno'}`;
-  loadAvatarImage(avatar, user.avatarIndex ?? 0);
+  loadUserAvatar(avatar, user);
 
   const identify = document.createElement('div');
   identify.className = 'activity-owner__identify';
@@ -629,7 +629,7 @@ function openSoulEspelho(user, options = {}) {
   const avatar = document.createElement('img');
   avatar.className = 'soul-card__avatar';
   avatar.alt = '';
-  loadAvatarImage(avatar, user.avatarIndex ?? 0);
+  loadUserAvatar(avatar, user);
   idSec.appendChild(avatar);
   idSec.appendChild(row(`${user.fullName || user.name} · @${user.username}`));
   idSec.appendChild(row(`Turma ${user.turma || '—'} · ${user.role === 'admin' ? 'Mestre' : 'Aluno'}`));

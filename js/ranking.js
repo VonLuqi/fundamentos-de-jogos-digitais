@@ -12,6 +12,7 @@ import {
   logout,
   requireSession,
   seasonArchiveGet,
+  userDisplayName,
 } from './api.js';
 import { applyPodiumClasses, podiumTierForRank } from './podium-vfx.js';
 import { formatSouls } from './hades-despertar/ui/NumberFormatter.js';
@@ -115,7 +116,7 @@ function renderRows(body, entries, selfId) {
 
     const cells = [
       row.rank,
-      row.fullName || row.username || '—',
+      userDisplayName(row),
       row.turma || '—',
       formatNumber(row.xp),
       formatNumber(row.achievements),

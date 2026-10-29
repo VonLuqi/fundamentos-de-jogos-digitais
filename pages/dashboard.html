@@ -22,7 +22,7 @@
   <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021d" />
   <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
   <link rel="stylesheet" href="../css/app-shell.css?v=20261028a" />
-  <link rel="stylesheet" href="../css/dashboard.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/dashboard.css?v=perfil-ui-1" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
@@ -552,64 +552,23 @@
           <div class="dashboard-rail">
             <aside class="profile-panel hades-mirror-frame" id="profile-panel" aria-label="Perfil do aluno">
 
-              <button class="avatar-frame" type="button" id="avatar-frame" aria-label="Alterar avatar do perfil">
+              <a class="avatar-frame" id="avatar-frame" href="../perfil/#avatar" aria-label="Trocar avatar no Meu Perfil">
                 <span class="avatar-frame__crown" aria-hidden="true">♛</span>
                 <img class="avatar-frame__glyph" id="avatar-glyph" alt="Avatar do jogador" />
                 <span class="avatar-frame__hint">Trocar avatar</span>
-              </button>
-              <p class="avatar-frame__counter" id="avatar-counter">Avatar 1 de 6</p>
+              </a>
+              <p class="avatar-frame__counter" id="avatar-pending" hidden>Foto em análise</p>
 
               <p class="profile-panel__username" id="profile-username">@—</p>
               <h2 class="profile-panel__name" id="profile-name">Carregando…</h2>
               <p class="profile-panel__turma" id="profile-turma" hidden></p>
               <p class="profile-panel__rank" id="profile-rank">—</p>
+              <p class="profile-panel__bio" id="profile-bio" hidden></p>
+              <a class="btn-gold btn-gold--ghost profile-panel__edit" href="../perfil/#editar">Editar perfil</a>
 
-              <button
-                class="profile-panel__messenger-shortcut"
-                type="button"
-                id="messenger-shortcut"
-                hidden
-              >
-                Atualizar selo do Mensageiro
-              </button>
 
               <p class="master-badge" id="master-badge" hidden>Mestre do Domínio</p>
 
-              <section class="messenger-seal" id="messenger-seal" hidden>
-                <h3 class="messenger-seal__title">Selo do Mensageiro</h3>
-                <p class="messenger-seal__state" id="messenger-state"></p>
-                <p class="messenger-seal__email" id="messenger-email" hidden></p>
-                <p class="messenger-seal__status" id="messenger-status" role="status" aria-live="polite"></p>
-
-                <form class="messenger-seal__form" id="messenger-form" hidden>
-                  <label class="messenger-seal__label" for="messenger-input">E-mail</label>
-                  <input
-                    class="messenger-seal__input"
-                    type="email"
-                    id="messenger-input"
-                    name="email"
-                    placeholder="Ex.: maria.silva@email.com"
-                    autocomplete="email"
-                    inputmode="email"
-                    required
-                  />
-                  <button class="btn-gold" type="submit" id="messenger-bind">
-                    Vincular e-mail
-                  </button>
-                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-cancel" hidden>
-                    Cancelar
-                  </button>
-                </form>
-
-                <div class="messenger-seal__actions" id="messenger-actions">
-                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-resend">
-                    Confirmar o selo
-                  </button>
-                  <button class="btn-gold btn-gold--ghost" type="button" id="messenger-change">
-                    Trocar endereço
-                  </button>
-                </div>
-              </section>
 
               <div class="profile-panel__stats">
                 <div class="level-badge" aria-label="Nível atual">
@@ -819,7 +778,7 @@
        vinculava o listener do botão "Ver Almas Registradas" e usava
        alert() estático em vez da API real. js/dashboard.js é a
        implementação completa (modais, admin tools, avatar, altar). -->
-  <script type="module" src="../js/dashboard.js?v=20261021i"></script>
+  <script type="module" src="../js/dashboard.js?v=perfil-ui-1"></script>
 
 </body>
 </html>

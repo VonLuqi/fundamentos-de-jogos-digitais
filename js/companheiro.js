@@ -14,7 +14,8 @@ import {
   describeLevelProgress,
   fillTrailheadField,
   getSession,
-  loadAvatarImage,
+  loadUserAvatar,
+  userDisplayName,
   logout,
   requireSession,
   fetchFriendProfile,
@@ -113,7 +114,7 @@ function toAlbumUser(profile) {
     achievements: Array.isArray(profile.achievements)
       ? profile.achievements.map((id) => String(id))
       : [],
-    name: profile.fullName || profile.username,
+    name: userDisplayName(profile, profile.username),
     username: profile.username,
   };
 }
@@ -160,7 +161,7 @@ async function renderMirrorProfile(profile) {
   const avatar = document.getElementById('mirror-avatar');
   if (section) section.hidden = false;
   if (avatar) {
-    await loadAvatarImage(avatar, profile.avatarIndex ?? 0);
+    await loadUserAvatar(avatar, profile);
   }
 
   const nameEl = document.getElementById('mirror-name');
@@ -176,7 +177,7 @@ async function renderMirrorProfile(profile) {
   const isAdmin = profile.role === 'admin';
   const progress = describeLevelProgress(profile.xp, { isAdmin });
 
-  if (nameEl) nameEl.textContent = profile.fullName || profile.username || '—';
+  if (nameEl) nameEl.textContent = userDisplayName(profile);
   if (handleEl) handleEl.textContent = `@${profile.username || '—'}`;
   if (rankEl) rankEl.textContent = progress.rank || profile.rank || '—';
   if (turmaEl) turmaEl.textContent = isAdmin ? 'Domínio' : (profile.turma || '—');
@@ -199,7 +200,7 @@ async function renderMirrorProfile(profile) {
     xpBarWrap.hidden = true;
   }
 
-  const label = profile.fullName || profile.username;
+  const label = userDisplayName(profile, profile.username);
   document.title = mirrorMode === 'turma'
     ? `${label} — Espelho da Turma | Fundamentos de Jogos Digitais`
     : `${label} — Espelho do Companheiro | Fundamentos de Jogos Digitais`;

@@ -1027,6 +1027,16 @@ export function resolveUserAvatar(user, { isSelf = false } = {}) {
   return { kind: 'catalog', avatarIndex, pending: false };
 }
 
+/**
+ * Nome que os colegas veem: o nome de exibição do Perfil, senão o nome civil, senão o @.
+ * Telas do Mestre (relatórios) continuam usando o nome civil para identificar o aluno.
+ */
+export function userDisplayName(user, fallback = '—') {
+  const chosen = String(user?.displayName ?? user?.display_name ?? '').trim();
+  if (chosen) return chosen;
+  return String(user?.fullName || user?.full_name || user?.name || user?.username || fallback);
+}
+
 /** Carrega em `imgEl` a foto do usuário; sem foto (ou se falhar) cai no personagem do catálogo. */
 export async function loadUserAvatar(imgEl, user, { isSelf = false } = {}) {
   const avatar = resolveUserAvatar(user, { isSelf });
@@ -2330,8 +2340,9 @@ export function needsMessengerSeal(user) {
   return !user.emailVerifiedAt;
 }
 
+/** Selo do Mensageiro: seção Conta do Perfil (o nome ficou por compatibilidade). */
 export function messengerSealDashboardUrl() {
-  return `${ROUTES.dashboard()}?selo=1`;
+  return `${ROUTES.perfil()}?selo=1#conta`;
 }
 
 export async function requireSession(options = {}) {
