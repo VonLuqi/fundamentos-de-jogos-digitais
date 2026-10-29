@@ -105,8 +105,11 @@ export function mountInstallButton(shell = typeof document !== 'undefined' ? doc
     btn.type = 'button';
     btn.className = 'app-shell__install is-attention';
     btn.setAttribute('data-pwa-install-btn', '1');
-    const logout = footer.querySelector('[data-shell-logout]');
-    if (logout) footer.insertBefore(btn, logout);
+    // O "Encerrar sessão" pode estar dentro do menu do chip de perfil (não é filho direto do
+    // rodapé): insere antes do item do rodapé que o contém — insertBefore com neto lança erro.
+    let anchor = footer.querySelector('[data-shell-logout]');
+    while (anchor && anchor.parentNode !== footer) anchor = anchor.parentNode;
+    if (anchor) footer.insertBefore(btn, anchor);
     else footer.appendChild(btn);
   }
 
