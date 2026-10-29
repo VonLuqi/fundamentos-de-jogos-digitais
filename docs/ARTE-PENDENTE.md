@@ -11,37 +11,10 @@
 ## Upgrades ainda vetoriais
 
 > **Gerado por `node scripts/despertar-art-lotes.mjs`. Não editar à mão.**
-> 209 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
+> 189 ícones em `assets/despertar/sprites/upgrades/` cujo WebP ainda coincide com o SVG. Um chat por lote. Não pintar fora da lista.
 > PNG em `.art-raw/upgrades/<id>.png`, depois `npm run despertar:art -- --folder upgrades --in-dir .art-raw/upgrades`. O SVG não se edita.
 
 ## U01 — upgrades (20)
-
-Custo de `81250000000000` (`martelos_automatos`) até `637500000000000` (`lanternas_de_pulsar`).
-
-| id | Nome no jogo | O que é |
-| --- | --- | --- |
-| `martelos_automatos` | Martelos Autômatos | Engrenagens de bronze délfico mantêm o estrondo perpétuo. |
-| `pinaculo_da_tempestade_de_almas` | Pináculo da Tempestade de Almas | Para-raios místicos capturam descargas espirituais na abóbada. |
-| `filhote_forjador_phlegethon` | Filhote Forjador do Phlegethon | Bafejam enxofre nas fornalhas e transformam a névoa de conquistas em brasa pura. |
-| `fuso_de_bronze_temporal` | Fuso de Bronze Temporal | Fia os segundos descartados pelos mortais em pura essência. |
-| `supremo_conselho_ctoniano` | Supremo Conselho Ctoniano | As três cortes unificam seus selos sob a bandeira do Imperador. |
-| `coracao_de_magma` | Coração de Magma | O núcleo incandescente do Submundo pulsa dentro das forjas. |
-| `rugido_do_abismo` | Rugido do Abismo | Três mil goelas ressoam como o trovão subterrâneo de Hades. |
-| `diadema_de_sangue_e_ouro` | Diadema de Sangue e Ouro | A coroa ancestral multiplica o reverenciar das multidões. |
-| `selo_de_hecate_noturna` | Selo de Hécate Noturna | A senhora das encruzilhadas abençoa cada portal das torres. |
-| `oraculo_da_lembranca_pura` | Oráculo da Lembrança Pura | Profecias cantadas de trás para a frente revelam tesouros de almas. |
-| `comboio_astral_do_acheron` | Comboio Astral do Acheron | Cem barcas estelares cruzam o zênite do Submundo em formação cerrada. |
-| `engrenagens_retrogradas` | Engrenagens Retrógradas | Giram para trás para colher o tributo de séculos que já passaram. |
-| `trono_sem_fim` | Trono Sem Fim | Galerias intermináveis de assentos imperiais dominam o horizonte. |
-| `cadinhos_de_ouro_frio` | Cadinhos de Ouro Frio | Transmutam escória mineral diretamente em moeda de passagem. |
-| `cidadela_dos_feiticeiros_do_styx` | Cidadela dos Feiticeiros do Styx | Duzentas torres formam uma rede ley sobre todo o rio dos juramentos. |
-| `decreto_irrevogavel` | Decreto Irrevogável | A palavra pronunciada na corte converte-se instantaneamente em almas. |
-| `veias_de_piropo` | Veias de Piropo | Canais de cristal vermelho distribuem o calor sem qualquer perda. |
-| `ventos_do_outro_lado` | Ventos do Outro Lado | A pressão entre dimensões empurra torrentes de almas para cá. |
-| `soberania_cerberiana` | Soberania Cerberiana | As portas do Submundo tornam-se intransponíveis e supremas. |
-| `lanternas_de_pulsar` | Lanternas de Pulsar | Faróis na proa que pulsam com o coração de estrelas colapsadas. |
-
-## U02 — upgrades (20)
 
 Custo de `700000000000000` (`fios_das_moiras_dourados`) até `6375000000000000` (`armada_das_esferas_celestes`).
 
@@ -68,7 +41,7 @@ Custo de `700000000000000` (`fios_das_moiras_dourados`) até `6375000000000000` 
 | `pacto_das_coroas_negras` | Pacto das Coroas Negras | Antigos reis da superfície prestam vassalagem eterna ao Trono. |
 | `armada_das_esferas_celestes` | Armada das Esferas Celestes | Duzentas naus recolhem a poeira anímica de galáxias inteiras. |
 
-## U03 — upgrades (20)
+## U02 — upgrades (20)
 
 Custo de `7000000000000000` (`pendulo_da_eternidade`) até `90000000000000000` (`filhote_supervisor_tartaro`).
 
@@ -95,7 +68,7 @@ Custo de `7000000000000000` (`pendulo_da_eternidade`) até `90000000000000000` (
 | `colisor_de_sombras_opostas` | Colisor de Sombras Opostas | Acelera espectros e anti-espectros até fundi-los em tributo. |
 | `filhote_supervisor_tartaro` | Filhote Supervisor do Tártaro | Rosnam em três tons harmónicos para manter cada oficina do Tártaro no compasso. |
 
-## U04 — upgrades (20)
+## U03 — upgrades (20)
 
 Custo de `93750000000000000` (`grande_obra_do_submundo`) até `1750000000000000000` (`dobras_de_segundo_infinito`).
 
@@ -122,7 +95,7 @@ Custo de `93750000000000000` (`grande_obra_do_submundo`) até `17500000000000000
 | `roleta_das_parcas` | Roleta das Parcas | Gira incessantemente convertendo azar mortal em fortuna ctônica. |
 | `dobras_de_segundo_infinito` | Dobras de Segundo Infinito | Dilatam cada instante produtivo em horas de rendimento. |
 
-## U05 — upgrades (20)
+## U04 — upgrades (20)
 
 Custo de `2550000000000000000` (`simetria_reversa_do_erebo`) até `52500000000000000000` (`lacos_de_retroalimentacao_eterna`).
 
@@ -149,7 +122,7 @@ Custo de `2550000000000000000` (`simetria_reversa_do_erebo`) até `5250000000000
 | `matriz_de_positrons_ctonianos` | Matriz de Pósitrons Ctonianos | Partículas espelhadas que ecoam cada batida da Foice. |
 | `lacos_de_retroalimentacao_eterna` | Laços de Retroalimentação Eterna | O futuro alimenta o passado num ciclo fechado de abundância. |
 
-## U06 — upgrades (20)
+## U05 — upgrades (20)
 
 Custo de `90000000000000000000` (`filhote_intendente_erebo`) até `1775000000000000000000` (`compilador_de_juramentos_estigios`).
 
@@ -176,7 +149,7 @@ Custo de `90000000000000000000` (`filhote_intendente_erebo`) até `1775000000000
 | `dominio_sobre_o_principio_e_o_fim` | Domínio sobre o Princípio e o Fim | Trezentos teares entrelaçam o alfa e o ômega na Foice de Hades. |
 | `compilador_de_juramentos_estigios` | Compilador de Juramentos Estígios | Otimiza o código da morte eliminando toda latência. |
 
-## U07 — upgrades (20)
+## U06 — upgrades (20)
 
 Custo de `2125000000000000000000` (`oceano_de_dirac_subterraneo`) até `120000000000000000000000` (`fenda_para_o_submundo_vizinho`).
 
@@ -203,7 +176,7 @@ Custo de `2125000000000000000000` (`oceano_de_dirac_subterraneo`) até `12000000
 | `determinismo_dourado` | Determinismo Dourado | O acaso deixa de existir: tudo o que pode render almas, renderá. |
 | `fenda_para_o_submundo_vizinho` | Fenda para o Submundo Vizinho | Drena um universo paralelo onde o Acheron corre duas vezes mais rápido. |
 
-## U08 — upgrades (20)
+## U07 — upgrades (20)
 
 Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000000000000000` (`servos_psionicos`).
 
@@ -230,7 +203,7 @@ Custo de `120000000000000000000000` (`servos_transversais`) até `19000000000000
 | `lobo_frontal_de_tita` | Lobo Frontal de Titã | Um único pensamento seu pesa mais que montanhas de ouro. |
 | `servos_psionicos` | Servos Psiônicos | Movem os remos com a força mental dos Padeiros do Córtex. |
 
-## U09 — upgrades (20)
+## U08 — upgrades (20)
 
 Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9500000000000000000000000000` (`noosfera_do_submundo`).
 
@@ -257,7 +230,7 @@ Custo de `38750000000000000000000000` (`onipotencia_fractal_infindavel`) até `9
 | `arquiteto_supremo_da_simulacao` | Arquiteto Supremo da Simulação | Trezentos consoles convertem o próprio loop em soberania. |
 | `noosfera_do_submundo` | Noosfera do Submundo | Cinquenta mentes colossais formam uma camada pensante ao redor do Tártaro. |
 
-## U10 — upgrades (20)
+## U09 — upgrades (20)
 
 Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `67500000000000000000000000000000` (`dinastia_autogerada`).
 
@@ -284,7 +257,7 @@ Custo de `13500000000000000000000000000` (`cinco_sombras_da_coroa`) até `675000
 | `centuria_de_imperadores_imortais` | Centúria de Imperadores Imortais | Cem avatares de Hades: nenhum canto do Submundo fica sem os teus olhos. |
 | `dinastia_autogerada` | Dinastia Autogerada | Sucedes a ti mesmo num ciclo real inquebrável. |
 
-## U11 — upgrades (9)
+## U10 — upgrades (9)
 
 Custo de `71250000000000000000000000000000` (`vontade_pura_sem_intermediarios`) até `67500000000000000000000000000000000` (`o_imperador_eterno_trezentos`).
 

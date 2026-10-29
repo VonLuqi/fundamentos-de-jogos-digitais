@@ -25,7 +25,7 @@ const doc = JSON.parse(fs.readFileSync(path.join(root, 'assets/despertar/art-req
 // Âncoras calibradas: pintado, vetorial e placeholder conhecidos.
 assert.equal((await classifySprite('generators', 'wandering_shade')).status, 'ilustrada', 'arte escura pintada não vira placeholder');
 assert.equal((await classifySprite('upgrades', 'ceifador_ctoniano')).status, 'ilustrada');
-assert.equal((await classifySprite('upgrades', 'martelos_automatos')).status, 'vetorial');
+assert.equal((await classifySprite('upgrades', 'fios_das_moiras_dourados')).status, 'vetorial');
 assert.equal((await classifySprite('upgrades', 'nao_existe_xyz')).status, 'faltando');
 
 const { byKey } = await auditArt();

@@ -48,8 +48,8 @@
     },
     "upgrades": {
       "total": 433,
-      "ilustrada": 224,
-      "vetorial": 209,
+      "ilustrada": 244,
+      "vetorial": 189,
       "placeholder": 0,
       "faltando": 0,
       "orphanFiles": 0,
@@ -184,8 +184,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 48,
-        "vetorial": 16,
+        "ilustrada": 55,
+        "vetorial": 9,
         "placeholder": 0,
         "faltando": 0
       }
@@ -318,8 +318,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 7,
-        "vetorial": 5,
+        "ilustrada": 8,
+        "vetorial": 4,
         "placeholder": 0,
         "faltando": 0
       }
@@ -351,8 +351,8 @@
       "auditable": true,
       "status": "interim",
       "counts": {
-        "ilustrada": 224,
-        "vetorial": 209,
+        "ilustrada": 244,
+        "vetorial": 189,
         "placeholder": 0,
         "faltando": 0
       }
