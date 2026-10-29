@@ -189,7 +189,7 @@
       "id": "art_upgrades",
       "listId": "B8",
       "priority": "P1",
-      "status": "interim",
+      "status": "delivered",
       "title": "Ícones dos Juramentos do Styx (Grade F1: 112 ícones)",
       "desc": "Set completo F1 (15 tiers por gerador T1–T6, cadeia Foice, Mil Foices e Sinergias Vol. I/II) via pipeline Gemini → Sharp WebP.",
       "sizes": [
@@ -295,8 +295,8 @@
       ],
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). 56 novos ícones F1 registrados. [2026-10-26: arte final — 396 catálogo via gen-upgrade-final-art.mjs + Onda A GenerateImage→process-upgrade-art.mjs; 2026-10-27: IDs legado cortejo_das_margens/brasa_cruzada → sinergias canónicas]",
       "detected": {
-        "ilustrada": 63,
-        "vetorial": 1,
+        "ilustrada": 64,
+        "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
       }
@@ -758,8 +758,8 @@
       "filesGlob": "upgrades/*.webp",
       "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 361 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
       "detected": {
-        "ilustrada": 284,
-        "vetorial": 149,
+        "ilustrada": 304,
+        "vetorial": 129,
         "placeholder": 0,
         "faltando": 0
       }
