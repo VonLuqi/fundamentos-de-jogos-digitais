@@ -39,6 +39,14 @@ assert.ok(ctrl.includes('submission_changed') && ctrl.includes('sha256_required'
 assert.ok(/status <> .{1,3}graded/.test(ctrl), 'UPDATE condicional contra tentativa graded');
 assert.ok(/sha256:\s*currentDetail\.submission/.test(adminJs), 'hub envia sha256 da entrega exibida');
 assert.ok(adminJs.includes('listGen') && adminJs.includes('detailGen'), 'hub descarta respostas antigas (geração)');
+// Página do aluno: a URL é a identidade; backend sem o exame nunca vira M1.
+const provaJs = read('js/prova.js');
+assert.ok(provaJs.includes('examMatchesUrl(status.exam)') && provaJs.includes('showExamUnavailable'), 'prova.js bloqueia exame divergente do servidor');
+assert.ok(provaJs.includes('Este exame ainda não está disponível no servidor. Avise o Mestre.'), 'mensagem clara de exame indisponível');
+assert.ok(/'trabalho-final':\s*\{\s*kind:\s*'project'/.test(provaJs), 'mapa local trabalho-final → project');
+assert.ok(!/buildExamCopy\(status\.exam \|\| null\)/.test(provaJs), 'sem copy M1 para exame ausente');
+assert.ok(provaJs.includes("typeof exam.kind !== 'string'"), 'exame não-M1 exige exam.kind explícito (backend antigo ecoa o id)');
+assert.ok(read('scripts/dev-server.mjs').includes('DEV_API_BASE'), 'dev-server aceita DEV_API_BASE');
 const svc = read('backend/src/Services/Prova/ProvaService.php');
 assert.ok(!/ProvaCatalog::(QUESTIONS|MC_ANSWER_KEY|QUESTION_COUNT|MC_POINTS_EACH|DISCURSIVE_POINTS_EACH)/.test(svc), 'ProvaService não deve fixar constantes do M1');
 

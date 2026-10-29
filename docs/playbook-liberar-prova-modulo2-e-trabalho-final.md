@@ -73,3 +73,15 @@ Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). 
 - [ ] Testar com uma conta de aluno da turma liberada: enviar `.zip`, reenviar, ver status
 - [ ] Hub: baixar o `.zip`, abrir no computador, publicar nota
 - [ ] Selar o gate ao fim da janela
+
+---
+
+## 7. Como testar localmente antes do deploy
+
+`npm run dev` (`scripts/dev-server.mjs`) serve o front local, mas **repassa `/api` para o backend de PRODUÇÃO**, que só conhece `modulo2-prova` e `trabalho-final` depois do deploy. Contra o backend antigo, `prova/?exam=modulo2-prova` e `?exam=trabalho-final` mostram o aviso **“Este exame ainda não está disponível no servidor. Avise o Mestre.”** (a página nunca cai na Provação do Módulo 1).
+
+Para testar o backend novo localmente:
+
+1. Tenha um MySQL/MariaDB local com `db/mysql/schema.sql` importado (nunca o de produção) e variáveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASS` apontando para ele.
+2. Suba o backend com um roteador que mande `/api/*` para `backend/index.php` (ex.: `php -S 127.0.0.1:8080 router.php`, onde o roteador define `$_GET['_route']` com o trecho depois de `/api/` e faz `require 'backend/index.php'`; use `-d upload_max_filesize=60M -d post_max_size=64M`).
+3. Em outro terminal: `DEV_API_BASE=http://127.0.0.1:8080 npm run dev` (PowerShell: `$env:DEV_API_BASE='http://127.0.0.1:8080'; npm run dev`).

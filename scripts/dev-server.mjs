@@ -15,7 +15,9 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.env.PORT || 3000);
-const PROD_API_BASE = 'https://projects.vonluqi.com/fundamentos-de-jogos-digitais';
+// Padrão: backend de PRODUÇÃO. Para testar o backend novo antes do deploy, suba um `php -S` local e use
+// DEV_API_BASE=http://127.0.0.1:8080 npm run dev (ver docs/playbook-liberar-prova-modulo2-e-trabalho-final.md).
+const PROD_API_BASE = (process.env.DEV_API_BASE || 'https://projects.vonluqi.com/fundamentos-de-jogos-digitais').replace(/\/+$/, '');
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

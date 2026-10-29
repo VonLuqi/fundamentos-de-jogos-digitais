@@ -56,6 +56,54 @@ function resolveExamId() {
 }
 
 const EXAM_ID = resolveExamId();
+
+/**
+ * Identidade local por exame (a URL é a fonte da verdade): rótulos do topo, tipo e nº de questões.
+ * Nunca depender do backend para decidir "isto é o Módulo 1" — um backend antigo devolve o M1 para qualquer examId.
+ */
+const LOCAL_EXAMS = Object.freeze({
+  'modulo1-provacao': { kind: 'quiz', eyebrow: 'Módulo 1 · Avaliação', title: 'Provação do Círculo Mágico', questions: 20 },
+  'modulo2-prova': { kind: 'quiz', eyebrow: 'Módulo 2 · Avaliação', title: 'Provação do Módulo 2', questions: 10 },
+  'trabalho-final': { kind: 'project', eyebrow: 'Trabalho Final · Entrega', title: 'Trabalho Final', questions: 0 },
+});
+const LOCAL_EXAM = LOCAL_EXAMS[EXAM_ID] || { kind: 'quiz', eyebrow: 'Avaliação', title: 'Avaliação', questions: 0 };
+const IS_PROJECT_LOCAL = LOCAL_EXAM.kind === 'project';
+
+function localQuestionCount() {
+  return LOCAL_EXAM.questions || QUESTION_COUNT;
+}
+
+/** O exame que o servidor devolveu é o da URL (e do mesmo tipo)? */
+function examMatchesUrl(exam) {
+  if (!exam || exam.id !== EXAM_ID) return false;
+  // Backend antigo ecoa o id pedido sem `kind` e serve questões do M1: só o M1 aceita resposta sem `kind`.
+  if (EXAM_ID !== DEFAULT_EXAM_ID && typeof exam.kind !== 'string') return false;
+  return (exam.kind || 'quiz') === LOCAL_EXAM.kind;
+}
+
+function showExamUnavailable() {
+  showPanel('blocked');
+  if (els.blockedMessage) {
+    els.blockedMessage.textContent = 'Este exame ainda não está disponível no servidor. Avise o Mestre.';
+  }
+}
+
+function paintTopbarForExam() {
+  const eyebrow = $('prova-topbar-eyebrow');
+  if (eyebrow) eyebrow.textContent = LOCAL_EXAM.eyebrow;
+  if (els.examTitle) els.examTitle.textContent = LOCAL_EXAM.title;
+  if (els.counter) els.counter.textContent = `Questão 1 de ${localQuestionCount()}`;
+  if (IS_PROJECT_LOCAL) {
+    // Trabalho Final: nunca contador, tempo nem integridade.
+    if (els.topbarMeta) els.topbarMeta.remove();
+    if (els.warn) els.warn.remove();
+    els.topbarMeta = null;
+    els.warn = null;
+    els.timer = null;
+    els.timerValue = null;
+    els.counter = null;
+  }
+}
 /** Copy do exame atual (M1 = PROVA_COPY idêntico; M2 deriva de `exam`). */
 let copy = PROVA_COPY;
 
@@ -383,7 +431,7 @@ function currentQuestion() {
 function buildProgressDots() {
   if (!els.progress) return;
   els.progress.replaceChildren();
-  const count = questions.length || QUESTION_COUNT;
+  const count = questions.length || localQuestionCount();
   for (let i = 0; i < count; i += 1) {
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -399,7 +447,7 @@ function buildProgressDots() {
 }
 
 function updateChromeForIndex(index) {
-  const count = questions.length || QUESTION_COUNT;
+  const count = questions.length || localQuestionCount();
   const n = Math.min(count, Math.max(1, index + 1));
   if (els.counter) els.counter.textContent = `Questão ${n} de ${count}`;
   const q = questions[index];
@@ -898,7 +946,7 @@ async function refreshDoneStatus() {
 
 async function goToQuestion(nextIndex) {
   if (busy || examLocked) return;
-  const count = questions.length || QUESTION_COUNT;
+  const count = questions.length || localQuestionCount();
   if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= count) return;
   if (nextIndex === displayIndex) return;
 
@@ -918,6 +966,10 @@ async function goToQuestion(nextIndex) {
 }
 
 async function enterExamFromPayload(payload) {
+  if (IS_PROJECT_LOCAL || !examMatchesUrl(payload?.exam)) {
+    showExamUnavailable();
+    return;
+  }
   examLocked = false;
   expireRetries = 0;
   applyAttemptPayload(payload);
@@ -1336,8 +1388,14 @@ async function submitContest() {
 async function bootStatus() {
   try {
     const status = await provaGetExamStatus(currentToken, asStudentOpts());
-    examMeta = status.exam || null;
-    copy = buildExamCopy(examMeta);
+    if (!examMatchesUrl(status.exam)) {
+      // Backend antigo/sem o exame: ausente, ou M1 devolvido no lugar. Nunca cair na M1 em silêncio.
+      console.warn('[prova] exame da URL não confere com o servidor', EXAM_ID, status.exam?.id);
+      showExamUnavailable();
+      return;
+    }
+    examMeta = status.exam;
+    copy = EXAM_ID === DEFAULT_EXAM_ID ? PROVA_COPY : buildExamCopy(examMeta);
     if (examMeta?.title && els.examTitle) {
       els.examTitle.textContent = examMeta.title;
     }
@@ -1390,8 +1448,11 @@ async function bootStatus() {
 
 async function main() {
   cacheEls();
-  ensureTimer();
-  buildProgressDots();
+  paintTopbarForExam();
+  if (!IS_PROJECT_LOCAL) {
+    ensureTimer();
+    buildProgressDots();
+  }
   bindChrome();
   showPanel('loading');
 
