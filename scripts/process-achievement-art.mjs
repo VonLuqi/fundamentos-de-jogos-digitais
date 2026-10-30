@@ -68,192 +68,127 @@ function estimateBorderBackgroundColor(data, width, height) {
 }
 
 /**
- * Remove o fundo conectado às bordas da imagem com flood-fill + rampa suave de alpha
- * e descontaminação das bordas para evitar halo escuro.
+ * Remove só o fundo ligado às bordas. Ícones ctonianos são quase pretos sobre preto:
+ * o filete (ouro/teal/brasa) fecha o contorno e o miolo fica opaco — sem flood
+ * que “come” sombra interna nem feather largo que deixa o ícone fantasma.
  */
 export function removeBackgroundBuffer(rawBuffer, width, height) {
   const data = new Uint8Array(rawBuffer);
   const totalPixels = width * height;
   const [bgR, bgG, bgB] = estimateBorderBackgroundColor(data, width, height);
 
-  // Mascaramento Flood-Fill 8-conectado a partir das bordas externas
-  const visited = new Uint8Array(totalPixels);
-  const bgMask = new Uint8Array(totalPixels);
-  const queue = new Int32Array(totalPixels);
-  let head = 0;
-  let tail = 0;
-
-  const hardBgThreshold = 34; // Distância máxima ao fundo para inundar livremente
-  const maxStepDiff = 18; // Diferença máxima entre vizinhos durante o flood-fill
-
-  function canSeed(pIdx) {
-    const i = pIdx * 4;
+  const ink = new Uint8Array(totalPixels);
+  for (let p = 0; p < totalPixels; p += 1) {
+    const i = p * 4;
     const r = data[i];
     const g = data[i + 1];
     const b = data[i + 2];
     const a = data[i + 3];
-    if (a < 16) return true;
+    if (a < 16) continue;
     const dist = colorDist(r, g, b, bgR, bgG, bgB);
     const lum = luminance(r, g, b);
-    return dist <= hardBgThreshold + 10 || lum <= 22;
+    const sat = saturation(r, g, b);
+    // Traço / volume do objeto (não o campo de fundo).
+    if (dist > 24 || lum > 28 || (sat > 0.32 && lum > 22)) ink[p] = 1;
   }
 
+  // Dilata o filete para fechar microfrestas e proteger o miolo escuro.
+  const barrier = new Uint8Array(ink);
+  const bridge = 2;
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      if (!ink[y * width + x]) continue;
+      for (let dy = -bridge; dy <= bridge; dy += 1) {
+        const ny = y + dy;
+        if (ny < 0 || ny >= height) continue;
+        for (let dx = -bridge; dx <= bridge; dx += 1) {
+          const nx = x + dx;
+          if (nx < 0 || nx >= width) continue;
+          barrier[ny * width + nx] = 1;
+        }
+      }
+    }
+  }
+
+  const exterior = new Uint8Array(totalPixels);
+  const queue = new Int32Array(totalPixels);
+  let head = 0;
+  let tail = 0;
+  function push(p) {
+    if (exterior[p] || barrier[p]) return;
+    exterior[p] = 1;
+    queue[tail++] = p;
+  }
   for (let x = 0; x < width; x += 1) {
-    const top = x;
-    const bot = (height - 1) * width + x;
-    if (!visited[top] && canSeed(top)) {
-      visited[top] = 1;
-      bgMask[top] = 1;
-      queue[tail++] = top;
-    }
-    if (!visited[bot] && canSeed(bot)) {
-      visited[bot] = 1;
-      bgMask[bot] = 1;
-      queue[tail++] = bot;
-    }
+    push(x);
+    push((height - 1) * width + x);
   }
-
   for (let y = 1; y < height - 1; y += 1) {
-    const left = y * width;
-    const right = y * width + (width - 1);
-    if (!visited[left] && canSeed(left)) {
-      visited[left] = 1;
-      bgMask[left] = 1;
-      queue[tail++] = left;
-    }
-    if (!visited[right] && canSeed(right)) {
-      visited[right] = 1;
-      bgMask[right] = 1;
-      queue[tail++] = right;
-    }
+    push(y * width);
+    push(y * width + (width - 1));
   }
-
-  const dirs = [
-    [-1, 0],
-    [1, 0],
-    [0, -1],
-    [0, 1],
-    [-1, -1],
-    [1, -1],
-    [-1, 1],
-    [1, 1],
-  ];
-
   while (head < tail) {
     const curr = queue[head++];
     const cx = curr % width;
-    const cy = (curr - cx) / width;
-    const ci = curr * 4;
-    const cr = data[ci];
-    const cg = data[ci + 1];
-    const cb = data[ci + 2];
-
-    for (let d = 0; d < dirs.length; d += 1) {
-      const nx = cx + dirs[d][0];
-      const ny = cy + dirs[d][1];
-      if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-      const next = ny * width + nx;
-      if (visited[next]) continue;
-
-      const ni = next * 4;
-      const nr = data[ni];
-      const ng = data[ni + 1];
-      const nb = data[ni + 2];
-      const na = data[ni + 3];
-
-      if (na < 16) {
-        visited[next] = 1;
-        bgMask[next] = 1;
-        queue[tail++] = next;
-        continue;
-      }
-
-      const distToBg = colorDist(nr, ng, nb, bgR, bgG, bgB);
-      const stepDist = colorDist(nr, ng, nb, cr, cg, cb);
-      const sat = saturation(nr, ng, nb);
-      const lum = luminance(nr, ng, nb);
-
-      // Só avança se o pixel continuar escuro/próximo da cor de fundo e sem salto brusco de borda
-      if (
-        (distToBg <= hardBgThreshold && stepDist <= maxStepDiff) ||
-        (lum <= 14 && sat < 0.25)
-      ) {
-        visited[next] = 1;
-        bgMask[next] = 1;
-        queue[tail++] = next;
-      }
+    const neighbors = [curr - 1, curr + 1, curr - width, curr + width];
+    for (let n = 0; n < 4; n += 1) {
+      const next = neighbors[n];
+      if (next < 0 || next >= totalPixels || exterior[next] || barrier[next]) continue;
+      const nx = next % width;
+      if (Math.abs(nx - cx) > 1) continue;
+      exterior[next] = 1;
+      queue[tail++] = next;
     }
   }
 
-  // Calcula distância de cada pixel de objeto até o fundo (para rampa suave nas bordas de 1-2px)
-  const boundaryFeather = new Float32Array(totalPixels);
-  boundaryFeather.fill(1.0);
-
+  // Feather mínimo (1px) só na borda verdadeira do objeto × fundo.
+  const feather = new Float32Array(totalPixels);
+  feather.fill(1);
   for (let y = 0; y < height; y += 1) {
     for (let x = 0; x < width; x += 1) {
       const idx = y * width + x;
-      if (bgMask[idx]) {
-        boundaryFeather[idx] = 0.0;
+      if (exterior[idx]) {
+        feather[idx] = 0;
         continue;
       }
-
-      // Verifica se é vizinho imediato (raio 1 ou 2) de um pixel de fundo
-      let touchesBgRadius1 = false;
-      let touchesBgRadius2 = false;
-
-      for (let dy = -2; dy <= 2; dy += 1) {
-        const ny = y + dy;
-        if (ny < 0 || ny >= height) continue;
-        for (let dx = -2; dx <= 2; dx += 1) {
+      let touchesExterior = false;
+      for (let dy = -1; dy <= 1 && !touchesExterior; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
           const nx = x + dx;
-          if (nx < 0 || nx >= width) continue;
-          if (bgMask[ny * width + nx]) {
-            if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) {
-              touchesBgRadius1 = true;
-            } else {
-              touchesBgRadius2 = true;
-            }
+          const ny = y + dy;
+          if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+          if (exterior[ny * width + nx]) {
+            touchesExterior = true;
+            break;
           }
         }
       }
-
-      if (touchesBgRadius1 || touchesBgRadius2) {
-        const i = idx * 4;
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const dist = colorDist(r, g, b, bgR, bgG, bgB);
-
-        // Rampa suave de alpha na borda externa do objeto
-        const low = touchesBgRadius1 ? 16 : 12;
-        const high = touchesBgRadius1 ? 68 : 48;
-        const ramp = Math.max(0, Math.min(1, (dist - low) / (high - low)));
-        boundaryFeather[idx] = ramp;
-      }
+      if (!touchesExterior) continue;
+      const i = idx * 4;
+      const dist = colorDist(data[i], data[i + 1], data[i + 2], bgR, bgG, bgB);
+      // Quase opaco: só suaviza o filete extremo do fundo.
+      feather[idx] = Math.max(0.72, Math.min(1, dist / 36));
     }
   }
 
-  // Aplica o canal alpha e descontamina cores da borda semi-transparente
-  for (let idx = 0; idx < totalPixels; idx += 1) {
-    const i = idx * 4;
-    if (bgMask[idx]) {
+  for (let p = 0; p < totalPixels; p += 1) {
+    const i = p * 4;
+    if (exterior[p]) {
       data[i] = 0;
       data[i + 1] = 0;
       data[i + 2] = 0;
       data[i + 3] = 0;
       continue;
     }
-
-    const alphaFactor = boundaryFeather[idx];
-    const newAlpha = Math.round(data[i + 3] * alphaFactor);
-    data[i + 3] = newAlpha;
-
-    if (newAlpha > 0 && alphaFactor < 0.96) {
-      // Descontaminação: remove a contribuição do fundo escuro nos pixels de transição
-      const safeAlpha = Math.max(0.22, alphaFactor);
-      data[i] = Math.min(255, Math.max(0, Math.round((data[i] - bgR * (1 - safeAlpha)) / safeAlpha)));
-      data[i + 1] = Math.min(255, Math.max(0, Math.round((data[i + 1] - bgG * (1 - safeAlpha)) / safeAlpha)));
-      data[i + 2] = Math.min(255, Math.max(0, Math.round((data[i + 2] - bgB * (1 - safeAlpha)) / safeAlpha)));
+    const factor = feather[p];
+    data[i + 3] = Math.round(255 * factor);
+    // Miolo quase preto sobre preto: empurrar levemente para cima para não sumir no UI escuro.
+    const lum = luminance(data[i], data[i + 1], data[i + 2]);
+    const dist = colorDist(data[i], data[i + 1], data[i + 2], bgR, bgG, bgB);
+    if (lum < 14 && dist < 20) {
+      data[i] = 16;
+      data[i + 1] = 18;
+      data[i + 2] = 24;
     }
   }
 
@@ -360,12 +295,69 @@ async function exportAula1ReferencePngs(destDir) {
   console.log(`Referências PNG exportadas em: ${destDir}`);
 }
 
+async function findRawSource(dir, id) {
+  for (const ext of ['.png', '.webp', '.jpg', '.jpeg']) {
+    const candidate = path.join(dir, `${id}${ext}`);
+    try {
+      await fs.access(candidate);
+      return candidate;
+    } catch {
+      /* next */
+    }
+  }
+  return null;
+}
+
+/**
+ * Recuperação sem bruto: reforça alpha de pixels mid/soft que ainda têm cor
+ * (ícones já processados demais pelo flood antigo).
+ */
+export async function repairAchievementAlpha(achievementId) {
+  const filePath = path.join(ACHIEVEMENTS_DIR, `${achievementId}.webp`);
+  const { data, info } = await sharp(filePath)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const out = Buffer.from(data);
+  let lifted = 0;
+  for (let i = 0; i < out.length; i += 4) {
+    const a = out[i + 3];
+    if (a === 0 || a >= 250) continue;
+    const lum = luminance(out[i], out[i + 1], out[i + 2]);
+    const sat = saturation(out[i], out[i + 1], out[i + 2]);
+    // Pixel com conteúdo (não residual de fundo) → opaco.
+    if (lum > 18 || sat > 0.2 || a >= 40) {
+      out[i + 3] = 255;
+      lifted += 1;
+    } else if (a >= 16) {
+      out[i + 3] = Math.min(255, Math.round(a * 2.2 + 40));
+      lifted += 1;
+    }
+  }
+  const webp = await trimAndCenterIcon(out, info.width, info.height, TARGET_SIZE);
+  await fs.writeFile(filePath, webp);
+  return { outPath: filePath, mode: 'repair-alpha', lifted };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const exportRefsIdx = args.indexOf('--export-refs');
   if (exportRefsIdx !== -1) {
     const dir = path.resolve(ROOT, args[exportRefsIdx + 1] || '.tmp-ach-refs');
     await exportAula1ReferencePngs(dir);
+    return;
+  }
+
+  const repairIdx = args.indexOf('--repair-ids');
+  if (repairIdx !== -1) {
+    const ids = String(args[repairIdx + 1] || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    for (const id of ids) {
+      const res = await repairAchievementAlpha(id);
+      console.log(`[REPAIR] ${id} lifted=${res.lifted} -> ${path.relative(ROOT, res.outPath)}`);
+    }
     return;
   }
 
@@ -376,18 +368,27 @@ async function main() {
     const validIds = new Set(
       (Array.isArray(catalogRaw) ? catalogRaw : []).map((entry) => path.parse(entry.file).name)
     );
+    const onlyIdx = args.indexOf('--ids');
+    const onlyIds = onlyIdx === -1
+      ? null
+      : new Set(
+        String(args[onlyIdx + 1] || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
     const preservedAula1 = new Set([
       'aula1_concluida',
       'gdd_integracao_documental',
-      'segredo_cartografo_do_inspector',
-      'segredo_alquimista_da_fisica',
-      'segredo_juramento_do_circulo',
+      // segredos da aula 1 só são preservados no batch completo; --ids força reprocesso
     ]);
     const entries = await fs.readdir(dir);
     for (const file of entries) {
       if (!/\.(png|webp|jpg|jpeg)$/i.test(file)) continue;
       const id = path.parse(file).name;
-      if (!validIds.has(id) || preservedAula1.has(id)) continue;
+      if (!validIds.has(id)) continue;
+      if (onlyIds && !onlyIds.has(id)) continue;
+      if (!onlyIds && preservedAula1.has(id)) continue;
       const fullArt = id === 'soberano_do_submundo';
       const res = await processAchievementImage({
         inputPath: path.join(dir, file),
