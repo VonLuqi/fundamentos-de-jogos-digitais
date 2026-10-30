@@ -11,7 +11,7 @@ import {
   createAchievementArtNode,
   ensureAchievementArtCatalogLoaded,
   rarityLabelForAchievement,
-} from './achievements-ui.js';
+} from './achievements-ui.js?v=20261030a';
 
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 

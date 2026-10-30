@@ -20,7 +20,7 @@ import {
   getAchievementCollectionStats,
   renderAchievementsList,
   setRainbowVfxSuspended,
-} from './achievements-ui.js';
+} from './achievements-ui.js?v=20261030a';
 import { isLessonPublished, PUBLISHED_GATE_KEY, renderLessonsList } from './lessons-ui.js';
 import { initUnderworldGate } from './underworld-gate.js?v=20261021i';
 

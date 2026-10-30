@@ -20,7 +20,7 @@ const ACHIEVEMENT_ART_CATALOG_FILE = 'assets/achievements/catalog.json';
 /** @type {Map<string, string>} id → nome do arquivo webp */
 let achievementArtById = new Map();
 let achievementArtCatalogPromise = null;
-const ACHIEVEMENT_ART_CATALOG_CACHE_KEY = 'hades_achievement_art_catalog_v2';
+const ACHIEVEMENT_ART_CATALOG_CACHE_KEY = 'hades_achievement_art_catalog_v3';
 
 function readCachedAchievementArtCatalog() {
   try {
@@ -54,7 +54,7 @@ export const ACHIEVEMENT_ART_IDS = new Set();
 export const SOBERANO_ACHIEVEMENT_ID = 'soberano_do_submundo';
 
 function achievementArtCatalogUrl() {
-  return `${rootPath()}/${ACHIEVEMENT_ART_CATALOG_FILE}`;
+  return `${rootPath()}/${ACHIEVEMENT_ART_CATALOG_FILE}?v=${ACHIEVEMENT_ART_CACHE_VER}`;
 }
 
 function normalizeAchievementArtCatalog(rawCatalog) {
@@ -95,7 +95,7 @@ export async function ensureAchievementArtCatalogLoaded() {
     return applyAchievementArtCatalog(cached);
   }
   if (!achievementArtCatalogPromise) {
-    achievementArtCatalogPromise = fetch(achievementArtCatalogUrl())
+    achievementArtCatalogPromise = fetch(achievementArtCatalogUrl(), { cache: 'no-store' })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error(`Falha ao carregar catalogo de artes (${response.status})`);
@@ -110,7 +110,7 @@ export async function ensureAchievementArtCatalogLoaded() {
   return achievementArtCatalogPromise;
 }
 
-const ACHIEVEMENT_ART_CACHE_VER = '20261029u';
+const ACHIEVEMENT_ART_CACHE_VER = '20261030a';
 
 /**
  * URL da arte WebP se o id estiver no catálogo; senão `null` (usar emoji).

@@ -8,7 +8,7 @@
 
 'use strict';
 
-import { setRainbowVfxSuspended } from './achievements-ui.js';
+import { setRainbowVfxSuspended } from './achievements-ui.js?v=20261030a';
 import { siteBasePath } from './api.js';
 
 const GATE_STORAGE_KEY = 'underworld_gate_ok';

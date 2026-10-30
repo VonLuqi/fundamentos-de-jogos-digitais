@@ -1,6 +1,6 @@
 'use strict';
 
-import { setRainbowVfxSuspended } from './achievements-ui.js';
+import { setRainbowVfxSuspended } from './achievements-ui.js?v=20261030a';
 import {
   DESPERTAR_GATE_ID,
   DESPERTAR_NAV_LABEL,
