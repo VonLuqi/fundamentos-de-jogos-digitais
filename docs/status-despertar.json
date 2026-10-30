@@ -105,12 +105,12 @@
     {
       "id": "art_foice",
       "auditable": true,
-      "status": "open",
+      "status": "delivered",
       "counts": {
         "ilustrada": 1,
         "vetorial": 0,
         "placeholder": 0,
-        "faltando": 1
+        "faltando": 0
       }
     },
     {
@@ -292,17 +292,6 @@
       }
     },
     {
-      "id": "art_f3_upgrades",
-      "auditable": true,
-      "status": "open",
-      "counts": {
-        "ilustrada": 0,
-        "vetorial": 0,
-        "placeholder": 0,
-        "faltando": 8
-      }
-    },
-    {
       "id": "art_f5_minigames",
       "auditable": true,
       "status": "delivered",
@@ -396,7 +385,7 @@
     "talentsGenericCopy": [],
     "talentsNoEffect": [],
     "achievements": 311,
-    "achievementUniqueArt": 24
+    "achievementUniqueArt": 311
   },
   "tests": null
 }

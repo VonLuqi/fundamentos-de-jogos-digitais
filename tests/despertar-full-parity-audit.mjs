@@ -466,11 +466,10 @@ run('7. Inventário WebP / Foice / conquistas / art-requests', () => {
   const allWebp = walkWebp(SPRITES);
   assert.ok(allWebp.length >= 400, `esperados ≥400 webp em sprites (got ${allWebp.length})`);
 
+  const foiceGlb = path.join(SPRITES, 'foice', 'foice-3d.glb');
   const foiceIdleWebp = path.join(SPRITES, 'foice', 'foice-idle.webp');
-  const foicePressedWebp = path.join(SPRITES, 'foice', 'foice-pressed.webp');
-  const foicePng = path.join(SPRITES, 'Foice.png');
-  if (!fs.existsSync(foiceIdleWebp) || !fs.existsSync(foicePressedWebp)) {
-    warn(`Foice P0: foice-idle/pressed.webp ausentes; UI usa ${fs.existsSync(foicePng) ? 'Foice.png' : 'fallback glyph'}`);
+  if (!fs.existsSync(foiceGlb) && !fs.existsSync(foiceIdleWebp)) {
+    warn('Foice: foice-3d.glb e foice-idle.webp ausentes');
   }
 
   const achDir = path.join(root, 'assets/achievements');

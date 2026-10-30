@@ -92,7 +92,7 @@ run('brief do Mestre cita paths e paleta', () => {
   const brief = fs.readFileSync(briefPath, 'utf8');
   assert.ok(brief.includes('WebP'));
   assert.ok(brief.includes('#00a896'));
-  assert.ok(brief.includes('foice-idle.webp'));
+  assert.ok(brief.includes('foice-3d.glb') || brief.includes('foice-idle.webp'));
   assert.ok(brief.includes('minecraft.webp'));
   assert.ok(brief.includes('hat_charon'));
   assert.ok(brief.includes('orbit_halo'));

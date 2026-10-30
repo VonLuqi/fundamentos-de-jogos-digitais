@@ -201,7 +201,7 @@ No Despertar, **placeholders procedurais/SVG** (`scripts/gen-despertar-sprites.m
 
 | Categoria de Asset | Cookie Clicker | Despertar hoje | Alvo com Gemini (F0–F8) | Destino no repositório |
 | --- | --- | --- | --- | --- |
-| **Altar / Foice** | Big Cookie + halos/partículas | `Foice.png` estática | `foice-idle.webp` + `foice-pressed.webp` (512²) | `assets/despertar/sprites/foice/` |
+| **Altar / Foice** | Big Cookie + halos/partículas | `Foice.png` estática | `foice-3d.glb` (+ `foice-idle.webp` fallback) | `assets/despertar/sprites/foice/` · `Foice3D.js` |
 | **Geradores T1–T6** | Ícone loja + sprite prateleira + fundo | Placeholders geométricos (`gen-despertar-sprites.mjs`) | Arte Hades/Submundo por gerador (128²/512² → WebP) + fundos de prateleira | `assets/despertar/sprites/generators/` |
 | **Geradores T7–T20** | 14 prédios (Temple → You) | Inexistente | Sprites de loja + mundo para T7–T12 (F3) e T13–T20 (F7) | `assets/despertar/sprites/generators/` |
 | **Juramentos Styx & Sinergias** | ~15 tiers/prédio + sinergias + cursor | Quadrados SVG com inicial (`upgrades/*.webp`) | Ícones temáticos com progressão de raridade/material por tier (F1) | `assets/despertar/sprites/upgrades/` |

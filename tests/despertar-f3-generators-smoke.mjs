@@ -410,7 +410,8 @@ run('5. WorldView T7–T12 (orçamento Perf preservado) + Conquistas + Códice +
   const artReqs = JSON.parse(
     fs.readFileSync(path.join(root, 'assets/despertar/art-requests.json'), 'utf8'),
   );
-  for (const key of ['art_t7', 'art_t8', 'art_t9', 'art_t10', 'art_t11', 'art_t12', 'art_f3_upgrades']) {
+  // art_f3_upgrades removido: IDs fantasma; cobertura real em art_f7_upgrades_late / art_synergy_vol_canon.
+  for (const key of ['art_t7', 'art_t8', 'art_t9', 'art_t10', 'art_t11', 'art_t12', 'art_f7_upgrades_late']) {
     const req = artReqs.requests.find((r) => r.id === key);
     assert.ok(req, `Pedido ${key} em art-requests.json`);
     assert.ok(

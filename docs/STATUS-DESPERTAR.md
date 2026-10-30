@@ -32,7 +32,7 @@ Placeholders por pasta (IDs para gerar arte):
 
 | Pedido | Status medido | Ilustrada | Vetorial | Placeholder | Faltando |
 | --- | --- | ---: | ---: | ---: | ---: |
-| `art_foice` | open | 1 | 0 | 0 | 1 |
+| `art_foice` | delivered | 1 | 0 | 0 | 0 |
 | `art_t1` | delivered | 1 | 0 | 0 | 0 |
 | `art_t2` | delivered | 1 | 0 | 0 | 0 |
 | `art_t3` | delivered | 1 | 0 | 0 | 0 |
@@ -51,7 +51,6 @@ Placeholders por pasta (IDs para gerar arte):
 | `art_t10` | delivered | 1 | 0 | 0 | 0 |
 | `art_t11` | delivered | 1 | 0 | 0 | 0 |
 | `art_t12` | delivered | 1 | 0 | 0 | 0 |
-| `art_f3_upgrades` | open | 0 | 0 | 0 | 8 |
 | `art_f5_minigames` | delivered | 21 | 0 | 0 | 0 |
 | `art_f4_veil_kittens` | delivered | 12 | 0 | 0 | 0 |
 | `art_f6_catabase_wrinklers` | delivered | 15 | 0 | 0 | 0 |
@@ -65,5 +64,5 @@ Placeholders por pasta (IDs para gerar arte):
 
 - Talentos com texto genérico ("Eco celestial espelhado"): **0/129**
 - Talentos sem efeito (fora `legado`): **0** — nenhum
-- Conquistas `despertar_*`: 311 usando **24** artes únicas
+- Conquistas `despertar_*`: 311 usando **311** artes únicas
 

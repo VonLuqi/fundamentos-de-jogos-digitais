@@ -20,7 +20,7 @@ Regenerar capa P2: `npm run despertar:art-requests`
 
 | ID | Peça | Tamanho | Path |
 | --- | --- | --- | --- |
-| B1 | Foice / Portal (idle + pressed) | 512² | `sprites/foice/foice-idle.webp`, `foice-pressed.webp` |
+| B1 | Foice / Portal (**3D GLB** · idle WebP fallback) | GLB + 512² | `sprites/foice/foice-3d.glb`, `foice-idle.webp` |
 | B2 | Sombra Vagante | 64² + 128² | `sprites/generators/wandering_shade.webp` (+ `.svg`) |
 | B3 | Servos de Caronte | 64² + 128² | `sprites/generators/charon_servants.webp` (+ `.svg`) |
 

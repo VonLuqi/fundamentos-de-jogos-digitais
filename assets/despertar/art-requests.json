@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-10-27",
+  "updated": "2026-10-30",
   "task": "B4+E3",
   "audience": "Mestre",
   "defaults": {
@@ -32,22 +32,23 @@
       "id": "art_foice",
       "listId": "B1",
       "priority": "P0",
-      "status": "open",
-      "title": "Foice / Portal do Acheron",
-      "desc": "Alvo de clique (idle + pressed). Dominante na coluna esquerda.",
+      "status": "delivered",
+      "title": "Foice / Portal do Acheron (3D)",
+      "desc": "Modelo 3D do altar (GLB). WebP idle permanece como fallback estático.",
       "sizes": [
-        "512x512"
+        "GLB",
+        "512x512 fallback"
       ],
       "files": [
-        "foice/foice-idle.webp",
-        "foice/foice-pressed.webp"
+        "foice/foice-3d.glb",
+        "foice/foice-idle.webp"
       ],
-      "notes": "Transparente; legível em círculo ~280–320px CSS. Opcional: SVG master. [reconciliado 2026-10-23: foice-idle/pressed.webp em disco]",
+      "notes": "Runtime: Foice3D.js carrega foice-3d.glb. foice-pressed.webp aposentado (pressed = animação 3D).",
       "detected": {
         "ilustrada": 1,
         "vetorial": 0,
         "placeholder": 0,
-        "faltando": 1
+        "faltando": 0
       }
     },
     {
@@ -560,36 +561,6 @@
         "vetorial": 0,
         "placeholder": 0,
         "faltando": 0
-      }
-    },
-    {
-      "id": "art_f3_upgrades",
-      "listId": "F3-UP",
-      "priority": "P1",
-      "status": "open",
-      "title": "Juramentos e Sinergias T7–T12 (98 ícones F3)",
-      "desc": "90 upgrades de linha (15 tiers × 6 geradores T7–T12) + 8 sinergias cruzadas Vol. I/II via pipeline Gemini → Sharp WebP.",
-      "sizes": [
-        "48x48",
-        "128x128"
-      ],
-      "filesGlob": "upgrades/*.webp",
-      "f3SynergyIds": [
-        "guardiao_dos_umbrais_i",
-        "guardiao_dos_umbrais_ii",
-        "jurisprudencia_arcana_i",
-        "jurisprudencia_arcana_ii",
-        "alquimia_estelar_i",
-        "alquimia_estelar_ii",
-        "trama_do_erebo_i",
-        "trama_do_erebo_ii"
-      ],
-      "notes": "Paths: assets/despertar/sprites/upgrades/{id}.webp (+ .svg fallback). Total catálogo = 210 upgrades. [2026-10-26: arte final no lote 396 + illustrated.json]",
-      "detected": {
-        "ilustrada": 0,
-        "vetorial": 0,
-        "placeholder": 0,
-        "faltando": 8
       }
     },
     {

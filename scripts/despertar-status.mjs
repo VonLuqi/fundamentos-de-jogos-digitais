@@ -181,16 +181,16 @@ function auditContent() {
   const generic = TALENTS.filter((t) => GENERIC_TALENT_BLURB.test(t.blurb || ''));
   const noEffect = TALENTS.filter((t) => t.id !== 'legado'
     && Object.keys(t.effects || {}).every((key) => DEAD_TALENT_EFFECT_KEYS.has(key)));
-  const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'game-catalog.json'), 'utf8'));
-  const arts = DESPERTAR_ACHIEVEMENT_IDS
-    .map((id) => catalog.achievements.find((a) => a.id === id)?.art)
-    .filter(Boolean);
+  // Fonte de verdade das Relíquias: assets/achievements/{id}.webp (+ catalog.json).
+  const achDir = path.join(ROOT, 'assets', 'achievements');
+  const ownArts = DESPERTAR_ACHIEVEMENT_IDS.filter((id) =>
+    fs.existsSync(path.join(achDir, `${id}.webp`)));
   return {
     talents: TALENTS.length,
     talentsGenericCopy: generic.map((t) => t.id),
     talentsNoEffect: noEffect.map((t) => t.id),
     achievements: DESPERTAR_ACHIEVEMENT_IDS.length,
-    achievementUniqueArt: new Set(arts).size,
+    achievementUniqueArt: ownArts.length,
   };
 }
 
