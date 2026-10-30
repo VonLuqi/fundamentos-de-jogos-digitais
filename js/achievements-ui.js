@@ -20,7 +20,7 @@ const ACHIEVEMENT_ART_CATALOG_FILE = 'assets/achievements/catalog.json';
 /** @type {Map<string, string>} id → nome do arquivo webp */
 let achievementArtById = new Map();
 let achievementArtCatalogPromise = null;
-const ACHIEVEMENT_ART_CATALOG_CACHE_KEY = 'hades_achievement_art_catalog_v1';
+const ACHIEVEMENT_ART_CATALOG_CACHE_KEY = 'hades_achievement_art_catalog_v2';
 
 function readCachedAchievementArtCatalog() {
   try {
@@ -110,7 +110,7 @@ export async function ensureAchievementArtCatalogLoaded() {
   return achievementArtCatalogPromise;
 }
 
-const ACHIEVEMENT_ART_CACHE_VER = '20261021g';
+const ACHIEVEMENT_ART_CACHE_VER = '20261029r';
 
 /**
  * URL da arte WebP se o id estiver no catálogo; senão `null` (usar emoji).

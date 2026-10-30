@@ -32,7 +32,7 @@ import {
   setRainbowVfxSuspended,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js?v=20261021g';
+} from './achievements-ui.js?v=20261029r';
 
 const COMPANIONS_FLASH_KEY = 'companionsFlash';
 

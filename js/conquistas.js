@@ -25,7 +25,7 @@ import {
   renderAchievementsList,
   SOBERANO_ACHIEVEMENT_ID,
   stopVeiledDescScramble,
-} from './achievements-ui.js?v=20261021g';
+} from './achievements-ui.js?v=20261029r';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
