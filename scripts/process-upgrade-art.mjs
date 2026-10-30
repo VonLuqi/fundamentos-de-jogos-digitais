@@ -15,7 +15,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
-import { trimAndCenterIcon } from './process-achievement-art.mjs';
+import { trimAndCenterIcon, liftSubjectVisibility } from './process-achievement-art.mjs';
 import { UPGRADES } from '../js/hades-despertar/config/upgrades.js';
 import { writeArtVersions } from './update-art-versions.mjs';
 
@@ -146,14 +146,9 @@ function removeEdgeBackground(rawBuffer, width, height) {
     }
     data[i + 3] = 255;
     opaque += 1;
-    const lum = luminance(data[i], data[i + 1], data[i + 2]);
-    const d = colorDist(data[i], data[i + 1], data[i + 2], bgR, bgG, bgB);
-    if (lum < 16 && d < 22) {
-      data[i] = 14;
-      data[i + 1] = 16;
-      data[i + 2] = 22;
-    }
   }
+
+  liftSubjectVisibility(data, { alphaFloor: 235, lumFloor: 48 });
 
   return { buffer: Buffer.from(data.buffer), opaqueRatio: opaque / total, bg: [bgR, bgG, bgB] };
 }
@@ -215,7 +210,22 @@ async function main() {
     }
     const { data, info } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
     const cleaned = removeEdgeBackground(data, info.width, info.height);
-    const webp = await trimAndCenterIcon(cleaned.buffer, info.width, info.height, TARGET);
+    const webpSoft = await trimAndCenterIcon(cleaned.buffer, info.width, info.height, TARGET);
+    // Resize 128² introduz AA semi-transparente — fecha o sujeito de novo.
+    const { data: sized, info: sizedInfo } = await sharp(webpSoft)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    for (let i = 0; i < sized.length; i += 4) {
+      const a = sized[i + 3];
+      if (a > 12 && a < 250) sized[i + 3] = 255;
+    }
+    liftSubjectVisibility(sized, { alphaFloor: 250, lumFloor: 48 });
+    const webp = await sharp(sized, {
+      raw: { width: sizedInfo.width, height: sizedInfo.height, channels: 4 },
+    })
+      .webp({ quality: 90, alphaQuality: 100 })
+      .toBuffer();
     await fs.writeFile(path.join(OUT_DIR, `${id}.webp`), webp);
     preserved.push(`${folder}/${id}`);
     ok += 1;

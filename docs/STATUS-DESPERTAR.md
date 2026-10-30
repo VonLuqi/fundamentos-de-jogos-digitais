@@ -1,6 +1,6 @@
 # Status do Despertar
 
-> **Gerado por `npm run despertar:status` em 2026-10-29. Não editar à mão.**
+> **Gerado por `npm run despertar:status` em 2026-10-30. Não editar à mão.**
 > Fonte de verdade de "o que está pronto": este arquivo e `npm run test:despertar`.
 > Os percentuais de `paridade-cookieclicker-despertar.md` são de design, não de entrega.
 

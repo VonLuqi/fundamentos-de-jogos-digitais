@@ -42,6 +42,69 @@ function saturation(r, g, b) {
   return max === 0 ? 0 : (max - min) / max;
 }
 
+/** Piso de luminância para ícones ctonianos não sumirem no UI escuro. */
+const LUM_FLOOR = 48;
+
+/**
+ * Remapeia RGB escuro para um piso ~48–70 preservando matiz/saturação.
+ * Pretos puros ganham um violeta-acinzentado legível (não vira cinza chapado).
+ */
+export function liftLuminanceRgb(r, g, b, floor = LUM_FLOOR) {
+  const lum = luminance(r, g, b);
+  if (lum >= floor) return [r, g, b];
+  const t = lum / floor;
+  const target = floor + (1 - t) * 18;
+  if (lum < 1.5) {
+    return [
+      Math.min(255, Math.round(target * 0.55)),
+      Math.min(255, Math.round(target * 0.58)),
+      Math.min(255, Math.round(target * 0.72)),
+    ];
+  }
+  const scale = target / lum;
+  return [
+    Math.min(255, Math.round(r * scale)),
+    Math.min(255, Math.round(g * scale)),
+    Math.min(255, Math.round(b * scale)),
+  ];
+}
+
+/**
+ * Reforça alpha do sujeito e sobe luminância de miolos escuros in-place (RGBA).
+ * @returns {{ alphaLifted: number, lumLifted: number }}
+ */
+export function liftSubjectVisibility(rgba, { alphaFloor = 235, lumFloor = LUM_FLOOR } = {}) {
+  let alphaLifted = 0;
+  let lumLifted = 0;
+  for (let i = 0; i < rgba.length; i += 4) {
+    let a = rgba[i + 3];
+    if (a < 8) continue;
+    if (a < alphaFloor) {
+      // Conteúdo mid/soft → quase opaco; residual de fundo fica.
+      const lum = luminance(rgba[i], rgba[i + 1], rgba[i + 2]);
+      const sat = saturation(rgba[i], rgba[i + 1], rgba[i + 2]);
+      if (lum > 14 || sat > 0.18 || a >= 40) {
+        rgba[i + 3] = 255;
+        a = 255;
+        alphaLifted += 1;
+      } else if (a >= 16) {
+        rgba[i + 3] = Math.min(255, Math.max(alphaFloor, Math.round(a * 2.1 + 48)));
+        a = rgba[i + 3];
+        alphaLifted += 1;
+      }
+    }
+    if (a < 200) continue;
+    const before = luminance(rgba[i], rgba[i + 1], rgba[i + 2]);
+    if (before >= lumFloor) continue;
+    const [nr, ng, nb] = liftLuminanceRgb(rgba[i], rgba[i + 1], rgba[i + 2], lumFloor);
+    rgba[i] = nr;
+    rgba[i + 1] = ng;
+    rgba[i + 2] = nb;
+    lumLifted += 1;
+  }
+  return { alphaLifted, lumLifted };
+}
+
 /**
  * Estima a cor predominante do fundo amostrando os pixels das 4 bordas externas.
  */
@@ -181,16 +244,15 @@ export function removeBackgroundBuffer(rawBuffer, width, height) {
       continue;
     }
     const factor = feather[p];
-    data[i + 3] = Math.round(255 * factor);
-    // Miolo quase preto sobre preto: empurrar levemente para cima para não sumir no UI escuro.
-    const lum = luminance(data[i], data[i + 1], data[i + 2]);
-    const dist = colorDist(data[i], data[i + 1], data[i + 2], bgR, bgG, bgB);
-    if (lum < 14 && dist < 20) {
-      data[i] = 16;
-      data[i + 1] = 18;
-      data[i + 2] = 24;
+    // Interior 100% opaco; filete mínimo ≥ ~217 (0.85) para não lavar no UI escuro.
+    if (factor >= 0.999) {
+      data[i + 3] = 255;
+    } else {
+      data[i + 3] = Math.max(217, Math.round(255 * Math.max(0.85, factor)));
     }
   }
+
+  liftSubjectVisibility(data, { alphaFloor: 235, lumFloor: LUM_FLOOR });
 
   return Buffer.from(data.buffer);
 }
@@ -309,8 +371,8 @@ async function findRawSource(dir, id) {
 }
 
 /**
- * Recuperação sem bruto: reforça alpha de pixels mid/soft que ainda têm cor
- * (ícones já processados demais pelo flood antigo).
+ * Recuperação sem bruto: reforça alpha mid/soft + lift de luminância
+ * (ícones já processados demais pelo flood antigo, ou full-art escura).
  */
 export async function repairAchievementAlpha(achievementId) {
   const filePath = path.join(ACHIEVEMENTS_DIR, `${achievementId}.webp`);
@@ -319,24 +381,36 @@ export async function repairAchievementAlpha(achievementId) {
     .raw()
     .toBuffer({ resolveWithObject: true });
   const out = Buffer.from(data);
-  let lifted = 0;
-  for (let i = 0; i < out.length; i += 4) {
-    const a = out[i + 3];
-    if (a === 0 || a >= 250) continue;
-    const lum = luminance(out[i], out[i + 1], out[i + 2]);
-    const sat = saturation(out[i], out[i + 1], out[i + 2]);
-    // Pixel com conteúdo (não residual de fundo) → opaco.
-    if (lum > 18 || sat > 0.2 || a >= 40) {
-      out[i + 3] = 255;
-      lifted += 1;
-    } else if (a >= 16) {
-      out[i + 3] = Math.min(255, Math.round(a * 2.2 + 40));
-      lifted += 1;
-    }
+  const { alphaLifted, lumLifted } = liftSubjectVisibility(out, {
+    alphaFloor: 235,
+    lumFloor: LUM_FLOOR,
+  });
+
+  // Full-art (soberano): sem trim transparente — grava cover opaco.
+  if (achievementId === 'soberano_do_submundo') {
+    const webp = await sharp(out, { raw: { width: info.width, height: info.height, channels: 4 } })
+      .removeAlpha()
+      .webp({ quality: 97, smartSubsample: true })
+      .toBuffer();
+    await fs.writeFile(filePath, webp);
+    return {
+      outPath: filePath,
+      mode: 'repair-full-art-lum',
+      lifted: alphaLifted + lumLifted,
+      alphaLifted,
+      lumLifted,
+    };
   }
+
   const webp = await trimAndCenterIcon(out, info.width, info.height, TARGET_SIZE);
   await fs.writeFile(filePath, webp);
-  return { outPath: filePath, mode: 'repair-alpha', lifted };
+  return {
+    outPath: filePath,
+    mode: 'repair-alpha',
+    lifted: alphaLifted + lumLifted,
+    alphaLifted,
+    lumLifted,
+  };
 }
 
 async function main() {
