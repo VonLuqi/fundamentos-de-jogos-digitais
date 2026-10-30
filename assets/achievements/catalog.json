@@ -476,5 +476,18 @@
   { "id": "despertar_talentos_100", "file": "despertar_talentos_100.webp" },
   { "id": "despertar_melhorias_50", "file": "despertar_melhorias_50.webp" },
   { "id": "despertar_melhorias_100", "file": "despertar_melhorias_100.webp" },
-  { "id": "despertar_melhorias_150", "file": "despertar_melhorias_150.webp" }
+  { "id": "despertar_melhorias_150", "file": "despertar_melhorias_150.webp" },
+  { "id": "despertar_juizo_50", "file": "despertar_juizo_50.webp" },
+  { "id": "despertar_juizo_100", "file": "despertar_juizo_100.webp" },
+  { "id": "despertar_almas_1e39", "file": "despertar_almas_1e39.webp" },
+  { "id": "despertar_sps_1e27", "file": "despertar_sps_1e27.webp" },
+  { "id": "despertar_sps_1e33", "file": "despertar_sps_1e33.webp" },
+  { "id": "despertar_ecos_777", "file": "despertar_ecos_777.webp" },
+  { "id": "despertar_nectar_100", "file": "despertar_nectar_100.webp" },
+  { "id": "despertar_nectar_1000", "file": "despertar_nectar_1000.webp" },
+  { "id": "despertar_sanguessuga_500", "file": "despertar_sanguessuga_500.webp" },
+  { "id": "despertar_sanguessuga_1000", "file": "despertar_sanguessuga_1000.webp" },
+  { "id": "despertar_prestigio_200", "file": "despertar_prestigio_200.webp" },
+  { "id": "despertar_cliques_1m", "file": "despertar_cliques_1m.webp" },
+  { "id": "despertar_ausencia_168h", "file": "despertar_ausencia_168h.webp" }
 ]
