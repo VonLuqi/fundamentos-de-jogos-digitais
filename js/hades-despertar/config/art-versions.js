@@ -6,7 +6,7 @@
 export const ART_VERSIONS = Object.freeze({
   'foice': 'fe745f07',
   'generators': '71320dc0',
-  'habitats': '198e68b7',
+  'habitats': '1860f638',
   'habitats/variants': '804e8fc5',
   'habitats/backgrounds': '80dd7bf1',
   'hud': '319af364',
