@@ -1140,25 +1140,29 @@ export class AltarOrbit {
     const ih = Number(sprite.naturalHeight || sprite.height) || 16;
     const gold = Boolean(placement?.gold);
     const negativo = !gold && Boolean(placement?.shiny);
-    void scale;
+    // Célula da órbita (não o tamanho nativo do WebP) — habitats 64² não podem estourar o anel.
+    const cell = Math.max(8, ORBIT_NPC_CELL * (Number(scale) > 0 ? Number(scale) : 1));
+    const fit = Math.min(cell / iw, cell / ih);
+    const dw = Math.max(1, Math.round(iw * fit));
+    const dh = Math.max(1, Math.round(ih * fit));
     ctx.save();
     ctx.globalAlpha = opacity;
     const pulse = gold && !reduced ? goldPulse(shinyGlitchNow()) : 0.7;
     if (gold && !reduced) {
-      paintGoldAura(ctx, x, y, Math.max(iw, ih) * 0.65, pulse);
+      paintGoldAura(ctx, x, y, Math.max(dw, dh) * 0.65, pulse);
     }
     ctx.translate(x, y);
     ctx.rotate(theta + Math.PI / 2);
     ctx.imageSmoothingEnabled = false;
     // Corpo da variante sempre visível (como nas prateleiras); só a aura depende de fancy/cap.
     if (gold) {
-      drawImageAsGold(ctx, sprite, -iw / 2, -ih / 2, iw, ih, { pulse, reducedMotion: reduced });
+      drawImageAsGold(ctx, sprite, -dw / 2, -dh / 2, dw, dh, { pulse, reducedMotion: reduced });
     } else if (negativo && 'filter' in ctx) {
       ctx.filter = 'invert(1) hue-rotate(180deg)';
-      ctx.drawImage(sprite, -iw / 2, -ih / 2, iw, ih);
+      ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
       ctx.filter = 'none';
     } else {
-      ctx.drawImage(sprite, -iw / 2, -ih / 2, iw, ih);
+      ctx.drawImage(sprite, -dw / 2, -dh / 2, dw, dh);
     }
     ctx.restore();
   }
