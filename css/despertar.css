@@ -5258,6 +5258,87 @@
 }
 
 /* --- Task 18 / D2 Juízo Higher-Lower (reforma HUD Despertar) --- */
+/* Juízo suspenso (anti-bot) */
+.despertar-juizo-ban {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: center;
+  padding: 1.6rem 1.2rem;
+  text-align: center;
+}
+
+.despertar-juizo-ban__title {
+  margin: 0;
+  font-family: var(--font-title, Cinzel, serif);
+  color: var(--hades-gold-bright, #f3d58a);
+}
+
+.despertar-juizo-ban__text {
+  margin: 0;
+  max-width: 34rem;
+  line-height: 1.5;
+}
+
+/* Painel do Mestre: anti-bot do Juízo */
+.despertar-guard {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.2rem;
+}
+
+.despertar-guard__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.despertar-guard__list {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.despertar-guard__item {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(207, 167, 89, 0.3);
+  border-radius: 0.5rem;
+  background: rgba(18, 14, 22, 0.55);
+}
+
+.despertar-guard__item.is-banned {
+  border-color: rgba(194, 53, 72, 0.7);
+  background: rgba(122, 31, 43, 0.25);
+}
+
+.despertar-guard__who {
+  margin: 0;
+  font-weight: 600;
+}
+
+.despertar-guard__status {
+  margin-left: 0.4rem;
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.despertar-guard__reason {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.despertar-guard__signals {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.82rem;
+  opacity: 0.85;
+}
+
+.despertar-guard__item .btn-gold {
+  justify-self: start;
+}
+
 .despertar-juizo-modal {
   position: fixed;
   inset: 0;

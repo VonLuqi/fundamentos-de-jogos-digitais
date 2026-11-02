@@ -10,6 +10,7 @@ use App\Core\Http;
 use App\Core\RateLimiter;
 use App\Services\Despertar\DespertarCatalog;
 use App\Services\Despertar\DespertarService;
+use App\Services\Despertar\JuizoGuard;
 use App\Services\Despertar\StaleSeasonEpochException;
 use App\Services\SessionService;
 use PDO;
@@ -109,6 +110,25 @@ final class DespertarController
                 'serverNow' => $armed['serverNow'],
                 'published' => DespertarService::isDespertarPublished(),
             ]);
+        }
+
+        // Admin: suspeitos e bans do Juízo (anti-bot) + desbanir
+        if ($action === 'juizoGuardList') {
+            if (!$isAdmin) {
+                Http::error(403, 'Esta senda é só do Mestre.');
+            }
+            Http::json(200, ['ok' => true, 'entries' => JuizoGuard::listForAdmin(), 'serverNow' => Database::nowIso()]);
+        }
+        if ($action === 'juizoGuardUnban') {
+            if (!$isAdmin) {
+                Http::error(403, 'Esta senda é só do Mestre.');
+            }
+            $targetId = isset($body['userId']) && is_numeric($body['userId']) ? (int) $body['userId'] : 0;
+            if ($targetId <= 0 || !JuizoGuard::unban($targetId, $userId)) {
+                Http::error(404, 'Esse aluno não tem ban nem suspeita registrados no Juízo.');
+            }
+            AdminAudit::record($userId, AdminAudit::ACTIONS['juizoUnban'], $targetId, ['scope' => 'despertar_juizo']);
+            Http::json(200, ['ok' => true, 'userId' => $targetId, 'entries' => JuizoGuard::listForAdmin()]);
         }
 
         // Archive eterno (leitura autenticada — disponível mesmo com Acheron selado)
@@ -478,8 +498,51 @@ final class DespertarController
             $row = DespertarService::getOrCreateStateRow($userId);
             $canonical = DespertarService::rowToCanonical($row);
 
+            // Anti-bot do Juízo (só alunos): ban ativo recusa início e palpite; o resto do Despertar segue.
+            if (!$isAdmin && $action !== 'juizoAbandon') {
+                $ban = JuizoGuard::activeBan($userId);
+                if ($ban === null) {
+                    $run = is_array($canonical['juizoRun'] ?? null) ? $canonical['juizoRun'] : [];
+                    $servedAt = (int) ($run['pairServedAt'] ?? 0);
+                    $clientSignals = is_array($body['juizoSignals'] ?? null) ? $body['juizoSignals'] : [];
+                    $verdict = JuizoGuard::record($userId, [
+                        'nowMs' => $nowMs,
+                        'isGuess' => $action === 'juizoGuess',
+                        'userAgent' => Http::header('User-Agent'),
+                        'secFetchSite' => Http::header('Sec-Fetch-Site'),
+                        'origin' => Http::header('Origin'),
+                        'latencyMs' => ($action === 'juizoGuess' && $servedAt > 0) ? $nowMs - $servedAt : null,
+                        'client' => [
+                            'webdriver' => ($clientSignals['webdriver'] ?? null) === true ? true : null,
+                            'trusted' => array_key_exists('trusted', $clientSignals) && is_bool($clientSignals['trusted'])
+                                ? $clientSignals['trusted'] : null,
+                        ],
+                    ]);
+                    if ($verdict['banned']) {
+                        // Zera recorde e sequência e encerra a corrida; Vereditos e marcos já reivindicados ficam.
+                        $saved = DespertarService::persistPatch($userId, [
+                            'juizo_best_streak' => 0,
+                            'juizo_current_streak' => 0,
+                            'juizo_run' => null,
+                            'updated_at' => $serverNow,
+                        ]);
+                        $ban = ['until' => (string) $verdict['until'], 'message' => (string) $verdict['message']];
+                        $canonical = DespertarService::rowToCanonical($saved);
+                    }
+                }
+                if ($ban !== null) {
+                    Http::json(403, [
+                        'ok' => false,
+                        'error' => 'despertar_juizo_banned',
+                        'message' => $ban['message'],
+                        'bannedUntil' => $ban['until'],
+                        'state' => DespertarService::buildStateDto($canonical),
+                    ]);
+                }
+            }
+
             if ($action === 'juizoStart') {
-                $result = DespertarService::juizoStart($canonical);
+                $result = DespertarService::juizoStart($canonical, $nowMs);
             } elseif ($action === 'juizoAbandon') {
                 $result = DespertarService::juizoAbandon($canonical);
             } else {
@@ -488,7 +551,7 @@ final class DespertarController
                     RateLimiter::applyRetryAfterHeader($juizoLimit);
                     Http::error(429, 'O Juízo pede calma — aguarde um instante.');
                 }
-                $result = DespertarService::juizoGuess($canonical, $body['choice'] ?? null);
+                $result = DespertarService::juizoGuess($canonical, $body['choice'] ?? null, $nowMs);
             }
 
             if (!$result['ok']) {

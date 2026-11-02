@@ -465,6 +465,127 @@ $anaSouls = (float) $pdo->query('SELECT souls FROM despertar_states WHERE user_i
 $check('CLI de novo (idempotente): ran=false, done=true, exit 0 e a T2 nova (321) fica', $c2['exit'] === 0 && ($c2['json']['ran'] ?? null) === false
     && ($c2['json']['done'] ?? null) === true && $anaSouls === 321.0, json_encode($c2));
 
+// ═════════════════════════════════════════════════════════════════════════════
+// ANTI-BOT DO JUÍZO (T8) pelo HTTP real: ban de 6 h só no Juízo, recorde zerado, desban, expiração
+// ═════════════════════════════════════════════════════════════════════════════
+echo "\n— Anti-bot do Juízo (HTTP) —\n";
+$chromeUa = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+$browserH = ["User-Agent: {$chromeUa}", 'Origin: http://127.0.0.1:8099', 'Sec-Fetch-Site: same-origin', 'Sec-Fetch-Mode: cors'];
+$pythonH = ['User-Agent: python-requests/2.31.0'];
+$gx = static function (string $action, array $body, string $tok, array $headers) use ($port): array {
+    $ctx = stream_context_create(['http' => [
+        'method' => 'POST', 'ignore_errors' => true, 'timeout' => 20,
+        'header' => implode("\r\n", array_merge(['Content-Type: application/json', "Authorization: Bearer {$tok}"], $headers)),
+        'content' => json_encode(array_merge(['action' => $action, 'token' => $tok, 'seasonEpoch' => 2], $body)),
+    ]]);
+    $raw = @file_get_contents("http://127.0.0.1:{$port}/api/despertar", false, $ctx);
+    $status = 0;
+    foreach ($http_response_header ?? [] as $h) {
+        if (preg_match('#^HTTP/\S+ (\d{3})#', $h, $m)) {
+            $status = (int) $m[1];
+        }
+    }
+    return ['status' => $status, 'json' => json_decode((string) $raw, true) ?: []];
+};
+$tokBia = $mkSession($ids['bia'], 'ensaio-bia');
+$tokDuda = $mkSession($ids['duda'], 'ensaio-duda');
+$tokGabi = $mkSession($ids['gabi'], 'ensaio-gabi');
+$milestone0 = \App\Services\Despertar\DespertarCatalog::JUIZO_STREAK_MILESTONES[0]['id'];
+$seedJuizo = static function (int $uid) use ($milestone0) {
+    DespertarService::getOrCreateStateRow($uid);
+    DespertarService::persistPatch($uid, [
+        'juizo_best_streak' => 21, 'juizo_current_streak' => 4, 'verdicts' => 33,
+        'juizo_milestones_claimed' => [$milestone0], 'updated_at' => \App\Core\Database::nowIso(),
+    ]);
+};
+$rowOf = static fn(int $uid): array => $pdo->query('SELECT juizo_best_streak b, juizo_current_streak c, juizo_run r, verdicts v, juizo_milestones_claimed m FROM despertar_states WHERE user_id=' . $uid)->fetch(PDO::FETCH_ASSOC) ?: [];
+
+// 1) Humano (Chrome, cabeçalhos de navegador, palpite com pausa humana): joga normal.
+$seedJuizo($ids['bia']);
+$hs = $gx('juizoStart', [], $tokBia, $browserH);
+usleep(900000);
+$hg = $gx('juizoGuess', ['choice' => 'A', 'juizoSignals' => ['webdriver' => false, 'trusted' => true]], $tokBia, $browserH);
+$check('Humano: Juízo inicia e o palpite é julgado (sem ban)', $hs['status'] === 200 && !empty($hs['json']['pair']) && $hg['status'] === 200,
+    "start={$hs['status']} guess={$hg['status']}");
+$check('Humano: o recorde não foi tocado', (int) $rowOf($ids['bia'])['b'] >= 21);
+
+// 2) Script (UA python-requests, sem Sec-Fetch/Origin): banido na hora, só no Juízo.
+$preBan = $rowOf($ids['bia']); // o palpite humano é aleatório: compara Vereditos/marcos com o instante ANTES do ban
+$bot = $gx('juizoStart', [], $tokBia, $pythonH);
+$until = $bot['json']['bannedUntil'] ?? '';
+$secs = $until !== '' ? (strtotime($until) - time()) : 0;
+$check('Bot (python-requests): Juízo recusado com 403 despertar_juizo_banned, mensagem clara e hora de liberação', $bot['status'] === 403
+    && ($bot['json']['error'] ?? '') === 'despertar_juizo_banned' && str_contains((string) ($bot['json']['message'] ?? ''), 'suspenso para você até')
+    && str_contains((string) ($bot['json']['message'] ?? ''), 'horário de Brasília'), (string) ($bot['json']['message'] ?? ''));
+$check('Ban dura 6 h (21600 s)', abs($secs - 21600) < 120, "restam {$secs}s");
+$dbBan = $pdo->query('SELECT TIMESTAMPDIFF(SECOND, banned_at, banned_until) d FROM despertar_juizo_guard WHERE user_id=' . $ids['bia'])->fetchColumn();
+$check('No banco: banned_until - banned_at = 21600 s', (int) $dbBan === 21600, "d={$dbBan}");
+$r = $rowOf($ids['bia']);
+$check('Ban zera recorde e sequência e encerra a corrida; Vereditos e marcos ficam', (int) $r['b'] === 0 && (int) $r['c'] === 0
+    && $r['r'] === null && (int) $r['v'] === (int) $preBan['v'] && $r['m'] === $preBan['m'] && (int) $preBan['v'] >= 33, json_encode([$preBan, $r]));
+
+// 3) O resto do Despertar segue; só o Juízo fecha (mesmo com cabeçalhos de navegador).
+$g = $gx('stateGet', [], $tokBia, $browserH);
+$sy = $gx('stateSync', ['clientState' => ['seasonEpoch' => 2] + ($g['json']['state'] ?? [])], $tokBia, $browserH);
+$check('No ban o resto do Despertar funciona (stateGet e stateSync 200)', $g['status'] === 200 && $sy['status'] === 200, "get={$g['status']} sync={$sy['status']}");
+$s1 = $gx('juizoStart', [], $tokBia, $browserH);
+$s2 = $gx('juizoGuess', ['choice' => 'A'], $tokBia, $browserH);
+$ab = $gx('juizoAbandon', [], $tokBia, $browserH);
+$check('No ban: juizoStart e juizoGuess seguem recusados (403) e abandonar é inofensivo', $s1['status'] === 403 && $s2['status'] === 403 && $ab['status'] === 200,
+    "start={$s1['status']} guess={$s2['status']} abandon={$ab['status']}");
+
+// 4) Painel do Mestre: lista com motivo/sinais; aluno não vê; desbanir registra auditoria.
+$lst = $gx('juizoGuardList', [], $tokAdmin, $browserH);
+$mine = array_values(array_filter($lst['json']['entries'] ?? [], static fn($e) => ($e['userId'] ?? 0) === $ids['bia']))[0] ?? [];
+$check('Admin vê o ban na lista: aluno, motivo, sinais e até quando', $lst['status'] === 200 && ($mine['active'] ?? false) === true
+    && str_contains((string) ($mine['reason'] ?? ''), 'User-Agent') && !empty($mine['signals']) && !empty($mine['bannedUntil']) && ($mine['name'] ?? '') !== '',
+    json_encode($mine['signals'][0] ?? null));
+$check('Aluno não acessa a lista nem desbane (403)', $gx('juizoGuardList', [], $tokBia, $browserH)['status'] === 403
+    && $gx('juizoGuardUnban', ['userId' => $ids['bia']], $tokBia, $browserH)['status'] === 403);
+$un = $gx('juizoGuardUnban', ['userId' => $ids['bia']], $tokAdmin, $browserH);
+$audit = (int) $pdo->query("SELECT COUNT(*) FROM admin_audit_events WHERE action='admin_despertar_juizo_unban' AND target_user_id=" . $ids['bia'])->fetchColumn();
+$check('Desbanir funciona e é registrado no AdminAudit', $un['status'] === 200 && $audit === 1, "status={$un['status']} audit={$audit}");
+$back = $gx('juizoStart', [], $tokBia, $browserH);
+$check('Depois de desbanido o aluno volta a jogar o Juízo', $back['status'] === 200 && !empty($back['json']['pair']), "status={$back['status']}");
+
+// 5) Expiração em 6 h (simulada recuando banned_until): volta sem precisar de desban.
+$gx('juizoStart', [], $tokBia, $pythonH); // bane de novo
+$pdo->exec("UPDATE despertar_juizo_guard SET banned_until = DATE_SUB(NOW(3), INTERVAL 1 SECOND) WHERE user_id=" . $ids['bia']);
+$exp = $gx('juizoStart', [], $tokBia, $browserH);
+$check('Ban expirado (6 h) libera sozinho', $exp['status'] === 200, "status={$exp['status']}");
+
+// 6) Bot de navegador sem webdriver: palpites instantâneos (< 350 ms) com TUDO o mais perfeito → banido no 2º.
+$seedJuizo($ids['duda']);
+$banAt = 0;
+for ($i = 1; $i <= 6 && $banAt === 0; $i++) {
+    $gx('juizoStart', [], $tokDuda, $browserH);
+    $gr = $gx('juizoGuess', ['choice' => 'A', 'juizoSignals' => ['webdriver' => false, 'trusted' => true]], $tokDuda, $browserH);
+    if ($gr['status'] === 403) {
+        $banAt = $i;
+    }
+}
+$check('Bot com UA/cabeçalhos de Chrome mas palpite instantâneo (<350 ms): banido no 2º palpite rápido', $banAt === 2, "banAt={$banAt}");
+$check('Esse ban também zerou o recorde', (int) $rowOf($ids['duda'])['b'] === 0);
+
+// 7) navigator.webdriver=true informado pelo cliente: banido na hora.
+$seedJuizo($ids['gabi']);
+$wd = $gx('juizoStart', ['juizoSignals' => ['webdriver' => true]], $tokGabi, $browserH);
+$check('webdriver=true: banido no primeiro pedido', $wd['status'] === 403 && ($wd['json']['error'] ?? '') === 'despertar_juizo_banned');
+
+// 8) Admin nunca é banido (prévia/teste).
+$adm = $gx('juizoStart', [], $tokAdmin, $pythonH);
+$check('Admin com UA de script não é banido (prévia/teste do Mestre)', $adm['status'] === 200 || $adm['status'] === 503, "status={$adm['status']}");
+
+// 9) Época/stale continua valendo no Juízo e o ban sobrevive ao reinício.
+$stale = $gx('juizoGuess', ['choice' => 'A', 'seasonEpoch' => 1], $tokBia, $browserH);
+$check('Juízo respeita a checagem de época (409 stale)', $stale['status'] === 409);
+$guardBefore = (int) $pdo->query('SELECT COUNT(*) FROM despertar_juizo_guard')->fetchColumn();
+DespertarService::setDespertarGate(DespertarService::SEASON_RESTART_GATE, false, $adminId);
+DespertarService::forgetSeasonCaches();
+DespertarService::restartSeason2IfDue($restartAt);
+$guardAfter = (int) $pdo->query('SELECT COUNT(*) FROM despertar_juizo_guard')->fetchColumn();
+$check('O reinício da temporada NÃO apaga o guard (bans seguem valendo)', $guardBefore >= 3 && $guardAfter === $guardBefore, "antes={$guardBefore} depois={$guardAfter}");
+
 if (is_resource($srv)) {
     proc_terminate($srv);
     proc_close($srv);

@@ -2209,8 +2209,28 @@ export function despertarJuizoStart(token) {
   return despertarWrite({ token, action: 'juizoStart' });
 }
 
-export function despertarJuizoGuess(token, choice) {
-  return despertarWrite({ token, action: 'juizoGuess', choice });
+/**
+ * `signals` (webdriver, trusted) são só informativos: o servidor decide o ban do Juízo (JuizoGuard).
+ * @param {{ webdriver?: boolean, trusted?: boolean|null }} [signals]
+ */
+export function despertarJuizoGuess(token, choice, signals) {
+  return despertarWrite({ token, action: 'juizoGuess', choice, juizoSignals: signals ?? null });
+}
+
+/** Admin: suspeitos e bans do Juízo (anti-bot). */
+export function despertarJuizoGuardList(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'juizoGuardList' }),
+  });
+}
+
+/** Admin: desbane um aluno do Juízo (registra no AdminAudit). */
+export function despertarJuizoGuardUnban(token, userId) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'juizoGuardUnban', userId }),
+  });
 }
 
 export function despertarJuizoAbandon(token) {

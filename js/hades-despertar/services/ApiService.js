@@ -396,10 +396,10 @@ export class ApiService {
     return result;
   }
 
-  async juizoGuess(choice) {
+  async juizoGuess(choice, signals) {
     const token = this.getToken();
     if (!token) return null;
-    const result = await despertarJuizoGuess(token, choice);
+    const result = await despertarJuizoGuess(token, choice, signals);
     if (result?.state) {
       this.applyServerState(result.state, { mode: 'replace', ok: true });
       this.onSynced?.({ ok: true, state: result.state, awarded: result.awarded || [] });

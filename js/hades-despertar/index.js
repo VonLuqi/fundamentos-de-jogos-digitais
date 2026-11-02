@@ -10,6 +10,8 @@ import {
   ApiError,
   DESPERTAR_PAUSED_ERROR,
   DESPERTAR_SEALED_ERROR,
+  despertarJuizoGuardList,
+  despertarJuizoGuardUnban,
   despertarStateGet,
   fetchDespertarPublished,
   fetchDespertarSeasonHold,
@@ -348,6 +350,104 @@ function bindTabs(root) {
     activate(visible[nextIndex], { focus: true });
   });
 }
+
+/** Painel do Mestre: suspeitos e bans do Juízo (anti-bot), com desbanir. */
+function mountJuizoGuardPanel({ token } = {}) {
+  const host = document.getElementById('despertar-debug');
+  if (!host || !token || host.querySelector('[data-juizo-guard-panel]')) return;
+  const fmt = (iso) => {
+    const t = Date.parse(String(iso || ''));
+    if (!Number.isFinite(t)) return '—';
+    return new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+    }).format(new Date(t));
+  };
+
+  const section = document.createElement('section');
+  section.className = 'despertar-guard';
+  section.setAttribute('data-juizo-guard-panel', '1');
+  const head = document.createElement('div');
+  head.className = 'despertar-guard__head';
+  const title = document.createElement('h3');
+  title.className = 'despertar-subsection';
+  title.textContent = 'Anti-bot do Juízo';
+  const refresh = document.createElement('button');
+  refresh.type = 'button';
+  refresh.className = 'despertar-ghost';
+  refresh.textContent = 'Atualizar';
+  head.append(title, refresh);
+  const note = document.createElement('p');
+  note.className = 'despertar-empty';
+  note.textContent = 'Bans automáticos de 6 h só no Juízo e alunos suspeitos (pontuação com decaimento). Desbanir libera na hora e limpa os sinais.';
+  const list = document.createElement('div');
+  list.className = 'despertar-guard__list';
+  list.setAttribute('data-juizo-guard-list', '');
+  section.append(head, note, list);
+  host.append(section);
+
+  const render = (entries) => {
+    list.textContent = '';
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'despertar-empty';
+      empty.textContent = 'Nenhum ban ou suspeita no momento.';
+      list.append(empty);
+      return;
+    }
+    for (const e of entries) {
+      const card = document.createElement('article');
+      card.className = `despertar-guard__item${e.active ? ' is-banned' : ''}`;
+      const top = document.createElement('p');
+      top.className = 'despertar-guard__who';
+      top.textContent = `${e.name} (${e.turma})`;
+      const status = document.createElement('span');
+      status.className = 'despertar-guard__status';
+      status.textContent = e.active
+        ? `Banido até ${fmt(e.bannedUntil)}`
+        : (e.bannedAt ? `Ban de ${fmt(e.bannedAt)} expirou/liberado` : `Suspeito · pontuação ${Number(e.score).toFixed(1)}`);
+      top.append(' ', status);
+      const why = document.createElement('p');
+      why.className = 'despertar-guard__reason';
+      why.textContent = e.reason ? `Motivo: ${e.reason}` : 'Sem motivo registrado.';
+      const sig = document.createElement('ul');
+      sig.className = 'despertar-guard__signals';
+      for (const s of e.signals || []) {
+        const li = document.createElement('li');
+        const extra = s.latencyMs != null ? ` (${s.latencyMs} ms)` : (s.ua ? ` (${s.ua})` : '');
+        li.textContent = `${fmt(new Date(s.t).toISOString())} · ${s.label}${extra}`;
+        sig.append(li);
+      }
+      const unban = document.createElement('button');
+      unban.type = 'button';
+      unban.className = 'btn-gold';
+      unban.textContent = e.active ? 'Desbanir' : 'Limpar suspeita';
+      unban.addEventListener('click', async () => {
+        unban.disabled = true;
+        try {
+          const res = await despertarJuizoGuardUnban(token, e.userId);
+          render(res.entries || []);
+        } catch (error) {
+          unban.disabled = false;
+          showApiWarning(error instanceof ApiError ? error.message : 'Não foi possível desbanir.');
+        }
+      });
+      card.append(top, why, sig, unban);
+      list.append(card);
+    }
+  };
+
+  const load = async () => {
+    try {
+      const res = await despertarJuizoGuardList(token);
+      render(res.entries || []);
+    } catch (error) {
+      list.textContent = error instanceof ApiError ? error.message : 'Não foi possível carregar a lista.';
+    }
+  };
+  refresh.addEventListener('click', () => { void load(); });
+  void load();
+}
+
 
 function bindDebugSandbox({
   api,
@@ -806,7 +906,7 @@ function bindJuizoCta(api, { onError, getState } = {}) {
 
   const modal = new JuizoModal(document, {
     start: () => api.juizoStart(),
-    guess: (choice) => api.juizoGuess(choice),
+    guess: (choice, signals) => api.juizoGuess(choice, signals),
     abandon: () => api.juizoAbandon(),
   }, {
     hasMercy: () => {
@@ -823,6 +923,10 @@ function bindJuizoCta(api, { onError, getState } = {}) {
   button.addEventListener('click', () => {
     if (button.disabled) return;
     modal.open().catch((error) => {
+      if (error?.payload?.error === 'despertar_juizo_banned') {
+        onError?.(error.payload.message || 'O Juízo está suspenso para você.', { dismissMs: 20000 });
+        return;
+      }
       onError?.(error?.message || 'O Juízo se fecha.');
     });
   });
@@ -1713,6 +1817,7 @@ async function init() {
     openLetheModal: () => letheUi.open(),
     markDirty: (scope) => uiRef.renderer?.markDirty?.(scope || 'all'),
   });
+  if (user.role === 'admin') mountJuizoGuardPanel({ token });
 
   harvestUi.show(catchUp.harvest);
   api.start();

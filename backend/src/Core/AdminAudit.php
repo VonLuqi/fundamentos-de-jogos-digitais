@@ -32,6 +32,7 @@ final class AdminAudit
         'resetAllProvaAttempts' => 'admin_reset_all_prova_attempts',
         'rebalanceLetheWallets' => 'admin_rebalance_lethe_wallets',
         'seasonOpen' => 'admin_despertar_season_open',
+        'juizoUnban' => 'admin_despertar_juizo_unban',
     ];
 
     /**

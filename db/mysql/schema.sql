@@ -423,6 +423,27 @@ CREATE TABLE IF NOT EXISTS `despertar_states` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
+-- 18b. despertar_juizo_guard (anti-bot do Juízo; o reinício da T2 NÃO apaga esta tabela)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `despertar_juizo_guard` (
+  `user_id` INT NOT NULL,
+  `score` DOUBLE NOT NULL DEFAULT 0,
+  `score_at` DATETIME(3) NULL DEFAULT NULL,
+  `banned_at` DATETIME(3) NULL DEFAULT NULL,
+  `banned_until` DATETIME(3) NULL DEFAULT NULL,
+  `ban_reason` VARCHAR(500) NULL DEFAULT NULL,
+  `ban_count` INT NOT NULL DEFAULT 0,
+  `state` JSON NULL,
+  `unbanned_by` INT NULL DEFAULT NULL,
+  `unbanned_at` DATETIME(3) NULL DEFAULT NULL,
+  `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  PRIMARY KEY (`user_id`),
+  KEY `despertar_juizo_guard_banned_idx` (`banned_until`),
+  CONSTRAINT `despertar_juizo_guard_user_fk`
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
 -- 19. classind_rooms
 -- -----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `classind_rooms` (

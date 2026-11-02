@@ -101,7 +101,7 @@ export class JuizoModal {
    * @param {Document} doc
    * @param {{
    *   start: () => Promise<object>,
-   *   guess: (choice: string) => Promise<object>,
+   *   guess: (choice: string, signals?: object) => Promise<object>,
    *   abandon: () => Promise<object>,
    * }} api
    * @param {{
@@ -118,6 +118,8 @@ export class JuizoModal {
     this._pendingChoice = null;
     this._focusBefore = null;
     this._lastPair = null;
+    /** Último palpite veio de clique/tecla real (isTrusted)? null = nenhum evento visto. */
+    this._lastInputTrusted = null;
     this._onKey = (event) => this.#onKeyDown(event);
   }
 
@@ -151,9 +153,9 @@ export class JuizoModal {
     const eduHint = this.root.querySelector('[data-juizo-hint]');
     if (eduHint) eduHint.textContent = JUIZO_MODAL_EDU_HINT;
 
-    this.cardA?.root?.addEventListener('click', () => this.#selectChoice('A'));
-    this.cardB?.root?.addEventListener('click', () => this.#selectChoice('B'));
-    this.btnTie?.addEventListener('click', () => this.#selectChoice('tie'));
+    this.cardA?.root?.addEventListener('click', (event) => { this.#noteInput(event); this.#selectChoice('A'); });
+    this.cardB?.root?.addEventListener('click', (event) => { this.#noteInput(event); this.#selectChoice('B'); });
+    this.btnTie?.addEventListener('click', (event) => { this.#noteInput(event); this.#selectChoice('tie'); });
     this.btnBack?.addEventListener('click', () => this.close({ abandon: true }));
     this.btnFailBack?.addEventListener('click', () => this.close({ abandon: false }));
     this.btnRestart?.addEventListener('click', () => this.open());
@@ -206,8 +208,54 @@ export class JuizoModal {
     if (prev && typeof prev.focus === 'function') prev.focus();
   }
 
+  /** Só informa o servidor; quem decide é o JuizoGuard. */
+  #noteInput(event) {
+    this._lastInputTrusted = event?.isTrusted === true;
+  }
+
+  #signals() {
+    const nav = typeof navigator !== 'undefined' ? navigator : null;
+    return { webdriver: nav?.webdriver === true, trusted: this._lastInputTrusted };
+  }
+
+  #showBanned(message) {
+    setHidden(this.play, true);
+    setHidden(this.fail, true);
+    this.#clearPendingChoice();
+    let box = this.root.querySelector('[data-juizo-banned]');
+    if (!box) {
+      box = this.doc.createElement('div');
+      box.className = 'despertar-juizo-ban';
+      box.setAttribute('data-juizo-banned', '1');
+      box.setAttribute('role', 'alert');
+      const title = this.doc.createElement('h3');
+      title.className = 'despertar-juizo-ban__title';
+      title.textContent = 'Juízo suspenso';
+      const text = this.doc.createElement('p');
+      text.className = 'despertar-juizo-ban__text';
+      text.setAttribute('data-juizo-banned-text', '');
+      const close = this.doc.createElement('button');
+      close.type = 'button';
+      close.className = 'btn-gold';
+      close.textContent = 'Fechar';
+      close.addEventListener('click', () => {
+        box.hidden = true;
+        this.close({ abandon: false });
+      });
+      box.append(title, text, close);
+      (this.root.querySelector('.despertar-juizo-modal__panel') || this.root).append(box);
+    }
+    setText(box.querySelector('[data-juizo-banned-text]'), message);
+    box.hidden = false;
+    box.querySelector('button')?.focus?.();
+  }
+
   #onKeyDown(event) {
     if (!this.isOpen) return;
+    if (event.key === 'Enter' || event.key === 'ArrowLeft' || event.key === 'ArrowRight'
+      || ['1', '2', 'e', 'E'].includes(event.key)) {
+      this.#noteInput(event);
+    }
     if (event.key === 'Escape') {
       event.preventDefault();
       if (this._pendingChoice && this.play && !this.play.hidden) {
@@ -506,7 +554,7 @@ export class JuizoModal {
     this._busy = true;
     this.#setChoicesDisabled(true);
     try {
-      const result = await this.api.guess(choice);
+      const result = await this.api.guess(choice, this.#signals());
       if (!result?.ok) {
         throw new Error(result?.error || 'O Juízo se fecha.');
       }
@@ -519,7 +567,11 @@ export class JuizoModal {
       }
     } catch (error) {
       console.error('[JuizoModal]', error);
-      this.#setChoicesDisabled(false);
+      if (error?.payload?.error === 'despertar_juizo_banned') {
+        this.#showBanned(error.payload.message || 'O Juízo está suspenso para você.');
+      } else {
+        this.#setChoicesDisabled(false);
+      }
     } finally {
       this._busy = false;
     }

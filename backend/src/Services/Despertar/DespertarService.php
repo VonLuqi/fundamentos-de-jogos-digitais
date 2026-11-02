@@ -1592,8 +1592,9 @@ final class DespertarService
      * @param array<string, mixed> $state
      * @return array<string, mixed>
      */
-    public static function juizoStart(array $state): array
+    public static function juizoStart(array $state, ?int $nowMs = null): array
     {
+        $servedAt = $nowMs ?? (int) round(microtime(true) * 1000);
         $pool = DespertarCatalog::getJuizoReadyPool();
         if (count($pool) < 30) {
             return ['ok' => false, 'status' => 503, 'error' => 'O Juízo ainda cataloga as almas.'];
@@ -1610,6 +1611,7 @@ final class DespertarService
             'ratingB' => (string) $challenger['rating'],
             'recentIds' => [],
             'mercyUsed' => false,
+            'pairServedAt' => $servedAt,
         ];
         $next = array_merge($state, [
             'juizoCurrentStreak' => 0,
@@ -1632,8 +1634,10 @@ final class DespertarService
      * @param array<string, mixed> $state
      * @return array<string, mixed>
      */
-    public static function juizoGuess(array $state, mixed $choice): array
+    public static function juizoGuess(array $state, mixed $choice, ?int $nowMs = null): array
     {
+        // Instante em que o PRÓXIMO par é servido: a latência do palpite seguinte é medida daqui (JuizoGuard).
+        $servedAt = $nowMs ?? (int) round(microtime(true) * 1000);
         $run = $state['juizoRun'] ?? null;
         if (!is_array($run) || empty($run['championId']) || empty($run['challengerId'])) {
             return ['ok' => false, 'status' => 400, 'error' => 'Não há julgamento em curso.'];
@@ -1680,6 +1684,7 @@ final class DespertarService
                     'ratingB' => (string) $nextPick[0]['rating'],
                     'recentIds' => $recent,
                     'mercyUsed' => true,
+                    'pairServedAt' => $servedAt,
                 ];
                 $next = array_merge($state, ['juizoRun' => $nextRun]);
                 return [
@@ -1768,6 +1773,7 @@ final class DespertarService
             'ratingB' => (string) $challenger['rating'],
             'recentIds' => $recent,
             'mercyUsed' => !empty($run['mercyUsed']),
+            'pairServedAt' => $servedAt,
         ];
 
         $stats = $state['stats'];

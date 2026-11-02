@@ -11,13 +11,13 @@ import {
   fetchLessonGates,
   getBootstrapGates,
   getSession,
-} from './api.js?v=reinicio-t2-3';
+} from './api.js?v=juizo-guard-1';
 import {
   DESPERTAR_SEASON_CLOSED,
   SEASON_RESTART_AT,
   SEASON_RESTART_BANNER_COPY,
   SEASON_RESTART_COPY,
-} from './hades-despertar/config/season-closed.js?v=reinicio-t2-3';
+} from './hades-despertar/config/season-closed.js?v=juizo-guard-1';
 import { initProfileChip, syncProfileChip } from './profile-chip.js';
 import { maybeOfferInstall } from './pwa-install.js';
 
