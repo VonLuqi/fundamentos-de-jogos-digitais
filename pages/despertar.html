@@ -1157,6 +1157,17 @@
       var DONE = 'O Acheron abre…';
       var sawPositive = false;
       var reloaded = false;
+      var reloadTimer = null;
+      function cancelSeasonOpenReload() {
+        if (reloadTimer) {
+          window.clearTimeout(reloadTimer);
+          reloadTimer = null;
+        }
+        reloaded = false;
+      }
+      // Boot do módulo chama isto ao tirar o hold estático — senão o timer de 15 s
+      // (agendado no primeiro paint, com a data já passada) recarrega o jogo em loop.
+      window.__despertarCancelSeasonOpenReload = cancelSeasonOpenReload;
       function pad(n) { return String(n).padStart(2, '0'); }
       function format(ms) {
         var total = Math.max(0, Math.ceil(ms / 1000));
@@ -1171,7 +1182,10 @@
       }
       function tick() {
         var node = document.querySelector('[data-season-open-countdown]');
-        if (!node) return;
+        if (!node) {
+          cancelSeasonOpenReload();
+          return;
+        }
         var opens = Date.parse(node.getAttribute('data-season-opens-at') || '');
         if (!isFinite(opens)) return;
         var left = opens - Date.now();
@@ -1184,12 +1198,13 @@
         if (reloaded) return;
         reloaded = true;
         // Relógio do aluno adiantado: o servidor ainda pode estar trancado; tenta de novo a cada 15 s.
-        window.setTimeout(function () { window.location.reload(); }, sawPositive ? 0 : 15000);
+        // Se o boot liberar a temporada e remover o nó, cancelSeasonOpenReload aborta este timer.
+        reloadTimer = window.setTimeout(function () { window.location.reload(); }, sawPositive ? 0 : 15000);
       }
       tick();
       window.setInterval(tick, 1000);
     })();
   </script>
-  <script type="module" src="../js/hades-despertar/index.js?v=juizo-guard-1"></script>
+  <script type="module" src="../js/hades-despertar/index.js?v=season-reload-cancel-1"></script>
 </body>
 </html>

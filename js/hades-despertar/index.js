@@ -130,10 +130,19 @@ function showSealedState(token = null, { isAdmin = false } = {}) {
 }
 
 /** Boot sem confirmação de época: véu simples + recarrega sozinho até o servidor responder. */
+function cancelSeasonOpenReload() {
+  try {
+    globalThis.__despertarCancelSeasonOpenReload?.();
+  } catch {
+    /* ignore */
+  }
+}
+
 function showReconnectingState() {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   document.querySelector('[data-season-hold-static]')?.remove();
+  cancelSeasonOpenReload();
   main.innerHTML = `
     <article class="despertar-classroom-veil despertar-classroom-veil--season hades-frame" data-despertar-reconnecting-veil>
       <p class="despertar-classroom-veil__eyebrow">${SEASON_RECONNECT_COPY.eyebrow}</p>
@@ -1093,6 +1102,7 @@ async function init() {
 
   // Liberado / preview: tira o fallback HTML para o jogo montar.
   document.querySelector('[data-season-hold-static]')?.remove();
+  cancelSeasonOpenReload();
 
   if (!isAdmin && !published) {
     showSealedState(token, { isAdmin });
