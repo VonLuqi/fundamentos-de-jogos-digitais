@@ -10,6 +10,7 @@ use App\Core\Http;
 use App\Core\RateLimiter;
 use App\Services\Despertar\DespertarCatalog;
 use App\Services\Despertar\DespertarService;
+use App\Services\Despertar\StaleSeasonEpochException;
 use App\Services\SessionService;
 use PDO;
 
@@ -28,6 +29,35 @@ final class DespertarController
 
     public static function handle(): never
     {
+        try {
+            self::dispatch();
+        } catch (StaleSeasonEpochException $e) {
+            // O reinício fez COMMIT entre a admissão e a gravação: nada foi gravado.
+            $payload = [
+                'ok' => false,
+                'error' => DespertarService::STALE_EPOCH_ERROR,
+                'message' => DespertarService::STALE_EPOCH_MESSAGE,
+                'staleEpoch' => true,
+                'seasonEpoch' => $e->currentEpoch,
+                'awarded' => self::emptyAwarded(),
+            ];
+            try {
+                $user = SessionService::loadUserBySessionToken(SessionService::extractRequestToken() ?? '');
+                if ($user) {
+                    $payload['state'] = DespertarService::buildStateDto(
+                        DespertarService::getOrCreateStateRow((int) $user['id']),
+                        ['achievements' => $user['conquistas'] ?? []]
+                    );
+                }
+            } catch (\Throwable) {
+                // sem estado novo: o cliente só precisa do código para limpar o local e recarregar
+            }
+            Http::json(409, $payload);
+        }
+    }
+
+    private static function dispatch(): never
+    {
         if (Http::method() !== 'POST') {
             header('Allow: POST');
             Http::error(405, 'Método não permitido.');
@@ -43,6 +73,16 @@ final class DespertarController
         }
         $userId = (int) $user['id'];
         $isAdmin = ($user['role'] ?? '') === 'admin';
+
+        // Reinício agendado da T2 (idempotente; backend/index.php já dispara em toda requisição da API).
+        DespertarService::restartSeason2IfDue();
+        // Época em que esta requisição foi admitida: toda gravação a relê sob lock e aborta se mudou.
+        DespertarService::currentSeasonEpoch();
+
+        // Situação pública (tranco, época, instante do reinício) — qualquer sessão, mesmo trancado.
+        if ($action === 'seasonStatus') {
+            Http::json(200, ['ok' => true, 'serverNow' => Database::nowIso()] + DespertarService::seasonStatus());
+        }
 
         // Admin: pausa de aula (Véu)
         if ($action === 'pauseSet' || $action === 'pauseClear') {
@@ -256,17 +296,20 @@ final class DespertarController
         $isSealedForUser = !$isAdmin && !$published;
         $isPlayBlocked = !$isAdmin && (!$published || DespertarService::isDespertarPauseActive($pauseState, $nowMs));
 
+        $sealedBody = [
+            'ok' => false,
+            'error' => DespertarService::DESPERTAR_SEALED_ERROR,
+            'message' => DespertarService::DESPERTAR_SEALED_MESSAGE,
+            'published' => false,
+            'restartHold' => DespertarService::isSeasonRestartHold(),
+            'pause' => null,
+            'pauseWindow' => null,
+            'serverNow' => $serverNow,
+        ];
+
         if ($action === 'stateGet') {
             if ($isSealedForUser) {
-                Http::json(403, [
-                    'ok' => false,
-                    'error' => DespertarService::DESPERTAR_SEALED_ERROR,
-                    'message' => DespertarService::DESPERTAR_SEALED_MESSAGE,
-                    'published' => false,
-                    'pause' => null,
-                    'pauseWindow' => null,
-                    'serverNow' => $serverNow,
-                ]);
+                Http::json(403, $sealedBody);
             }
 
             $row = DespertarService::getOrCreateStateRow($userId);
@@ -282,15 +325,7 @@ final class DespertarController
         }
 
         if ($isSealedForUser) {
-            Http::json(403, [
-                'ok' => false,
-                'error' => DespertarService::DESPERTAR_SEALED_ERROR,
-                'message' => DespertarService::DESPERTAR_SEALED_MESSAGE,
-                'published' => false,
-                'pause' => null,
-                'pauseWindow' => null,
-                'serverNow' => $serverNow,
-            ]);
+            Http::json(403, $sealedBody);
         }
 
         if ($isPlayBlocked) {
@@ -303,6 +338,26 @@ final class DespertarController
                 'pauseWindow' => $pauseWindow,
                 'serverNow' => $serverNow,
             ]);
+        }
+
+        // Escritas só com a época atual: save/aba de outra temporada não regrava nada, só recebe o estado novo.
+        if (in_array($action, ['stateSync', 'prestige', 'talentBuy', 'verdictBuy', 'closeAscension', 'juizoStart', 'juizoGuess', 'juizoAbandon'], true)) {
+            // No sync vale a época gravada no próprio save (clientState); nas demais, a da carga da página.
+            $clientEpoch = (is_array($body['clientState'] ?? null) && array_key_exists('seasonEpoch', $body['clientState']))
+                ? $body['clientState']['seasonEpoch']
+                : ($body['seasonEpoch'] ?? null);
+            if (!DespertarService::isSeasonEpochCurrent($clientEpoch)) {
+                $fresh = DespertarService::getOrCreateStateRow($userId);
+                Http::json(409, [
+                    'ok' => false,
+                    'error' => DespertarService::STALE_EPOCH_ERROR,
+                    'message' => DespertarService::STALE_EPOCH_MESSAGE,
+                    'staleEpoch' => true,
+                    'seasonEpoch' => DespertarService::currentSeasonEpoch(),
+                    'state' => DespertarService::buildStateDto($fresh, ['achievements' => $user['conquistas'] ?? []]),
+                    'awarded' => self::emptyAwarded(),
+                ]);
+            }
         }
 
         if ($action === 'stateSync') {
@@ -381,6 +436,17 @@ final class DespertarController
             }
 
             $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], true);
+            Http::json(200, [
+                'ok' => true,
+                'state' => DespertarService::buildStateDto($persisted['row']),
+                'awarded' => $persisted['awarded'],
+            ]);
+        }
+
+        if ($action === 'closeAscension') {
+            $row = DespertarService::getOrCreateStateRow($userId);
+            $result = DespertarService::applyCloseAscension($row, $nowMs);
+            $persisted = DespertarService::persistPatchAndAward($user, $result['patch'], $result['next'], false);
             Http::json(200, [
                 'ok' => true,
                 'state' => DespertarService::buildStateDto($persisted['row']),

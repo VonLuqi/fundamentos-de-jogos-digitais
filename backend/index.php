@@ -26,6 +26,7 @@ use App\Core\Database;
 use App\Core\Http;
 use App\Core\MysqlMigrator;
 use App\Core\RateLimiter;
+use App\Services\Despertar\DespertarService;
 
 // Resposta imediata para preflight CORS se aplicável
 if (Http::method() === 'OPTIONS') {
@@ -53,6 +54,15 @@ try {
     // Detalhe do banco só no log do servidor; o aluno vê uma mensagem genérica.
     error_log('[migrate] ' . $e->getMessage());
     Http::error(503, 'O Domínio está em manutenção. Tente de novo em instantes.');
+}
+
+// Reinício da Temporada 2 do Despertar: vale para qualquer requisição da API (ranking, placar, progresso...),
+// não só as do próprio Despertar. Antes do instante é só uma comparação de datas; depois do reset, o gate
+// vira 1 e cada requisição paga uma leitura por chave primária. Falha: loga e a próxima requisição tenta de novo.
+try {
+    DespertarService::restartSeason2IfDue();
+} catch (Throwable $e) {
+    error_log('[season-restart] ' . $e->getMessage());
 }
 
 // Rate limit por IP na borda (espelho do `middleware.js` da Vercel)

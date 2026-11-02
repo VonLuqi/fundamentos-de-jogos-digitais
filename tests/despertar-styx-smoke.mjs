@@ -358,14 +358,14 @@ await run('Lethe: prévia em 1e8 bloqueia o ritual; 4e9 bebe e zera geradores', 
   const lethe = describeLethe(ripe);
   assert.equal(lethe.canDrink, true);
   assert.equal(lethe.preview.obolsGain, '1');
-  assert.equal(lethe.preview.mnemosyneGain, '0');
+  assert.equal(lethe.preview.mnemosyneGain, '1');
 
   const ritual = ripe.applyPrestige();
   assert.equal(ritual.ok, true);
   assert.equal(Object.keys(ripe.quantities()).length, 0);
   assert.equal(ripe.upgrades.length, 0);
   assert.equal(cmp(ripe.obols, '1'), 0);
-  assert.equal(cmp(ripe.mnemosyne, '0'), 0, '1 óbolo → 0 essência (2:1)');
+  assert.equal(cmp(ripe.mnemosyne, '1'), 0, '1 óbolo → 1 essência (piso: a 1ª Catábase compra o selo raiz)');
   assert.equal(cmp(ripe.souls, '0'), 0);
   assert.equal(cmp(ripe.runSouls, '0'), 0);
   assert.equal(cmp(ripe.lifetimeSouls, '4000000000'), 0);

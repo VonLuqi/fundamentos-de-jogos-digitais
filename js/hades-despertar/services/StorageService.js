@@ -51,6 +51,39 @@ export class StorageService {
     this._pendingUserId = null;
     this._pendingState = null;
     this._flushing = null;
+    this._frozen = false;
+  }
+
+  /**
+   * Para de gravar de vez (aba de uma temporada que já acabou): nada pendente nem pagehide
+   * pode ressuscitar o save velho depois do clear().
+   */
+  freeze() {
+    this._frozen = true;
+    if (this._timerId != null) {
+      this.clearTimeout(this._timerId);
+      this._timerId = null;
+    }
+    this._pendingState = null;
+    this._pendingUserId = null;
+  }
+
+  /** Apaga o save local do jogador (IndexedDB e o fallback de sessão). */
+  async clear(userId) {
+    const id = asUserId(userId);
+    if (!id) return;
+    if (!this._idbDisabled) {
+      try {
+        await this.#idbDelete(id);
+      } catch {
+        this._idbDisabled = true;
+      }
+    }
+    try {
+      this.sessionStorage?.removeItem(sessionKey(id));
+    } catch {
+      /* sessionStorage indisponível */
+    }
   }
 
   async load(userId) {
@@ -67,7 +100,7 @@ export class StorageService {
 
   async save(userId, snapshot, extra = {}) {
     const id = asUserId(userId);
-    if (!id) return { ok: false, via: null };
+    if (!id || this._frozen) return { ok: false, via: null };
     const record = {
       userId: id,
       savedAt: extra.savedAt ?? new Date(this.now()).toISOString(),
@@ -87,7 +120,7 @@ export class StorageService {
 
   scheduleSave(userId, gameState) {
     const id = asUserId(userId);
-    if (!id || !gameState) return;
+    if (!id || !gameState || this._frozen) return;
     this._pendingUserId = id;
     this._pendingState = gameState;
     if (this._timerId != null) this.clearTimeout(this._timerId);
@@ -156,6 +189,13 @@ export class StorageService {
     const store = tx.objectStore(this.storeName);
     const row = await requestToPromise(store.get(userId));
     return row ?? null;
+  }
+
+  async #idbDelete(userId) {
+    const db = await this.#getDb();
+    const tx = db.transaction(this.storeName, 'readwrite');
+    const store = tx.objectStore(this.storeName);
+    await requestToPromise(store.delete(userId));
   }
 
   async #idbPut(record) {

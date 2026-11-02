@@ -22,6 +22,41 @@ export const DESPERTAR_SEASON_CLOSED = true;
  */
 export const SEASON_OPENS_AT = '2026-11-01T00:00:00-03:00';
 
+/**
+ * Reinício da Temporada 2 (bugs): o Despertar fica trancado para os alunos até este instante;
+ * a primeira requisição depois dele zera tudo no servidor e sobe a época.
+ * O mesmo literal está em DespertarService::SEASON_RESTART_AT.
+ */
+export const SEASON_RESTART_AT = '2026-11-02T12:00:00-03:00';
+
+/** Aviso do véu bloqueante durante o tranco do reinício (aluno). */
+export const SEASON_RESTART_COPY = Object.freeze({
+  eyebrow: 'Temporada 2 · reinício por bugs',
+  title: 'O Acheron guarda silêncio',
+  body: 'Encontramos bugs na Temporada 2 que poderiam deixar alguém em vantagem injusta. Por isso ela vai reiniciar: o Despertar fica fechado até lá e, ao meio-dia de segunda-feira, 2 de novembro (Brasília), todo mundo começa do zero, com as mesmas chances. O pódio da Temporada 1 continua eterno e o XP que você já ganhou fica.',
+  countdownLabel: 'A Temporada 2 recomeça em',
+  countdownDone: 'O Acheron abre…',
+  previewBanner: 'Modo teste — a turma está com o Acheron trancado até o reinício da Temporada 2.',
+  navLabel: 'O Despertar · reinício',
+  navTitle: 'Temporada 2 reiniciando — ver o aviso',
+});
+
+/** Boot que não conseguiu confirmar a época da temporada com o servidor (nunca joga com save de época desconhecida). */
+export const SEASON_RECONNECT_COPY = Object.freeze({
+  eyebrow: 'Reconectando ao Acheron',
+  title: 'O Acheron ainda não respondeu',
+  body: 'Não foi possível confirmar a temporada com o servidor. Seu progresso não foi tocado; tentando de novo em instantes…',
+  retryMs: 8000,
+});
+
+/** Banner do app-shell (todas as páginas) enquanto o reinício não acontece. */
+export const SEASON_RESTART_BANNER_COPY = Object.freeze({
+  text: 'O Despertar está fechado: a Temporada 2 vai reiniciar por causa de bugs, para ninguém sair em vantagem injusta. Todo mundo recomeça do zero na segunda-feira, 2 de novembro, ao meio-dia (Brasília). O XP ganho fica.',
+  countdownPrefix: 'Reinicia em',
+  countdownDone: 'Reiniciando…',
+  cta: 'Ver o aviso',
+});
+
 export const SEASON_CLOSED_COPY = Object.freeze({
   eyebrow: 'Temporada 1 encerrada · abrindo Temporada 2',
   title: 'O Acheron guarda silêncio',

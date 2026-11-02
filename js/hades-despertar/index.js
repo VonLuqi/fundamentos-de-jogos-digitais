@@ -19,6 +19,8 @@ import {
   logout,
   requireSession,
   ROUTES,
+  setDespertarSeasonEpoch,
+  setDespertarStaleEpochHandler,
   setLessonGate,
   seasonArchiveGet,
   seasonOpen,
@@ -39,7 +41,7 @@ import { foiceModelUrl } from './ui/world/SpriteAtlas.js';
 import { flashStyx, playLetheRitualFeel, playReapJuice, playFoiceSlash, spawnSlashTrail, flashBuyRow, tweenShelfSpawn, sealUpgradeIcon, juicePrefersReducedMotion, juiceBumpClass, showTutorialToast } from './ui/juice.js';
 import { setMarqueeText } from './ui/Marquee.js';
 import { presentClassroomPauseVeil, presentSeasonClosedVeil, presentSealedVeil, presentSeasonHall } from './ui/pauseVeil.js';
-import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY, SEASON_HALL_COPY } from './config/season-closed.js';
+import { DESPERTAR_SEASON_CLOSED, SEASON_CLOSED_COPY, SEASON_HALL_COPY, SEASON_RECONNECT_COPY, SEASON_RESTART_COPY } from './config/season-closed.js';
 import {
   consumeAdminPreviewQuery,
   setAdminPreviewActive,
@@ -103,8 +105,12 @@ function showSealedState(token = null, { isAdmin = false } = {}) {
     void (async () => {
       try {
         const season = await fetchDespertarSeasonHold(resolvedToken);
-        if (season.seasonHold) {
-          await showSeasonClosedState(resolvedToken, { isAdmin });
+        if (season.seasonHold || season.restartHold) {
+          await showSeasonClosedState(resolvedToken, {
+            isAdmin,
+            restart: !season.seasonHold && season.restartHold,
+            restartAt: season.restartAt,
+          });
           return;
         }
       } catch {
@@ -121,7 +127,22 @@ function showSealedState(token = null, { isAdmin = false } = {}) {
   presentSealedVeil(main, { aulasHref: ROUTES.aulas() });
 }
 
-function mountAdminPreviewBanner() {
+/** Boot sem confirmação de época: véu simples + recarrega sozinho até o servidor responder. */
+function showReconnectingState() {
+  const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
+  if (!main) return;
+  document.querySelector('[data-season-hold-static]')?.remove();
+  main.innerHTML = `
+    <article class="despertar-classroom-veil despertar-classroom-veil--season hades-frame" data-despertar-reconnecting-veil>
+      <p class="despertar-classroom-veil__eyebrow">${SEASON_RECONNECT_COPY.eyebrow}</p>
+      <h2 class="despertar-classroom-veil__title app-shell__title">${SEASON_RECONNECT_COPY.title}</h2>
+      <p class="despertar-classroom-veil__body">${SEASON_RECONNECT_COPY.body}</p>
+    </article>
+  `;
+  globalThis.setTimeout(() => globalThis.location.reload(), SEASON_RECONNECT_COPY.retryMs);
+}
+
+function mountAdminPreviewBanner({ restart = false } = {}) {
   const host = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!host || host.querySelector('[data-admin-preview-banner]')) return;
   const bar = document.createElement('div');
@@ -130,7 +151,7 @@ function mountAdminPreviewBanner() {
   bar.setAttribute('role', 'status');
   const text = document.createElement('p');
   text.className = 'despertar-admin-preview-banner__text';
-  text.textContent = SEASON_CLOSED_COPY.previewBanner;
+  text.textContent = restart ? SEASON_RESTART_COPY.previewBanner : SEASON_CLOSED_COPY.previewBanner;
   const exitBtn = document.createElement('button');
   exitBtn.type = 'button';
   exitBtn.className = 'despertar-ghost';
@@ -143,7 +164,7 @@ function mountAdminPreviewBanner() {
   host.prepend(bar);
 }
 
-async function showSeasonClosedState(token, { isAdmin = false } = {}) {
+async function showSeasonClosedState(token, { isAdmin = false, restart = false, restartAt = null } = {}) {
   const main = document.querySelector('.despertar-page') || document.querySelector('.app-shell__content');
   if (!main) return;
   const shell = document.querySelector('[data-shell]');
@@ -152,12 +173,15 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
     published: false,
     isAdmin,
     pauseActive: false,
+    restartHold: restart,
   });
   await presentSeasonClosedVeil(main, {
     aulasHref: ROUTES.aulas(),
     rankingHref: ROUTES.ranking(),
     token,
     isAdmin,
+    restart,
+    restartAt,
     leaderboardGet,
     onPreview: isAdmin
       ? () => {
@@ -166,7 +190,7 @@ async function showSeasonClosedState(token, { isAdmin = false } = {}) {
         globalThis.location.assign(`${base}?preview=1`);
       }
       : undefined,
-    onLiberate: isAdmin
+    onLiberate: isAdmin && !restart
       ? async () => {
         await seasonOpen(token, { confirm: SEASON_CLOSED_COPY.liberateConfirmToken, seasonId: 1 });
         setAdminPreviewActive(false);
@@ -927,6 +951,8 @@ async function init() {
   const published = season.effectivePublished;
   // Liberado só com season_liberated === true explícito.
   const seasonHold = Boolean(DESPERTAR_SEASON_CLOSED && season.seasonLiberated !== true);
+  // Reinício da T2 por bugs: trancado até as 12:00 de 2026-11-02 (o servidor é quem decide).
+  const restartHold = Boolean(season.restartHold) && !seasonHold;
 
   initAppShell({
     route: 'despertar',
@@ -940,10 +966,14 @@ async function init() {
   // Hold: pódio para todos até Abrir Temporada 2.
   // Preview só com ?preview=1 nesta carga (não sticky sozinho).
   const adminPreview = isAdmin && consumeAdminPreviewQuery({ isAdmin, requireQuery: true });
-  if (seasonHold && !adminPreview) {
+  if ((seasonHold || restartHold) && !adminPreview) {
     try {
-      await ensureAcheronSealedForSeason(token, isAdmin);
-      await showSeasonClosedState(token, { isAdmin });
+      if (seasonHold) await ensureAcheronSealedForSeason(token, isAdmin);
+      await showSeasonClosedState(token, {
+        isAdmin,
+        restart: restartHold,
+        restartAt: season.restartAt,
+      });
     } catch (error) {
       console.error('[Despertar] falha ao montar véu de temporada:', error);
       showApiWarning(
@@ -965,8 +995,8 @@ async function init() {
     return;
   }
 
-  if (adminPreview && seasonHold) {
-    mountAdminPreviewBanner();
+  if (adminPreview && (seasonHold || restartHold)) {
+    mountAdminPreviewBanner({ restart: restartHold });
   }
 
   // Probe: Acheron publicado mas sob Véu da Aula → countdown (aluno).
@@ -1144,6 +1174,18 @@ async function init() {
     logDiag: diagOn ? logSyncDiag : null,
   });
 
+  // Aba/save de uma temporada que já acabou: não regrava nada, limpa o local e recarrega no estado novo.
+  let staleSeasonReloading = false;
+  setDespertarStaleEpochHandler(() => {
+    if (staleSeasonReloading) return;
+    staleSeasonReloading = true;
+    storage.freeze();
+    api.stop();
+    void storage.clear(user.id).finally(() => {
+      globalThis.location.reload();
+    });
+  });
+
   bindJuizoCta(api, {
     onError: showApiWarning,
     getState: () => stateRef.current,
@@ -1152,6 +1194,8 @@ async function init() {
   const boot = await bootAuthoritativeSession(user.id, {
     storage,
     pause: pauseWindowRef.current,
+    knownSeasonEpoch: season.seasonEpoch,
+    requireSeasonEpoch: true,
     fetchServerState: async () => {
       const remote = await api.pullState({ apply: false });
       rememberPauseWindow(remote?.pauseWindow || remote?.pause);
@@ -1181,8 +1225,19 @@ async function init() {
     return;
   }
 
+  // Sem confirmar a época com o servidor não se monta o jogo (nada de save de época desconhecida):
+  // véu "reconectando" e nova tentativa.
+  if (boot.unavailable) {
+    showReconnectingState();
+    return;
+  }
+
   const { state, catchUp, decision, detach } = boot;
   stateRef.current = state;
+  setDespertarSeasonEpoch(state.seasonEpoch);
+  if (boot.staleLocalDiscarded && boot.discardedProgress) {
+    showApiWarning('A Temporada 2 recomeçou do zero. Seu progresso antigo foi descartado — boa corrida!', { dismissMs: 12000 });
+  }
   applyHarnessGrant(state);
   if (harnessEnabled()) {
     window.__despertar = { state, decision, api };
@@ -1226,8 +1281,9 @@ async function init() {
     };
 
     const softFail = (msg) => {
-      // Mantém selo local; tenta de novo no próximo ciclo.
-      showApiWarning(msg || 'O Submundo ainda sincroniza o selo…');
+      // Mantém selo local; tenta de novo no próximo ciclo. O servidor cita os selos pelo id: troca pelo nome.
+      const readable = String(msg || '').replace(/«([a-z0-9_]+)»/gi, (m, tid) => (getTalent(tid)?.name ? `«${getTalent(tid).name}»` : m));
+      showApiWarning(readable || 'O Submundo ainda sincroniza o selo…');
       api.markDirty();
       riverUiRef.current?.refresh?.();
       api.requestSync?.();

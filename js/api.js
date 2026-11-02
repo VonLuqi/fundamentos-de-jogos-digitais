@@ -746,6 +746,9 @@ export async function fetchSessionBootstrap(token) {
     gates: {
       despertar: {
         published: Boolean(gates?.despertar?.published),
+        restartHold: Boolean(gates?.despertar?.restartHold),
+        restartAt: gates?.despertar?.restartAt ?? null,
+        seasonEpoch: Number(gates?.despertar?.seasonEpoch) || null,
       },
       prova: {
         inProgress: Boolean(gates?.prova?.inProgress),
@@ -1165,6 +1168,18 @@ export function setLessonGate(token, lessonId, gateKey, released) {
  * @returns {Promise<{ published: boolean, seasonLiberated: boolean, seasonHold: boolean, effectivePublished: boolean }>}
  */
 export async function fetchDespertarSeasonHold(token) {
+  // Tranco do reinício da T2 (bugs): vem do servidor, que também confere o relógio das 12:00.
+  let restartHold = false;
+  let restartAt = null;
+  let seasonEpoch = null;
+  try {
+    const status = await despertarSeasonStatus(token);
+    restartHold = status?.restartHold === true;
+    restartAt = status?.restartAt ?? null;
+    seasonEpoch = Number(status?.seasonEpoch) || null;
+  } catch {
+    // sem status: o servidor ainda protege as escritas; segue pelos portões
+  }
   try {
     const result = await fetchLessonGates(token, DESPERTAR_GATE_ID);
     const published = Boolean(result?.gates?.published);
@@ -1174,13 +1189,19 @@ export async function fetchDespertarSeasonHold(token) {
       published,
       seasonLiberated,
       seasonHold,
-      effectivePublished: seasonHold ? false : published,
+      restartHold,
+      restartAt,
+      seasonEpoch,
+      effectivePublished: seasonHold || restartHold ? false : published,
     };
   } catch {
     return {
       published: false,
       seasonLiberated: false,
       seasonHold: true,
+      restartHold,
+      restartAt,
+      seasonEpoch,
       effectivePublished: false,
     };
   }
@@ -2035,6 +2056,47 @@ export async function listNotesForUser(token, targetUserId) {
 /* ============================================================
    5.1 O DESPERTAR (clicker — /api/despertar)
    ============================================================ */
+/**
+ * Época da temporada desta carga do Despertar (definida pelo boot depois de conferir o save local).
+ * Toda escrita manda a época; o servidor recusa a de outra temporada (409 despertar_stale_epoch).
+ */
+export const DESPERTAR_STALE_EPOCH_ERROR = 'despertar_stale_epoch';
+let despertarSeasonEpoch = null;
+let despertarStaleEpochHandler = null;
+
+export function setDespertarSeasonEpoch(epoch) {
+  const n = Math.floor(Number(epoch));
+  despertarSeasonEpoch = Number.isFinite(n) && n > 0 ? n : null;
+}
+
+/** Chamado uma vez quando o servidor recusa uma escrita por época velha (a UI limpa o local e recarrega). */
+export function setDespertarStaleEpochHandler(handler) {
+  despertarStaleEpochHandler = typeof handler === 'function' ? handler : null;
+}
+
+/** POST /despertar de escrita (sync, prestígio, talento, veredito, Juízo): carrega a época e trata a recusa por época. */
+async function despertarWrite(body) {
+  try {
+    return await request('/despertar', {
+      method: 'POST',
+      body: JSON.stringify({ ...body, seasonEpoch: despertarSeasonEpoch }),
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.payload?.error === DESPERTAR_STALE_EPOCH_ERROR) {
+      despertarStaleEpochHandler?.(error.payload);
+    }
+    throw error;
+  }
+}
+
+/** Situação pública do Despertar: tranco do reinício, instante e época. Dispara os relógios do servidor. */
+export function despertarSeasonStatus(token) {
+  return request('/despertar', {
+    method: 'POST',
+    body: JSON.stringify({ token, action: 'seasonStatus' }),
+  });
+}
+
 export function despertarStateGet(token) {
   return request('/despertar', {
     method: 'POST',
@@ -2124,59 +2186,35 @@ export function despertarDebugSet(token, set) {
 }
 
 export function despertarStateSync(token, clientState) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'stateSync', clientState }),
-  });
+  return despertarWrite({ token, action: 'stateSync', clientState });
 }
 
 export function despertarPrestige(token) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'prestige' }),
-  });
+  return despertarWrite({ token, action: 'prestige' });
 }
 
 export function despertarTalentBuy(token, talentId) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'talentBuy', talentId }),
-  });
+  return despertarWrite({ token, action: 'talentBuy', talentId });
 }
 
 export function despertarCloseAscension(token) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'closeAscension' }),
-  });
+  return despertarWrite({ token, action: 'closeAscension' });
 }
 
 export function despertarVerdictBuy(token, purchaseId) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'verdictBuy', purchaseId }),
-  });
+  return despertarWrite({ token, action: 'verdictBuy', purchaseId });
 }
 
 export function despertarJuizoStart(token) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'juizoStart' }),
-  });
+  return despertarWrite({ token, action: 'juizoStart' });
 }
 
 export function despertarJuizoGuess(token, choice) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'juizoGuess', choice }),
-  });
+  return despertarWrite({ token, action: 'juizoGuess', choice });
 }
 
 export function despertarJuizoAbandon(token) {
-  return request('/despertar', {
-    method: 'POST',
-    body: JSON.stringify({ token, action: 'juizoAbandon' }),
-  });
+  return despertarWrite({ token, action: 'juizoAbandon' });
 }
 
 /* ============================================================

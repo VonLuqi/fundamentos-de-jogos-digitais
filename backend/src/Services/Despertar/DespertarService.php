@@ -413,6 +413,8 @@ final class DespertarService
             'juizoCurrentStreak' => $state['juizoCurrentStreak'],
             'juizoMilestonesClaimed' => $state['juizoMilestonesClaimed'],
             'verdictPurchases' => $state['verdictPurchases'],
+            // Época da temporada: o cliente descarta o save local de outra época e o servidor recusa escrita velha.
+            'seasonEpoch' => self::currentSeasonEpoch(),
         ];
 
         if (isset($options['echoEpoch']) && is_int($options['echoEpoch']) && $options['echoEpoch'] >= 0) {
@@ -1367,21 +1369,26 @@ final class DespertarService
             ];
         }
         $requires = is_array($talent['requires'] ?? null) ? $talent['requires'] : [];
+        $missing = [];
         foreach ($requires as $needId) {
             if (!in_array((string) $needId, $db['talents'], true)) {
-                return [
-                    'ok' => false,
-                    'status' => 400,
-                    'error' => 'Ainda faltam vertentes no rio para este selo.',
-                    'state' => self::buildStateDto($db),
-                ];
+                $missing[] = '«' . $needId . '»';
             }
+        }
+        if ($missing !== []) {
+            return [
+                'ok' => false,
+                'status' => 400,
+                'error' => 'Ainda faltam vertentes no rio para este selo: sele antes ' . implode(', ', $missing) . '.',
+                'state' => self::buildStateDto($db),
+            ];
         }
         if (DespertarDecimal::cmp($db['mnemosyne'], $talent['cost']) < 0) {
             return [
                 'ok' => false,
                 'status' => 400,
-                'error' => 'Essência insuficiente.',
+                'error' => 'Essência insuficiente: você tem ' . DespertarDecimal::toBigIntFloor($db['mnemosyne'])
+                    . ', este selo custa ' . $talent['cost'] . '.',
                 'state' => self::buildStateDto($db),
             ];
         }
@@ -1844,6 +1851,124 @@ final class DespertarService
     /** Mesmo instante de js/hades-despertar/config/season-closed.js (Brasília). */
     public const SEASON_OPENS_AT = '2026-11-01T00:00:00-03:00';
 
+    /**
+     * Reinício da Temporada 2 (bugs): o Despertar fica trancado para os alunos até este instante,
+     * quando a primeira requisição zera tudo (restartSeason2IfDue) e sobe a época.
+     * Mesmo literal de js/hades-despertar/config/season-closed.js (SEASON_RESTART_AT).
+     */
+    public const SEASON_RESTART_HOLD = true;
+    public const SEASON_RESTART_AT = '2026-11-02T12:00:00-03:00';
+    /** Gate (lesson_gates, lesson_id='despertar') que marca o reinício como feito: idempotência e época. */
+    public const SEASON_RESTART_GATE = 'season2_restart_done';
+    /** Época antes do reinício; o reinício feito soma 1. */
+    public const SEASON_EPOCH_BASE = 1;
+    public const STALE_EPOCH_ERROR = 'despertar_stale_epoch';
+    public const STALE_EPOCH_MESSAGE = 'A Temporada 2 recomeçou. Recarregando o Acheron…';
+
+    private static ?int $seasonEpochCache = null;
+
+    /** Já vimos o gate do reinício = 1 neste processo: depois disso nem consulta o banco. */
+    private static bool $restartDoneSeen = false;
+    private static bool $restartGateRowEnsured = false;
+
+    /** Testes/CLI: esquece os caches por processo (época e "reinício já feito"). */
+    public static function forgetSeasonCaches(): void
+    {
+        self::$seasonEpochCache = null;
+        self::$restartDoneSeen = false;
+        self::$restartGateRowEnsured = false;
+    }
+
+    /** A linha do gate precisa existir para servir de trava entre reinício e escritas. */
+    private static function ensureRestartGateRow(): void
+    {
+        if (self::$restartGateRowEnsured) {
+            return;
+        }
+        Database::pdo()->prepare(
+            'INSERT IGNORE INTO `lesson_gates` (`lesson_id`, `gate_key`, `released`, `updated_at`)
+             VALUES (\'despertar\', :gk, 0, :now)'
+        )->execute([':gk' => self::SEASON_RESTART_GATE, ':now' => Database::nowSql()]);
+        self::$restartGateRowEnsured = true;
+    }
+
+    /**
+     * Dentro da transação de persistência: relê o gate do reinício SEM cache e com trava compartilhada
+     * (o reinício pega a mesma linha FOR UPDATE, então ou ele espera esta escrita ou esta vê a época nova).
+     * Se a época mudou desde que a requisição foi admitida, aborta antes de gravar qualquer coisa.
+     */
+    private static function assertSeasonEpochUnderLock(): void
+    {
+        $admitted = self::currentSeasonEpoch();
+        $stmt = Database::pdo()->prepare(
+            'SELECT `released` FROM `lesson_gates`
+             WHERE `lesson_id` = \'despertar\' AND `gate_key` = :gk LOCK IN SHARE MODE'
+        );
+        $stmt->execute([':gk' => self::SEASON_RESTART_GATE]);
+        $released = $stmt->fetchColumn();
+        $now = self::SEASON_EPOCH_BASE + (($released !== false && (bool) $released) ? 1 : 0);
+        if ($now !== $admitted) {
+            // Não atualiza o cache: quem foi admitido na época velha continua barrado até o fim da requisição.
+            throw new StaleSeasonEpochException($now);
+        }
+    }
+
+    private static function gateReleased(string $gateKey): bool
+    {
+        $stmt = Database::pdo()->prepare(
+            'SELECT `released` FROM `lesson_gates`
+             WHERE `lesson_id` = \'despertar\' AND `gate_key` = :gk LIMIT 1'
+        );
+        $stmt->execute([':gk' => $gateKey]);
+        $val = $stmt->fetchColumn();
+        return $val !== false && (bool) $val;
+    }
+
+    public static function isSeasonRestartDone(): bool
+    {
+        if (self::$restartDoneSeen) {
+            return true;
+        }
+        if (self::gateReleased(self::SEASON_RESTART_GATE)) {
+            return self::$restartDoneSeen = true;
+        }
+        return false;
+    }
+
+    /** Trancado para os alunos: do deploy até o reinício de 2026-11-02 12:00 ser executado. */
+    public static function isSeasonRestartHold(): bool
+    {
+        return self::SEASON_RESTART_HOLD && !self::isSeasonRestartDone();
+    }
+
+    /** Época autoritativa: BASE antes do reinício, BASE+1 depois. Vai no estado devolvido e no save local. */
+    public static function currentSeasonEpoch(): int
+    {
+        if (self::$seasonEpochCache !== null) {
+            return self::$seasonEpochCache;
+        }
+        try {
+            return self::$seasonEpochCache = self::SEASON_EPOCH_BASE + (self::isSeasonRestartDone() ? 1 : 0);
+        } catch (\Throwable) {
+            return self::SEASON_EPOCH_BASE;
+        }
+    }
+
+    /** Época enviada pelo cliente; null se ausente ou inválida. */
+    public static function parseSeasonEpoch(mixed $raw): ?int
+    {
+        if ($raw === null || $raw === '' || is_bool($raw) || !is_numeric($raw)) {
+            return null;
+        }
+        return (int) floor((float) $raw);
+    }
+
+    public static function isSeasonEpochCurrent(mixed $raw): bool
+    {
+        $epoch = self::parseSeasonEpoch($raw);
+        return $epoch !== null && $epoch === self::currentSeasonEpoch();
+    }
+
     public static function isSeasonLiberated(): bool
     {
         $pdo = Database::pdo();
@@ -1859,6 +1984,9 @@ final class DespertarService
     public static function isDespertarPublished(): bool
     {
         if (self::SEASON_CLOSED_HOLD && !self::isSeasonLiberated()) {
+            return false;
+        }
+        if (self::isSeasonRestartHold()) {
             return false;
         }
 
@@ -2095,6 +2223,129 @@ final class DespertarService
             error_log('[season-open] ' . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Relógio da temporada. Só o ensaio (banco com "ensaio" no nome) pode simulá-lo com FJD_ENSAIO_NOW;
+     * em qualquer outro banco a variável é ignorada.
+     */
+    public static function seasonClockNow(): \DateTimeImmutable
+    {
+        $fake = \App\Core\Env::get('FJD_ENSAIO_NOW');
+        if ($fake !== null && $fake !== '' && str_contains((string) \App\Core\Env::get('DB_NAME', ''), 'ensaio')) {
+            try {
+                return new \DateTimeImmutable($fake);
+            } catch (\Throwable) {
+                // relógio simulado inválido: usa o real
+            }
+        }
+        return new \DateTimeImmutable('now');
+    }
+
+    /**
+     * Ao meio-dia de 2026-11-02 (Brasília), a primeira requisição depois do instante zera o Despertar
+     * de todos (mesmo padrão de openNextSeasonIfDue). Idempotente: o gate `season2_restart_done`
+     * é conferido antes e dentro do GET_LOCK, então rodar de novo nunca apaga a T2 nova.
+     * `$now` existe para o ensaio simular o relógio; em produção fica null.
+     */
+    public static function restartSeason2IfDue(?\DateTimeImmutable $now = null): bool
+    {
+        if (!self::SEASON_RESTART_HOLD) {
+            return false;
+        }
+        try {
+            $at = new \DateTimeImmutable(self::SEASON_RESTART_AT);
+        } catch (\Throwable $e) {
+            error_log('[season-restart] instante inválido: ' . $e->getMessage());
+            return false;
+        }
+        if (($now ?? self::seasonClockNow()) < $at) {
+            return false;
+        }
+
+        try {
+            if (self::isSeasonRestartDone()) {
+                return false;
+            }
+            $pdo = Database::pdo();
+            $got = self::lockScalar($pdo, 'SELECT GET_LOCK(' . $pdo->quote('fjd_season2_restart') . ', 15)');
+            if ((string) $got !== '1') {
+                error_log('[season-restart] GET_LOCK não obtido; a próxima requisição (ou o cron) tenta de novo');
+                return false;
+            }
+            try {
+                if (self::isSeasonRestartDone()) {
+                    return false;
+                }
+                $res = self::performSeasonRestart(self::firstAdminUserId());
+                return !($res['skipped'] ?? false);
+            } finally {
+                self::lockScalar($pdo, 'SELECT RELEASE_LOCK(' . $pdo->quote('fjd_season2_restart') . ')');
+            }
+        } catch (\Throwable $e) {
+            error_log('[season-restart] ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Zera o progresso do Despertar de todos e sobe a época. NÃO arquiva nada (o pódio da T1,
+     * season_id=1, fica como está) e NÃO mexe no XP: só as conquistas despertar_* saem dos
+     * perfis, anotadas em despertar_paid_achievements (reconquistar não paga de novo).
+     * Tudo ou nada: o gate `season2_restart_done` é gravado na mesma transação do DELETE.
+     * Pega a linha do gate FOR UPDATE antes de tudo: escritas em andamento terminam primeiro e as
+     * seguintes releem a época nova (assertSeasonEpochUnderLock), então nada ressuscita estado velho.
+     * @return array{deleted: int, achievementsReset: array{users: int, removed: int}, skipped?: bool}
+     */
+    private static function performSeasonRestart(?int $adminUserId): array
+    {
+        $pdo = Database::pdo();
+        // DDL fora da transação: CREATE TABLE faz commit implícito no MySQL.
+        self::ensurePaidAchievementsTable();
+        self::ensureRestartGateRow();
+        $pdo->beginTransaction();
+        try {
+            $gate = $pdo->prepare(
+                'SELECT `released` FROM `lesson_gates`
+                 WHERE `lesson_id` = \'despertar\' AND `gate_key` = :gk FOR UPDATE'
+            );
+            $gate->execute([':gk' => self::SEASON_RESTART_GATE]);
+            if ((bool) $gate->fetchColumn()) {
+                $pdo->rollBack();
+                self::$restartDoneSeen = true;
+                return ['deleted' => 0, 'achievementsReset' => ['users' => 0, 'removed' => 0], 'skipped' => true];
+            }
+            $deleted = (int) $pdo->exec('DELETE FROM `despertar_states`');
+            $achievementsReset = self::resetDespertarAchievementsKeepXp($pdo);
+            self::setDespertarGate(self::SEASON_RESTART_GATE, true, $adminUserId);
+            $pdo->commit();
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            throw $e;
+        }
+        self::$seasonEpochCache = null;
+        self::$restartDoneSeen = true;
+
+        return ['deleted' => $deleted, 'achievementsReset' => $achievementsReset];
+    }
+
+    /**
+     * Situação pública do Despertar (qualquer sessão autenticada). Dispara os dois relógios.
+     * @return array{published: bool, seasonLiberated: bool, restartHold: bool, restartAt: string, seasonEpoch: int}
+     */
+    public static function seasonStatus(): array
+    {
+        self::openNextSeasonIfDue();
+        self::restartSeason2IfDue();
+        return [
+            'published' => self::isDespertarPublished(),
+            'seasonLiberated' => self::isSeasonLiberated(),
+            'restartHold' => self::isSeasonRestartHold(),
+            'restartAt' => self::SEASON_RESTART_AT,
+            'seasonEpoch' => self::currentSeasonEpoch(),
+        ];
     }
 
     private static function lockScalar(PDO $pdo, string $statement): mixed
@@ -2725,7 +2976,7 @@ final class DespertarService
               `juizo_milestones_claimed`, `verdict_purchases`, `juizo_run`, `last_sync_at`, `created_at`, `updated_at`)
              VALUES (:uid, 0.00, 0.00, 0.00, 0.00, 0.00, 0,
                      \'{}\', \'{}\', \'{}\', \'[]\', \'[]\',
-                     \'[]\', \'{}\', \'{"clicks":0,"max_buy_biggest":0,"juizo_tie_wins":0}\', 0, 0, 0,
+                     \'[]\', \'{"letheRebalanceV1":true,"letheRebalanceV2":true}\', \'{"clicks":0,"max_buy_biggest":0,"juizo_tie_wins":0}\', 0, 0, 0,
                      \'[]\', \'[]\', NULL, :ls, :ca, :ua)'
         );
         $ins->execute([':uid' => $userId, ':ls' => $nowSql, ':ca' => $nowSql, ':ua' => $nowSql]);
@@ -2831,8 +3082,28 @@ final class DespertarService
 
         if ($sets !== []) {
             $sql = 'UPDATE `despertar_states` SET ' . implode(', ', $sets) . ' WHERE `user_id` = :uid';
-            $upd = $pdo->prepare($sql);
-            $upd->execute($params);
+            // Sozinho: transação própria com a época relida sob lock. Dentro de persistPatchAndAward
+            // a transação (e a trava) já são do chamador.
+            $own = !$pdo->inTransaction();
+            if ($own) {
+                self::ensureRestartGateRow();
+                $pdo->beginTransaction();
+            }
+            try {
+                if ($own) {
+                    self::assertSeasonEpochUnderLock();
+                }
+                $upd = $pdo->prepare($sql);
+                $upd->execute($params);
+                if ($own) {
+                    $pdo->commit();
+                }
+            } catch (\Throwable $e) {
+                if ($own && $pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                throw $e;
+            }
         }
 
         return self::getOrCreateStateRow($userId);
@@ -2865,8 +3136,10 @@ final class DespertarService
         }
 
         $pdo = Database::pdo();
+        self::ensureRestartGateRow();
         $pdo->beginTransaction();
         try {
+            self::assertSeasonEpochUnderLock();
             $savedRow = self::persistPatch($userId, $patch);
 
             $awardedPayload = ['xp' => 0, 'achievements' => [], 'achievementDetails' => []];

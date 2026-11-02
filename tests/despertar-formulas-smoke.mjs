@@ -148,9 +148,10 @@ await run('Óbolos: 1ª Catábase a partir de 5,1e8 (1 óbolo); 4e9 → 1; Catá
   assert.equal(canPrestige('1000000000', 1), false);
   assert.deepEqual(prestigePreview('4000000000'), {
     obolsGain: '1',
-    mnemosyneGain: '0',
+    mnemosyneGain: '1',
     unlocked: true,
   });
+  // Piso de 1 Essência (Lethe: quem faz a Catábase compra o selo raiz).
   // 16e9 → raw 2; prestigeCount 1 → floor(2/2)=1; count 2 → floor(2/3)=0
   assert.equal(obolsFromRunSouls('16000000000', 0), '2');
   assert.equal(obolsFromRunSouls('16000000000', 1), '1');
@@ -162,14 +163,14 @@ await run('Óbolos: 1ª Catábase a partir de 5,1e8 (1 óbolo); 4e9 → 1; Catá
   });
   assert.deepEqual(prestigePreview('16000000000', 1), {
     obolsGain: '1',
-    mnemosyneGain: '0',
+    mnemosyneGain: '1',
     unlocked: true,
   });
   assert.equal(canPrestige('16000000000', 2), false);
   assert.equal(mnemosyneFromObolsGain('10'), '5');
   assert.equal(mnemosyneFromObolsGain('7'), '3');
   assert.equal(mnemosyneFromObolsGain('2'), '1');
-  assert.equal(mnemosyneFromObolsGain('1'), '0');
+  assert.equal(mnemosyneFromObolsGain('1'), '1');
   assert.equal(mnemosyneFromObolsGain('0'), '0');
   // Sem escada heavenlyPower / milestone legado → potência 0 (SPS = 1×).
   eqMoney(prestigeBonus('1'), '1');

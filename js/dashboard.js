@@ -15,7 +15,7 @@
 
 'use strict';
 
-import { applyDespertarNavState, initAppShell } from './app-shell.js';
+import { applyDespertarNavState, initAppShell } from './app-shell.js?v=reinicio-t2-3';
 import {
   getAchievementCollectionStats,
   renderAchievementsList,

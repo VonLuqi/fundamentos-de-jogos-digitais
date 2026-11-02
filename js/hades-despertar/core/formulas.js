@@ -1510,6 +1510,8 @@ export function mnemosyneFromObolsGain(obolsGain, talents = []) {
   const baseObols = toBigIntFloor(obolsGain || '0');
   if (baseObols <= 0n) return '0';
   let gain = baseObols / 2n;
+  // Espelha o PHP: quem consegue a Catábase sempre sai com 1 Essência (senão a 1ª não compra selo).
+  if (gain <= 0n) gain = 1n;
   const { mnemosyneGainMult } = talentEffects(talents);
   if (gain > 0n && cmp(mnemosyneGainMult, '1') > 0) {
     gain = toBigIntFloor(mul(String(gain), mnemosyneGainMult));

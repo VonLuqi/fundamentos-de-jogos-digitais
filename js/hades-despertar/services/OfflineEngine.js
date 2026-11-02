@@ -313,10 +313,12 @@ export async function bootAuthoritativeSession(userId, {
   now = Date.now,
   attachTarget,
   pause = null,
+  knownSeasonEpoch = null,
+  requireSeasonEpoch = false,
 } = {}) {
   if (!storage) throw new Error('StorageService é obrigatório no boot autoritativo.');
   const clock = typeof now === 'function' ? now : () => now;
-  const record = await storage.load(userId);
+  let record = await storage.load(userId);
 
   let server = null;
   let fetchError = null;
@@ -335,13 +337,45 @@ export async function bootAuthoritativeSession(userId, {
     }
   }
 
+  // Época da temporada: o save local de outra época (ou sem época) nunca volta a valer,
+  // senão ressuscitaria o progresso de uma temporada que o servidor já zerou.
+  let staleLocalDiscarded = false;
+  let discardedProgress = false;
+  // A época vem do estado do servidor ou, se o stateGet falhou, do seasonStatus que o chamador já tem.
+  const serverEpoch = Math.floor(Number(server?.seasonEpoch)) || Math.floor(Number(knownSeasonEpoch)) || 0;
+  if (serverEpoch > 0 && record) {
+    const localEpoch = Math.floor(Number(record?.state?.seasonEpoch)) || 0;
+    if (localEpoch !== serverEpoch) {
+      staleLocalDiscarded = true;
+      discardedProgress = isProgressfulState(record?.state);
+      await storage.clear?.(userId);
+      record = null;
+    }
+  }
+
+  const pauseWindow = normalizePauseWindow(pause) || normalizePauseWindow(pauseFromFetch);
+
+  // Sem estado do servidor, só se joga o save local cuja época foi CONFIRMADA igual à atual. Qualquer outra
+  // coisa (época desconhecida ou diferente) nunca monta o jogo, nem faz catch-up, nem regrava: o chamador
+  // mostra "reconectando" e tenta de novo.
+  if (requireSeasonEpoch && !server) {
+    const localEpoch = Math.floor(Number(record?.state?.seasonEpoch)) || 0;
+    if (!(serverEpoch > 0 && record && localEpoch === serverEpoch)) {
+      return {
+        unavailable: true,
+        fetchError,
+        pause: pauseWindow,
+        staleLocalDiscarded,
+        discardedProgress,
+      };
+    }
+  }
+
   const decision = resolveBootAuthority({
     local: record?.state ?? {},
     localSavedAt: record?.savedAt ?? null,
     server,
   });
-
-  const pauseWindow = normalizePauseWindow(pause) || normalizePauseWindow(pauseFromFetch);
 
   const state = GameState.fromSnapshot(decision.snapshot);
   const catchUp = applyCatchUp(state, {
@@ -361,5 +395,7 @@ export async function bootAuthoritativeSession(userId, {
     fetchError,
     server,
     pause: pauseWindow,
+    staleLocalDiscarded,
+    discardedProgress,
   };
 }

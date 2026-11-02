@@ -6,10 +6,18 @@ import {
   DESPERTAR_NAV_LABEL,
   DESPERTAR_NAV_LOCKED_LABEL,
   DESPERTAR_NAV_SEASON_LABEL,
+  despertarSeasonStatus,
+  fetchDespertarSeasonHold,
   fetchLessonGates,
   getBootstrapGates,
-} from './api.js';
-import { DESPERTAR_SEASON_CLOSED } from './hades-despertar/config/season-closed.js';
+  getSession,
+} from './api.js?v=reinicio-t2-3';
+import {
+  DESPERTAR_SEASON_CLOSED,
+  SEASON_RESTART_AT,
+  SEASON_RESTART_BANNER_COPY,
+  SEASON_RESTART_COPY,
+} from './hades-despertar/config/season-closed.js?v=reinicio-t2-3';
 import { initProfileChip, syncProfileChip } from './profile-chip.js';
 import { maybeOfferInstall } from './pwa-install.js';
 
@@ -104,7 +112,7 @@ function mapRouteToNavItem(route) {
  * Admin sempre vê o link vivo (pode pré-visualizar).
  * Aluno: Acheron aberto OU temporada fechada (só o pódio — o jogo não monta).
  */
-export function applyDespertarNavState(shell, { published = false, isAdmin = false, pauseActive = false } = {}) {
+export function applyDespertarNavState(shell, { published = false, isAdmin = false, pauseActive = false, restartHold = false } = {}) {
   const root = shell || document.querySelector('[data-shell]');
   if (!root) return;
   const link = root.querySelector('[data-nav-item="despertar"]');
@@ -115,7 +123,7 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
   const open = Boolean(isAdmin || published || seasonHold);
   link.classList.toggle('is-locked', !open);
   if (seasonHold && !published) {
-    link.textContent = DESPERTAR_NAV_SEASON_LABEL;
+    link.textContent = restartHold ? SEASON_RESTART_COPY.navLabel : DESPERTAR_NAV_SEASON_LABEL;
   } else {
     link.textContent = open ? DESPERTAR_NAV_LABEL : DESPERTAR_NAV_LOCKED_LABEL;
   }
@@ -128,7 +136,7 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
     }
     // A4 stub: badge textual — link continua clicável (véu na página).
     if (seasonHold && !published) {
-      link.setAttribute('title', 'Temporada encerrada — ver o pódio');
+      link.setAttribute('title', restartHold ? SEASON_RESTART_COPY.navTitle : 'Temporada encerrada — ver o pódio');
       delete link.dataset.despertarPause;
     } else if (pauseActive && !isAdmin) {
       link.setAttribute('title', 'Em aula');
@@ -147,6 +155,132 @@ export function applyDespertarNavState(shell, { published = false, isAdmin = fal
   bindLockedNavClicks(root);
 }
 
+/**
+ * Estilo do aviso embutido no JS de propósito: as páginas carregam app-shell.css com ?v= próprio
+ * (cache de 7 dias), então o banner não pode depender de uma folha que talvez esteja velha.
+ */
+const SEASON_RESTART_BANNER_CSS = `
+.season-restart-banner{display:flex;flex-wrap:wrap;align-items:center;gap:.35rem 1rem;width:100%;max-width:1320px;margin-inline:auto;padding:.7rem 1.5rem .7rem 5rem;box-sizing:border-box;color:#f0e9dc;background:linear-gradient(90deg,rgba(122,31,43,.7),rgba(40,18,24,.7));border-bottom:1px solid rgba(207,167,89,.4);font-size:.9rem;line-height:1.4}
+.season-restart-banner__text{flex:1 1 22rem;margin:0}
+.season-restart-banner__timer{margin:0;opacity:.85;white-space:nowrap}
+.season-restart-banner__timer strong{color:#f3d58a;font-variant-numeric:tabular-nums}
+.season-restart-banner__link{color:#f3d58a;text-decoration:underline;text-underline-offset:.2em;white-space:nowrap}
+@media (max-width:640px){.season-restart-banner{padding:.65rem 1rem;font-size:.85rem}}
+`;
+
+function ensureSeasonRestartBannerStyle() {
+  if (document.querySelector('[data-season-restart-banner-style]')) return;
+  const style = document.createElement('style');
+  style.setAttribute('data-season-restart-banner-style', '1');
+  style.textContent = SEASON_RESTART_BANNER_CSS;
+  document.head.append(style);
+}
+
+/** Instante do reinício e se o tranco segue valendo: bootstrap em cache ou, sem ele, o servidor. */
+async function readRestartHold(token, { fresh = false } = {}) {
+  if (fresh) {
+    // Depois do instante do reinício: nunca reaproveita o bootstrap em memória (ele guardaria restartHold=true
+    // para sempre). Consulta o seasonStatus de verdade; se falhar, o aviso continua e tenta de novo.
+    try {
+      const status = await despertarSeasonStatus(token);
+      return { restartHold: status?.restartHold === true, restartAt: status?.restartAt || SEASON_RESTART_AT };
+    } catch {
+      return { restartHold: true, restartAt: SEASON_RESTART_AT };
+    }
+  }
+  const cached = getBootstrapGates();
+  const gate = cached?.token === token ? cached.gates?.despertar : null;
+  if (gate && typeof gate.restartHold === 'boolean') {
+    return { restartHold: gate.restartHold, restartAt: gate.restartAt || SEASON_RESTART_AT };
+  }
+  try {
+    const season = await fetchDespertarSeasonHold(token);
+    return { restartHold: Boolean(season.restartHold), restartAt: season.restartAt || SEASON_RESTART_AT };
+  } catch {
+    return { restartHold: false, restartAt: SEASON_RESTART_AT };
+  }
+}
+
+function formatRestartCountdown(ms) {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  const days = Math.floor(total / 86400);
+  const pad = (n) => String(n).padStart(2, '0');
+  const hms = `${pad(Math.floor((total % 86400) / 3600))}:${pad(Math.floor((total % 3600) / 60))}:${pad(total % 60)}`;
+  if (days === 1) return `1 dia ${hms}`;
+  if (days > 1) return `${days} dias ${hms}`;
+  return hms;
+}
+
+/**
+ * Aviso para todo mundo, em qualquer página do app, enquanto o reinício da Temporada 2 não aconteceu.
+ * Some sozinho quando o servidor libera (depois das 12:00 de 2026-11-02).
+ */
+export async function mountSeasonRestartBanner(shell, shellToken) {
+  const token = shellToken || getSession()?.token || null;
+  const host = shell?.querySelector('.app-shell__main');
+  // Na página do Despertar o véu bloqueante já traz o aviso completo.
+  if (!host || !token || document.body?.dataset?.route === 'despertar') return;
+  if (host.querySelector('[data-season-restart-banner]')) return;
+  const { restartHold, restartAt } = await readRestartHold(token);
+  if (!restartHold || host.querySelector('[data-season-restart-banner]')) return;
+
+  const copy = SEASON_RESTART_BANNER_COPY;
+  ensureSeasonRestartBannerStyle();
+  const banner = document.createElement('aside');
+  banner.className = 'season-restart-banner';
+  banner.setAttribute('data-season-restart-banner', '1');
+  banner.setAttribute('role', 'status');
+
+  const text = document.createElement('p');
+  text.className = 'season-restart-banner__text';
+  text.textContent = copy.text;
+
+  const timer = document.createElement('p');
+  timer.className = 'season-restart-banner__timer';
+  const timerLabel = document.createElement('span');
+  timerLabel.textContent = `${copy.countdownPrefix} `;
+  const timerValue = document.createElement('strong');
+  timerValue.setAttribute('data-season-restart-countdown', '');
+  timer.append(timerLabel, timerValue);
+
+  const link = document.createElement('a');
+  link.className = 'season-restart-banner__link';
+  link.href = '../despertar/';
+  link.textContent = copy.cta;
+
+  banner.append(text, timer, link);
+  host.prepend(banner);
+
+  const opensAt = Date.parse(restartAt);
+  const tick = () => {
+    const left = opensAt - Date.now();
+    if (left > 0) {
+      timerValue.textContent = formatRestartCountdown(left);
+      return;
+    }
+    timerLabel.textContent = '';
+    timerValue.textContent = copy.countdownDone;
+  };
+  tick();
+  const interval = globalThis.setInterval(tick, 1000);
+
+  // Passou do instante: confere com o servidor (ele faz o reinício) e tira o aviso quando liberar.
+  const recheck = async () => {
+    if (Date.now() < opensAt) {
+      globalThis.setTimeout(recheck, Math.min(60_000, opensAt - Date.now() + 2000));
+      return;
+    }
+    const now = await readRestartHold(token, { fresh: true });
+    if (!now.restartHold) {
+      globalThis.clearInterval(interval);
+      banner.remove();
+      return;
+    }
+    globalThis.setTimeout(recheck, 15_000);
+  };
+  globalThis.setTimeout(recheck, Math.max(1000, opensAt - Date.now() + 2000));
+}
+
 async function syncDespertarNavFromToken(shell, token, role, despertarPublished) {
   const isAdmin = role === 'admin';
   if (!token) {
@@ -156,6 +290,11 @@ async function syncDespertarNavFromToken(shell, token, role, despertarPublished)
 
   if (typeof despertarPublished === 'boolean') {
     applyDespertarNavState(shell, { published: despertarPublished, isAdmin });
+    if (!despertarPublished) {
+      void readRestartHold(token).then(({ restartHold }) => {
+        if (restartHold) applyDespertarNavState(shell, { published: false, isAdmin, restartHold });
+      });
+    }
     return despertarPublished;
   }
 
@@ -165,7 +304,11 @@ async function syncDespertarNavFromToken(shell, token, role, despertarPublished)
     && typeof cached.gates?.despertar?.published === 'boolean'
   ) {
     const published = cached.gates.despertar.published;
-    applyDespertarNavState(shell, { published, isAdmin });
+    applyDespertarNavState(shell, {
+      published,
+      isAdmin,
+      restartHold: cached.gates.despertar.restartHold === true,
+    });
     return published;
   }
 
@@ -369,6 +512,7 @@ export function initAppShell({
 
   bindLockedNavClicks(shell);
   bindNavPrefetch(shell);
+  void mountSeasonRestartBanner(shell, token);
 
   if (mainRegion && !mainRegion.hasAttribute('tabindex')) {
     mainRegion.setAttribute('tabindex', '-1');

@@ -5904,6 +5904,19 @@ button.despertar-juizo-card:disabled {
   text-align: center;
 }
 
+/* Véu do reinício da T2: contagem e botões centralizados com o texto. */
+.despertar-classroom-veil--restart .despertar-classroom-veil__timer {
+  text-align: center;
+}
+
+.despertar-classroom-veil--restart .despertar-season-closed__actions {
+  justify-content: center;
+}
+
+.despertar-classroom-veil--restart .despertar-season-closed__actions > * {
+  flex: 0 0 auto;
+}
+
 .despertar-season-boards__eyebrow {
   margin-top: 1.25rem;
   text-align: center;

@@ -133,7 +133,7 @@ await run('snapshot DTO + prestígio local', () => {
   eqMoney(state.souls, '0');
   eqMoney(state.runSouls, '0');
   eqMoney(state.obols, '1');
-  eqMoney(state.mnemosyne, '0');
+  eqMoney(state.mnemosyne, '1');
   assert.equal(state.prestigeCount, 1);
   assert.equal(state.upgrades.length, 0);
   assert.equal(Object.keys(state.quantities()).length, 0);

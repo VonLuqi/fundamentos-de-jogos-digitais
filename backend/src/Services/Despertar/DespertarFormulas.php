@@ -2553,6 +2553,10 @@ final class DespertarFormulas
             return '0';
         }
         $gain = DespertarDecimal::intDiv($baseObols, '2');
+        // Quem consegue a Catábase sempre sai com 1 Essência: sem isso a 1ª (1 óbolo) não compra selo nenhum.
+        if (DespertarDecimal::intCmp($gain, '0') <= 0) {
+            $gain = '1';
+        }
         $eff = self::talentEffects($talents);
         $gainMult = (string) ($eff['mnemosyneGainMult'] ?? '1');
         if (DespertarDecimal::intCmp($gain, '0') > 0 && DespertarDecimal::cmp($gainMult, '1') > 0) {

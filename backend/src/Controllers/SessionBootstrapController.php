@@ -85,7 +85,21 @@ final class SessionBootstrapController
             Http::error(401, 'Sessão inválida.');
         }
 
+        // Reinício agendado da T2: a primeira requisição depois do instante zera tudo (idempotente).
+        try {
+            DespertarService::restartSeason2IfDue();
+        } catch (Throwable) {
+            // o bootstrap nunca cai por causa do relógio da temporada
+        }
         $published = self::isDespertarPublished();
+        $restartHold = false;
+        $seasonEpoch = DespertarService::SEASON_EPOCH_BASE;
+        try {
+            $restartHold = DespertarService::isSeasonRestartHold();
+            $seasonEpoch = DespertarService::currentSeasonEpoch();
+        } catch (Throwable) {
+            $restartHold = false;
+        }
         $seasonLiberated = false;
         try {
             $seasonLiberated = DespertarService::isSeasonLiberated();
@@ -103,6 +117,9 @@ final class SessionBootstrapController
                 'despertar' => [
                     'published' => $published,
                     'seasonLiberated' => $seasonLiberated,
+                    'restartHold' => $restartHold,
+                    'restartAt' => DespertarService::SEASON_RESTART_AT,
+                    'seasonEpoch' => $seasonEpoch,
                 ],
                 'prova' => [
                     'inProgress' => (bool) ($provaGate['inProgress'] ?? false),

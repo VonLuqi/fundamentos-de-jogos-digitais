@@ -327,6 +327,8 @@ export class GameState {
       0,
       Math.floor(Number(snapshot.syncEpoch ?? snapshot.clientEpoch)) || 0,
     );
+    /** Época da temporada do save (o servidor é a autoridade; save de outra época é descartado no boot). */
+    this.seasonEpoch = Math.max(0, Math.floor(Number(snapshot.seasonEpoch)) || 0);
     /** Flags só locais (Fase B) — NUNCA vão no toSnapshot / Postgres. */
     this.debugFlags = {
       freeShopping: false,
@@ -3315,6 +3317,7 @@ export class GameState {
       /** Hint de rebase no client (Fase A); server ignora até A3 ecoar. */
       clientEpoch: this.syncEpoch,
       syncEpoch: this.syncEpoch,
+      seasonEpoch: this.seasonEpoch,
       sps: money(this.rawSps()),
       rawSps: money(this.rawSps()),
       effectiveSps: money(this.effectiveSps()),

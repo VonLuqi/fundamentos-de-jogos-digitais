@@ -89,7 +89,9 @@ $check('Confirmação errada é recusada e não apaga nada', $bad['ok'] === fals
 $open = DespertarService::openNextSeason($adminId, 'Temporada 2');
 $check('Abrir Temporada 2 com "Temporada 2" (case-insensitive)', $open['ok'] === true, json_encode(['deleted' => $open['deleted']]));
 $check('Todos os estados apagados', (int) $pdo->query('SELECT COUNT(*) FROM `despertar_states`')->fetchColumn() === 0, "deleted={$open['deleted']}");
-$check('Portões: season_liberated e published ligados', DespertarService::isSeasonLiberated() && DespertarService::isDespertarPublished());
+$check('Portões: season_liberated e published ligados', DespertarService::isSeasonLiberated()
+    && (bool) $pdo->query("SELECT `released` FROM `lesson_gates` WHERE `lesson_id` = 'despertar' AND `gate_key` = 'published'")->fetchColumn());
+$check('Com o reinício pendente o jogo segue trancado para aluno mesmo após abrir a T2', DespertarService::isDespertarPublished() === false);
 
 $archive = DespertarService::getSeasonArchive(1);
 $names = static fn(string $board): array => array_map(static fn($r) => $r['username'], $archive['boards'][$board] ?? []);
@@ -155,6 +157,318 @@ $check('Conquista nova na T2 paga XP; a já paga (cem almas) não', in_array('de
     && in_array('despertar_cem_almas', $ana['conquistas'], true) && $ana['xp'] === $xpBefore + $xpOf($award['awarded']['achievements'] ?? [], $paid)
     && $milXp > 0 && ($award['awarded']['xp'] ?? -1) === $xpOf($award['awarded']['achievements'] ?? [], $paid),
     "xp={$ana['xp']} (mil_almas vale {$milXp})");
+
+// ═════════════════════════════════════════════════════════════════════════════
+// REINÍCIO DA TEMPORADA 2 (bugs): tranco até 2026-11-02 12:00 -03:00, zera tudo, sobe a época
+// ═════════════════════════════════════════════════════════════════════════════
+echo "\n— Reinício da T2 —\n";
+$restartAt = new \DateTimeImmutable(DespertarService::SEASON_RESTART_AT);
+$check('Instante do reinício é 2026-11-02 12:00 de Brasília', $restartAt->format('Y-m-d\TH:i:sP') === '2026-11-02T12:00:00-03:00');
+
+// Estado "bugado" da T2: todo mundo com progresso, inclusive óbolos/essência/talentos/Juízo/stats.
+$bugged = static fn(string $big) => [
+    'souls' => $big, 'obols' => '7110.00', 'mnemosyne' => '5100.00', 'lifetime_souls' => $big, 'run_souls' => $big,
+    'prestige_count' => 6, 'generators_state' => ['wandering_shade' => 40], 'upgrades_state' => ['x'], 'talents_state' => ['t'],
+    'stats' => ['clicks' => 999, 'max_buy_biggest' => 5, 'juizo_tie_wins' => 2], 'verdicts' => 33,
+    'juizo_best_streak' => 21, 'juizo_current_streak' => 4, 'verdict_purchases' => ['v'], 'milestones' => ['ascensionOpen' => true],
+    'last_sync_at' => \App\Core\Database::nowIso(), 'updated_at' => \App\Core\Database::nowIso(),
+];
+foreach (['ana', 'bia', 'caio', 'mestre'] as $u) {
+    $uid2 = $u === 'mestre' ? $adminId : $ids[$u];
+    DespertarService::getOrCreateStateRow($uid2);
+    DespertarService::persistPatch($uid2, $bugged('25700000000000.00'));
+    $pdo->prepare('UPDATE `users` SET `conquistas` = :c, `xp` = 500 WHERE `id` = :id')->execute([
+        ':c' => json_encode(['despertar_primeira_alma', 'despertar_mil_almas', 'aula1_concluida']), ':id' => $uid2,
+    ]);
+}
+$archiveBefore = json_encode(DespertarService::getSeasonArchive(1));
+$archiveRowsBefore = (int) $pdo->query('SELECT COUNT(*) FROM `despertar_season_archives`')->fetchColumn();
+
+// 1) Antes do instante: trancado para aluno, época 1, nada é apagado.
+$check('Tranco: Despertar fechado para aluno até o reinício (mesmo com T2 aberta e published ligado)',
+    DespertarService::isSeasonRestartHold() && DespertarService::isDespertarPublished() === false);
+$check('Época autoritativa antes do reinício = 1', DespertarService::currentSeasonEpoch() === 1);
+$check('Antes do instante o reinício não roda', DespertarService::restartSeason2IfDue($restartAt->modify('-1 second')) === false
+    && (int) $pdo->query('SELECT COUNT(*) FROM `despertar_states`')->fetchColumn() === 4
+    && !DespertarService::isSeasonRestartDone());
+$check('Save local da T1 (sem época) recusado; época antiga (0) recusada; época certa aceita',
+    !DespertarService::isSeasonEpochCurrent(null) && !DespertarService::isSeasonEpochCurrent(0)
+    && !DespertarService::isSeasonEpochCurrent('') && DespertarService::isSeasonEpochCurrent(1) && DespertarService::isSeasonEpochCurrent('1'));
+$dto1 = DespertarService::buildStateDto(DespertarService::getOrCreateStateRow($ids['ana']));
+$check('O estado devolvido carrega a época', ($dto1['seasonEpoch'] ?? null) === 1);
+
+// 2) Servidor HTTP de verdade (php -S) contra este banco: tranco e recusa por época.
+$port = 8099;
+$srv = proc_open([PHP_BINARY, '-S', "127.0.0.1:{$port}", $root . '/backend/index.php'], [1 => ['file', 'php://stderr', 'w'], 2 => ['file', 'php://stderr', 'w']], $pipes, $root);
+$http = static function (string $action, array $body, string $token) use ($port): array {
+    $ctx = stream_context_create(['http' => [
+        'method' => 'POST', 'ignore_errors' => true, 'timeout' => 20,
+        'header' => "Content-Type: application/json\r\nAuthorization: Bearer {$token}\r\n",
+        'content' => json_encode(['action' => $action, 'token' => $token] + $body),
+    ]]);
+    $raw = @file_get_contents("http://127.0.0.1:{$port}/api/despertar", false, $ctx);
+    $status = 0;
+    foreach ($http_response_header ?? [] as $h) {
+        if (preg_match('#^HTTP/\S+ (\d{3})#', $h, $m)) {
+            $status = (int) $m[1];
+        }
+    }
+    return ['status' => $status, 'json' => json_decode((string) $raw, true) ?: []];
+};
+$mkSession = static function (int $userId, string $tok) use ($pdo): string {
+    $pdo->prepare('INSERT INTO `sessions` (`token`, `user_id`, `expires_at`) VALUES (:t, :u, DATE_ADD(NOW(3), INTERVAL 1 DAY))')
+        ->execute([':t' => $tok, ':u' => $userId]);
+    return $tok;
+};
+$tokAna = $mkSession($ids['ana'], 'ensaio-ana');
+$tokAdmin = $mkSession($adminId, 'ensaio-admin');
+for ($i = 0; $i < 50; $i++) {
+    $up = @file_get_contents("http://127.0.0.1:{$port}/api/despertar", false, stream_context_create(['http' => ['ignore_errors' => true, 'method' => 'POST', 'timeout' => 2, 'content' => '{}']]));
+    if ($up !== false) {
+        break;
+    }
+    usleep(200000);
+}
+$st = $http('seasonStatus', [], $tokAna);
+$check('HTTP seasonStatus: trancado, época 1, instante do reinício', ($st['json']['restartHold'] ?? null) === true
+    && ($st['json']['seasonEpoch'] ?? null) === 1 && ($st['json']['restartAt'] ?? '') === '2026-11-02T12:00:00-03:00' && ($st['json']['published'] ?? null) === false,
+    json_encode($st['json']));
+$sync = $http('stateSync', ['seasonEpoch' => 1, 'clientState' => ['seasonEpoch' => 1, 'souls' => '999999999999', 'lifetimeSouls' => '999999999999', 'runSouls' => '999999999999']], $tokAna);
+$check('HTTP durante o tranco: aluno não escreve (sync 403 selado, restartHold)', $sync['status'] === 403
+    && ($sync['json']['error'] ?? '') === 'despertar_sealed' && ($sync['json']['restartHold'] ?? null) === true, "status={$sync['status']}");
+$get = $http('stateGet', [], $tokAna);
+$check('HTTP durante o tranco: aluno não lê o jogo (stateGet 403)', $get['status'] === 403);
+$adm = $http('stateGet', [], $tokAdmin);
+$check('HTTP durante o tranco: admin continua entrando (prévia/teste), com época 1', $adm['status'] === 200
+    && ($adm['json']['state']['seasonEpoch'] ?? null) === 1, "status={$adm['status']}");
+$admSyncOk = $http('stateSync', ['clientState' => ['seasonEpoch' => 1, 'souls' => '5', 'lifetimeSouls' => '5', 'runSouls' => '5']], $tokAdmin);
+$check('HTTP admin com a época certa grava', $admSyncOk['status'] === 200, "status={$admSyncOk['status']} " . ($admSyncOk['json']['error'] ?? ''));
+$admSyncOld = $http('stateSync', ['clientState' => ['souls' => '5', 'lifetimeSouls' => '5', 'runSouls' => '5']], $tokAdmin);
+$check('HTTP save sem época é recusado (409 despertar_stale_epoch + estado novo + flag)', $admSyncOld['status'] === 409
+    && ($admSyncOld['json']['error'] ?? '') === 'despertar_stale_epoch' && ($admSyncOld['json']['staleEpoch'] ?? null) === true
+    && ($admSyncOld['json']['state']['seasonEpoch'] ?? null) === 1, "status={$admSyncOld['status']}");
+foreach (['prestige', 'talentBuy', 'verdictBuy', 'juizoStart', 'juizoGuess', 'juizoAbandon'] as $act) {
+    $r = $http($act, ['seasonEpoch' => 0], $tokAdmin);
+    $check("HTTP {$act} de época velha recusado", $r['status'] === 409 && ($r['json']['error'] ?? '') === 'despertar_stale_epoch', "status={$r['status']}");
+}
+
+// 3) Meio-dia de segunda: a primeira requisição depois do instante reinicia.
+$stateBeforeRestart = (int) $pdo->query('SELECT COUNT(*) FROM `despertar_states`')->fetchColumn();
+$ran = DespertarService::restartSeason2IfDue($restartAt);
+$check('No instante exato o reinício roda', $ran === true && DespertarService::isSeasonRestartDone(), "estados antes={$stateBeforeRestart}");
+$check('Zerou TODOS os estados (alunos e admin)', (int) $pdo->query('SELECT COUNT(*) FROM `despertar_states`')->fetchColumn() === 0);
+$ana2 = $userRow($ids['ana']);
+$check('Conquistas despertar_* saíram; a de aula ficou; XP mantido (500)', $ana2['conquistas'] === ['aula1_concluida'] && $ana2['xp'] === 500, json_encode($ana2));
+$paidAna = json_decode((string) $pdo->query("SELECT `achievement_ids` FROM `despertar_paid_achievements` WHERE `user_id` = {$ids['ana']}")->fetchColumn(), true);
+$check('Já pagas acumulam (T1 + T2): reconquistar não paga XP de novo', in_array('despertar_primeira_alma', $paidAna, true) && in_array('despertar_mil_almas', $paidAna, true), json_encode($paidAna));
+$check('Pódio/arquivo da T1 intacto (mesmo conteúdo, mesma contagem) e T2 NÃO arquivada',
+    json_encode(DespertarService::getSeasonArchive(1)) === $archiveBefore
+    && (int) $pdo->query('SELECT COUNT(*) FROM `despertar_season_archives`')->fetchColumn() === $archiveRowsBefore
+    && DespertarService::getSeasonArchive(2) === null);
+$check('Libera o jogo: sem tranco, published, época 2',
+    !DespertarService::isSeasonRestartHold() && DespertarService::isDespertarPublished() && DespertarService::currentSeasonEpoch() === 2);
+
+// 4) Aluno novo na T2 nova: zerado, sem óbolo/essência "curados", época 2.
+$fresh2 = DespertarService::getOrCreateStateRow($ids['ana']);
+$f2 = DespertarService::rowToCanonical($fresh2);
+$check('Linha nova zerada: almas, óbolos, essência, catábases, geradores, talentos, Juízo, stats',
+    (float) $f2['souls'] === 0.0 && (float) $f2['obols'] === 0.0 && (float) $f2['mnemosyne'] === 0.0 && (float) $f2['lifetimeSouls'] === 0.0
+    && $f2['prestigeCount'] === 0 && array_sum($f2['generators'] ?? []) === 0 && $f2['talents'] === [] && $f2['upgrades'] === []
+    && $f2['verdicts'] === 0 && $f2['juizoBestStreak'] === 0 && ($f2['stats']['clicks'] ?? 0) === 0);
+$check('O heal do Lethe não dá óbolo/essência à linha nova', (float) $fresh2['obols'] === 0.0 && (float) $fresh2['mnemosyne'] === 0.0);
+$check('Estado novo carrega época 2', (DespertarService::buildStateDto($fresh2)['seasonEpoch'] ?? null) === 2);
+
+// 5) Segunda execução não apaga a T2 nova.
+DespertarService::persistPatch($ids['ana'], ['souls' => '321.00', 'lifetime_souls' => '321.00', 'run_souls' => '321.00', 'last_sync_at' => \App\Core\Database::nowIso()]);
+$again = DespertarService::restartSeason2IfDue($restartAt->modify('+2 hours'));
+$againNow = DespertarService::restartSeason2IfDue();
+$ana3 = DespertarService::rowToCanonical(DespertarService::getOrCreateStateRow($ids['ana']));
+$check('Segunda execução recusada: a T2 nova (321 almas) continua lá', $again === false && $againNow === false && (float) $ana3['souls'] === 321.0);
+
+// 6) HTTP depois do reinício: save/aba da T1 (época 1 ou sem época) é recusado; época 2 grava.
+$s1 = $http('stateSync', ['seasonEpoch' => 1, 'clientState' => ['seasonEpoch' => 1, 'souls' => '25700000000000', 'lifetimeSouls' => '25700000000000', 'runSouls' => '25700000000000', 'generators' => ['wandering_shade' => 40]]], $tokAna);
+$check('HTTP: save local da T1 (época 1) recusado com 409 e estado novo zerado', $s1['status'] === 409
+    && ($s1['json']['staleEpoch'] ?? null) === true && ($s1['json']['seasonEpoch'] ?? null) === 2
+    && (float) ($s1['json']['state']['souls'] ?? -1) === 321.0 && ($s1['json']['state']['seasonEpoch'] ?? null) === 2, "status={$s1['status']}");
+$ana4 = DespertarService::rowToCanonical(DespertarService::getOrCreateStateRow($ids['ana']));
+$check('HTTP: o servidor NÃO regravou nada com o save velho', (float) $ana4['souls'] === 321.0 && (float) $ana4['lifetimeSouls'] === 321.0 && array_sum($ana4['generators'] ?? []) === 0);
+$s0 = $http('stateSync', ['clientState' => ['souls' => '25700000000000', 'lifetimeSouls' => '25700000000000', 'runSouls' => '25700000000000']], $tokAna);
+$check('HTTP: save sem época também recusado', $s0['status'] === 409 && ($s0['json']['error'] ?? '') === 'despertar_stale_epoch');
+$s2 = $http('stateSync', ['seasonEpoch' => 2, 'clientState' => ['seasonEpoch' => 2, 'souls' => '350', 'lifetimeSouls' => '350', 'runSouls' => '350']], $tokAna);
+$check('HTTP: sync com a época nova (2) é aceito', $s2['status'] === 200 && ($s2['json']['state']['seasonEpoch'] ?? null) === 2, "status={$s2['status']} " . ($s2['json']['error'] ?? ''));
+$pr = $http('prestige', ['seasonEpoch' => 1], $tokAna);
+$check('HTTP: prestígio de época velha recusado', $pr['status'] === 409 && ($pr['json']['error'] ?? '') === 'despertar_stale_epoch');
+$ga = $http('stateGet', [], $tokAna);
+$check('HTTP: stateGet devolve a época 2 e o jogo já está liberado', $ga['status'] === 200 && ($ga['json']['state']['seasonEpoch'] ?? null) === 2);
+$st2 = $http('seasonStatus', [], $tokAna);
+$check('HTTP seasonStatus pós-reinício: sem tranco, época 2', ($st2['json']['restartHold'] ?? null) === false && ($st2['json']['seasonEpoch'] ?? null) === 2 && ($st2['json']['published'] ?? null) === true);
+// ═════════════════════════════════════════════════════════════════════════════
+// LETHE DE PONTA A PONTA (época 2, save zerado, API real): quem faz a Catábase compra o selo
+// O banco só entra para "ter jogado até lá" (almas da corrida); prestige/talentBuy/stateGet são HTTP.
+// ═════════════════════════════════════════════════════════════════════════════
+echo "\n— Lethe de ponta a ponta —\n";
+$bearer = static fn(int $uid, string $tok): string => $mkSession($uid, $tok);
+$post = static fn(string $tok, string $action, array $extra = []) => $http($action, ['seasonEpoch' => 2] + $extra, $tok);
+$runUpTo = static function (int $uid, string $souls) {
+    DespertarService::getOrCreateStateRow($uid);
+    DespertarService::persistPatch($uid, [
+        'souls' => $souls, 'run_souls' => $souls, 'lifetime_souls' => $souls,
+        'last_sync_at' => \App\Core\Database::nowIso(), 'updated_at' => \App\Core\Database::nowIso(),
+    ]);
+};
+$st = static fn(array $r): array => $r['json']['state'] ?? [];
+$money = static fn($v): float => (float) $v;
+
+// A) O mínimo possível: 5,1e8 almas = 1 óbolo. Tem que sobrar Essência para o selo raiz.
+$tokEnzo = $bearer($ids['enzo'], 'ensaio-enzo');
+$runUpTo($ids['enzo'], '510000000.00');
+$g0 = $post($tokEnzo, 'stateGet');
+$check('Lethe A: save zerado na época 2 (sem talentos, sem essência, época certa)', $g0['status'] === 200
+    && $st($g0)['talents'] === [] && $money($st($g0)['mnemosyne']) === 0.0 && ($st($g0)['seasonEpoch'] ?? null) === 2);
+$p0 = $post($tokEnzo, 'prestige');
+$check('Lethe A: 1ª Catábase no mínimo (5,1e8) aceita e deixa 1 óbolo + 1 Essência', $p0['status'] === 200
+    && $money($st($p0)['obols']) === 1.0 && $money($st($p0)['mnemosyne']) === 1.0 && $st($p0)['prestigeCount'] === 1, json_encode($p0['json']['error'] ?? ''));
+$bad = $post($tokEnzo, 'talentBuy', ['talentId' => 'portoes_gemeos']);
+$check('Lethe A: filho sem a raiz é recusado dizendo QUAL selo falta', $bad['status'] === 400
+    && str_contains((string) ($bad['json']['error'] ?? ''), 'faltam vertentes') && str_contains((string) ($bad['json']['error'] ?? ''), '«legado»'), (string) ($bad['json']['error'] ?? ''));
+$b0 = $post($tokEnzo, 'talentBuy', ['talentId' => 'legado']);
+$check('Lethe A: selo raiz comprado logo após o prestige, sem esperar flush/sync', $b0['status'] === 200
+    && $st($b0)['talents'] === ['legado'] && $money($st($b0)['mnemosyne']) === 0.0, (string) ($b0['json']['error'] ?? ''));
+$poor = $post($tokEnzo, 'talentBuy', ['talentId' => 'portoes_gemeos']);
+$check('Lethe A: sem essência a recusa diz quanto tem e quanto custa', $poor['status'] === 400
+    && str_contains((string) ($poor['json']['error'] ?? ''), 'Essência insuficiente: você tem 0, este selo custa 1'), (string) ($poor['json']['error'] ?? ''));
+$gA = $post($tokEnzo, 'stateGet');
+$check('Lethe A: recarregar (stateGet + heal) mantém selo, essência e óbolo', $st($gA)['talents'] === ['legado']
+    && $money($st($gA)['mnemosyne']) === 0.0 && $money($st($gA)['obols']) === 1.0);
+
+// B) Fluxo completo: raiz + filho, recarga, fechar/reabrir o Rio, 2ª Catábase.
+$tokFabi = $bearer($ids['fabi'], 'ensaio-fabi');
+$runUpTo($ids['fabi'], '64000000000.00'); // sqrt(64e9/4e9)=4 óbolos → 2 de Essência
+$p1 = $post($tokFabi, 'prestige');
+$check('Lethe B: Catábase com 6,4e10 almas dá 4 óbolos e 2 de Essência', $p1['status'] === 200
+    && $money($st($p1)['obols']) === 4.0 && $money($st($p1)['mnemosyne']) === 2.0 && ($st($p1)['ascensionOpen'] ?? null) === true);
+$sRoot = $post($tokFabi, 'talentBuy', ['talentId' => 'legado']);
+$sKid = $post($tokFabi, 'talentBuy', ['talentId' => 'portoes_gemeos']);
+$check('Lethe B: selo raiz e logo em seguida o filho comprados', $sRoot['status'] === 200 && $sKid['status'] === 200
+    && $st($sKid)['talents'] === ['legado', 'portoes_gemeos'] && $money($st($sKid)['mnemosyne']) === 0.0, (string) ($sKid['json']['error'] ?? ''));
+$again = $post($tokFabi, 'talentBuy', ['talentId' => 'legado']);
+$check('Lethe B: comprar o mesmo selo de novo é idempotente (sem cobrar)', $again['status'] === 200 && $money($st($again)['mnemosyne']) === 0.0);
+$syncAfter = $post($tokFabi, 'stateSync', ['clientState' => $st($sKid)]);
+$check('Lethe B: sync com o estado que o servidor acabou de devolver não perde selo nem essência', $syncAfter['status'] === 200
+    && $st($syncAfter)['talents'] === ['legado', 'portoes_gemeos'] && $money($st($syncAfter)['mnemosyne']) === 0.0, (string) ($syncAfter['json']['error'] ?? ''));
+$reload = $post($tokFabi, 'stateGet');
+$check('Lethe B: recarregar (stateGet) = selos, essência e óbolos batem', $st($reload)['talents'] === ['legado', 'portoes_gemeos']
+    && $money($st($reload)['mnemosyne']) === 0.0 && $money($st($reload)['obols']) === 4.0 && $st($reload)['prestigeCount'] === 1);
+
+// fechar e reabrir o Rio
+DespertarService::persistPatch($ids['fabi'], ['mnemosyne' => '3.00', 'updated_at' => \App\Core\Database::nowIso()]);
+$close = $post($tokFabi, 'closeAscension');
+$gClosed = $post($tokFabi, 'stateGet');
+$check('Rio: closeAscension é tratado pelo servidor (200) e o estado volta fechado', $close['status'] === 200
+    && ($st($close)['ascensionOpen'] ?? null) === false && ($st($gClosed)['ascensionOpen'] ?? null) === false, "status={$close['status']}");
+$reopen = $post($tokFabi, 'talentBuy', ['talentId' => 'bolachas_celestes']);
+$check('Rio: reabrir e comprar de novo (essência 3, selo de custo 3) funciona', $reopen['status'] === 200
+    && ($st($reopen)['ascensionOpen'] ?? null) === true && in_array('bolachas_celestes', $st($reopen)['talents'], true)
+    && $money($st($reopen)['mnemosyne']) === 0.0, (string) ($reopen['json']['error'] ?? ''));
+
+// 2ª Catábase e compra
+$runUpTo($ids['fabi'], '5184000000000.00'); // raw=36, /(1+1)=18 óbolos → 9 de Essência
+$p2 = $post($tokFabi, 'prestige');
+$check('Lethe B: 2ª Catábase aceita (18 óbolos novos, 9 de Essência)', $p2['status'] === 200 && $st($p2)['prestigeCount'] === 2
+    && $money($st($p2)['obols']) === 22.0 && $money($st($p2)['mnemosyne']) === 9.0, json_encode([$p2['json']['error'] ?? '', $st($p2)['obols'] ?? null, $st($p2)['mnemosyne'] ?? null]));
+$b2 = $post($tokFabi, 'talentBuy', ['talentId' => 'classic_dairy_selection']);
+$check('Lethe B: compra após a 2ª Catábase (custo 9)', $b2['status'] === 200 && $money($st($b2)['mnemosyne']) === 0.0
+    && in_array('classic_dairy_selection', $st($b2)['talents'], true), (string) ($b2['json']['error'] ?? ''));
+$gEnd = $post($tokFabi, 'stateGet');
+$check('Lethe B: no fim, selos e essência no servidor batem com o que a API devolveu', $st($gEnd)['talents'] === $st($b2)['talents']
+    && $money($st($gEnd)['mnemosyne']) === 0.0 && $money($st($gEnd)['obols']) === 22.0);
+
+// ═════════════════════════════════════════════════════════════════════════════
+// REINÍCIO INDEPENDENTE DE TRÁFEGO DO DESPERTAR (T6): qualquer requisição da API e o cron CLI
+// ═════════════════════════════════════════════════════════════════════════════
+echo "\n— Reinício por ranking e por cron —\n";
+$childEnv = static fn(string $now): array => array_merge(getenv(), ['FJD_ENSAIO_NOW' => $now]);
+$serverAt = static function (int $p, string $now) use ($root, $childEnv) {
+    $proc = proc_open([PHP_BINARY, '-S', "127.0.0.1:{$p}", $root . '/backend/index.php'], [1 => ['file', 'php://stderr', 'w'], 2 => ['file', 'php://stderr', 'w']], $pipes, $root, $childEnv($now));
+    for ($i = 0; $i < 50; $i++) {
+        if (@file_get_contents("http://127.0.0.1:{$p}/api/none", false, stream_context_create(['http' => ['ignore_errors' => true, 'timeout' => 2]])) !== false) {
+            break;
+        }
+        usleep(200000);
+    }
+    return $proc;
+};
+$apiPost = static function (int $p, string $route, array $body, string $tok): array {
+    $ctx = stream_context_create(['http' => [
+        'method' => 'POST', 'ignore_errors' => true, 'timeout' => 20,
+        'header' => "Content-Type: application/json\r\nAuthorization: Bearer {$tok}\r\n",
+        'content' => json_encode($body + ['token' => $tok]),
+    ]]);
+    $raw = @file_get_contents("http://127.0.0.1:{$p}/api/{$route}", false, $ctx);
+    $status = 0;
+    foreach ($http_response_header ?? [] as $h) {
+        if (preg_match('#^HTTP/\S+ (\d{3})#', $h, $m)) {
+            $status = (int) $m[1];
+        }
+    }
+    return ['status' => $status, 'json' => json_decode((string) $raw, true) ?: []];
+};
+$arm = static function () use ($adminId, $ids, $bugged, $pdo) {
+    DespertarService::setDespertarGate(DespertarService::SEASON_RESTART_GATE, false, $adminId);
+    DespertarService::forgetSeasonCaches();
+    foreach (['ana', 'bia'] as $u) {
+        DespertarService::getOrCreateStateRow($ids[$u]);
+        DespertarService::persistPatch($ids[$u], $bugged('25700000000000.00'));
+    }
+};
+$nStates = static fn(): int => (int) $pdo->query('SELECT COUNT(*) FROM `despertar_states`')->fetchColumn();
+
+// 1) Requisição de RANKING (rota progress, nem toca o Despertar) depois do instante dispara o reinício.
+$arm();
+$before = $serverAt(8097, '2026-11-02T14:59:59Z');
+$rBefore = $apiPost(8097, 'progress', ['action' => 'leaderboardGet', 'scope' => 'global', 'sort' => 'xp'], $tokAna);
+$stillThere = $nStates() >= 2 && !DespertarService::isSeasonRestartDone();
+proc_terminate($before);
+proc_close($before);
+$check('Ranking 1s ANTES do instante: responde e NÃO reinicia', $rBefore['status'] === 200 && $stillThere, "status={$rBefore['status']}");
+$after = $serverAt(8098, '2026-11-02T15:00:01Z');
+$rAfter = $apiPost(8098, 'progress', ['action' => 'leaderboardGet', 'scope' => 'global', 'sort' => 'xp'], $tokAna);
+DespertarService::forgetSeasonCaches();
+$check('Ranking 1s DEPOIS do instante: a própria requisição reinicia (estados zerados, gate feito, época 2)', $rAfter['status'] === 200
+    && $nStates() === 0 && DespertarService::isSeasonRestartDone() && DespertarService::currentSeasonEpoch() === 2, "status={$rAfter['status']} estados={$nStates()}");
+$rAgain = $apiPost(8098, 'progress', ['action' => 'leaderboardGet', 'scope' => 'global', 'sort' => 'xp'], $tokAna);
+$check('Ranking de novo: segue funcionando e não reinicia outra vez', $rAgain['status'] === 200 && $nStates() === 0);
+proc_terminate($after);
+proc_close($after);
+
+// 2) CLI idempotente (cron do cPanel).
+$cli = static function (string $now) use ($root, $childEnv): array {
+    $proc = proc_open([PHP_BINARY, $root . '/backend/cron-season-restart.php'], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $root, $childEnv($now));
+    $out = stream_get_contents($pipes[1]);
+    stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    return ['exit' => proc_close($proc), 'json' => json_decode(trim($out), true) ?: []];
+};
+$arm();
+$c0 = $cli('2026-11-02T14:59:59Z');
+$check('CLI antes do instante: não faz nada e sai 0', $c0['exit'] === 0 && ($c0['json']['ran'] ?? null) === false
+    && ($c0['json']['due'] ?? null) === false && $nStates() >= 2, json_encode($c0));
+$c1 = $cli('2026-11-02T15:00:00Z');
+DespertarService::forgetSeasonCaches();
+$check('CLI no instante: reinicia (ran=true, época 2, estados zerados) e sai 0', $c1['exit'] === 0 && ($c1['json']['ran'] ?? null) === true
+    && ($c1['json']['seasonEpoch'] ?? null) === 2 && $nStates() === 0, json_encode($c1));
+DespertarService::getOrCreateStateRow($ids['ana']);
+DespertarService::persistPatch($ids['ana'], ['souls' => '321.00', 'lifetime_souls' => '321.00', 'run_souls' => '321.00', 'last_sync_at' => \App\Core\Database::nowIso()]);
+$c2 = $cli('2026-11-02T18:00:00Z');
+$anaSouls = (float) $pdo->query('SELECT souls FROM despertar_states WHERE user_id=' . $ids['ana'])->fetchColumn();
+$check('CLI de novo (idempotente): ran=false, done=true, exit 0 e a T2 nova (321) fica', $c2['exit'] === 0 && ($c2['json']['ran'] ?? null) === false
+    && ($c2['json']['done'] ?? null) === true && $anaSouls === 321.0, json_encode($c2));
+
+if (is_resource($srv)) {
+    proc_terminate($srv);
+    proc_close($srv);
+}
 
 $failed = count(array_filter($results, static fn($r) => !$r['ok']));
 echo "\nensaio-temporada: " . (count($results) - $failed) . '/' . count($results) . " ok\n";

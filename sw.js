@@ -17,5 +17,15 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(fetch(event.request, { cache: 'no-store' }));
     return;
   }
+  // Reinício da T2: o aviso, o tranco e a época vivem nestes módulos; revalida a cada carga
+  // (o Apache/Cloudflare servem .js por 7 dias e as páginas importam estes arquivos sem ?v= novo).
+  if (
+    path.endsWith('/js/app-shell.js')
+    || path.endsWith('/js/api.js')
+    || path.endsWith('/hades-despertar/config/season-closed.js')
+  ) {
+    event.respondWith(fetch(event.request, { cache: 'no-cache' }));
+    return;
+  }
   event.respondWith(fetch(event.request));
 });

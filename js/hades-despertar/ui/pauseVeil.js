@@ -9,6 +9,8 @@ import {
   SEASON_CLOSED_COPY,
   SEASON_HALL_COPY,
   SEASON_OPENS_AT,
+  SEASON_RESTART_AT,
+  SEASON_RESTART_COPY,
 } from '../config/season-closed.js';
 import { formatSouls } from './NumberFormatter.js';
 
@@ -337,6 +339,31 @@ export async function presentSeasonClosedVeil(container, opts = {}) {
   const rankingHref = String(opts.rankingHref || '#');
   const scope = opts.scope === 'turma' ? 'turma' : 'global';
   const isAdmin = Boolean(opts.isAdmin);
+
+  // Reinício da T2 por bugs: aviso + contagem regressiva, sem pódio. Admin só ganha o teste.
+  if (opts.restart) {
+    container.innerHTML = `
+    <article class="despertar-classroom-veil despertar-classroom-veil--season despertar-classroom-veil--restart hades-frame" data-despertar-season-closed-veil data-despertar-restart-veil>
+      <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_RESTART_COPY.eyebrow)}</p>
+      <h2 class="despertar-classroom-veil__title app-shell__title">${escapeHtml(SEASON_RESTART_COPY.title)}</h2>
+      <p class="despertar-classroom-veil__body">${escapeHtml(SEASON_RESTART_COPY.body)}</p>
+      <p class="despertar-classroom-veil__eyebrow">${escapeHtml(SEASON_RESTART_COPY.countdownLabel)}</p>
+      <p class="despertar-classroom-veil__timer despertar-num" data-season-open-countdown data-season-opens-at="${escapeAttr(String(opts.restartAt || SEASON_RESTART_AT))}"></p>
+      <p class="despertar-classroom-veil__actions despertar-season-closed__actions">
+        ${isAdmin ? `<button class="btn-gold" type="button" data-season-preview>${escapeHtml(SEASON_CLOSED_COPY.ctaPreview)}</button>` : ''}
+        <a class="${isAdmin ? 'despertar-ghost' : 'btn-gold'}" href="${escapeAttr(aulasHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaAulas)}</a>
+        <a class="despertar-ghost" href="${escapeAttr(rankingHref)}">${escapeHtml(SEASON_CLOSED_COPY.ctaRanking)}</a>
+      </p>
+    </article>
+  `;
+    const restartPreviewBtn = container.querySelector('[data-season-preview]');
+    if (restartPreviewBtn && typeof opts.onPreview === 'function') {
+      restartPreviewBtn.addEventListener('click', () => {
+        void opts.onPreview();
+      });
+    }
+    return;
+  }
 
   const boardSlots = renderSeasonBoardsMarkup(null, { loading: true });
 

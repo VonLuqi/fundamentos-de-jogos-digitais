@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { initAppShell } from './app-shell.js?v=20261021g';
+import { initAppShell } from './app-shell.js?v=reinicio-t2-3';
 import {
   ApiError,
   ROUTES,
