@@ -927,8 +927,8 @@ export function describeCatabaseSummary(state = {}) {
     ? state.leechSummary()
     : { totalDigested: '0', totalPayout: '0', count: drainInfo.count };
   const spsLine = drainInfo.count > 0
-    ? `${formatRate(effectiveSps)} (Bruto: ${formatRate(rawSps)} · ${drainInfo.count} Sanguessugas: −${drainInfo.drainPercent}%)`
-    : `${formatRate(rawSps)} (Bruto: ${formatRate(rawSps)} · 0 Sanguessugas: −0%)`;
+    ? `${formatRate(effectiveSps)} (antes: ${formatRate(rawSps)} · ${drainInfo.count} Sanguessugas: −${drainInfo.drainPercent}%)`
+    : `${formatRate(rawSps)} (antes: ${formatRate(rawSps)} · 0 Sanguessugas: −0%)`;
   const digestedLine = `${formatSouls(leechSummary.totalDigested)} almas retidas (retorno no pop: +${formatSouls(leechSummary.totalPayout)})`;
   return {
     rawSps,
@@ -1484,10 +1484,14 @@ export class UIRenderer {
 
       if (slowDue || anyDirty) {
         if (slowDue) this._lastSlowSyncAt = nowMs;
-        setText(this._hud?.bonus, formatMultiplier(prestigeBonus(state.obols, state.talents, {
+        const prestigeMult = prestigeBonus(state.obols, state.talents, {
           upgrades: state.upgrades,
           milestones: state.milestones,
-        })));
+        });
+        setText(this._hud?.bonus, formatMultiplier(prestigeMult));
+        if (this._hud?.bonus) {
+          this._hud.bonus.title = `Só os óbolos (${formatSouls(state.obols)}): +1% cada até ×101, depois cresce devagar. O multiplicador de todas as camadas está em Stats.`;
+        }
         this.#renderHint(state);
         this.#renderTicker(state, { reducedMotion });
         this.#renderVeil(state, { reducedMotion, prefs: effectivePrefs });
