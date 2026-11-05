@@ -15,10 +15,41 @@ if (!is_file($externalBootstrap)) {
 require_once $externalBootstrap;
 
 use App\Core\Database;
-use App\Services\Despertar\DespertarFormulas;
-use App\Services\Despertar\DespertarService;
 
 header('Content-Type: application/json; charset=utf-8');
+
+function asList(mixed $value): array
+{
+    if (is_string($value)) {
+        $decoded = json_decode($value, true);
+        $value = is_array($decoded) ? $decoded : [];
+    }
+    if ($value instanceof stdClass) {
+        $value = (array) $value;
+    }
+    if (!is_array($value)) {
+        return [];
+    }
+    $out = [];
+    foreach ($value as $item) {
+        if (is_string($item) || is_int($item)) {
+            $out[] = (string) $item;
+        }
+    }
+    return $out;
+}
+
+function asMap(mixed $value): array
+{
+    if (is_string($value)) {
+        $decoded = json_decode($value, true);
+        $value = is_array($decoded) ? $decoded : [];
+    }
+    if ($value instanceof stdClass) {
+        $value = (array) $value;
+    }
+    return is_array($value) ? $value : [];
+}
 
 try {
     $pdo = Database::pdo();
@@ -34,39 +65,32 @@ try {
     $users = $stmt ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
     $out = [];
     foreach ($users as $user) {
-        $st = $pdo->prepare('SELECT * FROM `despertar_states` WHERE `user_id` = :id LIMIT 1');
+        $st = $pdo->prepare(
+            'SELECT `obols`, `mnemosyne`, `souls`, `run_souls`, `lifetime_souls`, `prestige_count`,
+                    `upgrades_state`, `talents_state`, `milestones`, `updated_at`
+             FROM `despertar_states` WHERE `user_id` = :id LIMIT 1'
+        );
         $st->execute([':id' => (int) $user['id']]);
         $row = $st->fetch(PDO::FETCH_ASSOC) ?: null;
         if (!$row) {
-            $out[] = ['user' => $user, 'state' => null];
+            $out[] = ['username' => $user['username'], 'fullName' => $user['full_name'], 'state' => null];
             continue;
         }
-        $state = DespertarService::buildStateDto($row);
-        $bonus = DespertarFormulas::prestigeBonus(
-            (string) ($state['obols'] ?? '0'),
-            is_array($state['talents'] ?? null) ? $state['talents'] : [],
-            [
-                'upgrades' => is_array($state['upgrades'] ?? null) ? $state['upgrades'] : [],
-                'milestones' => is_array($state['milestones'] ?? null) ? $state['milestones'] : [],
-            ]
-        );
-        $powerIds = ['segredo_do_obolo', 'banca_do_obolo', 'forja_do_obolo', 'confeitaria_do_obolo', 'chave_do_obolo'];
-        $ownedPower = array_values(array_intersect($powerIds, $state['upgrades'] ?? []));
+        $milestones = asMap($row['milestones'] ?? []);
         $out[] = [
             'id' => (int) $user['id'],
             'username' => $user['username'],
             'fullName' => $user['full_name'],
             'displayName' => $user['display_name'] ?? null,
-            'obols' => $state['obols'],
-            'mnemosyne' => $state['mnemosyne'],
-            'prestigeCount' => $state['prestigeCount'],
-            'souls' => $state['souls'],
-            'runSouls' => $state['runSouls'],
-            'lifetimeSouls' => $state['lifetimeSouls'],
-            'prestigeBonus' => $bonus,
-            'heavenlyUpgrades' => $ownedPower,
-            'heavenlyLegacy' => (bool) (($state['milestones']['heavenlyPowerLegacy'] ?? false)),
-            'talents' => $state['talents'],
+            'obols' => (string) $row['obols'],
+            'mnemosyne' => (string) $row['mnemosyne'],
+            'prestigeCount' => (int) $row['prestige_count'],
+            'souls' => (string) $row['souls'],
+            'runSouls' => (string) $row['run_souls'],
+            'lifetimeSouls' => (string) $row['lifetime_souls'],
+            'upgrades' => asList($row['upgrades_state'] ?? []),
+            'talents' => asList($row['talents_state'] ?? []),
+            'heavenlyLegacy' => (bool) ($milestones['heavenlyPowerLegacy'] ?? false),
             'updatedAt' => $row['updated_at'] ?? null,
         ];
     }
