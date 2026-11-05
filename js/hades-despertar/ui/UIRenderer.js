@@ -1484,13 +1484,11 @@ export class UIRenderer {
 
       if (slowDue || anyDirty) {
         if (slowDue) this._lastSlowSyncAt = nowMs;
-        const prestigeMult = prestigeBonus(state.obols, state.talents, {
-          upgrades: state.upgrades,
-          milestones: state.milestones,
-        });
-        setText(this._hud?.bonus, formatMultiplier(prestigeMult));
+        const breakdown = typeof state.spsBreakdown === 'function' ? state.spsBreakdown() : null;
+        const totalMult = breakdown?.rawMultiplier || '1';
+        setText(this._hud?.bonus, formatMultiplier(totalMult));
         if (this._hud?.bonus) {
-          this._hud.bonus.title = `Só os óbolos (${formatSouls(state.obols)}): +1% cada até ×101, depois cresce devagar. O multiplicador de todas as camadas está em Stats.`;
+          this._hud.bonus.title = 'Multiplicador total de todas as camadas (prestígio, vereditos, catábase, filhotes, auras e buffs).';
         }
         this.#renderHint(state);
         this.#renderTicker(state, { reducedMotion });
