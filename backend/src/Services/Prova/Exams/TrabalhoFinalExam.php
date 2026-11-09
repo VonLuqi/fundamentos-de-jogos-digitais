@@ -13,7 +13,7 @@ final class TrabalhoFinalExam
 {
     public const ID = 'trabalho-final';
     public const TITLE = 'Trabalho Final do Módulo 2';
-    public const MAX_BYTES = 50 * 1024 * 1024;
+    public const MAX_BYTES = 200 * 1024 * 1024;
     public const GUIDE_URL = '/pages/guia-trabalho-final.html';
 
     public static function definition(): ExamDefinition

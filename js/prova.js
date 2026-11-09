@@ -1163,7 +1163,7 @@ async function hasZipSignature(file) {
 
 /** Valida no cliente (o servidor valida de novo). Retorna mensagem de erro ou null. */
 async function validateProjectFile(file) {
-  const maxBytes = Number(examMeta?.project?.maxBytes) || 50 * 1024 * 1024;
+  const maxBytes = Number(examMeta?.project?.maxBytes) || 200 * 1024 * 1024;
   if (!file) return PROJECT_COPY.noFile;
   if (!/\.zip$/i.test(file.name)) return PROJECT_COPY.notZip;
   if (file.size <= 0) return PROJECT_COPY.empty;

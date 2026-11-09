@@ -6,7 +6,7 @@ Operação do **Mestre** para os dois exames novos. Ambos nascem **fechados** e 
 |-------|----------|------|--------|
 | Provação do Módulo 1 | `modulo1-provacao` | quiz | 20 questões (12 MC + 8 discursivas), 20 pts, 90 min, 1 tentativa |
 | Provação do Módulo 2 · O Balcão e o Labirinto do Submundo | `modulo2-prova` | quiz (só MC) | 10 questões A–E, 2 pts cada, 20 pts, 45 min, 1 tentativa. Corrige e libera a nota no envio (também quem já entregou). **Fechar nota** não é necessário |
-| Trabalho Final | `trabalho-final` | project | Sem timer. Aluno envia **1 `.zip`** (máx. 50 MB), pode **reenviar** até o prazo (`closes_at`) ou até você selar; vale o último. Nota 0–30 (Aulas 02–08) + feedback |
+| Trabalho Final | `trabalho-final` | project | Sem timer. Aluno envia **1 `.zip`** (máx. 200 MB), pode **reenviar** até o prazo (`closes_at`) ou até você selar; vale o último. Nota 0–30 (Aulas 02–08) + feedback |
 
 Conteúdo: [`avaliacao-modulo2-provacao.md`](./avaliacao-modulo2-provacao.md) (gabarito `B D A E C A D B E C`) · guia do aluno: [`pages/guia-trabalho-final.html`](../pages/guia-trabalho-final.html).
 
@@ -28,17 +28,18 @@ Arquivo: [`db/migrate-2026-10-29-prova-modulo2-trabalho-final.sql`](../db/migrat
 Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). A pasta tem `.htaccess` “negar tudo” e o `.htaccess` da raiz bloqueia `/uploads/trabalhos/` — **não há URL pública**; o único download é `adminDownloadSubmission` (autenticado, só admin). O nome original do aluno é só metadado.
 
 - Pasta precisa ser **gravável** pelo PHP (`chmod 750`/`755`). Alternativa fora do webroot: variável de ambiente `PROVA_UPLOAD_DIR=/home/USUARIO/trabalhos-fjd` (recomendado se a hospedagem permitir).
-- **Limites do PHP (HostGator):** o padrão costuma ser `upload_max_filesize` 2–64 MB e `post_max_size` 8–64 MB. Para 50 MB precisa de `upload_max_filesize ≥ 50M` e `post_max_size ≥ 56M`. O `.htaccess` do projeto tenta `php_value` (só vale em mod_php). Em PHP-FPM/FastCGI (padrão do cPanel) crie `.user.ini` **na raiz do site** (a mesma pasta do `index.html`):
+- **Limites do PHP (HostGator):** o padrão costuma ser `upload_max_filesize` 2–64 MB e `post_max_size` 8–64 MB. Para 200 MB precisa de `upload_max_filesize ≥ 205M` e `post_max_size ≥ 210M`. O `.htaccess` do projeto tenta `php_value` (só vale em mod_php). Em PHP-FPM/FastCGI (padrão do cPanel) crie `.user.ini` **na raiz do site** (a mesma pasta do `index.html`):
 
   ```ini
-  upload_max_filesize = 52M
-  post_max_size = 56M
-  max_execution_time = 120
+  upload_max_filesize = 205M
+  post_max_size = 210M
+  max_execution_time = 300
+  max_input_time = 600
   memory_limit = 256M
   ```
 
   O `.user.ini` demora até ~5 min para valer (`user_ini.cache_ttl`). Alternativa: cPanel → *MultiPHP INI Editor*. Se estourar o limite, o aluno vê “O servidor recusou o envio por tamanho” (HTTP 413) — ajuste e peça para reenviar.
-- O app valida: extensão `.zip`, assinatura `PK\x03\x04`, tamanho (50 MB), usuário autenticado e turma liberada; rate limit de 6 envios/min por aluno.
+- O app valida: extensão `.zip`, assinatura `PK\x03\x04`, tamanho (200 MB), usuário autenticado e turma liberada; rate limit de 6 envios/min por aluno.
 
 ## 3. Liberar
 
@@ -69,7 +70,7 @@ Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). 
 
 - [ ] Migration aplicada (`select id, is_open from prova_exams;` → 3 linhas, as novas com `0`)
 - [ ] `uploads/trabalhos/` gravável e `https://SEU-SITE/uploads/trabalhos/qualquer.zip` retorna **403/404**
-- [ ] `phpinfo`/`.user.ini`: `upload_max_filesize` e `post_max_size` ≥ 52M/56M
+- [ ] `phpinfo`/`.user.ini`: `upload_max_filesize` e `post_max_size` ≥ 205M/210M
 - [ ] Testar com uma conta de aluno da turma liberada: enviar `.zip`, reenviar, ver status
 - [ ] Hub: baixar o `.zip`, abrir no computador, publicar nota
 - [ ] Selar o gate ao fim da janela

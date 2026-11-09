@@ -125,7 +125,7 @@ if (ProvaService::clampQuestionIndex(19, $m1) !== 19) fail('clamp M1');
 $tf = ProvaCatalog::forExam('trabalho-final');
 if (!$tf->isProject() || $tf->hasTimer() || $tf->questionCount() !== 0) fail('TF kind');
 if ($tf->releasesGradeOnSubmit()) fail('Trabalho Final não libera nota sozinho');
-if (($tf->projectPublic()['maxBytes'] ?? 0) !== 50 * 1024 * 1024) fail('TF 50MB');
+if (($tf->projectPublic()['maxBytes'] ?? 0) !== 200 * 1024 * 1024) fail('TF 200MB');
 if (!str_contains((string) $tf->projectPublic()['guideUrl'], 'guia-trabalho-final')) fail('TF guia');
 
 // --- upload

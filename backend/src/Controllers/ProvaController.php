@@ -1004,7 +1004,7 @@ final class ProvaController
                     Http::json(409, ['error' => 'O trabalho já foi corrigido; não é mais possível reenviar.']);
                 }
 
-                $maxBytes = (int) ($def->project['maxBytes'] ?? 50 * 1024 * 1024);
+                $maxBytes = (int) ($def->project['maxBytes'] ?? 200 * 1024 * 1024);
                 if ($_FILES === [] && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
                     // post_max_size estourado: o PHP descarta o corpo inteiro (ver playbook, seção .user.ini).
                     Http::json(413, ['error' => 'O servidor recusou o envio por tamanho (post_max_size do PHP). Avise o Mestre.']);

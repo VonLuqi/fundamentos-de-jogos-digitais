@@ -148,10 +148,10 @@ DirectoryIndex index.html index.php
   </If>
 </IfModule>
 
-# Upload do Trabalho Final (.zip até 50 MB). Em PHP-FPM/FastCGI estas diretivas são ignoradas:
+# Upload do Trabalho Final (.zip até 200 MB). Em PHP-FPM/FastCGI estas diretivas são ignoradas:
 # configure upload_max_filesize/post_max_size em .user.ini (ver docs/playbook-liberar-prova-modulo2-e-trabalho-final.md)
 <IfModule mod_php.c>
-  php_value upload_max_filesize 52M
-  php_value post_max_size 56M
-  php_value max_execution_time 120
+  php_value upload_max_filesize 205M
+  php_value post_max_size 210M
+  php_value max_execution_time 300
 </IfModule>
