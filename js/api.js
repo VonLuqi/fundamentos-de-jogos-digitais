@@ -16,6 +16,7 @@
 'use strict';
 
 import { installDevtoolsGuard } from './devtools-guard.js';
+import { PROJECT_COPY } from './prova/copy.js';
 
 /* ---------- Única chave permitida no localStorage ---------- */
 const SESSION_KEY = 'activeSession';
@@ -2333,54 +2334,87 @@ export function provaReportIntegrityEvent(token, payload = {}) {
 }
 
 /**
- * Trabalho Final: envia UM .zip (multipart). Último envio vale até closes_at / Mestre fechar.
+ * Trabalho Final: envia UM .zip em partes de até 20 MiB. Último envio vale até o prazo/fechamento.
  * @param {string} token
  * @param {File} file
  * @param {{ examId?: string, onProgress?: (fraction: number) => void }} [options]
  */
-export function provaSubmitProject(token, file, options = {}) {
+export async function provaSubmitProject(token, file, options = {}) {
   const { examId = 'trabalho-final', onProgress } = options;
-  const url = `${siteBasePath()}${API_BASE}/prova?action=submitProject&examId=${encodeURIComponent(examId)}`;
   const resolvedToken = String(token || getSession()?.token || '').trim();
-  return new Promise((resolve, reject) => {
-    const form = new FormData();
-    form.append('action', 'submitProject');
-    form.append('examId', examId);
-    form.append('file', file, file.name);
+  let highestProgress = 0;
+  const progress = (bytes) => {
+    highestProgress = Math.max(highestProgress, Math.min(1, bytes / file.size));
+    if (typeof onProgress === 'function') onProgress(highestProgress);
+  };
+  const request = (action, data, partProgress) => new Promise((resolve, reject) => {
+    const url = `${siteBasePath()}${API_BASE}/prova?action=${action}&examId=${encodeURIComponent(examId)}`;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url);
     if (resolvedToken) xhr.setRequestHeader('Authorization', `Bearer ${resolvedToken}`);
     xhr.responseType = 'json';
-    if (xhr.upload && typeof onProgress === 'function') {
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable && event.total > 0) onProgress(event.loaded / event.total);
-      };
-    }
-    xhr.onerror = () => reject(new ApiError('Falha de rede no envio. Tente de novo.', 0));
-    xhr.onabort = () => reject(new ApiError('Envio cancelado.', 0));
+    xhr.timeout = 180000;
+    if (!(data instanceof FormData)) xhr.setRequestHeader('Content-Type', 'application/json');
+    if (xhr.upload && partProgress) xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && event.total > 0) partProgress(Math.min(1, event.loaded / event.total));
+    };
+    xhr.onerror = xhr.ontimeout = () => reject(new ApiError(PROJECT_COPY.networkFail, 0));
+    xhr.onabort = () => {
+      const error = new ApiError(PROJECT_COPY.cancelled, 0);
+      error.cancelled = true;
+      reject(error);
+    };
     xhr.onload = () => {
       let payload = xhr.response;
       if (typeof payload === 'string') {
         try { payload = JSON.parse(payload); } catch { payload = null; }
       }
-      if (!payload) {
-        reject(new ApiError(
-          xhr.status === 413
-            ? 'O servidor recusou o arquivo por tamanho (limite do PHP). Avise o Mestre.'
-            : 'A API do Domínio não respondeu ao envio.',
-          xhr.status,
-        ));
+      if (xhr.status < 200 || xhr.status >= 300 || !payload || payload.ok === false) {
+        const error = new ApiError(xhr.status === 413 ? PROJECT_COPY.hostSizeFail
+          : payload?.error || PROJECT_COPY.sendFail, xhr.status, payload);
+        const retryAfter = xhr.getResponseHeader('Retry-After');
+        const seconds = Number(retryAfter);
+        error.retryAfterMs = retryAfter
+          ? Math.min(120000, Math.max(0, Number.isFinite(seconds) ? seconds * 1000 : Date.parse(retryAfter) - Date.now()) || 0)
+          : 0;
+        reject(error);
         return;
       }
-      if (xhr.status < 200 || xhr.status >= 300 || payload.ok === false) {
-        reject(new ApiError(payload?.error ?? 'Erro desconhecido no envio.', xhr.status, payload));
-        return;
-      }
-      invalidateSessionBootstrapCache();
       resolve(payload);
     };
-    xhr.send(form);
+    xhr.send(data instanceof FormData ? data : JSON.stringify({ action, examId, ...data }));
   });
+  const init = await request('projectUploadInit', { fileName: file.name, size: file.size });
+  if (!Number.isInteger(init.chunkSize) || init.chunkSize <= 0 || init.chunkSize > 20 * 1024 * 1024
+    || !Number.isInteger(init.totalChunks) || init.totalChunks !== Math.ceil(file.size / init.chunkSize)
+    || typeof init.uploadId !== 'string') throw new ApiError(PROJECT_COPY.sendFail, 0);
+  progress(0);
+  for (let index = 0; index < init.totalChunks; index += 1) {
+    const start = index * init.chunkSize;
+    const part = file.slice(start, Math.min(file.size, start + init.chunkSize));
+    for (let retry = 0; ; retry += 1) {
+      const form = new FormData();
+      form.append('action', 'projectUploadChunk');
+      form.append('examId', examId);
+      form.append('uploadId', init.uploadId);
+      form.append('index', String(index));
+      form.append('file', part, 'part.bin');
+      try {
+        await request('projectUploadChunk', form, (fraction) => progress(start + part.size * fraction));
+        progress(start + part.size);
+        break;
+      } catch (error) {
+        const retryable = !error.cancelled && (error.status === 0 || error.status === 429
+          || (error.status >= 500 && error.status <= 599));
+        if (!retryable || retry >= 3) throw error;
+        await new Promise((resolve) => setTimeout(resolve, Math.max(500 * 2 ** retry, error.retryAfterMs || 0)));
+      }
+    }
+  }
+  // Finish is not automatically retried: a lost response may follow a committed submission.
+  const result = await request('projectUploadFinish', { uploadId: init.uploadId });
+  invalidateSessionBootstrapCache();
+  return result;
 }
 
 /**

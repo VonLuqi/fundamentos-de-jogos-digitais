@@ -116,6 +116,7 @@ final class ProvaProjectService
         $dest = $dir . '/' . $storedName;
         $moved = $viaUploadedFile ? @move_uploaded_file($tmpPath, $dest) : @copy($tmpPath, $dest);
         if (!$moved) {
+            if (is_file($dest)) @unlink($dest); // A failed copy may leave a partial new UUID file.
             return ['ok' => false, 'error' => 'Não foi possível gravar o arquivo.'];
         }
         @chmod($dest, 0640);

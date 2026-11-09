@@ -28,7 +28,8 @@ Arquivo: [`db/migrate-2026-10-29-prova-modulo2-trabalho-final.sql`](../db/migrat
 Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). A pasta tem `.htaccess` “negar tudo” e o `.htaccess` da raiz bloqueia `/uploads/trabalhos/` — **não há URL pública**; o único download é `adminDownloadSubmission` (autenticado, só admin). O nome original do aluno é só metadado.
 
 - Pasta precisa ser **gravável** pelo PHP (`chmod 750`/`755`). Alternativa fora do webroot: variável de ambiente `PROVA_UPLOAD_DIR=/home/USUARIO/trabalhos-fjd` (recomendado se a hospedagem permitir).
-- **Limites do PHP (HostGator):** o padrão costuma ser `upload_max_filesize` 2–64 MB e `post_max_size` 8–64 MB. Para 200 MB precisa de `upload_max_filesize ≥ 205M` e `post_max_size ≥ 210M`. O `.htaccess` do projeto tenta `php_value` (só vale em mod_php). Em PHP-FPM/FastCGI (padrão do cPanel) crie `.user.ini` **na raiz do site** (a mesma pasta do `index.html`):
+- **Envio em partes (cliente atualizado):** cada requisição envia no máximo **20 MiB** de arquivo, mais o pequeno overhead multipart. O limite total continua **200 MiB (209.715.200 bytes)**. Isso evita um corpo único de 200 MiB diante do limite de 100 MB assumido para o Cloudflare integrado da HostGator; o limite efetivo da hospedagem deve ser conferido pelo responsável no deploy. Não é necessário alterar banco ou fazer migration.
+- **Limites do PHP (HostGator):** para o cliente em partes, use `upload_max_filesize ≥ 24M` e `post_max_size ≥ 25M`. Clientes antigos em cache ainda usam `submitProject` e precisam dos valores maiores abaixo; continuam sujeitos ao limite de corpo do proxy. O `.htaccess` do projeto tenta `php_value` (só vale em mod_php). Em PHP-FPM/FastCGI (padrão do cPanel) crie `.user.ini` **na raiz do site** (a mesma pasta do `index.html`):
 
   ```ini
   upload_max_filesize = 205M
@@ -39,7 +40,35 @@ Os `.zip` ficam em `uploads/trabalhos/` com nome **gerado no servidor** (uuid). 
   ```
 
   O `.user.ini` demora até ~5 min para valer (`user_ini.cache_ttl`). Alternativa: cPanel → *MultiPHP INI Editor*. Se estourar o limite, o aluno vê “O servidor recusou o envio por tamanho” (HTTP 413) — ajuste e peça para reenviar.
-- O app valida: extensão `.zip`, assinatura `PK\x03\x04`, tamanho (200 MB), usuário autenticado e turma liberada; rate limit de 6 envios/min por aluno.
+- O app valida: extensão `.zip`, assinatura `PK\x03\x04`, tamanho (200 MiB), usuário autenticado, turma/prazo liberados e trabalho ainda não corrigido. A assinatura não substitui inspeção/antivírus do conteúdo do ZIP.
+
+### Protocolo e operação do envio em partes
+
+- `POST /api/prova?action=projectUploadInit&examId=trabalho-final`: JSON `{fileName,size}`; retorna UUID gerado pelo servidor, `chunkSize=20971520`, `totalChunks`. Há **um envio ativo por aluno**; iniciar outro descarta somente as partes temporárias do anterior. Nenhum envio anterior já entregue é apagado por isso.
+- `projectUploadChunk`: multipart `{uploadId,index,file}`. Verifica dono, exame, índice e tamanho exato (inclusive última parte). Aceita partes fora de ordem e reenvio idêntico; conteúdo diferente para índice já recebido exige reinício. O nome/caminho do cliente nunca define o caminho no disco.
+- `projectUploadFinish`: JSON `{uploadId}`. Revalida autenticação, turma/prazo e correção; concatena por streaming, confere tamanho e assinatura e usa **a mesma transação** do envio legado. A tentativa é travada contra correção/reenvio; arquivo anterior só é removido depois do commit. Falha no banco remove o arquivo novo; sucesso/falha do finish limpa as partes daquele envio. Finish incompleto exige iniciar novamente.
+- `submitProject` permanece disponível para clientes antigos em cache. O limite compartilhado de **6/min por aluno** protege init, finish e envio legado; partes têm bucket separado de **60/min por aluno**, suficiente para 10 partes com até 3 retentativas por parte. Não aumenta a proteção permissiva de outros endpoints.
+- O cliente envia as partes sequencialmente, preserva progresso agregado por bytes e faz no máximo **3 retentativas por parte** em falha de rede/timeout, 5xx ou 429, com backoff e `Retry-After` quando informado. Outros 4xx não são repetidos. Init e finish não são repetidos automaticamente; se a resposta do finish se perder, **verifique a entrega atual antes de reenviar**.
+- Estado fica em `PROVA_UPLOAD_DIR/.project-parts/user-<hash>/<uuid>/`, sob `.htaccess` deny-all, com metadados do servidor e lock por aluno. Não existe download público. Reserve espaço para partes + arquivo concatenado + cópia final: até aproximadamente **600 MiB transitórios por envio de 200 MiB**, além das entregas já guardadas.
+- `backend/cron-purge.php` remove partes inativas há **mais de 24h**, inclusive diretórios órfãos reconhecidos; ignora envios com lock em uso e preserva entregas finais. A limpeza de partes roda antes da limpeza de sessões, inclusive se esta falhar. O resultado inclui `projectUploadsPurged`. Mantenha o cron diário configurado; falhas de cron deixam temporários até a próxima execução.
+- Um **413** pode vir do PHP, servidor web ou proxy/Cloudflare, não apenas de `post_max_size`. Confira o limite por parte + overhead, permissões e logs; não peça para reduzir o ZIP abaixo de 100 MB como solução para o cliente atualizado.
+
+### Verificação local antes de liberar o deploy
+
+Sem HTTP externo, FTP, banco real ou credenciais de alunos:
+
+```sh
+node tests/prova-multiexam-smoke.mjs
+node tests/prova-chunk-upload-smoke.mjs
+php -l backend/src/Controllers/ProvaController.php
+php -l backend/src/Services/Prova/ProvaProjectUploadService.php
+php -l backend/src/Services/Prova/ProvaProjectService.php
+php -l backend/cron-purge.php
+node --check js/api.js
+node --check js/prova/copy.js
+```
+
+O novo smoke usa `PROVA_UPLOAD_DIR` exclusivo em temp, PHP CLI e XHR simulado. Cobre ordem trocada, reenvio idêntico/conflitante, dono/exame incorretos, tamanhos, assinatura, partes ausentes, traversal, descarte/reinício, compensação de falha transacional, cron e retry/progresso. A simulação de **200 MiB em 10 partes** percorreu concatenação, validação, cópia e SHA-256 com `memory_limit=32M`; pico medido neste ambiente: **2.097.152 bytes (2 MiB)**. O payload simulado verifica o contrato existente de tamanho/assinatura PK; não é validação completa da estrutura ZIP. Esses testes não comprovam limites reais do HostGator/Cloudflare; o deploy e a validação de homologação ficam com o responsável após QA.
 
 ## 3. Liberar
 

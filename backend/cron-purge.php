@@ -19,7 +19,10 @@ require_once __DIR__ . '/bootstrap.php';
 use App\Controllers\CronController;
 
 try {
+    // Independent filesystem cleanup still runs if the DB/session purge is unavailable.
+    $projectPartsPurged = \App\Services\Prova\ProvaProjectUploadService::purgeStale();
     $result = CronController::runPurgeNow();
+    $result['projectUploadsPurged'] = $projectPartsPurged;
     echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . PHP_EOL;
     exit(0);
 } catch (Throwable $e) {

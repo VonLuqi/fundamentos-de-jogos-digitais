@@ -9,6 +9,7 @@ use App\Core\RateLimiter;
 use App\Services\Prova\ExamDefinition;
 use App\Services\Prova\ProvaCatalog;
 use App\Services\Prova\ProvaProjectService;
+use App\Services\Prova\ProvaProjectUploadService;
 use App\Services\Prova\ProvaService;
 use App\Services\SessionService;
 use PDO;
@@ -27,6 +28,7 @@ final class ProvaController
         'submit' => ['limit' => 12, 'windowSec' => 60],
         'contest' => ['limit' => 10, 'windowSec' => 60],
         'upload' => ['limit' => 6, 'windowSec' => 60],
+        'uploadChunk' => ['limit' => 60, 'windowSec' => 60],
         'admin' => ['limit' => 90, 'windowSec' => 60],
     ];
 
@@ -985,11 +987,11 @@ final class ProvaController
             // -----------------------------------------------------------------
             // submitProject (exame kind=project): upload do .zip, último envio vale
             // -----------------------------------------------------------------
-            if ($action === 'submitProject' && $method === 'POST') {
+            if (in_array($action, ['submitProject', 'projectUploadInit', 'projectUploadChunk', 'projectUploadFinish'], true) && $method === 'POST') {
                 if (!$def->isProject()) {
                     Http::json(400, ['error' => 'Este exame não aceita envio de arquivo.']);
                 }
-                if (!self::rateLimitOr429((int) $user['id'], 'upload')) {
+                if (!self::rateLimitOr429((int) $user['id'], ($action === 'projectUploadChunk' ? 'uploadChunk' : 'upload'))) {
                     return;
                 }
                 $exam = ProvaService::loadExam($examId);
@@ -1005,86 +1007,35 @@ final class ProvaController
                 }
 
                 $maxBytes = (int) ($def->project['maxBytes'] ?? 200 * 1024 * 1024);
-                if ($_FILES === [] && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
-                    // post_max_size estourado: o PHP descarta o corpo inteiro (ver playbook, seção .user.ini).
-                    Http::json(413, ['error' => 'O servidor recusou o envio por tamanho (post_max_size do PHP). Avise o Mestre.']);
-                }
-                $v = ProvaProjectService::validateUpload($_FILES['file'] ?? null, $maxBytes);
-                if (!$v['ok']) {
-                    Http::json((int) ($v['status'] ?? 400), ['error' => $v['error'] ?? 'Upload inválido.']);
-                }
-                $stored = ProvaProjectService::storeFile((string) $_FILES['file']['tmp_name']);
-                if (!$stored['ok']) {
-                    Http::json(500, ['error' => $stored['error'] ?? 'Falha ao gravar o arquivo.']);
-                }
-
-                $nowSql = Database::nowSql($nowMs);
-                $newStored = (string) $stored['storedName'];
-                $res = null;
-                try {
-                    $pdo->beginTransaction();
-                    // Garante a linha (UNIQUE exam+user) e trava: reenvio × correção × reset ficam serializados.
-                    $ins = $pdo->prepare(
-                        'INSERT IGNORE INTO prova_attempts
-                         (id, exam_id, user_id, status, started_at, ends_at, submitted_at, current_question_index, integrity_summary, created_at, updated_at)
-                         VALUES (:id, :eid, :uid, \'submitted\', :st, :st2, :st3, 0, :isum, :st4, :st5)'
-                    );
-                    $ins->execute([
-                        ':id' => Database::uuidV4(),
-                        ':eid' => $examId,
-                        ':uid' => (int) $user['id'],
-                        ':st' => $nowSql,
-                        ':st2' => $nowSql,
-                        ':st3' => $nowSql,
-                        ':st4' => $nowSql,
-                        ':st5' => $nowSql,
-                        ':isum' => json_encode(['blurCount' => 0, 'leaveCount' => 0, 'lastEventAt' => null]),
-                    ]);
-                    $lockStmt = $pdo->prepare('SELECT * FROM prova_attempts WHERE exam_id = :eid AND user_id = :uid LIMIT 1 FOR UPDATE');
-                    $lockStmt->execute([':eid' => $examId, ':uid' => (int) $user['id']]);
-                    $attempt = $lockStmt->fetch(PDO::FETCH_ASSOC) ?: null;
-                    if (!$attempt) {
-                        throw new \RuntimeException('tentativa do trabalho não encontrada após INSERT');
+                $persist = static function (string $tmp, array $v, bool $viaUploadedFile) use ($pdo, $examId, $user, $nowMs): array {
+                    $stored = ProvaProjectService::storeFile($tmp, $viaUploadedFile);
+                    if (!$stored['ok']) {
+                        return ['status' => 500, 'error' => $stored['error'] ?? 'Falha ao gravar o arquivo.'];
                     }
-                    if (($attempt['status'] ?? '') === 'graded') {
-                        $pdo->rollBack();
-                        ProvaProjectService::deleteStoredFile($newStored);
-                        Http::json(409, ['error' => 'O trabalho já foi corrigido; não é mais possível reenviar.']);
+                    return self::persistProjectSubmission($pdo, $examId, (int) $user['id'], $nowMs, $v, $stored);
+                };
+                if ($action === 'projectUploadInit') {
+                    $result = ProvaProjectUploadService::init((int) $user['id'], $examId,
+                        is_string($body['fileName'] ?? null) ? $body['fileName'] : '', $body['size'] ?? null, $maxBytes);
+                } elseif ($action === 'projectUploadChunk') {
+                    if ($_FILES === [] && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+                        Http::json(413, ['error' => 'A hospedagem ou o proxy recusou esta parte por tamanho. Avise o Mestre.']);
                     }
-                    // Reenvio invalida rascunho de nota/feedback anterior.
-                    $upAtt = $pdo->prepare(
-                        'UPDATE prova_attempts
-                         SET status = \'submitted\', submitted_at = :sub, final_score = NULL, admin_notes = NULL, updated_at = :now
-                         WHERE id = :id AND status <> \'graded\''
-                    );
-                    $upAtt->execute([':sub' => $nowSql, ':now' => $nowSql, ':id' => $attempt['id']]);
-                    $res = ProvaProjectService::upsertSubmission(
-                        (string) $attempt['id'],
-                        $newStored,
-                        (string) $v['originalName'],
-                        (int) $v['size'],
-                        (string) $stored['sha256'],
-                        $nowMs
-                    );
-                    $pdo->commit();
-                } catch (Throwable $e) {
-                    if ($pdo->inTransaction()) {
-                        $pdo->rollBack();
+                    $result = ProvaProjectUploadService::chunk((int) $user['id'], $examId,
+                        is_string($body['uploadId'] ?? null) ? $body['uploadId'] : '', $body['index'] ?? null, $_FILES['file'] ?? null);
+                } elseif ($action === 'projectUploadFinish') {
+                    $result = ProvaProjectUploadService::finish((int) $user['id'], $examId,
+                        is_string($body['uploadId'] ?? null) ? $body['uploadId'] : '', $maxBytes,
+                        static fn(string $tmp, array $v): array => $persist($tmp, $v, false));
+                } else {
+                    // Compatibility for cached clients still posting one multipart ZIP.
+                    if ($_FILES === [] && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) {
+                        Http::json(413, ['error' => 'A hospedagem ou o proxy recusou o envio por tamanho. Avise o Mestre.']);
                     }
-                    ProvaProjectService::deleteStoredFile($newStored); // compensação: zip novo sem registro
-                    throw $e;
+                    $v = ProvaProjectService::validateUpload($_FILES['file'] ?? null, $maxBytes);
+                    $result = $v['ok'] ? $persist((string) $_FILES['file']['tmp_name'], $v, true) : $v;
                 }
-                // Arquivo anterior só sai depois do commit.
-                ProvaProjectService::deleteStoredFile($res['previous']);
-                $attempt = ProvaService::loadAttemptById((string) $attempt['id']);
-                $sub = $res['submission'];
-
-                Http::json(200, [
-                    'ok' => true,
-                    'serverNow' => Database::nowIso($nowMs),
-                    'attempt' => ProvaService::attemptStudentDto($attempt, $nowMs),
-                    'submission' => ProvaProjectService::submissionDto($sub),
-                ]);
+                Http::json((int) ($result['status'] ?? 200), $result['payload'] ?? $result);
             }
 
             // -----------------------------------------------------------------
@@ -1249,6 +1200,78 @@ final class ProvaController
             error_log('prova api error: ' . $e->getMessage());
             Http::json(500, ['error' => 'Erro interno na avaliação.']);
         }
+    }
+
+    /** Both cached multipart clients and chunked finish use this single transaction. */
+    private static function persistProjectSubmission(PDO $pdo, string $examId, int $userId, int $nowMs, array $v, array $stored): array
+    {
+        $nowSql = Database::nowSql($nowMs);
+        $newStored = (string) $stored['storedName'];
+        $res = null;
+        try {
+            $pdo->beginTransaction();
+            // Garante a linha (UNIQUE exam+user) e trava: reenvio × correção × reset ficam serializados.
+            $ins = $pdo->prepare(
+                'INSERT IGNORE INTO prova_attempts
+                 (id, exam_id, user_id, status, started_at, ends_at, submitted_at, current_question_index, integrity_summary, created_at, updated_at)
+                 VALUES (:id, :eid, :uid, \'submitted\', :st, :st2, :st3, 0, :isum, :st4, :st5)'
+            );
+            $ins->execute([
+                ':id' => Database::uuidV4(),
+                ':eid' => $examId,
+                ':uid' => $userId,
+                ':st' => $nowSql,
+                ':st2' => $nowSql,
+                ':st3' => $nowSql,
+                ':st4' => $nowSql,
+                ':st5' => $nowSql,
+                ':isum' => json_encode(['blurCount' => 0, 'leaveCount' => 0, 'lastEventAt' => null]),
+            ]);
+            $lockStmt = $pdo->prepare('SELECT * FROM prova_attempts WHERE exam_id = :eid AND user_id = :uid LIMIT 1 FOR UPDATE');
+            $lockStmt->execute([':eid' => $examId, ':uid' => $userId]);
+            $attempt = $lockStmt->fetch(PDO::FETCH_ASSOC) ?: null;
+            if (!$attempt) {
+                throw new \RuntimeException('tentativa do trabalho não encontrada após INSERT');
+            }
+            if (($attempt['status'] ?? '') === 'graded') {
+                $pdo->rollBack();
+                ProvaProjectService::deleteStoredFile($newStored);
+                return ['status' => 409, 'payload' => ['error' => 'O trabalho já foi corrigido; não é mais possível reenviar.']];
+            }
+            // Reenvio invalida rascunho de nota/feedback anterior.
+            $upAtt = $pdo->prepare(
+                'UPDATE prova_attempts
+                 SET status = \'submitted\', submitted_at = :sub, final_score = NULL, admin_notes = NULL, updated_at = :now
+                 WHERE id = :id AND status <> \'graded\''
+            );
+            $upAtt->execute([':sub' => $nowSql, ':now' => $nowSql, ':id' => $attempt['id']]);
+            $res = ProvaProjectService::upsertSubmission(
+                (string) $attempt['id'],
+                $newStored,
+                (string) $v['originalName'],
+                (int) $v['size'],
+                (string) $stored['sha256'],
+                $nowMs
+            );
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            ProvaProjectService::deleteStoredFile($newStored); // compensação: zip novo sem registro
+            throw $e;
+        }
+        // Arquivo anterior só sai depois do commit.
+        ProvaProjectService::deleteStoredFile($res['previous']);
+        $attempt = ProvaService::loadAttemptById((string) $attempt['id']);
+        $sub = $res['submission'];
+
+        return ['status' => 200, 'payload' => [
+            'ok' => true,
+            'serverNow' => Database::nowIso($nowMs),
+            'attempt' => ProvaService::attemptStudentDto($attempt, $nowMs),
+            'submission' => ProvaProjectService::submissionDto($sub),
+        ]];
     }
 
     private static function rateLimitOr429(int $userId, string $bucketKey): bool
