@@ -388,9 +388,11 @@ function paintTable(attempts) {
     const mc = row.mcScore != null ? `${row.mcScore}/${max.mc}` : '—';
     const showFinal = !isProjectExam() || row.status === 'graded' || row.finalScore != null;
     const final = row.finalScore != null && showFinal ? `${row.finalScore}/${max.total}` : '—';
-    const fileCell = sub
-      ? `${sub.originalName || 'arquivo.zip'} · ${formatBytes(sub.sizeBytes)}${sub.uploadCount > 1 ? ` · ${sub.uploadCount} envios` : ''}`
-      : 'sem arquivo';
+    const fileCell = !sub
+      ? 'sem arquivo'
+      : sub.fileAvailable === false
+        ? `${sub.originalName || 'arquivo.zip'} · apagado após a nota`
+        : `${sub.originalName || 'arquivo.zip'} · ${formatBytes(sub.sizeBytes)}${sub.uploadCount > 1 ? ` · ${sub.uploadCount} envios` : ''}`;
     const blurN = Number(row.blurCount) || 0;
     const leaveN = Number(row.leaveCount) || 0;
     const exitsTitle = `Saiu da aba: ${blurN} · Saiu da página: ${leaveN}`;
@@ -510,11 +512,18 @@ function paintDetail(attempt) {
     if (grading.locked && attempt.contest?.isOpen) {
       hint.textContent = 'Contestação aberta — responda abaixo ou reabra a correção.';
     } else if (grading.locked) {
-      hint.textContent = 'Nota fechada. Se o aluno contestar, você poderá responder ou reabrir.';
+      hint.textContent = project && attempt.submission?.fileAvailable === false
+        ? 'Nota fechada. O arquivo .zip foi apagado do servidor. Se o aluno contestar, você poderá responder ou reabrir a nota — o arquivo não volta.'
+        : 'Nota fechada. Se o aluno contestar, você poderá responder ou reabrir.';
     } else if (project) {
-      hint.textContent = grading.canScore
-        ? 'Baixe o .zip, avalie e publique a nota (0–30) com feedback.'
-        : 'Sem arquivo enviado ainda.';
+      const projectSub = attempt.submission || null;
+      if (!projectSub) {
+        hint.textContent = 'Sem arquivo enviado ainda.';
+      } else if (projectSub.fileAvailable === false) {
+        hint.textContent = 'O arquivo já foi apagado do servidor. Dá para ajustar a nota e publicar de novo; o .zip não volta.';
+      } else {
+        hint.textContent = 'Baixe o .zip, avalie e publique a nota (0–30) com feedback. Ao publicar, o arquivo é apagado do servidor.';
+      }
     } else if (!grading.canScore) {
       hint.textContent = 'Ainda em andamento — só dá para notar depois do envio (ou tempo esgotado).';
     } else if (!hasDisc) {
@@ -639,19 +648,24 @@ function paintProjectDetail(attempt, project) {
   if (!project) return;
 
   const sub = attempt.submission || null;
+  const fileOnDisk = Boolean(sub) && sub.fileAvailable !== false;
   const grading = attempt.grading || {};
   const meta = $('prova-admin-project-meta');
   if (meta) {
     meta.innerHTML = sub
       ? `<div><dt>Arquivo</dt><dd>${escapeHtml(sub.originalName || '—')}</dd></div>
-         <div><dt>Tamanho</dt><dd>${escapeHtml(formatBytes(sub.sizeBytes))}</dd></div>
+         <div><dt>${fileOnDisk ? 'Tamanho' : 'Tamanho enviado'}</dt><dd>${escapeHtml(formatBytes(sub.sizeBytes))}</dd></div>
          <div><dt>Último envio</dt><dd>${escapeHtml(formatWhen(sub.uploadedAt))}</dd></div>
          <div><dt>Envios</dt><dd>${escapeHtml(String(sub.uploadCount ?? 1))}</dd></div>
-         <div><dt>SHA-256</dt><dd>${escapeHtml(String(sub.sha256 || '—').slice(0, 16))}…</dd></div>`
+         <div><dt>SHA-256</dt><dd>${escapeHtml(String(sub.sha256 || '—').slice(0, 16))}…</dd></div>
+         ${fileOnDisk ? '' : '<div><dt>No servidor</dt><dd>Apagado após a publicação da nota</dd></div>'}`
       : '<div><dt>Arquivo</dt><dd>Nenhum envio.</dd></div>';
   }
   const dl = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-download'));
-  if (dl) dl.disabled = !sub;
+  if (dl) {
+    dl.hidden = Boolean(sub) && !fileOnDisk;
+    dl.disabled = !fileOnDisk;
+  }
 
   const locked = Boolean(grading.locked);
   const scoreInput = /** @type {HTMLInputElement|null} */ ($('prova-admin-project-score'));
@@ -672,7 +686,13 @@ function paintProjectDetail(attempt, project) {
   const pubBtn = /** @type {HTMLButtonElement|null} */ ($('prova-admin-project-publish'));
   if (saveBtn) saveBtn.disabled = locked || !sub;
   if (pubBtn) pubBtn.disabled = locked || !sub;
-  setProjectStatus(locked ? 'Nota publicada. Para editar, reabra pela contestação ou zere a entrega.' : '');
+  if (locked) {
+    setProjectStatus(sub && !fileOnDisk
+      ? 'Nota publicada. O arquivo foi apagado do servidor. Para editar a nota, reabra pela contestação ou zere a entrega.'
+      : 'Nota publicada. Para editar, reabra pela contestação ou zere a entrega.');
+  } else {
+    setProjectStatus('');
+  }
 }
 
 async function downloadSubmission() {
@@ -694,7 +714,7 @@ async function downloadSubmission() {
   } catch (error) {
     setProjectStatus(error instanceof ApiError ? error.message : 'Falha ao baixar o arquivo.', true);
   } finally {
-    if (btn) btn.disabled = !currentDetail?.submission;
+    if (btn) btn.disabled = !currentDetail?.submission || currentDetail.submission.fileAvailable === false;
   }
 }
 
@@ -709,7 +729,10 @@ async function gradeProject(finalize) {
     setProjectStatus('Informe a nota.', true);
     return;
   }
-  if (finalize && !window.confirm('Publicar a nota? O aluno passa a ver a nota e o feedback.')) return;
+  const fileStillThere = Boolean(currentDetail.submission) && currentDetail.submission.fileAvailable !== false;
+  if (finalize && !window.confirm(fileStillThere
+    ? 'Publicar a nota? O aluno passa a ver a nota e o feedback.\n\nO arquivo .zip será apagado do servidor para liberar espaço e não poderá ser baixado de novo.'
+    : 'Publicar a nota? O aluno passa a ver a nota e o feedback.')) return;
   setProjectStatus(finalize ? 'Publicando…' : 'Salvando…');
   try {
     const revising = Boolean(currentDetail.contest?.isOpen);
@@ -728,7 +751,9 @@ async function gradeProject(finalize) {
       ...(contestMessage ? { contestAdminMessage: contestMessage } : {}),
     }));
     paintDetail(res.attempt);
-    setProjectStatus(finalize ? 'Nota publicada.' : 'Rascunho salvo.');
+    setProjectStatus(finalize
+      ? (fileStillThere ? 'Nota publicada. O arquivo .zip foi apagado do servidor.' : 'Nota publicada.')
+      : 'Rascunho salvo.');
   } catch (error) {
     if (error instanceof ApiError && error.status === 409 && currentDetail?.id) {
       // reenvio/nota concorrente: recarrega a entrega atual antes de qualquer nova ação

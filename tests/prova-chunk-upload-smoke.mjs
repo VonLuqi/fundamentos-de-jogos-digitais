@@ -105,6 +105,19 @@ $u=U::init(11,'trabalho-final','200mb.zip',$max,$max);check($u['totalChunks']===
 for($i=9;$i>=0;$i--)check(put(11,$u,$i,$i===0?$full:$zero)['ok'],'200mb part');
 $r=finish(11,$u,$max);check($r['ok']&&$r['size']===$max&&gone($u),'200mb finish');
 $peak=memory_get_peak_usage(true);check($peak<32*1024*1024,'bounded memory');
+$keep=P::storeFile($small,false);check($keep['ok'],'keep store');
+$keepPath=P::pathForStoredName($keep['storedName']);
+P::deleteFileIfGraded(['status'=>'submitted'],['stored_name'=>$keep['storedName']]);
+check(is_file($keepPath),'draft keeps zip');
+P::deleteFileIfGraded(['status'=>'graded'],['stored_name'=>$keep['storedName']]);
+check(!is_file($keepPath),'published grade deletes zip');
+$dto=P::submissionDto(['stored_name'=>$keep['storedName'],'original_name'=>'t.zip','size_bytes'=>68,'sha256'=>$keep['sha256'],'upload_count'=>1,'uploaded_at'=>null,'first_uploaded_at'=>null]);
+check($dto['fileAvailable']===false&&$dto['originalName']==='t.zip','dto keeps metadata without file');
+$still=P::storeFile($small,false);$stillPath=P::pathForStoredName($still['storedName']);
+P::deleteFilesForGradedAttempts([['id'=>'a','status'=>'graded'],['id'=>'b','status'=>'submitted']],['a'=>['stored_name'=>$keep['storedName']],'b'=>['stored_name'=>$still['storedName']]]);
+check(is_file($stillPath),'batch keeps ungraded zip');
+P::deleteFilesForGradedAttempts([['id'=>'b','status'=>'graded']],['b'=>['stored_name'=>$still['storedName']]]);
+check(!is_file($stillPath),'batch deletes graded zip');
 echo json_encode(['php'=>'PASS','sizeBytes'=>$r['size'],'parts'=>10,'peakMemoryBytes'=>$peak,'memoryLimit'=>ini_get('memory_limit')]).PHP_EOL;
 `;
 try {

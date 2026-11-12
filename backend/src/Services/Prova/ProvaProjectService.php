@@ -157,6 +157,34 @@ final class ProvaProjectService
         }
     }
 
+    /**
+     * Tira o .zip do disco quando a nota já foi publicada. Nome, tamanho e hash
+     * continuam na linha — só o arquivo some, para não ocupar o host.
+     *
+     * @param array<string, mixed>|null $attempt
+     * @param array<string, mixed>|null $submission
+     */
+    public static function deleteFileIfGraded(?array $attempt, ?array $submission): void
+    {
+        if (!$attempt || ($attempt['status'] ?? '') !== 'graded' || !$submission) {
+            return;
+        }
+        $stored = $submission['stored_name'] ?? null;
+        self::deleteStoredFile(is_string($stored) ? $stored : null);
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $attempts
+     * @param array<string, array<string, mixed>> $subsByAttempt
+     */
+    public static function deleteFilesForGradedAttempts(array $attempts, array $subsByAttempt): void
+    {
+        foreach ($attempts as $attempt) {
+            $id = (string) ($attempt['id'] ?? '');
+            self::deleteFileIfGraded($attempt, $subsByAttempt[$id] ?? null);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Banco
     // -------------------------------------------------------------------------
@@ -304,6 +332,8 @@ final class ProvaProjectService
         if (!$row) {
             return null;
         }
+        $stored = (string) ($row['stored_name'] ?? '');
+        $path = $stored !== '' ? self::pathForStoredName($stored) : null;
         return [
             'originalName' => (string) ($row['original_name'] ?? ''),
             'sizeBytes' => (int) ($row['size_bytes'] ?? 0),
@@ -311,6 +341,7 @@ final class ProvaProjectService
             'firstUploadedAt' => Database::sqlToIso($row['first_uploaded_at'] ?? null),
             'uploadCount' => (int) ($row['upload_count'] ?? 1),
             'sha256' => (string) ($row['sha256'] ?? ''),
+            'fileAvailable' => $path !== null && is_file($path),
         ];
     }
 

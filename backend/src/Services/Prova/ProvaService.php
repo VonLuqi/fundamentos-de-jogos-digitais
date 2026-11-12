@@ -1069,6 +1069,8 @@ final class ProvaService
 
         if ($def && $def->isProject()) {
             $sub = ProvaProjectService::loadSubmission((string) $attempt['id']);
+            // Nota publicada não guarda o .zip: o detalhe também limpa entregas já fechadas.
+            ProvaProjectService::deleteFileIfGraded($attempt, $sub);
             $detail['submission'] = ProvaProjectService::submissionDto($sub);
             $detail['feedback'] = $notes['general'];
             $detail['grading'] = [

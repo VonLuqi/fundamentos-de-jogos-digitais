@@ -395,6 +395,9 @@ final class ProvaController
                 $subsByAttempt = $def->isProject()
                     ? ProvaProjectService::loadSubmissionsByAttempt(array_map(static fn(array $r): string => (string) $r['id'], $normalizedRows))
                     : [];
+                if ($def->isProject()) {
+                    ProvaProjectService::deleteFilesForGradedAttempts($normalizedRows, $subsByAttempt);
+                }
                 $allItems = array_map(
                     static function (array $row) use ($usersById, $nowMs, $def, $subsByAttempt): array {
                         $item = ProvaService::attemptAdminListItem($row, $usersById[(int) $row['user_id']] ?? null, $nowMs);
@@ -1056,8 +1059,11 @@ final class ProvaController
                 $assertExam($attempt);
                 $sub = $attempt ? ProvaProjectService::loadSubmission($attemptId) : null;
                 $path = $sub ? ProvaProjectService::pathForStoredName((string) $sub['stored_name']) : null;
-                if (!$attempt || !$path || !is_file($path)) {
-                    Http::json(404, ['error' => 'Entrega não encontrada.']);
+                if (!$attempt || !$sub || !$path || !is_file($path)) {
+                    $purged = $attempt && $sub && ($attempt['status'] ?? '') === 'graded';
+                    Http::json(404, ['error' => $purged
+                        ? 'O arquivo foi apagado do servidor após a publicação da nota.'
+                        : 'Entrega não encontrada.']);
                 }
                 $uStmt = $pdo->prepare('SELECT username FROM users WHERE id = :id LIMIT 1');
                 $uStmt->execute([':id' => (int) $attempt['user_id']]);
