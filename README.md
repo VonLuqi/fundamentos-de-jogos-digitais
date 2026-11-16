@@ -32,7 +32,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Tracking de visualização de aula por aluno (`lesson_views`) para relatórios
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
 - ✅ Módulo 01 — "A Regra do Jogo" (teoria MDA + simulação interativa em canvas)
-- ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api`
+- ✅ Servidor local de desenvolvimento (`scripts/dev-server.mjs`, `npm run dev`) que serve o front e encaminha `/api` ao backend (produção por padrão; `DEV_API_BASE` aponta para outro)
 - ✅ **Hades: O Despertar do Submundo** (`pages/despertar.html`): clicker server-authoritative (`/api/despertar`), layout Cookie (Altar · Mundo · Store), WorldView/AltarOrbit, sync + prestígio + talentos, **Bancada do Juiz** (Vereditos), Códice do Loop, conquistas no Álbum (gate do Mestre). Planos: [docs/plano-hades-despertar.md](docs/plano-hades-despertar.md) · [docs/plano-despertar-ui-cookieclicker.md](docs/plano-despertar-ui-cookieclicker.md).
 - ✅ **Juízo do Tartarus** (modal Higher/Lower no Despertar) + pool stub ≥200 em [data/despertar-juizo-pool.stub.json](data/despertar-juizo-pool.stub.json). Click no card / Empate (`A` \| `B` \| `tie`; aliases `higher`/`lower`). No acerto o desafiante sempre assume o trono. O Mestre completa cada entrada com `rating` (L|10|12|14|16|18), `blurb` e `cover` (filename sob `assets/classind-dle/covers/` ou `assets/despertar-juizo/covers/`); só entradas com `rating` entram no sorteio; o CTA exige ≥30 ready. GDD: [docs/gdd-juizo-v2.md](docs/gdd-juizo-v2.md).
 - ✅ **Placar do Domínio** (`pages/ranking.html`, CTA **Ver o Placar** no Painel): turma/global · XP · #relíquias · juizoBest — sem almas/SPS.
@@ -64,7 +64,7 @@ Layout jogável em `pages/despertar.html` (desktop: três colunas; mobile empilh
 ```text
 fundamentos-de-jogos-digitais/
 ├── index.html                   # Introdução / landing da plataforma
-├── local-server.mjs              # Servidor local de desenvolvimento (Node http)
+├── scripts/dev-server.mjs        # Servidor local de desenvolvimento (`npm run dev`)
 ├── migrate-passwords.js          # Script utilitário de migração de senhas legadas
 ├── package.json
 ├── api/
@@ -251,7 +251,7 @@ fundamentos-de-jogos-digitais/
 ### Servidor local dedicado (recomendado)
 
 ```bash
-node local-server.mjs
+npm run dev
 ```
 
 Acesse em `http://localhost:3000`.

@@ -162,7 +162,7 @@ async function init() {
     showApiWarning(
       error instanceof ApiError
         ? error.message
-        : 'A API não respondeu. Rode `vercel dev` localmente ou publique no Vercel.'
+        : 'A API do Domínio não respondeu. Verifique a conexão com o servidor.'
     );
     return;
   }
