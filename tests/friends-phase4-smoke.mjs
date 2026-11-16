@@ -71,8 +71,10 @@ assert(apiJs.includes('fetchFriendProfile'), 'api.js exporta fetchFriendProfile'
 assert(apiJs.includes('companheiro:'), 'ROUTES.companheiro existe');
 
 const progressJs = readProgressSurface(root);
-assert(progressJs.includes("action === 'friendsList'"), 'progress.js tem friendsList');
-assert(progressJs.includes("action === 'friendProfile'"), 'progress.js tem friendProfile');
+// Backend PHP roteia por `case '<action>':` (o legado JS usava `action === '<action>'`).
+const hasAction = (name) => progressJs.includes(`action === '${name}'`) || progressJs.includes(`case '${name}':`);
+assert(hasAction('friendsList'), 'progress.js tem friendsList');
+assert(hasAction('friendProfile'), 'progress.js tem friendProfile');
 assert(progressJs.includes('FRIEND_LIMIT'), 'progress.js define limite de companheiros');
 
 const appShell = read('js/app-shell.js');

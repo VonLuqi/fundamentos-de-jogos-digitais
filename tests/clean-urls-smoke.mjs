@@ -106,9 +106,10 @@ try {
   assert.equal(clean.status, 200, '/despertar/ → 200');
   assert.ok(clean.body.includes('O Despertar') || clean.body.includes('despertar'), 'HTML do Despertar');
 
+  // dev-server serve /despertar direto (um 301 entra em loop no Browser do Cursor); o 301 é do .htaccess em produção.
   const noSlash = await fetchPath('/despertar');
-  assert.equal(noSlash.status, 301, '/despertar → 301');
-  assert.ok(String(noSlash.location).endsWith('/despertar/'), 'Location com barra final');
+  assert.equal(noSlash.status, 200, '/despertar → 200 (dev-server)');
+  assert.ok(noSlash.body.includes('despertar'), 'HTML do Despertar sem barra final');
 
   const legacy = await fetchPath('/pages/despertar.html');
   assert.equal(legacy.status, 301, '/pages/despertar.html → 301');

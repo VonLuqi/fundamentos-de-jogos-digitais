@@ -22,6 +22,7 @@ use App\Controllers\DespertarController;
 use App\Controllers\ProgressController;
 use App\Controllers\ProvaController;
 use App\Controllers\SessionBootstrapController;
+use App\Controllers\TurmaGradesController;
 use App\Core\Database;
 use App\Core\Http;
 use App\Core\MysqlMigrator;
@@ -104,6 +105,10 @@ try {
 
         case 'prova':
             ProvaController::handle();
+            break;
+
+        case 'turma-grades':
+            TurmaGradesController::handle();
             break;
 
         case 'classind':

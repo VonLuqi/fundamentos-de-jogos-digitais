@@ -33,6 +33,8 @@ final class AdminAudit
         'rebalanceLetheWallets' => 'admin_rebalance_lethe_wallets',
         'seasonOpen' => 'admin_despertar_season_open',
         'juizoUnban' => 'admin_despertar_juizo_unban',
+        'closeTurmaGrades' => 'admin_close_turma_grades',
+        'reopenTurmaGrades' => 'admin_reopen_turma_grades',
     ];
 
     /**

@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -55,25 +56,25 @@ assert(js.includes('singleUse'), 'codigos.js envia singleUse');
 assert(api.includes('CODE_TTL_OPTIONS'), 'api.js exporta CODE_TTL_OPTIONS');
 assert(api.includes('singleUse'), 'generateCode cliente envia singleUse');
 
-const redeem = read('api/_lib/progress/redeem.js');
-const shared = read('api/_lib/progress/shared.js');
+// Backend atual é PHP (backend/src/{Controllers,Services/Progress}); legado api/_lib/ foi removido.
+const progressSurface = readProgressSurface(root);
+const redeem = progressSurface;
+const shared = progressSurface;
 const migrate = read('db/migrate-2026-10-02-redeem-code-ttl-single-use.sql');
 const setup = read('db/setup.sql');
 
 assert(migrate.includes('single_use'), 'migração adiciona single_use');
 assert(setup.includes('single_use boolean'), 'setup.sql tem single_use');
 assert(shared.includes('CODE_TTL_OPTIONS'), 'shared exporta CODE_TTL_OPTIONS');
-assert(shared.includes('normalizeCodeTtlMinutes'), 'shared normaliza TTL');
-assert(redeem.includes('isCodeSingleUse'), 'redeem trata uso único');
-assert(redeem.includes('ttlMinutes'), 'generateCode lê ttlMinutes');
-assert(read('api/progress.js').includes('ttlMinutes'), 'progress encaminha ttlMinutes');
+assert(shared.includes('normalizeTtlMinutes'), 'shared normaliza TTL');
+assert(redeem.includes("['single_use']"), 'redeem trata uso único');
+assert(redeem.includes("$body['ttlMinutes']"), 'generateCode lê ttlMinutes');
 assert(js.includes('generateCode'), 'codigos.js gera código');
 assert(js.includes('listCodes'), 'codigos.js lista histórico');
 assert(/codigos:\s*\(\)\s*=>/.test(api), 'ROUTES.codigos existe');
 
 assert(
-  /id="btn-generate-codes"[^>]*href="\.\/codigos\.html"/.test(dashboardHtml.replace(/\s+/g, ' '))
-  || dashboardHtml.includes('href="./codigos.html"') && dashboardHtml.includes('id="btn-generate-codes"'),
+  /id="btn-generate-codes"[^>]*href="(\.\.\/codigos\/|\.\/codigos\.html)"/.test(dashboardHtml.replace(/\s+/g, ' ')),
   'master-tools deve linkar para ./codigos.html',
 );
 assert(dashboardHtml.includes('Códigos de Acesso'), 'label Códigos de Acesso no Painel');
@@ -81,7 +82,8 @@ assert(
   !dashboardJs.includes("openScrollModal('Gerar Código de Acesso'"),
   'dashboard não deve mais abrir modal de gerar códigos',
 );
-assert(!dashboardJs.includes('generateCode,'), 'dashboard não importa generateCode');
+// Trono do Mestre (commit 71a8af5): o Painel cunha códigos no formulário "forja" (master-forge-*), sem modal.
+assert(dashboardJs.includes('master-forge-lesson') && dashboardJs.includes('generateCode('), 'dashboard cunha códigos pelo formulário forja');
 assert(dashboardJs.includes('toUpperCase'), 'Altar normaliza código em maiúsculas');
 
 const sidebars = [
@@ -94,7 +96,7 @@ const sidebars = [
 sidebars.forEach((rel) => {
   const page = read(rel);
   assert(
-    page.includes('data-nav-item="codigos"') && page.includes('href="./codigos.html"'),
+    page.includes('data-nav-item="codigos"') && (page.includes('href="../codigos/"') || page.includes('href="./codigos.html"')),
     `${rel}: sidebar deve ter link Códigos`,
   );
 });

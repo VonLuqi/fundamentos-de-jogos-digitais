@@ -23,6 +23,7 @@
   <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
   <link rel="stylesheet" href="../css/app-shell.css?v=20261028a" />
   <link rel="stylesheet" href="../css/dashboard.css?v=perfil-ui-1" />
+  <link rel="stylesheet" href="../css/notas-turma.css?v=1" />
   <script src="../js/devtools-guard.boot.js"></script>
 </head>
 <body class="app-shell-page" data-route="dashboard" data-role-scope="protected">
@@ -71,6 +72,7 @@
         <a class="app-shell__link" data-nav-item="codigos" data-admin-only href="../codigos/" hidden>Códigos de Acesso</a>
         <a class="app-shell__link" data-nav-item="souls" data-admin-only href="../souls/" hidden>Almas Registradas</a>
         <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="../prova-admin/" hidden>Prova Módulo 1</a>
+        <a class="app-shell__link" data-nav-item="notas-turma" data-admin-only href="../notas-turma/" hidden>Notas da Turma</a>
       </nav>
 
       <div class="app-shell__footer">
@@ -659,6 +661,14 @@
 
           <!-- ========== COLUNA DIREITA ========== -->
           <section class="hall-content" aria-label="Progresso e conquistas">
+
+      <!-- ========== NOTA FINAL DA TURMA (só após o Mestre fechar) ========== -->
+      <article class="altar-block hades-mirror-frame final-grade-card" id="final-grade-card" aria-labelledby="final-grade-title" hidden>
+        <h3 class="block-title" id="final-grade-title">Nota Final <span class="block-title__sub">(Fundamentos de Jogos Digitais)</span></h3>
+        <p class="final-grade-card__total" id="final-grade-total"></p>
+        <ul class="final-grade-card__list" id="final-grade-list"></ul>
+        <p class="final-grade-card__when" id="final-grade-when"></p>
+      </article>
 
       <!-- ========== ALTAR: OFERENDA AO ESTIGE ========== -->
       <article class="altar-block hades-mirror-frame">

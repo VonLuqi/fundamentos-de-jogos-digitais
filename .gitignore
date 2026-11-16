@@ -81,3 +81,9 @@ backend/migrations/
 uploads/trabalhos/*
 !uploads/trabalhos/.htaccess
 !uploads/trabalhos/.gitkeep
+
+# --- AI tooling (local) ---
+graphify-out/
+.code-review-graph/
+.claude/settings.local.json
+.mcp.json

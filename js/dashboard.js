@@ -60,6 +60,7 @@ import {
   provaAdminSetExamOpen,
   fetchAdminOverview,
   generateCode,
+  turmaGradesMyGrade,
 } from './api.js';
 import { DESPERTAR_SEASON_CLOSED } from './hades-despertar/config/season-closed.js';
 import { formatRate, formatSouls } from './hades-despertar/ui/NumberFormatter.js';
@@ -2113,6 +2114,45 @@ function showApiWarning(message) {
 /* ============================================================
    12. BOOT
    ============================================================ */
+/** Card "Nota Final": só aparece quando o Mestre fechou as notas da turma. */
+async function renderFinalGrade(token) {
+  const card = document.getElementById('final-grade-card');
+  if (!card || currentUser?.role === 'admin') return;
+  try {
+    const g = await turmaGradesMyGrade(token);
+    if (!g?.closed) {
+      card.hidden = true;
+      return;
+    }
+    if (g.missing) {
+      document.getElementById('final-grade-total').textContent = '';
+      document.getElementById('final-grade-list').replaceChildren();
+      document.getElementById('final-grade-when').textContent = 'Sua nota ainda não foi lançada. Fale com o professor.';
+      card.hidden = false;
+      return;
+    }
+    const n = (v) => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+    document.getElementById('final-grade-total').textContent = `${n(g.total)} / 100`;
+    const items = [
+      ['Códigos', g.codes, 10], ['Entregas', g.entregas, 20], ['Prova M1', g.m1, 20],
+      ['Prova M2', g.m2, 20], ['Trabalho Final', g.tf, 30],
+    ];
+    document.getElementById('final-grade-list').replaceChildren(...items.map(([label, v, max]) => {
+      const li = document.createElement('li');
+      const strong = document.createElement('strong');
+      strong.textContent = `${n(v)}/${max}`;
+      li.append(`${label}: `, strong);
+      return li;
+    }));
+    const when = g.closedAt ? new Date(g.closedAt) : null;
+    document.getElementById('final-grade-when').textContent = when && !Number.isNaN(when.getTime())
+      ? `Notas fechadas em ${when.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.` : '';
+    card.hidden = false;
+  } catch (error) {
+    console.error('[dashboard] Falha ao carregar a nota final:', error);
+  }
+}
+
 async function init() {
   initScrollModal();
   // Carrega a galeria fixa de avatares em paralelo com o guard de sessão.
@@ -2175,6 +2215,16 @@ async function init() {
   initAltar();
   initAdminTools();
   initUnderworldGate();
+  void renderFinalGrade(currentToken);
+  // Reabrir/fechar pelo Mestre reflete sem recarregar: refetch ao voltar à aba (máx. 1x/30 s, sem polling).
+  let finalGradeAt = Date.now();
+  const refreshFinalGrade = () => {
+    if (document.visibilityState !== 'visible' || Date.now() - finalGradeAt < 30000) return;
+    finalGradeAt = Date.now();
+    void renderFinalGrade(currentToken);
+  };
+  document.addEventListener('visibilitychange', refreshFinalGrade);
+  window.addEventListener('focus', refreshFinalGrade);
   renderRailPreviews(currentToken).catch((error) => {
     console.error('[dashboard] Falha ao renderizar previews do trilho:', error);
   });

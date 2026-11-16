@@ -62,6 +62,7 @@ const APP_PAGE_SLUGS = new Set([
   'classind-dle',
   'prova',
   'prova-admin',
+  'notas-turma',
   'guia-trabalho-final',
 ]);
 

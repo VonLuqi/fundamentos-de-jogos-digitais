@@ -80,6 +80,8 @@
     { "source": "/prova/", "destination": "/pages/prova.html" },
     { "source": "/prova-admin", "destination": "/pages/prova-admin.html" },
     { "source": "/prova-admin/", "destination": "/pages/prova-admin.html" },
+    { "source": "/notas-turma", "destination": "/pages/notas-turma.html" },
+    { "source": "/notas-turma/", "destination": "/pages/notas-turma.html" },
     { "source": "/guia-trabalho-final", "destination": "/pages/guia-trabalho-final.html" },
     { "source": "/guia-trabalho-final/", "destination": "/pages/guia-trabalho-final.html" },
     { "source": "/submundo/tartaro-oculto", "destination": "/pages/submundo/tartaro-oculto.html" },

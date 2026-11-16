@@ -358,6 +358,7 @@ const APP_PAGE_SLUGS = new Set([
   'classind-dle',
   'prova',
   'prova-admin',
+  'notas-turma',
   'guia-trabalho-final',
   'perfil',
 ]);
@@ -443,6 +444,7 @@ export const ROUTES = {
   classindDle: () => appRoute('classind-dle'),
   prova: () => appRoute('prova'),
   provaAdmin: () => appRoute('prova-admin'),
+  notasTurma: () => appRoute('notas-turma'),
   /** `prova/?exam=<id>` (M1 mantém a URL sem parâmetro). */
   provaExam: (examId) => provaRoute('prova', examId),
   provaAdminExam: (examId) => provaRoute('prova-admin', examId),
@@ -2484,6 +2486,36 @@ export function provaAdminScoreDiscursive(token, payload = {}) {
  */
 export function provaAdminFinalizeGrade(token, payload = {}) {
   return provaRequest(token, 'adminFinalizeGrade', payload);
+}
+
+/* Fechamento de notas da turma (100 pts) — /api/turma-grades */
+export function turmaGradesRequest(token, action, payload = {}) {
+  return request('/turma-grades', {
+    method: 'POST',
+    body: JSON.stringify({ token, action, ...payload }),
+  });
+}
+
+export function turmaGradesAdminGradebook(token, turma) {
+  return turmaGradesRequest(token, 'adminGradebook', { turma });
+}
+
+export function turmaGradesAdminClose(token, turma, { force = false } = {}) {
+  return turmaGradesRequest(token, 'adminClose', { turma, force });
+}
+
+export function turmaGradesAdminReopen(token, turma) {
+  return turmaGradesRequest(token, 'adminReopen', { turma });
+}
+
+/** Resposta: { ok, filename, source: 'snapshot'|'live', csv } */
+export function turmaGradesAdminCsv(token, turma) {
+  return turmaGradesRequest(token, 'adminCsv', { turma });
+}
+
+/** Aluno: { ok, closed: false } ou { ok, closed: true, codes, entregas, m1, m2, tf, total, details } */
+export function turmaGradesMyGrade(token) {
+  return turmaGradesRequest(token, 'myGrade');
 }
 
 export function provaContestGrade(token, message, options = {}) {

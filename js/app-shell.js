@@ -104,6 +104,7 @@ function mapRouteToNavItem(route) {
   if (route === 'souls') return 'souls';
   if (route === 'codigos') return 'codigos';
   if (route === 'prova-admin') return 'prova-admin';
+  if (route === 'notas-turma') return 'notas-turma';
   if (/^aula\d+$/i.test(route)) return 'aulas';
   return route;
 }

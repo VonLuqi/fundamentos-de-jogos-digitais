@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Fechamento das notas da turma — 100 pontos." />
+  <meta name="theme-color" content="#0d0a10" />
+  <title>Notas da Turma | Hub do Mestre</title>
+
+  <link rel="icon" href="../assets/icons/favicon.png" type="image/png" sizes="64x64" />
+  <link rel="icon" href="../assets/icons/favicon-32.png" type="image/png" sizes="32x32" />
+  <link rel="icon" href="../assets/icons/favicon-48.png" type="image/png" sizes="48x48" />
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png" sizes="180x180" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="../css/hades-tokens.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/hades-components.css?v=20261021d" />
+  <link rel="stylesheet" href="../css/app-shell.css?v=20261028a" />
+  <link rel="stylesheet" href="../css/notas-turma.css?v=1" />
+  <script src="../js/devtools-guard.boot.js"></script>
+</head>
+<body class="app-shell-page notas-turma-page" data-route="notas-turma" data-role-scope="admin">
+  <div class="vignette" aria-hidden="true"></div>
+
+  <div id="notas-turma-app" class="app-shell" data-shell hidden>
+
+    <button class="app-shell__overlay" type="button" aria-label="Fechar navegação" data-shell-overlay hidden></button>
+
+    <aside class="app-shell__sidebar" id="app-shell-sidebar" aria-label="Navegação principal" data-shell-sidebar>
+      <div class="app-shell__brand">
+        <p class="app-shell__brand-eyebrow">Fundamentos de Jogos Digitais</p>
+        <p class="app-shell__brand-title">Domínio do Herói</p>
+      </div>
+
+      <nav class="app-shell__nav" aria-label="Seções principais">
+        <a class="app-shell__link" data-nav-item="dashboard" href="../dashboard/">Painel do Heroi</a>
+        <a class="app-shell__link" data-nav-item="aulas" href="../aulas/">Aulas</a>
+        <a class="app-shell__link" data-nav-item="conquistas" href="../conquistas/">Conquistas</a>
+        <a class="app-shell__link" data-nav-item="ranking" href="../ranking/">Placar do Domínio</a>
+        <a class="app-shell__link" data-nav-item="salao" href="../salao-espiritual/">Salão Espiritual</a>
+        <a class="app-shell__link" data-nav-item="grimorio" href="../grimorio/">Grimório Pessoal</a>
+        <a class="app-shell__link" data-nav-item="codigos" data-admin-only href="../codigos/" hidden>Códigos de Acesso</a>
+        <a class="app-shell__link" data-nav-item="souls" data-admin-only href="../souls/" hidden>Almas Registradas</a>
+        <a class="app-shell__link" data-nav-item="prova-admin" data-admin-only href="../prova-admin/" hidden>Provas &amp; Trabalho</a>
+        <a class="app-shell__link" data-nav-item="notas-turma" data-admin-only href="../notas-turma/" hidden>Notas da Turma</a>
+      </nav>
+
+      <div class="app-shell__footer">
+        <button class="app-shell__logout" type="button" data-shell-logout>Encerrar Sessao</button>
+      </div>
+    </aside>
+
+    <div class="app-shell__main">
+      <header class="app-shell__header" data-shell-header>
+        <div class="app-shell__header-left">
+          <button
+            class="app-shell__menu-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="app-shell-sidebar"
+            aria-label="Abrir navegação"
+            data-shell-toggle
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <div class="app-shell__titles">
+            <p class="app-shell__eyebrow">Painel Administrativo</p>
+            <h1 class="app-shell__title" id="notas-page-title">NOTAS <span class="accent">DA TURMA</span></h1>
+          </div>
+        </div>
+      </header>
+
+      <main class="app-shell__content notas-main" aria-labelledby="notas-page-title">
+        <div class="api-warning" id="api-warning" hidden>
+          <p id="api-warning-text"></p>
+        </div>
+
+        <section class="notas-bar hades-mirror-frame" aria-label="Turma e estado do fechamento">
+          <label class="notas-field" for="notas-turma">
+            <span>Turma</span>
+            <select id="notas-turma"></select>
+          </label>
+          <p class="notas-status" id="notas-status" role="status" aria-live="polite">Carregando…</p>
+          <div class="notas-actions">
+            <button type="button" class="btn-gold btn-gold--ghost" id="notas-refresh">Atualizar</button>
+            <button type="button" class="btn-gold btn-gold--ghost" id="notas-csv">Exportar CSV</button>
+            <button type="button" class="btn-gold" id="notas-close">Fechar notas</button>
+            <button type="button" class="btn-gold btn-gold--ghost" id="notas-reopen" hidden>Reabrir notas</button>
+          </div>
+        </section>
+
+        <p class="notas-legend">
+          100 pontos: códigos 10 (8 aulas) · entregas 20 (2,5 por aula) · Prova M1 20 · Prova M2 20 · Trabalho Final 30.
+          Fechar publica a nota no painel de cada aluno.
+        </p>
+
+        <p class="notas-feedback" id="notas-feedback" role="alert" hidden></p>
+
+        <div class="notas-table-wrap" id="notas-table-wrap" tabindex="0" role="region" aria-label="Notas por aluno">
+          <table class="notas-table">
+            <caption class="sr-only">Notas da turma por item</caption>
+            <thead>
+              <tr>
+                <th scope="col">Aluno</th>
+                <th scope="col">Códigos (x/10)</th>
+                <th scope="col">Entregas (x/20)</th>
+                <th scope="col">M1 (x/20)</th>
+                <th scope="col">M2 (x/20)</th>
+                <th scope="col">TF (x/30)</th>
+                <th scope="col">Total (x/100)</th>
+              </tr>
+            </thead>
+            <tbody id="notas-body"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="notas-dialog" id="notas-dialog" aria-labelledby="notas-dialog-title">
+    <form method="dialog">
+      <h2 id="notas-dialog-title"></h2>
+      <p id="notas-dialog-body"></p>
+      <ul class="notas-dialog__list" id="notas-dialog-list" hidden></ul>
+      <div class="notas-dialog__actions">
+        <button type="submit" class="btn-gold btn-gold--ghost" value="cancel">Cancelar</button>
+        <button type="submit" class="btn-gold" value="confirm" id="notas-dialog-confirm">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="../js/notas-turma.js?v=1"></script>
+</body>
+</html>
