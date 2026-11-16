@@ -44,14 +44,14 @@ function assert(condition, message) {
 
 const api = read('js/api.js');
 assert(api.includes('grimorioEditar'), 'ROUTES.grimorioEditar deve existir');
-assert(api.includes("grimorio.html"), 'ROUTES.grimorioNota aponta ao workspace');
+assert(api.includes("const base = appRoute('grimorio');"), 'ROUTES.grimorioNota aponta ao workspace');
 assert(api.includes("action: 'noteClone'"), 'cloneNote deve chamar noteClone');
 assert(api.includes("action: 'noteRefuseShare'"), 'refuseNoteShare deve existir');
 assert(api.includes("action: 'noteEventsAck'"), 'ackNoteEvents deve existir');
 
 const progress = readProgressSurface(root);
-assert(progress.includes("action === 'noteClone'"), 'API noteClone');
-assert(progress.includes("action === 'noteRefuseShare'"), 'API noteRefuseShare');
+assert(progress.includes("case 'noteClone'"), 'API noteClone');
+assert(progress.includes("case 'noteRefuseShare'"), 'API noteRefuseShare');
 assert(progress.includes('user_note_events') || progress.includes('NOTE_EVENTS_TABLE'), 'eventos de nota');
 assert(progress.includes('cloned_from_note_id'), 'cloned_from_note_id no backend');
 
@@ -64,7 +64,7 @@ assert(setup.includes('cloned_from_note_id'), 'setup.sql com cloned_from');
 assert(setup.includes('user_note_events'), 'setup.sql com events');
 
 const listHtml = read('pages/grimorio.html');
-assert(listHtml.includes('grimorio-editar.html'), 'Nova inscrição → editar');
+assert(listHtml.includes('../grimorio-editar/'), 'Nova inscrição → editar');
 assert(listHtml.includes('grimorio-workspace'), 'workspace markup');
 assert(listHtml.includes('id="note-view"'), 'painel leitura no workspace');
 assert(listHtml.includes('note-clone'), 'CTA clonar no painel');
@@ -133,7 +133,6 @@ assert(read('js/aula4.js').includes('grimorio-from-note'), 'aula4 fromNote');
   'js/grimorio-tags.js',
   'js/grimorio-from-note.js',
   'js/api.js',
-  'api/progress.js',
 ].forEach((rel) => {
   const result = spawnSync(process.execPath, ['--check', path.join(root, rel)], {
     encoding: 'utf8',

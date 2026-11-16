@@ -46,11 +46,11 @@ assert(apiJs.includes('isLessonBatchFallbackStatus') || (apiJs.includes('404') &
 assert(/trackLessonView[\s\S]*enqueueLessonEvent/.test(apiJs), 'trackLessonView enfileira');
 assert(/saveLessonParagraph[\s\S]*flushLessonEvents/.test(apiJs), 'saveLessonParagraph faz flush');
 
-assert(progress.includes("action === 'lessonEventsBatch'"), 'server lessonEventsBatch');
+assert(progress.includes("case 'lessonEventsBatch'"), 'server lessonEventsBatch');
 assert(progress.includes('executeLessonView'), 'executeLessonView compartilhado');
 assert(progress.includes('executeLessonParagraph'), 'executeLessonParagraph compartilhado');
 assert(progress.includes('LESSON_EVENTS_BATCH_MAX'), 'limite de batch');
-assert(/\bevents\b/.test(progress.slice(progress.indexOf('const {'), progress.indexOf('} = req.body'))), 'destructuring events');
+assert(progress.includes("$body['events']"), 'events validado no body');
 
 assert(contratos.includes('lessonEventsBatch'), 'contrato D6');
 assert(/Task B6|dirty|lessonEventsBatch/i.test(faseB), 'doc Fase B cobre B6');

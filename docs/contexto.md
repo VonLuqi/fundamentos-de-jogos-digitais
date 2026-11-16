@@ -19,7 +19,7 @@ Criar um **hub gamificado** onde o aluno avança por módulos, ganha XP, sobe de
 | Módulo 01 | ✅ | Aula interativa (`js/aula1.js`) com simulação de MDA |
 | Infraestrutura | ✅ | Script `local-server.mjs`, migrations SQL em `db/` |
 | Documentação | ✅ | README detalhado, guias de setup e troubleshooting |
-| Testes básicos | ✅ | Smoke test `tests/login-check.mjs`, integração `tests/integration-check.mjs` |
+| Testes básicos | ✅ | Smoke tests em `tests/` |
 | CI / lint | ✅ | Script `npm run check` verifica sintaxe de todos os módulos |
 
 ### 4. Pontos críticos atuais

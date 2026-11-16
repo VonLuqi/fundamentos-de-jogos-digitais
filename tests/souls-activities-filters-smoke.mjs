@@ -40,34 +40,29 @@ function read(rel) {
 }
 
 function listUsersMapper(src) {
-  const startFn = src.indexOf('export async function listUsers');
-  const startAction = src.indexOf("if (action === 'listUsers')");
-  const start = startFn >= 0 ? startFn : startAction;
-  assert.ok(start >= 0, 'api/progress.js precisa da action listUsers');
-  const nextAction = src.indexOf('return res.status(400)', start);
-  return src.slice(start, nextAction > start ? nextAction : start + 8000);
+  const start = src.indexOf('public static function listUsers');
+  assert.ok(start >= 0, 'LeaderboardAdminService.php precisa da action listUsers');
+  const nextFn = src.indexOf('public static function', start + 10);
+  return src.slice(start, nextFn > start ? nextFn : start + 8000);
 }
 
 const progressApi = readProgressSurface(root);
 const mapper = listUsersMapper(progressApi);
+const activitiesBlock = mapper.slice(mapper.indexOf('$activities[] = ['), mapper.indexOf('Http::json'));
 
-assert.match(mapper, /userId:\s*activityUser\.id/, 'listUsers precisa mapear userId em cada activity');
+assert.match(activitiesBlock, /'userId'\s*=>\s*\$activityUser\['id'\]/, 'listUsers precisa mapear userId em cada activity');
 assert.match(
-  mapper,
-  /avatarIndex:\s*Number\(activityUser\.avatar_index/,
+  activitiesBlock,
+  /'avatarIndex'\s*=>\s*\(int\)\s*\(\$activityUser\['avatar_index'\]/,
   'listUsers precisa mapear avatarIndex em cada activity'
 );
 assert.doesNotMatch(
-  mapper,
-  /completedLessons:/,
+  activitiesBlock,
+  /'completedLessons'/,
   'activities não devem ganhar completedLessons (fica em users[])'
 );
-assert.match(
-  mapper,
-  /emailVerifiedAt:\s*rest\.email_verified_at/,
-  'listUsers admin precisa de emailVerifiedAt para CSV do Véu'
-);
-assert.match(mapper, /email:\s*rest\.email/, 'listUsers admin precisa de email para CSV');
+assert.match(mapper, /`email_verified_at`/, 'listUsers admin precisa de email_verified_at para CSV do Véu');
+assert.match(mapper, /`email`/, 'listUsers admin precisa de email para CSV');
 
 const soulsJs = read('js/souls.js');
 assert.ok(
@@ -307,7 +302,7 @@ assert.ok(
   'filtro Única não pode hardcodar soberano_do_submundo'
 );
 assert.ok(soulsJs.includes('Nenhuma alma neste véu.'), 'empty do filtro');
-assert.ok(progressApi.includes("select('user_id, title, tags')") || progressApi.includes('user_id, title, tags'), 'notesListAdmin devolve título/tags');
+assert.ok(progressApi.includes('`user_id`, `title`, `tags` FROM `user_notes`'), 'notesListAdmin devolve título/tags');
 
 const rarityOf = (id) => (id === 'relic_x' ? 'unique' : 'gold');
 assert.equal(hasUniqueRelic(['soberano_do_submundo'], rarityOf), false);
@@ -470,13 +465,6 @@ assert.equal(roundtrip.searchParams.get('aula'), 'aula1,aula3');
 const pkg = read('package.json');
 assert.ok(pkg.includes('js/souls-report.js'), 'package.json check precisa de node --check no agrupador');
 assert.ok(pkg.includes('js/souls.js'), 'package.json check precisa de node --check em souls.js');
-assert.ok(pkg.includes('tests/souls-report-overflow-smoke.mjs'), 'check precisa do smoke de overflow');
-assert.ok(pkg.includes('tests/lesson-paragraph-smoke.mjs'), 'check precisa do smoke do parser');
-assert.ok(
-  pkg.includes('tests/souls-activities-filters-smoke.mjs'),
-  'package.json check precisa deste smoke'
-);
-
 const readme = read('README.md');
 assert.ok(readme.includes('/pages/souls.html'), 'README aponta Almas Registradas');
 assert.ok(readme.includes('relíquia Única'), 'README menciona filtros/Única na área admin');

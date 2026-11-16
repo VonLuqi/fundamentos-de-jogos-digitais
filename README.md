@@ -134,8 +134,6 @@ fundamentos-de-jogos-digitais/
 │   ├── aula3.html
 │   └── souls.html
 ├── tests/
-│   ├── login-check.mjs
-│   ├── friends-phase1-smoke.mjs
 │   ├── friends-phase4-smoke.mjs
 │   ├── mirror-secret-axes-smoke.mjs
 │   └── despertar-*-smoke.mjs      # Smokes do Despertar (sync, Códice, conquistas, …)
@@ -337,20 +335,12 @@ O e-mail do aluno **não** aparece no DTO de companheiros, turma ou Almas. No pr
 ## Testes
 
 ```bash
-node tests/login-check.mjs
-node tests/integration-check.mjs
-node tests/friends-phase1-smoke.mjs
 node tests/friends-phase4-smoke.mjs
 node tests/mirror-secret-axes-smoke.mjs
-node tests/password-reset-smoke.mjs
 ```
 
-- [tests/login-check.mjs](tests/login-check.mjs): valida login com credenciais corretas e incorretas.
-- [tests/integration-check.mjs](tests/integration-check.mjs): valida sessão inválida, cálculo de XP/nível e resgate de código válido vs. inválido.
-- [tests/friends-phase1-smoke.mjs](tests/friends-phase1-smoke.mjs): actions de amigos rejeitam sessão inválida.
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
-- [tests/password-reset-smoke.mjs](tests/password-reset-smoke.mjs): pacto (esqueci / reset / e-mail), actions de auth, DTO de amigos sem e-mail, helpers de token — **não** chama Resend/SMTP.
 - [tests/ops-task1-mailer-probe-smoke.mjs](tests/ops-task1-mailer-probe-smoke.mjs): status do Mensageiro + `adminProbeMailer` / UI honesta (Task 1).
 - [tests/ops-task3-messenger-seal-smoke.mjs](tests/ops-task3-messenger-seal-smoke.mjs): Selo soft (e-mail opcional, reject no-op, sem redirect/403).
 - [tests/ops-task3-soul-recovery-smoke.mjs](tests/ops-task3-soul-recovery-smoke.mjs): Código de Recuperação da Alma (schema, issue/consume, Espelho + Pacto).
