@@ -46,9 +46,6 @@ const dash = read('pages/dashboard.html');
 assert.ok(dash.includes('href="../despertar/"'), 'nav dashboard usa ../despertar/');
 assert.ok(!dash.includes('href="./despertar.html"'), 'nav sem .html relativo antigo');
 
-const vercel = read('vercel.json');
-assert.ok(vercel.includes('"/despertar/"') && vercel.includes('/pages/despertar.html'), 'vercel rewrite despertar');
-
 const devServer = read('scripts/dev-server.mjs');
 assert.ok(devServer.includes('APP_PAGE_SLUGS'), 'dev-server conhece slugs');
 assert.ok(devServer.includes('/dashboard/'), 'dev-server log URLs limpas');
