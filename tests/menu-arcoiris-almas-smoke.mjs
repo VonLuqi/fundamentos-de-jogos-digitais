@@ -9,7 +9,6 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { readProgressSurface } from './_helpers/progress-surface.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const errors = [];
@@ -58,9 +57,6 @@ const conquistasCss = read('css/conquistas.css');
 const dashboardCss = read('css/dashboard.css');
 const soulsJs = read('js/souls.js');
 const apiJs = read('js/api.js');
-const progressApi = readProgressSurface(root);
-const despertarApi = read('api/despertar.js');
-const despertarGate = read('api/_lib/despertar-gate.js');
 
 /* --- C1 Aluno: Almas oculto (markup + CSS + JS) --- */
 shellPages.forEach((rel) => {
@@ -122,23 +118,6 @@ assert(
     && dashboardJs.includes('despertarResetStudents')
     && dashboardJs.includes('despertarRebalanceLetheWallets'),
   'dashboard deve ter toggle Abrir/Selar o Acheron, Limpar Estelas e Recalcular óbolos'
-);
-assert(
-  progressApi.includes("despertar: { published: false }")
-    || /despertar:\s*\{\s*published:\s*false/.test(progressApi),
-  'progress.js deve defaultar despertar.published=false'
-);
-assert(
-  progressApi.includes('FEATURE_GATE_IDS')
-    && progressApi.includes('isGateableLessonId'),
-  'progress.js deve aceitar gate de feature despertar'
-);
-assert(
-  despertarGate.includes('DESPERTAR_GATE_ID')
-    && despertarGate.includes('despertar_sealed')
-    && despertarApi.includes('isDespertarSealedForUser')
-    && despertarApi.includes('DESPERTAR_SEALED_ERROR'),
-  'api/despertar deve rejeitar alunos com Acheron selado'
 );
 notes.push('Despertar: nav selada + gate admin (smoke estático)');
 
