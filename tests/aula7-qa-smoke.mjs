@@ -221,4 +221,29 @@ const plano = read('docs/plano-aula7-papeis-workflow-versionamento.md');
 assert.ok(/2 encontros|200 min/i.test(plano), 'plano com ritmo 2 encontros');
 assert.ok(/Cartógrafo da Dupla|lesson_duos|diário/i.test(plano), 'plano reforma dupla/diário');
 
+// —— Backend PHP: segredos, catálogo e gate (AchievementsEvaluator / GameCatalog) ——
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpCatalogSrc = read('backend/src/Core/GameCatalog.php').replace(/\r\n/g, '\n');
+const phpAula7Secrets = (phpEvaluatorSrc.match(/case 'aula7': \{[\s\S]*?\n            \}\n/) || [''])[0];
+for (const id of [
+  'segredo_cercado_do_escopo',
+  'segredo_cinco_oficios',
+  'segredo_pasta_sagrada',
+]) {
+  assert.ok(phpAula7Secrets.includes(id), `AchievementsEvaluator.php aula7 lista ${id}`);
+  const entry = getAchievementById(id);
+  assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
+  assert.equal(entry?.meta?.family, 'aula7');
+}
+assert.ok(phpCatalogSrc.includes('aula{$i}_concluida'), 'GameCatalog.php gera aulaN_concluida');
+assert.ok(phpCatalogSrc.includes("'lessonTitle' => 'Aula 07 — Papéis na Indústria, Workflow e Versionamento Visual'"), 'LESSON_CATALOG.aula7 título curricular');
+assert.ok(
+  /'aula7' => \[\s*'lessonId' => 'aula7',\s*'lessonTitle' => '[^']*',\s*'xp' => 30,/.test(phpCatalogSrc),
+  'LESSON_CATALOG.aula7 xp 30'
+);
+assert.ok(
+  /'aula7' => \['published' => false\]/.test(phpCatalogSrc),
+  'LESSON_GATES.aula7 published:false por default'
+);
+
 console.log('OK aula7-qa-smoke');

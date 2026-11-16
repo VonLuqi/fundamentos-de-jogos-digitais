@@ -341,12 +341,7 @@ node tests/mirror-secret-axes-smoke.mjs
 
 - [tests/friends-phase4-smoke.mjs](tests/friends-phase4-smoke.mjs): arquivos, a11y do diálogo e documentação do Espelho.
 - [tests/mirror-secret-axes-smoke.mjs](tests/mirror-secret-axes-smoke.mjs): matriz texto/estilo das secretas no Espelho + contador Q3-B.
-- [tests/ops-task1-mailer-probe-smoke.mjs](tests/ops-task1-mailer-probe-smoke.mjs): status do Mensageiro + `adminProbeMailer` / UI honesta (Task 1).
-- [tests/ops-task3-messenger-seal-smoke.mjs](tests/ops-task3-messenger-seal-smoke.mjs): Selo soft (e-mail opcional, reject no-op, sem redirect/403).
-- [tests/ops-task3-soul-recovery-smoke.mjs](tests/ops-task3-soul-recovery-smoke.mjs): Código de Recuperação da Alma (schema, issue/consume, Espelho + Pacto).
-- [tests/ops-task4-caronte-recovery-smoke.mjs](tests/ops-task4-caronte-recovery-smoke.mjs): Senha do Caronte + recuperação legada (schema, actions, UI).
 - [tests/ops-task5-db-migrate-smoke.mjs](tests/ops-task5-db-migrate-smoke.mjs): script `db:migrate` (ledger, flags, README `DATABASE_URL`).
-- [tests/ops-task7-espelho-alma-smoke.mjs](tests/ops-task7-espelho-alma-smoke.mjs): Espelho da Alma (actions admin, audit, UI `?tab=users&u=`).
 
 Checklist manual (e-mail real, com `RESEND_API_KEY` **ou** SMTP): cadastro + selo; pedido certo envia e derruba sessões; username certo + e-mail errado ou conta admin não enviam; token expirado/usado recusa; aluno antigo vincula no painel; e-mail duplicado → 409; viewport estreito nos três painéis do pacto.
 

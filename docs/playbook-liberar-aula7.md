@@ -122,7 +122,6 @@ Finalize + Altar no **fim do Encontro 2** (o diário pode rascunhar no E1 via au
 ```bash
 node tests/aula7-qa-smoke.mjs
 node tests/aula7-duo-smoke.mjs
-node tests/aula7-secretas-volateis-smoke.mjs
 ```
 
 Ou o pacote completo: `npm run check`.

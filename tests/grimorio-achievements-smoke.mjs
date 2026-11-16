@@ -19,6 +19,45 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), 'utf8');
 }
 
+const GRIMORIO_PUBLIC_IDS = [
+  'grimorio_primeira_inscricao',
+  'grimorio_elo_da_trilha',
+  'grimorio_dez_inscricoes',
+  'grimorio_revelacao',
+  'grimorio_fixador',
+  'grimorio_eco_clonado',
+];
+const GRIMORIO_SECRET_IDS = [
+  'grimorio_vinculo_oculto',
+  'grimorio_eco_invertido',
+  'grimorio_escriba_ritual',
+  'grimorio_cartografo_pessoal',
+];
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpGrimoireSrc = (phpEvaluatorSrc.match(/function evaluateGrimoireIds[\s\S]*?\n    \}\n/) || [''])[0];
+const phpNotesSrc = read('backend/src/Services/Progress/FriendsNotesService.php').replace(/\r\n/g, '\n');
+
+for (const id of [...GRIMORIO_PUBLIC_IDS, ...GRIMORIO_SECRET_IDS]) {
+  assert.ok(phpGrimoireSrc.includes(`'${id}'`), `AchievementsEvaluator.php evaluateGrimoireIds usa ${id}`);
+  const entry = getAchievementById(id);
+  assert.ok(entry, `catálogo tem ${id}`);
+  assert.ok(entry.name && entry.desc, `${id} tem name/desc`);
+  assert.ok(Number.isFinite(getAchievementXp(id)), `${id} xp`);
+}
+for (const id of GRIMORIO_PUBLIC_IDS) {
+  assert.equal(getAchievementById(id)?.hidden, false, `${id} pública`);
+}
+for (const id of GRIMORIO_SECRET_IDS) {
+  assert.equal(getAchievementById(id)?.hidden, true, `${id} secreta`);
+  assert.ok(getAchievementById(id)?.meta?.kind, `${id} meta.kind`);
+}
+assert.ok(phpGrimoireSrc.includes("$originalNoteCount >= 10"), 'dez inscrições: limiar 10');
+assert.ok(phpNotesSrc.includes('`cloned_from_note_id` IS NULL'), 'filtro clones');
+for (const ev of ['create', 'share', 'clone']) {
+  assert.ok(phpNotesSrc.includes(`'event' => '${ev}'`), `hook ${ev}`);
+}
+assert.ok(/'pinned' => \(bool\) \$pinned,/.test(phpNotesSrc), 'pin no award');
+
 const publics = ACHIEVEMENTS.filter((a) => !a.hidden);
 const letters = [];
 for (const ach of publics) {

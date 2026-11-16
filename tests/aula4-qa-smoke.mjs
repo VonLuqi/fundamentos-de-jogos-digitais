@@ -137,4 +137,29 @@ assert.ok(aula4Html.includes('../css/aula.css'), 'reusa aula.css');
 assert.ok(!exists('css/aula4.css'), 'sem CSS one-off');
 
 console.log('OK — smoke QA Aula 04 (Task 9 estática)');
+// —— Backend PHP: segredos, catálogo e gate (AchievementsEvaluator / GameCatalog) ——
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpCatalogSrc = read('backend/src/Core/GameCatalog.php').replace(/\r\n/g, '\n');
+const phpAula4Secrets = (phpEvaluatorSrc.match(/case 'aula4': \{[\s\S]*?\n            \}\n/) || [''])[0];
+for (const id of [
+  'segredo_arqueologo_de_hardware',
+  'segredo_artesao_da_viewport',
+  'segredo_criatividade_sob_limite',
+]) {
+  assert.ok(phpAula4Secrets.includes(id), `AchievementsEvaluator.php aula4 lista ${id}`);
+  const entry = getAchievementById(id);
+  assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
+  assert.equal(entry?.meta?.family, 'aula4');
+}
+assert.ok(phpCatalogSrc.includes('aula{$i}_concluida'), 'GameCatalog.php gera aulaN_concluida');
+assert.ok(phpCatalogSrc.includes("'lessonTitle' => 'Aula 04 — A Linha do Tempo das Plataformas e as Restrições Técnicas'"), 'LESSON_CATALOG.aula4 título curricular');
+assert.ok(
+  /'aula4' => \[\s*'lessonId' => 'aula4',\s*'lessonTitle' => '[^']*',\s*'xp' => 30,/.test(phpCatalogSrc),
+  'LESSON_CATALOG.aula4 xp 30'
+);
+assert.ok(
+  /'aula4' => \['published' => false\]/.test(phpCatalogSrc),
+  'LESSON_GATES.aula4 published:false por default'
+);
+
 console.log('Playbook Mestre: liberar gate published + gerar código no Painel/Trilha quando a turma começar.');

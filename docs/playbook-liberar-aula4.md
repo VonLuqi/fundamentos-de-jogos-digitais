@@ -41,7 +41,6 @@ Pré-requisito curricular: aluno com `aula3` concluída (`LESSON_PREREQUISITES.a
 
 ```bash
 node tests/aula4-qa-smoke.mjs
-node tests/aula4-secretas-volateis-smoke.mjs
 ```
 
 Ou o pacote completo: `npm run check`.

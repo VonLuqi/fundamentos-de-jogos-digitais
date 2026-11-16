@@ -231,4 +231,29 @@ assert.ok(
   'README aula04 não empurra câmera como próxima aula oficial'
 );
 
+// —— Backend PHP: segredos, catálogo e gate (AchievementsEvaluator / GameCatalog) ——
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpCatalogSrc = read('backend/src/Core/GameCatalog.php').replace(/\r\n/g, '\n');
+const phpAula5Secrets = (phpEvaluatorSrc.match(/case 'aula5': \{[\s\S]*?\n            \}\n/) || [''])[0];
+for (const id of [
+  'segredo_balanca_da_faixa',
+  'segredo_oraculo_do_classind',
+  'segredo_selo_do_livre',
+]) {
+  assert.ok(phpAula5Secrets.includes(id), `AchievementsEvaluator.php aula5 lista ${id}`);
+  const entry = getAchievementById(id);
+  assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
+  assert.equal(entry?.meta?.family, 'aula5');
+}
+assert.ok(phpCatalogSrc.includes('aula{$i}_concluida'), 'GameCatalog.php gera aulaN_concluida');
+assert.ok(phpCatalogSrc.includes("'lessonTitle' => 'Aula 05 — Classificação Indicativa (ClassInd), IARC e Design Saudável'"), 'LESSON_CATALOG.aula5 título curricular');
+assert.ok(
+  /'aula5' => \[\s*'lessonId' => 'aula5',\s*'lessonTitle' => '[^']*',\s*'xp' => 30,/.test(phpCatalogSrc),
+  'LESSON_CATALOG.aula5 xp 30'
+);
+assert.ok(
+  /'aula5' => \['published' => false\]/.test(phpCatalogSrc),
+  'LESSON_GATES.aula5 published:false por default'
+);
+
 console.log('OK aula5-qa-smoke');

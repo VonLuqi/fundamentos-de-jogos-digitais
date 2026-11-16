@@ -99,5 +99,4 @@ Finalize + Altar no **fim do Encontro 2**.
 ```bash
 node tests/aula8-qa-smoke.mjs
 node tests/aula8-duo-smoke.mjs
-node tests/aula8-secretas-volateis-smoke.mjs
 ```

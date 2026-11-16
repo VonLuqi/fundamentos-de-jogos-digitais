@@ -109,7 +109,6 @@ Lembre a turma: cosmético com moedas ganhas jogando; **sem** dinheiro real; **s
 
 ```bash
 node tests/aula6-qa-smoke.mjs
-node tests/aula6-secretas-volateis-smoke.mjs
 ```
 
 Ou o pacote completo: `npm run check`.

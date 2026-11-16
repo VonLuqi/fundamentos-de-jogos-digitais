@@ -39,7 +39,6 @@ Default no código: `LESSON_GATES.aula3.published = false` em `api/progress.js`.
 
 ```bash
 node tests/aula3-qa-smoke.mjs
-node tests/aula3-secretas-volateis-smoke.mjs
 ```
 
 Ou o pacote completo: `npm run check`.

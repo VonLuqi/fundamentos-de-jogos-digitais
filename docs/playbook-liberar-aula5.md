@@ -138,8 +138,6 @@ Lembre a turma: higienizar é mudar **feedback** (visual/narrativa/cura/inimigos
 ```bash
 node tests/aula5-qa-smoke.mjs
 node tests/aula5-iarc-smoke.mjs
-node tests/aula5-secretas-volateis-smoke.mjs
-node tests/classind-api-smoke.mjs
 node tests/classind-dle-pages-smoke.mjs
 node tests/classind-schema-smoke.mjs
 ```

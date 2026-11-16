@@ -134,4 +134,29 @@ assert.ok(
 );
 
 console.log('OK — smoke QA Aula 02 (Task 9 estática)');
+// —— Backend PHP: segredos, catálogo e gate (AchievementsEvaluator / GameCatalog) ——
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpCatalogSrc = read('backend/src/Core/GameCatalog.php').replace(/\r\n/g, '\n');
+const phpAula2Secrets = (phpEvaluatorSrc.match(/case 'aula2': \{[\s\S]*?\n            \}\n/) || [''])[0];
+for (const id of [
+  'segredo_arquiteto_de_cenas',
+  'segredo_cartografo_do_input',
+  'segredo_lexico_do_desenvolvedor',
+]) {
+  assert.ok(phpAula2Secrets.includes(id), `AchievementsEvaluator.php aula2 lista ${id}`);
+  const entry = getAchievementById(id);
+  assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
+  assert.equal(entry?.meta?.family, 'aula2');
+}
+assert.ok(phpCatalogSrc.includes('aula{$i}_concluida'), 'GameCatalog.php gera aulaN_concluida');
+assert.ok(phpCatalogSrc.includes("'lessonTitle' => 'Aula 02 — O Glossário do Desenvolvedor e o Player na Tela'"), 'LESSON_CATALOG.aula2 título curricular');
+assert.ok(
+  /'aula2' => \[\s*'lessonId' => 'aula2',\s*'lessonTitle' => '[^']*',\s*'xp' => 30,/.test(phpCatalogSrc),
+  'LESSON_CATALOG.aula2 xp 30'
+);
+assert.ok(
+  /'aula2' => \['published' => false\]/.test(phpCatalogSrc),
+  'LESSON_GATES.aula2 published:false por default'
+);
+
 console.log('Playbook Mestre: liberar gate published + gerar código no Painel/Trilha quando a turma começar.');

@@ -89,4 +89,27 @@ assert.ok(/Cartógrafo do Perfil/i.test(playbook), 'nome pública');
 assert.ok(/Quantic Foundry/i.test(aula8Html) && /LabirintoDeMoedas/i.test(aula8Html), 'teoria + projeto');
 const pkg = read('package.json');
 assert.ok(pkg.includes('js/aula8.js'), 'package.json node --check aula8.js');
+// —— Backend PHP: segredos, catálogo e gate (AchievementsEvaluator / GameCatalog) ——
+const phpEvaluatorSrc = read('backend/src/Services/Progress/AchievementsEvaluator.php').replace(/\r\n/g, '\n');
+const phpCatalogSrc = read('backend/src/Core/GameCatalog.php').replace(/\r\n/g, '\n');
+const phpAula8Secrets = (phpEvaluatorSrc.match(/case 'aula8': \{[\s\S]*?\n            \}\n/) || [''])[0];
+for (const id of [
+  'segredo_modelo_quantic',
+]) {
+  assert.ok(phpAula8Secrets.includes(id), `AchievementsEvaluator.php aula8 lista ${id}`);
+  const entry = getAchievementById(id);
+  assert.equal(entry?.hidden, true, `${id} hidden no álbum`);
+  assert.equal(entry?.meta?.family, 'aula8');
+}
+assert.ok(phpCatalogSrc.includes('aula{$i}_concluida'), 'GameCatalog.php gera aulaN_concluida');
+assert.ok(phpCatalogSrc.includes("'lessonTitle' => 'Aula 08 — Perfis de Jogadores e o Modelo Quantic Foundry'"), 'LESSON_CATALOG.aula8 título curricular');
+assert.ok(
+  /'aula8' => \[\s*'lessonId' => 'aula8',\s*'lessonTitle' => '[^']*',\s*'xp' => 30,/.test(phpCatalogSrc),
+  'LESSON_CATALOG.aula8 xp 30'
+);
+assert.ok(
+  /'aula8' => \['published' => false\]/.test(phpCatalogSrc),
+  'LESSON_GATES.aula8 published:false por default'
+);
+
 console.log('OK aula8-qa-smoke');
