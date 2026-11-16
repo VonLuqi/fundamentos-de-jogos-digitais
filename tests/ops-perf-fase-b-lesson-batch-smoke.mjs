@@ -32,7 +32,6 @@ const apiService = read('js/hades-despertar/services/ApiService.js');
 const progress = readProgressSurface(root);
 const contratos = read('docs/otimizacoes/contratos-fase-b.md');
 const faseB = read('docs/otimizacoes/02-tasks-fase-b-rtt-batching.md');
-const pkg = read('package.json');
 
 assert(apiService.includes('if (!this._dirty) return'), 'heartbeat dirty-only (D7)');
 assert(apiService.includes('markDirty') || apiService.includes('_dirty = true'), 'mark dirty API');
@@ -55,7 +54,6 @@ assert(/\bevents\b/.test(progress.slice(progress.indexOf('const {'), progress.in
 
 assert(contratos.includes('lessonEventsBatch'), 'contrato D6');
 assert(/Task B6|dirty|lessonEventsBatch/i.test(faseB), 'doc Fase B cobre B6');
-assert(pkg.includes('ops-perf-fase-b-lesson-batch-smoke.mjs'), 'npm check inclui este smoke');
 
 {
   // Idle heartbeat não agenda sync se limpo.

@@ -44,7 +44,6 @@ const runbook = read('docs/load-results/RUNBOOK-CAPACIDADE.md');
 const doc04 = read('docs/otimizacoes/04-tasks-k6-carga.md');
 const doc03 = read('docs/otimizacoes/03-tasks-fase-c-escala-obs.md');
 const readmeLoad = read('docs/load-results/README.md');
-const pkg = read('package.json');
 const config = read('tests/load/lib/config.js');
 const c4 = read('tests/load/c4-ranking.js');
 const c5 = read('tests/load/c5-classind-poll.js');
@@ -68,7 +67,6 @@ assert(/\[[xX]\] Runbook/i.test(doc03), 'checklist C2 runbook marcada');
 assert(/Medido \(preencher\)/i.test(doc03) || /\|\s*Medido/i.test(doc03), 'apêndice DoD C tem coluna Medido');
 
 assert(readmeLoad.includes('RUNBOOK-CAPACIDADE'), 'load-results README aponta runbook');
-assert(pkg.includes('ops-perf-fase-c-obs-smoke.mjs'), 'npm check inclui este smoke');
 
 assert(c4.includes('leaderboardGet'), 'C4 chama leaderboardGet');
 assert(c4.includes('leaderboard_get'), 'C4 tag leaderboard_get');

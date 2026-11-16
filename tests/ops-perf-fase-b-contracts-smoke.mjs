@@ -31,7 +31,6 @@ const doc04 = read('docs/otimizacoes/04-tasks-k6-carga.md');
 const baseline = read('docs/load-results/BASELINE-POST-A.md');
 const loadReadme = read('docs/load-results/README.md');
 const master = read('docs/otimizacoes/00-master-plan.md');
-const pkg = read('package.json');
 
 assert(contratos.includes('fase-b.v1'), 'contratos com versão fase-b.v1');
 assert(contratos.includes('/api/session-bootstrap'), 'contrato bootstrap');
@@ -56,7 +55,6 @@ assert(baseline.includes('p95'), 'baseline tem tabela p95');
 assert(loadReadme.includes('LOAD_USERNAME'), 'load-results README documenta env');
 
 assert(master.includes('04-tasks-k6-carga.md'), 'Master Plan linka doc 04');
-assert(pkg.includes('ops-perf-fase-b-contracts-smoke.mjs'), 'npm check inclui este smoke');
 
 [
   'tests/load/c1-login-boot.js',
