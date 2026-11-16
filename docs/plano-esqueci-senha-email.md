@@ -8,7 +8,7 @@ O **Pacto de Sangue** (`pages/auth.html` → `js/auth.js` → `POST /api/auth`) 
 
 Este plano cobre um fluxo funcional de recuperação **só para alunos**, com **confirmação no e-mail**: o aluno pede a renovação, recebe um link, prova posse da caixa de entrada e define uma nova Palavra de Passagem.
 
-Documento predecessor de auth: [`docs/vercel-dev-troubleshoot.md`](./vercel-dev-troubleshoot.md). Stack a manter: HTML/JS + Supabase + `api/auth.js` (auth customizada — **não** migrar para Supabase Auth neste ciclo).
+Documento predecessor de auth: `docs/vercel-dev-troubleshoot.md` (removido). Stack a manter: HTML/JS + Supabase + `api/auth.js` (auth customizada — **não** migrar para Supabase Auth neste ciclo).
 
 Direção visual obrigatória: Design System Hades-like (`--hades-*`, Cinzel / Crimson Text, `btn-pact`, linguagem do Domínio). Não introduzir tela genérica de “Forgot password” de SaaS.
 

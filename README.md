@@ -32,7 +32,7 @@ O projeto está em fase **funcional**, com os seguintes fluxos já implementados
 - ✅ Tracking de visualização de aula por aluno (`lesson_views`) para relatórios
 - ✅ Migração automática de senhas legadas (texto plano → hash `scrypt`) no login
 - ✅ Módulo 01 — "A Regra do Jogo" (teoria MDA + simulação interativa em canvas)
-- ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api` sem depender do Vercel CLI
+- ✅ Servidor local de desenvolvimento (`local-server.mjs`) que expõe as rotas `/api`
 - ✅ **Hades: O Despertar do Submundo** (`pages/despertar.html`): clicker server-authoritative (`/api/despertar`), layout Cookie (Altar · Mundo · Store), WorldView/AltarOrbit, sync + prestígio + talentos, **Bancada do Juiz** (Vereditos), Códice do Loop, conquistas no Álbum (gate do Mestre). Planos: [docs/plano-hades-despertar.md](docs/plano-hades-despertar.md) · [docs/plano-despertar-ui-cookieclicker.md](docs/plano-despertar-ui-cookieclicker.md).
 - ✅ **Juízo do Tartarus** (modal Higher/Lower no Despertar) + pool stub ≥200 em [data/despertar-juizo-pool.stub.json](data/despertar-juizo-pool.stub.json). Click no card / Empate (`A` \| `B` \| `tie`; aliases `higher`/`lower`). No acerto o desafiante sempre assume o trono. O Mestre completa cada entrada com `rating` (L|10|12|14|16|18), `blurb` e `cover` (filename sob `assets/classind-dle/covers/` ou `assets/despertar-juizo/covers/`); só entradas com `rating` entram no sorteio; o CTA exige ≥30 ready. GDD: [docs/gdd-juizo-v2.md](docs/gdd-juizo-v2.md).
 - ✅ **Placar do Domínio** (`pages/ranking.html`, CTA **Ver o Placar** no Painel): turma/global · XP · #relíquias · juizoBest — sem almas/SPS.
@@ -105,8 +105,7 @@ fundamentos-de-jogos-digitais/
 │   ├── plano-hades-despertar.md   # Plano Fases 0–8 do Despertar
 │   ├── plano-despertar-ui-cookieclicker.md # Fase 8 — UI Cookie + Juízo dle
 │   ├── gdd-hades-despertar.md     # GDD do clicker
-│   ├── gdd-juizo-v2.md            # GDD curto do Juízo Higher/Lower
-│   └── vercel-dev-troubleshoot.md
+│   └── gdd-juizo-v2.md            # GDD curto do Juízo Higher/Lower
 ├── js/
 │   ├── main.js                    # CTA de entrada da introdução (auth ou dashboard)
 │   ├── api.js                     # Cliente HTTP + gerenciamento de sessão
@@ -152,7 +151,7 @@ fundamentos-de-jogos-digitais/
 | Estilização  | CSS3 (Design Tokens / `:root`)               |
 | Lógica       | JavaScript (ES Modules)                      |
 | Runtime      | Node.js >= 18                                |
-| Backend/API  | Rotas serverless em `/api` (compatíveis com Vercel) |
+| Backend/API  | Backend PHP em `backend/` (front controller `backend/index.php`, rotas `/api`) |
 | Banco        | Supabase (PostgreSQL)                        |
 | Senhas       | `scrypt` (com migração automática de legado) |
 | Fontes       | Cinzel, Crimson Text                         |
@@ -198,18 +197,9 @@ fundamentos-de-jogos-digitais/
 
    **pg pool runtime (Fase C / C5 — último recurso):** `DATABASE_URL_RUNTIME` = URI **Transaction** (porta **6543**). Flag `DESPERTAR_PG_POOL=1` (default **off**) faz o hotspot `stateSync` chamar `despertar_persist_and_award` via `pg` Pool (max 1–3 / isolate, `PG_POOL_MAX`). Falha → fallback PostgREST + log `pg_pool_fallback=1`. **Proibido** Session/Direct (5432) em serverless. Só ligar com evidência D5 (conexões approaching max / p95). Ver [`api/_lib/pg-pool.js`](api/_lib/pg-pool.js).
 
-   **Vercel KV (Fase A — performance):** `KV_REST_API_URL` + `KV_REST_API_TOKEN` (ou o par Upstash `UPSTASH_REDIS_REST_*`). Usado para rate limit de jogo (Despertar sync / Juízo / underworld) e cache de `lesson_gates`. Sem KV no `.env.local`, a API **degrada** para limite em memória do isolate (ok em dev; em Production/Preview configure o Storage KV na Vercel). Detalhes: [`docs/otimizacoes/01-tasks-fase-a-contencao.md`](docs/otimizacoes/01-tasks-fase-a-contencao.md).
+   **Cron (`/api/cron/sessions-purge`, `/api/cron/warmup`):** exigem `CRON_SECRET` (`Authorization: Bearer $CRON_SECRET` ou `?secret=`); veja `backend/src/Controllers/CronController.php` e `backend/cron-purge.php`.
 
-   **Edge Middleware (Fase C / C1 — teto por IP):** [`middleware.js`](middleware.js) na raiz (Vercel Routing Middleware) limita `/api/auth` (30/min/IP), `/api/despertar` (60/min/IP) e `/api/progress` (90/min/IP) **antes** do isolate Node, com o mesmo KV REST. Sem KV no Edge: fail-open com teto in-memory + `edge_rate_degraded=1`. `/api/cron/*` fica fora do matcher. O `local-server` (`npm run dev`) **não** roda este Middleware — só Preview/Production na Vercel. Detalhes: [`docs/otimizacoes/03-tasks-fase-c-escala-obs.md`](docs/otimizacoes/03-tasks-fase-c-escala-obs.md).
-
-   **Leaderboard KV cache (Fase C / C4 — opcional):** `LEADERBOARD_KV_CACHE=1` ativa snapshot compartilhado do Placar (`fjd:lb:…`, TTL 30–60 s via `LEADERBOARD_CACHE_TTL_SEC`, partida 45). Default **off** até k6 C4 `measured` mostrar p95 `leaderboardGet` acima do limiar. Invalidação best-effort após awards / redeem / admin XP. Ver [`api/_lib/leaderboard-cache.js`](api/_lib/leaderboard-cache.js).
-
-   **Cache de assets (Fase C / C6):** em [`vercel.json`](vercel.json), `/assets/**` recebe `Cache-Control` longo (7d + SWR) e `/data/**` TTL curto (60s) porque JSON (`game-catalog.json`, pool Juízo) muda **sem** hash no filename. `/api/**` permanece `no-store` (inclui `session-bootstrap`). **Cache bust:** ao substituir um asset no mesmo path, mude o nome do arquivo **ou** aguarde o TTL / faça hard refresh; para catálogos versionáveis, prefira novo filename com hash (ex. `game-catalog.<hash>.json`) se precisar invalidação imediata em CDN.
-   **Cron sessions-purge (Fase A / A5):** defina `CRON_SECRET` na Vercel (Production + Preview). O job diário `0 5 * * *` chama [`/api/cron/sessions-purge`](api/cron/sessions-purge.js) com `Authorization: Bearer $CRON_SECRET` e remove linhas de `sessions` com `expires_at` vencido — **fora** do login. Local: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/sessions-purge`.
-
-   **Cron warmup (Fase C / C7):** `45 11 * * 1-5` (≈ **08:45 BRT**, dias úteis) chama [`/api/cron/warmup`](api/cron/warmup.js) com o mesmo `CRON_SECRET`. Aquece isolates de auth/progress/bootstrap via GET (sem scrypt; 401 esperado). Janela recomendada: **15–30 min antes** da abertura da turma — ajuste o schedule no [`vercel.json`](vercel.json) se a aula for noutro horário. Manual: `curl -H "Authorization: Bearer $CRON_SECRET" "$APP_BASE_URL/api/cron/warmup"`. Detalhes: [`docs/load-results/WARMUP-C7.md`](docs/load-results/WARMUP-C7.md).
-
-   Em produção (Vercel), `APP_BASE_URL` deve ser `https://fundamentos-de-jogos-digitais.vercel.app` (o servidor também usa esse host se a var faltar só em Production).
+   Em produção, `APP_BASE_URL` deve ser `https://projects.vonluqi.com/fundamentos-de-jogos-digitais` (sem a var, o backend deriva a URL do host da requisição).
 
    ### Checklist do Mensageiro (entrega real)
 
@@ -217,15 +207,15 @@ fundamentos-de-jogos-digitais/
 
    Caminhos que realmente entregam à turma (escolha **um** go-live):
 
-   1. **SMTP Gmail (rápido):** senha de app em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) + `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` / `MAIL_FROM` com o mesmo Gmail. Coloque na Vercel (Production + Preview) e faça redeploy.
+   1. **SMTP Gmail (rápido):** senha de app em [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) + `SMTP_HOST` / `SMTP_USER` / `SMTP_PASS` / `MAIL_FROM` com o mesmo Gmail. Coloque no `.env` do backend (veja `.env.hostgator.example`).
    2. **Resend com domínio verificado:** [resend.com/domains](https://resend.com/domains) (SPF/DKIM) + `RESEND_API_KEY` + `MAIL_FROM` / `RESEND_MAIL_FROM` no domínio real. **Não** anunciar à turma enquanto o from for `resend.dev`.
    3. Se Resend **e** SMTP estiverem setados: o servidor tenta Resend e cai no SMTP se o Resend recusar (modo teste).
 
-   **Sonda do Mestre:** no Painel do Herói (admin) → **Testar o Mensageiro** (`adminProbeMailer`). Informe um e-mail que você controle; o status do canal aparece sob as Ferramentas do Mestre. Logs Vercel: `[mailer]` com `reason` (`no_provider`, `resend_testing_domain`, `smtp_exception`, …).
+   **Sonda do Mestre:** no Painel do Herói (admin) → **Testar o Mensageiro** (`adminProbeMailer`). Informe um e-mail que você controle; o status do canal aparece sob as Ferramentas do Mestre. Logs do servidor: `[mailer]` com `reason` (`no_provider`, `resend_testing_domain`, `smtp_exception`, …).
 
    Plano: [`docs/plano-email-opcional-recuperacao-admin.md`](docs/plano-email-opcional-recuperacao-admin.md) Task 1.
 
-   Coloque as vars na Vercel (Production + Preview) e em `.env.local`. Não versionar a API key nem a senha SMTP.
+   Coloque as vars no `.env` do backend (veja `.env.hostgator.example`) e em `.env.local`. Não versionar a API key nem a senha SMTP.
 
 3. **Schema do banco**
 
@@ -252,25 +242,19 @@ fundamentos-de-jogos-digitais/
 
    Cada arquivo roda em uma transação; logs `APPLY` / `SKIP` / `FAIL`. Exit ≠ 0 se falhar. O script **não** imprime a connection string.
 
-   > ⚠️ Em produção: backup antes; não use `--bootstrap` com dados. A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id` (veja [docs/vercel-dev-troubleshoot.md](docs/vercel-dev-troubleshoot.md)).
+   > ⚠️ Em produção: backup antes; não use `--bootstrap` com dados. A coluna `id` de `users` deve ser do mesmo tipo referenciado em `sessions.user_id`.
 
 4. Se preferir o SQL Editor manual (legado), execute [db/setup.sql](db/setup.sql) e, em bancos antigos, os arquivos `db/migrate-*.sql` na ordem do nome — ou migre de uma vez com o script acima.
 
 ## Como Executar Localmente
 
-### Opção 1 — Servidor local dedicado (recomendado, sem Vercel CLI)
+### Servidor local dedicado (recomendado)
 
 ```bash
 node local-server.mjs
 ```
 
 Acesse em `http://localhost:3000`.
-
-### Opção 2 — Vercel CLI
-
-```bash
-npx vercel dev
-```
 
 ### Verificação de sintaxe
 

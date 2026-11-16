@@ -65,7 +65,6 @@ jobs:
             *.sql
             package.json
             package-lock.json
-            vercel.json
             middleware.js
             migrate-passwords.js
 

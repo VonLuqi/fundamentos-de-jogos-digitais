@@ -23,7 +23,7 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/.*\.js$ - [F,L,NC]
   # Entregas do Trabalho Final: nunca servidas diretamente (download só via /api/prova, admin)
   RewriteRule ^uploads/trabalhos(?:/|$) - [F,L,NC]
-  RewriteRule ^(?:middleware\.js|local-server\.mjs|migrate-passwords\.js|package(?:-lock)?\.json|vercel\.json)$ - [F,L,NC]
+  RewriteRule ^(?:middleware\.js|local-server\.mjs|migrate-passwords\.js|package(?:-lock)?\.json)$ - [F,L,NC]
 
   # ---------------------------------------------------------------------------
   # 2. Rotas da API (/api/* -> backend/index.php)
@@ -49,7 +49,7 @@ DirectoryIndex index.html index.php
   RewriteRule ^(auth|dashboard|aulas|aula[1-8]|conquistas|salao-espiritual|grimorio|grimorio-editar|grimorio-nota|companheiro|souls|codigos|despertar|ranking|perfil|classind-dle|prova|prova-admin|notas-turma|guia-trabalho-final)/$ pages/$1.html [L,END]
 
   # ---------------------------------------------------------------------------
-  # 4. Rewrites do ARG do Submundo (espelho do vercel.json)
+  # 4. Rewrites do ARG do Submundo
   #    Em subdiretório (ex.: /fundamentos-de-jogos-digitais/submundo/tartaro-oculto),
   #    garante barra final para que os caminhos relativos ../../ do HTML resolvam
   #    para a raiz do projeto.
