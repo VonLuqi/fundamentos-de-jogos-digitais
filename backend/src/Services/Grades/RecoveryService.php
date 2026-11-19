@@ -21,9 +21,10 @@ final class RecoveryService
      *
      * @param ?float $total      total do snapshot da turma (null = turma não fechada / aluno sem snapshot)
      * @param ?float $recScore   final_score da prova de recuperação já corrigida (null = sem nota)
+     * @param bool $override     liberado manualmente pelo Mestre: sempre em recuperação (total null = 0)
      * @return array{status: ?string, threshold: float, recoveryCap: float, recovery: array{eligible: bool, score: ?float, closed: bool, finalScore: ?float}}
      */
-    public static function statusDto(?float $total, bool $recoveryClosed, ?float $recScore): array
+    public static function statusDto(?float $total, bool $recoveryClosed, ?float $recScore, bool $override = false): array
     {
         $dto = [
             'status' => null,
@@ -31,10 +32,13 @@ final class RecoveryService
             'recoveryCap' => self::CAP,
             'recovery' => ['eligible' => false, 'score' => null, 'closed' => false, 'finalScore' => null],
         ];
+        if ($override && $total === null) {
+            $total = 0.0;
+        }
         if ($total === null) {
             return $dto;
         }
-        if ($total >= self::THRESHOLD) {
+        if ($total >= self::THRESHOLD && !$override) {
             $dto['status'] = 'aprovado';
             return $dto;
         }
@@ -151,12 +155,12 @@ final class RecoveryService
     public static function studentDto(array $user): array
     {
         $turma = (string) ($user['turma'] ?? '');
-        // Liberado manualmente sem snapshot: base 0 para status/teto.
-        $total = self::snapshotTotal($turma, (int) $user['id']) ?? (self::hasOverride((int) $user['id']) ? 0.0 : null);
-        if ($total === null || $total >= self::THRESHOLD) {
+        $total = self::snapshotTotal($turma, (int) $user['id']);
+        $override = self::hasOverride((int) $user['id']);
+        if (!$override && ($total === null || $total >= self::THRESHOLD)) {
             return self::statusDto($total, false, null);
         }
-        return self::statusDto($total, self::closure($turma)['status'] === 'closed', self::recoveryScore((int) $user['id']));
+        return self::statusDto($total, self::closure($turma)['status'] === 'closed', self::recoveryScore((int) $user['id']), $override);
     }
 
     /**
@@ -183,7 +187,7 @@ final class RecoveryService
             $score = $r['final_score'] !== null && $r['graded_at'] !== null ? (float) $r['final_score'] : null;
             // Liberado manualmente sem snapshot: total exibido null, cálculo com base 0.
             $total = $r['total'] !== null ? (float) $r['total'] : null;
-            $dto = self::statusDto($total ?? 0.0, $closed, $score);
+            $dto = self::statusDto($total, $closed, $score, $r['ov'] !== null);
             $out[] = [
                 'userId' => (int) $r['user_id'],
                 'name' => (string) $r['full_name'],
