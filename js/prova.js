@@ -65,6 +65,7 @@ const LOCAL_EXAMS = Object.freeze({
   'modulo1-provacao': { kind: 'quiz', eyebrow: 'Módulo 1 · Avaliação', title: 'Provação do Círculo Mágico', questions: 20 },
   'modulo2-prova': { kind: 'quiz', eyebrow: 'Módulo 2 · Avaliação', title: 'Provação do Módulo 2', questions: 10 },
   'trabalho-final': { kind: 'project', eyebrow: 'Trabalho Final · Entrega', title: 'Trabalho Final', questions: 0 },
+  'recuperacao-prova': { kind: 'quiz', eyebrow: 'Recuperação · Avaliação', title: 'Prova de Recuperação', questions: 30 },
 });
 const LOCAL_EXAM = LOCAL_EXAMS[EXAM_ID] || { kind: 'quiz', eyebrow: 'Avaliação', title: 'Avaliação', questions: 0 };
 const IS_PROJECT_LOCAL = LOCAL_EXAM.kind === 'project';
@@ -791,6 +792,19 @@ function renderReview(review) {
       `;
     }
 
+    // Recuperação: correção automática (IA) das discursivas; pendente = professor corrige à mão.
+    const aiFeedback = String(item.aiFeedback || '').trim();
+    if (!isMc && aiFeedback) {
+      body += `
+        <div class="prova-review__comment prova-review__comment--ai">
+          <span class="prova-review__comment-label">Correção automática</span>
+          ${escapeHtml(aiFeedback)}
+        </div>
+      `;
+    } else if (!isMc && (item.aiPending || item.pointsAwarded == null)) {
+      body += '<p class="prova-review__pending">Aguardando correção do professor.</p>';
+    }
+
     li.innerHTML = body;
     els.doneReviewList.appendChild(li);
   }
@@ -1439,9 +1453,11 @@ async function bootStatus() {
     console.error('[prova] status', error);
     showPanel('blocked');
     if (els.blockedMessage) {
-      els.blockedMessage.textContent = error instanceof ApiError
-        ? error.message
-        : copy.blockedLoad;
+      els.blockedMessage.textContent = error instanceof ApiError && error.payload?.code === 'not_eligible'
+        ? 'A prova de recuperação é só para quem ficou abaixo de 55 pontos.'
+        : error instanceof ApiError
+          ? error.message
+          : copy.blockedLoad;
     }
   }
 }

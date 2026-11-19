@@ -2115,6 +2115,31 @@ function showApiWarning(message) {
    12. BOOT
    ============================================================ */
 /** Card "Nota Final": só aparece quando o Mestre fechou as notas da turma. */
+const FINAL_STATUS_COPY = {
+  aprovado: ['Aprovado', (g) => `Você atingiu a nota mínima de ${g.threshold ?? 55} pontos.`],
+  recuperacao: ['Em recuperação', (g) => `Sua nota ficou abaixo de ${g.threshold ?? 55}. Faça a prova de recuperação.`],
+  aprovado_recuperacao: ['Aprovado na recuperação', (g) => `Nota final limitada a ${g.recoveryCap ?? 60} pontos.`],
+  reprovado: ['Reprovado', () => 'Você não atingiu a nota mínima na recuperação.'],
+};
+
+/** Selo de situação (status null = sem selo) + CTA da prova de recuperação. */
+function renderFinalStatus(g) {
+  const badge = document.getElementById('final-grade-status');
+  const cta = document.getElementById('final-grade-cta');
+  const entry = FINAL_STATUS_COPY[g.status];
+  if (badge) {
+    badge.hidden = !entry;
+    badge.dataset.status = entry ? g.status : '';
+    badge.replaceChildren();
+    if (entry) {
+      const strong = document.createElement('strong');
+      strong.textContent = entry[0];
+      badge.append(strong, ` · ${entry[1](g)}`);
+    }
+  }
+  if (cta) cta.hidden = !(g.status === 'recuperacao' && g.recovery?.eligible && !g.recovery?.closed);
+}
+
 async function renderFinalGrade(token) {
   const card = document.getElementById('final-grade-card');
   if (!card || currentUser?.role === 'admin') return;
@@ -2132,7 +2157,9 @@ async function renderFinalGrade(token) {
       return;
     }
     const n = (v) => Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
-    document.getElementById('final-grade-total').textContent = `${n(g.total)} / 100`;
+    const shown = g.status === 'aprovado_recuperacao' && g.recovery?.finalScore != null ? g.recovery.finalScore : g.total;
+    document.getElementById('final-grade-total').textContent = `${n(shown)} / 100`;
+    renderFinalStatus(g);
     const items = [
       ['Códigos', g.codes, 10], ['Entregas', g.entregas, 20], ['Prova M1', g.m1, 20],
       ['Prova M2', g.m2, 20], ['Trabalho Final', g.tf, 30],

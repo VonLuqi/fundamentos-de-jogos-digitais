@@ -96,6 +96,11 @@
             <button type="button" class="btn-gold" id="notas-close">Fechar notas</button>
             <button type="button" class="btn-gold btn-gold--ghost" id="notas-reopen" hidden>Reabrir notas</button>
           </div>
+          <p class="notas-status" id="notas-rec-status" role="status" aria-live="polite" hidden></p>
+          <div class="notas-actions">
+            <button type="button" class="btn-gold" id="notas-rec-close" hidden>Fechar notas da recuperação</button>
+            <button type="button" class="btn-gold btn-gold--ghost" id="notas-rec-reopen" hidden>Reabrir recuperação</button>
+          </div>
         </section>
 
         <p class="notas-legend">
@@ -117,6 +122,8 @@
                 <th scope="col">M2 (x/20)</th>
                 <th scope="col">TF (x/30)</th>
                 <th scope="col">Total (x/100)</th>
+                <th scope="col">Recuperação (x/100)</th>
+                <th scope="col">Situação</th>
               </tr>
             </thead>
             <tbody id="notas-body"></tbody>
