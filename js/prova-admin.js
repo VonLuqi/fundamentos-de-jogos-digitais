@@ -52,6 +52,7 @@ const EXAM_TITLES = {
   'modulo1-provacao': ['PROVA', 'MÓDULO 1'],
   'modulo2-prova': ['PROVA', 'MÓDULO 2'],
   'trabalho-final': ['TRABALHO', 'FINAL'],
+  'recuperacao-prova': ['PROVA', 'RECUPERAÇÃO'],
 };
 
 /** Exame da URL (`?exam=`); sem parâmetro = Módulo 1. */
@@ -591,12 +592,19 @@ function paintDetail(attempt) {
         const locked = Boolean(grading.locked) || !grading.canScore;
         const text = q.studentText || '(sem resposta)';
         const rubricHtml = formatRubricHtml(q.rubric);
+        const maxPts = q.maxPoints != null && Number(q.maxPoints) > 0 ? Number(q.maxPoints) : 1;
+        const step = maxPts > 1 ? 0.5 : 0.25;
+        const hasAi = q.aiScore != null || q.aiFeedback;
+        const aiHtml = hasAi
+          ? `<div class="prova-admin-q__ai"><span class="prova-admin-q__ai-label">Correção automática (IA)${q.aiScore != null ? ` · ${escapeHtml(String(q.aiScore))} / ${maxPts}` : ''}</span>${q.aiFeedback ? escapeHtml(String(q.aiFeedback)) : ''}<span class="prova-admin-q__ai-hint">Sua nota abaixo substitui a da IA.</span></div>`
+          : (q.aiPending ? '<p class="prova-admin-q__ai prova-admin-q__ai--pending">IA indisponível nesta questão — corrija manualmente.</p>' : '');
         body.innerHTML = `
           ${rubricHtml}
           <pre class="prova-admin-q__answer">${escapeHtml(text)}</pre>
+          ${aiHtml}
           <label class="prova-admin-q__score">
-            <span>Nota (0–1)</span>
-            <input type="number" min="0" max="1" step="0.25" inputmode="decimal"
+            <span>Nota (0–${maxPts})</span>
+            <input type="number" min="0" max="${maxPts}" step="${step}" inputmode="decimal"
               data-score-input="${escapeHtml(q.questionId)}"
               value="${q.pointsAwarded != null ? escapeHtml(String(q.pointsAwarded)) : ''}"
               ${locked ? 'disabled' : ''} />

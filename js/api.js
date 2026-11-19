@@ -2508,6 +2508,15 @@ export function turmaGradesAdminReopen(token, turma) {
   return turmaGradesRequest(token, 'adminReopen', { turma });
 }
 
+/** Recuperação (contrato T245-T247; nomes de action a confirmar com @D1). */
+export function turmaGradesAdminRecoveryClose(token, turma, { force = false } = {}) {
+  return turmaGradesRequest(token, 'adminRecoveryClose', { turma, force });
+}
+
+export function turmaGradesAdminRecoveryReopen(token, turma) {
+  return turmaGradesRequest(token, 'adminRecoveryReopen', { turma });
+}
+
 /** Resposta: { ok, filename, source: 'snapshot'|'live', csv } */
 export function turmaGradesAdminCsv(token, turma) {
   return turmaGradesRequest(token, 'adminCsv', { turma });

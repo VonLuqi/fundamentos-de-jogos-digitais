@@ -15,6 +15,8 @@ import {
   turmaGradesAdminClose,
   turmaGradesAdminCsv,
   turmaGradesAdminGradebook,
+  turmaGradesAdminRecoveryClose,
+  turmaGradesAdminRecoveryReopen,
   turmaGradesAdminReopen,
 } from './api.js';
 
@@ -79,6 +81,30 @@ function renderStatus() {
   status.textContent = text;
   $('notas-close').hidden = closed;
   $('notas-reopen').hidden = !closed;
+  renderRecoveryStatus(closed);
+}
+
+const REC_STATUS_LABELS = {
+  aprovado: 'Aprovado',
+  recuperacao: 'Em recuperação',
+  aprovado_recuperacao: 'Aprovado na recuperação',
+  reprovado: 'Reprovado',
+};
+
+/** Fechamento da recuperação: só depois de fechar as notas da turma e só se houver alunos elegíveis. */
+function renderRecoveryStatus(mainClosed) {
+  const rec = gradebook?.recoveryClosure;
+  const recClosed = rec?.status === 'closed';
+  const eligible = (gradebook?.rows ?? []).filter((r) => r.recovery?.eligible).length;
+  const show = mainClosed && eligible > 0;
+  const status = $('notas-rec-status');
+  status.hidden = !show;
+  status.dataset.state = recClosed ? 'closed' : 'open';
+  status.textContent = recClosed
+    ? `Recuperação fechada${rec.closedAt ? ` em ${fmtDate(rec.closedAt)}` : ''} — situação visível aos alunos`
+    : `Recuperação aberta — ${eligible} aluno(s) elegível(is); a situação ainda não aparece para eles`;
+  $('notas-rec-close').hidden = !show || recClosed;
+  $('notas-rec-reopen').hidden = !show || !recClosed;
 }
 
 function cell(text) {
@@ -94,7 +120,7 @@ function renderRows() {
   if (!rows.length) {
     const tr = document.createElement('tr');
     const td = cell('Nenhum aluno nesta turma.');
-    td.colSpan = 7;
+    td.colSpan = 9;
     tr.append(td);
     body.append(tr);
     return;
@@ -134,6 +160,10 @@ function renderRows() {
       cell(fmt(r.total)),
     );
     tr.lastChild.className = 'notas-total';
+    const rec = r.recovery;
+    const recTd = cell(rec?.eligible ? (rec.score != null ? fmt(rec.score) : 'pendente') : '—');
+    if (rec?.closed) recTd.className = 'notas-rec--closed';
+    tr.append(recTd, cell(REC_STATUS_LABELS[rec?.status ?? r.status] || '—'));
     body.append(tr);
   }
 }
@@ -251,8 +281,61 @@ async function exportCsv() {
   }
 }
 
+async function closeRecovery(force = false) {
+  const turma = currentTurma();
+  if (!force) {
+    const ok = await confirmDialog({
+      title: `Fechar notas da recuperação da ${turma}?`,
+      body: 'A situação (aprovado ou reprovado) será publicada no perfil de cada aluno em recuperação. A nota final da recuperação vale no máximo 60. Você poderá reabrir depois.',
+      confirmLabel: 'Fechar recuperação',
+    });
+    if (!ok) return;
+  }
+  setBusy(true);
+  try {
+    await turmaGradesAdminRecoveryClose(token, turma, { force });
+    showFeedback(`Recuperação da ${turma} fechada e publicada.`, 'ok');
+    await load();
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 409 && Array.isArray(error.payload?.pending) && !force) {
+      setBusy(false);
+      const ok = await confirmDialog({
+        title: 'Há provas de recuperação pendentes',
+        body: 'Estes alunos ainda não têm a prova corrigida (ou não fizeram). Fechar mesmo assim?',
+        items: pendingItems(error.payload.pending),
+        confirmLabel: 'Fechar mesmo assim',
+      });
+      if (ok) await closeRecovery(true);
+      return;
+    }
+    showFeedback(errMsg(error, 'Não foi possível fechar a recuperação.'));
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function reopenRecovery() {
+  const turma = currentTurma();
+  const ok = await confirmDialog({
+    title: `Reabrir recuperação da ${turma}?`,
+    body: 'A situação some do perfil dos alunos em recuperação até você fechar de novo.',
+    confirmLabel: 'Reabrir recuperação',
+  });
+  if (!ok) return;
+  setBusy(true);
+  try {
+    await turmaGradesAdminRecoveryReopen(token, turma);
+    showFeedback(`Recuperação da ${turma} reaberta.`, 'ok');
+    await load();
+  } catch (error) {
+    showFeedback(errMsg(error, 'Não foi possível reabrir a recuperação.'));
+  } finally {
+    setBusy(false);
+  }
+}
+
 function setBusy(busy) {
-  for (const id of ['notas-refresh', 'notas-csv', 'notas-close', 'notas-reopen', 'notas-turma']) {
+  for (const id of ['notas-refresh', 'notas-csv', 'notas-close', 'notas-reopen', 'notas-rec-close', 'notas-rec-reopen', 'notas-turma']) {
     $(id).disabled = busy;
   }
 }
@@ -286,6 +369,8 @@ async function init() {
   $('notas-csv').addEventListener('click', exportCsv);
   $('notas-close').addEventListener('click', () => closeGrades(false));
   $('notas-reopen').addEventListener('click', reopenGrades);
+  $('notas-rec-close').addEventListener('click', () => closeRecovery(false));
+  $('notas-rec-reopen').addEventListener('click', reopenRecovery);
   await load();
 }
 

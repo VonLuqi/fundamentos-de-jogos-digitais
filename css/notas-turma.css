@@ -88,8 +88,34 @@
 
 .notas-table-wrap {
   overflow-x: auto;
+  scrollbar-width: none;
   border: 1px solid rgba(194, 160, 72, 0.3);
   background: var(--hades-panel);
+}
+.notas-table-wrap::-webkit-scrollbar { display: none; }
+
+/* Indicador de rolagem horizontal: linha fina + ponto vermelho que acompanha o scroll. */
+.notas-table-wrap::after {
+  content: "";
+  position: sticky;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 8px;
+  background:
+    radial-gradient(circle 3px at 4px 50%, #e53935 96%, transparent) 0 0 / 100% 100% no-repeat,
+    linear-gradient(rgba(194, 160, 72, 0.45), rgba(194, 160, 72, 0.45)) 0 50% / 100% 1px no-repeat;
+}
+@supports (animation-timeline: scroll()) {
+  .notas-table-wrap::after {
+    background-size: 8px 100%, 100% 1px;
+    background-position: 0 0, 0 50%;
+    animation: notas-scroll-dot linear both;
+    animation-timeline: scroll(x nearest);
+  }
+}
+@keyframes notas-scroll-dot {
+  to { background-position: 100% 0, 0 50%; }
 }
 
 .notas-table {
@@ -197,6 +223,26 @@
 .final-grade-card__list li { color: var(--hades-text); }
 .final-grade-card__list strong { color: var(--hades-gold); font-variant-numeric: tabular-nums; }
 .final-grade-card__when { margin: 0; font-size: 0.9rem; color: var(--hades-text-dim); }
+
+.final-grade-card__status {
+  display: block;
+  margin: 0.4rem 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.95rem;
+  color: var(--hades-text);
+  border: 1px solid var(--status-c, var(--hades-gold));
+  background: rgba(255, 255, 255, 0.04);
+  overflow-wrap: anywhere;
+}
+.final-grade-card__status strong { color: var(--status-c, var(--hades-gold-bright)); }
+.final-grade-card__status[data-status="aprovado"],
+.final-grade-card__status[data-status="aprovado_recuperacao"] { --status-c: #7fd18b; }
+.final-grade-card__status[data-status="recuperacao"] { --status-c: #f0c060; }
+.final-grade-card__status[data-status="reprovado"] { --status-c: #ff8a80; }
+.final-grade-card__cta { display: inline-flex; align-items: center; min-height: 44px; margin-top: 0.6rem; }
+
+/* Coluna de recuperação (notas-turma) */
+.notas-rec--closed { color: var(--hades-gold-bright); }
 
 @media (max-width: 600px) {
   .notas-actions { width: 100%; }
