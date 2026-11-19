@@ -812,7 +812,7 @@ final class ProvaService
     public static function loadAnswers(string $attemptId): array
     {
         $pdo = Database::get();
-        $stmt = $pdo->prepare('SELECT question_id, choice, text_answer, points_awarded, is_correct, updated_at FROM prova_answers WHERE attempt_id = :aid');
+        $stmt = $pdo->prepare('SELECT question_id, choice, text_answer, points_awarded, is_correct, ai_feedback, ai_points, updated_at FROM prova_answers WHERE attempt_id = :aid');
         $stmt->execute([':aid' => $attemptId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
