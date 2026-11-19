@@ -147,6 +147,37 @@
           </div>
         </section>
 
+        <section class="prova-admin-gate hades-mirror-frame" id="prova-admin-lessons" aria-label="Aulas da turma">
+          <p class="prova-admin-gate__label">Aulas 1–8</p>
+          <p class="prova-admin-gate__hint">Sela ou libera todas as aulas de conteúdo de uma vez (provas ficam de fora).</p>
+          <div class="prova-admin-gate__actions">
+            <button type="button" class="btn-refresh" id="prova-admin-lessons-seal">Selar todas</button>
+            <button type="button" class="btn-refresh" id="prova-admin-lessons-release">Liberar todas</button>
+          </div>
+          <p class="prova-admin-meta" id="prova-admin-lessons-status" role="status"></p>
+        </section>
+
+        <section class="prova-admin-gate hades-mirror-frame" id="prova-admin-recovery" aria-label="Recuperação">
+          <p class="prova-admin-gate__label">Participantes da recuperação</p>
+          <p class="prova-admin-meta" id="prova-admin-recovery-status" role="status">Carregando…</p>
+          <div class="prova-admin-table-wrap">
+            <table class="prova-admin-table" id="prova-admin-recovery-table" hidden>
+              <thead>
+                <tr>
+                  <th scope="col">Aluno</th>
+                  <th scope="col">Turma</th>
+                  <th scope="col">Nota original</th>
+                  <th scope="col">Prova</th>
+                  <th scope="col">Nota rec.</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Nota final</th>
+                </tr>
+              </thead>
+              <tbody id="prova-admin-recovery-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
         <section class="prova-admin-filters" aria-label="Filtros">
           <label class="prova-admin-filters__field">
             <span>Turma</span>

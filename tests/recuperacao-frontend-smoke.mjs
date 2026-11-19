@@ -34,6 +34,19 @@ const adm = read('js/prova-admin.js');
 check(adm.includes('aiFeedback') && adm.includes('maxPts'), 'prova-admin.js: IA + máximo por questão');
 check(read('pages/prova-admin.html').includes('recuperacao-prova'), 'prova-admin.html: opção do exame');
 
+// Hub do Mestre: selar/liberar todas + lista da recuperação
+const admHtml = read('pages/prova-admin.html');
+for (const id of ['prova-admin-lessons-seal', 'prova-admin-lessons-release', 'prova-admin-recovery-tbody']) {
+  check(admHtml.includes(`id="${id}"`), `prova-admin.html: #${id}`);
+}
+check(admHtml.includes('Selar todas') && admHtml.includes('Liberar todas'), 'prova-admin.html: botões em lote');
+check(api.includes("'adminRecoveryBoard'") && api.includes('turmaGradesAdminRecoveryBoard'), 'api.js: wrapper adminRecoveryBoard');
+check(adm.includes('bulkLessonGate') && adm.includes('setLessonGate(currentToken') && adm.includes('window.confirm'), 'prova-admin.js: lote via setLessonGate + confirm');
+check(adm.includes('Nenhum aluno em recuperação') && adm.includes('Não iniciou'), 'prova-admin.js: estados da lista de recuperação');
+check(!/LESSONS\.filter|kind\s*===\s*'assessment'/.test(adm), 'prova-admin.js: não filtra provas à mão (LESSONS já exclui)');
+const lessonsSrc = api.slice(api.indexOf('export const LESSONS'));
+check(lessonsSrc.includes("lesson.kind !== 'assessment'"), 'api.js: LESSONS exclui assessment');
+
 if (errors.length) {
   console.error('FAIL recuperacao-frontend-smoke');
   for (const e of errors) console.error(' -', e);

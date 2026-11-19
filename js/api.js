@@ -2513,6 +2513,11 @@ export function turmaGradesAdminRecoveryClose(token, turma, { force = false } = 
   return turmaGradesRequest(token, 'adminRecoveryClose', { turma, force });
 }
 
+/** Resposta: { ok, closure, rows: [{ userId, name, total, attemptStatus, score, status, finalScore }] } */
+export function turmaGradesAdminRecoveryBoard(token, turma) {
+  return turmaGradesRequest(token, 'adminRecoveryBoard', { turma });
+}
+
 export function turmaGradesAdminRecoveryReopen(token, turma) {
   return turmaGradesRequest(token, 'adminRecoveryReopen', { turma });
 }

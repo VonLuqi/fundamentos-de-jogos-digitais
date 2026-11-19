@@ -8,6 +8,7 @@
 import { initAppShell } from './app-shell.js?v=juizo-guard-1';
 import {
   ApiError,
+  LESSONS,
   ROUTES,
   getSession,
   logout,
@@ -22,7 +23,11 @@ import {
   provaAdminScoreDiscursive,
   provaAdminSetExamOpen,
   requireAdmin,
+  setLessonGate,
+  turmaGradesAdminGradebook,
+  turmaGradesAdminRecoveryBoard,
 } from './api.js';
+import { PUBLISHED_GATE_KEY } from './lessons-ui.js';
 
 const STATUS_LABELS = {
   in_progress: 'Em andamento',
@@ -1273,6 +1278,93 @@ async function respondContest(contestAction) {
   }
 }
 
+/** Selar/liberar em lote: laço sobre setLessonGate (aulas de conteúdo, sem provas — LESSONS já exclui assessment). */
+async function bulkLessonGate(released) {
+  if (!currentToken) return;
+  const verb = released ? 'Liberar' : 'Selar';
+  if (!window.confirm(`${verb} todas as ${LESSONS.length} aulas de conteúdo para a turma?`)) return;
+  const status = $('prova-admin-lessons-status');
+  const buttons = [$('prova-admin-lessons-seal'), $('prova-admin-lessons-release')];
+  buttons.forEach((b) => { if (b) b.disabled = true; });
+  const failed = [];
+  for (let i = 0; i < LESSONS.length; i += 1) {
+    if (status) status.textContent = `${released ? 'Liberando' : 'Selando'} ${i + 1}/${LESSONS.length}…`;
+    try {
+      await setLessonGate(currentToken, LESSONS[i].id, PUBLISHED_GATE_KEY, released);
+    } catch (error) {
+      failed.push(`${LESSONS[i].title || LESSONS[i].id}: ${error instanceof ApiError ? error.message : 'falha'}`);
+    }
+  }
+  buttons.forEach((b) => { if (b) b.disabled = false; });
+  const ok = LESSONS.length - failed.length;
+  if (status) {
+    status.textContent = `${ok} de ${LESSONS.length} aulas ${released ? 'liberadas' : 'seladas'}.`
+      + (failed.length ? ` Falhas — ${failed.join(' · ')}` : '');
+  }
+  status?.classList.toggle('is-error', failed.length > 0);
+}
+
+const REC_STATUS_LABELS = {
+  aprovado: 'Aprovado',
+  recuperacao: 'Em recuperação',
+  aprovado_recuperacao: 'Aprovado na recuperação',
+  reprovado: 'Reprovado',
+};
+
+function recExamLabel(attemptStatus) {
+  if (!attemptStatus) return 'Não iniciou';
+  if (attemptStatus === 'in_progress') return 'Em andamento';
+  return 'Entregue';
+}
+
+function recNum(value) {
+  return value === null || value === undefined ? '—' : String(value);
+}
+
+/** Lista de elegíveis (total < 55) de todas as turmas do filtro. */
+async function loadRecovery() {
+  const status = $('prova-admin-recovery-status');
+  const table = $('prova-admin-recovery-table');
+  const tbody = $('prova-admin-recovery-tbody');
+  if (!status || !table || !tbody || !currentToken) return;
+  const turmas = Array.from($('prova-admin-filter-turma')?.options ?? [])
+    .map((o) => o.value).filter((v) => v !== 'all');
+  const rows = [];
+  const notClosed = [];
+  try {
+    for (const turma of turmas) {
+      const board = await turmaGradesAdminRecoveryBoard(currentToken, turma);
+      const list = board?.rows ?? [];
+      list.forEach((r) => rows.push({ ...r, turma }));
+      if (list.length === 0) {
+        const gb = await turmaGradesAdminGradebook(currentToken, turma);
+        if (gb?.closure?.status !== 'closed') notClosed.push(turma);
+      }
+    }
+  } catch (error) {
+    status.textContent = error instanceof ApiError ? error.message : 'Falha ao carregar a recuperação.';
+    return;
+  }
+  tbody.replaceChildren();
+  table.hidden = rows.length === 0;
+  const notes = notClosed.length ? ` Notas ainda não fechadas: ${notClosed.join(', ')}.` : '';
+  status.textContent = rows.length
+    ? `${rows.length} aluno(s) em recuperação.${notes}`
+    : `Nenhum aluno em recuperação.${notes}`;
+  rows.forEach((r) => {
+    const tr = document.createElement('tr');
+    [
+      r.name, r.turma, recNum(r.total), recExamLabel(r.attemptStatus), recNum(r.score),
+      REC_STATUS_LABELS[r.status] || r.status || '—', recNum(r.finalScore),
+    ].forEach((text) => {
+      const td = document.createElement('td');
+      td.textContent = text;
+      tr.append(td);
+    });
+    tbody.append(tr);
+  });
+}
+
 async function init() {
   let result;
   try {
@@ -1303,6 +1395,9 @@ async function init() {
 
   bindFilters();
   paintExamChrome();
+  $('prova-admin-lessons-seal')?.addEventListener('click', () => bulkLessonGate(false));
+  $('prova-admin-lessons-release')?.addEventListener('click', () => bulkLessonGate(true));
+  loadRecovery();
 
   const params = new URLSearchParams(window.location.search);
   const attemptId = params.get('attempt');
