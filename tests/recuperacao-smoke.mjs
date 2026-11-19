@@ -73,11 +73,11 @@ $out['st'] = [
 $d = ProvaCatalog::forExam(RecuperacaoExam::ID);
 $out['def'] = ['dur' => $d->durationMinutes, 'total' => $d->totalPoints, 'mc' => $d->mcPointsEach, 'disc' => $d->discursivePointsEach,
   'ai' => $d->aiGradesDiscursive, 'only' => $d->recoveryOnly, 'releases' => $d->releasesGradeOnSubmit(), 'exists' => ProvaCatalog::exists('recuperacao-prova'),
-  'discIds' => $d->listDiscursiveQuestionIds()];
+  'discIds' => $d->listDiscursiveQuestionIds(), 'n' => $d->questionCount(), 'nMc' => $d->mcQuestionCount(), 'mcMax' => $d->mcMax(), 'discMax' => $d->discursiveMax(), 'keyN' => count($d->mcAnswerKey), 'rubN' => count($d->discursiveRubrics)];
 // --- clamp ---
 $out['clamp'] = [G::clampPoints(3.3, 4.0), G::clampPoints(9, 4.0), G::clampPoints(-2, 4.0), G::clampPoints('2,7', 4.0), G::clampPoints('abc', 4.0), G::clampPoints(null, 4.0), G::clampPoints(3.74, 4.0), G::clampPoints(NAN, 4.0)];
 // --- grader com HTTP simulado ---
-$answers = [['question_id' => 'q21', 'text_answer' => 'Resposta técnica sobre game loop.']];
+$answers = array_map(fn($id) => ['question_id' => $id, 'text_answer' => 'Resposta técnica sobre game loop.'], $d->listDiscursiveQuestionIds());
 $ok = fn(string $json) => ['status' => 200, 'body' => json_encode(['content' => [['type' => 'text', 'text' => $json]]])];
 $seen = [];
 $mk = function (callable $respond) use (&$seen) {
@@ -145,7 +145,8 @@ assert.deepEqual(
   [r.def.dur, r.def.total, r.def.mc, r.def.disc, r.def.ai, r.def.only, r.def.releases, r.def.exists],
   [120, 100, 3, 4, true, true, false, true]
 );
-assert.ok(r.def.discIds.length >= 1);
+assert.deepEqual([r.def.n, r.def.nMc, r.def.discIds.length, r.def.mcMax, r.def.discMax, r.def.keyN, r.def.rubN], [30, 20, 10, 60, 40, 20, 10], '30 questões: 20 mc (60) + 10 abertas (40)');
+assert.equal(r.def.discIds[0], 'q21');
 
 // clamp 0–4 passo 0.5
 assert.deepEqual(r.clamp, [3.5, 4, 0, 2.5, null, null, 3.5, null]);

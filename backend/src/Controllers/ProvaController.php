@@ -587,7 +587,7 @@ final class ProvaController
                     }
                     $pts = $attDef->normalizeDiscursivePoints($it['points']);
                     if ($pts === null) {
-                        Http::json(400, ['error' => 'Informe nota entre 0 e 1 (ex.: 0, 0.25, 0.5, 0.75 ou 1).']);
+                        Http::json(400, ['error' => 'Informe nota entre 0 e ' . $attDef->discursivePointsEach . ' (passos de 0.5).']);
                     }
                     $scoreItems[$k]['points'] = $pts;
                 }
