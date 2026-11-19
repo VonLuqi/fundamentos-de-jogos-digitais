@@ -24,6 +24,10 @@ final class ExamDefinition
     public int $mcPointsEach;
     public int $discursivePointsEach;
     public bool $placeholder;
+    /** Discursivas corrigidas por IA no envio (recuperação). */
+    public bool $aiGradesDiscursive;
+    /** Só alunos elegíveis à recuperação (turma fechada, total < 55). */
+    public bool $recoveryOnly;
     /** @var array<int, array<string, mixed>> */
     public array $questions;
     /** @var array<string, string> */
@@ -48,6 +52,8 @@ final class ExamDefinition
         $this->mcPointsEach = (int) ($cfg['mcPointsEach'] ?? 1);
         $this->discursivePointsEach = (int) ($cfg['discursivePointsEach'] ?? 1);
         $this->placeholder = !empty($cfg['placeholder']);
+        $this->aiGradesDiscursive = !empty($cfg['aiGradesDiscursive']);
+        $this->recoveryOnly = !empty($cfg['recoveryOnly']);
         $this->questions = $cfg['questions'] ?? [];
         $this->mcAnswerKey = $cfg['mcAnswerKey'] ?? [];
         $this->mcJustifications = $cfg['mcJustifications'] ?? [];

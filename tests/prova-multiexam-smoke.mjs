@@ -89,7 +89,7 @@ use App\\Services\\Prova\\ProvaProjectService;
 function fail(string $m): never { fwrite(STDERR, $m . "\\n"); exit(1); }
 
 // --- registro
-if (ProvaCatalog::examIds() !== ['modulo1-provacao', 'modulo2-prova', 'trabalho-final']) fail('examIds');
+if (ProvaCatalog::examIds() !== ['modulo1-provacao', 'modulo2-prova', 'trabalho-final', 'recuperacao-prova']) fail('examIds');
 if (ProvaCatalog::forExam('nao-existe') !== null) fail('exame inexistente deve ser null');
 
 $m1 = ProvaCatalog::forExam('modulo1-provacao');

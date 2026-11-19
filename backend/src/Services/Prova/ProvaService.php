@@ -18,6 +18,9 @@ final class ProvaService
     public const ADMIN_GENERAL_NOTE_MAX = 4000;
     public const PROVA_CONTEST_MESSAGE_MAX = 4000;
 
+    /** Injeta o corretor de IA (testes); null = AiDiscursiveGrader padrão. */
+    public static ?AiDiscursiveGrader $aiGrader = null;
+
     public const INTEGRITY_EVENT_TYPES = [
         'tab_blur',
         'tab_focus',
@@ -481,6 +484,8 @@ final class ProvaService
                     'pointsAwarded' => $pointsAwarded,
                     'maxPoints' => $def->discursivePointsEach,
                     'comment' => $comments[$qid] ?? '',
+                    'aiFeedback' => isset($row['ai_feedback']) ? (string) $row['ai_feedback'] : null,
+                    'aiPending' => $def->aiGradesDiscursive && !isset($row['ai_feedback']),
                 ]);
             }
         }
@@ -863,8 +868,29 @@ final class ProvaService
             ]);
         }
 
+        // Recuperação: discursivas corrigidas por IA; as que falharem ficam pendentes p/ correção manual.
+        $discScore = 0.0;
+        $aiComplete = false;
+        if ($def !== null && $def->aiGradesDiscursive) {
+            $ai = (self::$aiGrader ?? new AiDiscursiveGrader())->gradeAttempt($def, $answers);
+            $upAi = $pdo->prepare(
+                'INSERT INTO prova_answers (attempt_id, question_id, points_awarded, ai_points, ai_feedback, updated_at)
+                 VALUES (:aid, :qid, :pts, :aip, :fb, :now)
+                 ON DUPLICATE KEY UPDATE
+                   points_awarded = VALUES(points_awarded),
+                   ai_points = VALUES(ai_points),
+                   ai_feedback = VALUES(ai_feedback),
+                   updated_at = VALUES(updated_at)'
+            );
+            foreach ($ai['results'] as $qid => $r) {
+                $upAi->execute([':aid' => $attempt['id'], ':qid' => $qid, ':pts' => $r['points'], ':aip' => $r['points'], ':fb' => $r['feedback'], ':now' => $nowSql]);
+                $discScore += $r['points'];
+            }
+            $aiComplete = $ai['complete'];
+        }
+
         $submittedSql = !empty($attempt['submitted_at']) ? (string) $attempt['submitted_at'] : $nowSql;
-        if ($def !== null && $def->releasesGradeOnSubmit()) {
+        if ($def !== null && ($def->releasesGradeOnSubmit() || $aiComplete)) {
             $upAtt = $pdo->prepare(
                 'UPDATE prova_attempts
                  SET status = \'graded\', submitted_at = :sub, mc_score = :mcs,
@@ -874,8 +900,8 @@ final class ProvaService
             $upAtt->execute([
                 ':sub' => $submittedSql,
                 ':mcs' => $mc['mcScore'],
-                ':ds' => 0,
-                ':fs' => $mc['mcScore'],
+                ':ds' => $discScore,
+                ':fs' => $mc['mcScore'] + $discScore,
                 ':gat' => $nowSql,
                 ':now' => $nowSql,
                 ':id' => $attempt['id'],
@@ -1008,6 +1034,8 @@ final class ProvaService
                     'rubric' => $q['rubric'] ?? null,
                     'maxPoints' => $def ? $def->discursivePointsEach : 1,
                     'comment' => $comments[$qid] ?? '',
+                    'aiScore' => isset($row['ai_points']) ? (float) $row['ai_points'] : null,
+                    'aiFeedback' => isset($row['ai_feedback']) ? (string) $row['ai_feedback'] : null,
                 ]);
             }
         }

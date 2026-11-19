@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Core\Database;
 use App\Core\Http;
 use App\Core\RateLimiter;
+use App\Services\Grades\RecoveryService;
 use App\Services\Prova\ExamDefinition;
 use App\Services\Prova\ProvaCatalog;
 use App\Services\Prova\ProvaProjectService;
@@ -72,6 +73,11 @@ final class ProvaController
                 Http::json(400, ['error' => 'Este exame é uma entrega de arquivo; use o envio do trabalho.', 'code' => 'exam_is_project']);
             }
         };
+
+        // Recuperação: só alunos com nota final da turma fechada < 55 (Mestre passa).
+        if ($def->recoveryOnly && !str_starts_with($action, 'admin') && !SessionService::isAdmin($user) && !RecoveryService::isEligible($user)) {
+            Http::json(403, ['error' => 'Esta avaliação é só para alunos em recuperação.', 'code' => 'not_eligible']);
+        }
 
         try {
             $nowMs = (int) round(microtime(true) * 1000);

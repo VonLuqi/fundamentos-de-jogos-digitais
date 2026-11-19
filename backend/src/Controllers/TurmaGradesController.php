@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Core\AdminAudit;
 use App\Core\Http;
 use App\Core\RateLimiter;
+use App\Services\Grades\RecoveryService;
 use App\Services\Grades\TurmaGradesService;
 use App\Services\Progress\ProgressShared;
 use App\Services\SessionService;
@@ -39,7 +40,7 @@ final class TurmaGradesController
         }
 
         if ($action === 'myGrade') {
-            Http::json(200, ['ok' => true] + TurmaGradesService::studentGrade($user));
+            Http::json(200, ['ok' => true] + TurmaGradesService::studentGrade($user) + RecoveryService::studentDto($user));
         }
 
         if (!str_starts_with($action, 'admin')) {
@@ -75,9 +76,26 @@ final class TurmaGradesController
                         }
                     }
                 }
+                $recClosure = RecoveryService::closure($turma);
+                $board = [];
+                if ($closure['status'] === 'closed') {
+                    foreach (RecoveryService::boardRows($turma) as $b) {
+                        $board[$b['userId']] = $b;
+                    }
+                }
+                foreach ($rows as $i => $r) {
+                    $b = $board[$r['userId']] ?? null;
+                    $rows[$i]['recovery'] = [
+                        'eligible' => $b !== null,
+                        'score' => $b['score'] ?? null,
+                        'closed' => $b !== null && $recClosure['status'] === 'closed',
+                        'status' => $b['status'] ?? null,
+                    ];
+                }
                 Http::json(200, [
                     'ok' => true,
                     'closure' => $closure,
+                    'recoveryClosure' => ['status' => $recClosure['status'], 'closedAt' => $recClosure['closedAt']],
                     'rows' => $rows,
                     'pending' => TurmaGradesService::pendingList($rows),
                     'missingFromSnapshot' => $missing,
@@ -108,6 +126,32 @@ final class TurmaGradesController
                 }
                 AdminAudit::record($actorId, AdminAudit::ACTIONS['reopenTurmaGrades'], null, ['turma' => $turma]);
                 Http::json(200, ['ok' => true, 'closure' => TurmaGradesService::closure($turma)]);
+            case 'adminRecoveryBoard':
+                Http::json(200, ['ok' => true, 'closure' => RecoveryService::closure($turma), 'rows' => RecoveryService::boardRows($turma)]);
+            case 'adminRecoveryClose':
+                if ($method !== 'POST') {
+                    Http::json(405, ['error' => 'Method not allowed']);
+                }
+                $res = RecoveryService::close($turma, $actorId, ($body['force'] ?? false) === true);
+                if (!$res['ok']) {
+                    Http::error($res['status'], $res['error'] ?? 'Erro.', isset($res['pending']) ? ['pending' => $res['pending']] : []);
+                }
+                AdminAudit::record($actorId, AdminAudit::ACTIONS['closeRecovery'], null, [
+                    'turma' => $turma,
+                    'force' => ($body['force'] ?? false) === true,
+                    'pendingCount' => count($res['pending'] ?? []),
+                ]);
+                Http::json(200, ['ok' => true, 'closure' => RecoveryService::closure($turma), 'pending' => $res['pending']]);
+            case 'adminRecoveryReopen':
+                if ($method !== 'POST') {
+                    Http::json(405, ['error' => 'Method not allowed']);
+                }
+                $res = RecoveryService::reopen($turma, $actorId);
+                if (!$res['ok']) {
+                    Http::error($res['status'], $res['error'] ?? 'Erro.');
+                }
+                AdminAudit::record($actorId, AdminAudit::ACTIONS['reopenRecovery'], null, ['turma' => $turma]);
+                Http::json(200, ['ok' => true, 'closure' => RecoveryService::closure($turma)]);
             case 'adminCsv':
                 $closure = TurmaGradesService::closure($turma);
                 Http::json(200, [

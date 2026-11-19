@@ -604,6 +604,8 @@ CREATE TABLE IF NOT EXISTS `prova_answers` (
   `text_answer` MEDIUMTEXT NULL DEFAULT NULL,
   `is_correct` TINYINT(1) NULL DEFAULT NULL,
   `points_awarded` DECIMAL(6, 2) NULL DEFAULT NULL,
+  `ai_feedback` TEXT NULL DEFAULT NULL,
+  `ai_points` DECIMAL(6, 2) NULL DEFAULT NULL,
   `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`attempt_id`, `question_id`),
   KEY `prova_answers_attempt_idx` (`attempt_id`),
@@ -719,5 +721,22 @@ CREATE TABLE IF NOT EXISTS `turma_grade_snapshots` (
   CONSTRAINT `turma_grade_snapshots_user_fk`
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -----------------------------------------------------------------------------
+-- 30. turma_recovery_closures (fechamento das notas de recuperação) + exame recuperacao-prova
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `turma_recovery_closures` (
+  `turma` VARCHAR(16) NOT NULL,
+  `status` VARCHAR(16) NOT NULL DEFAULT 'open',
+  `closed_at` DATETIME(3) NULL DEFAULT NULL,
+  `closed_by` INT NULL DEFAULT NULL,
+  `reopened_at` DATETIME(3) NULL DEFAULT NULL,
+  `reopened_by` INT NULL DEFAULT NULL,
+  PRIMARY KEY (`turma`),
+  CONSTRAINT `turma_recovery_closures_status_chk` CHECK (`status` IN ('closed', 'open'))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT IGNORE INTO `prova_exams` (`id`, `title`, `duration_minutes`, `total_points`, `is_open`, `open_turmas`)
+VALUES ('recuperacao-prova', 'Prova de Recuperação: Fundamentos de Jogos Digitais', 120, 100.00, 0, '[]');
 
 SET FOREIGN_KEY_CHECKS = 1;

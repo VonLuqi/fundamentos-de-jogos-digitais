@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Services\Prova;
 
 use App\Services\Prova\Exams\Modulo2Exam;
+use App\Services\Prova\Exams\RecuperacaoExam;
 use App\Services\Prova\Exams\TrabalhoFinalExam;
 
 /**
@@ -496,7 +497,7 @@ final class ProvaCatalog
      */
     public static function examIds(): array
     {
-        return [self::EXAM_ID, Modulo2Exam::ID, TrabalhoFinalExam::ID];
+        return [self::EXAM_ID, Modulo2Exam::ID, TrabalhoFinalExam::ID, RecuperacaoExam::ID];
     }
 
     public static function exists(string $examId): bool
@@ -517,6 +518,7 @@ final class ProvaCatalog
                 self::EXAM_ID => self::modulo1Definition(),
                 Modulo2Exam::ID => Modulo2Exam::definition(),
                 TrabalhoFinalExam::ID => TrabalhoFinalExam::definition(),
+                RecuperacaoExam::ID => RecuperacaoExam::definition(),
             };
         }
         return self::$registry[$examId];

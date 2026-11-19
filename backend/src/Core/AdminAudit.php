@@ -35,6 +35,8 @@ final class AdminAudit
         'juizoUnban' => 'admin_despertar_juizo_unban',
         'closeTurmaGrades' => 'admin_close_turma_grades',
         'reopenTurmaGrades' => 'admin_reopen_turma_grades',
+        'closeRecovery' => 'admin_close_recovery',
+        'reopenRecovery' => 'admin_reopen_recovery',
     ];
 
     /**
