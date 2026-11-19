@@ -37,6 +37,8 @@ final class AdminAudit
         'reopenTurmaGrades' => 'admin_reopen_turma_grades',
         'closeRecovery' => 'admin_close_recovery',
         'reopenRecovery' => 'admin_reopen_recovery',
+        'grantRecoveryOverride' => 'admin_grant_recovery_override',
+        'revokeRecoveryOverride' => 'admin_revoke_recovery_override',
     ];
 
     /**

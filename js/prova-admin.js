@@ -26,6 +26,9 @@ import {
   setLessonGate,
   turmaGradesAdminGradebook,
   turmaGradesAdminRecoveryBoard,
+  turmaGradesAdminRecoveryGrant,
+  turmaGradesAdminRecoveryOverrides,
+  turmaGradesAdminRecoveryRevoke,
 } from './api.js';
 import { PUBLISHED_GATE_KEY } from './lessons-ui.js';
 
@@ -1356,6 +1359,7 @@ async function loadRecovery() {
     [
       r.name, r.turma, recNum(r.total), recExamLabel(r.attemptStatus), recNum(r.score),
       REC_STATUS_LABELS[r.status] || r.status || '—', recNum(r.finalScore),
+      r.override ? 'liberado manualmente' : '',
     ].forEach((text) => {
       const td = document.createElement('td');
       td.textContent = text;
@@ -1363,6 +1367,71 @@ async function loadRecovery() {
     });
     tbody.append(tr);
   });
+}
+
+let overrideStudents = [];
+
+function paintOverrideSelect() {
+  const select = $('prova-admin-override-select');
+  if (!select) return;
+  const q = ($('prova-admin-override-search')?.value ?? '').trim().toLowerCase();
+  select.replaceChildren();
+  overrideStudents
+    .filter((s) => !s.override && (!q || s.name.toLowerCase().includes(q)))
+    .forEach((s) => {
+      const opt = document.createElement('option');
+      opt.value = String(s.userId);
+      opt.textContent = `${s.name}${s.turma ? ` (${s.turma})` : ''}`;
+      select.append(opt);
+    });
+}
+
+function paintOverrideList() {
+  const list = $('prova-admin-override-list');
+  if (!list) return;
+  list.replaceChildren();
+  overrideStudents.filter((s) => s.override).forEach((s) => {
+    const li = document.createElement('li');
+    li.textContent = `${s.name}${s.turma ? ` (${s.turma})` : ''}${s.reason ? ` — ${s.reason}` : ''} `;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-refresh';
+    btn.textContent = 'Remover';
+    btn.addEventListener('click', () => changeOverride(() => turmaGradesAdminRecoveryRevoke(currentToken, s.userId), `Liberação de ${s.name} removida.`));
+    li.append(btn);
+    list.append(li);
+  });
+}
+
+async function changeOverride(call, okText) {
+  const status = $('prova-admin-override-status');
+  try {
+    const res = await call();
+    overrideStudents = res?.students ?? [];
+    if (status) { status.textContent = okText ?? ''; status.classList.remove('is-error'); }
+    paintOverrideSelect();
+    paintOverrideList();
+    loadRecovery();
+  } catch (error) {
+    if (status) {
+      status.textContent = error instanceof ApiError ? error.message : 'Falha ao atualizar a liberação.';
+      status.classList.add('is-error');
+    }
+  }
+}
+
+async function initOverrides() {
+  $('prova-admin-override-search')?.addEventListener('input', paintOverrideSelect);
+  $('prova-admin-override-grant')?.addEventListener('click', () => {
+    const id = Number($('prova-admin-override-select')?.value);
+    if (!id) return;
+    const name = overrideStudents.find((s) => s.userId === id)?.name ?? 'Aluno';
+    changeOverride(
+      () => turmaGradesAdminRecoveryGrant(currentToken, id, $('prova-admin-override-reason')?.value ?? ''),
+      `Recuperação liberada para ${name}.`,
+    );
+  });
+  await changeOverride(() => turmaGradesAdminRecoveryOverrides(currentToken));
 }
 
 async function init() {
@@ -1398,6 +1467,7 @@ async function init() {
   $('prova-admin-lessons-seal')?.addEventListener('click', () => bulkLessonGate(false));
   $('prova-admin-lessons-release')?.addEventListener('click', () => bulkLessonGate(true));
   loadRecovery();
+  initOverrides();
 
   const params = new URLSearchParams(window.location.search);
   const attemptId = params.get('attempt');

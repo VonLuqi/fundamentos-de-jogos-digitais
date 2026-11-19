@@ -160,6 +160,23 @@
         <section class="prova-admin-gate hades-mirror-frame" id="prova-admin-recovery" aria-label="Recuperação">
           <p class="prova-admin-gate__label">Participantes da recuperação</p>
           <p class="prova-admin-meta" id="prova-admin-recovery-status" role="status">Carregando…</p>
+          <div class="prova-admin-filters" id="prova-admin-override">
+            <label class="prova-admin-filters__field">
+              <span>Liberar recuperação para um aluno</span>
+              <input type="search" id="prova-admin-override-search" placeholder="Buscar pelo nome" autocomplete="off" />
+            </label>
+            <label class="prova-admin-filters__field">
+              <span>Aluno</span>
+              <select id="prova-admin-override-select"></select>
+            </label>
+            <label class="prova-admin-filters__field">
+              <span>Motivo (opcional)</span>
+              <input type="text" id="prova-admin-override-reason" maxlength="255" autocomplete="off" />
+            </label>
+            <button type="button" class="btn-refresh" id="prova-admin-override-grant">Liberar recuperação</button>
+          </div>
+          <p class="prova-admin-meta" id="prova-admin-override-status" role="status"></p>
+          <ul class="prova-admin-meta" id="prova-admin-override-list"></ul>
           <div class="prova-admin-table-wrap">
             <table class="prova-admin-table" id="prova-admin-recovery-table" hidden>
               <thead>
@@ -171,6 +188,7 @@
                   <th scope="col">Nota rec.</th>
                   <th scope="col">Status</th>
                   <th scope="col">Nota final</th>
+                  <th scope="col">Origem</th>
                 </tr>
               </thead>
               <tbody id="prova-admin-recovery-tbody"></tbody>

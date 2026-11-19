@@ -2522,6 +2522,19 @@ export function turmaGradesAdminRecoveryReopen(token, turma) {
   return turmaGradesRequest(token, 'adminRecoveryReopen', { turma });
 }
 
+/** Liberação manual da recuperação por aluno. Resposta: { ok, students: [{ userId, name, turma, override, reason }] } */
+export function turmaGradesAdminRecoveryOverrides(token) {
+  return turmaGradesRequest(token, 'adminRecoveryOverrides');
+}
+
+export function turmaGradesAdminRecoveryGrant(token, userId, reason = '') {
+  return turmaGradesRequest(token, 'adminRecoveryGrant', { userId, reason });
+}
+
+export function turmaGradesAdminRecoveryRevoke(token, userId) {
+  return turmaGradesRequest(token, 'adminRecoveryRevoke', { userId });
+}
+
 /** Resposta: { ok, filename, source: 'snapshot'|'live', csv } */
 export function turmaGradesAdminCsv(token, turma) {
   return turmaGradesRequest(token, 'adminCsv', { turma });

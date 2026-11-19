@@ -49,6 +49,31 @@ final class TurmaGradesController
         if (!SessionService::isAdmin($user)) {
             Http::json(403, ['error' => 'Acesso restrito ao Mestre.']);
         }
+        // Liberação manual por aluno: não depende de turma.
+        if (in_array($action, ['adminRecoveryOverrides', 'adminRecoveryGrant', 'adminRecoveryRevoke'], true)) {
+            $actor = (int) $user['id'];
+            if ($action !== 'adminRecoveryOverrides') {
+                if ($method !== 'POST') {
+                    Http::json(405, ['error' => 'Method not allowed']);
+                }
+                $target = $body['userId'] ?? null;
+                if (!is_int($target) || $target <= 0) {
+                    Http::json(400, ['error' => 'Informe userId.']);
+                }
+                if ($action === 'adminRecoveryGrant') {
+                    $reason = is_string($body['reason'] ?? null) ? (string) $body['reason'] : '';
+                    $res = RecoveryService::grantOverride($target, $actor, $reason);
+                    if (!$res['ok']) {
+                        Http::error($res['status'], $res['error'] ?? 'Erro.');
+                    }
+                    AdminAudit::record($actor, AdminAudit::ACTIONS['grantRecoveryOverride'], $target, ['reason' => mb_substr(trim($reason), 0, 255)]);
+                } else {
+                    RecoveryService::revokeOverride($target);
+                    AdminAudit::record($actor, AdminAudit::ACTIONS['revokeRecoveryOverride'], $target);
+                }
+            }
+            Http::json(200, ['ok' => true, 'students' => RecoveryService::overrideStudents()]);
+        }
         $rawTurma = $method === 'GET' ? Http::query('turma') : ($body['turma'] ?? Http::query('turma'));
         if (!is_string($rawTurma)) {
             Http::json(400, ['error' => 'turma deve ser texto.']);
