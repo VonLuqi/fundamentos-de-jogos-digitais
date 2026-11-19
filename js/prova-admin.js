@@ -1282,7 +1282,7 @@ async function respondContest(contestAction) {
 async function bulkLessonGate(released) {
   if (!currentToken) return;
   const verb = released ? 'Liberar' : 'Selar';
-  if (!window.confirm(`${verb} todas as ${LESSONS.length} aulas de conteúdo para a turma?`)) return;
+  if (!window.confirm(`${verb} todas as ${LESSONS.length} aulas de conteúdo para TODOS os alunos (todas as turmas)?`)) return;
   const status = $('prova-admin-lessons-status');
   const buttons = [$('prova-admin-lessons-seal'), $('prova-admin-lessons-release')];
   buttons.forEach((b) => { if (b) b.disabled = true; });
